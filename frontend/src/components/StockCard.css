@@ -1,0 +1,110 @@
+.stock-card {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 16px;
+  padding: 24px;
+  margin: 16px;
+  color: white;
+  box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  transition: all 0.3s ease;
+  min-width: 300px;
+  max-width: 400px;
+}
+
+.stock-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 40px rgba(31, 38, 135, 0.5);
+}
+
+.stock-header {
+  margin-bottom: 20px;
+}
+
+.stock-symbol {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 4px;
+}
+
+.stock-name {
+  font-size: 14px;
+  opacity: 0.8;
+  font-weight: 300;
+}
+
+.stock-price-section {
+  margin-bottom: 24px;
+}
+
+.current-price {
+  font-size: 32px;
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+
+.price-change {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.stock-details {
+  margin-bottom: 20px;
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+.detail-row span:first-child {
+  opacity: 0.8;
+}
+
+.detail-row span:last-child {
+  font-weight: 600;
+}
+
+.trading-signal {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 16px;
+  margin-top: 16px;
+}
+
+.signal-header {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 12px;
+  opacity: 0.9;
+}
+
+.signal-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.signal-type {
+  font-size: 18px;
+  font-weight: bold;
+  padding: 4px 12px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.signal-confidence,
+.signal-target {
+  font-size: 12px;
+  opacity: 0.9;
+}
+
+.signal-reason {
+  font-size: 12px;
+  opacity: 0.8;
+  line-height: 1.4;
+  font-style: italic;
+}

@@ -1,0 +1,231 @@
+.dashboard {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+  padding: 20px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 20px;
+  border-radius: 16px;
+  backdrop-filter: blur(10px);
+}
+
+.dashboard-header h1 {
+  color: white;
+  margin: 0;
+  font-size: 28px;
+  font-weight: 600;
+}
+
+.header-info {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-end;
+}
+
+.connection-status {
+  font-size: 14px;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.connection-status.connected {
+  color: #00C851;
+}
+
+.connection-status.disconnected {
+  color: #ff4444;
+}
+
+.stats {
+  display: flex;
+  gap: 16px;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.dashboard-controls {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 30px;
+  justify-content: center;
+}
+
+.analyze-all-btn,
+.refresh-btn,
+.analyze-btn {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 25px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.analyze-all-btn {
+  background: linear-gradient(45deg, #00C851, #00ff6b);
+  color: white;
+}
+
+.refresh-btn {
+  background: linear-gradient(45deg, #007bff, #0056b3);
+  color: white;
+}
+
+.analyze-btn {
+  background: linear-gradient(45deg, #ffc107, #ff8f00);
+  color: white;
+  padding: 8px 16px;
+  font-size: 12px;
+  margin-top: 12px;
+  width: 100%;
+}
+
+.analyze-all-btn:hover,
+.refresh-btn:hover,
+.analyze-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
+.analyze-all-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.trading-signals-summary {
+  margin-bottom: 30px;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 20px;
+  border-radius: 16px;
+  backdrop-filter: blur(10px);
+}
+
+.trading-signals-summary h2 {
+  color: white;
+  margin-bottom: 16px;
+  font-size: 20px;
+}
+
+.signals-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.signal-summary {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 16px;
+  border-radius: 12px;
+  text-align: center;
+}
+
+.signal-stock {
+  font-size: 18px;
+  font-weight: bold;
+  color: white;
+  margin-bottom: 8px;
+}
+
+.signal-type {
+  font-size: 16px;
+  font-weight: bold;
+  padding: 4px 12px;
+  border-radius: 16px;
+  margin-bottom: 8px;
+  display: inline-block;
+}
+
+.signal-type.buy {
+  background: #00C851;
+  color: white;
+}
+
+.signal-type.sell {
+  background: #ff4444;
+  color: white;
+}
+
+.signal-type.hold {
+  background: #ffbb33;
+  color: white;
+}
+
+.signal-conf {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.stocks-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 20px;
+  justify-items: center;
+}
+
+.stock-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.dashboard-loading {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+  color: white;
+}
+
+.loading-spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid rgba(255, 255, 255, 0.3);
+  border-top: 4px solid #fff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 20px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.no-stocks {
+  text-align: center;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 18px;
+  margin-top: 60px;
+}
+
+@media (max-width: 768px) {
+  .dashboard-header {
+    flex-direction: column;
+    gap: 16px;
+    text-align: center;
+  }
+  
+  .dashboard-controls {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .stocks-grid {
+    grid-template-columns: 1fr;
+  }
+}
