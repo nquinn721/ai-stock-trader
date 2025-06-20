@@ -1,3 +1,5 @@
+- this is not python IMPORTANT
+
 # Bash commands
 
 - Use only powershell commands
@@ -6,8 +8,8 @@
 
 # Workflow
 
-- kill the client before starting it again
-- kill the server before starting it again
+- Close files in the ide after you edit them IMPORTANT
+- You do not need to restart the client or the server after making changes, leave them running IMPORTANT
 - Dont let anything hang more than 10 seconds
 - After editing a file, close it from the ide
 - Read the whole project and understand all the code

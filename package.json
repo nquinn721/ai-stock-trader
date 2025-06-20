@@ -1,0 +1,12 @@
+{
+  "dependencies": {
+    "brain.js": "^2.0.0-beta.24",
+    "ml-matrix": "^6.12.1",
+    "ml-regression": "^6.3.0",
+    "simple-statistics": "^7.8.8",
+    "synaptic": "^1.1.4"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.3"
+  }
+}

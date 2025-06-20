@@ -115,7 +115,6 @@ The application tracks these 10 stocks:
 - **TSLA** - Tesla Inc.
 - **NVDA** - NVIDIA Corporation
 - **META** - Meta Platforms Inc.
-- **BRK.B** - Berkshire Hathaway Inc.
 - **JPM** - JPMorgan Chase & Co.
 - **JNJ** - Johnson & Johnson
 
