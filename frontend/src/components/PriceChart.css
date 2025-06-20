@@ -385,17 +385,17 @@
 
 /* Styles for small charts in stock cards */
 .price-chart-small {
-  padding: 8px; /* Reduced padding for small charts */
+  padding: 6px; /* Further reduced padding for small charts */
 }
 
 .price-chart-small .chart-header {
-  margin-bottom: 4px; /* Reduced margin for small charts */
+  margin-bottom: 2px; /* Minimal margin for small charts */
   font-size: 12px; /* Smaller font size */
 }
 
 .price-chart-small .chart-footer {
-  margin-top: 4px; /* Reduced margin for small charts */
-  padding-top: 4px; /* Reduced padding for small charts */
+  margin-top: 2px; /* Minimal margin for small charts */
+  padding-top: 2px; /* Minimal padding for small charts */
 }
 
 .price-chart-small .chart-symbol {
@@ -403,5 +403,18 @@
 }
 
 .price-chart-small .chart-container {
-  margin: 2px 0; /* Reduced container margin for small charts */
+  margin: 1px 0; /* Minimal container margin for small charts */
+}
+
+.price-chart-small .chart-info {
+  margin: 1px 0; /* Minimal margin for chart info */
+  padding: 2px 0; /* Minimal padding */
+}
+
+.price-chart-small .price-range {
+  font-size: 11px; /* Smaller font for price range */
+}
+
+.price-chart-small .time-range {
+  font-size: 10px; /* Smaller font for time range */
 }

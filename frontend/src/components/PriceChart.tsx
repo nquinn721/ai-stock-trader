@@ -167,13 +167,14 @@ const PriceChart: React.FC<PriceChartProps> = ({
     let svgHeight: number;
     if (height <= 160) {
       // For small charts (stock cards), use more of the available space
-      // Account for header (~32px) and footer (~32px) and padding (~16px)
-      svgHeight = Math.max(height - 30, 110);
+      // Account for header (~24px) and footer (~24px) and minimal padding
+      svgHeight = Math.max(height - 25, 115);
     } else {
       // For larger charts, leave more space for UI elements
       svgHeight = Math.max(height - 70, 100);
     }
-    const padding = 20;
+    // Use smaller padding for small charts to maximize chart area
+    const padding = height <= 160 ? 15 : 20;
 
     const points = priceHistory
       .map((point, index) => {
