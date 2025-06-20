@@ -32,6 +32,17 @@ export class StockController {
   ): Promise<any> {
     return this.stockService.getStockHistory(symbol.toUpperCase(), period);
   }
+
+  @Get('with-signals/all')
+  @ApiOperation({ summary: 'Get all stocks with their latest trading signals' })
+  @ApiResponse({
+    status: 200,
+    description: 'List of all stocks with trading signals',
+  })
+  async getAllStocksWithSignals() {
+    return this.stockService.getAllStocksWithSignals();
+  }
+
   @Get(':symbol/update')
   @ApiOperation({ summary: 'Update stock price' })
   @ApiResponse({ status: 200, description: 'Updated stock data' })

@@ -10,6 +10,7 @@ import { Position } from './entities/position.entity';
 import { Stock } from './entities/stock.entity';
 import { Trade } from './entities/trade.entity';
 import { TradingSignal } from './entities/trading-signal.entity';
+import { BreakoutModule } from './modules/breakout/breakout.module';
 import { NewsModule } from './modules/news/news.module';
 import { PaperTradingModule } from './modules/paper-trading/paper-trading.module';
 import { StockModule } from './modules/stock/stock.module';
@@ -44,6 +45,7 @@ import { SeedService } from './services/seed.service';
     NewsModule,
     TradingModule,
     PaperTradingModule,
+    BreakoutModule,
   ],
   controllers: [AppController],
   providers: [AppService, SeedService],

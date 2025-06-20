@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable, forwardRef } from '@nestjs/common';
 import {
   ConnectedSocket,
   MessageBody,
@@ -26,7 +26,10 @@ export class StockWebSocketGateway
 
   private clients: Map<string, Socket> = new Map();
 
-  constructor(private stockService: StockService) {}
+  constructor(
+    @Inject(forwardRef(() => StockService))
+    private stockService: StockService,
+  ) {}
 
   handleConnection(client: Socket) {
     console.log(`Client connected: ${client.id}`);
@@ -66,14 +69,21 @@ export class StockWebSocketGateway
     // Leave room for specific stock
     client.leave(`stock_${data.symbol}`);
   }
-
   async sendStockUpdates(client?: Socket) {
     try {
-      const stocks = await this.stockService.getAllStocks();
+      const stocks = await this.stockService.getAllStocksWithSentiment();
       const target = client || this.server;
       target.emit('stock_updates', stocks);
     } catch (error) {
       console.error('Error sending stock updates:', error);
+      // Fallback to stocks without sentiment if sentiment service fails
+      try {
+        const stocks = await this.stockService.getAllStocks();
+        const target = client || this.server;
+        target.emit('stock_updates', stocks);
+      } catch (fallbackError) {
+        console.error('Error sending fallback stock updates:', fallbackError);
+      }
     }
   }
 
