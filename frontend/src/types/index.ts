@@ -1,3 +1,63 @@
+export interface SentimentData {
+  score: number;
+  label: string;
+  confidence: number;
+  articlesAnalyzed: number;
+  lastUpdated?: string;
+}
+
+export interface DayTradingPattern {
+  type:
+    | "flag"
+    | "pennant"
+    | "double_top"
+    | "double_bottom"
+    | "head_shoulders"
+    | "inverse_head_shoulders"
+    | "triangle"
+    | "rectangle"
+    | "wedge"
+    | "none";
+  confidence: number;
+  direction: "bullish" | "bearish" | "neutral";
+  entryPoint: number;
+  targetPrice: number;
+  stopLoss: number;
+  timeframe: string;
+  description: string;
+}
+
+export interface BreakoutStrategy {
+  signal: "bullish" | "bearish" | "neutral";
+  probability: number;
+  supportLevel: number;
+  resistanceLevel: number;
+  currentTrend: "upward" | "downward" | "sideways";
+  volatility: number;
+  rsi: number;
+  bollingerPosition: "upper" | "middle" | "lower";
+  recommendation: string;
+  confidence: number;
+  lastCalculated: string;
+  dayTradingPatterns: DayTradingPattern[];
+  modelPredictions: {
+    neuralNetwork: number;
+    svmLike: number;
+    ensemble: number;
+    momentum: number;
+    meanReversion: number;
+  };
+}
+
+export interface NewsArticle {
+  title: string;
+  sentiment: string;
+  score: number;
+  confidence: number;
+  source: string;
+  publishedAt: string;
+}
+
 export interface Stock {
   id: number;
   symbol: string;
@@ -11,6 +71,9 @@ export interface Stock {
   marketCap: number;
   createdAt: string;
   updatedAt: string;
+  sentiment?: SentimentData;
+  recentNews?: NewsArticle[];
+  breakoutStrategy?: BreakoutStrategy;
 }
 
 export interface StockPrice {

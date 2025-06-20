@@ -1,0 +1,121 @@
+.day-trading-patterns {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 12px;
+  margin-top: 12px;
+}
+
+.patterns-header {
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.patterns-count {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+.no-patterns {
+  color: #aaa;
+  font-size: 12px;
+  text-align: center;
+  padding: 8px;
+}
+
+.patterns-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.pattern-item {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  padding: 10px;
+}
+
+.pattern-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.pattern-icon {
+  font-size: 16px;
+}
+
+.pattern-name {
+  font-weight: 600;
+  color: #fff;
+  font-size: 13px;
+  flex: 1;
+}
+
+.pattern-direction {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.pattern-details {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 6px;
+}
+
+.pattern-confidence {
+  font-size: 11px;
+  color: #ccc;
+}
+
+.pattern-prices {
+  display: flex;
+  gap: 8px;
+  font-size: 11px;
+}
+
+.pattern-prices span {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 2px 4px;
+  border-radius: 3px;
+  color: #ddd;
+}
+
+.pattern-timeframe {
+  font-size: 11px;
+  color: #aaa;
+}
+
+.pattern-description {
+  font-size: 11px;
+  color: #bbb;
+  line-height: 1.3;
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .pattern-prices {
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .pattern-prices span {
+    text-align: center;
+  }
+}

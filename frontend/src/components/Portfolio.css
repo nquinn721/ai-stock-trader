@@ -1,53 +1,79 @@
 .portfolio-container {
   min-height: 100vh;
-  background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
-  padding: 20px;
-  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(
+    135deg,
+    #0d1117 0%,
+    #161b22 25%,
+    #21262d 50%,
+    #30363d 75%,
+    #1c2128 100%
+  );
+  background-attachment: fixed;
+  padding: 24px;
+  font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI",
+    sans-serif;
+  color: #f0f6fc;
 }
 
 .portfolio-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 30px;
-  background: rgba(255, 255, 255, 0.1);
-  padding: 20px;
-  border-radius: 16px;
-  backdrop-filter: blur(10px);
+  margin-bottom: 36px;
+  background: linear-gradient(
+    135deg,
+    rgba(99, 102, 241, 0.1),
+    rgba(139, 92, 246, 0.1)
+  );
+  padding: 28px;
+  border-radius: 24px;
+  backdrop-filter: blur(20px);
+  border: 2px solid;
+  border-image: linear-gradient(135deg, #6366f1, #8b5cf6) 1;
+  box-shadow: 0 16px 60px rgba(0, 0, 0, 0.4), 0 8px 32px rgba(99, 102, 241, 0.2);
 }
 
 .portfolio-header h1 {
-  color: white;
+  color: #f0f6fc;
   margin: 0;
-  font-size: 28px;
-  font-weight: 600;
+  font-size: 32px;
+  font-weight: 900;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6, #d946ef);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  letter-spacing: -1px;
 }
 
 .back-button,
 .trade-button {
-  padding: 10px 20px;
-  border: none;
-  border-radius: 25px;
-  font-weight: 600;
+  padding: 14px 24px;
+  border: 2px solid;
+  border-radius: 30px;
+  font-weight: 700;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   text-transform: uppercase;
   letter-spacing: 1px;
+  backdrop-filter: blur(15px);
+  font-size: 14px;
 }
 
 .back-button {
-  background: rgba(255, 255, 255, 0.2);
-  color: white;
+  background: rgba(13, 17, 23, 0.6);
+  color: #f0f6fc;
+  border-color: #6366f1;
 }
 
 .trade-button {
-  background: linear-gradient(45deg, #00c851, #00ff6b);
+  background: linear-gradient(135deg, #10b981, #059669);
   color: white;
+  border-color: #10b981;
 }
 
 .back-button:hover,
 .trade-button:hover {
-  transform: translateY(-2px);
+  transform: translateY(-4px) scale(1.05);
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
 }
 

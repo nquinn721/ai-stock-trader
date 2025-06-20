@@ -1,56 +1,43 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { useSocket } from "../context/SocketContext";
-import { TradingSignal } from "../types";
+import { Stock, TradingSignal } from "../types";
 import "./Dashboard.css";
-import PaperTrading from "./PaperTrading";
+import PortfolioSummary from "./PortfolioSummary";
+import QuickTrade from "./QuickTrade";
 import StockCard from "./StockCard";
 
 const Dashboard: React.FC = () => {
-  const { isConnected, stocks, tradingSignals } = useSocket();
+  const { isConnected, tradingSignals } = useSocket();
+  const [stocksWithSignals, setStocksWithSignals] = useState<
+    (Stock & { tradingSignal: TradingSignal | null })[]
+  >([]);
   const [signals, setSignals] = useState<TradingSignal[]>([]);
-  const [activeTab, setActiveTab] = useState<"dashboard" | "paper-trading">(
-    "dashboard"
-  );
   const [loading, setLoading] = useState(true);
-
   useEffect(() => {
+    fetchStocksWithSignals();
     fetchTradingSignals();
   }, []);
+
+  const fetchStocksWithSignals = async () => {
+    try {
+      const response = await axios.get(
+        "http://localhost:8000/stocks/with-signals/all"
+      );
+      setStocksWithSignals(response.data);
+    } catch (error) {
+      console.error("Error fetching stocks with signals:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const fetchTradingSignals = async () => {
     try {
       const response = await axios.get("http://localhost:8000/trading/signals");
       setSignals(response.data);
     } catch (error) {
       console.error("Error fetching trading signals:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const getSignalForStock = (stockSymbol: string) => {
-    return signals.find(
-      (signal) => signal.stock?.symbol === stockSymbol && signal.isActive
-    );
-  };
-  const analyzeStock = async (symbol: string) => {
-    try {
-      await axios.post(`http://localhost:8000/trading/analyze/${symbol}`);
-      // Refresh signals after analysis
-      setTimeout(fetchTradingSignals, 1000);
-    } catch (error) {
-      console.error("Error analyzing stock:", error);
-    }
-  };
-  const analyzeAllStocks = async () => {
-    try {
-      setLoading(true);
-      await axios.post("http://localhost:8000/trading/analyze-all");
-      setTimeout(fetchTradingSignals, 2000);
-    } catch (error) {
-      console.error("Error analyzing all stocks:", error);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -74,94 +61,67 @@ const Dashboard: React.FC = () => {
             }`}
           >
             {isConnected ? "🟢 Connected" : "🔴 Disconnected"}
-          </div>
+          </div>{" "}
           <div className="stats">
-            <span>Stocks: {stocks.length}</span>
-            <span>
+            <span>Stocks: {stocksWithSignals.length}</span>
+            <span title="Trading signals that are currently valid and haven't expired or been replaced">
               Active Signals: {signals.filter((s) => s.isActive).length}
             </span>
           </div>
-        </div>
+        </div>{" "}
       </header>{" "}
       <div className="dashboard-controls">
-        <div className="tab-navigation">
+        {" "}
+        <div className="dashboard-action-buttons">
           <button
-            className={`tab-button ${
-              activeTab === "dashboard" ? "active" : ""
-            }`}
-            onClick={() => setActiveTab("dashboard")}
+            className="refresh-btn"
+            onClick={() => {
+              fetchStocksWithSignals();
+              fetchTradingSignals();
+            }}
           >
-            Stock Dashboard
-          </button>
-          <button
-            className={`tab-button ${
-              activeTab === "paper-trading" ? "active" : ""
-            }`}
-            onClick={() => setActiveTab("paper-trading")}
-          >
-            Paper Trading
+            Refresh Data
           </button>
         </div>
-
-        {activeTab === "dashboard" && (
-          <div className="dashboard-action-buttons">
-            <button
-              className="analyze-all-btn"
-              onClick={analyzeAllStocks}
-              disabled={loading}
-            >
-              Analyze All Stocks
-            </button>
-            <button className="refresh-btn" onClick={fetchTradingSignals}>
-              Refresh Signals
-            </button>
-          </div>
-        )}
       </div>
-      {activeTab === "dashboard" ? (
-        <>
-          <div className="trading-signals-summary">
-            <h2>Latest Trading Signals</h2>
-            <div className="signals-grid">
-              {tradingSignals.slice(0, 3).map((signal, index) => (
-                <div key={index} className="signal-summary">
-                  <div className="signal-stock">
-                    {signal.stock?.symbol || "Unknown"}
-                  </div>
-                  <div className={`signal-type ${signal.signal}`}>
-                    {signal.signal.toUpperCase()}
-                  </div>
-                  <div className="signal-conf">
-                    {(signal.confidence * 100).toFixed(1)}% confidence
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-          <div className="stocks-grid">
-            {stocks.map((stock) => (
-              <div key={stock.id} className="stock-container">
-                <StockCard
-                  stock={stock}
-                  signal={getSignalForStock(stock.symbol)}
-                />
-                <button
-                  className="analyze-btn"
-                  onClick={() => analyzeStock(stock.symbol)}
-                >
-                  Analyze {stock.symbol}
-                </button>
+      {/* Paper Trading Section */}
+      <div className="paper-trading-section">
+        <PortfolioSummary />
+        <QuickTrade />
+      </div>{" "}
+      <div className="trading-signals-summary">
+        <h2>Latest Trading Signals</h2>
+        <div className="signals-grid">
+          {tradingSignals.slice(0, 3).map((signal, index) => (
+            <div key={index} className="signal-summary">
+              <div className="signal-stock">
+                {signal.stock?.symbol || "Unknown"}
               </div>
-            ))}
-          </div>{" "}
-          {stocks.length === 0 && (
-            <div className="no-stocks">
-              <p>No stocks available. Please check your backend connection.</p>
+              <div className={`signal-type ${signal.signal}`}>
+                {signal.signal.toUpperCase()}
+              </div>
+              <div className="signal-conf">
+                {(signal.confidence * 100).toFixed(1)}% confidence
+              </div>
             </div>
-          )}
-        </>
-      ) : (
-        <PaperTrading />
+          ))}
+        </div>
+      </div>{" "}
+      <div className="stocks-grid">
+        {stocksWithSignals.map((stockWithSignal) => (
+          <div key={stockWithSignal.id} className="stock-container">
+            {" "}
+            <StockCard
+              stock={stockWithSignal}
+              signal={stockWithSignal.tradingSignal || undefined}
+            />
+          </div>
+        ))}
+      </div>
+      {stocksWithSignals.length === 0 && (
+        <div className="no-stocks">
+          <p>No stocks available. Please check your backend connection.</p>
+        </div>
       )}
     </div>
   );

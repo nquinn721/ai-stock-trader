@@ -78,18 +78,18 @@ const PortfolioList: React.FC<PortfolioListProps> = ({ onSelectPortfolio }) => {
       window.alert(error.response?.data?.message || "Error deleting portfolio");
     }
   };
-
-  const formatCurrency = (amount: number) => {
+  const formatCurrency = (amount: number | string | null | undefined) => {
+    const numValue = Number(amount) || 0;
     return new Intl.NumberFormat("en-US", {
       style: "currency",
       currency: "USD",
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
-    }).format(amount);
+    }).format(numValue);
   };
-
-  const formatPercent = (percent: number) => {
-    return `${percent >= 0 ? "+" : ""}${percent.toFixed(2)}%`;
+  const formatPercent = (percent: number | string | null | undefined) => {
+    const numValue = Number(percent) || 0;
+    return `${numValue >= 0 ? "+" : ""}${numValue.toFixed(2)}%`;
   };
 
   if (loading) {
