@@ -99,12 +99,11 @@ const Dashboard: React.FC = () => {
         <div className="charts-grid">
           {topStock && (
             <div className="main-chart">
-              <h3>Featured Stock: {topStock.symbol}</h3>{" "}
-              <PriceChart
+              <h3>Featured Stock: {topStock.symbol}</h3>{" "}              <PriceChart
                 symbol={topStock.symbol}
                 currentPrice={topStock.currentPrice}
                 changePercent={topStock.changePercent || 0}
-                height={200}
+                height={250}
                 showRealTime={true}
                 period="1H"
                 interval={30000} // 30 seconds - much slower to prevent hanging
@@ -112,12 +111,11 @@ const Dashboard: React.FC = () => {
             </div>
           )}{" "}
           {stocksWithSignals.slice(0, 3).map((stock) => (
-            <div key={stock.id} className="mini-chart">
-              <PriceChart
+            <div key={stock.id} className="mini-chart">              <PriceChart
                 symbol={stock.symbol}
                 currentPrice={stock.currentPrice}
                 changePercent={stock.changePercent || 0}
-                height={120}
+                height={160}
                 showRealTime={false}
                 period="1H"
               />

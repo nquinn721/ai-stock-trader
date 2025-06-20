@@ -6,12 +6,14 @@
   );
   border: 1px solid rgba(99, 102, 241, 0.3);
   border-radius: 16px;
-  padding: 20px;
+  padding: 16px; /* Reduced from 20px */
   margin-top: 16px;
   backdrop-filter: blur(20px);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), 0 4px 16px rgba(99, 102, 241, 0.1);
   position: relative;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 .price-chart::before {
@@ -38,7 +40,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 16px;
+  margin-bottom: 12px; /* Reduced from 16px */
   font-size: 14px;
   font-weight: 600;
   color: #f0f6fc;
@@ -96,7 +98,8 @@
 
 .chart-container {
   position: relative;
-  margin: 12px 0;
+  margin: 8px 0; /* Reduced from 12px */
+  flex: 1; /* Take available space */
 }
 
 .price-chart-svg {
@@ -179,10 +182,10 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: 12px;
+  margin-top: 8px; /* Reduced from 12px */
   font-size: 11px;
   color: #94a3b8;
-  padding: 8px 12px;
+  padding: 6px 10px; /* Reduced padding */
   background: rgba(255, 255, 255, 0.03);
   border-radius: 6px;
   border: 1px solid rgba(255, 255, 255, 0.05);
@@ -262,8 +265,8 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: 16px;
-  padding-top: 12px;
+  margin-top: 8px; /* Reduced from 16px */
+  padding-top: 8px; /* Reduced from 12px */
   border-top: 1px solid rgba(255, 255, 255, 0.05);
 }
 

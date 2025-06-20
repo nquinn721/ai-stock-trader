@@ -166,7 +166,7 @@ const PriceChart: React.FC<PriceChartProps> = ({
 
     // Create SVG path
     const width = 400;
-    const svgHeight = height - 40; // Leave space for labels
+    const svgHeight = height - 80; // Leave more space for header/footer (was 40)
     const padding = 20;
 
     const points = priceHistory
