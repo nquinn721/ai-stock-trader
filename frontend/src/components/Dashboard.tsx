@@ -80,28 +80,14 @@ const Dashboard: React.FC = () => {
           </div>
         </div>{" "}
       </header>{" "}
-      <div className="dashboard-controls">
-        {" "}
-        <div className="dashboard-action-buttons">
-          <button
-            className="refresh-btn"
-            onClick={() => {
-              fetchStocksWithSignals();
-              fetchTradingSignals();
-            }}
-          >
-            Refresh Data
-          </button>
-        </div>
-      </div>{" "}
       {/* Paper Trading Section */}
       <div className="paper-trading-section">
         <div className="portfolio-overview">
-          <PortfolioSummary />
+          <PortfolioSummary />{" "}
           <PortfolioChart
             portfolioId={1}
             timeframe={selectedTimeframe}
-            height={300}
+            height={400}
             onTimeframeChange={setSelectedTimeframe}
           />
         </div>
@@ -113,7 +99,8 @@ const Dashboard: React.FC = () => {
         <div className="charts-grid">
           {topStock && (
             <div className="main-chart">
-              <h3>Featured Stock: {topStock.symbol}</h3>{" "}              <PriceChart
+              <h3>Featured Stock: {topStock.symbol}</h3>{" "}
+              <PriceChart
                 symbol={topStock.symbol}
                 currentPrice={topStock.currentPrice}
                 changePercent={topStock.changePercent || 0}
@@ -123,7 +110,8 @@ const Dashboard: React.FC = () => {
                 interval={30000} // 30 seconds - much slower to prevent hanging
               />
             </div>
-          )}{" "}          {stocksWithSignals.slice(0, 3).map((stock) => (
+          )}{" "}
+          {stocksWithSignals.slice(0, 3).map((stock) => (
             <div key={stock.id} className="mini-chart">
               <PriceChart
                 symbol={stock.symbol}

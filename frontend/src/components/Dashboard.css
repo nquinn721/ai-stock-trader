@@ -141,17 +141,6 @@
   box-shadow: 0 8px 24px rgba(99, 102, 241, 0.3);
 }
 
-.dashboard-controls {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 30px;
-}
-
-.dashboard-action-buttons {
-  display: flex;
-  gap: 16px;
-}
-
 /* Paper Trading Section */
 .paper-trading-section {
   margin-bottom: 32px;
@@ -178,7 +167,6 @@
 }
 
 .analyze-all-btn,
-.refresh-btn,
 .analyze-btn {
   padding: 12px 24px;
   border: none;
@@ -198,12 +186,6 @@
   box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
 }
 
-.refresh-btn {
-  background: linear-gradient(45deg, #2196f3, #42a5f5);
-  color: white;
-  box-shadow: 0 4px 15px rgba(33, 150, 243, 0.3);
-}
-
 .analyze-btn {
   background: linear-gradient(45deg, #ff9a00, #ffb74d);
   color: white;
@@ -215,7 +197,6 @@
 }
 
 .analyze-all-btn:hover,
-.refresh-btn:hover,
 .analyze-btn:hover {
   transform: translateY(-3px);
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
@@ -223,10 +204,6 @@
 
 .analyze-all-btn:hover {
   box-shadow: 0 8px 25px rgba(76, 175, 80, 0.4);
-}
-
-.refresh-btn:hover {
-  box-shadow: 0 8px 25px rgba(33, 150, 243, 0.4);
 }
 
 .analyze-btn:hover {
