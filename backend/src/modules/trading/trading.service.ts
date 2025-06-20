@@ -1,9 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { TradingSignal, SignalType } from '../../entities/trading-signal.entity';
+import yahooFinance from 'yahoo-finance2';
 import { Stock } from '../../entities/stock.entity';
-import { StockPrice } from '../../entities/stock-price.entity';
+import {
+  SignalType,
+  TradingSignal,
+} from '../../entities/trading-signal.entity';
 import { NewsService } from '../news/news.service';
 
 @Injectable()
@@ -13,84 +16,115 @@ export class TradingService {
     private tradingSignalRepository: Repository<TradingSignal>,
     @InjectRepository(Stock)
     private stockRepository: Repository<Stock>,
-    @InjectRepository(StockPrice)
-    private stockPriceRepository: Repository<StockPrice>,
     private newsService: NewsService,
   ) {}
-
-  async detectBreakout(symbol: string): Promise<{ isBreakout: boolean; signal: SignalType; confidence: number; reason: string }> {
+  async detectBreakout(
+    symbol: string,
+  ): Promise<{
+    isBreakout: boolean;
+    signal: SignalType;
+    confidence: number;
+    reason: string;
+  }> {
     const stock = await this.stockRepository.findOne({ where: { symbol } });
     if (!stock) {
       throw new Error(`Stock ${symbol} not found`);
     }
 
-    // Get recent price data
-    const recentPrices = await this.stockPriceRepository.find({
-      where: { stockId: stock.id },
-      order: { date: 'DESC' },
-      take: 20, // Last 20 days
-    });
+    try {
+      // Get recent historical data from Yahoo Finance
+      const historical = await yahooFinance.historical(symbol, {
+        period1: new Date(Date.now() - 20 * 24 * 60 * 60 * 1000), // 20 days ago
+        period2: new Date(),
+        interval: '1d' as any,
+      });
 
-    if (recentPrices.length < 10) {
-      return { isBreakout: false, signal: SignalType.HOLD, confidence: 0, reason: 'Insufficient data' };
-    }
+      if (historical.length < 10) {
+        return {
+          isBreakout: false,
+          signal: SignalType.HOLD,
+          confidence: 0,
+          reason: 'Insufficient data',
+        };
+      }
 
-    const prices = recentPrices.reverse(); // Oldest first
-    const currentPrice = prices[prices.length - 1].close;
-    
-    // Calculate moving averages
-    const sma10 = this.calculateSMA(prices.slice(-10), 'close');
-    const sma20 = this.calculateSMA(prices, 'close');
-    
-    // Calculate RSI
-    const rsi = this.calculateRSI(prices, 14);
-    
-    // Calculate volume average
-    const avgVolume = this.calculateSMA(prices.slice(-10), 'volume');
-    const currentVolume = prices[prices.length - 1].volume;
-    
-    // Get sentiment
-    const sentiment = await this.newsService.getAverageSentiment(symbol, 7);
-    
-    // Breakout detection logic
-    let signal = SignalType.HOLD;
-    let confidence = 0;
-    let reason = '';
-    let isBreakout = false;
+      const prices = historical.sort(
+        (a, b) => a.date.getTime() - b.date.getTime(),
+      ); // Oldest first
+      const currentPrice = prices[prices.length - 1].close;
 
-    // Bullish breakout conditions
-    if (
-      currentPrice > sma10 && 
-      sma10 > sma20 && 
-      currentVolume > avgVolume * 1.5 && 
-      rsi < 70 &&
-      sentiment > 0.1
-    ) {
-      signal = SignalType.BUY;
-      confidence = Math.min(0.9, 0.5 + (sentiment * 0.2) + ((currentVolume / avgVolume - 1) * 0.2));
-      reason = 'Bullish breakout detected: price above moving averages with high volume and positive sentiment';
-      isBreakout = true;
-    }
-    // Bearish breakout conditions
-    else if (
-      currentPrice < sma10 && 
-      sma10 < sma20 && 
-      currentVolume > avgVolume * 1.3 && 
-      rsi > 30 &&
-      sentiment < -0.1
-    ) {
-      signal = SignalType.SELL;
-      confidence = Math.min(0.9, 0.5 + (Math.abs(sentiment) * 0.2) + ((currentVolume / avgVolume - 1) * 0.2));
-      reason = 'Bearish breakout detected: price below moving averages with high volume and negative sentiment';
-      isBreakout = true;
-    }
-    // Consolidation/Hold conditions
-    else {
-      confidence = 0.3;
-      reason = 'No clear breakout pattern detected, market consolidating';
-    }
+      // Calculate moving averages
+      const sma10 = this.calculateSMA(prices.slice(-10), 'close');
+      const sma20 = this.calculateSMA(prices, 'close');
 
-    return { isBreakout, signal, confidence, reason };
+      // Calculate RSI
+      const rsi = this.calculateRSI(prices, 14);
+
+      // Calculate volume average
+      const avgVolume = this.calculateSMA(prices.slice(-10), 'volume');
+      const currentVolume = prices[prices.length - 1].volume;
+
+      // Get sentiment
+      const sentiment = await this.newsService.getAverageSentiment(symbol, 7);
+
+      // Breakout detection logic
+      let signal = SignalType.HOLD;
+      let confidence = 0;
+      let reason = '';
+      let isBreakout = false;
+
+      // Bullish breakout conditions
+      if (
+        currentPrice > sma10 &&
+        sma10 > sma20 &&
+        currentVolume > avgVolume * 1.5 &&
+        rsi < 70 &&
+        sentiment > 0.1
+      ) {
+        signal = SignalType.BUY;
+        confidence = Math.min(
+          0.9,
+          0.5 + sentiment * 0.2 + (currentVolume / avgVolume - 1) * 0.2,
+        );
+        reason =
+          'Bullish breakout detected: price above moving averages with high volume and positive sentiment';
+        isBreakout = true;
+      }
+      // Bearish breakout conditions
+      else if (
+        currentPrice < sma10 &&
+        sma10 < sma20 &&
+        currentVolume > avgVolume * 1.3 &&
+        rsi > 30 &&
+        sentiment < -0.1
+      ) {
+        signal = SignalType.SELL;
+        confidence = Math.min(
+          0.9,
+          0.5 +
+            Math.abs(sentiment) * 0.2 +
+            (currentVolume / avgVolume - 1) * 0.2,
+        );
+        reason =
+          'Bearish breakout detected: price below moving averages with high volume and negative sentiment';
+        isBreakout = true;
+      }
+      // Consolidation/Hold conditions
+      else {
+        confidence = 0.3;
+        reason = 'No clear breakout pattern detected, market consolidating';
+      }
+
+      return { isBreakout, signal, confidence, reason };
+    } catch (error) {
+      console.error(`Error detecting breakout for ${symbol}:`, error);
+      return {
+        isBreakout: false,
+        signal: SignalType.HOLD,
+        confidence: 0,
+        reason: 'Error fetching data',
+      };
+    }
   }
 
   private calculateSMA(prices: any[], field: string): number {
@@ -115,7 +149,7 @@ export class TradingService {
 
     if (avgLoss === 0) return 100;
     const rs = avgGain / avgLoss;
-    return 100 - (100 / (1 + rs));
+    return 100 - 100 / (1 + rs);
   }
 
   async generateTradingSignal(symbol: string): Promise<TradingSignal> {
@@ -125,7 +159,7 @@ export class TradingService {
     }
 
     const analysis = await this.detectBreakout(symbol);
-    
+
     // Calculate target price based on signal
     let targetPrice = stock.currentPrice;
     if (analysis.signal === SignalType.BUY) {
@@ -137,7 +171,7 @@ export class TradingService {
     // Deactivate previous signals for this stock
     await this.tradingSignalRepository.update(
       { stockId: stock.id, isActive: true },
-      { isActive: false }
+      { isActive: false },
     );
 
     const tradingSignal = this.tradingSignalRepository.create({
@@ -161,7 +195,10 @@ export class TradingService {
     });
   }
 
-  async getSignalsForStock(symbol: string, limit: number = 10): Promise<TradingSignal[]> {
+  async getSignalsForStock(
+    symbol: string,
+    limit: number = 10,
+  ): Promise<TradingSignal[]> {
     const stock = await this.stockRepository.findOne({ where: { symbol } });
     if (!stock) {
       throw new Error(`Stock ${symbol} not found`);

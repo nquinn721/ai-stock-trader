@@ -1,6 +1,6 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
-import { io } from 'socket.io-client';
-import { Stock, TradingSignal, News } from '../types';
+import React, { createContext, useContext, useEffect, useState } from "react";
+import * as io from "socket.io-client";
+import { News, Stock, TradingSignal } from "../types";
 
 interface SocketContextType {
   socket: any;
@@ -21,7 +21,7 @@ const SocketContext = createContext<SocketContextType>({
 export const useSocket = () => {
   const context = useContext(SocketContext);
   if (!context) {
-    throw new Error('useSocket must be used within a SocketProvider');
+    throw new Error("useSocket must be used within a SocketProvider");
   }
   return context;
 };
@@ -36,41 +36,43 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
   const [stocks, setStocks] = useState<Stock[]>([]);
   const [tradingSignals, setTradingSignals] = useState<TradingSignal[]>([]);
   const [news, setNews] = useState<News[]>([]);
-
   useEffect(() => {
-    const newSocket = io('http://localhost:3000', {
-      transports: ['websocket', 'polling'],
+    const newSocket = io.connect("http://localhost:8000", {
+      transports: ["websocket", "polling"],
     });
 
-    newSocket.on('connect', () => {
-      console.log('Connected to server');
+    newSocket.on("connect", () => {
+      console.log("Connected to server");
       setIsConnected(true);
-      newSocket.emit('subscribe_stocks');
+      newSocket.emit("subscribe_stocks");
     });
 
-    newSocket.on('disconnect', () => {
-      console.log('Disconnected from server');
+    newSocket.on("disconnect", () => {
+      console.log("Disconnected from server");
       setIsConnected(false);
     });
 
-    newSocket.on('stock_updates', (data: Stock[]) => {
+    newSocket.on("stock_updates", (data: Stock[]) => {
       setStocks(data);
     });
 
-    newSocket.on('stock_update', ({ symbol, data }: { symbol: string; data: Stock }) => {
-      setStocks(prev => 
-        prev.map(stock => 
-          stock.symbol === symbol ? { ...stock, ...data } : stock
-        )
-      );
+    newSocket.on(
+      "stock_update",
+      ({ symbol, data }: { symbol: string; data: Stock }) => {
+        setStocks((prev) =>
+          prev.map((stock) =>
+            stock.symbol === symbol ? { ...stock, ...data } : stock
+          )
+        );
+      }
+    );
+
+    newSocket.on("trading_signal", (signal: TradingSignal) => {
+      setTradingSignals((prev) => [signal, ...prev.slice(0, 9)]); // Keep last 10 signals
     });
 
-    newSocket.on('trading_signal', (signal: TradingSignal) => {
-      setTradingSignals(prev => [signal, ...prev.slice(0, 9)]); // Keep last 10 signals
-    });
-
-    newSocket.on('news_update', (newsItem: News) => {
-      setNews(prev => [newsItem, ...prev.slice(0, 19)]); // Keep last 20 news items
+    newSocket.on("news_update", (newsItem: News) => {
+      setNews((prev) => [newsItem, ...prev.slice(0, 19)]); // Keep last 20 news items
     });
 
     setSocket(newSocket);
@@ -89,8 +91,6 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
   };
 
   return (
-    <SocketContext.Provider value={value}>
-      {children}
-    </SocketContext.Provider>
+    <SocketContext.Provider value={value}>{children}</SocketContext.Provider>
   );
 };

@@ -6,6 +6,9 @@
 
 # Workflow
 
+- kill the client before starting it again
+- kill the server before starting it again
+- Dont let anything hang more than 10 seconds
 - After editing a file, close it from the ide
 - Read the whole project and understand all the code
 - Be careful not to break anything that was working while you are trying to change something else

@@ -1,17 +1,13 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { TradingSignal } from '../../entities/trading-signal.entity';
 import { Stock } from '../../entities/stock.entity';
-import { StockPrice } from '../../entities/stock-price.entity';
+import { TradingSignal } from '../../entities/trading-signal.entity';
 import { NewsModule } from '../news/news.module';
 import { TradingController } from './trading.controller';
 import { TradingService } from './trading.service';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([TradingSignal, Stock, StockPrice]),
-    NewsModule,
-  ],
+  imports: [TypeOrmModule.forFeature([TradingSignal, Stock]), NewsModule],
   controllers: [TradingController],
   providers: [TradingService],
   exports: [TradingService],

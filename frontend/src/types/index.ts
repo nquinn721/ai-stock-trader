@@ -42,7 +42,7 @@ export interface News {
 export interface TradingSignal {
   id: number;
   stockId: number;
-  signal: 'buy' | 'sell' | 'hold';
+  signal: "buy" | "sell" | "hold";
   confidence: number;
   targetPrice: number;
   currentPrice: number;
@@ -50,6 +50,65 @@ export interface TradingSignal {
   isActive: boolean;
   createdAt: string;
   stock?: Stock;
+}
+
+export interface Portfolio {
+  id: number;
+  name: string;
+  initialCash: number;
+  currentCash: number;
+  totalValue: number;
+  totalPnL: number;
+  totalReturn: number;
+  isActive: boolean;
+  positions?: Position[];
+  trades?: Trade[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Position {
+  id: number;
+  portfolioId: number;
+  stockId: number;
+  symbol: string;
+  quantity: number;
+  averagePrice: number;
+  totalCost: number;
+  currentValue: number;
+  unrealizedPnL: number;
+  unrealizedReturn: number;
+  stock?: Stock;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Trade {
+  id: number;
+  portfolioId: number;
+  stockId: number;
+  symbol: string;
+  type: "buy" | "sell";
+  quantity: number;
+  price: number;
+  totalValue: number;
+  commission: number;
+  status: "pending" | "executed" | "cancelled" | "failed";
+  notes?: string;
+  stock?: Stock;
+  executedAt: string;
+}
+
+export interface CreateTradeRequest {
+  portfolioId: number;
+  symbol: string;
+  type: "buy" | "sell";
+  quantity: number;
+}
+
+export interface CreatePortfolioRequest {
+  name: string;
+  initialCash?: number;
 }
 
 export interface SocketEvents {

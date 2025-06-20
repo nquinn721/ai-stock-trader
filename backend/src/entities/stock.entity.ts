@@ -22,11 +22,10 @@ export class Stock {
 
   @Column('text')
   description: string;
-
-  @Column('decimal', { precision: 10, scale: 2, nullable: true })
+  @Column('decimal', { precision: 15, scale: 2, nullable: true })
   currentPrice: number;
 
-  @Column('decimal', { precision: 10, scale: 2, nullable: true })
+  @Column('decimal', { precision: 15, scale: 2, nullable: true })
   previousClose: number;
 
   @Column('decimal', { precision: 5, scale: 2, nullable: true })
@@ -34,8 +33,7 @@ export class Stock {
 
   @Column('bigint', { nullable: true })
   volume: number;
-
-  @Column('decimal', { precision: 10, scale: 2, nullable: true })
+  @Column('decimal', { precision: 20, scale: 2, nullable: true })
   marketCap: number;
 
   @CreateDateColumn()

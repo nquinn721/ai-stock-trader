@@ -3,7 +3,6 @@ import { Cron, CronExpression } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import yahooFinance from 'yahoo-finance2';
-import { StockPrice } from '../../entities/stock-price.entity';
 import { Stock } from '../../entities/stock.entity';
 
 @Injectable()
@@ -11,8 +10,6 @@ export class StockService {
   constructor(
     @InjectRepository(Stock)
     private stockRepository: Repository<Stock>,
-    @InjectRepository(StockPrice)
-    private stockPriceRepository: Repository<StockPrice>,
   ) {}
   async getAllStocks(): Promise<Stock[]> {
     return this.stockRepository.find();
@@ -22,7 +19,19 @@ export class StockService {
   }
   async updateStockPrice(symbol: string): Promise<Stock | null> {
     try {
-      const quote = await yahooFinance.quote(symbol);
+      // Skip symbols with dots as they cause issues with yahoo-finance2
+      if (symbol.includes('.')) {
+        console.log(`Skipping symbol with dot: ${symbol}`);
+        return await this.getStockBySymbol(symbol);
+      }
+
+      const quote = await yahooFinance.quote(
+        symbol,
+        {},
+        {
+          validateResult: false,
+        },
+      );
       const stock = await this.getStockBySymbol(symbol);
 
       if (stock && quote) {
@@ -33,25 +42,11 @@ export class StockService {
         stock.marketCap = Number(quote.marketCap) || 0;
 
         await this.stockRepository.save(stock);
-
-        // Save historical data
-        const stockPrice = this.stockPriceRepository.create({
-          stockId: stock.id,
-          open: Number(quote.regularMarketOpen) || Number(quote.regularMarketPrice) || 0,
-          high: Number(quote.regularMarketDayHigh) || Number(quote.regularMarketPrice) || 0,
-          low: Number(quote.regularMarketDayLow) || Number(quote.regularMarketPrice) || 0,
-          close: Number(quote.regularMarketPrice) || 0,
-          adjustedClose: Number(quote.regularMarketPrice) || 0,
-          volume: Number(quote.regularMarketVolume) || 0,
-          date: new Date(),
-        });
-
-        await this.stockPriceRepository.save(stockPrice);
       }
 
       return stock;
     } catch (error) {
-      console.error(`Error updating stock price for ${symbol}:`, error);
+      console.error(`Error updating stock price for ${symbol}:`, error.message);
       return null;
     }
   }
@@ -68,14 +63,29 @@ export class StockService {
   }
   async getStockHistory(symbol: string, period: string = '1mo'): Promise<any> {
     try {
-      const historical = await yahooFinance.historical(symbol, {
-        period1: this.getPeriodStartDate(period),
-        period2: new Date(),
-        interval: '1d' as any,
-      });
+      // Skip symbols with dots as they cause issues with yahoo-finance2
+      if (symbol.includes('.')) {
+        console.log(`Skipping historical data for symbol with dot: ${symbol}`);
+        return [];
+      }
+
+      const historical = await yahooFinance.historical(
+        symbol,
+        {
+          period1: this.getPeriodStartDate(period),
+          period2: new Date(),
+          interval: '1d' as any,
+        },
+        {
+          validateResult: false,
+        },
+      );
       return historical;
     } catch (error) {
-      console.error(`Error fetching historical data for ${symbol}:`, error);
+      console.error(
+        `Error fetching historical data for ${symbol}:`,
+        error.message,
+      );
       return [];
     }
   }

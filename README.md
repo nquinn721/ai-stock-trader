@@ -15,6 +15,7 @@ A comprehensive stock trading application with real-time data, sentiment analysi
 ## 🏗️ Architecture
 
 ### Backend (NestJS)
+
 - **Framework**: NestJS with TypeScript
 - **Database**: MySQL with TypeORM
 - **Real-time**: WebSocket support via Socket.IO
@@ -22,12 +23,14 @@ A comprehensive stock trading application with real-time data, sentiment analysi
 - **Documentation**: Swagger UI
 
 ### Frontend (React)
+
 - **Framework**: React with TypeScript
 - **State Management**: React Context + Socket.IO
 - **UI**: Modern CSS with gradient designs
 - **Charts**: Recharts for data visualization
 
 ### Analysis Engine
+
 - **Language**: Python
 - **Libraries**: scikit-learn, pandas, numpy
 - **Features**: Technical analysis and sentiment scoring
@@ -35,6 +38,7 @@ A comprehensive stock trading application with real-time data, sentiment analysi
 ## 📦 Installation
 
 ### Prerequisites
+
 - Node.js (v16 or higher)
 - MySQL Server
 - Python 3.8+
@@ -48,6 +52,7 @@ npm install
 ```
 
 Create `.env` file:
+
 ```env
 DATABASE_HOST=localhost
 DATABASE_PORT=3306
@@ -69,6 +74,7 @@ npm install
 ### Database Setup
 
 1. Create MySQL database:
+
 ```sql
 CREATE DATABASE stock_trading_db;
 CREATE USER 'admin'@'localhost' IDENTIFIED BY 'password';
@@ -79,18 +85,21 @@ FLUSH PRIVILEGES;
 ## 🚀 Running the Application
 
 ### Start Backend
+
 ```bash
 cd backend
 npm run start:dev
 ```
 
 ### Start Frontend
+
 ```bash
 cd frontend
 npm start
 ```
 
 The application will be available at:
+
 - Frontend: http://localhost:3001
 - Backend API: http://localhost:3000
 - API Documentation: http://localhost:3000/api
@@ -98,6 +107,7 @@ The application will be available at:
 ## 📊 Monitored Stocks
 
 The application tracks these 10 stocks:
+
 - **AAPL** - Apple Inc.
 - **GOOGL** - Alphabet Inc.
 - **MSFT** - Microsoft Corporation
@@ -112,12 +122,14 @@ The application tracks these 10 stocks:
 ## 🔌 API Endpoints
 
 ### Stocks
+
 - `GET /stocks` - Get all stocks
 - `GET /stocks/:symbol` - Get specific stock
 - `GET /stocks/:symbol/history` - Get price history
 - `PUT /stocks/:symbol/update` - Update stock price
 
 ### Trading Signals
+
 - `GET /trading/signals` - Get active trading signals
 - `GET /trading/signals/:symbol` - Get signals for specific stock
 - `POST /trading/analyze/:symbol` - Generate new signal
@@ -125,6 +137,7 @@ The application tracks these 10 stocks:
 - `GET /trading/breakout/:symbol` - Check breakout patterns
 
 ### News & Sentiment
+
 - `GET /news/:symbol` - Get news for stock
 - `GET /news/:symbol/sentiment` - Get sentiment analysis
 - `POST /news/:symbol/fetch` - Fetch and analyze new news
@@ -134,12 +147,14 @@ The application tracks these 10 stocks:
 The AI trading system uses multiple indicators:
 
 1. **Technical Analysis**
+
    - Simple Moving Averages (10, 20 day)
    - Relative Strength Index (RSI)
    - Volume analysis
    - Price breakout detection
 
 2. **Sentiment Analysis**
+
    - News headline analysis
    - Social media sentiment (future)
    - Market sentiment indicators
@@ -154,6 +169,7 @@ The AI trading system uses multiple indicators:
 ### Environment Variables
 
 #### Backend (.env)
+
 ```env
 DATABASE_HOST=localhost
 DATABASE_PORT=3306
@@ -164,6 +180,7 @@ PORT=3000
 ```
 
 #### Frontend
+
 - API endpoints are configured to point to `http://localhost:3000`
 - WebSocket connection to backend
 
@@ -210,6 +227,7 @@ PORT=3000
 ## 📊 Database Schema
 
 ### Tables
+
 - `stocks` - Stock information
 - `stock_prices` - Historical price data
 - `news` - News articles with sentiment
@@ -225,11 +243,13 @@ PORT=3000
 ## 🚀 Deployment
 
 ### Docker (Future)
+
 ```bash
 docker-compose up
 ```
 
 ### Manual Deployment
+
 1. Build frontend: `npm run build`
 2. Start backend: `npm run start:prod`
 3. Configure reverse proxy (nginx)

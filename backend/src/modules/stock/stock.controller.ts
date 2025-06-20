@@ -14,11 +14,12 @@ export class StockController {
   async getAllStocks(): Promise<Stock[]> {
     return this.stockService.getAllStocks();
   }
-
   @Get(':symbol')
   @ApiOperation({ summary: 'Get stock by symbol' })
   @ApiResponse({ status: 200, description: 'Stock details' })
-  async getStockBySymbol(@Param('symbol') symbol: string): Promise<Stock> {
+  async getStockBySymbol(
+    @Param('symbol') symbol: string,
+  ): Promise<Stock | null> {
     return this.stockService.getStockBySymbol(symbol.toUpperCase());
   }
 
@@ -31,11 +32,12 @@ export class StockController {
   ): Promise<any> {
     return this.stockService.getStockHistory(symbol.toUpperCase(), period);
   }
-
   @Get(':symbol/update')
   @ApiOperation({ summary: 'Update stock price' })
   @ApiResponse({ status: 200, description: 'Updated stock data' })
-  async updateStockPrice(@Param('symbol') symbol: string): Promise<Stock> {
+  async updateStockPrice(
+    @Param('symbol') symbol: string,
+  ): Promise<Stock | null> {
     return this.stockService.updateStockPrice(symbol.toUpperCase());
   }
 }
