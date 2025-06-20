@@ -13,7 +13,7 @@ interface Notification {
 
 interface Portfolio {
   id: number;
-  cash: number;
+  currentCash: number;
   totalValue: number;
 }
 
@@ -129,12 +129,11 @@ const QuickTrade: React.FC = () => {
       const response = await axios.get(
         `http://localhost:8000/paper-trading/portfolios/${targetId}`,
         { timeout: 10000 }
-      );
-      setPortfolio({
-        id: response.data.id,
-        cash: response.data.cash,
-        totalValue: response.data.totalValue,
-      });
+      );        setPortfolio({
+          id: response.data.id,
+          currentCash: response.data.currentCash,
+          totalValue: response.data.totalValue,
+        });
     } catch (error) {
       console.error("Error fetching portfolio details:", error);
     }
@@ -157,13 +156,13 @@ const QuickTrade: React.FC = () => {
       if (
         tradeForm.type === "buy" &&
         portfolio &&
-        estimatedTotal > portfolio.cash
+        estimatedTotal > portfolio.currentCash
       ) {
         addNotification({
           type: "error",
           message: `Insufficient funds. Need $${estimatedTotal.toFixed(
             2
-          )}, but only have $${portfolio.cash.toFixed(2)} available.`,
+          )}, but only have $${portfolio.currentCash.toFixed(2)} available.`,
         });
         return;
       }
@@ -292,7 +291,7 @@ const QuickTrade: React.FC = () => {
         <div className="portfolio-summary">
           <div className="portfolio-stat">
             <span className="stat-label">Available Cash</span>
-            <span className="stat-value">{formatCurrency(portfolio.cash)}</span>
+            <span className="stat-value">{formatCurrency(portfolio.currentCash)}</span>
           </div>
           <div className="portfolio-stat">
             <span className="stat-label">Total Value</span>

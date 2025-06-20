@@ -19,87 +19,134 @@ export class PaperTradingService {
 
   /**
    * Mock paper trading functionality
-   */
-  async createPortfolio(createPortfolioDto: CreatePortfolioDto): Promise<any> {
+   */ async createPortfolio(
+    createPortfolioDto: CreatePortfolioDto,
+  ): Promise<any> {
     const { userId, initialBalance = 100000 } = createPortfolioDto;
     return {
-      id: `portfolio-${Date.now()}`,
-      userId,
-      balance: initialBalance,
+      id: Date.now(),
+      name: `Portfolio for ${userId}`,
+      initialCash: initialBalance,
+      currentCash: initialBalance,
       totalValue: initialBalance,
+      totalPnL: 0,
+      totalReturn: 0,
+      isActive: true,
       positions: [],
-      createdAt: new Date(),
+      trades: [],
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
     };
   }
-
   async getPortfolios(): Promise<any[]> {
-    // Mock multiple portfolios
+    // Mock multiple portfolios with correct structure
     return [
       {
-        id: `portfolio-1`,
-        userId: 'user1',
-        balance: 95000,
-        totalValue: 105000,
-        positions: [
-          {
-            symbol: 'AAPL',
-            quantity: 10,
-            averagePrice: 175.0,
-            currentPrice: 178.5,
-            totalValue: 1785.0,
-            unrealizedPnL: 35.0,
-          },
-        ],
-        trades: [],
-        createdAt: new Date(),
+        id: 1,
+        name: 'Test Portfolio 1',
+        initialCash: 100000,
+        currentCash: 95000,
+        totalValue: 97488.75,
+        totalPnL: -2511.25,
+        totalReturn: -2.51,
+        isActive: true,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
       },
       {
-        id: `portfolio-2`,
-        userId: 'user2',
-        balance: 98000,
+        id: 2,
+        name: 'Test Portfolio 2',
+        initialCash: 100000,
+        currentCash: 98000,
         totalValue: 102000,
-        positions: [
-          {
-            symbol: 'GOOGL',
-            quantity: 5,
-            averagePrice: 138.0,
-            currentPrice: 140.75,
-            totalValue: 703.75,
-            unrealizedPnL: 13.75,
-          },
-        ],
-        trades: [],
-        createdAt: new Date(),
+        totalPnL: 2000,
+        totalReturn: 2.0,
+        isActive: true,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
       },
     ];
   }
-
   async getPortfolio(id: string | number): Promise<any> {
+    const currentCash = 95000;
+    const positions = [
+      {
+        id: 1,
+        portfolioId: Number(id),
+        stockId: 1,
+        symbol: 'AAPL',
+        quantity: 10,
+        averagePrice: 175.0,
+        totalCost: 1750.0,
+        currentValue: 1785.0,
+        unrealizedPnL: 35.0,
+        unrealizedReturn: 2.0,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      },
+      {
+        id: 2,
+        portfolioId: Number(id),
+        stockId: 2,
+        symbol: 'GOOGL',
+        quantity: 5,
+        averagePrice: 138.0,
+        totalCost: 690.0,
+        currentValue: 703.75,
+        unrealizedPnL: 13.75,
+        unrealizedReturn: 1.99,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      },
+    ];
+
+    const totalPositionValue = positions.reduce(
+      (sum, pos) => sum + pos.currentValue,
+      0,
+    );
+    const totalValue = currentCash + totalPositionValue;
+    const initialCash = 100000;
+    const totalPnL = totalValue - initialCash;
+    const totalReturn = (totalPnL / initialCash) * 100;
+
     return {
-      id: `portfolio-${id}`,
-      userId: `user-${id}`,
-      balance: 95000,
-      totalValue: 105000,
-      positions: [
+      id: Number(id),
+      name: `Test Portfolio ${id}`,
+      initialCash,
+      currentCash,
+      totalValue,
+      totalPnL,
+      totalReturn,
+      isActive: true,
+      positions,
+      trades: [
         {
+          id: 1,
+          portfolioId: Number(id),
           symbol: 'AAPL',
+          type: 'buy',
           quantity: 10,
-          averagePrice: 175.0,
-          currentPrice: 178.5,
-          totalValue: 1785.0,
-          unrealizedPnL: 35.0,
+          price: 175.0,
+          totalAmount: 1750.0,
+          executedAt: new Date(Date.now() - 86400000).toISOString(), // 1 day ago
+          createdAt: new Date(Date.now() - 86400000).toISOString(),
+          updatedAt: new Date(Date.now() - 86400000).toISOString(),
         },
         {
+          id: 2,
+          portfolioId: Number(id),
           symbol: 'GOOGL',
+          type: 'buy',
           quantity: 5,
-          averagePrice: 138.0,
-          currentPrice: 140.75,
-          totalValue: 703.75,
-          unrealizedPnL: 13.75,
+          price: 138.0,
+          totalAmount: 690.0,
+          executedAt: new Date(Date.now() - 172800000).toISOString(), // 2 days ago
+          createdAt: new Date(Date.now() - 172800000).toISOString(),
+          updatedAt: new Date(Date.now() - 172800000).toISOString(),
         },
       ],
-      trades: [],
-      createdAt: new Date(),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
     };
   }
 

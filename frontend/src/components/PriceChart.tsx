@@ -163,12 +163,11 @@ const PriceChart: React.FC<PriceChartProps> = ({
     const previousPrice = prices[prices.length - 2] || currentPrice;
     const priceChange = currentPrice - previousPrice;
     const isRising = priceChange >= 0; // Create SVG path
-    const width = 400;
-    // Adjust SVG height calculation based on container height
+    const width = 400;    // Adjust SVG height calculation based on container height
     let svgHeight: number;
-    if (height <= 120) {
+    if (height <= 140) {
       // For small charts (stock cards), use more of the available space
-      svgHeight = Math.max(height - 50, 60);
+      svgHeight = Math.max(height - 40, 80);
     } else {
       // For larger charts, leave more space for UI elements
       svgHeight = Math.max(height - 70, 100);
