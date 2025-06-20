@@ -47,8 +47,9 @@ const DayTradingPatterns: React.FC<DayTradingPatternsProps> = ({
     }
   };
   const formatPrice = (price: number | string | undefined) => {
-    const numPrice = typeof price === 'number' ? price : parseFloat(String(price || 0));
-    return isNaN(numPrice) ? '0.00' : numPrice.toFixed(2);
+    const numPrice =
+      typeof price === "number" ? price : parseFloat(String(price || 0));
+    return isNaN(numPrice) ? "0.00" : numPrice.toFixed(2);
   };
 
   const formatPatternName = (type: string) => {
@@ -99,10 +100,15 @@ const DayTradingPatterns: React.FC<DayTradingPatternsProps> = ({
               <div className="pattern-details">
                 <div className="pattern-confidence">
                   Confidence: {(pattern.confidence * 100).toFixed(1)}%
-                </div>                <div className="pattern-prices">
+                </div>{" "}
+                <div className="pattern-prices">
                   <span>Entry: ${formatPrice(pattern.entryPoint)}</span>
-                  {pattern.targetPrice && <span>Target: ${formatPrice(pattern.targetPrice)}</span>}
-                  {pattern.stopLoss && <span>Stop: ${formatPrice(pattern.stopLoss)}</span>}
+                  {pattern.targetPrice && (
+                    <span>Target: ${formatPrice(pattern.targetPrice)}</span>
+                  )}
+                  {pattern.stopLoss && (
+                    <span>Stop: ${formatPrice(pattern.stopLoss)}</span>
+                  )}
                 </div>
                 <div className="pattern-timeframe">
                   Timeframe: {pattern.timeframe}

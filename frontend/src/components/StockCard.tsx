@@ -40,12 +40,39 @@ const StockCard: React.FC<StockCardProps> = ({ stock, signal }) => {
     const numValue = Number(percent) || 0;
     return numValue.toFixed(2);
   };
-
   return (
     <div className="stock-card">
+      {" "}
       <div className="stock-header">
-        <div className="stock-symbol">{stock.symbol}</div>
-        <div className="stock-name">{stock.name}</div>
+        <div className="stock-info">
+          <div className="stock-symbol">{stock.symbol}</div>
+          <div className="stock-name">{stock.name}</div>
+        </div>
+        {/* Stock Details - Compact Top Right */}
+        <div className="stock-details-compact">
+          <div className="detail-compact">
+            <span className="label-compact">Close:</span>
+            <span className="value-compact">
+              ${formatPrice(stock.previousClose)}
+            </span>
+          </div>
+          <div className="detail-compact">
+            <span className="label-compact">Volume:</span>
+            <span className="value-compact">
+              {(Number(stock.volume) || 0).toLocaleString()}
+            </span>
+          </div>
+          <div className="detail-compact">
+            <span className="label-compact">Cap:</span>
+            <span className="value-compact">
+              {formatNumber(stock.marketCap)}
+            </span>
+          </div>
+          <div className="detail-compact">
+            <span className="label-compact">Sector:</span>
+            <span className="value-compact">{stock.sector}</span>
+          </div>
+        </div>
       </div>
       <div className="stock-price-section">
         <div className="current-price">${formatPrice(stock.currentPrice)}</div>
@@ -55,24 +82,6 @@ const StockCard: React.FC<StockCardProps> = ({ stock, signal }) => {
         >
           {(Number(stock.changePercent) || 0) >= 0 ? "+" : ""}
           {formatPercent(stock.changePercent)}%
-        </div>
-      </div>
-      <div className="stock-details">
-        <div className="detail-row">
-          <span>Previous Close:</span>
-          <span>${formatPrice(stock.previousClose)}</span>
-        </div>
-        <div className="detail-row">
-          <span>Volume:</span>
-          <span>{(Number(stock.volume) || 0).toLocaleString()}</span>
-        </div>
-        <div className="detail-row">
-          <span>Market Cap:</span>
-          <span>{formatNumber(stock.marketCap)}</span>
-        </div>
-        <div className="detail-row">
-          <span>Sector:</span>
-          <span>{stock.sector}</span>
         </div>{" "}
       </div>{" "}
       {/* Live Price Chart */}
@@ -81,7 +90,7 @@ const StockCard: React.FC<StockCardProps> = ({ stock, signal }) => {
         currentPrice={Number(stock.currentPrice) || 0}
         changePercent={Number(stock.changePercent) || 0}
       />
-      {/* Sentiment Section */}
+      {/* Sentiment Section - Below Chart */}
       {stock.sentiment && (
         <SentimentDisplay
           sentiment={stock.sentiment}
@@ -89,6 +98,40 @@ const StockCard: React.FC<StockCardProps> = ({ stock, signal }) => {
           symbol={stock.symbol}
         />
       )}
+      {/* AI Trading Recommendation Section - Below Sentiment */}
+      <div className="trading-signal">
+        <div className="signal-header">🤖 AI Recommendation</div>
+        {signal ? (
+          <>
+            <div className="signal-content">
+              <div className={`signal-type ${signal.signal}`}>
+                {signal.signal === "buy"
+                  ? "🚀 BUY"
+                  : signal.signal === "sell"
+                  ? "📉 SELL"
+                  : signal.signal === "hold"
+                  ? "⚖️ HOLD"
+                  : (signal.signal as string).toUpperCase()}
+              </div>
+              <div className="signal-confidence">
+                AI Confidence:{" "}
+                {((Number(signal.confidence) || 0) * 100).toFixed(1)}%
+              </div>
+              <div className="signal-target">
+                Price Target: ${formatPrice(signal.targetPrice)}
+              </div>
+            </div>
+          </>
+        ) : (
+          <>
+            <div className="signal-content">
+              <div className="signal-type neutral">🤖 ANALYZING</div>
+              <div className="signal-confidence">AI Confidence: Loading...</div>
+              <div className="signal-target">Price Target: Computing...</div>
+            </div>
+          </>
+        )}
+      </div>
       {/* Breakout Strategy Section */}
       {stock.breakoutStrategy && (
         <BreakoutDisplay
@@ -102,39 +145,7 @@ const StockCard: React.FC<StockCardProps> = ({ stock, signal }) => {
           patterns={stock.breakoutStrategy.dayTradingPatterns}
           symbol={stock.symbol}
         />
-      )}      {/* AI Trading Recommendation Section - Always show, with default if no signal */}
-      <div className="trading-signal">
-        <div className="signal-header">🤖 AI Recommendation</div>
-        {signal ? (
-          <>            <div className="signal-content">              <div className={`signal-type ${signal.signal}`}>
-                {signal.signal === 'buy' ? '🚀 BUY' : 
-                 signal.signal === 'sell' ? '📉 SELL' : 
-                 signal.signal === 'hold' ? '⚖️ HOLD' : 
-                 (signal.signal as string).toUpperCase()}
-              </div>
-              <div className="signal-confidence">
-                AI Confidence:{" "}
-                {((Number(signal.confidence) || 0) * 100).toFixed(1)}%
-              </div>
-              <div className="signal-target">
-                Price Target: ${formatPrice(signal.targetPrice)}
-              </div>
-            </div>
-            <div className="signal-reason">
-              🎯 AI analysis complete. Our machine learning models recommend this action based on technical indicators, market sentiment, and pattern recognition.
-            </div>
-          </>
-        ) : (
-          <>
-            <div className="signal-content">              <div className="signal-type neutral">🤖 ANALYZING</div>
-              <div className="signal-confidence">AI Confidence: Loading...</div>
-              <div className="signal-target">Price Target: Computing...</div>
-            </div>            <div className="signal-reason">
-              🔄 AI models are processing market data, technical indicators, and sentiment analysis. Fresh recommendations incoming!
-            </div>
-          </>
-        )}
-      </div>
+      )}
     </div>
   );
 };

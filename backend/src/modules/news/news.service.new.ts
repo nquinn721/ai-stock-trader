@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import axios from 'axios';
 import { WordTokenizer } from 'natural';
 import * as Sentiment from 'sentiment';
 
@@ -61,30 +60,41 @@ export class NewsService {
   }
 
   /**
-   * Fetch real news articles for a stock symbol using NewsAPI
+   * Generate mock news sentiment data for a stock symbol
    */
   async fetchNewsForStock(symbol: string): Promise<any[]> {
-    // Replace 'YOUR_NEWSAPI_KEY' with your actual NewsAPI key
-    const apiKey = process.env.NEWSAPI_KEY || 'YOUR_NEWSAPI_KEY';
-    const url = `https://newsapi.org/v2/everything?q=${encodeURIComponent(
-      symbol,
-    )}&sortBy=publishedAt&language=en&pageSize=5&apiKey=${apiKey}`;
-    try {
-      const response = await axios.get(url);
-      if (response.data && response.data.articles) {
-        return response.data.articles.map((article: any) => ({
-          title: article.title,
-          summary: article.description,
-          url: article.url,
-          publishedAt: article.publishedAt,
-          source: article.source.name,
-        }));
-      }
-      return [];
-    } catch (error) {
-      console.error('Error fetching news:', error.message);
-      return [];
-    }
+    // Return mock news articles with varied sentiment
+    const mockNews = [
+      {
+        title: `${symbol} reports strong quarterly earnings`,
+        summary: `${symbol} exceeded analyst expectations with robust revenue growth`,
+        url: `https://example.com/news/${symbol}-earnings`,
+        publishedAt: new Date(
+          Date.now() - Math.random() * 24 * 60 * 60 * 1000,
+        ).toISOString(),
+        source: 'Financial Times',
+      },
+      {
+        title: `Market outlook positive for ${symbol}`,
+        summary: `Analysts are optimistic about ${symbol}'s future prospects`,
+        url: `https://example.com/news/${symbol}-outlook`,
+        publishedAt: new Date(
+          Date.now() - Math.random() * 48 * 60 * 60 * 1000,
+        ).toISOString(),
+        source: 'Reuters',
+      },
+      {
+        title: `${symbol} faces market volatility concerns`,
+        summary: `Industry challenges may impact ${symbol}'s performance`,
+        url: `https://example.com/news/${symbol}-volatility`,
+        publishedAt: new Date(
+          Date.now() - Math.random() * 72 * 60 * 60 * 1000,
+        ).toISOString(),
+        source: 'Bloomberg',
+      },
+    ];
+
+    return mockNews;
   }
 
   /**
@@ -109,14 +119,6 @@ export class NewsService {
       confidence: Math.min(0.9, Math.abs(result.score) * 0.1 + 0.5),
       tokens: tokens.slice(0, 10), // First 10 tokens
     };
-  }
-
-  /**
-   * Get news for stock - alias for fetchNewsForStock to match controller expectations
-   */
-  async getNewsForStock(symbol: string, limit: number = 10): Promise<any[]> {
-    const allNews = await this.fetchNewsForStock(symbol);
-    return allNews.slice(0, limit);
   }
 
   /**
@@ -218,27 +220,5 @@ export class NewsService {
     }
 
     return results;
-  }
-
-  /**
-   * Save news with sentiment analysis (mock implementation)
-   */
-  async saveNewsWithSentiment(symbol: string, newsItem: any): Promise<any> {
-    // Analyze sentiment of the news item
-    const text = `${newsItem.title || ''} ${newsItem.summary || ''}`;
-    const sentiment = await this.analyzeSentiment(text);
-
-    // Return mock saved news object
-    return {
-      id: `news-${Date.now()}-${Math.random()}`,
-      symbol,
-      title: newsItem.title,
-      summary: newsItem.summary,
-      url: newsItem.url,
-      publishedAt: newsItem.publishedAt,
-      source: newsItem.source,
-      sentiment: sentiment,
-      savedAt: new Date().toISOString(),
-    };
   }
 }

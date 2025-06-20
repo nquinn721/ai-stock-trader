@@ -1,8 +1,12 @@
+---
+applyTo: "**"
+---
+
 # AI Assistant Development Guidelines
 
 ## Overview
 
-This document provides quick reference guidelines for AI assistants working on the Stock Trading App project. For detailed information, see the [comprehensive documentation](./docs/).
+This document provides quick reference guidelines for AI assistants working on the Stock Trading App project. For detailed information, see the [comprehensive documentation](../../docs/).
 
 ## Quick Reference
 
@@ -23,16 +27,16 @@ This document provides quick reference guidelines for AI assistants working on t
 
 ## Documentation Links
 
-📚 **Comprehensive Documentation**: [./docs/README.md](./docs/README.md)
+📚 **Comprehensive Documentation**: [../../docs/README.md](../../docs/README.md)
 
 📋 **Architecture Decision Records**:
 
-- [ADR-001: Development Environment Standards](./docs/adrs/001-development-environment-standards.md)
-- [ADR-002: Code Style Standards](./docs/adrs/002-code-style-standards.md)
-- [ADR-003: Workflow Standards](./docs/adrs/003-workflow-standards.md)
-- [ADR-004: AI Assistant Guidelines](./docs/adrs/004-ai-assistant-guidelines.md)
-- [ADR-005: API Design Standards](./docs/adrs/005-api-design-standards.md)
-- [ADR-006: Real-Time Data Integration](./docs/adrs/006-real-data-integration.md)
+- [ADR-001: Development Environment Standards](../../docs/adrs/001-development-environment-standards.md)
+- [ADR-002: Code Style Standards](../../docs/adrs/002-code-style-standards.md)
+- [ADR-003: Workflow Standards](../../docs/adrs/003-workflow-standards.md)
+- [ADR-004: AI Assistant Guidelines](../../docs/adrs/004-ai-assistant-guidelines.md)
+- [ADR-005: API Design Standards](../../docs/adrs/005-api-design-standards.md)
+- [ADR-006: Real-Time Data Integration](../../docs/adrs/006-real-data-integration.md)
 
 ## Pre-Approved Commands
 
@@ -73,6 +77,4 @@ taskkill /F /PID <process_id>
 
 ---
 
-**Note**: This is a condensed reference. Always consult the [full documentation](./docs/) for detailed guidelines and decision rationale.
-
-**GitHub Instructions**: This file is also available as GitHub instructions at `/.github/instructions/CLAUDE.md.instructions.md` for automatic AI assistant integration.
+**Note**: This is a condensed reference. Always consult the [full documentation](../../docs/) for detailed guidelines and decision rationale.

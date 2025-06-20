@@ -8,8 +8,6 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { Portfolio } from '../../entities/portfolio.entity';
-import { Trade } from '../../entities/trade.entity';
 import {
   CreatePortfolioDto,
   CreateTradeDto,
@@ -20,29 +18,26 @@ import {
 @Controller('paper-trading')
 export class PaperTradingController {
   constructor(private readonly paperTradingService: PaperTradingService) {}
-
   @Post('portfolios')
   @ApiOperation({ summary: 'Create a new portfolio' })
   @ApiResponse({ status: 201, description: 'Portfolio created successfully' })
   async createPortfolio(
     @Body() createPortfolioDto: CreatePortfolioDto,
-  ): Promise<Portfolio> {
+  ): Promise<any> {
     return this.paperTradingService.createPortfolio(createPortfolioDto);
   }
 
   @Get('portfolios')
   @ApiOperation({ summary: 'Get all portfolios' })
   @ApiResponse({ status: 200, description: 'List of all portfolios' })
-  async getPortfolios(): Promise<Portfolio[]> {
+  async getPortfolios(): Promise<any[]> {
     return this.paperTradingService.getPortfolios();
   }
 
   @Get('portfolios/:id')
   @ApiOperation({ summary: 'Get portfolio by ID' })
   @ApiResponse({ status: 200, description: 'Portfolio details' })
-  async getPortfolio(
-    @Param('id', ParseIntPipe) id: number,
-  ): Promise<Portfolio> {
+  async getPortfolio(@Param('id', ParseIntPipe) id: number): Promise<any> {
     return this.paperTradingService.getPortfolio(id);
   }
 
@@ -52,11 +47,10 @@ export class PaperTradingController {
   async deletePortfolio(@Param('id', ParseIntPipe) id: number): Promise<void> {
     return this.paperTradingService.deletePortfolio(id);
   }
-
   @Post('trade')
   @ApiOperation({ summary: 'Execute a paper trade' })
   @ApiResponse({ status: 201, description: 'Trade executed successfully' })
-  async executeTrade(@Body() createTradeDto: CreateTradeDto): Promise<Trade> {
+  async executeTrade(@Body() createTradeDto: CreateTradeDto): Promise<any> {
     return this.paperTradingService.executeTrade(createTradeDto);
   }
 

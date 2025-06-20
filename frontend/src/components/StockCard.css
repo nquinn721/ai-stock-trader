@@ -17,7 +17,7 @@
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   min-width: 350px;
   max-width: 450px;
-  min-height: 650px; /* Increased height to accommodate new components */
+  min-height: 600px; /* Increased height since AI recommendation is back at bottom */
   width: 100%;
   position: relative;
   overflow: hidden;
@@ -93,6 +93,46 @@
   margin-bottom: 24px;
   z-index: 2;
   position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.stock-info {
+  flex: 1;
+}
+
+.stock-details-compact {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 120px;
+  background: rgba(22, 27, 34, 0.8);
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  border-radius: 12px;
+  padding: 8px;
+  backdrop-filter: blur(10px);
+}
+
+.detail-compact {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 10px;
+  line-height: 1.2;
+}
+
+.label-compact {
+  color: #8b949e;
+  font-weight: 500;
+  min-width: 35px;
+}
+
+.value-compact {
+  color: #f0f6fc;
+  font-weight: 600;
+  text-align: right;
+  font-size: 9px;
 }
 
 .stock-symbol {
