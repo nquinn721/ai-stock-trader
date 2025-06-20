@@ -165,7 +165,7 @@ const PriceChart: React.FC<PriceChartProps> = ({
     const isRising = priceChange >= 0;    // Create SVG path
     const width = 400;
     // Adjust SVG height calculation based on container height
-    let svgHeight;
+    let svgHeight: number;
     if (height <= 120) {
       // For small charts (stock cards), use more of the available space
       svgHeight = Math.max(height - 50, 60);
