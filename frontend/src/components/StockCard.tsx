@@ -89,7 +89,7 @@ const StockCard: React.FC<StockCardProps> = ({ stock, signal }) => {
         currentPrice={Number(stock.currentPrice) || 0}
         changePercent={Number(stock.changePercent) || 0}
         showRealTime={false}
-        height={140}
+        height={160}
       />
       {/* Sentiment Section - Below Chart */}
       {stock.sentiment && (

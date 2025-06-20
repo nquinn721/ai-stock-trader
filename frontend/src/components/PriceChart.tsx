@@ -165,9 +165,10 @@ const PriceChart: React.FC<PriceChartProps> = ({
     const isRising = priceChange >= 0; // Create SVG path
     const width = 400;    // Adjust SVG height calculation based on container height
     let svgHeight: number;
-    if (height <= 140) {
+    if (height <= 160) {
       // For small charts (stock cards), use more of the available space
-      svgHeight = Math.max(height - 40, 80);
+      // Account for header (~32px) and footer (~32px) and padding (~16px)
+      svgHeight = Math.max(height - 30, 110);
     } else {
       // For larger charts, leave more space for UI elements
       svgHeight = Math.max(height - 70, 100);
@@ -329,9 +330,8 @@ const PriceChart: React.FC<PriceChartProps> = ({
         )}
       </div>
     );
-  };
-  return (
-    <div className="price-chart" style={{ height }}>
+  };  return (
+    <div className={`price-chart ${height <= 160 ? 'price-chart-small' : ''}`} style={{ height }}>
       <div className="chart-header">
         <div className="chart-title">
           <span className="chart-symbol">{symbol}</span>

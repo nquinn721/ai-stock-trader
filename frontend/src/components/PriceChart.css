@@ -382,3 +382,26 @@
     padding: 3px 6px;
   }
 }
+
+/* Styles for small charts in stock cards */
+.price-chart-small {
+  padding: 8px; /* Reduced padding for small charts */
+}
+
+.price-chart-small .chart-header {
+  margin-bottom: 4px; /* Reduced margin for small charts */
+  font-size: 12px; /* Smaller font size */
+}
+
+.price-chart-small .chart-footer {
+  margin-top: 4px; /* Reduced margin for small charts */
+  padding-top: 4px; /* Reduced padding for small charts */
+}
+
+.price-chart-small .chart-symbol {
+  font-size: 14px; /* Smaller symbol font for small charts */
+}
+
+.price-chart-small .chart-container {
+  margin: 2px 0; /* Reduced container margin for small charts */
+}
