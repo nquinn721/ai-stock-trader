@@ -2,6 +2,7 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { CreateTradeRequest, Portfolio } from "../types";
 import "./Portfolio.css";
+import PortfolioChart from "./PortfolioChart";
 
 interface PortfolioProps {
   portfolioId: number;
@@ -132,8 +133,14 @@ const PortfolioComponent: React.FC<PortfolioProps> = ({
             }`}
           >
             {formatPercent(portfolio.totalReturn)}
-          </div>
+          </div>{" "}
         </div>
+      </div>
+
+      {/* Portfolio Performance Chart */}
+      <div className="portfolio-chart-section">
+        <h2>Portfolio Performance</h2>
+        <PortfolioChart portfolioId={portfolioId} height={350} />
       </div>
 
       <div className="portfolio-content">

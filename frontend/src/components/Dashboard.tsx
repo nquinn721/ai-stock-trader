@@ -3,7 +3,9 @@ import React, { useEffect, useState } from "react";
 import { useSocket } from "../context/SocketContext";
 import { Stock, TradingSignal } from "../types";
 import "./Dashboard.css";
+import PortfolioChart from "./PortfolioChart";
 import PortfolioSummary from "./PortfolioSummary";
+import PriceChart from "./PriceChart";
 import QuickTrade from "./QuickTrade";
 import StockCard from "./StockCard";
 
@@ -14,6 +16,14 @@ const Dashboard: React.FC = () => {
   >([]);
   const [signals, setSignals] = useState<TradingSignal[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedTimeframe, setSelectedTimeframe] = useState<
+    "1D" | "1W" | "1M" | "3M" | "1Y"
+  >("1M");
+
+  // Get top performing stock for main chart display
+  const topStock =
+    stocksWithSignals.find((s) => s.changePercent && s.changePercent > 0) ||
+    stocksWithSignals[0];
   useEffect(() => {
     fetchStocksWithSignals();
     fetchTradingSignals();
@@ -83,11 +93,49 @@ const Dashboard: React.FC = () => {
             Refresh Data
           </button>
         </div>
-      </div>
+      </div>{" "}
       {/* Paper Trading Section */}
       <div className="paper-trading-section">
-        <PortfolioSummary />
+        <div className="portfolio-overview">
+          <PortfolioSummary />
+          <PortfolioChart
+            portfolioId={1}
+            timeframe={selectedTimeframe}
+            height={300}
+            onTimeframeChange={setSelectedTimeframe}
+          />
+        </div>
         <QuickTrade />
+      </div>
+      {/* Market Overview with Real-time Charts */}
+      <div className="market-overview-section">
+        <h2>Market Overview</h2>
+        <div className="charts-grid">
+          {topStock && (
+            <div className="main-chart">
+              <h3>Featured Stock: {topStock.symbol}</h3>{" "}              <PriceChart
+                symbol={topStock.symbol}
+                currentPrice={topStock.currentPrice}
+                changePercent={topStock.changePercent || 0}
+                height={200}
+                showRealTime={true}
+                period="1H"
+                interval={30000} // 30 seconds - much slower to prevent hanging
+              />
+            </div>
+          )}{" "}          {stocksWithSignals.slice(0, 3).map((stock) => (
+            <div key={stock.id} className="mini-chart">
+              <PriceChart
+                symbol={stock.symbol}
+                currentPrice={stock.currentPrice}
+                changePercent={stock.changePercent || 0}
+                height={120}
+                showRealTime={false}
+                period="1H"
+              />
+            </div>
+          ))}
+        </div>
       </div>{" "}
       <div className="trading-signals-summary">
         <h2>Latest Trading Signals</h2>

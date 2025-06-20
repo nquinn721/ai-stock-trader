@@ -89,6 +89,7 @@ const StockCard: React.FC<StockCardProps> = ({ stock, signal }) => {
         symbol={stock.symbol}
         currentPrice={Number(stock.currentPrice) || 0}
         changePercent={Number(stock.changePercent) || 0}
+        showRealTime={false}
       />
       {/* Sentiment Section - Below Chart */}
       {stock.sentiment && (
@@ -97,10 +98,10 @@ const StockCard: React.FC<StockCardProps> = ({ stock, signal }) => {
           recentNews={stock.recentNews}
           symbol={stock.symbol}
         />
-      )}
-      {/* AI Trading Recommendation Section - Below Sentiment */}
+      )}{" "}
+      {/* Trading Signal Section - Below Sentiment */}
       <div className="trading-signal">
-        <div className="signal-header">🤖 AI Recommendation</div>
+        <div className="signal-header">📊 Trading Signal</div>
         {signal ? (
           <>
             <div className="signal-content">
@@ -112,9 +113,9 @@ const StockCard: React.FC<StockCardProps> = ({ stock, signal }) => {
                   : signal.signal === "hold"
                   ? "⚖️ HOLD"
                   : (signal.signal as string).toUpperCase()}
-              </div>
+              </div>{" "}
               <div className="signal-confidence">
-                AI Confidence:{" "}
+                Signal Confidence:{" "}
                 {((Number(signal.confidence) || 0) * 100).toFixed(1)}%
               </div>
               <div className="signal-target">
@@ -125,8 +126,10 @@ const StockCard: React.FC<StockCardProps> = ({ stock, signal }) => {
         ) : (
           <>
             <div className="signal-content">
-              <div className="signal-type neutral">🤖 ANALYZING</div>
-              <div className="signal-confidence">AI Confidence: Loading...</div>
+              <div className="signal-type neutral">📊 ANALYZING</div>
+              <div className="signal-confidence">
+                Signal Confidence: Loading...
+              </div>
               <div className="signal-target">Price Target: Computing...</div>
             </div>
           </>

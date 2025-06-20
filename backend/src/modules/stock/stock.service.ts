@@ -140,12 +140,10 @@ export class StockService {
       // Get existing mock signal for this stock
       let latestSignal = this.mockSignals.find(
         (s) => s.stockId === stock.id && s.isActive,
-      );
-
-      // Always generate fresh ML-powered AI signals for live data
-      // Force signal regeneration every 1 minute for live ML analysis demonstration
-      const oneMinuteAgo = new Date(Date.now() - 1 * 60 * 1000);
-      if (!latestSignal || latestSignal.createdAt < oneMinuteAgo) {
+      );      // Always generate fresh ML-powered AI signals for live data
+      // Force signal regeneration every 5 minutes for better performance
+      const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
+      if (!latestSignal || latestSignal.createdAt < fiveMinutesAgo) {
         console.log(
           `🤖 Generating AI signal for ${stock.symbol} using ML models`,
         );
