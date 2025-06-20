@@ -162,7 +162,7 @@ const PriceChart: React.FC<PriceChartProps> = ({
     const currentPrice = prices[prices.length - 1];
     const previousPrice = prices[prices.length - 2] || currentPrice;
     const priceChange = currentPrice - previousPrice;
-    const isRising = priceChange >= 0;    // Create SVG path
+    const isRising = priceChange >= 0; // Create SVG path
     const width = 400;
     // Adjust SVG height calculation based on container height
     let svgHeight: number;

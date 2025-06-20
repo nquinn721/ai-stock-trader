@@ -90,42 +90,8 @@ const Dashboard: React.FC = () => {
             height={400}
             onTimeframeChange={setSelectedTimeframe}
           />
-        </div>
-        <QuickTrade />
+        </div>        <QuickTrade />
       </div>
-      {/* Market Overview with Real-time Charts */}
-      <div className="market-overview-section">
-        <h2>Market Overview</h2>
-        <div className="charts-grid">
-          {topStock && (
-            <div className="main-chart">
-              <h3>Featured Stock: {topStock.symbol}</h3>{" "}
-              <PriceChart
-                symbol={topStock.symbol}
-                currentPrice={topStock.currentPrice}
-                changePercent={topStock.changePercent || 0}
-                height={300}
-                showRealTime={true}
-                period="1H"
-                interval={30000} // 30 seconds - much slower to prevent hanging
-              />
-            </div>
-          )}{" "}
-          {stocksWithSignals.slice(0, 3).map((stock) => (
-            <div key={stock.id} className="mini-chart">
-              {" "}
-              <PriceChart
-                symbol={stock.symbol}
-                currentPrice={stock.currentPrice}
-                changePercent={stock.changePercent || 0}
-                height={200}
-                showRealTime={false}
-                period="1H"
-              />
-            </div>
-          ))}
-        </div>
-      </div>{" "}
       <div className="trading-signals-summary">
         <h2>Latest Trading Signals</h2>
         <div className="signals-grid">
