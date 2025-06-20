@@ -1,12 +1,4 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Param,
-  ParseIntPipe,
-  Post,
-} from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import {
   CreatePortfolioDto,
@@ -33,18 +25,16 @@ export class PaperTradingController {
   async getPortfolios(): Promise<any[]> {
     return this.paperTradingService.getPortfolios();
   }
-
   @Get('portfolios/:id')
   @ApiOperation({ summary: 'Get portfolio by ID' })
   @ApiResponse({ status: 200, description: 'Portfolio details' })
-  async getPortfolio(@Param('id', ParseIntPipe) id: number): Promise<any> {
+  async getPortfolio(@Param('id') id: string): Promise<any> {
     return this.paperTradingService.getPortfolio(id);
   }
-
   @Delete('portfolios/:id')
   @ApiOperation({ summary: 'Delete portfolio' })
   @ApiResponse({ status: 200, description: 'Portfolio deleted successfully' })
-  async deletePortfolio(@Param('id', ParseIntPipe) id: number): Promise<void> {
+  async deletePortfolio(@Param('id') id: string): Promise<void> {
     return this.paperTradingService.deletePortfolio(id);
   }
   @Post('trade')
@@ -53,13 +43,10 @@ export class PaperTradingController {
   async executeTrade(@Body() createTradeDto: CreateTradeDto): Promise<any> {
     return this.paperTradingService.executeTrade(createTradeDto);
   }
-
   @Get('portfolios/:id/performance')
   @ApiOperation({ summary: 'Get portfolio performance data' })
   @ApiResponse({ status: 200, description: 'Portfolio performance data' })
-  async getPortfolioPerformance(
-    @Param('id', ParseIntPipe) id: number,
-  ): Promise<any> {
+  async getPortfolioPerformance(@Param('id') id: string): Promise<any> {
     return this.paperTradingService.getPortfolioPerformance(id);
   }
 }
