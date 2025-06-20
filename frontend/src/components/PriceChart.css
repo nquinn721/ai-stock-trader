@@ -6,14 +6,15 @@
   );
   border: 1px solid rgba(99, 102, 241, 0.3);
   border-radius: 16px;
-  padding: 16px; /* Reduced from 20px */
+  padding: 12px; /* Reduced for tighter spacing */
   margin-top: 16px;
   backdrop-filter: blur(20px);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), 0 4px 16px rgba(99, 102, 241, 0.1);
   position: relative;
-  overflow: hidden;
+  overflow: visible; /* Allow content to be visible */
   display: flex;
   flex-direction: column;
+  min-height: 0; /* Prevent flex shrinking issues */
 }
 
 .price-chart::before {
@@ -40,12 +41,13 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 12px; /* Reduced from 16px */
+  margin-bottom: 8px; /* Reduced for tighter spacing */
   font-size: 14px;
   font-weight: 600;
   color: #f0f6fc;
   position: relative;
   z-index: 1;
+  flex-shrink: 0; /* Prevent shrinking */
 }
 
 .chart-title {
@@ -98,8 +100,11 @@
 
 .chart-container {
   position: relative;
-  margin: 8px 0; /* Reduced from 12px */
+  margin: 4px 0; /* Reduced spacing */
   flex: 1; /* Take available space */
+  min-height: 0; /* Prevent flex shrinking issues */
+  display: flex;
+  flex-direction: column;
 }
 
 .price-chart-svg {
@@ -182,13 +187,14 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: 8px; /* Reduced from 12px */
+  margin-top: 6px; /* Further reduced for tighter spacing */
   font-size: 11px;
   color: #94a3b8;
-  padding: 6px 10px; /* Reduced padding */
+  padding: 4px 8px; /* Reduced padding */
   background: rgba(255, 255, 255, 0.03);
   border-radius: 6px;
   border: 1px solid rgba(255, 255, 255, 0.05);
+  flex-shrink: 0; /* Prevent shrinking */
 }
 
 .price-range {
@@ -265,9 +271,10 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: 8px; /* Reduced from 16px */
-  padding-top: 8px; /* Reduced from 12px */
+  margin-top: 6px; /* Further reduced for tighter spacing */
+  padding-top: 6px; /* Reduced padding */
   border-top: 1px solid rgba(255, 255, 255, 0.05);
+  flex-shrink: 0; /* Prevent shrinking */
 }
 
 .price-change {

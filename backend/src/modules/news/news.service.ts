@@ -7,7 +7,7 @@ import * as Sentiment from 'sentiment';
 export class NewsService {
   private sentiment: any;
   private wordTokenizer: WordTokenizer;
-  private newsCache = new Map<string, { data: any[], timestamp: number }>();
+  private newsCache = new Map<string, { data: any[]; timestamp: number }>();
   private CACHE_DURATION = 5 * 60 * 1000; // 5 minutes cache
 
   constructor() {
@@ -60,7 +60,7 @@ export class NewsService {
         negative: -2,
       },
     });
-  }  /**
+  } /**
    * Fetch real news articles for a stock symbol using multiple sources
    */
   async fetchNewsForStock(symbol: string): Promise<any[]> {
@@ -76,14 +76,20 @@ export class NewsService {
     // Try multiple sources in order of preference    // 1. Try Alpha Vantage API first
     const alphaVantageResult = await this.tryAlphaVantageNews(symbol);
     if (alphaVantageResult.length > 0) {
-      this.newsCache.set(symbol, { data: alphaVantageResult, timestamp: Date.now() });
+      this.newsCache.set(symbol, {
+        data: alphaVantageResult,
+        timestamp: Date.now(),
+      });
       return alphaVantageResult;
     }
-    
+
     // 2. Try Finnhub API as fallback
     const finnhubResult = await this.tryFinnhubNews(symbol);
     if (finnhubResult.length > 0) {
-      this.newsCache.set(symbol, { data: finnhubResult, timestamp: Date.now() });
+      this.newsCache.set(symbol, {
+        data: finnhubResult,
+        timestamp: Date.now(),
+      });
       return finnhubResult;
     }
 

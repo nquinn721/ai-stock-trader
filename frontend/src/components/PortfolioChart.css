@@ -140,7 +140,10 @@
 
 .metric-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); /* Slightly smaller minimum */
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(140px, 1fr)
+  ); /* Slightly smaller minimum */
   gap: 12px; /* Reduced from 15px */
 }
 
