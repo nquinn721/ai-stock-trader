@@ -1,24 +1,28 @@
-// Types for project management data
+// Updated types for React-based project management
 export type Epic = {
   id: string;
   title: string;
   description: string;
-  status: string;
+  status: "TODO" | "IN_PROGRESS" | "DONE" | "ON_HOLD";
   owner: string;
+  createdDate: string;
+  completedDate?: string;
 };
 
 export type Story = {
   id: string;
   title: string;
   description: string;
-  status: string;
-  priority: string;
+  status: "TODO" | "IN_PROGRESS" | "DONE" | "BLOCKED" | "REVIEW";
+  priority: "Low" | "Medium" | "High" | "Critical";
   epic: string;
   storyPoints: number;
-  sprint: number;
+  sprint?: number;
   assignee: string;
   progress: number;
   dependencies: string[];
+  createdDate: string;
+  completedDate?: string;
 };
 
 export type Sprint = {
@@ -28,11 +32,15 @@ export type Sprint = {
   startDate: string;
   endDate: string;
   stories: string[];
-  status: string;
+  status: "PLANNING" | "ACTIVE" | "COMPLETED" | "CANCELLED";
+  velocity?: number;
 };
 
-export type Script = {
-  name: string;
+export type ProjectAction = {
+  id: string;
+  type: "CREATE_STORY" | "START_SPRINT" | "GENERATE_REPORT";
+  title: string;
   description: string;
-  usage: string;
+  icon: string;
+  color: string;
 };

@@ -1,6 +1,6 @@
 import React from "react";
 import { createRoot } from "react-dom/client";
-import { ProjectManagementDashboard } from "./components/ProjectManagementDashboard";
+import ProjectManagementDashboard from "./components/ProjectManagementDashboard";
 import "./index.css";
 import reportWebVitals from "./reportWebVitals";
 

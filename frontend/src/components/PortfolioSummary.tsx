@@ -6,6 +6,8 @@ import "./PortfolioSummary.css";
 const PortfolioSummary: React.FC = () => {
   const [portfolio, setPortfolio] = useState<Portfolio | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
   useEffect(() => {
     fetchTestPortfolio();
 
@@ -23,31 +25,47 @@ const PortfolioSummary: React.FC = () => {
 
   const fetchTestPortfolio = async () => {
     try {
+      setLoading(true);
+      setError(null);
+      console.log("Fetching portfolios...");
       const response = await axios.get(
-        "http://localhost:8000/paper-trading/portfolios"
+        "http://localhost:8000/paper-trading/portfolios",
+        { timeout: 10000 } // 10 second timeout
       );
       const portfolios = response.data;
+      console.log("Portfolios received:", portfolios);
 
       if (portfolios.length > 0) {
         // Get the first portfolio or create one if none exists
         const testPortfolio = portfolios[0];
+        console.log("Fetching portfolio details for:", testPortfolio.id);
         const detailResponse = await axios.get(
-          `http://localhost:8000/paper-trading/portfolios/${testPortfolio.id}`
+          `http://localhost:8000/paper-trading/portfolios/${testPortfolio.id}`,
+          { timeout: 10000 }
         );
+        console.log("Portfolio details received:", detailResponse.data);
         setPortfolio(detailResponse.data);
       } else {
         // Create a default test portfolio
+        console.log("Creating new portfolio...");
         const createResponse = await axios.post(
           "http://localhost:8000/paper-trading/portfolios",
           {
             name: "Test Portfolio",
             initialCash: 100000,
-          }
+          },
+          { timeout: 10000 }
         );
+        console.log("New portfolio created:", createResponse.data);
         setPortfolio(createResponse.data);
       }
     } catch (error) {
       console.error("Error fetching test portfolio:", error);
+      setError(
+        `Failed to load portfolio: ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`
+      );
     } finally {
       setLoading(false);
     }
@@ -65,7 +83,6 @@ const PortfolioSummary: React.FC = () => {
     const numValue = Number(percent) || 0;
     return `${numValue >= 0 ? "+" : ""}${numValue.toFixed(2)}%`;
   };
-
   if (loading) {
     return (
       <div className="portfolio-summary-loading">
@@ -75,10 +92,46 @@ const PortfolioSummary: React.FC = () => {
     );
   }
 
+  if (error) {
+    return (
+      <div className="portfolio-summary-error">
+        <p>{error}</p>
+        <button
+          onClick={() => fetchTestPortfolio()}
+          style={{
+            marginTop: "10px",
+            padding: "8px 16px",
+            backgroundColor: "#6366f1",
+            color: "white",
+            border: "none",
+            borderRadius: "4px",
+            cursor: "pointer",
+          }}
+        >
+          Retry
+        </button>
+      </div>
+    );
+  }
+
   if (!portfolio) {
     return (
       <div className="portfolio-summary-error">
-        <p>Unable to load portfolio</p>
+        <p>No portfolio data available</p>
+        <button
+          onClick={() => fetchTestPortfolio()}
+          style={{
+            marginTop: "10px",
+            padding: "8px 16px",
+            backgroundColor: "#6366f1",
+            color: "white",
+            border: "none",
+            borderRadius: "4px",
+            cursor: "pointer",
+          }}
+        >
+          Load Portfolio
+        </button>
       </div>
     );
   }

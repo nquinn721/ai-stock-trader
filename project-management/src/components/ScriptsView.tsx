@@ -1,211 +1,195 @@
 import {
-  ContentCopy as CopyIcon,
-  Description as DocumentIcon,
-  PlayArrow as RunIcon,
-  Code as ScriptIcon,
+  AddTask as CreateStoryIcon,
+  Assessment as ReportIcon,
+  PlayArrow as StartSprintIcon,
 } from "@mui/icons-material";
 import {
   Box,
+  Button,
   Card,
+  CardActions,
   CardContent,
   Chip,
-  Grid,
-  IconButton,
   Stack,
-  Tooltip,
   Typography,
 } from "@mui/material";
-import React from "react";
-import { scripts } from "../data/scripts";
-import { Script } from "../data/types";
+import React, { useState } from "react";
+import { projectActions } from "../data/projectActions";
+import CreateStoryDialog from "./CreateStoryDialog";
+import GenerateReportDialog from "./GenerateReportDialog";
+import StartSprintDialog from "./StartSprintDialog";
+
+const getActionIcon = (actionType: string) => {
+  switch (actionType) {
+    case "CREATE_STORY":
+      return <CreateStoryIcon sx={{ color: "#4caf50" }} />;
+    case "START_SPRINT":
+      return <StartSprintIcon sx={{ color: "#2196f3" }} />;
+    case "GENERATE_REPORT":
+      return <ReportIcon sx={{ color: "#ff9800" }} />;
+    default:
+      return <CreateStoryIcon sx={{ color: "#9c27b0" }} />;
+  }
+};
 
 const ScriptsView: React.FC = () => {
-  const handleCopyUsage = (usage: string) => {
-    navigator.clipboard.writeText(usage);
+  const [createStoryOpen, setCreateStoryOpen] = useState(false);
+  const [startSprintOpen, setStartSprintOpen] = useState(false);
+  const [generateReportOpen, setGenerateReportOpen] = useState(false);
+
+  const handleActionClick = (actionType: string) => {
+    switch (actionType) {
+      case "CREATE_STORY":
+        setCreateStoryOpen(true);
+        break;
+      case "START_SPRINT":
+        setStartSprintOpen(true);
+        break;
+      case "GENERATE_REPORT":
+        setGenerateReportOpen(true);
+        break;
+    }
   };
 
-  if (!scripts.length) {
-    return (
-      <Box sx={{ mt: 6, textAlign: "center" }}>
-        <Typography variant="h5" color="textSecondary">
-          No automation scripts found.
-        </Typography>
-      </Box>
-    );
-  }
+  const handleCreateStory = (storyData: any) => {
+    console.log("Creating story:", storyData);
+    // In a real app, this would update the global state or call an API
+  };
+
+  const handleStartSprint = (sprintData: any) => {
+    console.log("Starting sprint:", sprintData);
+    // In a real app, this would update the global state or call an API
+  };
+
+  const handleGenerateReport = (reportData: any) => {
+    console.log("Generated report:", reportData);
+    // In a real app, this would save/display the report
+  };
 
   return (
     <Box>
       <Typography variant="h4" gutterBottom>
-        Automation Scripts
+        Project Actions
       </Typography>
       <Typography variant="body1" color="textSecondary" sx={{ mb: 3 }}>
-        PowerShell scripts converted to React components for project management
-        automation.
+        React-based project management actions - no PowerShell scripts needed
       </Typography>
 
-      <Grid container spacing={3}>
-        {scripts.map((script: Script, index: number) => {
-          const scriptType = script.name.includes("generate")
-            ? "Generator"
-            : script.name.includes("create")
-            ? "Creator"
-            : script.name.includes("start")
-            ? "Initializer"
-            : "Utility";
-
-          const getScriptColor = (type: string) => {
-            switch (type) {
-              case "Generator":
-                return "#4caf50";
-              case "Creator":
-                return "#2196f3";
-              case "Initializer":
-                return "#ff9800";
-              default:
-                return "#9c27b0";
-            }
-          };
-
-          const color = getScriptColor(scriptType);
-
+      <Box
+        sx={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(350px, 1fr))",
+          gap: 3,
+        }}
+      >
+        {" "}
+        {projectActions.map((action, index: number) => {
           return (
-            <Grid item xs={12} md={6} lg={4} key={index}>
-              <Card
-                sx={{
-                  borderRadius: 3,
-                  boxShadow: 3,
-                  height: "100%",
-                  borderLeft: `4px solid ${color}`,
-                  transition: "transform 0.2s ease, box-shadow 0.2s ease",
-                  "&:hover": {
-                    transform: "translateY(-2px)",
-                    boxShadow: 6,
-                  },
-                }}
-              >
-                <CardContent>
-                  <Stack direction="row" alignItems="center" spacing={1} mb={2}>
-                    <ScriptIcon sx={{ color, fontSize: 28 }} />
-                    <Typography variant="h6" sx={{ flexGrow: 1 }}>
-                      {script.name}
-                    </Typography>
-                    <Chip
-                      label={scriptType}
-                      size="small"
-                      sx={{ backgroundColor: `${color}20`, color }}
-                    />
-                  </Stack>
-
-                  <Typography variant="body2" sx={{ mb: 3, minHeight: 40 }}>
-                    {script.description}
+            <Card
+              key={action.id}
+              sx={{
+                borderRadius: 3,
+                boxShadow: 3,
+                height: "100%",
+                borderLeft: `4px solid ${action.color}`,
+                transition: "transform 0.2s ease, box-shadow 0.2s ease",
+                "&:hover": {
+                  transform: "translateY(-2px)",
+                  boxShadow: 6,
+                },
+              }}
+            >
+              <CardContent>
+                <Stack direction="row" alignItems="center" spacing={1} mb={2}>
+                  {getActionIcon(action.type)}
+                  <Typography variant="h6" sx={{ flexGrow: 1 }}>
+                    {action.title}
                   </Typography>
-
-                  <Box
+                  <Chip
+                    label="React"
+                    size="small"
                     sx={{
-                      backgroundColor: "#f5f5f5",
-                      borderRadius: 2,
-                      p: 2,
-                      mb: 2,
-                      border: "1px solid #e0e0e0",
+                      backgroundColor: `${action.color}20`,
+                      color: action.color,
                     }}
-                  >
-                    <Stack
-                      direction="row"
-                      alignItems="center"
-                      spacing={1}
-                      mb={1}
-                    >
-                      <DocumentIcon sx={{ fontSize: 16, color: "#666" }} />
-                      <Typography
-                        variant="caption"
-                        color="textSecondary"
-                        sx={{ fontWeight: "bold" }}
-                      >
-                        USAGE:
-                      </Typography>
-                      <Box sx={{ flexGrow: 1 }} />
-                      <Tooltip title="Copy command">
-                        <IconButton
-                          size="small"
-                          onClick={() => handleCopyUsage(script.usage)}
-                          sx={{ padding: 0.5 }}
-                        >
-                          <CopyIcon sx={{ fontSize: 16 }} />
-                        </IconButton>
-                      </Tooltip>
-                    </Stack>
-                    <Typography
-                      variant="body2"
-                      sx={{
-                        fontFamily: "monospace",
-                        fontSize: "0.8rem",
-                        backgroundColor: "#fff",
-                        padding: 1,
-                        borderRadius: 1,
-                        border: "1px solid #ddd",
-                        wordBreak: "break-all",
-                      }}
-                    >
-                      {script.usage}
-                    </Typography>
-                  </Box>
+                  />
+                </Stack>
 
-                  <Stack
-                    direction="row"
-                    spacing={1}
-                    justifyContent="space-between"
-                    alignItems="center"
-                  >
-                    <Chip
-                      label="PowerShell"
-                      size="small"
-                      variant="outlined"
-                      sx={{ fontSize: "0.7rem" }}
-                    />
-                    <Chip
-                      label="Automation"
-                      size="small"
-                      variant="outlined"
-                      sx={{ fontSize: "0.7rem" }}
-                    />
-                    <Tooltip title="Run script (simulated)">
-                      <IconButton
-                        size="small"
-                        sx={{
-                          backgroundColor: `${color}20`,
-                          color,
-                          "&:hover": { backgroundColor: `${color}30` },
-                        }}
-                      >
-                        <RunIcon />
-                      </IconButton>
-                    </Tooltip>
-                  </Stack>
-                </CardContent>
-              </Card>
-            </Grid>
+                <Typography
+                  variant="body2"
+                  color="textSecondary"
+                  sx={{ mb: 3 }}
+                >
+                  {action.description}
+                </Typography>
+
+                <Stack
+                  direction="row"
+                  spacing={1}
+                  flexWrap="wrap"
+                  sx={{ mb: 2 }}
+                >
+                  <Chip
+                    label="React"
+                    size="small"
+                    variant="outlined"
+                    sx={{ fontSize: "0.7rem" }}
+                  />
+                  <Chip
+                    label="TypeScript"
+                    size="small"
+                    variant="outlined"
+                    sx={{ fontSize: "0.7rem" }}
+                  />
+                  <Chip
+                    label="Interactive"
+                    size="small"
+                    variant="outlined"
+                    sx={{ fontSize: "0.7rem" }}
+                  />
+                </Stack>
+              </CardContent>
+
+              <CardActions>
+                <Button
+                  variant="contained"
+                  size="small"
+                  onClick={() => handleActionClick(action.type)}
+                  startIcon={getActionIcon(action.type)}
+                  sx={{
+                    backgroundColor: action.color,
+                    "&:hover": {
+                      backgroundColor: action.color,
+                      filter: "brightness(0.8)",
+                    },
+                  }}
+                >
+                  Execute Action
+                </Button>
+              </CardActions>
+            </Card>
           );
         })}
-      </Grid>
-
-      {/* Additional Information */}
-      <Box sx={{ mt: 4, p: 3, backgroundColor: "#f8f9fa", borderRadius: 2 }}>
-        <Typography variant="h6" gutterBottom>
-          Script Integration Notes
-        </Typography>
-        <Typography variant="body2" color="textSecondary">
-          • These PowerShell scripts have been converted to React components for
-          visualization
-          <br />
-          • Click the copy icon to copy the script usage command
-          <br />
-          • The "Run" button simulates script execution (actual PowerShell
-          integration would require backend support)
-          <br />• Scripts are categorized by their primary function: Generator,
-          Creator, Initializer, or Utility
-        </Typography>
       </Box>
+
+      {/* Action Dialogs */}
+      <CreateStoryDialog
+        open={createStoryOpen}
+        onClose={() => setCreateStoryOpen(false)}
+        onCreateStory={handleCreateStory}
+      />
+
+      <StartSprintDialog
+        open={startSprintOpen}
+        onClose={() => setStartSprintOpen(false)}
+        onStartSprint={handleStartSprint}
+      />
+
+      <GenerateReportDialog
+        open={generateReportOpen}
+        onClose={() => setGenerateReportOpen(false)}
+        onGenerate={handleGenerateReport}
+      />
     </Box>
   );
 };

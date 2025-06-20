@@ -17,16 +17,27 @@ const QuickTrade: React.FC = () => {
   useEffect(() => {
     fetchPortfolioId();
   }, []);
-
   const fetchPortfolioId = async () => {
     try {
       const response = await axios.get(
-        "http://localhost:8000/paper-trading/portfolios"
+        "http://localhost:8000/paper-trading/portfolios",
+        { timeout: 10000 }
       );
       const portfolios = response.data;
 
       if (portfolios.length > 0) {
         setPortfolioId(portfolios[0].id);
+      } else {
+        // Create a default portfolio if none exists
+        const createResponse = await axios.post(
+          "http://localhost:8000/paper-trading/portfolios",
+          {
+            name: "Quick Trade Portfolio",
+            initialCash: 100000,
+          },
+          { timeout: 10000 }
+        );
+        setPortfolioId(createResponse.data.id);
       }
     } catch (error) {
       console.error("Error fetching portfolio ID:", error);
@@ -45,7 +56,9 @@ const QuickTrade: React.FC = () => {
         quantity: parseInt(tradeForm.quantity),
       };
 
-      await axios.post("http://localhost:8000/paper-trading/trade", tradeData);
+      await axios.post("http://localhost:8000/paper-trading/trade", tradeData, {
+        timeout: 10000,
+      });
 
       // Reset form
       setTradeForm({ symbol: "", type: "buy", quantity: "" });

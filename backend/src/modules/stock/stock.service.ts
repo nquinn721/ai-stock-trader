@@ -105,9 +105,16 @@ export class StockService {
       } as Stock,
     ];
   }
-
-  async getAllStocks(): Promise<Stock[]> {
-    return this.mockStocks;
+  async getAllStocks(): Promise<
+    (Stock & {
+      tradingSignal?: TradingSignal | null;
+      breakoutStrategy?: any;
+      sentiment?: any;
+      recentNews?: any[];
+    })[]
+  > {
+    // Use the same logic as getAllStocksWithSignals but return basic format
+    return await this.getAllStocksWithSignals();
   }
   async getAllStocksWithSignals(): Promise<
     (Stock & {

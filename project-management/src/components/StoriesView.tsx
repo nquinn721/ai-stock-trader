@@ -15,10 +15,8 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
-import Grid from "@mui/material/Grid";
 import React from "react";
 import { stories } from "../data/stories";
-import { Story } from "../data/types";
 
 const getStatusMeta = (status: string) => {
   switch (status) {
@@ -75,103 +73,105 @@ const StoriesView: React.FC = () => {
   return (
     <Box>
       <Typography variant="h4" gutterBottom>
-        User Stories Storyboard
+        Storyboard
       </Typography>
-      <Grid container spacing={3}>
-        {stories.map((story: Story) => {
+      <Box
+        sx={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(400px, 1fr))",
+          gap: 3,
+        }}
+      >
+        {stories.map((story) => {
           const statusMeta = getStatusMeta(story.status);
           return (
-            <Grid item xs={12} sm={6} md={4} key={story.id}>
-              <Card sx={{ borderRadius: 3, boxShadow: 3, height: "100%" }}>
-                <CardContent>
-                  <Stack direction="row" alignItems="center" spacing={1} mb={1}>
-                    <Tooltip title={statusMeta.label}>
-                      <span>{statusMeta.icon}</span>
-                    </Tooltip>
-                    <Typography variant="h6" sx={{ flexGrow: 1 }}>
-                      {story.title}
-                    </Typography>
-                    <Chip
-                      label={story.priority}
-                      size="small"
-                      color={getPriorityColor(story.priority) as any}
-                    />
-                  </Stack>
-                  <Typography
-                    variant="body2"
-                    color="textSecondary"
-                    sx={{ mb: 1 }}
-                  >
-                    {story.description}
+            <Card
+              key={story.id}
+              sx={{ borderRadius: 3, boxShadow: 3, height: "100%" }}
+            >
+              <CardContent>
+                <Stack direction="row" alignItems="center" spacing={1} mb={1}>
+                  <Tooltip title={statusMeta.label}>
+                    <span>{statusMeta.icon}</span>
+                  </Tooltip>
+                  <Typography variant="h6" sx={{ flexGrow: 1 }}>
+                    {story.title}
                   </Typography>
-                  <Stack direction="row" spacing={1} mb={1} flexWrap="wrap">
+                  <Chip
+                    label={story.priority}
+                    size="small"
+                    color={getPriorityColor(story.priority) as any}
+                  />
+                </Stack>
+                <Typography
+                  variant="body2"
+                  color="textSecondary"
+                  sx={{ mb: 1 }}
+                >
+                  {story.description}
+                </Typography>
+                <Stack direction="row" spacing={1} mb={1} flexWrap="wrap">
+                  <Chip
+                    label={`ID: ${story.id}`}
+                    size="small"
+                    variant="outlined"
+                  />
+                  <Chip
+                    label={`Epic: ${story.epic}`}
+                    size="small"
+                    variant="outlined"
+                  />
+                  <Chip label={`${story.storyPoints} pts`} size="small" />
+                  {story.sprint && (
                     <Chip
-                      label={`ID: ${story.id}`}
+                      label={`Sprint ${story.sprint}`}
                       size="small"
-                      variant="outlined"
+                      color="primary"
                     />
+                  )}
+                  {story.assignee && (
                     <Chip
-                      label={`Epic: ${story.epic}`}
+                      avatar={<Avatar>{story.assignee[0]}</Avatar>}
+                      label={story.assignee}
                       size="small"
-                      variant="outlined"
+                      color="secondary"
                     />
-                    <Chip label={`${story.storyPoints} pts`} size="small" />
-                    {story.sprint && (
-                      <Chip
-                        label={`Sprint ${story.sprint}`}
-                        size="small"
-                        color="primary"
-                      />
-                    )}
-                    {story.assignee && (
-                      <Chip
-                        avatar={<Avatar>{story.assignee[0]}</Avatar>}
-                        label={story.assignee}
-                        size="small"
-                        color="secondary"
-                      />
-                    )}
-                  </Stack>
-                  {typeof story.progress === "number" && story.progress > 0 && (
-                    <Box mb={1}>
-                      <Typography variant="caption" color="textSecondary">
-                        Progress: {story.progress}%
-                      </Typography>
-                      <LinearProgress
-                        variant="determinate"
-                        value={story.progress}
-                        sx={{ height: 8, borderRadius: 4, mt: 0.5 }}
-                      />
-                    </Box>
                   )}
-                  {story.dependencies && story.dependencies.length > 0 && (
-                    <Box mt={1}>
-                      <Typography variant="caption" color="textSecondary">
-                        Dependencies:
-                      </Typography>
-                      <Stack
-                        direction="row"
-                        spacing={1}
-                        mt={0.5}
-                        flexWrap="wrap"
-                      >
-                        {story.dependencies.map((dep) => (
-                          <Chip
-                            key={dep}
-                            label={dep}
-                            size="small"
-                            variant="outlined"
-                          />
-                        ))}
-                      </Stack>
-                    </Box>
-                  )}
-                </CardContent>
-              </Card>
-            </Grid>
+                </Stack>
+                {typeof story.progress === "number" && story.progress > 0 && (
+                  <Box mb={1}>
+                    <Typography variant="caption" color="textSecondary">
+                      Progress: {story.progress}%
+                    </Typography>
+                    <LinearProgress
+                      variant="determinate"
+                      value={story.progress}
+                      sx={{ height: 8, borderRadius: 4, mt: 0.5 }}
+                    />
+                  </Box>
+                )}
+                {story.dependencies && story.dependencies.length > 0 && (
+                  <Box mt={1}>
+                    <Typography variant="caption" color="textSecondary">
+                      Dependencies:
+                    </Typography>
+                    <Stack direction="row" spacing={1} mt={0.5} flexWrap="wrap">
+                      {story.dependencies.map((dep) => (
+                        <Chip
+                          key={dep}
+                          label={dep}
+                          size="small"
+                          variant="outlined"
+                        />
+                      ))}
+                    </Stack>
+                  </Box>
+                )}
+              </CardContent>
+            </Card>
           );
         })}
-      </Grid>
+      </Box>
     </Box>
   );
 };

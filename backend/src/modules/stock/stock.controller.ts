@@ -7,11 +7,20 @@ import { StockService } from './stock.service';
 @Controller('stocks')
 export class StockController {
   constructor(private readonly stockService: StockService) {}
-
   @Get()
-  @ApiOperation({ summary: 'Get all stocks' })
-  @ApiResponse({ status: 200, description: 'List of all stocks' })
-  async getAllStocks(): Promise<Stock[]> {
+  @ApiOperation({ summary: 'Get all stocks with sentiment and signals' })
+  @ApiResponse({
+    status: 200,
+    description: 'List of all stocks with enriched data',
+  })
+  async getAllStocks(): Promise<
+    (Stock & {
+      tradingSignal?: any;
+      breakoutStrategy?: any;
+      sentiment?: any;
+      recentNews?: any[];
+    })[]
+  > {
     return this.stockService.getAllStocks();
   }
   @Get(':symbol')

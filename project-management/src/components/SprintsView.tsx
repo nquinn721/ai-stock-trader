@@ -9,7 +9,6 @@ import {
   Card,
   CardContent,
   Chip,
-  Grid,
   LinearProgress,
   Stack,
   Typography,
@@ -64,7 +63,13 @@ const SprintsView: React.FC = () => {
       <Typography variant="h4" gutterBottom>
         Sprint Management
       </Typography>
-      <Grid container spacing={3}>
+      <Box
+        sx={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(600px, 1fr))",
+          gap: 3,
+        }}
+      >
         {sprints.map((sprint: Sprint) => {
           const statusMeta = getStatusMeta(sprint.status);
           const sprintStories = stories.filter((story) =>
@@ -113,186 +118,179 @@ const SprintsView: React.FC = () => {
           );
 
           return (
-            <Grid item xs={12} md={6} key={sprint.id}>
-              <Card
-                sx={{
-                  borderRadius: 3,
-                  boxShadow: 3,
-                  height: "100%",
-                  borderLeft: `4px solid ${statusMeta.color}`,
-                }}
-              >
-                <CardContent>
-                  <Stack direction="row" alignItems="center" spacing={1} mb={2}>
-                    <SprintIcon
-                      sx={{ color: statusMeta.color, fontSize: 28 }}
-                    />
-                    <Typography variant="h5" sx={{ flexGrow: 1 }}>
-                      {sprint.name}
-                    </Typography>
-                    <Chip
-                      icon={statusMeta.icon}
-                      label={statusMeta.label}
-                      size="small"
-                      sx={{
-                        backgroundColor: `${statusMeta.color}20`,
-                        color: statusMeta.color,
-                      }}
-                    />
-                  </Stack>
-
-                  <Typography
-                    variant="body1"
-                    sx={{ mb: 2, fontStyle: "italic" }}
-                  >
-                    Goal: {sprint.goal}
+            <Card
+              key={sprint.id}
+              sx={{
+                borderRadius: 3,
+                boxShadow: 3,
+                height: "100%",
+                borderLeft: `4px solid ${statusMeta.color}`,
+              }}
+            >
+              <CardContent>
+                <Stack direction="row" alignItems="center" spacing={1} mb={2}>
+                  <SprintIcon sx={{ color: statusMeta.color, fontSize: 28 }} />
+                  <Typography variant="h5" sx={{ flexGrow: 1 }}>
+                    {sprint.name}
                   </Typography>
+                  <Chip
+                    icon={statusMeta.icon}
+                    label={statusMeta.label}
+                    size="small"
+                    sx={{
+                      backgroundColor: `${statusMeta.color}20`,
+                      color: statusMeta.color,
+                    }}
+                  />
+                </Stack>
 
-                  <Stack direction="row" spacing={1} mb={2} flexWrap="wrap">
-                    <Chip
-                      label={`${sprint.startDate} - ${sprint.endDate}`}
-                      size="small"
-                      variant="outlined"
-                    />
-                    <Chip
-                      label={`${sprintStories.length} Stories`}
-                      size="small"
-                    />
-                    <Chip label={`${totalStoryPoints} Points`} size="small" />
+                <Typography variant="body1" sx={{ mb: 2, fontStyle: "italic" }}>
+                  Goal: {sprint.goal}
+                </Typography>
+
+                <Stack direction="row" spacing={1} mb={2} flexWrap="wrap">
+                  <Chip
+                    label={`${sprint.startDate} - ${sprint.endDate}`}
+                    size="small"
+                    variant="outlined"
+                  />
+                  <Chip
+                    label={`${sprintStories.length} Stories`}
+                    size="small"
+                  />
+                  <Chip label={`${totalStoryPoints} Points`} size="small" />
+                </Stack>
+
+                {/* Story Progress */}
+                <Box sx={{ mb: 2 }}>
+                  <Typography
+                    variant="body2"
+                    color="textSecondary"
+                    sx={{ mb: 1 }}
+                  >
+                    Story Progress: {progress}% ({completedStories.length}/
+                    {sprintStories.length} completed)
+                  </Typography>
+                  <LinearProgress
+                    variant="determinate"
+                    value={progress}
+                    sx={{ height: 8, borderRadius: 4 }}
+                  />
+                </Box>
+
+                {/* Story Points Progress */}
+                <Box sx={{ mb: 2 }}>
+                  <Typography
+                    variant="body2"
+                    color="textSecondary"
+                    sx={{ mb: 1 }}
+                  >
+                    Story Points: {completedStoryPoints}/{totalStoryPoints}{" "}
+                    completed
+                  </Typography>
+                  <LinearProgress
+                    variant="determinate"
+                    value={
+                      totalStoryPoints > 0
+                        ? (completedStoryPoints / totalStoryPoints) * 100
+                        : 0
+                    }
+                    sx={{ height: 6, borderRadius: 3 }}
+                    color="secondary"
+                  />
+                </Box>
+
+                {/* Time Progress */}
+                <Box sx={{ mb: 2 }}>
+                  <Typography
+                    variant="body2"
+                    color="textSecondary"
+                    sx={{ mb: 1 }}
+                  >
+                    Time Progress: {Math.round(timeProgress)}% ({daysElapsed}/
+                    {totalDays} days)
+                  </Typography>
+                  <LinearProgress
+                    variant="determinate"
+                    value={timeProgress}
+                    sx={{ height: 6, borderRadius: 3 }}
+                    color={timeProgress > progress ? "warning" : "success"}
+                  />
+                </Box>
+
+                {/* Story Status Breakdown */}
+                <Box sx={{ mb: 2 }}>
+                  <Typography
+                    variant="body2"
+                    color="textSecondary"
+                    sx={{ mb: 1 }}
+                  >
+                    Story Status:
+                  </Typography>
+                  <Stack direction="row" spacing={1} flexWrap="wrap">
+                    {completedStories.length > 0 && (
+                      <Chip
+                        label={`${completedStories.length} Done`}
+                        size="small"
+                        sx={{
+                          backgroundColor: "#4caf5020",
+                          color: "#4caf50",
+                        }}
+                      />
+                    )}
+                    {inProgressStories.length > 0 && (
+                      <Chip
+                        label={`${inProgressStories.length} In Progress`}
+                        size="small"
+                        sx={{
+                          backgroundColor: "#ff980020",
+                          color: "#ff9800",
+                        }}
+                      />
+                    )}
+                    {todoStories.length > 0 && (
+                      <Chip
+                        label={`${todoStories.length} Todo`}
+                        size="small"
+                        sx={{
+                          backgroundColor: "#2196f320",
+                          color: "#2196f3",
+                        }}
+                      />
+                    )}
                   </Stack>
+                </Box>
 
-                  {/* Story Progress */}
-                  <Box sx={{ mb: 2 }}>
+                {/* Sprint Stories */}
+                {sprintStories.length > 0 && (
+                  <Box>
                     <Typography
                       variant="body2"
                       color="textSecondary"
                       sx={{ mb: 1 }}
                     >
-                      Story Progress: {progress}% ({completedStories.length}/
-                      {sprintStories.length} completed)
-                    </Typography>
-                    <LinearProgress
-                      variant="determinate"
-                      value={progress}
-                      sx={{ height: 8, borderRadius: 4 }}
-                    />
-                  </Box>
-
-                  {/* Story Points Progress */}
-                  <Box sx={{ mb: 2 }}>
-                    <Typography
-                      variant="body2"
-                      color="textSecondary"
-                      sx={{ mb: 1 }}
-                    >
-                      Story Points: {completedStoryPoints}/{totalStoryPoints}{" "}
-                      completed
-                    </Typography>
-                    <LinearProgress
-                      variant="determinate"
-                      value={
-                        totalStoryPoints > 0
-                          ? (completedStoryPoints / totalStoryPoints) * 100
-                          : 0
-                      }
-                      sx={{ height: 6, borderRadius: 3 }}
-                      color="secondary"
-                    />
-                  </Box>
-
-                  {/* Time Progress */}
-                  <Box sx={{ mb: 2 }}>
-                    <Typography
-                      variant="body2"
-                      color="textSecondary"
-                      sx={{ mb: 1 }}
-                    >
-                      Time Progress: {Math.round(timeProgress)}% ({daysElapsed}/
-                      {totalDays} days)
-                    </Typography>
-                    <LinearProgress
-                      variant="determinate"
-                      value={timeProgress}
-                      sx={{ height: 6, borderRadius: 3 }}
-                      color={timeProgress > progress ? "warning" : "success"}
-                    />
-                  </Box>
-
-                  {/* Story Status Breakdown */}
-                  <Box sx={{ mb: 2 }}>
-                    <Typography
-                      variant="body2"
-                      color="textSecondary"
-                      sx={{ mb: 1 }}
-                    >
-                      Story Status:
+                      Sprint Stories:
                     </Typography>
                     <Stack direction="row" spacing={1} flexWrap="wrap">
-                      {completedStories.length > 0 && (
+                      {sprintStories.map((story) => (
                         <Chip
-                          label={`${completedStories.length} Done`}
+                          key={story.id}
+                          label={`${story.id}: ${story.title.substring(0, 20)}${
+                            story.title.length > 20 ? "..." : ""
+                          }`}
                           size="small"
-                          sx={{
-                            backgroundColor: "#4caf5020",
-                            color: "#4caf50",
-                          }}
+                          variant="outlined"
+                          sx={{ fontSize: "0.7rem" }}
                         />
-                      )}
-                      {inProgressStories.length > 0 && (
-                        <Chip
-                          label={`${inProgressStories.length} In Progress`}
-                          size="small"
-                          sx={{
-                            backgroundColor: "#ff980020",
-                            color: "#ff9800",
-                          }}
-                        />
-                      )}
-                      {todoStories.length > 0 && (
-                        <Chip
-                          label={`${todoStories.length} Todo`}
-                          size="small"
-                          sx={{
-                            backgroundColor: "#2196f320",
-                            color: "#2196f3",
-                          }}
-                        />
-                      )}
+                      ))}
                     </Stack>
                   </Box>
-
-                  {/* Sprint Stories */}
-                  {sprintStories.length > 0 && (
-                    <Box>
-                      <Typography
-                        variant="body2"
-                        color="textSecondary"
-                        sx={{ mb: 1 }}
-                      >
-                        Sprint Stories:
-                      </Typography>
-                      <Stack direction="row" spacing={1} flexWrap="wrap">
-                        {sprintStories.map((story) => (
-                          <Chip
-                            key={story.id}
-                            label={`${story.id}: ${story.title.substring(
-                              0,
-                              20
-                            )}${story.title.length > 20 ? "..." : ""}`}
-                            size="small"
-                            variant="outlined"
-                            sx={{ fontSize: "0.7rem" }}
-                          />
-                        ))}
-                      </Stack>
-                    </Box>
-                  )}
-                </CardContent>
-              </Card>
-            </Grid>
+                )}
+              </CardContent>
+            </Card>
           );
         })}
-      </Grid>
+      </Box>
     </Box>
   );
 };
