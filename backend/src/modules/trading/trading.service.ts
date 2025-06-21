@@ -44,12 +44,12 @@ export class TradingService {
 
   /**
    * Generate mock trading signal
-   */
-  async generateTradingSignal(symbol: string): Promise<any> {
+   */ async generateTradingSignal(symbol: string): Promise<any> {
+    // Try to get live data from stock service
     const breakoutResult = await this.detectBreakout(symbol);
     const sentiment = await this.newsService.getAverageSentiment(symbol);
 
-    // Combine technical analysis with sentiment
+    // Combine technical analysis with sentiment for live trading signal
     let adjustedConfidence = breakoutResult.confidence;
     if (sentiment > 2 && breakoutResult.signal === SignalType.BUY) {
       adjustedConfidence = Math.min(0.95, adjustedConfidence + 0.2);
@@ -66,30 +66,14 @@ export class TradingService {
       sentimentScore: sentiment,
       timestamp: new Date(),
     };
-  }
-  /**
-   * Get recent trading signals for a symbol (mock implementation)
+  } /**
+   * Get recent trading signals for a symbol
    */
   async getRecentSignals(symbol: string, limit: number = 10): Promise<any[]> {
-    const signals: any[] = [];
-    const now = Date.now();
-
-    for (let i = 0; i < limit; i++) {
-      const timestamp = new Date(now - i * 2 * 60 * 60 * 1000); // Every 2 hours
-      const mockSignal = await this.generateTradingSignal(symbol);
-
-      signals.push({
-        ...mockSignal,
-        timestamp,
-        id: `${symbol}-${timestamp.getTime()}`,
-      });
-    }
-
-    return signals;
-  }
-
-  /**
-   * Get all active trading signals (mock implementation)
+    console.log(`📊 No real trading signal data available for ${symbol}`);
+    return [];
+  } /**
+   * Get all active trading signals
    */
   async getActiveSignals(): Promise<any[]> {
     const symbols = [
@@ -104,19 +88,26 @@ export class TradingService {
     ];
     const signals: any[] = [];
 
+    console.log(
+      `📊 Generating live trading signals for ${symbols.length} stocks...`,
+    );
+
     for (const symbol of symbols) {
-      const signal = await this.generateTradingSignal(symbol);
-      signals.push({
-        ...signal,
-        id: `signal-${symbol}-${Date.now()}`,
-        isActive: true,
-        createdAt: new Date(),
-      });
+      try {
+        const signal = await this.generateTradingSignal(symbol);
+        signals.push({
+          ...signal,
+          id: `signal-${symbol}-${Date.now()}`,
+          isActive: true,
+          createdAt: new Date(),
+        });
+      } catch (error) {
+        console.error(`Error generating signal for ${symbol}:`, error);
+      }
     }
 
     return signals;
   }
-
   /**
    * Get trading signals for a specific stock
    */
@@ -128,47 +119,8 @@ export class TradingService {
    * Analyze all stocks and generate trading signals
    */
   async analyzeAllStocks(): Promise<any[]> {
-    const symbols = [
-      'AAPL',
-      'GOOGL',
-      'MSFT',
-      'AMZN',
-      'TSLA',
-      'NVDA',
-      'META',
-      'NFLX',
-    ];
-    const signals: any[] = [];
-
-    for (const symbol of symbols) {
-      try {
-        const signal = await this.generateTradingSignal(symbol);
-        const breakoutResult = await this.detectBreakout(symbol);
-
-        signals.push({
-          symbol,
-          signal: signal.signal,
-          confidence: signal.confidence,
-          reason: signal.reason,
-          breakoutAnalysis: breakoutResult,
-          timestamp: new Date(),
-          id: `analysis-${symbol}-${Date.now()}`,
-        });
-      } catch (error) {
-        console.error(`Error analyzing ${symbol}:`, error);
-        signals.push({
-          symbol,
-          signal: SignalType.HOLD,
-          confidence: 0,
-          reason: `Error analyzing ${symbol}`,
-          timestamp: new Date(),
-          id: `analysis-${symbol}-${Date.now()}`,
-          error: true,
-        });
-      }
-    }
-
-    return signals;
+    console.log(`📊 No real trading signal data available for analysis`);
+    return [];
   }
 
   /**

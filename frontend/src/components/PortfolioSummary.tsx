@@ -1,19 +1,18 @@
-import axios from "axios";
-import React, { useEffect, useState } from "react";
-import { Portfolio } from "../types";
+import { observer } from "mobx-react-lite";
+import React, { useEffect } from "react";
+import { usePortfolioStore } from "../stores/StoreContext";
 import "./PortfolioSummary.css";
 
-const PortfolioSummary: React.FC = () => {
-  const [portfolio, setPortfolio] = useState<Portfolio | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+const PortfolioSummary: React.FC = observer(() => {
+  const portfolioStore = usePortfolioStore();
 
   useEffect(() => {
-    fetchTestPortfolio();
+    // Fetch portfolio for test user (ID: 1)
+    portfolioStore.fetchPortfolio(1);
 
     // Listen for portfolio updates from QuickTrade
     const handlePortfolioUpdate = () => {
-      fetchTestPortfolio();
+      portfolioStore.fetchPortfolio(1);
     };
 
     window.addEventListener("portfolio-updated", handlePortfolioUpdate);
@@ -21,55 +20,7 @@ const PortfolioSummary: React.FC = () => {
     return () => {
       window.removeEventListener("portfolio-updated", handlePortfolioUpdate);
     };
-  }, []);
-
-  const fetchTestPortfolio = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      console.log("Fetching portfolios...");
-      const response = await axios.get(
-        "http://localhost:8000/paper-trading/portfolios",
-        { timeout: 10000 } // 10 second timeout
-      );
-      const portfolios = response.data;
-      console.log("Portfolios received:", portfolios);
-
-      if (portfolios.length > 0) {
-        // Get the first portfolio or create one if none exists
-        const testPortfolio = portfolios[0];
-        console.log("Fetching portfolio details for:", testPortfolio.id);
-        const detailResponse = await axios.get(
-          `http://localhost:8000/paper-trading/portfolios/${testPortfolio.id}`,
-          { timeout: 10000 }
-        );
-        console.log("Portfolio details received:", detailResponse.data);
-        setPortfolio(detailResponse.data);
-      } else {
-        // Create a default test portfolio
-        console.log("Creating new portfolio...");
-        const createResponse = await axios.post(
-          "http://localhost:8000/paper-trading/portfolios",
-          {
-            name: "Test Portfolio",
-            initialCash: 100000,
-          },
-          { timeout: 10000 }
-        );
-        console.log("New portfolio created:", createResponse.data);
-        setPortfolio(createResponse.data);
-      }
-    } catch (error) {
-      console.error("Error fetching test portfolio:", error);
-      setError(
-        `Failed to load portfolio: ${
-          error instanceof Error ? error.message : "Unknown error"
-        }`
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, [portfolioStore]);
 
   const formatCurrency = (amount: number | string | null | undefined) => {
     const numValue = Number(amount) || 0;
@@ -83,7 +34,8 @@ const PortfolioSummary: React.FC = () => {
     const numValue = Number(percent) || 0;
     return `${numValue >= 0 ? "+" : ""}${numValue.toFixed(2)}%`;
   };
-  if (loading) {
+
+  if (portfolioStore.isLoading) {
     return (
       <div className="portfolio-summary-loading">
         <div className="loading-spinner"></div>
@@ -92,12 +44,12 @@ const PortfolioSummary: React.FC = () => {
     );
   }
 
-  if (error) {
+  if (portfolioStore.error) {
     return (
       <div className="portfolio-summary-error">
-        <p>{error}</p>
+        <p>{portfolioStore.error}</p>
         <button
-          onClick={() => fetchTestPortfolio()}
+          onClick={() => portfolioStore.fetchPortfolio(1)}
           style={{
             marginTop: "10px",
             padding: "8px 16px",
@@ -114,12 +66,12 @@ const PortfolioSummary: React.FC = () => {
     );
   }
 
-  if (!portfolio) {
+  if (!portfolioStore.portfolio) {
     return (
       <div className="portfolio-summary-error">
         <p>No portfolio data available</p>
         <button
-          onClick={() => fetchTestPortfolio()}
+          onClick={() => portfolioStore.fetchPortfolio(1)}
           style={{
             marginTop: "10px",
             padding: "8px 16px",
@@ -136,6 +88,8 @@ const PortfolioSummary: React.FC = () => {
     );
   }
 
+  const { portfolio } = portfolioStore;
+
   return (
     <div className="portfolio-summary-container">
       <h2>Paper Trading Portfolio</h2>
@@ -149,35 +103,38 @@ const PortfolioSummary: React.FC = () => {
         <div className="summary-stat">
           <span className="stat-label">Cash</span>
           <span className="stat-value">
-            {formatCurrency(portfolio.currentCash)}
+            {formatCurrency(portfolio.totalCash)}
           </span>
         </div>
         <div className="summary-stat">
-          <span className="stat-label">P&L</span>
+          <span className="stat-label">Day Change</span>
           <span
             className={`stat-value ${
-              Number(portfolio.totalPnL) >= 0 ? "positive" : "negative"
+              portfolioStore.isPositive ? "positive" : "negative"
             }`}
           >
-            {formatCurrency(portfolio.totalPnL)}
+            {formatCurrency(portfolio.dayChange)}
           </span>
         </div>
         <div className="summary-stat">
           <span className="stat-label">Return</span>
           <span
             className={`stat-value ${
-              Number(portfolio.totalReturn) >= 0 ? "positive" : "negative"
+              portfolioStore.totalReturn >= 0 ? "positive" : "negative"
             }`}
           >
-            {formatPercent(portfolio.totalReturn)}
+            {formatPercent(portfolio.totalReturnPercent)}
           </span>
         </div>
-      </div>{" "}
-      {portfolio.positions && portfolio.positions.length > 0 && (
+      </div>
+
+      {portfolioStore.positions && portfolioStore.positions.length > 0 && (
         <div className="portfolio-positions">
-          <h3>Current Holdings ({portfolio.positions.length} positions)</h3>
+          <h3>
+            Current Holdings ({portfolioStore.positions.length} positions)
+          </h3>
           <div className="positions-list">
-            {portfolio.positions.map((position) => (
+            {portfolioStore.topPositions.map((position) => (
               <div key={position.id} className="position-item">
                 <div className="position-main">
                   <span className="position-symbol">{position.symbol}</span>
@@ -191,12 +148,12 @@ const PortfolioSummary: React.FC = () => {
                   </span>
                   <span
                     className={`position-pnl ${
-                      Number(position.unrealizedPnL) >= 0
+                      Number(position.unrealizedPnl) >= 0
                         ? "positive"
                         : "negative"
                     }`}
                   >
-                    {formatCurrency(position.unrealizedPnL)}
+                    {formatCurrency(position.unrealizedPnl)}
                   </span>
                 </div>
               </div>
@@ -204,38 +161,8 @@ const PortfolioSummary: React.FC = () => {
           </div>
         </div>
       )}
-      {portfolio.trades && portfolio.trades.length > 0 && (
-        <div className="portfolio-history">
-          <h3>Recent Trades ({portfolio.trades.length} total)</h3>
-          <div className="trades-list">
-            {portfolio.trades
-              .slice()
-              .reverse()
-              .slice(0, 5)
-              .map((trade) => (
-                <div key={trade.id} className="trade-item">
-                  <div className="trade-main">
-                    <span className={`trade-type ${trade.type}`}>
-                      {trade.type.toUpperCase()}
-                    </span>
-                    <span className="trade-symbol">{trade.symbol}</span>
-                    <span className="trade-quantity">{trade.quantity}</span>
-                  </div>
-                  <div className="trade-details">
-                    <span className="trade-price">
-                      @ {formatCurrency(trade.price)}
-                    </span>
-                    <span className="trade-date">
-                      {new Date(trade.executedAt).toLocaleDateString()}
-                    </span>
-                  </div>
-                </div>
-              ))}
-          </div>
-        </div>
-      )}
     </div>
   );
-};
+});
 
 export default PortfolioSummary;

@@ -32,78 +32,82 @@ export class StockService {
     private breakoutService: BreakoutService,
     private mlAnalysisService: MLAnalysisService,
   ) {
-    // Initialize mock data
+    // Initialize with live stock symbols for tracking
     this.initializeMockData();
+    console.log(
+      '📊 Stock service initialized - will fetch live data from Yahoo Finance',
+    );
   }
-
   private initializeMockData() {
-    // Create mock stocks with varied prices
+    // Initialize with popular stock symbols for live data tracking
     this.mockStocks = [
       {
         id: 1,
         symbol: 'AAPL',
         name: 'Apple Inc.',
-        currentPrice: 178.5,
-        previousClose: 176.25,
-        volume: 52000000,
+        currentPrice: 0,
+        previousClose: 0,
+        volume: 0,
       } as Stock,
       {
         id: 2,
         symbol: 'GOOGL',
         name: 'Alphabet Inc.',
-        currentPrice: 140.75,
-        previousClose: 138.9,
-        volume: 28000000,
+        currentPrice: 0,
+        previousClose: 0,
+        volume: 0,
       } as Stock,
       {
         id: 3,
         symbol: 'MSFT',
         name: 'Microsoft Corporation',
-        currentPrice: 415.25,
-        previousClose: 412.8,
-        volume: 35000000,
+        currentPrice: 0,
+        previousClose: 0,
+        volume: 0,
       } as Stock,
       {
         id: 4,
         symbol: 'AMZN',
         name: 'Amazon.com Inc.',
-        currentPrice: 145.6,
-        previousClose: 143.25,
-        volume: 41000000,
+        currentPrice: 0,
+        previousClose: 0,
+        volume: 0,
       } as Stock,
       {
         id: 5,
         symbol: 'TSLA',
         name: 'Tesla Inc.',
-        currentPrice: 248.75,
-        previousClose: 245.1,
-        volume: 67000000,
+        currentPrice: 0,
+        previousClose: 0,
+        volume: 0,
       } as Stock,
       {
         id: 6,
         symbol: 'NVDA',
         name: 'NVIDIA Corporation',
-        currentPrice: 485.3,
-        previousClose: 478.9,
-        volume: 39000000,
+        currentPrice: 0,
+        previousClose: 0,
+        volume: 0,
       } as Stock,
       {
         id: 7,
         symbol: 'META',
         name: 'Meta Platforms Inc.',
-        currentPrice: 325.8,
-        previousClose: 322.45,
-        volume: 31000000,
+        currentPrice: 0,
+        previousClose: 0,
+        volume: 0,
       } as Stock,
       {
         id: 8,
         symbol: 'NFLX',
         name: 'Netflix Inc.',
-        currentPrice: 465.2,
-        previousClose: 461.75,
-        volume: 18000000,
+        currentPrice: 0,
+        previousClose: 0,
+        volume: 0,
       } as Stock,
     ];
+    this.mockSignals = [];
+    console.log('📊 Initialized stock symbols for live data tracking');
   }
   async getAllStocks(): Promise<
     (Stock & {
@@ -113,8 +117,8 @@ export class StockService {
       recentNews?: any[];
     })[]
   > {
-    // Use the same logic as getAllStocksWithSignals but return basic format
-    return await this.getAllStocksWithSignals();
+    // Return stocks with live data from Yahoo Finance
+    return this.mockStocks.filter((stock) => stock.currentPrice > 0);
   }
   async getAllStocksWithSignals(): Promise<
     (Stock & {
@@ -124,7 +128,7 @@ export class StockService {
       recentNews?: any[];
     })[]
   > {
-    const stocks = this.mockStocks; // Use mock data instead of database
+    const stocks = this.mockStocks.filter((stock) => stock.currentPrice > 0);
     const stocksWithSignals: (Stock & {
       tradingSignal: TradingSignal | null;
       breakoutStrategy?: any;
@@ -136,120 +140,12 @@ export class StockService {
     const stockSymbols = stocks.map((stock) => stock.symbol);
     const sentimentMap =
       await this.newsService.getPortfolioSentiment(stockSymbols);
+
     for (const stock of stocks) {
-      // Get existing mock signal for this stock
-      let latestSignal = this.mockSignals.find(
-        (s) => s.stockId === stock.id && s.isActive,
-      ); // Always generate fresh ML-powered AI signals for live data
-      // Force signal regeneration every 5 minutes for better performance
-      const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
-      if (!latestSignal || latestSignal.createdAt < fiveMinutesAgo) {
-        console.log(
-          `🤖 Generating AI signal for ${stock.symbol} using ML models`,
-        );
-        try {
-          // Get historical data for ML analysis
-          const historicalData = await this.getHistoricalData(stock.symbol);
+      // Generate trading signal based on live price data
+      const signal = await this.generateLiveTradingSignal(stock);
 
-          if (historicalData && historicalData.length > 0) {
-            // Use ML Analysis Service for proper AI-powered prediction
-            const mlPrediction =
-              await this.mlAnalysisService.generateEnsemblePrediction(
-                historicalData,
-                {
-                  currentPrice: stock.currentPrice,
-                  volume: stock.volume,
-                  previousClose: stock.previousClose,
-                },
-              );
-
-            // Convert ML prediction to trading signal
-            let signal: SignalType;
-            if (
-              mlPrediction.direction === 'bullish' &&
-              mlPrediction.confidence > 0.6
-            ) {
-              signal = SignalType.BUY;
-            } else if (
-              mlPrediction.direction === 'bearish' &&
-              mlPrediction.confidence > 0.6
-            ) {
-              signal = SignalType.SELL;
-            } else {
-              signal = SignalType.HOLD;
-            }
-
-            // Calculate target price based on ML prediction
-            const priceMultiplier =
-              signal === SignalType.BUY
-                ? 1 + mlPrediction.probability * 0.1
-                : signal === SignalType.SELL
-                  ? 1 - mlPrediction.probability * 0.1
-                  : 1 + (Math.random() - 0.5) * 0.02;
-
-            // Deactivate old signals first to ensure fresh generation
-            this.mockSignals.forEach((s) => {
-              if (s.stockId === stock.id && s.isActive) {
-                s.isActive = false;
-              }
-            });
-            const newSignal = {
-              id: Date.now(),
-              stockId: stock.id,
-              stock: stock,
-              signal: signal,
-              confidence: Math.max(0.3, mlPrediction.confidence), // Dynamic confidence from ML
-              targetPrice: stock.currentPrice * priceMultiplier,
-              currentPrice: stock.currentPrice,
-              reason: `🧠 ${mlPrediction.reasoning} - Live ML analysis with ${(mlPrediction.confidence * 100).toFixed(1)}% confidence`,
-              isActive: true,
-              createdAt: new Date(),
-              updatedAt: new Date(),
-            } as TradingSignal;
-
-            this.mockSignals.push(newSignal);
-            latestSignal = newSignal;
-            console.log(
-              `✅ AI signal generated for ${stock.symbol}: ${signal} (${(mlPrediction.confidence * 100).toFixed(1)}%)`,
-            );
-          } else {
-            // Fallback if no historical data - still deactivate old signals
-            console.log(
-              `⚠️ No historical data for ${stock.symbol}, using basic analysis`,
-            );
-
-            // Deactivate old signals first
-            this.mockSignals.forEach((s) => {
-              if (s.stockId === stock.id && s.isActive) {
-                s.isActive = false;
-              }
-            });
-
-            const fallbackSignal = await this.generateBasicSignal(stock);
-            this.mockSignals.push(fallbackSignal);
-            latestSignal = fallbackSignal;
-          }
-        } catch (error) {
-          console.error(
-            `❌ Error generating AI signal for ${stock.symbol}:`,
-            error,
-          );
-
-          // Deactivate old signals first
-          this.mockSignals.forEach((s) => {
-            if (s.stockId === stock.id && s.isActive) {
-              s.isActive = false;
-            }
-          });
-
-          // Fallback to basic signal on error
-          const fallbackSignal = await this.generateBasicSignal(stock);
-          this.mockSignals.push(fallbackSignal);
-          latestSignal = fallbackSignal;
-        }
-      }
-
-      // Always calculate breakout strategy with ML models and day trading patterns
+      // Calculate breakout strategy with live data
       const breakoutStrategy = await this.calculateBreakoutStrategy(
         stock.symbol,
         stock.currentPrice,
@@ -257,7 +153,7 @@ export class StockService {
 
       stocksWithSignals.push({
         ...stock,
-        tradingSignal: latestSignal,
+        tradingSignal: signal,
         breakoutStrategy,
         sentiment: sentimentMap.get(stock.symbol)?.sentiment || {
           score: 0,
@@ -272,37 +168,59 @@ export class StockService {
     return stocksWithSignals;
   }
   async getStockBySymbol(symbol: string): Promise<Stock | null> {
-    // Use mock data instead of database
     return this.mockStocks.find((stock) => stock.symbol === symbol) || null;
   }
   async updateStockPrice(symbol: string): Promise<Stock | null> {
     try {
       // Skip symbols with dots as they cause issues with yahoo-finance2
       if (symbol.includes('.')) {
-        console.log(`Skipping symbol with dot: ${symbol}`);
+        console.log(`⏭️ Skipping symbol with dot: ${symbol}`);
         return await this.getStockBySymbol(symbol);
       }
 
-      const quote = await yahooFinance.quote(
-        symbol,
-        {},
-        {
-          validateResult: false,
-        },
-      );
+      console.log(`📊 Fetching live data for ${symbol} from Yahoo Finance...`);
+
+      // Add timeout to prevent hanging
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('API timeout')), 10000); // 10 second timeout
+      });
+
+      const quote = await Promise.race([
+        yahooFinance.quote(
+          symbol,
+          {},
+          {
+            validateResult: false,
+          },
+        ),
+        timeoutPromise,
+      ]);
+
       const stock = await this.getStockBySymbol(symbol);
 
       if (stock && quote) {
-        stock.currentPrice = Number(quote.regularMarketPrice) || 0;
-        stock.previousClose = Number(quote.regularMarketPreviousClose) || 0;
-        stock.changePercent = Number(quote.regularMarketChangePercent) || 0;
-        stock.volume = Number(quote.regularMarketVolume) || 0;
-        stock.marketCap = Number(quote.marketCap) || 0;
-        // Update mock data instead of database
+        const newPrice = Number(quote.regularMarketPrice) || 0;
+        const prevClose = Number(quote.regularMarketPreviousClose) || 0;
+        const changePercent = Number(quote.regularMarketChangePercent) || 0;
+        const volume = Number(quote.regularMarketVolume) || 0;
+        const marketCap = Number(quote.marketCap) || 0;
+
+        // Update stock with live data
+        stock.currentPrice = newPrice;
+        stock.previousClose = prevClose;
+        stock.changePercent = changePercent;
+        stock.volume = volume;
+        stock.marketCap = marketCap;
+
+        // Update in our stock array
         const index = this.mockStocks.findIndex((s) => s.symbol === symbol);
         if (index !== -1) {
           this.mockStocks[index] = stock;
         }
+
+        console.log(
+          `✅ Updated ${symbol}: $${newPrice.toFixed(2)} (${changePercent >= 0 ? '+' : ''}${changePercent.toFixed(2)}%)`,
+        );
 
         // Broadcast the updated stock data via WebSocket
         this.websocketGateway.broadcastStockUpdate(symbol, {
@@ -314,50 +232,97 @@ export class StockService {
           marketCap: stock.marketCap,
           timestamp: new Date().toISOString(),
         });
+      } else {
+        console.log(`⚠️ No quote data received for ${symbol}`);
       }
 
       return stock;
     } catch (error) {
-      console.error(`Error updating stock price for ${symbol}:`, error.message);
+      console.error(
+        `❌ Error updating stock price for ${symbol}:`,
+        error.message,
+      );
       return null;
     }
   }
-  @Cron('*/5 * * * * *') // Every 5 seconds
+  @Cron('0 */2 * * * *') // Every 2 minutes (less aggressive to prevent API rate limiting)
   async updateAllStockPrices() {
-    const stocks = await this.getAllStocks();
-    console.log(`Updating prices for ${stocks.length} stocks...`);
-    for (const stock of stocks) {
-      const updatedStock = await this.updateStockPrice(stock.symbol);
-      // Add small delay to avoid rate limiting
-      await new Promise((resolve) => setTimeout(resolve, 100));
+    const stocks = this.mockStocks; // Get all tracked stocks
+    const connectedClients = this.websocketGateway.getConnectedClientsCount();
+
+    if (connectedClients === 0) {
+      console.log('⏸️ No clients connected, skipping price update');
+      return;
     }
 
-    // Send all updated stocks to clients
-    this.websocketGateway.sendStockUpdates();
+    console.log(
+      `🔄 Updating live prices for ${stocks.length} stocks (${connectedClients} clients connected)...`,
+    );
+
+    let successCount = 0;
+    for (const stock of stocks) {
+      try {
+        const updated = await this.updateStockPrice(stock.symbol);
+        if (updated) successCount++;
+        // Add delay to avoid rate limiting
+        await new Promise((resolve) => setTimeout(resolve, 500));
+      } catch (error) {
+        console.error(`❌ Error updating ${stock.symbol}:`, error.message);
+      }
+    }
+
+    // Broadcast all updated stocks to clients via WebSocket
+    if (successCount > 0) {
+      await this.websocketGateway.broadcastAllStockUpdates();
+      console.log(
+        `✅ Updated ${successCount}/${stocks.length} stocks and broadcasted to ${connectedClients} clients`,
+      );
+    } else {
+      console.log('⚠️ No stocks were successfully updated');
+    }
   }
   async getStockHistory(symbol: string, period: string = '1mo'): Promise<any> {
     try {
       // Skip symbols with dots as they cause issues with yahoo-finance2
       if (symbol.includes('.')) {
-        console.log(`Skipping historical data for symbol with dot: ${symbol}`);
+        console.log(
+          `⏭️ Skipping historical data for symbol with dot: ${symbol}`,
+        );
         return [];
       }
 
-      const historical = await yahooFinance.historical(
-        symbol,
-        {
-          period1: this.getPeriodStartDate(period),
-          period2: new Date(),
-          interval: '1d' as any,
-        },
-        {
-          validateResult: false,
-        },
+      console.log(`📈 Fetching historical data for ${symbol}...`);
+
+      // Add timeout to prevent hanging
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(
+          () => reject(new Error('Historical data API timeout')),
+          15000,
+        ); // 15 second timeout
+      });
+
+      const historical = await Promise.race([
+        yahooFinance.historical(
+          symbol,
+          {
+            period1: this.getPeriodStartDate(period),
+            period2: new Date(),
+            interval: '1d' as any,
+          },
+          {
+            validateResult: false,
+          },
+        ),
+        timeoutPromise,
+      ]);
+
+      console.log(
+        `✅ Retrieved ${Array.isArray(historical) ? historical.length : 0} historical data points for ${symbol}`,
       );
       return historical;
     } catch (error) {
       console.error(
-        `Error fetching historical data for ${symbol}:`,
+        `❌ Error fetching historical data for ${symbol}:`,
         error.message,
       );
       return [];
@@ -539,5 +504,82 @@ export class StockService {
       createdAt: new Date(),
       updatedAt: new Date(),
     } as TradingSignal;
+  }
+
+  /**
+   * Generate trading signal based on live price data and technical analysis
+   */
+  private async generateLiveTradingSignal(
+    stock: Stock,
+  ): Promise<TradingSignal> {
+    try {
+      // Get historical data for technical analysis
+      const historicalData = await this.getHistoricalData(stock.symbol);
+
+      if (historicalData && historicalData.length > 20) {
+        // Use ML analysis with real historical data
+        const mlPrediction = await this.mlAnalysisService.predictPriceMomentum(
+          historicalData,
+          { symbol: stock.symbol, price: stock.currentPrice },
+        );
+
+        // Get sentiment data
+        const sentiment = await this.newsService.getAverageSentiment(
+          stock.symbol,
+        );
+
+        // Determine signal based on ML prediction and sentiment
+        let signal: SignalType = SignalType.HOLD;
+        let confidence = mlPrediction.confidence;
+
+        if (
+          mlPrediction.direction === 'bullish' &&
+          mlPrediction.confidence > 0.6
+        ) {
+          signal = SignalType.BUY;
+          // Boost confidence if sentiment is also positive
+          if (sentiment > 1) {
+            confidence = Math.min(0.95, confidence + 0.15);
+          }
+        } else if (
+          mlPrediction.direction === 'bearish' &&
+          mlPrediction.confidence > 0.6
+        ) {
+          signal = SignalType.SELL;
+          // Boost confidence if sentiment is also negative
+          if (sentiment < -1) {
+            confidence = Math.min(0.95, confidence + 0.15);
+          }
+        }
+
+        // Calculate target price
+        const priceMultiplier =
+          signal === SignalType.BUY
+            ? 1 + mlPrediction.probability * 0.05 // 0-5% upside
+            : signal === SignalType.SELL
+              ? 1 - mlPrediction.probability * 0.05 // 0-5% downside
+              : 1;
+
+        return {
+          id: Date.now() + Math.random(),
+          stockId: stock.id,
+          stock: stock,
+          signal: signal,
+          confidence: confidence,
+          targetPrice: stock.currentPrice * priceMultiplier,
+          currentPrice: stock.currentPrice,
+          reason: `🤖 AI Analysis: ${mlPrediction.reasoning} | Sentiment: ${sentiment.toFixed(2)} | Confidence: ${(confidence * 100).toFixed(1)}%`,
+          isActive: true,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        } as TradingSignal;
+      } else {
+        // Fallback to basic technical analysis if no historical data
+        return await this.generateBasicSignal(stock);
+      }
+    } catch (error) {
+      console.error(`Error generating live signal for ${stock.symbol}:`, error);
+      return await this.generateBasicSignal(stock);
+    }
   }
 }

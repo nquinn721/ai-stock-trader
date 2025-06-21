@@ -1,4 +1,10 @@
 import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Portfolio } from '../../entities/portfolio.entity';
+import { Position } from '../../entities/position.entity';
+import { Stock } from '../../entities/stock.entity';
+import { Trade, TradeStatus, TradeType } from '../../entities/trade.entity';
 
 // DTOs that the controller expects
 export class CreatePortfolioDto {
@@ -15,16 +21,25 @@ export class CreateTradeDto {
 
 @Injectable()
 export class PaperTradingService {
-  constructor() {}
-
+  constructor(
+    @InjectRepository(Portfolio)
+    private portfolioRepository: Repository<Portfolio>,
+    @InjectRepository(Position)
+    private positionRepository: Repository<Position>,
+    @InjectRepository(Trade)
+    private tradeRepository: Repository<Trade>,
+    @InjectRepository(Stock)
+    private stockRepository: Repository<Stock>,
+  ) {}
   /**
-   * Mock paper trading functionality
-   */ async createPortfolio(
+   * Create a new portfolio
+   */
+  async createPortfolio(
     createPortfolioDto: CreatePortfolioDto,
-  ): Promise<any> {
+  ): Promise<Portfolio> {
     const { userId, initialBalance = 100000 } = createPortfolioDto;
-    return {
-      id: Date.now(),
+
+    const portfolio = this.portfolioRepository.create({
       name: `Portfolio for ${userId}`,
       initialCash: initialBalance,
       currentCash: initialBalance,
@@ -32,195 +47,173 @@ export class PaperTradingService {
       totalPnL: 0,
       totalReturn: 0,
       isActive: true,
-      positions: [],
-      trades: [],
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-  }
-  async getPortfolios(): Promise<any[]> {
-    // Mock multiple portfolios with correct structure
-    return [
-      {
-        id: 1,
-        name: 'Test Portfolio 1',
-        initialCash: 100000,
-        currentCash: 95000,
-        totalValue: 97488.75,
-        totalPnL: -2511.25,
-        totalReturn: -2.51,
-        isActive: true,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      },
-      {
-        id: 2,
-        name: 'Test Portfolio 2',
-        initialCash: 100000,
-        currentCash: 98000,
-        totalValue: 102000,
-        totalPnL: 2000,
-        totalReturn: 2.0,
-        isActive: true,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      },
-    ];
-  }
-  async getPortfolio(id: string | number): Promise<any> {
-    const currentCash = 95000;
-    const positions = [
-      {
-        id: 1,
-        portfolioId: Number(id),
-        stockId: 1,
-        symbol: 'AAPL',
-        quantity: 10,
-        averagePrice: 175.0,
-        totalCost: 1750.0,
-        currentValue: 1785.0,
-        unrealizedPnL: 35.0,
-        unrealizedReturn: 2.0,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      },
-      {
-        id: 2,
-        portfolioId: Number(id),
-        stockId: 2,
-        symbol: 'GOOGL',
-        quantity: 5,
-        averagePrice: 138.0,
-        totalCost: 690.0,
-        currentValue: 703.75,
-        unrealizedPnL: 13.75,
-        unrealizedReturn: 1.99,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      },
-    ];
+    });
 
-    const totalPositionValue = positions.reduce(
-      (sum, pos) => sum + pos.currentValue,
-      0,
-    );
-    const totalValue = currentCash + totalPositionValue;
-    const initialCash = 100000;
-    const totalPnL = totalValue - initialCash;
-    const totalReturn = (totalPnL / initialCash) * 100;
-
-    return {
-      id: Number(id),
-      name: `Test Portfolio ${id}`,
-      initialCash,
-      currentCash,
-      totalValue,
-      totalPnL,
-      totalReturn,
-      isActive: true,
-      positions,
-      trades: [
-        {
-          id: 1,
-          portfolioId: Number(id),
-          symbol: 'AAPL',
-          type: 'buy',
-          quantity: 10,
-          price: 175.0,
-          totalAmount: 1750.0,
-          executedAt: new Date(Date.now() - 86400000).toISOString(), // 1 day ago
-          createdAt: new Date(Date.now() - 86400000).toISOString(),
-          updatedAt: new Date(Date.now() - 86400000).toISOString(),
-        },
-        {
-          id: 2,
-          portfolioId: Number(id),
-          symbol: 'GOOGL',
-          type: 'buy',
-          quantity: 5,
-          price: 138.0,
-          totalAmount: 690.0,
-          executedAt: new Date(Date.now() - 172800000).toISOString(), // 2 days ago
-          createdAt: new Date(Date.now() - 172800000).toISOString(),
-          updatedAt: new Date(Date.now() - 172800000).toISOString(),
-        },
-      ],
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
+    return await this.portfolioRepository.save(portfolio);
   }
+  async getPortfolios(): Promise<Portfolio[]> {
+    return await this.portfolioRepository.find({
+      where: { isActive: true },
+      relations: ['positions', 'trades'],
+      order: { createdAt: 'DESC' },
+    });
+  }
+  async getPortfolio(id: string | number): Promise<Portfolio> {
+    const portfolio = await this.portfolioRepository.findOne({
+      where: { id: Number(id), isActive: true },
+      relations: ['positions', 'trades'],
+    });
 
+    if (!portfolio) {
+      throw new Error('Portfolio not found');
+    }
+
+    // Calculate current values for positions
+    await this.updatePositionValues(portfolio);
+
+    return portfolio;
+  }
   async deletePortfolio(id: string | number): Promise<void> {
-    console.log(`Mock: Deleted portfolio ${id}`);
-    // In mock mode, just log the operation
-  }
+    const portfolio = await this.portfolioRepository.findOne({
+      where: { id: Number(id) },
+    });
 
-  async executeTrade(createTradeDto: CreateTradeDto): Promise<any> {
+    if (!portfolio) {
+      throw new Error('Portfolio not found');
+    }
+
+    // Soft delete - mark as inactive
+    portfolio.isActive = false;
+    await this.portfolioRepository.save(portfolio);
+  }
+  async executeTrade(createTradeDto: CreateTradeDto): Promise<Trade> {
     const { userId, symbol, type, quantity } = createTradeDto;
-    return {
-      id: `trade-${Date.now()}`,
-      userId,
-      symbol,
-      type,
+
+    // Find user's portfolio
+    const portfolio = await this.portfolioRepository.findOne({
+      where: { isActive: true },
+      relations: ['positions'],
+    });
+
+    if (!portfolio) {
+      throw new Error('No active portfolio found');
+    }
+
+    // Get current stock price
+    const stock = await this.stockRepository.findOne({
+      where: { symbol: symbol.toUpperCase() },
+    });
+
+    if (!stock) {
+      throw new Error(`Stock ${symbol} not found`);
+    }
+
+    const currentPrice = Number(stock.currentPrice);
+    const totalAmount = currentPrice * quantity;
+
+    // Validate trade
+    if (type === 'buy' && portfolio.currentCash < totalAmount) {
+      throw new Error('Insufficient funds');
+    }
+
+    // Check for existing position
+    let position = await this.positionRepository.findOne({
+      where: { portfolioId: portfolio.id, symbol: symbol.toUpperCase() },
+    });
+
+    if (type === 'sell' && (!position || position.quantity < quantity)) {
+      throw new Error('Insufficient shares to sell');
+    } // Create trade record
+    const trade = this.tradeRepository.create({
+      portfolioId: portfolio.id,
+      stockId: stock.id,
+      symbol: symbol.toUpperCase(),
+      type: type === 'buy' ? TradeType.BUY : TradeType.SELL,
       quantity,
-      price: 150 + Math.random() * 100, // Mock price
-      status: 'executed',
+      price: currentPrice,
+      totalValue: totalAmount,
+      status: TradeStatus.EXECUTED,
       executedAt: new Date(),
-    };
+    });
+
+    await this.tradeRepository.save(trade);
+
+    // Update portfolio cash
+    if (type === 'buy') {
+      portfolio.currentCash -= totalAmount;
+    } else {
+      portfolio.currentCash += totalAmount;
+    }
+
+    // Update or create position
+    if (type === 'buy') {
+      if (position) {
+        // Update existing position
+        const newTotalCost = position.totalCost + totalAmount;
+        const newQuantity = position.quantity + quantity;
+        position.averagePrice = newTotalCost / newQuantity;
+        position.quantity = newQuantity;
+        position.totalCost = newTotalCost;
+      } else {
+        // Create new position
+        position = this.positionRepository.create({
+          portfolioId: portfolio.id,
+          stockId: stock.id,
+          symbol: symbol.toUpperCase(),
+          quantity,
+          averagePrice: currentPrice,
+          totalCost: totalAmount,
+        });
+      }
+      await this.positionRepository.save(position);
+    } else {
+      // Sell - update position
+      if (position) {
+        position.quantity -= quantity;
+        if (position.quantity === 0) {
+          await this.positionRepository.remove(position);
+        } else {
+          position.totalCost = position.averagePrice * position.quantity;
+          await this.positionRepository.save(position);
+        }
+      }
+    }
+
+    // Update portfolio totals
+    await this.updatePortfolioTotals(portfolio);
+    await this.portfolioRepository.save(portfolio);
+
+    return trade;
   }
   async getPortfolioPerformance(id: string | number): Promise<any> {
     const portfolio = await this.getPortfolio(id);
-    const now = new Date();
-    const days = 30; // Last 30 days
 
-    // Generate realistic historical performance data
-    const performanceHistory: any[] = [];
-    let baseValue = 100000; // Starting value
-    let currentValue = baseValue;
+    // Get historical trades to calculate performance over time
+    const trades = await this.tradeRepository.find({
+      where: { portfolioId: Number(id) },
+      order: { executedAt: 'ASC' },
+    });
 
-    for (let i = days; i >= 0; i--) {
-      const date = new Date(now.getTime() - i * 24 * 60 * 60 * 1000);
+    // Calculate performance history based on actual trades
+    const performanceHistory = await this.calculatePerformanceHistory(
+      portfolio,
+      trades,
+    );
 
-      // Simulate market movement with slight upward bias
-      const dailyChange = (Math.random() - 0.48) * 0.02; // Slight positive bias
-      currentValue *= 1 + dailyChange;
+    const currentValue = portfolio.totalValue;
+    const totalGain = portfolio.totalPnL;
+    const totalGainPercent = portfolio.totalReturn;
 
-      // Add some volatility on certain days
-      if (i % 7 === 0) {
-        // Weekly volatility
-        const weeklyVolatility = (Math.random() - 0.5) * 0.05;
-        currentValue *= 1 + weeklyVolatility;
-      }
+    // Get latest day change (simplified - would need more complex calculation for real day changes)
+    const dayGain = 0; // TODO: Calculate based on today's price movements
+    const dayGainPercent = 0;
 
-      const prevValue =
-        performanceHistory.length > 0
-          ? performanceHistory[performanceHistory.length - 1].totalValue
-          : baseValue;
-      const dayChange = i === days ? 0 : currentValue - prevValue;
-      const dayChangePercent =
-        i === days ? 0 : ((currentValue - prevValue) / prevValue) * 100;
-
-      performanceHistory.push({
-        date: date.toISOString().split('T')[0],
-        timestamp: date.getTime(),
-        totalValue: Math.round(currentValue * 100) / 100,
-        cash: Math.round(currentValue * 0.2 * 100) / 100, // 20% cash
-        investedValue: Math.round(currentValue * 0.8 * 100) / 100, // 80% invested
-        dayChange: Math.round(dayChange * 100) / 100,
-        dayChangePercent: Math.round(dayChangePercent * 100) / 100,
-      });
-    }
-
-    const totalGain = currentValue - baseValue;
-    const totalGainPercent = (totalGain / baseValue) * 100;
-    const latestDay = performanceHistory[performanceHistory.length - 1];
-    const dayGain = latestDay?.dayChange || 0;
-    const dayGainPercent = latestDay?.dayChangePercent || 0;
-
-    // Calculate portfolio metrics
+    // Calculate portfolio metrics from performance history
     const returns = performanceHistory.slice(1).map((point, index) => {
       const prevValue = performanceHistory[index].totalValue;
-      return ((point.totalValue - prevValue) / prevValue) * 100;
+      return prevValue > 0
+        ? ((point.totalValue - prevValue) / prevValue) * 100
+        : 0;
     });
 
     const maxDrawdown = this.calculateMaxDrawdown(
@@ -236,25 +229,159 @@ export class PaperTradingService {
       totalGainPercent: Math.round(totalGainPercent * 100) / 100,
       dayGain: Math.round(dayGain * 100) / 100,
       dayGainPercent: Math.round(dayGainPercent * 100) / 100,
-      positions: portfolio.positions.map((pos) => ({
-        symbol: pos.symbol,
-        gain: pos.unrealizedPnL,
-        gainPercent:
-          (pos.unrealizedPnL / (pos.averagePrice * pos.quantity)) * 100,
-        quantity: pos.quantity,
-        currentValue: pos.totalValue,
-      })),
+      positions:
+        portfolio.positions?.map((pos) => ({
+          symbol: pos.symbol,
+          gain: pos.unrealizedPnL || 0,
+          gainPercent:
+            pos.totalCost > 0
+              ? ((pos.unrealizedPnL || 0) / pos.totalCost) * 100
+              : 0,
+          quantity: pos.quantity,
+          currentValue: pos.currentValue || pos.totalCost,
+        })) || [],
       performance: performanceHistory,
       metrics: {
         maxDrawdown: Math.round(maxDrawdown * 100) / 100,
         volatility: Math.round(volatility * 100) / 100,
         sharpeRatio: Math.round(sharpeRatio * 100) / 100,
-        bestDay: Math.max(...returns),
-        worstDay: Math.min(...returns),
+        bestDay: returns.length > 0 ? Math.max(...returns) : 0,
+        worstDay: returns.length > 0 ? Math.min(...returns) : 0,
         totalReturn: totalGainPercent,
-        annualizedReturn: (totalGainPercent * 365) / days, // Rough annualization
+        annualizedReturn:
+          Math.round(
+            ((totalGainPercent * 365) /
+              Math.max(1, performanceHistory.length)) *
+              100,
+          ) / 100,
       },
     };
+  }
+
+  private async calculatePerformanceHistory(
+    portfolio: Portfolio,
+    trades: Trade[],
+  ): Promise<any[]> {
+    const history: any[] = [];
+    let currentCash = portfolio.initialCash;
+    let currentPositions: {
+      [symbol: string]: { quantity: number; avgPrice: number };
+    } = {};
+
+    // Start with initial portfolio state
+    history.push({
+      date: portfolio.createdAt.toISOString().split('T')[0],
+      timestamp: portfolio.createdAt.getTime(),
+      totalValue: portfolio.initialCash,
+      cash: portfolio.initialCash,
+      investedValue: 0,
+      dayChange: 0,
+      dayChangePercent: 0,
+    });
+
+    // Process each trade chronologically
+    for (const trade of trades) {
+      const tradeValue = Number(trade.totalValue);
+
+      if (trade.type === TradeType.BUY) {
+        currentCash -= tradeValue;
+        if (currentPositions[trade.symbol]) {
+          const totalQuantity =
+            currentPositions[trade.symbol].quantity + trade.quantity;
+          const totalCost =
+            currentPositions[trade.symbol].quantity *
+              currentPositions[trade.symbol].avgPrice +
+            tradeValue;
+          currentPositions[trade.symbol] = {
+            quantity: totalQuantity,
+            avgPrice: totalCost / totalQuantity,
+          };
+        } else {
+          currentPositions[trade.symbol] = {
+            quantity: trade.quantity,
+            avgPrice: Number(trade.price),
+          };
+        }
+      } else {
+        currentCash += tradeValue;
+        if (currentPositions[trade.symbol]) {
+          currentPositions[trade.symbol].quantity -= trade.quantity;
+          if (currentPositions[trade.symbol].quantity <= 0) {
+            delete currentPositions[trade.symbol];
+          }
+        }
+      }
+
+      // Calculate current invested value (using current prices if available)
+      let investedValue = 0;
+      for (const [symbol, position] of Object.entries(currentPositions)) {
+        // For simplicity, use average price. In production, you'd fetch current prices
+        investedValue += position.quantity * position.avgPrice;
+      }
+
+      const totalValue = currentCash + investedValue;
+      const prevValue =
+        history[history.length - 1]?.totalValue || portfolio.initialCash;
+      const dayChange = totalValue - prevValue;
+      const dayChangePercent =
+        prevValue > 0 ? (dayChange / prevValue) * 100 : 0;
+
+      history.push({
+        date: trade.executedAt.toISOString().split('T')[0],
+        timestamp: trade.executedAt.getTime(),
+        totalValue: Math.round(totalValue * 100) / 100,
+        cash: Math.round(currentCash * 100) / 100,
+        investedValue: Math.round(investedValue * 100) / 100,
+        dayChange: Math.round(dayChange * 100) / 100,
+        dayChangePercent: Math.round(dayChangePercent * 100) / 100,
+      });
+    }
+
+    // If no trades, return at least the initial state
+    return history.length > 1 ? history : history;
+  }
+
+  /**
+   * Update position values based on current stock prices
+   */
+  private async updatePositionValues(portfolio: Portfolio): Promise<void> {
+    if (!portfolio.positions) return;
+
+    for (const position of portfolio.positions) {
+      const stock = await this.stockRepository.findOne({
+        where: { symbol: position.symbol },
+      });
+
+      if (stock) {
+        const currentPrice = Number(stock.currentPrice);
+        position.currentValue = currentPrice * position.quantity;
+        position.unrealizedPnL = position.currentValue - position.totalCost;
+        position.unrealizedReturn =
+          position.totalCost > 0
+            ? (position.unrealizedPnL / position.totalCost) * 100
+            : 0;
+      }
+    }
+
+    await this.updatePortfolioTotals(portfolio);
+  }
+
+  /**
+   * Update portfolio total values
+   */
+  private async updatePortfolioTotals(portfolio: Portfolio): Promise<void> {
+    const totalPositionValue =
+      portfolio.positions?.reduce(
+        (sum, pos) => sum + (pos.currentValue || pos.totalCost),
+        0,
+      ) || 0;
+
+    portfolio.totalValue = portfolio.currentCash + totalPositionValue;
+    portfolio.totalPnL = portfolio.totalValue - portfolio.initialCash;
+    portfolio.totalReturn =
+      portfolio.initialCash > 0
+        ? (portfolio.totalPnL / portfolio.initialCash) * 100
+        : 0;
   }
 
   private calculateMaxDrawdown(values: number[]): number {

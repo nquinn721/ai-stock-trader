@@ -16,6 +16,9 @@ Architecture Decision Records (ADRs) are documents that capture important archit
 | [004](./004-ai-assistant-guidelines.md)           | AI Assistant Integration Guidelines                     | Accepted |
 | [005](./005-api-design-standards.md)              | API Design and Integration Standards                    | Accepted |
 | [006](./006-real-data-integration.md)             | Transition from Mock Data to Real-Time Data Integration | Accepted |
+| [007](./007-testing-infrastructure-standards.md)  | Testing Infrastructure and Standards                    | Accepted |
+| [008](./008-github-workflow-standards.md)         | GitHub Workflow and Collaboration Standards             | Accepted |
+| [009](./009-websocket-architecture.md)            | WebSocket Architecture and Real-Time Communication      | Accepted |
 
 ## Template
 

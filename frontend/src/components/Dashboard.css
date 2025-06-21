@@ -143,26 +143,53 @@
 
 /* Paper Trading Section */
 .paper-trading-section {
-  margin-bottom: 32px;
+  margin-bottom: 40px;
   background: linear-gradient(
     135deg,
-    rgba(0, 0, 0, 0.4) 0%,
-    rgba(20, 20, 20, 0.6) 100%
+    rgba(15, 23, 42, 0.95) 0%,
+    rgba(30, 42, 64, 0.95) 50%,
+    rgba(51, 65, 85, 0.95) 100%
   );
-  padding: 25px;
-  border-radius: 20px;
-  backdrop-filter: blur(15px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  padding: 32px;
+  border-radius: 24px;
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(148, 163, 184, 0.1);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15), 0 8px 16px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
   display: grid;
-  grid-template-columns: 3fr 1fr;
-  gap: 30px;
+  grid-template-columns: 2.5fr 1fr;
+  gap: 40px;
+  position: relative;
+  overflow: hidden;
 }
 
-@media (max-width: 1024px) {
+.paper-trading-section::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(59, 130, 246, 0.5),
+    transparent
+  );
+}
+
+@media (max-width: 1200px) {
   .paper-trading-section {
     grid-template-columns: 1fr;
-    gap: 20px;
+    gap: 32px;
+    padding: 28px;
+  }
+}
+
+@media (max-width: 768px) {
+  .paper-trading-section {
+    padding: 24px;
+    gap: 24px;
   }
 }
 
@@ -418,10 +445,9 @@
 
 /* Portfolio Overview Section */
 .portfolio-overview {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 24px;
-  margin-bottom: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
 }
 
 /* Market Overview Section */

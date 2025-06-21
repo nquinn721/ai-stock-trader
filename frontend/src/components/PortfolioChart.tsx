@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from "react";
+import { observer } from "mobx-react-lite";
+import { usePortfolioStore } from "../stores/StoreContext";
 import "./PortfolioChart.css";
 
 interface PortfolioChartProps {
-  portfolioId: number;
+  userId?: number;
   timeframe?: "1D" | "1W" | "1M" | "3M" | "1Y";
   height?: number;
   onTimeframeChange?: (timeframe: "1D" | "1W" | "1M" | "3M" | "1Y") => void;
@@ -31,14 +33,14 @@ interface ChartData {
   };
 }
 
-const PortfolioChart: React.FC<PortfolioChartProps> = ({
-  portfolioId,
+const PortfolioChart: React.FC<PortfolioChartProps> = observer(({
+  userId = 1,
   timeframe: propTimeframe = "1M",
   height = 300,
   onTimeframeChange,
 }) => {
+  const portfolioStore = usePortfolioStore();
   const [chartData, setChartData] = useState<ChartData | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
   const [selectedMetric, setSelectedMetric] = useState<
     "value" | "return" | "profit"
   >("value");
@@ -49,61 +51,47 @@ const PortfolioChart: React.FC<PortfolioChartProps> = ({
   const currentTimeframe = onTimeframeChange
     ? propTimeframe
     : internalTimeframe;
-
   useEffect(() => {
     fetchPortfolioPerformance();
-  }, [portfolioId, currentTimeframe]);
+  }, [userId, currentTimeframe, portfolioStore]);
+
   const fetchPortfolioPerformance = async () => {
-    setIsLoading(true);
     try {
-      // First try to get portfolio list to ensure backend is running
-      const listResponse = await fetch(
-        `http://localhost:8000/paper-trading/portfolios`
-      );
-      if (!listResponse.ok) {
-        throw new Error("Backend not available");
+      // Fetch performance history from MobX store
+      await portfolioStore.fetchPerformanceHistory(userId, currentTimeframe);
+      
+      // Transform MobX store data to chart format
+      if (portfolioStore.performanceHistory.length > 0) {
+        const transformedData: ChartData = {
+          performanceHistory: portfolioStore.performanceHistory.map((point) => ({
+            date: point.date,
+            totalValue: point.value,
+            cash: 0, // This would need to be added to the store data
+            investedValue: point.value,
+            profit: point.return,
+            percentReturn: point.returnPercent,
+          })),
+          metrics: {
+            totalReturn: portfolioStore.totalReturn,
+            totalReturnPercent: portfolioStore.totalReturnPercent,
+            maxDrawdown: 0, // Would need to calculate or fetch from backend
+            volatility: 0, // Would need to calculate or fetch from backend
+            sharpeRatio: 0, // Would need to calculate or fetch from backend
+            bestDay: 0, // Would need to calculate or fetch from backend
+            worstDay: 0, // Would need to calculate or fetch from backend
+          },
+        };
+        setChartData(transformedData);
+      } else {
+        // Fallback to mock data if no performance history
+        const mockData: ChartData = generateMockPerformanceData();
+        setChartData(mockData);
       }
-
-      // Then call the actual portfolio performance API
-      const response = await fetch(
-        `http://localhost:8000/paper-trading/portfolios/${portfolioId}/performance`
-      );
-      if (!response.ok) {
-        throw new Error("Failed to fetch portfolio performance");
-      }
-
-      const data = await response.json();
-
-      // Transform API data to match our component interface
-      const transformedData: ChartData = {
-        performanceHistory: data.performance.map((point: any) => ({
-          date: point.date,
-          totalValue: point.totalValue,
-          cash: point.cash,
-          investedValue: point.investedValue,
-          profit: point.totalValue - 100000, // Assuming 100k base
-          percentReturn: ((point.totalValue - 100000) / 100000) * 100,
-        })),
-        metrics: {
-          totalReturn: data.totalGain,
-          totalReturnPercent: data.totalGainPercent,
-          maxDrawdown: data.metrics.maxDrawdown,
-          volatility: data.metrics.volatility,
-          sharpeRatio: data.metrics.sharpeRatio,
-          bestDay: data.metrics.bestDay,
-          worstDay: data.metrics.worstDay,
-        },
-      };
-      setChartData(transformedData);
-      console.log("✅ Portfolio data loaded successfully from API");
     } catch (error) {
-      console.error("⚠️ Portfolio Chart API Error:", error);
+      console.error("⚠️ Portfolio Chart Error:", error);
       // Fallback to mock data
       const mockData: ChartData = generateMockPerformanceData();
-      console.log("📊 Using mock portfolio data");
       setChartData(mockData);
-    } finally {
-      setIsLoading(false);
     }
   };
   const generateMockPerformanceData = (): ChartData => {
@@ -345,7 +333,7 @@ const PortfolioChart: React.FC<PortfolioChartProps> = ({
     }).format(amount);
   };
 
-  if (isLoading) {
+  if (portfolioStore.isLoading) {
     return (
       <div className="portfolio-chart-loading">
         <div className="chart-spinner"></div>

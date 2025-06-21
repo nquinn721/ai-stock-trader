@@ -83,7 +83,8 @@ const StockCard: React.FC<StockCardProps> = ({ stock, signal }) => {
           {(Number(stock.changePercent) || 0) >= 0 ? "+" : ""}
           {formatPercent(stock.changePercent)}%
         </div>{" "}
-      </div>{" "}      {/* Live Price Chart */}
+      </div>{" "}
+      {/* Live Price Chart */}
       <PriceChart
         symbol={stock.symbol}
         currentPrice={Number(stock.currentPrice) || 0}

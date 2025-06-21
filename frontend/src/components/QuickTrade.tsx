@@ -1,7 +1,7 @@
-import axios from "axios";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { observer } from "mobx-react-lite";
 import { useSocket } from "../context/SocketContext";
-import { CreateTradeRequest } from "../types";
+import { useTradeStore, usePortfolioStore } from "../stores/StoreContext";
 import "./QuickTrade.css";
 
 interface Notification {
@@ -11,43 +11,34 @@ interface Notification {
   duration?: number;
 }
 
-interface Portfolio {
-  id: number;
-  currentCash: number;
-  totalValue: number;
-}
-
-const QuickTrade: React.FC = () => {
+const QuickTrade: React.FC = observer(() => {
   const { stocks } = useSocket();
-  const [portfolioId, setPortfolioId] = useState<number | null>(null);
-  const [portfolio, setPortfolio] = useState<Portfolio | null>(null);
-  const [portfolioLoading, setPortfolioLoading] = useState(true);
+  const tradeStore = useTradeStore();
+  const portfolioStore = usePortfolioStore();
+  
   const [tradeForm, setTradeForm] = useState({
     symbol: "",
     type: "buy" as "buy" | "sell",
     quantity: "",
   });
-  const [executing, setExecuting] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [showConfirmation, setShowConfirmation] = useState(false);
-  const [retryCount, setRetryCount] = useState(0);
-  const MAX_RETRIES = 3;
+
   useEffect(() => {
-    fetchPortfolioId();
-  }, []);
+    // Fetch portfolio data on component mount
+    portfolioStore.fetchPortfolio(1);
+  }, [portfolioStore]);
 
   useEffect(() => {
     // Listen for portfolio updates from other components
     const handlePortfolioUpdate = () => {
-      if (portfolioId) {
-        fetchPortfolioDetails();
-      }
+      portfolioStore.fetchPortfolio(1);
     };
 
     window.addEventListener("portfolio-updated", handlePortfolioUpdate);
     return () =>
       window.removeEventListener("portfolio-updated", handlePortfolioUpdate);
-  }, [portfolioId]);
+  }, [portfolioStore]);
 
   // Memoized current stock price
   const currentStock = useMemo(() => {
@@ -129,11 +120,12 @@ const QuickTrade: React.FC = () => {
       const response = await axios.get(
         `http://localhost:8000/paper-trading/portfolios/${targetId}`,
         { timeout: 10000 }
-      );        setPortfolio({
-          id: response.data.id,
-          currentCash: response.data.currentCash,
-          totalValue: response.data.totalValue,
-        });
+      );
+      setPortfolio({
+        id: response.data.id,
+        currentCash: response.data.currentCash,
+        totalValue: response.data.totalValue,
+      });
     } catch (error) {
       console.error("Error fetching portfolio details:", error);
     }
@@ -291,7 +283,9 @@ const QuickTrade: React.FC = () => {
         <div className="portfolio-summary">
           <div className="portfolio-stat">
             <span className="stat-label">Available Cash</span>
-            <span className="stat-value">{formatCurrency(portfolio.currentCash)}</span>
+            <span className="stat-value">
+              {formatCurrency(portfolio.currentCash)}
+            </span>
           </div>
           <div className="portfolio-stat">
             <span className="stat-label">Total Value</span>

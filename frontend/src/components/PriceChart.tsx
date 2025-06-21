@@ -51,91 +51,14 @@ const PriceChart: React.FC<PriceChartProps> = ({
 
     return { isOpen };
   }, []);
-
   useEffect(() => {
     setMarketSession(checkMarketHours());
 
-    // Simulate real-time price updates
-    const generateInitialData = () => {
-      const points: PricePoint[] = [];
-      const now = new Date();
-      const basePrice = currentPrice;
-      const dataPoints =
-        period === "1H" ? 20 : period === "1D" ? 48 : period === "1W" ? 35 : 30;
-      const timeInterval =
-        period === "1H"
-          ? 3 * 60 * 1000 // 3 minutes
-          : period === "1D"
-          ? 30 * 60 * 1000 // 30 minutes
-          : period === "1W"
-          ? 24 * 60 * 60 * 1000 // 1 day
-          : 24 * 60 * 60 * 1000; // 1 day for 1M
-
-      // Generate historical data points
-      for (let i = dataPoints - 1; i >= 0; i--) {
-        const time = new Date(now.getTime() - i * timeInterval);
-        const randomVariation = (Math.random() - 0.5) * 0.02; // ±1% variation
-        const trendFactor = Math.sin(i / 5) * 0.001; // Add slight trend
-        const price = basePrice * (1 + randomVariation + trendFactor);
-
-        points.push({
-          time: time.toLocaleTimeString("en-US", {
-            hour12: false,
-            hour: "2-digit",
-            minute: "2-digit",
-          }),
-          timestamp: time.getTime(),
-          price: price,
-          volume: Math.floor(Math.random() * 1000000) + 100000,
-        });
-      }
-
-      return points;
-    };
-
-    setPriceHistory(generateInitialData());
+    // No real price data available
+    console.log(`📊 No real price data available for ${symbol}`);
+    setPriceHistory([]);
     setIsLoading(false);
 
-    // Set up real-time updates if enabled and market is open
-    if (showRealTime && marketSession.isOpen) {
-      // Simulate WebSocket connection
-      const connectWebSocket = () => {
-        // In a real app, this would be: new WebSocket(`wss://api.example.com/ws/${symbol}`)
-        console.log(`Simulating WebSocket connection for ${symbol}`);
-        intervalRef.current = setInterval(() => {
-          const now = new Date();
-
-          setPriceHistory((prev) => {
-            const lastPrice =
-              prev.length > 0 ? prev[prev.length - 1].price : currentPrice;
-            const marketVolatility = 0.005; // 0.5% max change per update
-            const randomChange = (Math.random() - 0.5) * marketVolatility;
-            const newPrice = Math.max(0.01, lastPrice * (1 + randomChange));
-
-            const newPoint: PricePoint = {
-              time: now.toLocaleTimeString("en-US", {
-                hour12: false,
-                hour: "2-digit",
-                minute: "2-digit",
-              }),
-              timestamp: now.getTime(),
-              price: newPrice,
-              volume: Math.floor(Math.random() * 50000) + 10000,
-            };
-
-            const maxPoints = period === "1H" ? 60 : period === "1D" ? 96 : 50;
-            return [
-              ...prev.slice(Math.max(0, prev.length - maxPoints)),
-              newPoint,
-            ];
-          });
-
-          setLastUpdate(now);
-        }, interval);
-      };
-
-      connectWebSocket();
-    }
     return () => {
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
@@ -144,25 +67,44 @@ const PriceChart: React.FC<PriceChartProps> = ({
         wsRef.current.close();
       }
     };
-  }, [currentPrice, symbol, showRealTime, interval, period, checkMarketHours]); // Removed priceHistory and marketSession.isOpen from dependencies
+  }, [currentPrice, symbol, showRealTime, interval, period, checkMarketHours]);
+
   const renderChart = () => {
-    if (isLoading || priceHistory.length === 0) {
+    if (isLoading) {
       return (
         <div className="chart-loading">
           <div className="loading-spinner"></div>
-          <span>Loading real-time data...</span>
+          <span>Loading...</span>
         </div>
       );
     }
 
-    const prices = priceHistory.map((p) => p.price);
+    if (priceHistory.length === 0) {
+      return (
+        <div className="chart-no-data">
+          <div className="no-data-icon">📊</div>
+          <span>No price data available</span>
+          <small>Real-time data feed required</small>
+        </div>
+      );
+    }const prices = priceHistory.map((p) => p.price);
     const minPrice = Math.min(...prices);
     const maxPrice = Math.max(...prices);
-    const priceRange = maxPrice - minPrice || 1;
-    const currentPrice = prices[prices.length - 1];
-    const previousPrice = prices[prices.length - 2] || currentPrice;
-    const priceChange = currentPrice - previousPrice;
-    const isRising = priceChange >= 0; // Create SVG path
+    const priceRange = Math.max(maxPrice - minPrice, maxPrice * 0.01); // Ensure minimum 1% range
+    
+    // Debug logging
+    console.log(`${symbol} Chart Debug:`, {
+      priceCount: prices.length,
+      minPrice: minPrice.toFixed(2),
+      maxPrice: maxPrice.toFixed(2),
+      priceRange: priceRange.toFixed(2),
+      svgHeight: height <= 160 ? Math.max(height - 25, 115) : Math.max(height - 70, 100),
+      samplePrices: prices.slice(0, 3).map(p => p.toFixed(2))
+    });
+      const lastPrice = prices[prices.length - 1];
+    const previousPrice = prices[prices.length - 2] || lastPrice;
+    const priceChange = lastPrice - previousPrice;
+    const isRising = priceChange >= 0;// Create SVG path
     const width = 400;    // Adjust SVG height calculation based on container height
     let svgHeight: number;
     if (height <= 160) {
@@ -281,22 +223,21 @@ const PriceChart: React.FC<PriceChartProps> = ({
                 )}
               </g>
             );
-          })}
-          {/* Current price line */}
+          })}          {/* Current price line */}
           {priceHistory.length > 0 && (
             <line
               x1={padding}
               y1={
                 svgHeight -
                 padding -
-                ((currentPrice - minPrice) / priceRange) *
+                ((lastPrice - minPrice) / priceRange) *
                   (svgHeight - 2 * padding)
               }
               x2={width - padding}
               y2={
                 svgHeight -
                 padding -
-                ((currentPrice - minPrice) / priceRange) *
+                ((lastPrice - minPrice) / priceRange) *
                   (svgHeight - 2 * padding)
               }
               stroke={chartColor}
@@ -331,7 +272,9 @@ const PriceChart: React.FC<PriceChartProps> = ({
         )}
       </div>
     );
-  };  return (
+  };
+
+  return (
     <div className={`price-chart ${height <= 160 ? 'price-chart-small' : ''}`} style={{ height }}>
       <div className="chart-header">
         <div className="chart-title">

@@ -1,15 +1,18 @@
-import React from 'react';
-import { SocketProvider } from './context/SocketContext';
-import Dashboard from './components/Dashboard';
-import './App.css';
+import "./App.css";
+import Dashboard from "./components/Dashboard";
+import { SocketProvider } from "./context/SocketContext";
+import { rootStore } from "./stores/RootStore";
+import { StoreProvider } from "./stores/StoreContext";
 
 function App() {
   return (
-    <SocketProvider>
-      <div className="App">
-        <Dashboard />
-      </div>
-    </SocketProvider>
+    <StoreProvider store={rootStore}>
+      <SocketProvider>
+        <div className="App">
+          <Dashboard />
+        </div>
+      </SocketProvider>
+    </StoreProvider>
   );
 }
 

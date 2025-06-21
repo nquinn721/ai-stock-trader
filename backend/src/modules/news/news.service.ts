@@ -196,84 +196,11 @@ export class NewsService {
       confidence: Math.min(0.9, Math.abs(score) * 0.5 + 0.3),
     };
   }
-
   private generateRealisticMockNews(symbol: string): any[] {
-    const newsTemplates = [
-      {
-        title:
-          '{symbol} Reports Strong Q4 Earnings, Beats Analyst Expectations',
-        sentiment: 'positive',
-        score: 0.6,
-        source: 'MarketWatch',
-      },
-      {
-        title: '{symbol} Announces Strategic Partnership for Market Expansion',
-        sentiment: 'positive',
-        score: 0.4,
-        source: 'Reuters',
-      },
-      {
-        title:
-          'Analysts Upgrade {symbol} Price Target Following Innovation Summit',
-        sentiment: 'positive',
-        score: 0.5,
-        source: 'Bloomberg',
-      },
-      {
-        title: '{symbol} Faces Regulatory Challenges in Key Markets',
-        sentiment: 'negative',
-        score: -0.4,
-        source: 'Financial Times',
-      },
-      {
-        title: 'Market Volatility Impacts {symbol} Trading Volume',
-        sentiment: 'neutral',
-        score: 0.1,
-        source: 'CNBC',
-      },
-      {
-        title: '{symbol} CEO Discusses Long-term Growth Strategy',
-        sentiment: 'positive',
-        score: 0.3,
-        source: 'Yahoo Finance',
-      },
-      {
-        title: 'Supply Chain Concerns Affect {symbol} Production Outlook',
-        sentiment: 'negative',
-        score: -0.3,
-        source: 'WSJ',
-      },
-    ];
-
-    // Randomly select 3-5 articles
-    const selectedNews = newsTemplates
-      .sort(() => Math.random() - 0.5)
-      .slice(0, Math.floor(Math.random() * 3) + 3)
-      .map((template, index) => {
-        const daysAgo = Math.floor(Math.random() * 7) + 1;
-        const publishDate = new Date(
-          Date.now() - daysAgo * 24 * 60 * 60 * 1000,
-        );
-
-        return {
-          title: template.title.replace('{symbol}', symbol),
-          summary: `${template.title.replace('{symbol}', symbol)}. Market analysis shows continued interest in ${symbol} performance...`,
-          url: `https://example.com/news/${symbol.toLowerCase()}-${index + 1}`,
-          publishedAt: publishDate.toISOString(),
-          source: template.source,
-          sentiment: {
-            score: template.score + (Math.random() - 0.5) * 0.2, // Add some variation
-            label: template.sentiment,
-            confidence: Math.random() * 0.3 + 0.7, // 70-100% confidence
-          },
-          relevanceScore: (Math.random() * 0.3 + 0.7).toString(), // 70-100% relevance
-        };
-      });
-
     console.log(
-      `📰 Generated ${selectedNews.length} realistic mock articles for ${symbol}`,
+      `📰 No real news data available for ${symbol} - returning empty array`,
     );
-    return selectedNews;
+    return [];
   }
 
   /**
@@ -378,15 +305,13 @@ export class NewsService {
 
     return sentimentMap;
   }
-
   /**
    * Get average sentiment for a stock symbol
    */
   async getAverageSentiment(symbol: string, days: number = 7): Promise<number> {
-    // Mock implementation - return random sentiment score
-    const baseScore = Math.sin(Date.now() / 100000) * 2; // Oscillating between -2 and 2
-    const randomVariation = (Math.random() - 0.5) * 1; // Add some randomness
-    return Math.max(-5, Math.min(5, baseScore + randomVariation));
+    // No real sentiment data available
+    console.log(`📰 No real sentiment data available for ${symbol}`);
+    return 0; // Return neutral sentiment
   }
 
   /**
@@ -441,147 +366,25 @@ export class NewsService {
       savedAt: new Date().toISOString(),
     };
   }
-
   /**
    * Generate realistic mock sentiment data for testing/fallback
    */
   private generateMockSentiment(symbol: string): any {
-    // Create deterministic but varied sentiment based on symbol
-    const symbolHash = symbol
-      .split('')
-      .reduce((acc, char) => acc + char.charCodeAt(0), 0);
-    const timeVariation = Math.sin(Date.now() / 300000) * 0.5; // Slow oscillation
-    const symbolVariation = (symbolHash % 100) / 50 - 1; // -1 to 1 based on symbol
-
-    const baseScore = symbolVariation + timeVariation;
-    const score = Math.max(-2, Math.min(2, baseScore));
-
-    let label = 'neutral';
-    if (score > 0.5) label = 'positive';
-    else if (score < -0.5) label = 'negative';
-
-    const confidence = Math.min(
-      0.9,
-      Math.max(0.3, Math.abs(score) * 0.4 + 0.4),
-    );
-
+    console.log(`📰 No real sentiment data available for ${symbol}`);
     return {
-      score: parseFloat(score.toFixed(2)),
-      label,
-      confidence: parseFloat(confidence.toFixed(2)),
-      articlesAnalyzed: Math.floor(Math.random() * 5) + 3, // 3-7 articles
+      score: 0,
+      label: 'neutral',
+      confidence: 0,
+      articlesAnalyzed: 0,
       lastUpdated: new Date().toISOString(),
     };
-  }
-  /**
+  } /**
    * Generate mock news articles for testing/fallback
    */
   private generateMockNews(symbol: string): any[] {
-    const newsVariations = [
-      {
-        positive: [
-          `${symbol} Reports Strong Q4 Earnings, Beats Expectations`,
-          `${symbol} Announces Strategic Partnership with Tech Giant`,
-          `${symbol} Stock Rallies on Positive Analyst Upgrades`,
-          `${symbol} Shows Resilient Performance Despite Market Volatility`,
-          `${symbol} Expands Market Presence with New Product Launch`,
-        ],
-        negative: [
-          `${symbol} Faces Regulatory Challenges in Key Markets`,
-          `${symbol} Reports Lower Than Expected Revenue Growth`,
-          `${symbol} Stock Declines Following Analyst Downgrades`,
-          `${symbol} Encounters Supply Chain Disruptions`,
-          `${symbol} Management Expresses Cautious Outlook`,
-        ],
-        neutral: [
-          `${symbol} Maintains Steady Performance in Current Quarter`,
-          `${symbol} Announces Routine Board Meeting Results`,
-          `${symbol} Provides Market Update and Guidance`,
-          `${symbol} Reports Mixed Results in Latest Earnings`,
-          `${symbol} Continues Implementation of Strategic Plan`,
-        ],
-      },
-    ];
-
-    const sentimentTypes = ['positive', 'negative', 'neutral'];
-    const selectedSentiment =
-      sentimentTypes[Math.floor(Math.random() * sentimentTypes.length)];
-    const titles = newsVariations[0][selectedSentiment];
-
-    const sentimentScores = {
-      positive: { min: 0.3, max: 0.8, label: 'positive' },
-      negative: { min: -0.8, max: -0.3, label: 'negative' },
-      neutral: { min: -0.2, max: 0.2, label: 'neutral' },
-    };
-
-    const scoreRange = sentimentScores[selectedSentiment];
-
-    return titles
-      .slice(0, 3 + Math.floor(Math.random() * 3))
-      .map((title, index) => {
-        const score =
-          scoreRange.min + Math.random() * (scoreRange.max - scoreRange.min);
-        const confidence = 0.6 + Math.random() * 0.3;
-
-        return {
-          title,
-          summary: `${this.generateRealisticSummary(symbol, selectedSentiment)} Analysis shows ${selectedSentiment === 'positive' ? 'favorable' : selectedSentiment === 'negative' ? 'challenging' : 'mixed'} market conditions.`,
-          url: `https://finance.example.com/news/${symbol.toLowerCase()}-${selectedSentiment}-${index}-${Date.now()}`,
-          publishedAt: new Date(
-            Date.now() - index * 3600000 - Math.random() * 7200000,
-          ).toISOString(),
-          source: this.getRandomSource(),
-          sentiment: {
-            score: parseFloat(score.toFixed(3)),
-            label: scoreRange.label,
-            confidence: parseFloat(confidence.toFixed(2)),
-          },
-          relevanceScore: (0.7 + Math.random() * 0.3).toFixed(3),
-        };
-      });
-  }
-
-  private generateRealisticSummary(symbol: string, sentiment: string): string {
-    const summaries = {
-      positive: [
-        `${symbol} demonstrates strong fundamentals with improved operational efficiency.`,
-        `Market analysts express optimism about ${symbol}'s growth trajectory.`,
-        `${symbol} benefits from favorable market conditions and strategic initiatives.`,
-        `Institutional investors show increased confidence in ${symbol}'s outlook.`,
-      ],
-      negative: [
-        `${symbol} faces headwinds from challenging market dynamics.`,
-        `Concerns mount over ${symbol}'s ability to maintain growth momentum.`,
-        `${symbol} grapples with industry-wide pressures affecting performance.`,
-        `Market volatility poses risks to ${symbol}'s near-term prospects.`,
-      ],
-      neutral: [
-        `${symbol} navigates current market conditions with measured approach.`,
-        `Mixed signals emerge from ${symbol}'s latest market performance.`,
-        `${symbol} maintains steady course amid evolving market landscape.`,
-        `Investors await further clarity on ${symbol}'s strategic direction.`,
-      ],
-    };
-
-    const options = summaries[sentiment];
-    return options[Math.floor(Math.random() * options.length)];
-  }
-
-  private getRandomSource(): string {
-    const sources = [
-      'Bloomberg',
-      'Reuters',
-      'MarketWatch',
-      'Yahoo Finance',
-      'CNBC',
-      'Financial Times',
-      'Wall Street Journal',
-      'Seeking Alpha',
-      'The Motley Fool',
-      "Barron's",
-      'Forbes',
-      'Benzinga',
-    ];
-    return sources[Math.floor(Math.random() * sources.length)];
+    console.log(
+      `📰 No real news data available for ${symbol} - returning empty array`,
+    );
+    return [];
   }
 }

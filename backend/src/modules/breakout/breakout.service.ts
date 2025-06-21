@@ -130,15 +130,15 @@ export class BreakoutService {
   ): BreakoutStrategy {
     return {
       signal: 'neutral',
-      probability: 0.5,
-      supportLevel: currentPrice * 0.95,
-      resistanceLevel: currentPrice * 1.05,
+      probability: 0.0,
+      supportLevel: 0,
+      resistanceLevel: 0,
       currentTrend: 'sideways',
-      volatility: 0.2,
-      rsi: 50,
+      volatility: 0.0,
+      rsi: 0,
       bollingerPosition: 'middle',
-      recommendation: reason,
-      confidence: 0.1,
+      recommendation: `No trading data available: ${reason}`,
+      confidence: 0.0,
       lastCalculated: new Date().toISOString(),
       dayTradingPatterns: [],
       modelPredictions: {
