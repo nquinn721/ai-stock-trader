@@ -1,14 +1,14 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import StockAutocomplete from '../components/StockAutocomplete';
+import { render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import StockAutocomplete from "../components/StockAutocomplete";
 
-describe('StockAutocomplete', () => {
+describe("StockAutocomplete", () => {
   const mockStocks = [
-    { symbol: 'AAPL', name: 'Apple Inc.' },
-    { symbol: 'GOOGL', name: 'Alphabet Inc.' },
-    { symbol: 'MSFT', name: 'Microsoft Corporation' },
-    { symbol: 'AMZN', name: 'Amazon.com Inc.' },
-    { symbol: 'TSLA', name: 'Tesla Inc.' },
+    { symbol: "AAPL", name: "Apple Inc." },
+    { symbol: "GOOGL", name: "Alphabet Inc." },
+    { symbol: "MSFT", name: "Microsoft Corporation" },
+    { symbol: "AMZN", name: "Amazon.com Inc." },
+    { symbol: "TSLA", name: "Tesla Inc." },
   ];
 
   const mockOnChange = jest.fn();
@@ -17,7 +17,7 @@ describe('StockAutocomplete', () => {
     mockOnChange.mockClear();
   });
 
-  it('renders input field with placeholder', () => {
+  it("renders input field with placeholder", () => {
     render(
       <StockAutocomplete
         stocks={mockStocks}
@@ -27,171 +27,141 @@ describe('StockAutocomplete', () => {
       />
     );
 
-    expect(screen.getByPlaceholderText('Search stocks...')).toBeInTheDocument();
+    expect(screen.getByPlaceholderText("Search stocks...")).toBeInTheDocument();
   });
 
-  it('displays all stocks when input is focused and empty', async () => {
+  it("displays all stocks when input is focused and empty", async () => {
     render(
-      <StockAutocomplete
-        stocks={mockStocks}
-        value=""
-        onChange={mockOnChange}
-      />
+      <StockAutocomplete stocks={mockStocks} value="" onChange={mockOnChange} />
     );
 
-    const input = screen.getByRole('textbox');
+    const input = screen.getByRole("textbox");
     await userEvent.click(input);
 
     await waitFor(() => {
-      expect(screen.getByText('Apple Inc.')).toBeInTheDocument();
-      expect(screen.getByText('AAPL')).toBeInTheDocument();
-      expect(screen.getByText('GOOGL')).toBeInTheDocument();
-      expect(screen.getByText('Microsoft Corporation')).toBeInTheDocument();
+      expect(screen.getByText("Apple Inc.")).toBeInTheDocument();
+      expect(screen.getByText("AAPL")).toBeInTheDocument();
+      expect(screen.getByText("GOOGL")).toBeInTheDocument();
+      expect(screen.getByText("Microsoft Corporation")).toBeInTheDocument();
     });
   });
 
-  it('filters stocks by symbol when typing', async () => {
+  it("filters stocks by symbol when typing", async () => {
     render(
-      <StockAutocomplete
-        stocks={mockStocks}
-        value=""
-        onChange={mockOnChange}
-      />
+      <StockAutocomplete stocks={mockStocks} value="" onChange={mockOnChange} />
     );
 
-    const input = screen.getByRole('textbox');
-    await userEvent.type(input, 'AAP');
+    const input = screen.getByRole("textbox");
+    await userEvent.type(input, "AAP");
 
     await waitFor(() => {
-      expect(screen.getByText('AAPL')).toBeInTheDocument();
-      expect(screen.getByText('Apple Inc.')).toBeInTheDocument();
-      expect(screen.queryByText('GOOGL')).not.toBeInTheDocument();
+      expect(screen.getByText("AAPL")).toBeInTheDocument();
+      expect(screen.getByText("Apple Inc.")).toBeInTheDocument();
+      expect(screen.queryByText("GOOGL")).not.toBeInTheDocument();
     });
 
-    expect(mockOnChange).toHaveBeenCalledWith('AAP');
+    expect(mockOnChange).toHaveBeenCalledWith("AAP");
   });
 
-  it('filters stocks by company name when typing', async () => {
+  it("filters stocks by company name when typing", async () => {
     render(
-      <StockAutocomplete
-        stocks={mockStocks}
-        value=""
-        onChange={mockOnChange}
-      />
+      <StockAutocomplete stocks={mockStocks} value="" onChange={mockOnChange} />
     );
 
-    const input = screen.getByRole('textbox');
-    await userEvent.type(input, 'apple');
+    const input = screen.getByRole("textbox");
+    await userEvent.type(input, "apple");
 
     await waitFor(() => {
-      expect(screen.getByText('AAPL')).toBeInTheDocument();
-      expect(screen.getByText('Apple Inc.')).toBeInTheDocument();
-      expect(screen.queryByText('GOOGL')).not.toBeInTheDocument();
+      expect(screen.getByText("AAPL")).toBeInTheDocument();
+      expect(screen.getByText("Apple Inc.")).toBeInTheDocument();
+      expect(screen.queryByText("GOOGL")).not.toBeInTheDocument();
     });
   });
 
-  it('shows no results message when no stocks match', async () => {
+  it("shows no results message when no stocks match", async () => {
     render(
-      <StockAutocomplete
-        stocks={mockStocks}
-        value=""
-        onChange={mockOnChange}
-      />
+      <StockAutocomplete stocks={mockStocks} value="" onChange={mockOnChange} />
     );
 
-    const input = screen.getByRole('textbox');
-    await userEvent.type(input, 'XYZ');
+    const input = screen.getByRole("textbox");
+    await userEvent.type(input, "XYZ");
 
     await waitFor(() => {
-      expect(screen.getByText('No stocks found')).toBeInTheDocument();
-      expect(screen.getByText(/Try searching for: AAPL, GOOGL/)).toBeInTheDocument();
+      expect(screen.getByText("No stocks found")).toBeInTheDocument();
+      expect(
+        screen.getByText(/Try searching for: AAPL, GOOGL/)
+      ).toBeInTheDocument();
     });
   });
 
-  it('selects stock when option is clicked', async () => {
+  it("selects stock when option is clicked", async () => {
     render(
-      <StockAutocomplete
-        stocks={mockStocks}
-        value=""
-        onChange={mockOnChange}
-      />
+      <StockAutocomplete stocks={mockStocks} value="" onChange={mockOnChange} />
     );
 
-    const input = screen.getByRole('textbox');
+    const input = screen.getByRole("textbox");
     await userEvent.click(input);
 
     await waitFor(() => {
-      expect(screen.getByText('AAPL')).toBeInTheDocument();
+      expect(screen.getByText("AAPL")).toBeInTheDocument();
     });
 
-    await userEvent.click(screen.getByText('AAPL'));
+    await userEvent.click(screen.getByText("AAPL"));
 
-    expect(mockOnChange).toHaveBeenCalledWith('AAPL');
+    expect(mockOnChange).toHaveBeenCalledWith("AAPL");
   });
 
-  it('handles keyboard navigation with arrow keys', async () => {
+  it("handles keyboard navigation with arrow keys", async () => {
     render(
-      <StockAutocomplete
-        stocks={mockStocks}
-        value=""
-        onChange={mockOnChange}
-      />
+      <StockAutocomplete stocks={mockStocks} value="" onChange={mockOnChange} />
     );
 
-    const input = screen.getByRole('textbox');
+    const input = screen.getByRole("textbox");
     await userEvent.click(input);
 
     await waitFor(() => {
-      expect(screen.getByText('AAPL')).toBeInTheDocument();
-    });    // Navigate down
-    userEvent.keyboard('{ArrowDown}');
-    userEvent.keyboard('{ArrowDown}');
+      expect(screen.getByText("AAPL")).toBeInTheDocument();
+    }); // Navigate down
+    userEvent.keyboard("{ArrowDown}");
+    userEvent.keyboard("{ArrowDown}");
 
     // Select with Enter
-    userEvent.keyboard('{Enter}');
+    userEvent.keyboard("{Enter}");
 
-    expect(mockOnChange).toHaveBeenCalledWith('GOOGL');
+    expect(mockOnChange).toHaveBeenCalledWith("GOOGL");
   });
 
-  it('closes dropdown on Escape key', async () => {
+  it("closes dropdown on Escape key", async () => {
     render(
-      <StockAutocomplete
-        stocks={mockStocks}
-        value=""
-        onChange={mockOnChange}
-      />
+      <StockAutocomplete stocks={mockStocks} value="" onChange={mockOnChange} />
     );
 
-    const input = screen.getByRole('textbox');
+    const input = screen.getByRole("textbox");
     await userEvent.click(input);
 
     await waitFor(() => {
-      expect(screen.getByText('AAPL')).toBeInTheDocument();
+      expect(screen.getByText("AAPL")).toBeInTheDocument();
     });
 
-    userEvent.keyboard('{Escape}');
+    userEvent.keyboard("{Escape}");
 
     await waitFor(() => {
-      expect(screen.queryByText('AAPL')).not.toBeInTheDocument();
+      expect(screen.queryByText("AAPL")).not.toBeInTheDocument();
     });
   });
 
-  it('converts input to uppercase', async () => {
+  it("converts input to uppercase", async () => {
     render(
-      <StockAutocomplete
-        stocks={mockStocks}
-        value=""
-        onChange={mockOnChange}
-      />
+      <StockAutocomplete stocks={mockStocks} value="" onChange={mockOnChange} />
     );
 
-    const input = screen.getByRole('textbox');
-    await userEvent.type(input, 'aapl');
+    const input = screen.getByRole("textbox");
+    await userEvent.type(input, "aapl");
 
-    expect(mockOnChange).toHaveBeenCalledWith('AAPL');
+    expect(mockOnChange).toHaveBeenCalledWith("AAPL");
   });
 
-  it('is disabled when disabled prop is true', () => {
+  it("is disabled when disabled prop is true", () => {
     render(
       <StockAutocomplete
         stocks={mockStocks}
@@ -201,11 +171,11 @@ describe('StockAutocomplete', () => {
       />
     );
 
-    const input = screen.getByRole('textbox');
+    const input = screen.getByRole("textbox");
     expect(input).toBeDisabled();
   });
 
-  it('closes dropdown when clicking outside', async () => {
+  it("closes dropdown when clicking outside", async () => {
     render(
       <div>
         <StockAutocomplete
@@ -217,61 +187,53 @@ describe('StockAutocomplete', () => {
       </div>
     );
 
-    const input = screen.getByRole('textbox');
+    const input = screen.getByRole("textbox");
     await userEvent.click(input);
 
     await waitFor(() => {
-      expect(screen.getByText('AAPL')).toBeInTheDocument();
+      expect(screen.getByText("AAPL")).toBeInTheDocument();
     });
 
     // Click outside
-    await userEvent.click(screen.getByTestId('outside'));
+    await userEvent.click(screen.getByTestId("outside"));
 
     await waitFor(() => {
-      expect(screen.queryByText('AAPL')).not.toBeInTheDocument();
+      expect(screen.queryByText("AAPL")).not.toBeInTheDocument();
     });
   });
 
-  it('maintains case-insensitive filtering', async () => {
+  it("maintains case-insensitive filtering", async () => {
     render(
-      <StockAutocomplete
-        stocks={mockStocks}
-        value=""
-        onChange={mockOnChange}
-      />
+      <StockAutocomplete stocks={mockStocks} value="" onChange={mockOnChange} />
     );
 
-    const input = screen.getByRole('textbox');
-    await userEvent.type(input, 'microsoft');
+    const input = screen.getByRole("textbox");
+    await userEvent.type(input, "microsoft");
 
     await waitFor(() => {
-      expect(screen.getByText('MSFT')).toBeInTheDocument();
-      expect(screen.getByText('Microsoft Corporation')).toBeInTheDocument();
+      expect(screen.getByText("MSFT")).toBeInTheDocument();
+      expect(screen.getByText("Microsoft Corporation")).toBeInTheDocument();
     });
   });
 
-  it('highlights first option when typing and Enter selects it', async () => {
+  it("highlights first option when typing and Enter selects it", async () => {
     render(
-      <StockAutocomplete
-        stocks={mockStocks}
-        value=""
-        onChange={mockOnChange}
-      />
+      <StockAutocomplete stocks={mockStocks} value="" onChange={mockOnChange} />
     );
 
-    const input = screen.getByRole('textbox');
-    await userEvent.type(input, 'AAP');
+    const input = screen.getByRole("textbox");
+    await userEvent.type(input, "AAP");
 
     await waitFor(() => {
-      expect(screen.getByText('AAPL')).toBeInTheDocument();
+      expect(screen.getByText("AAPL")).toBeInTheDocument();
     });
 
-    userEvent.keyboard('{Enter}');
+    userEvent.keyboard("{Enter}");
 
-    expect(mockOnChange).toHaveBeenCalledWith('AAPL');
+    expect(mockOnChange).toHaveBeenCalledWith("AAPL");
   });
 
-  it('applies custom className', () => {
+  it("applies custom className", () => {
     const { container } = render(
       <StockAutocomplete
         stocks={mockStocks}
@@ -281,6 +243,8 @@ describe('StockAutocomplete', () => {
       />
     );
 
-    expect(container.querySelector('.stock-autocomplete.custom-class')).toBeInTheDocument();
+    expect(
+      container.querySelector(".stock-autocomplete.custom-class")
+    ).toBeInTheDocument();
   });
 });

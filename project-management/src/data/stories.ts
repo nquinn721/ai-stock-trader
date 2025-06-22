@@ -148,8 +148,7 @@ export const stories: Story[] = [
     id: "S10",
     title: "Write unit tests for React components",
     description:
-      "Create comprehensive unit tests for all React components using Jest and React Testing Library. Target 90%+ coverage for Dashboard, QuickTrade, PortfolioChart, and StockCard components.",
-    status: "TODO",
+      "Create comprehensive unit tests for all React components using Jest and React Testing Library. Target 90%+ coverage for Dashboard, QuickTrade, PortfolioChart, and StockCard components.",    status: "DONE",
     priority: "High",
     epic: "E2",
     storyPoints: 5,
@@ -157,13 +156,13 @@ export const stories: Story[] = [
     progress: 0,
     dependencies: [],
     createdDate: "2025-06-21",
-  },
-  {
+    completedDate: "2025-06-21",
+  },  {
     id: "S11",
     title: "Write integration tests for API calls",
     description:
       "Create integration tests for all frontend API calls including stock data fetching, portfolio operations, and WebSocket connections. Mock external dependencies properly.",
-    status: "TODO",
+    status: "DONE",
     priority: "High",
     epic: "E2",
     storyPoints: 3,
@@ -171,6 +170,7 @@ export const stories: Story[] = [
     progress: 0,
     dependencies: ["S10"],
     createdDate: "2025-06-21",
+    completedDate: "2025-06-21",
   },
   {
     id: "S12",

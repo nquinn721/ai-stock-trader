@@ -247,11 +247,15 @@ const PortfolioComponent: React.FC<PortfolioProps> = ({
               >
                 ×
               </button>
-            </div>            <div className="trade-form">
+            </div>{" "}
+            <div className="trade-form">
               <div className="form-group">
                 <label>Symbol:</label>
                 <StockAutocomplete
-                  stocks={stocks.map(stock => ({ symbol: stock.symbol, name: stock.name }))}
+                  stocks={stocks.map((stock) => ({
+                    symbol: stock.symbol,
+                    name: stock.name,
+                  }))}
                   value={tradeForm.symbol}
                   onChange={(symbol) => setTradeForm({ ...tradeForm, symbol })}
                   placeholder="Search stock symbol or name..."
