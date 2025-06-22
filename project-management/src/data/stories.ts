@@ -346,8 +346,7 @@ export const stories: Story[] = [
     storyPoints: 4,
     assignee: "Dave",
     progress: 0,
-    dependencies: ["S22"],
-    createdDate: "2025-06-21",
+    dependencies: ["S22"],    createdDate: "2025-06-21",
   },
   {
     id: "S24",
@@ -362,5 +361,19 @@ export const stories: Story[] = [
     progress: 0,
     dependencies: ["S23"],
     createdDate: "2025-06-21",
+  },
+  {
+    id: "S25",
+    title: "Implement Advanced Order Management System",
+    description:
+      "Build comprehensive order management system supporting entry orders, stop-loss orders, and take-profit orders with automatic execution. Features include: conditional order placement (buy at entry price), automatic stop-loss execution (sell when price drops to stop level), take-profit orders (sell when price reaches profit target), order queue management, real-time price monitoring for order triggers, order status tracking (pending/triggered/executed/cancelled), portfolio integration with order P&L tracking, and WebSocket notifications for order events. All orders execute automatically based on live market data with no manual intervention required.",
+    status: "TODO",
+    priority: "High",
+    epic: "E1",
+    storyPoints: 8,
+    assignee: "Trading Team",
+    progress: 0,
+    dependencies: ["S23"],
+    createdDate: "2025-06-22",
   },
 ];

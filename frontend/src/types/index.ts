@@ -174,9 +174,23 @@ export interface CreatePortfolioRequest {
   initialCash?: number;
 }
 
+export interface PortfolioUpdate {
+  portfolioId: number;
+  totalValue: number;
+  totalPnL: number;
+  totalReturn: number;
+  currentCash: number;
+  dayGain: number;
+  dayGainPercent: number;
+  timestamp: string;
+  positions: Position[];
+}
+
 export interface SocketEvents {
   stock_updates: Stock[];
   stock_update: { symbol: string; data: Stock };
   trading_signal: TradingSignal;
   news_update: News;
+  portfolio_update: PortfolioUpdate;
+  portfolio_error: { portfolioId: number; message: string; timestamp: string };
 }

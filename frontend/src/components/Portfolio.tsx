@@ -16,7 +16,7 @@ const PortfolioComponent: React.FC<PortfolioProps> = ({
   portfolioId,
   onBack,
 }) => {
-  const { stocks } = useSocket();
+  const { stocks, subscribeToPortfolio, unsubscribeFromPortfolio, portfolioUpdates } = useSocket();
   const [portfolio, setPortfolio] = useState<Portfolio | null>(null);
   const [loading, setLoading] = useState(true);
   const [tradeForm, setTradeForm] = useState({
@@ -29,7 +29,29 @@ const PortfolioComponent: React.FC<PortfolioProps> = ({
 
   useEffect(() => {
     fetchPortfolio();
-  }, [portfolioId]);
+    // Subscribe to real-time portfolio updates
+    subscribeToPortfolio(portfolioId);
+    
+    return () => {
+      // Unsubscribe when component unmounts
+      unsubscribeFromPortfolio(portfolioId);
+    };
+  }, [portfolioId, subscribeToPortfolio, unsubscribeFromPortfolio]);
+
+  // Update portfolio with real-time data when available
+  useEffect(() => {
+    const portfolioUpdate = portfolioUpdates.get(portfolioId);
+    if (portfolioUpdate && portfolio) {
+      setPortfolio(prev => prev ? {
+        ...prev,
+        totalValue: portfolioUpdate.totalValue,
+        totalPnL: portfolioUpdate.totalPnL,
+        totalReturn: portfolioUpdate.totalReturn,
+        currentCash: portfolioUpdate.currentCash,
+        positions: portfolioUpdate.positions,
+      } : null);
+    }
+  }, [portfolioUpdates, portfolioId, portfolio]);
 
   const fetchPortfolio = async () => {
     try {
@@ -99,19 +121,23 @@ const PortfolioComponent: React.FC<PortfolioProps> = ({
   }
 
   return (
-    <div className="portfolio-container">
-      <div className="portfolio-header">
-        {" "}
+    <div className="portfolio-container">      <div className="portfolio-header">
         <button className="back-button" onClick={onBack}>
           <FontAwesomeIcon icon="arrow-left" /> Back to Portfolios
         </button>
-        <h1>{portfolio.name}</h1>
+        <div className="header-content">
+          <h1>{portfolio.name}</h1>
+          {portfolioUpdates.get(portfolioId) && (
+            <span className="real-time-indicator">
+              <FontAwesomeIcon icon="broadcast-tower" className="pulse" />
+              Live
+            </span>
+          )}
+        </div>
         <button className="trade-button" onClick={() => setShowTradeForm(true)}>
           New Trade
         </button>
-      </div>
-
-      <div className="portfolio-summary">
+      </div><div className="portfolio-summary">
         <div className="summary-card">
           <h3>Portfolio Value</h3>
           <div className="value">{formatCurrency(portfolio.totalValue)}</div>
@@ -138,7 +164,20 @@ const PortfolioComponent: React.FC<PortfolioProps> = ({
             }`}
           >
             {formatPercent(portfolio.totalReturn)}
-          </div>{" "}
+          </div>
+        </div>
+        <div className="summary-card">
+          <h3>Day P&L</h3>
+          <div
+            className={`value ${
+              (portfolioUpdates.get(portfolioId)?.dayGain || 0) >= 0 ? "positive" : "negative"
+            }`}
+          >
+            {formatCurrency(portfolioUpdates.get(portfolioId)?.dayGain || 0)}
+            <span className="percentage">
+              {formatPercent(portfolioUpdates.get(portfolioId)?.dayGainPercent || 0)}
+            </span>
+          </div>
         </div>
       </div>
 

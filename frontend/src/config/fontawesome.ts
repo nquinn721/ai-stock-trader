@@ -7,6 +7,7 @@ import {
   faBackward,
   faBalanceScale,
   faBell,
+  faBroadcastTower,
   // Portfolio and trading specific
   faBriefcase,
   faCalculator,
@@ -105,6 +106,7 @@ library.add(
   faHandHoldingUsd,
   faExchangeAlt,
   faPiggyBank,
+  faBroadcastTower,
 
   // Navigation and UI
   faHome,

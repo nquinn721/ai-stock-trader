@@ -33,6 +33,12 @@
   box-shadow: 0 16px 60px rgba(0, 0, 0, 0.4), 0 8px 32px rgba(99, 102, 241, 0.2);
 }
 
+.header-content {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
 .portfolio-header h1 {
   color: #f0f6fc;
   margin: 0;
@@ -43,6 +49,37 @@
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   letter-spacing: -1px;
+}
+
+.real-time-indicator {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.pulse {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 1;
+  }
 }
 
 .back-button,
@@ -104,6 +141,14 @@
   font-size: 24px;
   font-weight: 700;
   color: white;
+}
+
+.summary-card .value .percentage {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  margin-top: 4px;
+  opacity: 0.8;
 }
 
 .summary-card .value.positive {
