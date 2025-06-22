@@ -1,4 +1,5 @@
 import React from "react";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { BreakoutStrategy } from "../types";
 import "./BreakoutDisplay.css";
 
@@ -23,17 +24,16 @@ const BreakoutDisplay: React.FC<BreakoutDisplayProps> = ({
         return "#666";
     }
   };
-
   const getTrendIcon = (trend: string) => {
     switch (trend) {
       case "upward":
-        return "↗️";
+        return <FontAwesomeIcon icon="long-arrow-alt-up" style={{ color: '#00C851' }} />;
       case "downward":
-        return "↘️";
+        return <FontAwesomeIcon icon="long-arrow-alt-down" style={{ color: '#ff4444' }} />;
       case "sideways":
-        return "➡️";
+        return <FontAwesomeIcon icon="arrow-right" style={{ color: '#ffbb33' }} />;
       default:
-        return "➡️";
+        return <FontAwesomeIcon icon="arrow-right" style={{ color: '#666' }} />;
     }
   };
 
@@ -59,9 +59,10 @@ const BreakoutDisplay: React.FC<BreakoutDisplayProps> = ({
   };
 
   return (
-    <div className="breakout-display">
-      <div className="breakout-header">
-        <span className="breakout-title">📈 Breakout Analysis</span>
+    <div className="breakout-display">      <div className="breakout-header">
+        <span className="breakout-title">
+          <FontAwesomeIcon icon="chart-line" /> Breakout Analysis
+        </span>
         <span className="breakout-timestamp">
           {new Date(breakoutStrategy.lastCalculated).toLocaleTimeString()}
         </span>

@@ -8,7 +8,7 @@ export class AppService {
 
   getHealth() {
     const startTime = Date.now();
-    
+
     return {
       status: 'ok',
       timestamp: new Date().toISOString(),
@@ -18,8 +18,8 @@ export class AppService {
       version: '1.0.0',
       services: {
         database: 'healthy',
-        api: 'healthy'
-      }
+        api: 'healthy',
+      },
     };
   }
 }

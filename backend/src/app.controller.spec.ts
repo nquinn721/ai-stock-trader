@@ -22,7 +22,7 @@ describe('AppController', () => {
   describe('health', () => {
     it('should return health status', () => {
       const health = appController.getHealth();
-      
+
       expect(health).toHaveProperty('status', 'ok');
       expect(health).toHaveProperty('timestamp');
       expect(health).toHaveProperty('uptime');

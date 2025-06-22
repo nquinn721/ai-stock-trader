@@ -1,3 +1,4 @@
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { useSocket } from "../context/SocketContext";
@@ -53,9 +54,10 @@ const Dashboard: React.FC = () => {
   if (loading) {
     return (
       <div className="dashboard">
+        {" "}
         <EmptyState
           type="loading"
-          icon="⏳"
+          icon={<FontAwesomeIcon icon="clock" />}
           title="Loading Stock Data"
           description="Fetching real-time market data and trading signals..."
           size="large"
@@ -74,7 +76,11 @@ const Dashboard: React.FC = () => {
               isConnected ? "connected" : "disconnected"
             }`}
           >
-            {isConnected ? "🟢 Connected" : "🔴 Disconnected"}
+            <FontAwesomeIcon
+              icon="circle"
+              style={{ color: isConnected ? "#00C851" : "#ff4444" }}
+            />
+            {isConnected ? " Connected" : " Disconnected"}
           </div>{" "}
           <div className="stats">
             <span>Stocks: {stocksWithSignals.length}</span>
@@ -135,7 +141,7 @@ const Dashboard: React.FC = () => {
       {stocksWithSignals.length === 0 && (
         <EmptyState
           type="no-data"
-          icon="📊"
+          icon={<FontAwesomeIcon icon="chart-line" />}
           title="No Stock Data Available"
           description="Real stock market API integration is required to display live stock data. Please configure API keys for Yahoo Finance, Alpha Vantage, or similar services."
           size="large"

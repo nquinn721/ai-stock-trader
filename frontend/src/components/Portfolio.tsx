@@ -1,5 +1,6 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useSocket } from "../context/SocketContext";
 import { CreateTradeRequest, Portfolio } from "../types";
 import "./Portfolio.css";
@@ -99,9 +100,8 @@ const PortfolioComponent: React.FC<PortfolioProps> = ({
 
   return (
     <div className="portfolio-container">
-      <div className="portfolio-header">
-        <button className="back-button" onClick={onBack}>
-          ← Back to Portfolios
+      <div className="portfolio-header">        <button className="back-button" onClick={onBack}>
+          <FontAwesomeIcon icon="arrow-left" /> Back to Portfolios
         </button>
         <h1>{portfolio.name}</h1>
         <button className="trade-button" onClick={() => setShowTradeForm(true)}>

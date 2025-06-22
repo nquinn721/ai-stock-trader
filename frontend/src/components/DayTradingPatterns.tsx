@@ -1,4 +1,5 @@
 import React from "react";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { DayTradingPattern } from "../types";
 import "./DayTradingPatterns.css";
 
@@ -10,29 +11,28 @@ interface DayTradingPatternsProps {
 const DayTradingPatterns: React.FC<DayTradingPatternsProps> = ({
   patterns,
   symbol,
-}) => {
-  const getPatternIcon = (type: string) => {
+}) => {  const getPatternIcon = (type: string) => {
     switch (type) {
       case "flag":
-        return "🏳️";
+        return <FontAwesomeIcon icon="chart-line" style={{ color: '#ffbb33' }} />;
       case "pennant":
-        return "🚩";
+        return <FontAwesomeIcon icon="chart-area" style={{ color: '#ffbb33' }} />;
       case "double_top":
-        return "⛰️";
+        return <FontAwesomeIcon icon="caret-up" style={{ color: '#00C851' }} />;
       case "double_bottom":
-        return "🏔️";
+        return <FontAwesomeIcon icon="caret-down" style={{ color: '#ff4444' }} />;
       case "head_shoulders":
-        return "👤";
+        return <FontAwesomeIcon icon="chart-bar" style={{ color: '#666' }} />;
       case "inverse_head_shoulders":
-        return "🙃";
+        return <FontAwesomeIcon icon="chart-bar" style={{ color: '#666' }} />;
       case "triangle":
-        return "🔺";
+        return <FontAwesomeIcon icon="caret-up" style={{ color: '#6f42c1' }} />;
       case "rectangle":
-        return "⬜";
+        return <FontAwesomeIcon icon="square" style={{ color: '#20c997' }} />;
       case "wedge":
-        return "🔸";
+        return <FontAwesomeIcon icon="caret-right" style={{ color: '#fd7e14' }} />;
       default:
-        return "📊";
+        return <FontAwesomeIcon icon="chart-line" />;
     }
   };
 

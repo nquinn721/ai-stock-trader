@@ -176,15 +176,14 @@ export const stories: Story[] = [
     id: "S12",
     title: "Implement Playwright E2E tests",
     description:
-      "Create end-to-end tests using Playwright covering user workflows: login, stock browsing, trading, portfolio viewing, and performance charts.",
-    status: "TODO",
+      "Create end-to-end tests using Playwright covering user workflows: login, stock browsing, trading, portfolio viewing, and performance charts.",    status: "DONE",
     priority: "High",
     epic: "E2",
     storyPoints: 5,
     assignee: "Carol",
-    progress: 0,
-    dependencies: ["S10"],
+    progress: 0,    dependencies: ["S10"],
     createdDate: "2025-06-21",
+    completedDate: "2025-06-21",
   },
   // FONTAWESOME INTEGRATION
   {
@@ -192,7 +191,7 @@ export const stories: Story[] = [
     title: "Add FontAwesome to client application",
     description:
       "Install and configure FontAwesome icons library. Replace existing icons with FontAwesome icons for trading, portfolio, charts, and navigation elements.",
-    status: "TODO",
+    status: "DONE",
     priority: "Medium",
     epic: "E3",
     storyPoints: 2,
@@ -200,6 +199,7 @@ export const stories: Story[] = [
     progress: 0,
     dependencies: [],
     createdDate: "2025-06-21",
+    completedDate: "2025-06-22",
   },
   // DAY TRADING ANALYSIS STORIES
   {

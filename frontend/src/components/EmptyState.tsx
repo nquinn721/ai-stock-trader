@@ -1,3 +1,4 @@
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React from "react";
 import "./EmptyState.css";
 
@@ -61,17 +62,17 @@ const EmptyState: React.FC<EmptyStateProps> = ({
   const getDefaultIcon = () => {
     switch (type) {
       case "no-data":
-        return "📊";
+        return <FontAwesomeIcon icon="chart-line" />;
       case "loading":
-        return "⏳";
+        return <FontAwesomeIcon icon="spinner" spin />;
       case "error":
-        return "⚠️";
+        return <FontAwesomeIcon icon="exclamation-triangle" />;
       case "search":
-        return "🔍";
+        return <FontAwesomeIcon icon="search" />;
       case "portfolio":
-        return "💼";
+        return <FontAwesomeIcon icon="briefcase" />;
       default:
-        return "📭";
+        return <FontAwesomeIcon icon="inbox" />;
     }
   };
 
@@ -84,23 +85,18 @@ const EmptyState: React.FC<EmptyStateProps> = ({
       aria-live="polite"
     >
       <div className="empty-state__content">
+        {" "}
         {displayIcon && (
           <div className="empty-state__icon" aria-hidden="true">
-            {typeof displayIcon === "string" ? (
-              <span className="empty-state__emoji">{displayIcon}</span>
-            ) : (
-              displayIcon
-            )}
+            {displayIcon}
           </div>
         )}
-
         <div className="empty-state__text">
           <h3 className="empty-state__title">{title}</h3>
           {description && (
             <p className="empty-state__description">{description}</p>
           )}
         </div>
-
         {action && (
           <div className="empty-state__actions">
             <button
