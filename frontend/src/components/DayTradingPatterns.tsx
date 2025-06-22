@@ -1,5 +1,5 @@
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React from "react";
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { DayTradingPattern } from "../types";
 import "./DayTradingPatterns.css";
 
@@ -11,26 +11,35 @@ interface DayTradingPatternsProps {
 const DayTradingPatterns: React.FC<DayTradingPatternsProps> = ({
   patterns,
   symbol,
-}) => {  const getPatternIcon = (type: string) => {
+}) => {
+  const getPatternIcon = (type: string) => {
     switch (type) {
       case "flag":
-        return <FontAwesomeIcon icon="chart-line" style={{ color: '#ffbb33' }} />;
+        return (
+          <FontAwesomeIcon icon="chart-line" style={{ color: "#ffbb33" }} />
+        );
       case "pennant":
-        return <FontAwesomeIcon icon="chart-area" style={{ color: '#ffbb33' }} />;
+        return (
+          <FontAwesomeIcon icon="chart-area" style={{ color: "#ffbb33" }} />
+        );
       case "double_top":
-        return <FontAwesomeIcon icon="caret-up" style={{ color: '#00C851' }} />;
+        return <FontAwesomeIcon icon="caret-up" style={{ color: "#00C851" }} />;
       case "double_bottom":
-        return <FontAwesomeIcon icon="caret-down" style={{ color: '#ff4444' }} />;
+        return (
+          <FontAwesomeIcon icon="caret-down" style={{ color: "#ff4444" }} />
+        );
       case "head_shoulders":
-        return <FontAwesomeIcon icon="chart-bar" style={{ color: '#666' }} />;
+        return <FontAwesomeIcon icon="chart-bar" style={{ color: "#666" }} />;
       case "inverse_head_shoulders":
-        return <FontAwesomeIcon icon="chart-bar" style={{ color: '#666' }} />;
+        return <FontAwesomeIcon icon="chart-bar" style={{ color: "#666" }} />;
       case "triangle":
-        return <FontAwesomeIcon icon="caret-up" style={{ color: '#6f42c1' }} />;
+        return <FontAwesomeIcon icon="caret-up" style={{ color: "#6f42c1" }} />;
       case "rectangle":
-        return <FontAwesomeIcon icon="square" style={{ color: '#20c997' }} />;
+        return <FontAwesomeIcon icon="square" style={{ color: "#20c997" }} />;
       case "wedge":
-        return <FontAwesomeIcon icon="caret-right" style={{ color: '#fd7e14' }} />;
+        return (
+          <FontAwesomeIcon icon="caret-right" style={{ color: "#fd7e14" }} />
+        );
       default:
         return <FontAwesomeIcon icon="chart-line" />;
     }

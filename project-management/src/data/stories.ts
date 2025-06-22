@@ -314,14 +314,13 @@ export const stories: Story[] = [
     progress: 0,
     dependencies: ["S19"],
     createdDate: "2025-06-21",
-  },
-  // PORTFOLIO LIVE DATA VERIFICATION
+  },  // PORTFOLIO LIVE DATA VERIFICATION
   {
     id: "S22",
     title: "Audit Portfolio Data Sources",
     description:
       "Verify all portfolio data comes from live API endpoints. Remove any mock data from backend portfolio services and ensure real-time data flow.",
-    status: "TODO",
+    status: "DONE",
     priority: "Critical",
     epic: "E1",
     storyPoints: 3,
@@ -329,6 +328,7 @@ export const stories: Story[] = [
     progress: 0,
     dependencies: [],
     createdDate: "2025-06-21",
+    completedDate: "2025-06-22",
   },
   {
     id: "S23",

@@ -1,5 +1,5 @@
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React from "react";
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { BreakoutStrategy } from "../types";
 import "./BreakoutDisplay.css";
 
@@ -27,13 +27,25 @@ const BreakoutDisplay: React.FC<BreakoutDisplayProps> = ({
   const getTrendIcon = (trend: string) => {
     switch (trend) {
       case "upward":
-        return <FontAwesomeIcon icon="long-arrow-alt-up" style={{ color: '#00C851' }} />;
+        return (
+          <FontAwesomeIcon
+            icon="long-arrow-alt-up"
+            style={{ color: "#00C851" }}
+          />
+        );
       case "downward":
-        return <FontAwesomeIcon icon="long-arrow-alt-down" style={{ color: '#ff4444' }} />;
+        return (
+          <FontAwesomeIcon
+            icon="long-arrow-alt-down"
+            style={{ color: "#ff4444" }}
+          />
+        );
       case "sideways":
-        return <FontAwesomeIcon icon="arrow-right" style={{ color: '#ffbb33' }} />;
+        return (
+          <FontAwesomeIcon icon="arrow-right" style={{ color: "#ffbb33" }} />
+        );
       default:
-        return <FontAwesomeIcon icon="arrow-right" style={{ color: '#666' }} />;
+        return <FontAwesomeIcon icon="arrow-right" style={{ color: "#666" }} />;
     }
   };
 
@@ -59,7 +71,9 @@ const BreakoutDisplay: React.FC<BreakoutDisplayProps> = ({
   };
 
   return (
-    <div className="breakout-display">      <div className="breakout-header">
+    <div className="breakout-display">
+      {" "}
+      <div className="breakout-header">
         <span className="breakout-title">
           <FontAwesomeIcon icon="chart-line" /> Breakout Analysis
         </span>
@@ -67,7 +81,6 @@ const BreakoutDisplay: React.FC<BreakoutDisplayProps> = ({
           {new Date(breakoutStrategy.lastCalculated).toLocaleTimeString()}
         </span>
       </div>
-
       <div className="breakout-signal">
         <div
           className="signal-badge"
@@ -79,7 +92,6 @@ const BreakoutDisplay: React.FC<BreakoutDisplayProps> = ({
           {formatPercent(breakoutStrategy.probability)}% confidence
         </div>
       </div>
-
       <div className="breakout-metrics">
         <div className="metric-row">
           <span className="metric-label">Trend:</span>
@@ -125,7 +137,6 @@ const BreakoutDisplay: React.FC<BreakoutDisplayProps> = ({
           </span>
         </div>
       </div>
-
       <div className="support-resistance">
         <div className="sr-level support">
           <span className="sr-label">Support:</span>
@@ -140,7 +151,6 @@ const BreakoutDisplay: React.FC<BreakoutDisplayProps> = ({
           </span>
         </div>
       </div>
-
       <div className="breakout-recommendation">
         <div className="recommendation-text">
           {breakoutStrategy.recommendation}
