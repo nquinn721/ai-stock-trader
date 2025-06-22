@@ -27,6 +27,13 @@ export interface DayTradingPattern {
   description: string;
 }
 
+export interface VolumeSpike {
+  date: string;
+  volume: number;
+  ratio: number; // Ratio compared to average volume
+  significance: 'high' | 'medium' | 'low';
+}
+
 export interface BreakoutStrategy {
   signal: "bullish" | "bearish" | "neutral";
   probability: number;
@@ -40,6 +47,33 @@ export interface BreakoutStrategy {
   confidence: number;
   lastCalculated: string;
   dayTradingPatterns: DayTradingPattern[];
+  technicalIndicators?: {
+    sma20?: number;
+    sma50?: number;
+    sma200?: number;
+    ema12?: number;
+    ema26?: number;
+    ema9?: number;
+    macd?: {
+      macd: number;
+      signal: number;
+      histogram: number;
+    };
+    bollingerBands?: {
+      upper: number;
+      middle: number;
+      lower: number;
+    };
+  };
+  volumeAnalysis?: {
+    currentVolume: number;
+    avgVolume: number;
+    volumeRatio: number;
+    vwap: number;
+    volumeSpikes: VolumeSpike[];
+    volumeTrend: 'increasing' | 'decreasing' | 'stable';
+    volumeStrength: 'high' | 'medium' | 'low';
+  };
   modelPredictions: {
     neuralNetwork: number;
     svmLike: number;
@@ -173,7 +207,6 @@ export interface CreatePortfolioRequest {
   name: string;
   initialCash?: number;
 }
-
 export interface PortfolioUpdate {
   portfolioId: number;
   totalValue: number;

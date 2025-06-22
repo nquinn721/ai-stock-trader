@@ -171,6 +171,87 @@
   font-weight: 500;
 }
 
+/* Technical Indicators Section */
+.technical-indicators {
+  margin-top: 16px;
+  padding: 16px;
+  background: rgba(13, 17, 23, 0.4);
+  border-radius: 12px;
+  border: 1px solid rgba(99, 102, 241, 0.2);
+}
+
+.indicators-title {
+  color: #f0f6fc;
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.indicators-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 8px;
+}
+
+.indicator-item {
+  display: flex;
+  flex-direction: column;
+  padding: 8px;
+  background: rgba(30, 41, 59, 0.3);
+  border-radius: 8px;
+  border: 1px solid rgba(99, 102, 241, 0.1);
+  transition: all 0.2s ease;
+}
+
+.indicator-item:hover {
+  background: rgba(30, 41, 59, 0.5);
+  border-color: rgba(99, 102, 241, 0.3);
+}
+
+.indicator-label {
+  font-size: 11px;
+  color: #8b949e;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.indicator-value {
+  font-size: 13px;
+  color: #f0f6fc;
+  font-weight: 600;
+  margin-top: 2px;
+}
+
+.macd-histogram {
+  opacity: 0.8;
+}
+
+/* MACD specific styling */
+.metric-row .macd-histogram {
+  font-weight: 400;
+}
+
+/* Responsive technical indicators */
+@media (max-width: 768px) {
+  .indicators-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .technical-indicators {
+    padding: 12px;
+  }
+  
+  .indicators-title {
+    font-size: 13px;
+  }
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .breakout-metrics {
@@ -202,4 +283,77 @@
 
 .signal-badge:hover {
   transform: scale(1.05);
+}
+
+/* Volume Analysis Styles */
+.volume-analysis-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.volume-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background: rgba(13, 17, 23, 0.4);
+  border-radius: 8px;
+  border-left: 3px solid #6366f1;
+}
+
+.volume-spikes {
+  grid-column: 1 / -1;
+  margin-top: 8px;
+}
+
+.spikes-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.spike-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 10px;
+  background: rgba(22, 27, 34, 0.6);
+  border-radius: 6px;
+  border: 1px solid rgba(99, 102, 241, 0.2);
+}
+
+.spike-date {
+  font-size: 12px;
+  color: #8b949e;
+  font-weight: 500;
+}
+
+.spike-ratio {
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+/* Volume trend indicators */
+.volume-row .metric-value svg {
+  margin-right: 4px;
+}
+
+/* Responsive volume analysis */
+@media (max-width: 768px) {
+  .volume-analysis-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  
+  .volume-row {
+    padding: 6px 10px;
+  }
+  
+  .spike-item {
+    padding: 4px 8px;
+  }
 }

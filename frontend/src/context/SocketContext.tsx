@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import * as io from "socket.io-client";
-import { News, Stock, TradingSignal, PortfolioUpdate } from "../types";
+import { News, PortfolioUpdate, Stock, TradingSignal } from "../types";
 
 interface SocketContextType {
   socket: any;
@@ -42,19 +42,21 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
   const [stocks, setStocks] = useState<Stock[]>([]);
   const [tradingSignals, setTradingSignals] = useState<TradingSignal[]>([]);
   const [news, setNews] = useState<News[]>([]);
-  const [portfolioUpdates, setPortfolioUpdates] = useState<Map<number, PortfolioUpdate>>(new Map());
+  const [portfolioUpdates, setPortfolioUpdates] = useState<
+    Map<number, PortfolioUpdate>
+  >(new Map());
 
   const subscribeToPortfolio = (portfolioId: number) => {
     if (socket && isConnected) {
       console.log(`📈 Subscribing to portfolio ${portfolioId}`);
-      socket.emit('subscribe_portfolio', { portfolioId });
+      socket.emit("subscribe_portfolio", { portfolioId });
     }
   };
 
   const unsubscribeFromPortfolio = (portfolioId: number) => {
     if (socket && isConnected) {
       console.log(`📉 Unsubscribing from portfolio ${portfolioId}`);
-      socket.emit('unsubscribe_portfolio', { portfolioId });
+      socket.emit("unsubscribe_portfolio", { portfolioId });
     }
   };
   useEffect(() => {
@@ -109,13 +111,17 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
     newSocket.on("trading_signal", (signal: TradingSignal) => {
       console.log("🔔 New trading signal:", signal);
       setTradingSignals((prev) => [signal, ...prev.slice(0, 9)]); // Keep last 10 signals
-    });    newSocket.on("news_update", (newsItem: News) => {
+    });
+    newSocket.on("news_update", (newsItem: News) => {
       console.log("📰 News update:", newsItem);
       setNews((prev) => [newsItem, ...prev.slice(0, 19)]); // Keep last 20 news items
     });
 
     newSocket.on("portfolio_update", (portfolioUpdate: PortfolioUpdate) => {
-      console.log(`📈 Portfolio update for ${portfolioUpdate.portfolioId}:`, portfolioUpdate);
+      console.log(
+        `📈 Portfolio update for ${portfolioUpdate.portfolioId}:`,
+        portfolioUpdate
+      );
       setPortfolioUpdates((prev) => {
         const newMap = new Map(prev);
         newMap.set(portfolioUpdate.portfolioId, portfolioUpdate);
@@ -123,9 +129,12 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
       });
     });
 
-    newSocket.on("portfolio_error", (error: { portfolioId: number; message: string; timestamp: string }) => {
-      console.error(`❌ Portfolio error for ${error.portfolioId}:`, error);
-    });
+    newSocket.on(
+      "portfolio_error",
+      (error: { portfolioId: number; message: string; timestamp: string }) => {
+        console.error(`❌ Portfolio error for ${error.portfolioId}:`, error);
+      }
+    );
 
     setSocket(newSocket);
 

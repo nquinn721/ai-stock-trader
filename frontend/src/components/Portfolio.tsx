@@ -16,7 +16,12 @@ const PortfolioComponent: React.FC<PortfolioProps> = ({
   portfolioId,
   onBack,
 }) => {
-  const { stocks, subscribeToPortfolio, unsubscribeFromPortfolio, portfolioUpdates } = useSocket();
+  const {
+    stocks,
+    subscribeToPortfolio,
+    unsubscribeFromPortfolio,
+    portfolioUpdates,
+  } = useSocket();
   const [portfolio, setPortfolio] = useState<Portfolio | null>(null);
   const [loading, setLoading] = useState(true);
   const [tradeForm, setTradeForm] = useState({
@@ -31,7 +36,7 @@ const PortfolioComponent: React.FC<PortfolioProps> = ({
     fetchPortfolio();
     // Subscribe to real-time portfolio updates
     subscribeToPortfolio(portfolioId);
-    
+
     return () => {
       // Unsubscribe when component unmounts
       unsubscribeFromPortfolio(portfolioId);
@@ -42,14 +47,18 @@ const PortfolioComponent: React.FC<PortfolioProps> = ({
   useEffect(() => {
     const portfolioUpdate = portfolioUpdates.get(portfolioId);
     if (portfolioUpdate && portfolio) {
-      setPortfolio(prev => prev ? {
-        ...prev,
-        totalValue: portfolioUpdate.totalValue,
-        totalPnL: portfolioUpdate.totalPnL,
-        totalReturn: portfolioUpdate.totalReturn,
-        currentCash: portfolioUpdate.currentCash,
-        positions: portfolioUpdate.positions,
-      } : null);
+      setPortfolio((prev) =>
+        prev
+          ? {
+              ...prev,
+              totalValue: portfolioUpdate.totalValue,
+              totalPnL: portfolioUpdate.totalPnL,
+              totalReturn: portfolioUpdate.totalReturn,
+              currentCash: portfolioUpdate.currentCash,
+              positions: portfolioUpdate.positions,
+            }
+          : null
+      );
     }
   }, [portfolioUpdates, portfolioId, portfolio]);
 
@@ -121,7 +130,9 @@ const PortfolioComponent: React.FC<PortfolioProps> = ({
   }
 
   return (
-    <div className="portfolio-container">      <div className="portfolio-header">
+    <div className="portfolio-container">
+      {" "}
+      <div className="portfolio-header">
         <button className="back-button" onClick={onBack}>
           <FontAwesomeIcon icon="arrow-left" /> Back to Portfolios
         </button>
@@ -137,7 +148,8 @@ const PortfolioComponent: React.FC<PortfolioProps> = ({
         <button className="trade-button" onClick={() => setShowTradeForm(true)}>
           New Trade
         </button>
-      </div><div className="portfolio-summary">
+      </div>
+      <div className="portfolio-summary">
         <div className="summary-card">
           <h3>Portfolio Value</h3>
           <div className="value">{formatCurrency(portfolio.totalValue)}</div>
@@ -170,23 +182,25 @@ const PortfolioComponent: React.FC<PortfolioProps> = ({
           <h3>Day P&L</h3>
           <div
             className={`value ${
-              (portfolioUpdates.get(portfolioId)?.dayGain || 0) >= 0 ? "positive" : "negative"
+              (portfolioUpdates.get(portfolioId)?.dayGain || 0) >= 0
+                ? "positive"
+                : "negative"
             }`}
           >
             {formatCurrency(portfolioUpdates.get(portfolioId)?.dayGain || 0)}
             <span className="percentage">
-              {formatPercent(portfolioUpdates.get(portfolioId)?.dayGainPercent || 0)}
+              {formatPercent(
+                portfolioUpdates.get(portfolioId)?.dayGainPercent || 0
+              )}
             </span>
           </div>
         </div>
       </div>
-
       {/* Portfolio Performance Chart */}
       <div className="portfolio-chart-section">
         <h2>Portfolio Performance</h2>
         <PortfolioChart portfolioId={portfolioId} height={350} />
       </div>
-
       <div className="portfolio-content">
         <div className="positions-section">
           <h2>Positions</h2>
@@ -276,7 +290,6 @@ const PortfolioComponent: React.FC<PortfolioProps> = ({
           )}
         </div>
       </div>
-
       {showTradeForm && (
         <div className="trade-modal">
           <div className="trade-modal-content">

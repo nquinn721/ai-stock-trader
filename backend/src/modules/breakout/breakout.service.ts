@@ -35,6 +35,33 @@ export interface BreakoutStrategy {
   confidence: number;
   lastCalculated: string;
   dayTradingPatterns: DayTradingPattern[];
+  technicalIndicators?: {
+    sma20?: number;
+    sma50?: number;
+    sma200?: number;
+    ema12?: number;
+    ema26?: number;
+    ema9?: number;
+    macd?: {
+      macd: number;
+      signal: number;
+      histogram: number;
+    };
+    bollingerBands?: {
+      upper: number;
+      middle: number;
+      lower: number;
+    };
+  };
+  volumeAnalysis?: {
+    currentVolume: number;
+    avgVolume: number;
+    volumeRatio: number;
+    vwap: number;
+    volumeSpikes: VolumeSpike[];
+    volumeTrend: 'increasing' | 'decreasing' | 'stable';
+    volumeStrength: 'high' | 'medium' | 'low';
+  };
   modelPredictions: {
     neuralNetwork: number;
     svmLike: number;
@@ -51,6 +78,13 @@ export interface HistoricalData {
   low: number;
   close: number;
   volume: number;
+}
+
+export interface VolumeSpike {
+  date: string;
+  volume: number;
+  ratio: number; // Ratio compared to average volume
+  significance: 'high' | 'medium' | 'low';
 }
 
 @Injectable()
@@ -116,6 +150,25 @@ export class BreakoutService {
         confidence: signal.confidence,
         lastCalculated: new Date().toISOString(),
         dayTradingPatterns,
+        technicalIndicators: {
+          sma20: technicalAnalysis.sma20,
+          sma50: technicalAnalysis.sma50,
+          sma200: technicalAnalysis.sma200,
+          ema12: technicalAnalysis.ema12,
+          ema26: technicalAnalysis.ema26,
+          ema9: technicalAnalysis.ema9,
+          macd: technicalAnalysis.macd,
+          bollingerBands: technicalAnalysis.bollinger,
+        },
+        volumeAnalysis: {
+          currentVolume: technicalAnalysis.volume,
+          avgVolume: technicalAnalysis.avgVolume,
+          volumeRatio: technicalAnalysis.volume / technicalAnalysis.avgVolume,
+          vwap: this.calculateVWAP(historicalData),
+          volumeSpikes: this.detectVolumeSpikes(historicalData),
+          volumeTrend: this.analyzeVolumeTrend(historicalData),
+          volumeStrength: this.analyzeVolumeStrength(historicalData),
+        },
         modelPredictions,
       };
     } catch (error) {
@@ -148,6 +201,15 @@ export class BreakoutService {
         momentum: 0.0,
         meanReversion: 0.0,
       },
+      volumeAnalysis: {
+        currentVolume: 0,
+        avgVolume: 0,
+        volumeRatio: 0,
+        vwap: 0,
+        volumeSpikes: [],
+        volumeTrend: 'stable',
+        volumeStrength: 'low',
+      },
     };
   }
 
@@ -160,9 +222,18 @@ export class BreakoutService {
     // RSI calculation
     const rsi = this.calculateRSI(closes, 14);
 
-    // Moving averages
+    // Simple Moving averages
     const sma20 = this.calculateSMA(closes, 20);
     const sma50 = this.calculateSMA(closes, 50);
+    const sma200 = this.calculateSMA(closes, 200);
+
+    // Exponential Moving Averages
+    const ema12 = this.calculateEMA(closes, 12);
+    const ema26 = this.calculateEMA(closes, 26);
+    const ema9 = this.calculateEMA(closes, 9);
+
+    // MACD calculation
+    const macd = this.calculateMACD(closes, 12, 26, 9);
 
     // Bollinger Bands
     const bollinger = this.calculateBollingerBands(closes, 20, 2);
@@ -177,6 +248,11 @@ export class BreakoutService {
       rsi,
       sma20,
       sma50,
+      sma200,
+      ema12,
+      ema26,
+      ema9,
+      macd,
       bollinger,
       volatility,
       trend,
@@ -404,6 +480,64 @@ export class BreakoutService {
     return Math.sqrt(variance) * Math.sqrt(252); // Annualized volatility
   }
 
+  /**
+   * Calculate Exponential Moving Average (EMA)
+   */
+  private calculateEMA(prices: number[], period: number): number {
+    if (prices.length < period) return prices[prices.length - 1] || 0;
+
+    const multiplier = 2 / (period + 1);
+    let ema = this.calculateSMA(prices.slice(0, period), period);
+
+    for (let i = period; i < prices.length; i++) {
+      ema = (prices[i] - ema) * multiplier + ema;
+    }
+
+    return ema;
+  }
+
+  /**
+   * Calculate MACD (Moving Average Convergence Divergence)
+   */
+  private calculateMACD(
+    prices: number[],
+    fastPeriod: number = 12,
+    slowPeriod: number = 26,
+    signalPeriod: number = 9,
+  ) {
+    if (prices.length < slowPeriod) {
+      return {
+        macd: 0,
+        signal: 0,
+        histogram: 0,
+      };
+    }
+
+    const emaFast = this.calculateEMA(prices, fastPeriod);
+    const emaSlow = this.calculateEMA(prices, slowPeriod);
+    const macdLine = emaFast - emaSlow;
+
+    // Calculate MACD values for signal line
+    const macdValues: number[] = [];
+
+    // Calculate MACD line for each point to get signal
+    for (let i = slowPeriod - 1; i < prices.length; i++) {
+      const subPrices = prices.slice(0, i + 1);
+      const fastEMA = this.calculateEMA(subPrices, fastPeriod);
+      const slowEMA = this.calculateEMA(subPrices, slowPeriod);
+      macdValues.push(fastEMA - slowEMA);
+    }
+
+    const signalLine = this.calculateEMA(macdValues, signalPeriod);
+    const histogram = macdLine - signalLine;
+
+    return {
+      macd: Math.round(macdLine * 10000) / 10000,
+      signal: Math.round(signalLine * 10000) / 10000,
+      histogram: Math.round(histogram * 10000) / 10000,
+    };
+  }
+
   private determineTrend(
     prices: number[],
     sma20: number,
@@ -424,139 +558,256 @@ export class BreakoutService {
     return 'sideways';
   }
 
+  /**
+   * Calculate Volume Weighted Average Price (VWAP)
+   */
+  private calculateVWAP(data: HistoricalData[]): number {
+    if (!data || data.length === 0) return 0;
+
+    let totalVolume = 0;
+    let totalVolumePrice = 0;
+
+    for (const candle of data) {
+      const typicalPrice = (candle.high + candle.low + candle.close) / 3;
+      totalVolumePrice += typicalPrice * candle.volume;
+      totalVolume += candle.volume;
+    }
+
+    return totalVolume > 0 ? totalVolumePrice / totalVolume : 0;
+  }
+
+  /**
+   * Detect volume spikes in historical data
+   */
+  private detectVolumeSpikes(data: HistoricalData[]): VolumeSpike[] {
+    if (!data || data.length < 10) return [];
+
+    const spikes: VolumeSpike[] = [];
+    const volumes = data.map(d => d.volume);
+    const avgVolume = this.calculateSMA(volumes, 20);
+
+    // Look for volume spikes in the last 10 periods
+    const recentData = data.slice(-10);
+    
+    for (const candle of recentData) {
+      const ratio = candle.volume / avgVolume;
+      
+      if (ratio >= 2.0) {
+        spikes.push({
+          date: candle.date,
+          volume: candle.volume,
+          ratio: ratio,
+          significance: ratio >= 3.0 ? 'high' : ratio >= 2.5 ? 'medium' : 'low'
+        });
+      }
+    }
+
+    return spikes.sort((a, b) => b.ratio - a.ratio); // Sort by ratio descending
+  }
+
+  /**
+   * Analyze volume trend over recent periods
+   */
+  private analyzeVolumeTrend(data: HistoricalData[]): 'increasing' | 'decreasing' | 'stable' {
+    if (!data || data.length < 10) return 'stable';
+
+    const recentVolumes = data.slice(-10).map(d => d.volume);
+    const firstHalf = recentVolumes.slice(0, 5);
+    const secondHalf = recentVolumes.slice(5);
+
+    const firstHalfAvg = firstHalf.reduce((sum, vol) => sum + vol, 0) / firstHalf.length;
+    const secondHalfAvg = secondHalf.reduce((sum, vol) => sum + vol, 0) / secondHalf.length;
+
+    const changePercent = ((secondHalfAvg - firstHalfAvg) / firstHalfAvg) * 100;
+
+    if (changePercent > 20) return 'increasing';
+    if (changePercent < -20) return 'decreasing';
+    return 'stable';
+  }
+
+  /**
+   * Analyze volume strength relative to historical averages
+   */
+  private analyzeVolumeStrength(data: HistoricalData[]): 'high' | 'medium' | 'low' {
+    if (!data || data.length < 20) return 'low';
+
+    const volumes = data.map(d => d.volume);
+    const currentVolume = volumes[volumes.length - 1];
+    const avgVolume = this.calculateSMA(volumes, 20);
+    const ratio = currentVolume / avgVolume;
+
+    if (ratio >= 1.5) return 'high';
+    if (ratio >= 0.8) return 'medium';
+    return 'low';
+  }
+
+  /**
+   * Determine Bollinger Band position
+   */
   private getBollingerPosition(
-    price: number,
-    bollinger: any,
+    currentPrice: number,
+    bollinger: { upper: number; middle: number; lower: number }
   ): 'upper' | 'middle' | 'lower' {
-    if (price >= bollinger.upper) return 'upper';
-    if (price <= bollinger.lower) return 'lower';
+    if (currentPrice >= bollinger.upper * 0.95) return 'upper';
+    if (currentPrice <= bollinger.lower * 1.05) return 'lower';
     return 'middle';
   }
 
+  /**
+   * Calculate support and resistance levels
+   */
   private calculateSupportResistance(
     data: HistoricalData[],
-    currentPrice: number,
-  ) {
-    const highs = data.map((d) => d.high);
-    const lows = data.map((d) => d.low);
+    currentPrice: number
+  ): { support: number; resistance: number } {
+    if (!data || data.length < 10) {
+      return {
+        support: currentPrice * 0.95,
+        resistance: currentPrice * 1.05
+      };
+    }
 
-    // Find recent highs and lows for support/resistance
+    const highs = data.map(d => d.high);
+    const lows = data.map(d => d.low);
+    
+    // Find recent highs and lows
     const recentHighs = highs.slice(-20).sort((a, b) => b - a);
     const recentLows = lows.slice(-20).sort((a, b) => a - b);
-
-    const resistance =
-      recentHighs.slice(0, 3).reduce((sum, high) => sum + high, 0) / 3;
-    const support =
-      recentLows.slice(0, 3).reduce((sum, low) => sum + low, 0) / 3;
-
-    return {
-      resistance: Math.max(resistance, currentPrice * 1.02),
-      support: Math.min(support, currentPrice * 0.98),
-    };
+    
+    // Calculate resistance as average of top 3 recent highs
+    const resistance = recentHighs.slice(0, 3).reduce((sum, high) => sum + high, 0) / 3;
+    
+    // Calculate support as average of bottom 3 recent lows
+    const support = recentLows.slice(0, 3).reduce((sum, low) => sum + low, 0) / 3;
+    
+    return { support, resistance };
   }
 
+  /**
+   * Determine overall trading signal
+   */
   private determineSignal(
-    technicalAnalysis: any,
-    modelPredictions: any,
+    technical: any,
+    modelPredictions: {
+      neuralNetwork: number;
+      svmLike: number;
+      ensemble: number;
+      momentum: number;
+      meanReversion: number;
+    },
     patterns: DayTradingPattern[],
-    symbol: string,
-  ) {
-    // Combine all signals to determine overall recommendation
+    symbol: string
+  ): {
+    direction: 'bullish' | 'bearish' | 'neutral';
+    probability: number;
+    recommendation: string;
+    confidence: number;
+  } {
     let bullishScore = 0;
     let bearishScore = 0;
+    let signals: string[] = [];
 
-    // Enhanced technical analysis scoring with more dynamic thresholds
-    if (technicalAnalysis.trend === 'upward') bullishScore += 0.3;
-    if (technicalAnalysis.trend === 'downward') bearishScore += 0.3;
-    if (technicalAnalysis.rsi < 30) bullishScore += 0.25; // More strict oversold
-    if (technicalAnalysis.rsi > 70) bearishScore += 0.25; // More strict overbought
-    if (technicalAnalysis.bollingerPosition === 'lower') bullishScore += 0.15;
-    if (technicalAnalysis.bollingerPosition === 'upper') bearishScore += 0.15;
-
-    // Enhanced model predictions scoring with balanced approach
-    bullishScore += Math.max(0, modelPredictions.neuralNetwork) * 0.25;
-    bearishScore += Math.max(0, -modelPredictions.neuralNetwork) * 0.25;
-    bullishScore += Math.max(0, modelPredictions.momentum) * 0.2;
-    bearishScore += Math.max(0, -modelPredictions.momentum) * 0.2;
-    bullishScore += Math.max(0, modelPredictions.ensemble) * 0.15;
-    bearishScore += Math.max(0, -modelPredictions.ensemble) * 0.15;
-
-    // Pattern scoring
-    const bullishPatterns = patterns.filter((p) => p.direction === 'bullish');
-    const bearishPatterns = patterns.filter((p) => p.direction === 'bearish');
-
-    bullishScore +=
-      bullishPatterns.reduce((sum, p) => sum + p.confidence, 0) * 0.1;
-    bearishScore +=
-      bearishPatterns.reduce((sum, p) => sum + p.confidence, 0) * 0.1;
-
-    // Add more sophisticated time-based and market-based randomization
-    const timeVariation = Math.sin(Date.now() / 120000) * 0.2; // 2-minute cycles, larger range
-    const marketSentiment = (Math.random() - 0.5) * 0.4; // Larger market sentiment range
-    const symbolHash = symbol
-      .split('')
-      .reduce((hash, char) => hash + char.charCodeAt(0), 0);
-    const symbolVariation = Math.sin(symbolHash + Date.now() / 300000) * 0.15; // 5-minute cycles for symbol-specific variation
-
-    // Apply variations to create more balanced distribution
-    bullishScore += Math.max(
-      0,
-      timeVariation + marketSentiment + symbolVariation,
-    );
-    bearishScore += Math.max(
-      0,
-      -(timeVariation + marketSentiment + symbolVariation),
-    );
-
-    // Add random walk component to prevent predictable patterns
-    const randomWalk = (Math.random() - 0.5) * 0.3;
-    if (randomWalk > 0) {
-      bullishScore += randomWalk;
-    } else {
-      bearishScore += Math.abs(randomWalk);
+    // Technical indicators scoring
+    if (technical.rsi < 30) {
+      bullishScore += 2;
+      signals.push('RSI oversold');
+    } else if (technical.rsi > 70) {
+      bearishScore += 2;
+      signals.push('RSI overbought');
     }
-    bearishScore += symbolVariation < 0 ? Math.abs(symbolVariation) : 0;
 
-    const netScore = bullishScore - bearishScore;
-    const confidence = Math.min(0.95, Math.max(0.3, Math.abs(netScore) + 0.25));
+    if (technical.trend === 'upward') {
+      bullishScore += 2;
+      signals.push('Upward trend');
+    } else if (technical.trend === 'downward') {
+      bearishScore += 2;
+      signals.push('Downward trend');
+    }
 
-    let direction: 'bullish' | 'bearish' | 'neutral';
-    let recommendation: string;
+    // MACD signals
+    if (technical.macd && technical.macd.macd > technical.macd.signal) {
+      bullishScore += 1;
+      signals.push('MACD bullish');
+    } else if (technical.macd && technical.macd.macd < technical.macd.signal) {
+      bearishScore += 1;
+      signals.push('MACD bearish');
+    }
 
-    // More balanced thresholds for better signal distribution
-    if (netScore > 0.15) {
+    // Volume analysis
+    if (technical.volume > technical.avgVolume * 1.5) {
+      if (bullishScore > bearishScore) {
+        bullishScore += 1;
+        signals.push('High volume supports bullish trend');
+      } else if (bearishScore > bullishScore) {
+        bearishScore += 1;
+        signals.push('High volume supports bearish trend');
+      }
+    }
+
+    // ML predictions
+    const avgPrediction = Object.values(modelPredictions).reduce((sum: number, val: any) => sum + val, 0) / Object.keys(modelPredictions).length;
+    if (avgPrediction > 0.6) {
+      bullishScore += 2;
+      signals.push('ML models predict upward movement');
+    } else if (avgPrediction < 0.4) {
+      bearishScore += 2;
+      signals.push('ML models predict downward movement');
+    }
+
+    // Pattern analysis
+    const bullishPatterns = patterns.filter(p => p.direction === 'bullish').length;
+    const bearishPatterns = patterns.filter(p => p.direction === 'bearish').length;
+    
+    if (bullishPatterns > bearishPatterns) {
+      bullishScore += bullishPatterns;
+      signals.push(`${bullishPatterns} bullish patterns detected`);
+    } else if (bearishPatterns > bullishPatterns) {
+      bearishScore += bearishPatterns;
+      signals.push(`${bearishPatterns} bearish patterns detected`);
+    }
+
+    // Determine final signal
+    const totalScore = bullishScore + bearishScore;
+    let direction: 'bullish' | 'bearish' | 'neutral' = 'neutral';
+    let probability = 0.5;
+    let confidence = Math.min(totalScore * 10, 100);
+
+    if (bullishScore > bearishScore && bullishScore >= 3) {
       direction = 'bullish';
-      recommendation = `🚀 Bullish signal detected with ${(confidence * 100).toFixed(1)}% confidence. Technical analysis and ML predictions suggest upward momentum.`;
-    } else if (netScore < -0.15) {
+      probability = Math.min(0.5 + (bullishScore - bearishScore) * 0.1, 0.9);
+    } else if (bearishScore > bullishScore && bearishScore >= 3) {
       direction = 'bearish';
-      recommendation = `📉 Bearish signal detected with ${(confidence * 100).toFixed(1)}% confidence. Indicators point to potential downward pressure.`;
-    } else {
-      direction = 'neutral';
-      recommendation = `⚖️ Neutral signal - market in consolidation phase. Confidence: ${(confidence * 100).toFixed(1)}%. Monitoring for clearer directional signals.`;
+      probability = Math.min(0.5 + (bearishScore - bullishScore) * 0.1, 0.9);
     }
+
+    const recommendation = this.generateRecommendation(direction, signals, symbol);
 
     return {
       direction,
-      probability: confidence,
-      confidence,
+      probability,
       recommendation,
+      confidence
     };
   }
 
-  convertYahooDataToHistorical(yahooData: any[]): HistoricalData[] {
-    if (!yahooData || !Array.isArray(yahooData)) return [];
-
-    return yahooData
-      .filter((item) => item && typeof item === 'object')
-      .map((item) => ({
-        date: item.date ? item.date.toISOString() : new Date().toISOString(),
-        open: Number(item.open) || 0,
-        high: Number(item.high) || 0,
-        low: Number(item.low) || 0,
-        close: Number(item.close) || 0,
-        volume: Number(item.volume) || 0,
-      }))
-      .filter((item) => item.close > 0);
+  /**
+   * Generate trading recommendation text
+   */
+  private generateRecommendation(
+    direction: 'bullish' | 'bearish' | 'neutral',
+    signals: string[],
+    symbol: string
+  ): string {
+    const signalText = signals.length > 0 ? signals.join(', ') : 'Mixed signals';
+    
+    switch(direction) {
+      case 'bullish':
+        return `CONSIDER BUYING ${symbol}. Bullish indicators: ${signalText}. Monitor for entry opportunities.`;
+      case 'bearish':
+        return `CONSIDER SELLING/SHORTING ${symbol}. Bearish indicators: ${signalText}. Look for exit points or short positions.`;
+      default:
+        return `HOLD/WATCH ${symbol}. Neutral signals: ${signalText}. Wait for clearer direction.`;
+    }
   }
 
   // Pattern Detection Methods
@@ -991,4 +1242,26 @@ export class BreakoutService {
       return currentPrice * (baseMultiplier + confidenceAdjustment);
     }
   }
+
+  /**
+   * Convert Yahoo Finance historical data to our HistoricalData format
+   */
+  convertYahooDataToHistorical(yahooData: any[]): HistoricalData[] {
+    if (!Array.isArray(yahooData)) {
+      return [];
+    }
+
+    return yahooData.map(item => ({
+      date: item.date instanceof Date ? item.date.toISOString().split('T')[0] : item.date.toString(),
+      open: Number(item.open) || 0,
+      high: Number(item.high) || 0,
+      low: Number(item.low) || 0,
+      close: Number(item.close) || 0,
+      volume: Number(item.volume) || 0,
+    })).filter(item => 
+      // Filter out invalid data points
+      item.open > 0 && item.high > 0 && item.low > 0 && item.close > 0
+    );
+  }
+
 }

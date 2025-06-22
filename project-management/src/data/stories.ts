@@ -204,15 +204,14 @@ export const stories: Story[] = [
     progress: 0,
     dependencies: [],
     createdDate: "2025-06-21",
-    completedDate: "2025-06-22",
-  },
+    completedDate: "2025-06-22",  },
   // DAY TRADING ANALYSIS STORIES
   {
     id: "S14",
     title: "Implement Technical Analysis Indicators",
     description:
       "Add RSI, MACD, Bollinger Bands, and Moving Averages calculations to backend. These are key indicators day traders use for entry/exit decisions.",
-    status: "TODO",
+    status: "DONE",
     priority: "High",
     epic: "E4",
     storyPoints: 5,
@@ -220,13 +219,13 @@ export const stories: Story[] = [
     progress: 0,
     dependencies: [],
     createdDate: "2025-06-21",
-  },
-  {
+    completedDate: "2025-06-22",
+  },  {
     id: "S15",
     title: "Add Volume Analysis System",
     description:
       "Implement volume spike detection, volume-weighted average price (VWAP), and volume trend analysis. High volume confirms price movements for day traders.",
-    status: "TODO",
+    status: "DONE",
     priority: "High",
     epic: "E4",
     storyPoints: 3,
@@ -234,6 +233,7 @@ export const stories: Story[] = [
     progress: 0,
     dependencies: [],
     createdDate: "2025-06-21",
+    completedDate: "2025-06-22",
   },
   {
     id: "S16",
@@ -346,7 +346,8 @@ export const stories: Story[] = [
     storyPoints: 4,
     assignee: "Dave",
     progress: 0,
-    dependencies: ["S22"],    createdDate: "2025-06-21",
+    dependencies: ["S22"],
+    createdDate: "2025-06-21",
   },
   {
     id: "S24",
@@ -374,6 +375,20 @@ export const stories: Story[] = [
     assignee: "Trading Team",
     progress: 0,
     dependencies: ["S23"],
+    createdDate: "2025-06-22",
+  },
+  {
+    id: "S26",
+    title: "ML Model Integration Audit and Strategy",
+    description:
+      "Conduct comprehensive audit of current trading logic and identify opportunities to replace manual calculations with trained machine learning models. Areas to evaluate: breakout strategy calculations (neural network, SVM, ensemble predictions), sentiment analysis enhancement (NLP models for news analysis), portfolio optimization (reinforcement learning for position sizing), risk management (ML-based stop-loss positioning), pattern recognition (CNN models for chart pattern detection), market prediction (LSTM/Transformer models for price forecasting), trading signal generation (ensemble ML models), and performance attribution analysis. Create implementation roadmap prioritizing highest-impact ML integrations with clear ROI metrics.",
+    status: "TODO",
+    priority: "Medium",
+    epic: "E4",
+    storyPoints: 5,
+    assignee: "Data Science Team",
+    progress: 0,
+    dependencies: ["S22", "S23"],
     createdDate: "2025-06-22",
   },
 ];

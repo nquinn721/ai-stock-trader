@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
+import { Cron } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Cron } from '@nestjs/schedule';
 import { Order, OrderStatus, OrderType } from '../../entities/order.entity';
 import { Stock } from '../../entities/stock.entity';
 import { PaperTradingService } from '../paper-trading/paper-trading.service';
@@ -83,7 +83,10 @@ export class OrderService {
   /**
    * Update an existing order (only pending orders)
    */
-  async updateOrder(orderId: number, updateOrderDto: UpdateOrderDto): Promise<Order> {
+  async updateOrder(
+    orderId: number,
+    updateOrderDto: UpdateOrderDto,
+  ): Promise<Order> {
     const order = await this.orderRepository.findOne({
       where: { id: orderId },
     });
@@ -118,20 +121,25 @@ export class OrderService {
       }
 
       // Group orders by symbol to minimize database queries
-      const ordersBySymbol = pendingOrders.reduce((acc, order) => {
-        if (!acc[order.symbol]) {
-          acc[order.symbol] = [];
-        }
-        acc[order.symbol].push(order);
-        return acc;
-      }, {} as Record<string, Order[]>);
+      const ordersBySymbol = pendingOrders.reduce(
+        (acc, order) => {
+          if (!acc[order.symbol]) {
+            acc[order.symbol] = [];
+          }
+          acc[order.symbol].push(order);
+          return acc;
+        },
+        {} as Record<string, Order[]>,
+      );
 
       // Check each symbol's orders
       for (const [symbol, orders] of Object.entries(ordersBySymbol)) {
         await this.checkOrdersForSymbol(symbol, orders);
       }
 
-      console.log(`✅ Order monitoring complete. Checked ${pendingOrders.length} orders.`);
+      console.log(
+        `✅ Order monitoring complete. Checked ${pendingOrders.length} orders.`,
+      );
     } catch (error) {
       console.error('❌ Error monitoring orders:', error);
     }
@@ -140,7 +148,10 @@ export class OrderService {
   /**
    * Check orders for a specific symbol against current market price
    */
-  private async checkOrdersForSymbol(symbol: string, orders: Order[]): Promise<void> {
+  private async checkOrdersForSymbol(
+    symbol: string,
+    orders: Order[],
+  ): Promise<void> {
     const stock = await this.stockRepository.findOne({
       where: { symbol: symbol.toUpperCase() },
     });
@@ -185,9 +196,14 @@ export class OrderService {
   /**
    * Execute a triggered order
    */
-  private async executeOrder(order: Order, currentPrice: number): Promise<void> {
+  private async executeOrder(
+    order: Order,
+    currentPrice: number,
+  ): Promise<void> {
     try {
-      console.log(`🚀 Executing ${order.type} order ${order.id} for ${order.symbol} at $${currentPrice}`);
+      console.log(
+        `🚀 Executing ${order.type} order ${order.id} for ${order.symbol} at $${currentPrice}`,
+      );
 
       // Update order status to triggered
       order.status = OrderStatus.TRIGGERED;
@@ -195,7 +211,7 @@ export class OrderService {
 
       // Execute the trade based on order type
       let tradeType: 'buy' | 'sell';
-      
+
       if (order.type === OrderType.ENTRY) {
         tradeType = 'buy';
       } else {
@@ -229,10 +245,9 @@ export class OrderService {
       });
 
       console.log(`✅ Order ${order.id} executed successfully`);
-
     } catch (error) {
       console.error(`❌ Failed to execute order ${order.id}:`, error);
-      
+
       // Mark order as failed/cancelled if execution fails
       order.status = OrderStatus.CANCELLED;
       await this.orderRepository.save(order);
@@ -249,26 +264,36 @@ export class OrderService {
   /**
    * Validate order creation requirements
    */
-  private async validateOrderCreation(createOrderDto: CreateOrderDto): Promise<void> {
+  private async validateOrderCreation(
+    createOrderDto: CreateOrderDto,
+  ): Promise<void> {
     // Check if portfolio exists
-    const portfolio = await this.paperTradingService.getPortfolio(createOrderDto.portfolioId);
-    
+    const portfolio = await this.paperTradingService.getPortfolio(
+      createOrderDto.portfolioId,
+    );
+
     if (!portfolio) {
       throw new Error('Portfolio not found');
     }
 
     // For entry orders, check if sufficient funds will be available
     if (createOrderDto.type === OrderType.ENTRY) {
-      const requiredFunds = createOrderDto.triggerPrice * createOrderDto.quantity;
+      const requiredFunds =
+        createOrderDto.triggerPrice * createOrderDto.quantity;
       if (portfolio.currentCash < requiredFunds) {
         throw new Error('Insufficient funds for entry order');
       }
     }
 
     // For stop-loss and take-profit orders, check if position exists and has sufficient shares
-    if (createOrderDto.type === OrderType.STOP_LOSS || createOrderDto.type === OrderType.TAKE_PROFIT) {
-      const position = portfolio.positions?.find(p => p.symbol === createOrderDto.symbol.toUpperCase());
-      
+    if (
+      createOrderDto.type === OrderType.STOP_LOSS ||
+      createOrderDto.type === OrderType.TAKE_PROFIT
+    ) {
+      const position = portfolio.positions?.find(
+        (p) => p.symbol === createOrderDto.symbol.toUpperCase(),
+      );
+
       if (!position) {
         throw new Error(`No position found for ${createOrderDto.symbol}`);
       }

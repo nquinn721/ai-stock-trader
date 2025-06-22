@@ -9,8 +9,8 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { StockService } from '../stock/stock.service';
 import { PaperTradingService } from '../paper-trading/paper-trading.service';
+import { StockService } from '../stock/stock.service';
 
 @WebSocketGateway({
   cors: {
@@ -149,7 +149,7 @@ export class StockWebSocketGateway
         console.log(
           `📊 Broadcasted ${stocks.length} stock updates to all clients`,
         );
-        
+
         // Also broadcast portfolio updates since stock prices changed
         await this.broadcastPortfolioUpdates();
       }
@@ -170,7 +170,9 @@ export class StockWebSocketGateway
     @MessageBody() data: { portfolioId: number },
     @ConnectedSocket() client: Socket,
   ) {
-    console.log(`Client ${client.id} subscribed to portfolio ${data.portfolioId}`);
+    console.log(
+      `Client ${client.id} subscribed to portfolio ${data.portfolioId}`,
+    );
 
     // Add to client's portfolio subscriptions
     if (!this.portfolioSubscriptions.has(client.id)) {
@@ -190,7 +192,9 @@ export class StockWebSocketGateway
     @MessageBody() data: { portfolioId: number },
     @ConnectedSocket() client: Socket,
   ) {
-    console.log(`Client ${client.id} unsubscribed from portfolio ${data.portfolioId}`);
+    console.log(
+      `Client ${client.id} unsubscribed from portfolio ${data.portfolioId}`,
+    );
 
     // Remove from client's portfolio subscriptions
     if (this.portfolioSubscriptions.has(client.id)) {
@@ -206,8 +210,10 @@ export class StockWebSocketGateway
    */
   async sendPortfolioUpdate(portfolioId: number, client?: Socket) {
     try {
-      const performance = await this.paperTradingService.getPortfolioPerformance(portfolioId);
-      const portfolio = await this.paperTradingService.getPortfolio(portfolioId);
+      const performance =
+        await this.paperTradingService.getPortfolioPerformance(portfolioId);
+      const portfolio =
+        await this.paperTradingService.getPortfolio(portfolioId);
 
       const portfolioUpdate = {
         portfolioId,
@@ -224,12 +230,17 @@ export class StockWebSocketGateway
       if (client) {
         client.emit('portfolio_update', portfolioUpdate);
       } else {
-        this.server.to(`portfolio_${portfolioId}`).emit('portfolio_update', portfolioUpdate);
+        this.server
+          .to(`portfolio_${portfolioId}`)
+          .emit('portfolio_update', portfolioUpdate);
       }
 
       console.log(`📈 Sent portfolio update for portfolio ${portfolioId}`);
     } catch (error) {
-      console.error(`Error sending portfolio update for ${portfolioId}:`, error);
+      console.error(
+        `Error sending portfolio update for ${portfolioId}:`,
+        error,
+      );
       const target = client || this.server.to(`portfolio_${portfolioId}`);
       target.emit('portfolio_error', {
         portfolioId,
@@ -257,7 +268,9 @@ export class StockWebSocketGateway
       }
 
       if (subscribedPortfolioIds.size > 0) {
-        console.log(`📊 Broadcasted portfolio updates for ${subscribedPortfolioIds.size} portfolios`);
+        console.log(
+          `📊 Broadcasted portfolio updates for ${subscribedPortfolioIds.size} portfolios`,
+        );
       }
     } catch (error) {
       console.error('Error broadcasting portfolio updates:', error);

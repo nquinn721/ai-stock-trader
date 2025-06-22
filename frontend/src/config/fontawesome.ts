@@ -7,9 +7,9 @@ import {
   faBackward,
   faBalanceScale,
   faBell,
-  faBroadcastTower,
   // Portfolio and trading specific
   faBriefcase,
+  faBroadcastTower,
   faCalculator,
   faCalendar,
   faCaretDown,
