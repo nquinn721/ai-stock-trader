@@ -1,5 +1,5 @@
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React, { useEffect, useRef, useState } from "react";
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import "./StockAutocomplete.css";
 
 interface Stock {
@@ -163,7 +163,8 @@ const StockAutocomplete: React.FC<StockAutocompleteProps> = ({
           className="autocomplete-input"
           autoComplete="off"
           spellCheck="false"
-        />        {isOpen && (
+        />{" "}
+        {isOpen && (
           <div className="autocomplete-icon">
             <FontAwesomeIcon icon="chevron-up" />
           </div>

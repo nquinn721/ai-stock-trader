@@ -202,11 +202,10 @@ export class PaperTradingService {
 
     const currentValue = portfolio.totalValue;
     const totalGain = portfolio.totalPnL;
-    const totalGainPercent = portfolio.totalReturn;
-
-    // Get latest day change (simplified - would need more complex calculation for real day changes)
-    const dayGain = 0; // TODO: Calculate based on today's price movements
-    const dayGainPercent = 0;
+    const totalGainPercent = portfolio.totalReturn; // Calculate today's gain based on price movements
+    const dayGain = await this.calculateDayGain(portfolio);
+    const dayGainPercent =
+      portfolio.totalValue > 0 ? (dayGain / portfolio.totalValue) * 100 : 0;
 
     // Calculate portfolio metrics from performance history
     const returns = performanceHistory.slice(1).map((point, index) => {
@@ -310,13 +309,17 @@ export class PaperTradingService {
             delete currentPositions[trade.symbol];
           }
         }
-      }
-
-      // Calculate current invested value (using current prices if available)
+      } // Calculate current invested value using current market prices
       let investedValue = 0;
       for (const [symbol, position] of Object.entries(currentPositions)) {
-        // For simplicity, use average price. In production, you'd fetch current prices
-        investedValue += position.quantity * position.avgPrice;
+        // Fetch current stock price from database
+        const stock = await this.stockRepository.findOne({
+          where: { symbol: symbol.toUpperCase() },
+        });
+        const currentPrice = stock
+          ? Number(stock.currentPrice)
+          : position.avgPrice;
+        investedValue += position.quantity * currentPrice;
       }
 
       const totalValue = currentCash + investedValue;
@@ -419,5 +422,32 @@ export class PaperTradingService {
     );
     const riskFreeRate = 0.02 / 252; // 2% annual risk-free rate, daily
     return std === 0 ? 0 : ((mean - riskFreeRate) / std) * Math.sqrt(252); // Annualized
+  }
+
+  /**
+   * Calculate today's portfolio gain based on stock price movements
+   */
+  private async calculateDayGain(portfolio: Portfolio): Promise<number> {
+    if (!portfolio.positions || portfolio.positions.length === 0) {
+      return 0;
+    }
+
+    let dayGain = 0;
+
+    for (const position of portfolio.positions) {
+      const stock = await this.stockRepository.findOne({
+        where: { symbol: position.symbol },
+      });
+
+      if (stock && stock.previousClose && stock.currentPrice) {
+        const currentPrice = Number(stock.currentPrice);
+        const previousClose = Number(stock.previousClose);
+        const priceChange = currentPrice - previousClose;
+        const positionDayGain = priceChange * position.quantity;
+        dayGain += positionDayGain;
+      }
+    }
+
+    return dayGain;
   }
 }

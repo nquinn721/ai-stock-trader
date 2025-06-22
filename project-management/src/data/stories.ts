@@ -128,7 +128,8 @@ export const stories: Story[] = [
     dependencies: [],
     createdDate: "2025-06-08",
     completedDate: "2025-06-21",
-  },  {
+  },
+  {
     id: "S9",
     title: "Create API health check endpoint",
     description:
@@ -148,7 +149,8 @@ export const stories: Story[] = [
     id: "S10",
     title: "Write unit tests for React components",
     description:
-      "Create comprehensive unit tests for all React components using Jest and React Testing Library. Target 90%+ coverage for Dashboard, QuickTrade, PortfolioChart, and StockCard components.",    status: "DONE",
+      "Create comprehensive unit tests for all React components using Jest and React Testing Library. Target 90%+ coverage for Dashboard, QuickTrade, PortfolioChart, and StockCard components.",
+    status: "DONE",
     priority: "High",
     epic: "E2",
     storyPoints: 5,
@@ -157,7 +159,8 @@ export const stories: Story[] = [
     dependencies: [],
     createdDate: "2025-06-21",
     completedDate: "2025-06-21",
-  },  {
+  },
+  {
     id: "S11",
     title: "Write integration tests for API calls",
     description:
@@ -176,12 +179,14 @@ export const stories: Story[] = [
     id: "S12",
     title: "Implement Playwright E2E tests",
     description:
-      "Create end-to-end tests using Playwright covering user workflows: login, stock browsing, trading, portfolio viewing, and performance charts.",    status: "DONE",
+      "Create end-to-end tests using Playwright covering user workflows: login, stock browsing, trading, portfolio viewing, and performance charts.",
+    status: "DONE",
     priority: "High",
     epic: "E2",
     storyPoints: 5,
     assignee: "Carol",
-    progress: 0,    dependencies: ["S10"],
+    progress: 0,
+    dependencies: ["S10"],
     createdDate: "2025-06-21",
     completedDate: "2025-06-21",
   },
@@ -314,7 +319,7 @@ export const stories: Story[] = [
     progress: 0,
     dependencies: ["S19"],
     createdDate: "2025-06-21",
-  },  // PORTFOLIO LIVE DATA VERIFICATION
+  }, // PORTFOLIO LIVE DATA VERIFICATION
   {
     id: "S22",
     title: "Audit Portfolio Data Sources",
