@@ -44,26 +44,6 @@ A comprehensive stock trading application with real-time data, sentiment analysi
 - Python 3.8+
 - Git
 
-### Backend Setup
-
-```bash
-cd backend
-npm install
-```
-
-Create `.env` file:
-
-```env
-DATABASE_HOST=localhost
-DATABASE_PORT=3306
-DATABASE_USERNAME=admin
-DATABASE_PASSWORD=password
-DATABASE_NAME=stock_trading_db
-JWT_SECRET=your-jwt-secret-key
-API_KEY_NEWS=your-news-api-key
-PORT=3000
-```
-
 ### Frontend Setup
 
 ```bash

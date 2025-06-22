@@ -32,12 +32,9 @@ export class RootStore {
 
     // Listen for trade confirmations
     this.webSocketStore.addListener("tradeConfirmed", (trade: any) => {
-      this.tradeStore.addTrade(trade);
-      // Refresh portfolio after trade
+      this.tradeStore.addTrade(trade); // Refresh portfolio after trade
       if (this.portfolioStore.portfolio) {
-        this.portfolioStore.fetchPortfolio(
-          this.portfolioStore.portfolio.userId
-        );
+        this.portfolioStore.fetchPortfolio(this.portfolioStore.portfolio.id);
       }
     });
   }

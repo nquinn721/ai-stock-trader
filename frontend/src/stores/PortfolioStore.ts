@@ -14,22 +14,27 @@ export interface Position {
 
 export interface Portfolio {
   id: number;
-  userId: number;
+  name: string;
+  initialCash: number;
+  currentCash: number;
   totalValue: number;
-  totalCash: number;
-  totalEquity: number;
-  dayChange: number;
-  dayChangePercent: number;
+  totalPnL: number;
   totalReturn: number;
-  totalReturnPercent: number;
+  isActive: boolean;
   positions: Position[];
+  trades: any[];
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface PerformanceData {
   date: string;
-  value: number;
-  return: number;
-  returnPercent: number;
+  timestamp: number;
+  totalValue: number;
+  cash: number;
+  investedValue: number;
+  dayChange: number;
+  dayChangePercent: number;
 }
 
 export class PortfolioStore {
@@ -50,11 +55,11 @@ export class PortfolioStore {
     });
     try {
       const response = (await this.apiStore.get(
-        `/api/portfolio/${userId}`
-      )) as { data: Portfolio };
+        `/paper-trading/portfolios/${userId}`
+      )) as Portfolio;
       runInAction(() => {
-        this.portfolio = response.data;
-        this.positions = response.data.positions || [];
+        this.portfolio = response;
+        this.positions = response.positions || [];
         this.isLoading = false;
       });
     } catch (error: any) {
@@ -64,26 +69,9 @@ export class PortfolioStore {
       });
     }
   }
-
   async fetchPositions(userId: number) {
-    runInAction(() => {
-      this.isLoading = true;
-      this.error = null;
-    });
-    try {
-      const response = (await this.apiStore.get(
-        `/api/portfolio/${userId}/positions`
-      )) as { data: Position[] };
-      runInAction(() => {
-        this.positions = response.data;
-        this.isLoading = false;
-      });
-    } catch (error: any) {
-      runInAction(() => {
-        this.error = error.message || "Failed to fetch positions";
-        this.isLoading = false;
-      });
-    }
+    // Positions are included in the portfolio data, so just fetch the portfolio
+    await this.fetchPortfolio(userId);
   }
 
   async fetchPerformanceHistory(userId: number, period: string = "1M") {
@@ -93,10 +81,27 @@ export class PortfolioStore {
     });
     try {
       const response = (await this.apiStore.get(
-        `/api/portfolio/${userId}/performance?period=${period}`
-      )) as { data: PerformanceData[] };
+        `/paper-trading/portfolios/${userId}/performance?period=${period}`
+      )) as any;
       runInAction(() => {
-        this.performanceHistory = response.data;
+        // Transform the performance data to ensure numbers are numbers
+        this.performanceHistory = (response.performance || []).map(
+          (point: any) => ({
+            date: point.date,
+            timestamp: point.timestamp,
+            totalValue:
+              typeof point.totalValue === "string"
+                ? parseFloat(point.totalValue)
+                : point.totalValue,
+            cash:
+              typeof point.cash === "string"
+                ? parseFloat(point.cash)
+                : point.cash,
+            investedValue: point.investedValue,
+            dayChange: point.dayChange,
+            dayChangePercent: point.dayChangePercent,
+          })
+        );
         this.isLoading = false;
       });
     } catch (error: any) {
@@ -119,16 +124,13 @@ export class PortfolioStore {
           (position.unrealizedPnl /
             (position.quantity * position.averagePrice)) *
           100;
-      }
-
-      // Update portfolio totals
+      } // Update portfolio totals
       if (this.portfolio) {
-        this.portfolio.totalEquity = this.positions.reduce(
+        const totalEquity = this.positions.reduce(
           (sum, pos) => sum + pos.marketValue,
           0
         );
-        this.portfolio.totalValue =
-          this.portfolio.totalCash + this.portfolio.totalEquity;
+        this.portfolio.totalValue = this.portfolio.currentCash + totalEquity;
       }
     });
   }
@@ -136,21 +138,28 @@ export class PortfolioStore {
   get totalPortfolioValue() {
     return this.portfolio?.totalValue || 0;
   }
-
   get totalCash() {
-    return this.portfolio?.totalCash || 0;
+    return this.portfolio?.currentCash || 0;
   }
 
   get totalEquity() {
-    return this.portfolio?.totalEquity || 0;
+    return this.positions.reduce((sum, pos) => sum + pos.marketValue, 0);
   }
 
   get dayChange() {
-    return this.portfolio?.dayChange || 0;
+    // Calculate day change based on positions
+    return this.positions.reduce((sum, pos) => {
+      const dayChange = (pos.currentPrice - pos.averagePrice) * pos.quantity;
+      return sum + dayChange;
+    }, 0);
   }
 
   get dayChangePercent() {
-    return this.portfolio?.dayChangePercent || 0;
+    const totalInvested = this.positions.reduce(
+      (sum, pos) => sum + pos.averagePrice * pos.quantity,
+      0
+    );
+    return totalInvested > 0 ? (this.dayChange / totalInvested) * 100 : 0;
   }
 
   get totalReturn() {
@@ -158,7 +167,8 @@ export class PortfolioStore {
   }
 
   get totalReturnPercent() {
-    return this.portfolio?.totalReturnPercent || 0;
+    const initialValue = this.portfolio?.initialCash || 0;
+    return initialValue > 0 ? (this.totalReturn / initialValue) * 100 : 0;
   }
 
   get topPositions() {

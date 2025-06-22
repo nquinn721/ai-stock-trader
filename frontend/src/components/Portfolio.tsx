@@ -1,8 +1,10 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
+import { useSocket } from "../context/SocketContext";
 import { CreateTradeRequest, Portfolio } from "../types";
 import "./Portfolio.css";
 import PortfolioChart from "./PortfolioChart";
+import StockAutocomplete from "./StockAutocomplete";
 
 interface PortfolioProps {
   portfolioId: number;
@@ -13,6 +15,7 @@ const PortfolioComponent: React.FC<PortfolioProps> = ({
   portfolioId,
   onBack,
 }) => {
+  const { stocks } = useSocket();
   const [portfolio, setPortfolio] = useState<Portfolio | null>(null);
   const [loading, setLoading] = useState(true);
   const [tradeForm, setTradeForm] = useState({
@@ -244,20 +247,16 @@ const PortfolioComponent: React.FC<PortfolioProps> = ({
               >
                 ×
               </button>
-            </div>
-            <div className="trade-form">
+            </div>            <div className="trade-form">
               <div className="form-group">
                 <label>Symbol:</label>
-                <input
-                  type="text"
+                <StockAutocomplete
+                  stocks={stocks.map(stock => ({ symbol: stock.symbol, name: stock.name }))}
                   value={tradeForm.symbol}
-                  onChange={(e) =>
-                    setTradeForm({
-                      ...tradeForm,
-                      symbol: e.target.value.toUpperCase(),
-                    })
-                  }
-                  placeholder="e.g., AAPL"
+                  onChange={(symbol) => setTradeForm({ ...tradeForm, symbol })}
+                  placeholder="Search stock symbol or name..."
+                  disabled={executing}
+                  className="symbol-autocomplete"
                 />
               </div>
               <div className="form-group">

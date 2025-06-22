@@ -110,9 +110,8 @@ export class NewsService {
     }
 
     const alphaVantageUrl = `https://www.alphavantage.co/query?function=NEWS_SENTIMENT&tickers=${symbol}&limit=8&apikey=${apiKey}`;
-
     try {
-      const response = await axios.get(alphaVantageUrl, { timeout: 8000 });
+      const response = await axios.get(alphaVantageUrl, { timeout: 5000 });
 
       if (
         response.data &&
@@ -151,9 +150,8 @@ export class NewsService {
     }
 
     const finnhubUrl = `https://finnhub.io/api/v1/company-news?symbol=${symbol}&from=${this.getDateDaysAgo(7)}&to=${this.getDateDaysAgo(0)}&token=${apiKey}`;
-
     try {
-      const response = await axios.get(finnhubUrl, { timeout: 8000 });
+      const response = await axios.get(finnhubUrl, { timeout: 5000 });
 
       if (
         response.data &&
@@ -259,17 +257,19 @@ export class NewsService {
             totalConfidence += sentiment.confidence;
             articlesAnalyzed++;
           }
-        }
-
-        // If no news or API failed, generate realistic mock sentiment data
+        } // If no news or API failed, return neutral/empty sentiment data
         if (articlesAnalyzed === 0) {
           console.log(
-            `🔄 Using mock sentiment data for ${symbol} (NewsAPI not available)`,
+            `� No news data available for ${symbol} - using neutral sentiment`,
           );
-          const mockSentiment = this.generateMockSentiment(symbol);
           sentimentMap.set(symbol, {
-            sentiment: mockSentiment,
-            recentNews: this.generateMockNews(symbol),
+            sentiment: {
+              score: 0,
+              label: 'neutral',
+              confidence: 0,
+              articlesAnalyzed: 0,
+            },
+            recentNews: [],
           });
           continue;
         }
@@ -294,11 +294,15 @@ export class NewsService {
         });
       } catch (error) {
         console.error(`Error analyzing sentiment for ${symbol}:`, error);
-        // Generate mock sentiment on error
-        const mockSentiment = this.generateMockSentiment(symbol);
+        // Return neutral sentiment on error
         sentimentMap.set(symbol, {
-          sentiment: mockSentiment,
-          recentNews: this.generateMockNews(symbol),
+          sentiment: {
+            score: 0,
+            label: 'neutral',
+            confidence: 0,
+            articlesAnalyzed: 0,
+          },
+          recentNews: [],
         });
       }
     }

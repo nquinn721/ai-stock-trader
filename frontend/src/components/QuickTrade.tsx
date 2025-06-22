@@ -1,7 +1,10 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import axios from "axios";
 import { observer } from "mobx-react-lite";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useSocket } from "../context/SocketContext";
-import { useTradeStore, usePortfolioStore } from "../stores/StoreContext";
+import { usePortfolioStore, useTradeStore } from "../stores/StoreContext";
+import EmptyState from "./EmptyState";
+import StockAutocomplete from "./StockAutocomplete";
 import "./QuickTrade.css";
 
 interface Notification {
@@ -11,11 +14,21 @@ interface Notification {
   duration?: number;
 }
 
+interface CreateTradeRequest {
+  portfolioId: number;
+  symbol: string;
+  type: "buy" | "sell";
+  quantity: number;
+  price: number;
+}
+
+const MAX_RETRIES = 3;
+
 const QuickTrade: React.FC = observer(() => {
   const { stocks } = useSocket();
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const tradeStore = useTradeStore();
   const portfolioStore = usePortfolioStore();
-  
   const [tradeForm, setTradeForm] = useState({
     symbol: "",
     type: "buy" as "buy" | "sell",
@@ -23,6 +36,11 @@ const QuickTrade: React.FC = observer(() => {
   });
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [showConfirmation, setShowConfirmation] = useState(false);
+  const [executing, setExecuting] = useState(false);
+  const [portfolioLoading, setPortfolioLoading] = useState(false);
+  const [portfolioId, setPortfolioId] = useState<number | null>(null);
+  const [retryCount, setRetryCount] = useState(0);
+  const [portfolio, setPortfolio] = useState<any>(null);
 
   useEffect(() => {
     // Fetch portfolio data on component mount
@@ -60,6 +78,7 @@ const QuickTrade: React.FC = observer(() => {
     []
   );
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const fetchPortfolioId = async () => {
     try {
       setPortfolioLoading(true);
@@ -140,6 +159,7 @@ const QuickTrade: React.FC = observer(() => {
         symbol: tradeForm.symbol.toUpperCase(),
         type: tradeForm.type,
         quantity: parseInt(tradeForm.quantity),
+        price: currentStock?.currentPrice || 0,
       }; // Calculate estimated cost/proceeds
       const estimatedPrice = currentStock?.currentPrice || 0;
       const estimatedTotal = estimatedPrice * parseInt(tradeForm.quantity);
@@ -242,10 +262,12 @@ const QuickTrade: React.FC = observer(() => {
   if (portfolioLoading) {
     return (
       <div className="quick-trade-container">
-        <div className="loading-state">
-          <div className="loading-spinner"></div>
-          <p>Loading portfolio...</p>
-        </div>
+        <EmptyState
+          title="Loading Portfolio"
+          description="Setting up your trading portfolio..."
+          type="loading"
+          size="medium"
+        />
       </div>
     );
   }
@@ -294,25 +316,16 @@ const QuickTrade: React.FC = observer(() => {
             </span>
           </div>
         </div>
-      )}
-
-      <div className="quick-trade-form">
+      )}      <div className="quick-trade-form">
         <div className="trade-input-group">
-          <select
+          <StockAutocomplete
+            stocks={stocks.map(stock => ({ symbol: stock.symbol, name: stock.name }))}
             value={tradeForm.symbol}
-            onChange={(e) =>
-              setTradeForm({ ...tradeForm, symbol: e.target.value })
-            }
-            className="symbol-select"
+            onChange={(symbol) => setTradeForm({ ...tradeForm, symbol })}
+            placeholder="Search stock symbol or name..."
             disabled={executing}
-          >
-            <option value="">Select Symbol</option>
-            {stocks.map((stock) => (
-              <option key={stock.symbol} value={stock.symbol}>
-                {stock.symbol} - {stock.name}
-              </option>
-            ))}
-          </select>
+            className="symbol-autocomplete"
+          />
           <input
             type="number"
             placeholder="Qty"
@@ -442,6 +455,6 @@ const QuickTrade: React.FC = observer(() => {
       )}
     </div>
   );
-};
+});
 
 export default QuickTrade;

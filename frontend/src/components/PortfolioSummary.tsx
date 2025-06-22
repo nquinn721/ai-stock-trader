@@ -1,6 +1,7 @@
 import { observer } from "mobx-react-lite";
 import React, { useEffect } from "react";
 import { usePortfolioStore } from "../stores/StoreContext";
+import EmptyState from "./EmptyState";
 import "./PortfolioSummary.css";
 
 const PortfolioSummary: React.FC = observer(() => {
@@ -34,57 +35,44 @@ const PortfolioSummary: React.FC = observer(() => {
     const numValue = Number(percent) || 0;
     return `${numValue >= 0 ? "+" : ""}${numValue.toFixed(2)}%`;
   };
-
   if (portfolioStore.isLoading) {
     return (
-      <div className="portfolio-summary-loading">
-        <div className="loading-spinner"></div>
-        <p>Loading portfolio...</p>
-      </div>
+      <EmptyState
+        icon="⏳"
+        title="Loading Portfolio"
+        description="Fetching your portfolio data..."
+        type="loading"
+      />
     );
   }
-
   if (portfolioStore.error) {
     return (
-      <div className="portfolio-summary-error">
-        <p>{portfolioStore.error}</p>
-        <button
-          onClick={() => portfolioStore.fetchPortfolio(1)}
-          style={{
-            marginTop: "10px",
-            padding: "8px 16px",
-            backgroundColor: "#6366f1",
-            color: "white",
-            border: "none",
-            borderRadius: "4px",
-            cursor: "pointer",
-          }}
-        >
-          Retry
-        </button>
-      </div>
+      <EmptyState
+        title="Portfolio Error"
+        description={portfolioStore.error}
+        type="error"
+        size="medium"
+        action={{
+          label: "Retry",
+          onClick: () => portfolioStore.fetchPortfolio(1),
+          variant: "primary",
+        }}
+      />
     );
   }
-
   if (!portfolioStore.portfolio) {
     return (
-      <div className="portfolio-summary-error">
-        <p>No portfolio data available</p>
-        <button
-          onClick={() => portfolioStore.fetchPortfolio(1)}
-          style={{
-            marginTop: "10px",
-            padding: "8px 16px",
-            backgroundColor: "#6366f1",
-            color: "white",
-            border: "none",
-            borderRadius: "4px",
-            cursor: "pointer",
-          }}
-        >
-          Load Portfolio
-        </button>
-      </div>
+      <EmptyState
+        title="No Portfolio Data"
+        description="Portfolio information is not available at the moment."
+        type="portfolio"
+        size="medium"
+        action={{
+          label: "Load Portfolio",
+          onClick: () => portfolioStore.fetchPortfolio(1),
+          variant: "primary",
+        }}
+      />
     );
   }
 
@@ -99,11 +87,11 @@ const PortfolioSummary: React.FC = observer(() => {
           <span className="stat-value">
             {formatCurrency(portfolio.totalValue)}
           </span>
-        </div>
+        </div>{" "}
         <div className="summary-stat">
           <span className="stat-label">Cash</span>
           <span className="stat-value">
-            {formatCurrency(portfolio.totalCash)}
+            {formatCurrency(portfolio.currentCash)}
           </span>
         </div>
         <div className="summary-stat">
@@ -113,7 +101,7 @@ const PortfolioSummary: React.FC = observer(() => {
               portfolioStore.isPositive ? "positive" : "negative"
             }`}
           >
-            {formatCurrency(portfolio.dayChange)}
+            {formatCurrency(portfolioStore.dayChange)}
           </span>
         </div>
         <div className="summary-stat">
@@ -123,7 +111,7 @@ const PortfolioSummary: React.FC = observer(() => {
               portfolioStore.totalReturn >= 0 ? "positive" : "negative"
             }`}
           >
-            {formatPercent(portfolio.totalReturnPercent)}
+            {formatPercent(portfolioStore.totalReturnPercent)}
           </span>
         </div>
       </div>

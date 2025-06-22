@@ -38,6 +38,7 @@ const PriceChart: React.FC<PriceChartProps> = ({
   const [marketSession, setMarketSession] = useState<MarketSession>({
     isOpen: true,
   });
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const wsRef = useRef<WebSocket | null>(null);
@@ -58,15 +59,19 @@ const PriceChart: React.FC<PriceChartProps> = ({
     console.log(`📊 No real price data available for ${symbol}`);
     setPriceHistory([]);
     setIsLoading(false);
-
     return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      const currentInterval = intervalRef.current;
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      const currentWs = wsRef.current;
+      if (currentInterval) {
+        clearInterval(currentInterval);
       }
-      if (wsRef.current) {
-        wsRef.current.close();
+      if (currentWs) {
+        currentWs.close();
       }
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentPrice, symbol, showRealTime, interval, period, checkMarketHours]);
 
   const renderChart = () => {
@@ -87,25 +92,27 @@ const PriceChart: React.FC<PriceChartProps> = ({
           <small>Real-time data feed required</small>
         </div>
       );
-    }const prices = priceHistory.map((p) => p.price);
+    }
+    const prices = priceHistory.map((p) => p.price);
     const minPrice = Math.min(...prices);
     const maxPrice = Math.max(...prices);
     const priceRange = Math.max(maxPrice - minPrice, maxPrice * 0.01); // Ensure minimum 1% range
-    
+
     // Debug logging
     console.log(`${symbol} Chart Debug:`, {
       priceCount: prices.length,
       minPrice: minPrice.toFixed(2),
       maxPrice: maxPrice.toFixed(2),
       priceRange: priceRange.toFixed(2),
-      svgHeight: height <= 160 ? Math.max(height - 25, 115) : Math.max(height - 70, 100),
-      samplePrices: prices.slice(0, 3).map(p => p.toFixed(2))
+      svgHeight:
+        height <= 160 ? Math.max(height - 25, 115) : Math.max(height - 70, 100),
+      samplePrices: prices.slice(0, 3).map((p) => p.toFixed(2)),
     });
-      const lastPrice = prices[prices.length - 1];
+    const lastPrice = prices[prices.length - 1];
     const previousPrice = prices[prices.length - 2] || lastPrice;
     const priceChange = lastPrice - previousPrice;
-    const isRising = priceChange >= 0;// Create SVG path
-    const width = 400;    // Adjust SVG height calculation based on container height
+    const isRising = priceChange >= 0; // Create SVG path
+    const width = 400; // Adjust SVG height calculation based on container height
     let svgHeight: number;
     if (height <= 160) {
       // For small charts (stock cards), use more of the available space
@@ -129,8 +136,8 @@ const PriceChart: React.FC<PriceChartProps> = ({
         return `${x},${y}`;
       })
       .join(" ");
-
     const chartColor = isRising ? "#10b981" : "#ef4444";
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const fillColor = isRising
       ? "rgba(16, 185, 129, 0.1)"
       : "rgba(239, 68, 68, 0.1)";
@@ -223,7 +230,8 @@ const PriceChart: React.FC<PriceChartProps> = ({
                 )}
               </g>
             );
-          })}          {/* Current price line */}
+          })}{" "}
+          {/* Current price line */}
           {priceHistory.length > 0 && (
             <line
               x1={padding}
@@ -275,7 +283,10 @@ const PriceChart: React.FC<PriceChartProps> = ({
   };
 
   return (
-    <div className={`price-chart ${height <= 160 ? 'price-chart-small' : ''}`} style={{ height }}>
+    <div
+      className={`price-chart ${height <= 160 ? "price-chart-small" : ""}`}
+      style={{ height }}
+    >
       <div className="chart-header">
         <div className="chart-title">
           <span className="chart-symbol">{symbol}</span>

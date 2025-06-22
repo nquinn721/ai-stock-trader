@@ -6,6 +6,9 @@ module.exports = {
   transform: {
     '^.+\\.(t|j)s$': 'ts-jest',
   },
+  transformIgnorePatterns: [
+    'node_modules/(?!(@xenova/transformers)/)',
+  ],
   collectCoverageFrom: [
     '**/*.(t|j)s',
     '!**/*.spec.ts',
@@ -14,6 +17,8 @@ module.exports = {
     '!**/dist/**',
   ],
   coverageDirectory: '../coverage',
-  testEnvironment: 'node',
-  setupFilesAfterEnv: ['<rootDir>/../test/setup.ts'],
+  testEnvironment: 'node',  setupFilesAfterEnv: ['<rootDir>/../test/setup.ts'],
+  moduleNameMapper: {
+    '^@xenova/transformers$': '<rootDir>/../__mocks__/@xenova/transformers.js',
+  },
 };

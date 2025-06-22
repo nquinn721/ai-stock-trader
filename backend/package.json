@@ -71,28 +71,10 @@
     "source-map-support": "^0.5.21",
     "supertest": "^7.1.1",
     "ts-jest": "^29.4.0",
-    "ts-loader": "^9.5.2",
-    "ts-node": "^10.9.2",
+    "ts-loader": "^9.5.2",    "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.20.0"
-  },
-  "jest": {
-    "moduleFileExtensions": [
-      "js",
-      "json",
-      "ts"
-    ],
-    "rootDir": "src",
-    "testRegex": ".*\\.spec\\.ts$",
-    "transform": {
-      "^.+\\.(t|j)s$": "ts-jest"
-    },
-    "collectCoverageFrom": [
-      "**/*.(t|j)s"
-    ],
-    "coverageDirectory": "../coverage",
-    "testEnvironment": "node"
   },
   "main": "index.js",
   "directories": {
