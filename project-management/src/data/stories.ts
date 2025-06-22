@@ -80,7 +80,8 @@ export const stories: Story[] = [
     dependencies: [],
     createdDate: "2025-06-05",
     completedDate: "2025-06-06",
-  },  {
+  },
+  {
     id: "S6",
     title: "Create empty state component",
     description:
@@ -95,7 +96,8 @@ export const stories: Story[] = [
     dependencies: [],
     createdDate: "2025-06-06",
     completedDate: "2025-06-21",
-  },  {
+  },
+  {
     id: "S7",
     title: "Add stock symbol search autocomplete",
     description:
@@ -116,7 +118,7 @@ export const stories: Story[] = [
     title: "Fix portfolio percentage calculations",
     description:
       "Correct the percentage calculation logic for portfolio gains/losses display.",
-    status: "TODO",
+    status: "DONE",
     priority: "High",
     epic: "E2",
     storyPoints: 2,
@@ -125,13 +127,13 @@ export const stories: Story[] = [
     progress: 0,
     dependencies: [],
     createdDate: "2025-06-08",
-  },
-  {
+    completedDate: "2025-06-21",
+  },  {
     id: "S9",
     title: "Create API health check endpoint",
     description:
       "Add a simple /health endpoint to monitor API availability and response time.",
-    status: "TODO",
+    status: "DONE",
     priority: "Medium",
     epic: "E3",
     storyPoints: 1,
@@ -139,6 +141,7 @@ export const stories: Story[] = [
     progress: 0,
     dependencies: [],
     createdDate: "2025-06-10",
+    completedDate: "2025-06-21",
   },
   // CLIENT TESTING STORIES
   {

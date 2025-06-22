@@ -188,19 +188,19 @@
     padding: 14px 40px 14px 16px;
     font-size: 16px; /* Prevent zoom on iOS */
   }
-  
+
   .autocomplete-dropdown {
     max-height: 200px;
   }
-  
+
   .autocomplete-option {
     padding: 12px 14px;
   }
-  
+
   .option-symbol {
     font-size: 15px;
   }
-  
+
   .option-name {
     font-size: 12px;
   }
@@ -212,12 +212,12 @@
     border-color: #fff;
     background: rgba(0, 0, 0, 0.8);
   }
-  
+
   .autocomplete-dropdown {
     border-color: #fff;
     background: rgba(0, 0, 0, 0.9);
   }
-  
+
   .option-symbol {
     color: #fff;
     background: none;
@@ -230,11 +230,11 @@
   .autocomplete-dropdown {
     animation: none;
   }
-  
+
   .autocomplete-option {
     transition: none;
   }
-  
+
   .autocomplete-input {
     transition: none;
   }

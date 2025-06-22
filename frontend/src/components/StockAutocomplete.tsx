@@ -1,5 +1,5 @@
-import React, { useState, useRef, useEffect } from 'react';
-import './StockAutocomplete.css';
+import React, { useEffect, useRef, useState } from "react";
+import "./StockAutocomplete.css";
 
 interface Stock {
   symbol: string;
@@ -75,7 +75,7 @@ const StockAutocomplete: React.FC<StockAutocompleteProps> = ({
   // Handle keyboard navigation
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (!isOpen) {
-      if (e.key === 'Enter' || e.key === 'ArrowDown') {
+      if (e.key === "Enter" || e.key === "ArrowDown") {
         setIsOpen(true);
         return;
       }
@@ -83,19 +83,19 @@ const StockAutocomplete: React.FC<StockAutocompleteProps> = ({
     }
 
     switch (e.key) {
-      case 'ArrowDown':
+      case "ArrowDown":
         e.preventDefault();
         setHighlightedIndex((prev) =>
           prev < filteredStocks.length - 1 ? prev + 1 : 0
         );
         break;
-      case 'ArrowUp':
+      case "ArrowUp":
         e.preventDefault();
         setHighlightedIndex((prev) =>
           prev > 0 ? prev - 1 : filteredStocks.length - 1
         );
         break;
-      case 'Enter':
+      case "Enter":
         e.preventDefault();
         if (highlightedIndex >= 0 && filteredStocks[highlightedIndex]) {
           handleStockSelect(filteredStocks[highlightedIndex]);
@@ -103,7 +103,7 @@ const StockAutocomplete: React.FC<StockAutocompleteProps> = ({
           handleStockSelect(filteredStocks[0]);
         }
         break;
-      case 'Escape':
+      case "Escape":
         setIsOpen(false);
         setHighlightedIndex(-1);
         inputRef.current?.blur();
@@ -114,11 +114,13 @@ const StockAutocomplete: React.FC<StockAutocompleteProps> = ({
   // Scroll highlighted item into view
   useEffect(() => {
     if (highlightedIndex >= 0 && dropdownRef.current) {
-      const highlighted = dropdownRef.current.children[highlightedIndex] as HTMLElement;
+      const highlighted = dropdownRef.current.children[
+        highlightedIndex
+      ] as HTMLElement;
       if (highlighted) {
         highlighted.scrollIntoView({
-          block: 'nearest',
-          behavior: 'smooth',
+          block: "nearest",
+          behavior: "smooth",
         });
       }
     }
@@ -138,9 +140,9 @@ const StockAutocomplete: React.FC<StockAutocompleteProps> = ({
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
 
@@ -182,7 +184,7 @@ const StockAutocomplete: React.FC<StockAutocompleteProps> = ({
                 <div
                   key={stock.symbol}
                   className={`autocomplete-option ${
-                    index === highlightedIndex ? 'highlighted' : ''
+                    index === highlightedIndex ? "highlighted" : ""
                   }`}
                   onClick={() => handleStockSelect(stock)}
                   onMouseEnter={() => setHighlightedIndex(index)}
@@ -196,7 +198,8 @@ const StockAutocomplete: React.FC<StockAutocompleteProps> = ({
             <div className="autocomplete-no-results">
               <div className="no-results-text">No stocks found</div>
               <div className="no-results-hint">
-                Try searching for: AAPL, GOOGL, MSFT, AMZN, TSLA, NVDA, META, NFLX
+                Try searching for: AAPL, GOOGL, MSFT, AMZN, TSLA, NVDA, META,
+                NFLX
               </div>
             </div>
           )}

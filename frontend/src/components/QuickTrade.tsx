@@ -4,8 +4,8 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useSocket } from "../context/SocketContext";
 import { usePortfolioStore, useTradeStore } from "../stores/StoreContext";
 import EmptyState from "./EmptyState";
-import StockAutocomplete from "./StockAutocomplete";
 import "./QuickTrade.css";
+import StockAutocomplete from "./StockAutocomplete";
 
 interface Notification {
   id: string;
@@ -297,9 +297,7 @@ const QuickTrade: React.FC = observer(() => {
           ))}
         </div>
       )}
-
       <h2>Quick Trade</h2>
-
       {/* Portfolio Summary */}
       {portfolio && (
         <div className="portfolio-summary">
@@ -316,10 +314,14 @@ const QuickTrade: React.FC = observer(() => {
             </span>
           </div>
         </div>
-      )}      <div className="quick-trade-form">
+      )}{" "}
+      <div className="quick-trade-form">
         <div className="trade-input-group">
           <StockAutocomplete
-            stocks={stocks.map(stock => ({ symbol: stock.symbol, name: stock.name }))}
+            stocks={stocks.map((stock) => ({
+              symbol: stock.symbol,
+              name: stock.name,
+            }))}
             value={tradeForm.symbol}
             onChange={(symbol) => setTradeForm({ ...tradeForm, symbol })}
             placeholder="Search stock symbol or name..."
@@ -405,7 +407,6 @@ const QuickTrade: React.FC = observer(() => {
               }`}
         </button>
       </div>
-
       {/* Confirmation Dialog */}
       {showConfirmation && currentStock && (
         <div className="confirmation-overlay">
