@@ -29,10 +29,25 @@ const QuickTrade: React.FC = observer(() => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const tradeStore = useTradeStore();
   const portfolioStore = usePortfolioStore();
+  const [activeTab, setActiveTab] = useState<'basic' | 'advanced'>('basic');
   const [tradeForm, setTradeForm] = useState({
     symbol: "",
     type: "buy" as "buy" | "sell",
     quantity: "",
+  });
+  const [advancedForm, setAdvancedForm] = useState({
+    symbol: "",
+    orderType: "market" as "market" | "limit" | "stop" | "stop-limit" | "trailing-stop",
+    side: "buy" as "buy" | "sell",
+    quantity: "",
+    limitPrice: "",
+    stopPrice: "",
+    trailAmount: "",
+    timeInForce: "day" as "day" | "gtc" | "ioc" | "fok",
+    riskPercent: "2",
+    stopLossPercent: "",
+    takeProfitPercent: "",
+    bracket: false,
   });
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [showConfirmation, setShowConfirmation] = useState(false);
@@ -271,7 +286,6 @@ const QuickTrade: React.FC = observer(() => {
       </div>
     );
   }
-
   return (
     <div className="quick-trade-container">
       {/* Notifications */}
@@ -297,7 +311,23 @@ const QuickTrade: React.FC = observer(() => {
           ))}
         </div>
       )}
-      <h2>Quick Trade</h2>
+
+      {/* Tab Navigation */}
+      <div className="trade-tabs">
+        <button
+          className={`tab ${activeTab === 'basic' ? 'active' : ''}`}
+          onClick={() => setActiveTab('basic')}
+        >
+          Quick Trade
+        </button>
+        <button
+          className={`tab ${activeTab === 'advanced' ? 'active' : ''}`}
+          onClick={() => setActiveTab('advanced')}
+        >
+          Advanced Trading
+        </button>
+      </div>
+
       {/* Portfolio Summary */}
       {portfolio && (
         <div className="portfolio-summary">
@@ -314,7 +344,12 @@ const QuickTrade: React.FC = observer(() => {
             </span>
           </div>
         </div>
-      )}{" "}
+      )}
+
+      {/* Basic Trading Tab */}
+      {activeTab === 'basic' && (
+        <div className="basic-trading-form">
+          <h2>Quick Trade</h2>
       <div className="quick-trade-form">
         <div className="trade-input-group">
           <StockAutocomplete
@@ -393,9 +428,7 @@ const QuickTrade: React.FC = observer(() => {
           >
             SELL
           </button>
-        </div>
-
-        <button
+        </div>        <button
           className="execute-trade-btn"
           onClick={handleTradeSubmit}
           disabled={executing || !isValidTrade() || !portfolioId}
@@ -403,10 +436,225 @@ const QuickTrade: React.FC = observer(() => {
           {executing
             ? "Executing..."
             : `${tradeForm.type.toUpperCase()} ${tradeForm.quantity || "0"} ${
-                tradeForm.symbol || "Stock"
-              }`}
+                tradeForm.symbol || "Stock"              }`}
         </button>
+        </div>
       </div>
+      )}
+
+      {/* Advanced Trading Tab */}
+      {activeTab === 'advanced' && (
+        <div className="advanced-trading-form">
+          <h2>Advanced Trading</h2>
+          
+          {/* Stock Selection */}
+          <div className="advanced-input-section">
+            <label>Stock Symbol</label>
+            <StockAutocomplete
+              stocks={stocks.map((stock) => ({
+                symbol: stock.symbol,
+                name: stock.name,
+              }))}
+              value={advancedForm.symbol}
+              onChange={(symbol) => setAdvancedForm({ ...advancedForm, symbol })}
+              placeholder="Search stock symbol or name..."
+              disabled={executing}
+              className="symbol-autocomplete"
+            />
+          </div>
+
+          {/* Order Type Selection */}
+          <div className="advanced-input-section">
+            <label>Order Type</label>
+            <select
+              value={advancedForm.orderType}
+              onChange={(e) => setAdvancedForm({ ...advancedForm, orderType: e.target.value as any })}
+              className="order-type-select"
+            >
+              <option value="market">Market Order</option>
+              <option value="limit">Limit Order</option>
+              <option value="stop">Stop Order</option>
+              <option value="stop-limit">Stop-Limit Order</option>
+              <option value="trailing-stop">Trailing Stop</option>
+            </select>
+          </div>
+
+          {/* Side and Quantity */}
+          <div className="advanced-input-row">
+            <div className="advanced-input-section">
+              <label>Side</label>
+              <div className="side-buttons">
+                <button
+                  className={`side-btn buy ${advancedForm.side === 'buy' ? 'active' : ''}`}
+                  onClick={() => setAdvancedForm({ ...advancedForm, side: 'buy' })}
+                >
+                  BUY
+                </button>
+                <button
+                  className={`side-btn sell ${advancedForm.side === 'sell' ? 'active' : ''}`}
+                  onClick={() => setAdvancedForm({ ...advancedForm, side: 'sell' })}
+                >
+                  SELL
+                </button>
+              </div>
+            </div>
+            <div className="advanced-input-section">
+              <label>Quantity</label>
+              <input
+                type="number"
+                value={advancedForm.quantity}
+                onChange={(e) => setAdvancedForm({ ...advancedForm, quantity: e.target.value })}
+                placeholder="Shares"
+                min="1"
+                max="10000"
+              />
+            </div>
+          </div>
+
+          {/* Price Fields (conditional based on order type) */}
+          {(advancedForm.orderType === 'limit' || advancedForm.orderType === 'stop-limit') && (
+            <div className="advanced-input-section">
+              <label>Limit Price</label>
+              <input
+                type="number"
+                value={advancedForm.limitPrice}
+                onChange={(e) => setAdvancedForm({ ...advancedForm, limitPrice: e.target.value })}
+                placeholder="$0.00"
+                step="0.01"
+              />
+            </div>
+          )}
+
+          {(advancedForm.orderType === 'stop' || advancedForm.orderType === 'stop-limit') && (
+            <div className="advanced-input-section">
+              <label>Stop Price</label>
+              <input
+                type="number"
+                value={advancedForm.stopPrice}
+                onChange={(e) => setAdvancedForm({ ...advancedForm, stopPrice: e.target.value })}
+                placeholder="$0.00"
+                step="0.01"
+              />
+            </div>
+          )}
+
+          {advancedForm.orderType === 'trailing-stop' && (
+            <div className="advanced-input-section">
+              <label>Trail Amount ($)</label>
+              <input
+                type="number"
+                value={advancedForm.trailAmount}
+                onChange={(e) => setAdvancedForm({ ...advancedForm, trailAmount: e.target.value })}
+                placeholder="$0.00"
+                step="0.01"
+              />
+            </div>
+          )}
+
+          {/* Time in Force */}
+          <div className="advanced-input-section">
+            <label>Time in Force</label>
+            <select
+              value={advancedForm.timeInForce}
+              onChange={(e) => setAdvancedForm({ ...advancedForm, timeInForce: e.target.value as any })}
+            >
+              <option value="day">Day</option>
+              <option value="gtc">Good Till Canceled (GTC)</option>
+              <option value="ioc">Immediate or Cancel (IOC)</option>
+              <option value="fok">Fill or Kill (FOK)</option>
+            </select>
+          </div>
+
+          {/* Risk Management */}
+          <div className="risk-management-section">
+            <h3>Risk Management</h3>
+            
+            <div className="advanced-input-row">
+              <div className="advanced-input-section">
+                <label>Position Size (% of Portfolio)</label>
+                <input
+                  type="number"
+                  value={advancedForm.riskPercent}
+                  onChange={(e) => setAdvancedForm({ ...advancedForm, riskPercent: e.target.value })}
+                  placeholder="2"
+                  min="0.1"
+                  max="100"
+                  step="0.1"
+                />
+              </div>
+              <div className="advanced-input-section">
+                <label>Stop Loss (%)</label>
+                <input
+                  type="number"
+                  value={advancedForm.stopLossPercent}
+                  onChange={(e) => setAdvancedForm({ ...advancedForm, stopLossPercent: e.target.value })}
+                  placeholder="5"
+                  min="0.1"
+                  max="50"
+                  step="0.1"
+                />
+              </div>
+            </div>
+
+            <div className="advanced-input-row">
+              <div className="advanced-input-section">
+                <label>Take Profit (%)</label>
+                <input
+                  type="number"
+                  value={advancedForm.takeProfitPercent}
+                  onChange={(e) => setAdvancedForm({ ...advancedForm, takeProfitPercent: e.target.value })}
+                  placeholder="10"
+                  min="0.1"
+                  max="100"
+                  step="0.1"
+                />
+              </div>
+              <div className="advanced-input-section">
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={advancedForm.bracket}
+                    onChange={(e) => setAdvancedForm({ ...advancedForm, bracket: e.target.checked })}
+                  />
+                  Bracket Order (Stop Loss + Take Profit)
+                </label>
+              </div>
+            </div>
+          </div>
+
+          {/* Position Sizing Calculator */}
+          {advancedForm.symbol && advancedForm.riskPercent && portfolio && (
+            <div className="position-calculator">
+              <h4>Position Size Calculator</h4>
+              <div className="calculator-results">
+                <div className="calc-item">
+                  <span>Recommended Position Size:</span>
+                  <span>{Math.floor((portfolio.totalValue * parseFloat(advancedForm.riskPercent)) / 100 / (stocks.find(s => s.symbol === advancedForm.symbol)?.currentPrice || 1))} shares</span>
+                </div>
+                <div className="calc-item">
+                  <span>Maximum Investment:</span>
+                  <span>{formatCurrency((portfolio.totalValue * parseFloat(advancedForm.riskPercent)) / 100)}</span>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Advanced Execute Button */}
+          <button
+            className="execute-advanced-trade-btn"
+            onClick={() => {
+              addNotification({
+                type: "info",
+                message: "Advanced trading features are in development. Please use Quick Trade for now.",
+              });
+            }}
+            disabled={executing}
+          >
+            {executing ? "Executing..." : "Execute Advanced Trade"}
+          </button>
+        </div>
+      )}
+
       {/* Confirmation Dialog */}
       {showConfirmation && currentStock && (
         <div className="confirmation-overlay">

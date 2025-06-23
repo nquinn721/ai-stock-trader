@@ -348,9 +348,12 @@ class NotificationService {
       if (filters?.type) params.append("type", filters.type);
       if (filters?.priority) params.append("priority", filters.priority);
       if (filters?.status) params.append("status", filters.status);
-      if (filters?.dateFrom) params.append("dateFrom", filters.dateFrom.toISOString());
-      if (filters?.dateTo) params.append("dateTo", filters.dateTo.toISOString());
-      if (filters?.tags) filters.tags.forEach(tag => params.append("tags", tag));
+      if (filters?.dateFrom)
+        params.append("dateFrom", filters.dateFrom.toISOString());
+      if (filters?.dateTo)
+        params.append("dateTo", filters.dateTo.toISOString());
+      if (filters?.tags)
+        filters.tags.forEach((tag) => params.append("tags", tag));
 
       const response = await axios.get(`${this.baseURL}/history`, { params });
       return response.data;
@@ -431,7 +434,7 @@ class NotificationService {
    */
   async exportNotifications(
     userId: string,
-    format: 'json' | 'csv' = 'json',
+    format: "json" | "csv" = "json",
     filters?: {
       type?: NotificationType;
       priority?: string;
@@ -448,18 +451,24 @@ class NotificationService {
       if (filters?.type) params.append("type", filters.type);
       if (filters?.priority) params.append("priority", filters.priority);
       if (filters?.status) params.append("status", filters.status);
-      if (filters?.dateFrom) params.append("dateFrom", filters.dateFrom.toISOString());
-      if (filters?.dateTo) params.append("dateTo", filters.dateTo.toISOString());
+      if (filters?.dateFrom)
+        params.append("dateFrom", filters.dateFrom.toISOString());
+      if (filters?.dateTo)
+        params.append("dateTo", filters.dateTo.toISOString());
 
       const response = await axios.get(`${this.baseURL}/export`, {
         params,
-        responseType: 'blob' // Handle file downloads
+        responseType: "blob", // Handle file downloads
       });
 
       return {
         data: response.data,
-        filename: response.headers['content-disposition']?.split('filename=')[1] || `notifications.${format}`,
-        contentType: response.headers['content-type'] || (format === 'csv' ? 'text/csv' : 'application/json'),
+        filename:
+          response.headers["content-disposition"]?.split("filename=")[1] ||
+          `notifications.${format}`,
+        contentType:
+          response.headers["content-type"] ||
+          (format === "csv" ? "text/csv" : "application/json"),
       };
     } catch (error) {
       console.error("Failed to export notifications:", error);
@@ -476,10 +485,13 @@ class NotificationService {
     tags: string[]
   ): Promise<Notification> {
     try {
-      const response = await axios.post(`${this.baseURL}/${notificationId}/tags`, {
-        userId,
-        tags,
-      });
+      const response = await axios.post(
+        `${this.baseURL}/${notificationId}/tags`,
+        {
+          userId,
+          tags,
+        }
+      );
       return response.data;
     } catch (error) {
       console.error("Failed to add tags to notification:", error);
@@ -493,7 +505,7 @@ class NotificationService {
   downloadFile(data: Blob, filename: string, contentType: string): void {
     const blob = new Blob([data], { type: contentType });
     const url = window.URL.createObjectURL(blob);
-    const link = document.createElement('a');
+    const link = document.createElement("a");
     link.href = url;
     link.download = filename;
     document.body.appendChild(link);
