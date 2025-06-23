@@ -6,6 +6,81 @@ export interface SentimentData {
   lastUpdated?: string;
 }
 
+// Pattern Recognition Interfaces
+export interface CandlestickPattern {
+  type:
+    | "doji"
+    | "hammer"
+    | "hanging_man"
+    | "shooting_star"
+    | "inverted_hammer"
+    | "bullish_engulfing"
+    | "bearish_engulfing"
+    | "morning_star"
+    | "evening_star"
+    | "three_white_soldiers"
+    | "three_black_crows"
+    | "piercing_pattern"
+    | "dark_cloud_cover"
+    | "harami"
+    | "harami_cross"
+    | "none";
+  confidence: number;
+  direction: "bullish" | "bearish" | "neutral";
+  significance: "strong" | "moderate" | "weak";
+  timeframe: string;
+  date: string;
+  description: string;
+  reliability: number; // 0-1 historical reliability score
+}
+
+export interface ChartPattern {
+  type:
+    | "head_and_shoulders"
+    | "inverse_head_and_shoulders"
+    | "double_top"
+    | "double_bottom"
+    | "triple_top"
+    | "triple_bottom"
+    | "ascending_triangle"
+    | "descending_triangle"
+    | "symmetrical_triangle"
+    | "rising_wedge"
+    | "falling_wedge"
+    | "bull_flag"
+    | "bear_flag"
+    | "bull_pennant"
+    | "bear_pennant"
+    | "cup_and_handle"
+    | "rectangle"
+    | "channel_up"
+    | "channel_down"
+    | "none";
+  confidence: number;
+  direction: "bullish" | "bearish" | "neutral";
+  breakoutTarget: number;
+  stopLoss: number;
+  timeframe: string;
+  patternStart: string;
+  patternEnd: string;
+  description: string;
+  volume_confirmation: boolean;
+}
+
+export interface PatternRecognitionAnalysis {
+  candlestickPatterns: CandlestickPattern[];
+  chartPatterns: ChartPattern[];
+  patternSummary: {
+    bullishSignals: number;
+    bearishSignals: number;
+    neutralSignals: number;
+    overallSentiment: "bullish" | "bearish" | "neutral";
+    confidence: number;
+  };
+  aiPatternScore: number; // 0-1 ML confidence in pattern detection
+  recommendedAction: "buy" | "sell" | "hold" | "watch";
+}
+
 export interface DayTradingPattern {
   type:
     | "flag"
@@ -31,13 +106,13 @@ export interface VolumeSpike {
   date: string;
   volume: number;
   ratio: number; // Ratio compared to average volume
-  significance: 'high' | 'medium' | 'low';
+  significance: "high" | "medium" | "low";
 }
 
 export interface SupportResistanceLevel {
   price: number;
-  strength: 'strong' | 'moderate' | 'weak';
-  type: 'support' | 'resistance';
+  strength: "strong" | "moderate" | "weak";
+  type: "support" | "resistance";
   touches: number; // Number of times price has tested this level
   confidence: number; // 0-1 confidence score
   zone: {
@@ -64,7 +139,7 @@ export interface SupportResistanceAnalysis {
   };
   keyZones: {
     price: number;
-    type: 'support' | 'resistance';
+    type: "support" | "resistance";
     strength: number;
   }[];
 }
@@ -82,6 +157,7 @@ export interface BreakoutStrategy {
   confidence: number;
   lastCalculated: string;
   dayTradingPatterns: DayTradingPattern[];
+  patternRecognition?: PatternRecognitionAnalysis;
   technicalIndicators?: {
     sma20?: number;
     sma50?: number;
@@ -102,11 +178,11 @@ export interface BreakoutStrategy {
     stochastic?: {
       k: number;
       d: number;
-      signal: 'overbought' | 'oversold' | 'neutral';
+      signal: "overbought" | "oversold" | "neutral";
     };
     williamsR?: {
       value: number;
-      signal: 'overbought' | 'oversold' | 'neutral';
+      signal: "overbought" | "oversold" | "neutral";
     };
     atr?: {
       value: number;
@@ -116,7 +192,7 @@ export interface BreakoutStrategy {
       historicalVolatility: number;
       averageVolatility: number;
       volatilityRank: number; // 0-100 percentile rank
-      regime: 'low' | 'normal' | 'high';
+      regime: "low" | "normal" | "high";
     };
   };
   volumeAnalysis?: {
@@ -125,8 +201,8 @@ export interface BreakoutStrategy {
     volumeRatio: number;
     vwap: number;
     volumeSpikes: VolumeSpike[];
-    volumeTrend: 'increasing' | 'decreasing' | 'stable';
-    volumeStrength: 'high' | 'medium' | 'low';
+    volumeTrend: "increasing" | "decreasing" | "stable";
+    volumeStrength: "high" | "medium" | "low";
   };
   supportResistanceAnalysis?: SupportResistanceAnalysis;
   modelPredictions: {

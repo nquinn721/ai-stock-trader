@@ -582,4 +582,67 @@ export class StockService {
       return await this.generateBasicSignal(stock);
     }
   }
+
+  /**
+   * Get pattern recognition analysis for a specific stock
+   */
+  async getPatternAnalysis(symbol: string): Promise<any> {
+    try {
+      // Get historical data
+      const historicalData = await this.getStockHistory(symbol, '3mo');
+
+      if (!historicalData || historicalData.length === 0) {
+        return {
+          symbol,
+          error: 'No historical data available for pattern analysis',
+          patternRecognition: null,
+        };
+      }
+
+      // Convert Yahoo Finance data to our format
+      const convertedData =
+        this.breakoutService.convertYahooDataToHistorical(historicalData);
+
+      if (convertedData.length === 0) {
+        return {
+          symbol,
+          error: 'Unable to process historical data',
+          patternRecognition: null,
+        };
+      }
+
+      // Get current price
+      const currentPrice = convertedData[convertedData.length - 1]?.close || 0;
+
+      // Get the full breakout strategy (which includes pattern recognition)
+      const breakoutStrategy =
+        await this.breakoutService.calculateBreakoutStrategy(
+          symbol,
+          currentPrice,
+          convertedData,
+        );
+
+      return {
+        symbol,
+        currentPrice,
+        lastUpdated: new Date().toISOString(),
+        patternRecognition: breakoutStrategy.patternRecognition,
+        // Also include relevant context
+        technicalContext: {
+          rsi: breakoutStrategy.rsi,
+          currentTrend: breakoutStrategy.currentTrend,
+          volatility: breakoutStrategy.volatility,
+          supportLevel: breakoutStrategy.supportLevel,
+          resistanceLevel: breakoutStrategy.resistanceLevel,
+        },
+      };
+    } catch (error) {
+      console.error(`Error getting pattern analysis for ${symbol}:`, error);
+      return {
+        symbol,
+        error: `Failed to analyze patterns: ${error.message}`,
+        patternRecognition: null,
+      };
+    }
+  }
 }

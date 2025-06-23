@@ -60,4 +60,15 @@ export class StockController {
   ): Promise<Stock | null> {
     return this.stockService.updateStockPrice(symbol.toUpperCase());
   }
+
+  @Get(':symbol/patterns')
+  @ApiOperation({ summary: 'Get pattern recognition analysis for a stock' })
+  @ApiResponse({
+    status: 200,
+    description:
+      'Pattern recognition analysis including candlestick and chart patterns',
+  })
+  async getPatternAnalysis(@Param('symbol') symbol: string): Promise<any> {
+    return this.stockService.getPatternAnalysis(symbol.toUpperCase());
+  }
 }

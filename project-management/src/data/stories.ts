@@ -251,7 +251,8 @@ export const stories: Story[] = [
     dependencies: ["S14"],
     createdDate: "2025-06-21",
     completedDate: "2025-06-22",
-  },  {
+  },
+  {
     id: "S17",
     title: "Add Momentum and Volatility Indicators",
     description:
@@ -265,13 +266,12 @@ export const stories: Story[] = [
     dependencies: ["S14"],
     createdDate: "2025-06-21",
     completedDate: "2025-06-22",
-  },
-  {
+  },  {
     id: "S18",
     title: "Create Pattern Recognition System",
     description:
       "Implement candlestick pattern recognition (Doji, Hammer, Engulfing) and chart patterns (Head & Shoulders, Triangles, Flags) using AI/ML models for automated detection.",
-    status: "TODO",
+    status: "DONE",
     priority: "High",
     epic: "E4",
     storyPoints: 8,
@@ -279,6 +279,7 @@ export const stories: Story[] = [
     progress: 0,
     dependencies: ["S14", "S16"],
     createdDate: "2025-06-21",
+    completedDate: "2025-06-22",
   },
   // LIVE RECOMMENDATIONS SYSTEM
   {

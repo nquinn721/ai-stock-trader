@@ -165,6 +165,34 @@ const BreakoutDisplay: React.FC<BreakoutDisplayProps> = ({
     }
   };
 
+  const getPatternSentimentColor = (sentiment: string) => {
+    switch (sentiment) {
+      case "bullish":
+        return "#00C851";
+      case "bearish":
+        return "#ff4444";
+      case "neutral":
+        return "#ffbb33";
+      default:
+        return "#666";
+    }
+  };
+
+  const getActionColor = (action: string) => {
+    switch (action) {
+      case "buy":
+        return "#00C851";
+      case "sell":
+        return "#ff4444";
+      case "watch":
+        return "#007bff";
+      case "hold":
+        return "#ffbb33";
+      default:
+        return "#666";
+    }
+  };
+
   return (
     <div className="breakout-display">
       {" "}
@@ -195,7 +223,6 @@ const BreakoutDisplay: React.FC<BreakoutDisplayProps> = ({
             {breakoutStrategy.currentTrend}
           </span>
         </div>
-
         <div className="metric-row">
           <span className="metric-label">RSI:</span>
           <span
@@ -212,7 +239,6 @@ const BreakoutDisplay: React.FC<BreakoutDisplayProps> = ({
             {breakoutStrategy.rsi.toFixed(1)}
           </span>
         </div>
-
         <div className="metric-row">
           <span className="metric-label">Bollinger:</span>
           <span
@@ -223,51 +249,73 @@ const BreakoutDisplay: React.FC<BreakoutDisplayProps> = ({
           >
             {breakoutStrategy.bollingerPosition}
           </span>
-        </div>        <div className="metric-row">
+        </div>{" "}
+        <div className="metric-row">
           <span className="metric-label">Volatility:</span>
           <span className="metric-value">
             {formatPercent(breakoutStrategy.volatility)}%
           </span>
         </div>
-
         {/* MACD Indicator */}
         {breakoutStrategy.technicalIndicators?.macd && (
           <div className="metric-row">
             <span className="metric-label">MACD:</span>
-            <span 
+            <span
               className="metric-value"
               style={{
-                color: breakoutStrategy.technicalIndicators.macd.histogram > 0 ? "#00C851" : "#ff4444"
+                color:
+                  breakoutStrategy.technicalIndicators.macd.histogram > 0
+                    ? "#00C851"
+                    : "#ff4444",
               }}
             >
               {breakoutStrategy.technicalIndicators.macd.macd.toFixed(4)}
-              <span className="macd-histogram" style={{ fontSize: "0.8em", marginLeft: "4px" }}>
-                ({breakoutStrategy.technicalIndicators.macd.histogram > 0 ? "+" : ""}{breakoutStrategy.technicalIndicators.macd.histogram.toFixed(4)})
+              <span
+                className="macd-histogram"
+                style={{ fontSize: "0.8em", marginLeft: "4px" }}
+              >
+                (
+                {breakoutStrategy.technicalIndicators.macd.histogram > 0
+                  ? "+"
+                  : ""}
+                {breakoutStrategy.technicalIndicators.macd.histogram.toFixed(4)}
+                )
               </span>
             </span>
           </div>
         )}
-
         {/* Moving Averages */}
-        {breakoutStrategy.technicalIndicators?.ema12 && breakoutStrategy.technicalIndicators?.ema26 && (
-          <div className="metric-row">
-            <span className="metric-label">EMA Cross:</span>
-            <span 
-              className="metric-value"
-              style={{
-                color: breakoutStrategy.technicalIndicators.ema12 > breakoutStrategy.technicalIndicators.ema26 ? "#00C851" : "#ff4444"
-              }}
-            >
-              {breakoutStrategy.technicalIndicators.ema12 > breakoutStrategy.technicalIndicators.ema26 ? "Bullish" : "Bearish"}
-              <FontAwesomeIcon 
-                icon={breakoutStrategy.technicalIndicators.ema12 > breakoutStrategy.technicalIndicators.ema26 ? "arrow-up" : "arrow-down"} 
-                style={{ marginLeft: "4px" }}
-              />
-            </span>
-          </div>
-        )}
+        {breakoutStrategy.technicalIndicators?.ema12 &&
+          breakoutStrategy.technicalIndicators?.ema26 && (
+            <div className="metric-row">
+              <span className="metric-label">EMA Cross:</span>
+              <span
+                className="metric-value"
+                style={{
+                  color:
+                    breakoutStrategy.technicalIndicators.ema12 >
+                    breakoutStrategy.technicalIndicators.ema26
+                      ? "#00C851"
+                      : "#ff4444",
+                }}
+              >
+                {breakoutStrategy.technicalIndicators.ema12 >
+                breakoutStrategy.technicalIndicators.ema26
+                  ? "Bullish"
+                  : "Bearish"}
+                <FontAwesomeIcon
+                  icon={
+                    breakoutStrategy.technicalIndicators.ema12 >
+                    breakoutStrategy.technicalIndicators.ema26
+                      ? "arrow-up"
+                      : "arrow-down"
+                  }
+                  style={{ marginLeft: "4px" }}
+                />
+              </span>
+            </div>
+          )}
       </div>
-
       {/* Technical Indicators Section */}
       {breakoutStrategy.technicalIndicators && (
         <div className="technical-indicators">
@@ -278,43 +326,60 @@ const BreakoutDisplay: React.FC<BreakoutDisplayProps> = ({
             {breakoutStrategy.technicalIndicators.sma20 && (
               <div className="indicator-item">
                 <span className="indicator-label">SMA 20:</span>
-                <span className="indicator-value">${formatPrice(breakoutStrategy.technicalIndicators.sma20)}</span>
+                <span className="indicator-value">
+                  ${formatPrice(breakoutStrategy.technicalIndicators.sma20)}
+                </span>
               </div>
             )}
             {breakoutStrategy.technicalIndicators.sma50 && (
               <div className="indicator-item">
                 <span className="indicator-label">SMA 50:</span>
-                <span className="indicator-value">${formatPrice(breakoutStrategy.technicalIndicators.sma50)}</span>
+                <span className="indicator-value">
+                  ${formatPrice(breakoutStrategy.technicalIndicators.sma50)}
+                </span>
               </div>
             )}
             {breakoutStrategy.technicalIndicators.ema12 && (
               <div className="indicator-item">
                 <span className="indicator-label">EMA 12:</span>
-                <span className="indicator-value">${formatPrice(breakoutStrategy.technicalIndicators.ema12)}</span>
+                <span className="indicator-value">
+                  ${formatPrice(breakoutStrategy.technicalIndicators.ema12)}
+                </span>
               </div>
             )}
             {breakoutStrategy.technicalIndicators.ema26 && (
               <div className="indicator-item">
                 <span className="indicator-label">EMA 26:</span>
-                <span className="indicator-value">${formatPrice(breakoutStrategy.technicalIndicators.ema26)}</span>
+                <span className="indicator-value">
+                  ${formatPrice(breakoutStrategy.technicalIndicators.ema26)}
+                </span>
               </div>
             )}
             {breakoutStrategy.technicalIndicators.bollingerBands && (
               <>
                 <div className="indicator-item">
                   <span className="indicator-label">BB Upper:</span>
-                  <span className="indicator-value">${formatPrice(breakoutStrategy.technicalIndicators.bollingerBands.upper)}</span>
+                  <span className="indicator-value">
+                    $
+                    {formatPrice(
+                      breakoutStrategy.technicalIndicators.bollingerBands.upper
+                    )}
+                  </span>
                 </div>
                 <div className="indicator-item">
                   <span className="indicator-label">BB Lower:</span>
-                  <span className="indicator-value">${formatPrice(breakoutStrategy.technicalIndicators.bollingerBands.lower)}</span>
+                  <span className="indicator-value">
+                    $
+                    {formatPrice(
+                      breakoutStrategy.technicalIndicators.bollingerBands.lower
+                    )}
+                  </span>
                 </div>
               </>
             )}
           </div>
         </div>
       )}
-
       {/* Momentum & Volatility Indicators Section */}
       {breakoutStrategy.technicalIndicators && (
         <div className="section">
@@ -327,18 +392,30 @@ const BreakoutDisplay: React.FC<BreakoutDisplayProps> = ({
               <div className="momentum-indicator">
                 <div className="indicator-header">
                   <span className="indicator-name">Stochastic</span>
-                  <span 
+                  <span
                     className="signal-badge small"
                     style={{
-                      backgroundColor: getOscillatorColor(breakoutStrategy.technicalIndicators.stochastic.signal)
+                      backgroundColor: getOscillatorColor(
+                        breakoutStrategy.technicalIndicators.stochastic.signal
+                      ),
                     }}
                   >
                     {breakoutStrategy.technicalIndicators.stochastic.signal}
                   </span>
                 </div>
                 <div className="stochastic-values">
-                  <span className="stoch-k">%K: {breakoutStrategy.technicalIndicators.stochastic.k.toFixed(1)}</span>
-                  <span className="stoch-d">%D: {breakoutStrategy.technicalIndicators.stochastic.d.toFixed(1)}</span>
+                  <span className="stoch-k">
+                    %K:{" "}
+                    {breakoutStrategy.technicalIndicators.stochastic.k.toFixed(
+                      1
+                    )}
+                  </span>
+                  <span className="stoch-d">
+                    %D:{" "}
+                    {breakoutStrategy.technicalIndicators.stochastic.d.toFixed(
+                      1
+                    )}
+                  </span>
                 </div>
               </div>
             )}
@@ -348,17 +425,22 @@ const BreakoutDisplay: React.FC<BreakoutDisplayProps> = ({
               <div className="momentum-indicator">
                 <div className="indicator-header">
                   <span className="indicator-name">Williams %R</span>
-                  <span 
+                  <span
                     className="signal-badge small"
                     style={{
-                      backgroundColor: getOscillatorColor(breakoutStrategy.technicalIndicators.williamsR.signal)
+                      backgroundColor: getOscillatorColor(
+                        breakoutStrategy.technicalIndicators.williamsR.signal
+                      ),
                     }}
                   >
                     {breakoutStrategy.technicalIndicators.williamsR.signal}
                   </span>
                 </div>
                 <div className="williams-value">
-                  {breakoutStrategy.technicalIndicators.williamsR.value.toFixed(1)}%
+                  {breakoutStrategy.technicalIndicators.williamsR.value.toFixed(
+                    1
+                  )}
+                  %
                 </div>
               </div>
             )}
@@ -370,8 +452,16 @@ const BreakoutDisplay: React.FC<BreakoutDisplayProps> = ({
                   <span className="indicator-name">ATR</span>
                 </div>
                 <div className="atr-values">
-                  <span className="atr-absolute">${breakoutStrategy.technicalIndicators.atr.value.toFixed(2)}</span>
-                  <span className="atr-normalized">({breakoutStrategy.technicalIndicators.atr.normalized.toFixed(2)}%)</span>
+                  <span className="atr-absolute">
+                    ${breakoutStrategy.technicalIndicators.atr.value.toFixed(2)}
+                  </span>
+                  <span className="atr-normalized">
+                    (
+                    {breakoutStrategy.technicalIndicators.atr.normalized.toFixed(
+                      2
+                    )}
+                    %)
+                  </span>
                 </div>
               </div>
             )}
@@ -381,27 +471,48 @@ const BreakoutDisplay: React.FC<BreakoutDisplayProps> = ({
               <div className="volatility-indicator">
                 <div className="indicator-header">
                   <span className="indicator-name">Volatility Regime</span>
-                  <span 
+                  <span
                     className="regime-badge"
                     style={{
-                      backgroundColor: getVolatilityRegimeColor(breakoutStrategy.technicalIndicators.volatilityIndicators.regime)
+                      backgroundColor: getVolatilityRegimeColor(
+                        breakoutStrategy.technicalIndicators
+                          .volatilityIndicators.regime
+                      ),
                     }}
                   >
-                    {breakoutStrategy.technicalIndicators.volatilityIndicators.regime}
+                    {
+                      breakoutStrategy.technicalIndicators.volatilityIndicators
+                        .regime
+                    }
                   </span>
                 </div>
                 <div className="volatility-details">
                   <div className="vol-item">
                     <span className="vol-label">Current:</span>
-                    <span className="vol-value">{breakoutStrategy.technicalIndicators.volatilityIndicators.historicalVolatility.toFixed(1)}%</span>
+                    <span className="vol-value">
+                      {breakoutStrategy.technicalIndicators.volatilityIndicators.historicalVolatility.toFixed(
+                        1
+                      )}
+                      %
+                    </span>
                   </div>
                   <div className="vol-item">
                     <span className="vol-label">Average:</span>
-                    <span className="vol-value">{breakoutStrategy.technicalIndicators.volatilityIndicators.averageVolatility.toFixed(1)}%</span>
+                    <span className="vol-value">
+                      {breakoutStrategy.technicalIndicators.volatilityIndicators.averageVolatility.toFixed(
+                        1
+                      )}
+                      %
+                    </span>
                   </div>
                   <div className="vol-item">
                     <span className="vol-label">Rank:</span>
-                    <span className="vol-value">{breakoutStrategy.technicalIndicators.volatilityIndicators.volatilityRank.toFixed(0)}th</span>
+                    <span className="vol-value">
+                      {breakoutStrategy.technicalIndicators.volatilityIndicators.volatilityRank.toFixed(
+                        0
+                      )}
+                      th
+                    </span>
                   </div>
                 </div>
               </div>
@@ -409,7 +520,6 @@ const BreakoutDisplay: React.FC<BreakoutDisplayProps> = ({
           </div>
         </div>
       )}
-
       {/* Volume Analysis Section */}
       {breakoutStrategy.volumeAnalysis && (
         <div className="section">
@@ -420,54 +530,65 @@ const BreakoutDisplay: React.FC<BreakoutDisplayProps> = ({
             <div className="volume-row">
               <span className="metric-label">Current Volume:</span>
               <span className="metric-value">
-                {formatLargeNumber(breakoutStrategy.volumeAnalysis.currentVolume)}
+                {formatLargeNumber(
+                  breakoutStrategy.volumeAnalysis.currentVolume
+                )}
               </span>
             </div>
-            
+
             <div className="volume-row">
               <span className="metric-label">Avg Volume:</span>
               <span className="metric-value">
                 {formatLargeNumber(breakoutStrategy.volumeAnalysis.avgVolume)}
               </span>
             </div>
-            
+
             <div className="volume-row">
               <span className="metric-label">Volume Ratio:</span>
-              <span 
+              <span
                 className="metric-value"
                 style={{
-                  color: getVolumeRatioColor(breakoutStrategy.volumeAnalysis.volumeRatio)
+                  color: getVolumeRatioColor(
+                    breakoutStrategy.volumeAnalysis.volumeRatio
+                  ),
                 }}
               >
                 {breakoutStrategy.volumeAnalysis.volumeRatio.toFixed(2)}x
               </span>
             </div>
-            
+
             <div className="volume-row">
               <span className="metric-label">VWAP:</span>
               <span className="metric-value">
                 ${formatPrice(breakoutStrategy.volumeAnalysis.vwap)}
               </span>
             </div>
-            
+
             <div className="volume-row">
               <span className="metric-label">Volume Trend:</span>
-              <span 
+              <span
                 className="metric-value"
                 style={{
-                  color: getVolumeTrendColor(breakoutStrategy.volumeAnalysis.volumeTrend)
+                  color: getVolumeTrendColor(
+                    breakoutStrategy.volumeAnalysis.volumeTrend
+                  ),
                 }}
               >
-                {getVolumeTrendIcon(breakoutStrategy.volumeAnalysis.volumeTrend)} {breakoutStrategy.volumeAnalysis.volumeTrend}
+                {getVolumeTrendIcon(
+                  breakoutStrategy.volumeAnalysis.volumeTrend
+                )}{" "}
+                {breakoutStrategy.volumeAnalysis.volumeTrend}
               </span>
             </div>
-            
+
             <div className="volume-row">
               <span className="metric-label">Volume Strength:</span>
-              <span 
+              <span
                 className="metric-value"
                 style={{
-                  color: getVolumeStrengthColor(breakoutStrategy.volumeAnalysis.volumeStrength)
+                  color: getVolumeStrengthColor(
+                    breakoutStrategy.volumeAnalysis.volumeStrength
+                  ),
                 }}
               >
                 {breakoutStrategy.volumeAnalysis.volumeStrength}
@@ -479,26 +600,232 @@ const BreakoutDisplay: React.FC<BreakoutDisplayProps> = ({
               <div className="volume-spikes">
                 <span className="metric-label">Recent Volume Spikes:</span>
                 <div className="spikes-list">
-                  {breakoutStrategy.volumeAnalysis.volumeSpikes.slice(0, 3).map((spike, index) => (
-                    <div key={index} className="spike-item">
-                      <span className="spike-date">{new Date(spike.date).toLocaleDateString()}</span>
-                      <span 
-                        className="spike-ratio"
-                        style={{
-                          color: getSpikeSignificanceColor(spike.significance)
-                        }}
-                      >
-                        {spike.ratio.toFixed(1)}x ({spike.significance})
-                      </span>
-                    </div>
-                  ))}
+                  {breakoutStrategy.volumeAnalysis.volumeSpikes
+                    .slice(0, 3)
+                    .map((spike, index) => (
+                      <div key={index} className="spike-item">
+                        <span className="spike-date">
+                          {new Date(spike.date).toLocaleDateString()}
+                        </span>
+                        <span
+                          className="spike-ratio"
+                          style={{
+                            color: getSpikeSignificanceColor(
+                              spike.significance
+                            ),
+                          }}
+                        >
+                          {spike.ratio.toFixed(1)}x ({spike.significance})
+                        </span>
+                      </div>
+                    ))}
                 </div>
               </div>
             )}
           </div>
         </div>
       )}
+      {/* Pattern Recognition Section */}
+      {breakoutStrategy.patternRecognition && (
+        <div className="section">
+          <h4 className="section-title">
+            <FontAwesomeIcon icon="eye" /> Pattern Recognition
+          </h4>
 
+          {/* Pattern Summary */}
+          <div className="pattern-summary">
+            <div className="pattern-overview">
+              <div className="pattern-sentiment">
+                <span className="metric-label">Overall Sentiment:</span>
+                <span
+                  className="metric-value pattern-sentiment-badge"
+                  style={{
+                    backgroundColor: getPatternSentimentColor(
+                      breakoutStrategy.patternRecognition.patternSummary
+                        .overallSentiment
+                    ),
+                  }}
+                >
+                  {breakoutStrategy.patternRecognition.patternSummary.overallSentiment.toUpperCase()}
+                </span>
+              </div>
+              <div className="pattern-confidence">
+                <span className="metric-label">Confidence:</span>
+                <span className="metric-value">
+                  {formatPercent(
+                    breakoutStrategy.patternRecognition.patternSummary
+                      .confidence
+                  )}
+                  %
+                </span>
+              </div>
+              <div className="ai-score">
+                <span className="metric-label">AI Score:</span>
+                <span className="metric-value">
+                  {formatPercent(
+                    breakoutStrategy.patternRecognition.aiPatternScore
+                  )}
+                  %
+                </span>
+              </div>
+              <div className="recommended-action">
+                <span className="metric-label">Action:</span>
+                <span
+                  className="metric-value action-badge"
+                  style={{
+                    backgroundColor: getActionColor(
+                      breakoutStrategy.patternRecognition.recommendedAction
+                    ),
+                  }}
+                >
+                  {breakoutStrategy.patternRecognition.recommendedAction.toUpperCase()}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Signal Counts */}
+          <div className="pattern-signals">
+            <div className="signal-count bullish">
+              <FontAwesomeIcon icon="arrow-up" />
+              <span>
+                Bullish:{" "}
+                {
+                  breakoutStrategy.patternRecognition.patternSummary
+                    .bullishSignals
+                }
+              </span>
+            </div>
+            <div className="signal-count bearish">
+              <FontAwesomeIcon icon="arrow-down" />
+              <span>
+                Bearish:{" "}
+                {
+                  breakoutStrategy.patternRecognition.patternSummary
+                    .bearishSignals
+                }
+              </span>
+            </div>
+            <div className="signal-count neutral">
+              <FontAwesomeIcon icon="minus" />
+              <span>
+                Neutral:{" "}
+                {
+                  breakoutStrategy.patternRecognition.patternSummary
+                    .neutralSignals
+                }
+              </span>
+            </div>
+          </div>
+
+          {/* Candlestick Patterns */}
+          {breakoutStrategy.patternRecognition.candlestickPatterns.length >
+            0 && (
+            <div className="candlestick-patterns">
+              <h5 className="pattern-category-title">
+                <FontAwesomeIcon icon="candle-holder" /> Candlestick Patterns
+              </h5>
+              <div className="patterns-grid">
+                {breakoutStrategy.patternRecognition.candlestickPatterns.map(
+                  (pattern, index) => (
+                    <div key={index} className="pattern-card">
+                      <div className="pattern-header">
+                        <span className="pattern-type">
+                          {pattern.type.replace(/_/g, " ").toUpperCase()}
+                        </span>
+                        <span
+                          className="pattern-direction"
+                          style={{ color: getSignalColor(pattern.direction) }}
+                        >
+                          {pattern.direction}
+                        </span>
+                      </div>
+                      <div className="pattern-details">
+                        <div className="pattern-metric">
+                          <span>
+                            Confidence: {formatPercent(pattern.confidence)}%
+                          </span>
+                        </div>
+                        <div className="pattern-metric">
+                          <span>
+                            Reliability: {formatPercent(pattern.reliability)}%
+                          </span>
+                        </div>
+                        <div className="pattern-metric">
+                          <span>Significance: {pattern.significance}</span>
+                        </div>
+                      </div>
+                      <div className="pattern-description">
+                        {pattern.description}
+                      </div>
+                      <div className="pattern-date">
+                        {new Date(pattern.date).toLocaleDateString()}
+                      </div>
+                    </div>
+                  )
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Chart Patterns */}
+          {breakoutStrategy.patternRecognition.chartPatterns.length > 0 && (
+            <div className="chart-patterns">
+              <h5 className="pattern-category-title">
+                <FontAwesomeIcon icon="chart-area" /> Chart Patterns
+              </h5>
+              <div className="patterns-grid">
+                {breakoutStrategy.patternRecognition.chartPatterns.map(
+                  (pattern, index) => (
+                    <div key={index} className="pattern-card">
+                      <div className="pattern-header">
+                        <span className="pattern-type">
+                          {pattern.type.replace(/_/g, " ").toUpperCase()}
+                        </span>
+                        <span
+                          className="pattern-direction"
+                          style={{ color: getSignalColor(pattern.direction) }}
+                        >
+                          {pattern.direction}
+                        </span>
+                      </div>
+                      <div className="pattern-details">
+                        <div className="pattern-metric">
+                          <span>
+                            Confidence: {formatPercent(pattern.confidence)}%
+                          </span>
+                        </div>
+                        <div className="pattern-metric">
+                          <span>
+                            Target: ${formatPrice(pattern.breakoutTarget)}
+                          </span>
+                        </div>
+                        <div className="pattern-metric">
+                          <span>
+                            Stop Loss: ${formatPrice(pattern.stopLoss)}
+                          </span>
+                        </div>
+                        <div className="pattern-metric">
+                          <span>
+                            Volume Confirmation:{" "}
+                            {pattern.volume_confirmation ? "Yes" : "No"}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="pattern-description">
+                        {pattern.description}
+                      </div>
+                      <div className="pattern-timeframe">
+                        {pattern.patternStart} to {pattern.patternEnd}
+                      </div>
+                    </div>
+                  )
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
       <div className="support-resistance">
         <div className="sr-level support">
           <span className="sr-label">Support:</span>
