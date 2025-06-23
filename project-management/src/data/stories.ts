@@ -493,24 +493,26 @@ export const stories: Story[] = [
     progress: 0,
     dependencies: [],
     createdDate: "2025-06-23",
-    completedDate: "2025-06-23",
-  },
+    completedDate: "2025-06-23",  },
 
-  // === ML INFRASTRUCTURE IMPLEMENTATION PHASE STORIES ===  // S27 Phase 1: Foundation Infrastructure
+  // === ML INFRASTRUCTURE IMPLEMENTATION PHASE STORIES ===
+  
+  // S27 Phase 1: Foundation Infrastructure
   {
     id: "S27A",
     title: "ML Infrastructure Foundation - Data Pipeline",
     description:
       "Establish the foundational data pipeline for ML model training and inference. Create data ingestion services for historical and real-time market data, implement feature engineering pipeline with technical indicators calculation, establish data validation and quality checks, create data versioning and lineage tracking, and implement efficient data storage solutions optimized for ML workloads. Include automated data preprocessing, normalization, and feature extraction processes.",
-    status: "IN_PROGRESS",
+    status: "DONE",
     priority: "High",
     epic: "E3",
     storyPoints: 13,
     sprint: 5,
     assignee: "AI Assistant",
-    progress: 85,
+    progress: 100,
     dependencies: ["S26"],
     createdDate: "2025-06-23",
+    completedDate: "2025-06-23",
   },
   {
     id: "S27B",

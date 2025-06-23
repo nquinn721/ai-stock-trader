@@ -86,9 +86,33 @@
         "completionRate": 100
       },
       "services": [
-        "MarketPredictionService",
-        "SignalGenerationService",
+        "MarketPredictionService",        "SignalGenerationService",
         "EnsembleSystemsService"
+      ]
+    },
+    "S27A": {
+      "id": "S27A",
+      "title": "ML Infrastructure Foundation - Data Pipeline",
+      "status": "COMPLETED",
+      "priority": "High",
+      "storyPoints": 13,
+      "assignee": "AI Assistant",
+      "sprint": "Sprint 5",
+      "epic": "ML Trading Enhancement",
+      "completedDate": "2025-06-23",
+      "acceptanceCriteria": {
+        "total": 30,
+        "completed": 30,
+        "completionRate": 100
+      },
+      "services": [
+        "DataIngestionService",
+        "FeaturePipelineService",
+        "DataValidationService",
+        "DataVersioningService",
+        "DataStorageService",
+        "DataPreprocessingService",
+        "DataPipelineOrchestratorService"
       ]
     }
   },
@@ -102,11 +126,10 @@
       "status": "COMPLETED",
       "completionRate": 100,
       "stories": ["Testing stories 18-25"]
-    },
-    "Phase 3 (ML Infrastructure)": {
+    },    "Phase 3 (ML Infrastructure)": {
       "status": "COMPLETED",
       "completionRate": 100,
-      "stories": ["S27", "S28", "S29"]
+      "stories": ["S27", "S28", "S29", "S27A"]
     },
     "Phase 4 (Advanced Features)": {
       "status": "PLANNED",

@@ -11,6 +11,7 @@ import {
 import { MLController } from './ml.controller';
 import { ABTestingService } from './services/ab-testing.service';
 import { DataIngestionService } from './services/data-ingestion.service';
+import { DataPipelineOrchestratorService } from './services/data-pipeline-orchestrator.service';
 import { DataPreprocessingService } from './services/data-preprocessing.service';
 import { DataStorageService } from './services/data-storage.service';
 import { DataValidationService } from './services/data-validation.service';
@@ -57,8 +58,8 @@ import { SignalGenerationService } from './services/signal-generation.service';
     DataVersioningService,
     DataStorageService,
     DataPreprocessingService,
-  ],
-  exports: [
+    DataPipelineOrchestratorService,
+  ],  exports: [
     MLService,
     FeatureEngineeringService,
     MLInferenceService,
@@ -77,6 +78,7 @@ import { SignalGenerationService } from './services/signal-generation.service';
     DataVersioningService,
     DataStorageService,
     DataPreprocessingService,
+    DataPipelineOrchestratorService,
   ],
 })
 export class MLModule {}
