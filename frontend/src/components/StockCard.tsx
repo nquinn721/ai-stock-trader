@@ -135,7 +135,8 @@ const StockCard: React.FC<StockCardProps> = ({ stock, signal }) => {
             </div>
           </>
         )}
-      </div>      {/* Breakout Strategy Section */}
+      </div>{" "}
+      {/* Breakout Strategy Section */}
       {stock.breakoutStrategy && (
         <BreakoutDisplay
           breakoutStrategy={stock.breakoutStrategy}

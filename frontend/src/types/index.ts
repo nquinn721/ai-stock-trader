@@ -136,7 +136,8 @@ export interface SupportResistanceAnalysis {
     r1: number;
     r2: number;
     r3: number;
-  };  keyZones: {
+  };
+  keyZones: {
     price: number;
     type: "support" | "resistance";
     strength: number;
@@ -183,7 +184,11 @@ export interface RiskManagementRecommendation {
     afterTradeExposure: number; // risk % after this trade
     correlationRisk: number; // risk from correlated positions
     sectorConcentration: number; // concentration in this sector
-    recommendation: "low_risk" | "moderate_risk" | "high_risk" | "excessive_risk";
+    recommendation:
+      | "low_risk"
+      | "moderate_risk"
+      | "high_risk"
+      | "excessive_risk";
   };
   riskScore: number; // 0-100 overall risk score
   recommendation: "PROCEED" | "REDUCE_SIZE" | "WAIT" | "AVOID";
@@ -420,6 +425,94 @@ export interface EnhancedPosition {
   lastUpdated: string;
 }
 
+// Portfolio Analytics Interfaces
+export interface SectorAllocation {
+  sector: string;
+  value: number;
+  percentage: number;
+  positions: number;
+  averageReturn: number;
+  topPerformer: string;
+  worstPerformer: string;
+}
+
+export interface PerformanceAttribution {
+  sectorContribution: Array<{
+    sector: string;
+    contribution: number;
+    weight: number;
+    return: number;
+  }>;
+  positionContribution: Array<{
+    symbol: string;
+    contribution: number;
+    weight: number;
+    return: number;
+  }>;
+  totalReturn: number;
+  alphaGeneration: number;
+}
+
+export interface RiskMetrics {
+  portfolioVolatility: number;
+  beta: number;
+  sharpeRatio: number;
+  sortinoRatio: number;
+  maxDrawdown: number;
+  valueAtRisk: number;
+  expectedShortfall: number;
+  correlationMatrix: { [symbol: string]: { [symbol2: string]: number } };
+  concentrationRisk: number;
+  liquidityRisk: number;
+}
+
+export interface BenchmarkComparison {
+  benchmark: string;
+  portfolioReturn: number;
+  benchmarkReturn: number;
+  alpha: number;
+  beta: number;
+  trackingError: number;
+  informationRatio: number;
+  upCapture: number;
+  downCapture: number;
+  winRate: number;
+}
+
+export interface PortfolioAnalytics {
+  portfolioId: number;
+  timestamp: string;
+  totalValue: number;
+  performanceSummary: {
+    totalReturn: number;
+    dayReturn: number;
+    weekReturn: number;
+    monthReturn: number;
+    yearReturn: number;
+    annualizedReturn: number;
+    volatility: number;
+    sharpeRatio: number;
+  };
+  sectorAllocation: SectorAllocation[];
+  performanceAttribution: PerformanceAttribution;
+  riskMetrics: RiskMetrics;
+  benchmarkComparison: BenchmarkComparison[];
+  topHoldings: Array<{
+    symbol: string;
+    weight: number;
+    value: number;
+    return: number;
+    contribution: number;
+  }>;
+  rebalancingSuggestions: Array<{
+    action: "reduce" | "increase" | "add" | "remove";
+    symbol: string;
+    currentWeight: number;
+    targetWeight: number;
+    reasoning: string;
+  }>;
+}
+
 export interface SocketEvents {
   stock_updates: Stock[];
   stock_update: { symbol: string; data: Stock };
@@ -427,4 +520,163 @@ export interface SocketEvents {
   news_update: News;
   portfolio_update: PortfolioUpdate;
   portfolio_error: { portfolioId: number; message: string; timestamp: string };
+  portfolio_analytics: {
+    portfolioId: number;
+    analytics: PortfolioAnalytics;
+    timestamp: string;
+  };
+  portfolio_analytics_update: {
+    portfolioId: number;
+    analytics: PortfolioAnalytics;
+    timestamp: string;
+  };
+  portfolio_analytics_error: {
+    portfolioId: number;
+    message: string;
+    timestamp: string;
+  };
+  sector_allocation: {
+    portfolioId: number;
+    sectorAllocation: SectorAllocation[];
+    timestamp: string;
+  };
+  sector_allocation_error: {
+    portfolioId: number;
+    message: string;
+    timestamp: string;
+  };
+  performance_attribution: {
+    portfolioId: number;
+    performanceAttribution: PerformanceAttribution;
+    timestamp: string;
+  };
+  performance_attribution_error: {
+    portfolioId: number;
+    message: string;
+    timestamp: string;
+  };
+  risk_metrics: {
+    portfolioId: number;
+    riskMetrics: RiskMetrics;
+    timestamp: string;
+  };
+  risk_metrics_error: {
+    portfolioId: number;
+    message: string;
+    timestamp: string;
+  };
+  benchmark_comparison: {
+    portfolioId: number;
+    benchmarkComparison: BenchmarkComparison[];
+    timestamp: string;
+  };
+  benchmark_comparison_error: {
+    portfolioId: number;
+    message: string;
+    timestamp: string;
+  };
+  rebalancing_suggestions: {
+    portfolioId: number;
+    rebalancingSuggestions: PortfolioAnalytics["rebalancingSuggestions"];
+    timestamp: string;
+  };
+  rebalancing_suggestions_error: {
+    portfolioId: number;
+    message: string;
+    timestamp: string;
+  };
+}
+
+// Order Management Types
+export interface Order {
+  id: number;
+  portfolioId: number;
+  symbol: string;
+  orderType:
+    | "market"
+    | "limit"
+    | "stop_loss"
+    | "take_profit"
+    | "stop_limit"
+    | "entry";
+  side: "buy" | "sell";
+  quantity: number;
+  limitPrice?: number;
+  stopPrice?: number;
+  triggerPrice?: number;
+  timeInForce?: "day" | "gtc" | "ioc" | "fok";
+  status: "pending" | "triggered" | "executed" | "cancelled" | "expired";
+  executedPrice?: number;
+  executedQuantity?: number;
+  commission?: number;
+  notes?: string;
+  createdAt: string;
+  updatedAt?: string;
+  executedAt?: string;
+  cancelledAt?: string;
+  cancellationReason?: string;
+  expiryDate?: string;
+  parentOrderId?: number;
+}
+
+export interface CreateOrderDto {
+  portfolioId: number;
+  symbol: string;
+  orderType: Order["orderType"];
+  side: Order["side"];
+  quantity: number;
+  limitPrice?: number;
+  stopPrice?: number;
+  triggerPrice?: number;
+  timeInForce?: Order["timeInForce"];
+  notes?: string;
+  expiryDate?: Date;
+  parentOrderId?: number;
+}
+
+export interface OrderExecutionResult {
+  success: boolean;
+  orderId: number;
+  executedPrice?: number;
+  executedQuantity?: number;
+  commission?: number;
+  message: string;
+  timestamp: Date;
+}
+
+// Order Management WebSocket Events
+export interface OrderManagementSocketEvents {
+  // Outgoing events
+  create_order: CreateOrderDto;
+  cancel_order: { orderId: number };
+  get_order_book: void;
+
+  // Incoming events
+  order_created: Order;
+  order_canceled: { orderId: number };
+  order_executed: {
+    orderId: number;
+    symbol: string;
+    side: Order["side"];
+    quantity: number;
+    executedPrice: number;
+    executedQuantity: number;
+    commission: number;
+    portfolioId: number;
+    timestamp: Date;
+    executionReason: string;
+  };
+  order_execution_failed: {
+    orderId: number;
+    symbol: string;
+    portfolioId: number;
+    message: string;
+    timestamp: Date;
+  };
+  order_book_update: Order | { orderId: number; status: string };
+  order_book_data: Order[];
+  order_error: {
+    message: string;
+    details?: string;
+  };
 }

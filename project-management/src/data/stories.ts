@@ -296,13 +296,12 @@ export const stories: Story[] = [
     progress: 0,
     dependencies: ["S14", "S15", "S16", "S17", "S18"],
     createdDate: "2025-06-21",
-  },
-  {
+  },  {
     id: "S20",
     title: "Implement Real-Time Notification System",
     description:
       "Create comprehensive real-time notification system that alerts users to: Trading Opportunities (buy/sell signals from S19 recommendation engine with confidence scores), Pattern Alerts (breakout confirmations, pattern completions, support/resistance breaks), Technical Alerts (RSI overbought/oversold, MACD crossovers, Bollinger Band squeezes, volume spikes), Risk Management (stop-loss triggers, take-profit targets, position sizing alerts), Market Events (news sentiment changes, earnings announcements, analyst upgrades/downgrades), and Multi-timeframe Alerts (1m scalping opportunities, 5m momentum shifts, 1h trend changes). Features: Customizable alert thresholds, priority-based notifications, push notifications, email alerts, in-app notifications, alert history, and smart filtering to prevent notification overload.",
-    status: "TODO",
+    status: "DONE",
     priority: "Critical",
     epic: "E5",
     storyPoints: 6,
@@ -310,7 +309,9 @@ export const stories: Story[] = [
     progress: 0,
     dependencies: ["S19"],
     createdDate: "2025-06-21",
-  },  {
+    completedDate: "2025-06-23",
+  },
+  {
     id: "S21",
     title: "Add Risk Management Integration",
     description:
@@ -324,7 +325,7 @@ export const stories: Story[] = [
     dependencies: ["S19"],
     createdDate: "2025-06-21",
     completedDate: "2025-06-22",
-  },// PORTFOLIO LIVE DATA VERIFICATION
+  }, // PORTFOLIO LIVE DATA VERIFICATION
   {
     id: "S22",
     title: "Audit Portfolio Data Sources",
@@ -345,7 +346,7 @@ export const stories: Story[] = [
     title: "Implement Live Portfolio Performance Tracking",
     description:
       "Ensure portfolio performance metrics (P&L, returns, positions) update in real-time from live market data. Add WebSocket updates for instant portfolio changes.",
-    status: "TODO",
+    status: "DONE",
     priority: "High",
     epic: "E1",
     storyPoints: 4,
@@ -353,13 +354,14 @@ export const stories: Story[] = [
     progress: 0,
     dependencies: ["S22"],
     createdDate: "2025-06-21",
+    completedDate: "2025-06-22",
   },
   {
     id: "S24",
     title: "Add Portfolio Analytics Dashboard",
     description:
       "Create comprehensive portfolio analytics showing sector allocation, performance attribution, risk metrics, and comparison to market benchmarks using live data.",
-    status: "TODO",
+    status: "DONE",
     priority: "Medium",
     epic: "E1",
     storyPoints: 5,
@@ -367,13 +369,14 @@ export const stories: Story[] = [
     progress: 0,
     dependencies: ["S23"],
     createdDate: "2025-06-21",
+    completedDate: "2025-06-23",
   },
   {
     id: "S25",
     title: "Implement Advanced Order Management System",
     description:
       "Build comprehensive order management system supporting entry orders, stop-loss orders, and take-profit orders with automatic execution. Features include: conditional order placement (buy at entry price), automatic stop-loss execution (sell when price drops to stop level), take-profit orders (sell when price reaches profit target), order queue management, real-time price monitoring for order triggers, order status tracking (pending/triggered/executed/cancelled), portfolio integration with order P&L tracking, and WebSocket notifications for order events. All orders execute automatically based on live market data with no manual intervention required.",
-    status: "TODO",
+    status: "DONE",
     priority: "High",
     epic: "E1",
     storyPoints: 8,
@@ -381,19 +384,35 @@ export const stories: Story[] = [
     progress: 0,
     dependencies: ["S23"],
     createdDate: "2025-06-22",
+    completedDate: "2025-06-22",
   },
   {
     id: "S26",
     title: "ML Model Integration Audit and Strategy",
     description:
       "Conduct comprehensive audit of current trading logic and identify opportunities to replace manual calculations with trained machine learning models. Areas to evaluate: breakout strategy calculations (neural network, SVM, ensemble predictions), sentiment analysis enhancement (NLP models for news analysis), portfolio optimization (reinforcement learning for position sizing), risk management (ML-based stop-loss positioning), pattern recognition (CNN models for chart pattern detection), market prediction (LSTM/Transformer models for price forecasting), trading signal generation (ensemble ML models), and performance attribution analysis. Create implementation roadmap prioritizing highest-impact ML integrations with clear ROI metrics.",
-    status: "TODO",
+    status: "DONE",
     priority: "Medium",
     epic: "E4",
     storyPoints: 5,
     assignee: "Data Science Team",
     progress: 0,
     dependencies: ["S22", "S23"],
+    createdDate: "2025-06-22",
+    completedDate: "2025-06-22",
+  },
+  {
+    id: "S27",
+    title: "ML Infrastructure Implementation - Phase 1 Execution",
+    description:
+      "Based on S26 findings, implement Phase 1 ML models: (1) Breakout Strategy Enhancement using Neural Network ensemble with 25-40% expected improvement in success rate, targeting technical indicators (RSI, MACD, Bollinger Bands), volume patterns, and market sentiment. (2) Dynamic Risk Management using Deep Q-Network for adaptive stop-loss and position sizing with 15-30% expected volatility reduction. Create feature engineering pipeline, implement model training infrastructure, deploy real-time inference endpoints, establish A/B testing framework, and integrate with existing order management system. Set up monitoring dashboards for model performance tracking and implement fallback mechanisms for production safety. Expected ROI: 200-400% within 6 months.",
+    status: "TODO",
+    priority: "High",
+    epic: "E4",
+    storyPoints: 8,
+    assignee: "ML Engineering Team",
+    progress: 0,
+    dependencies: ["S26"],
     createdDate: "2025-06-22",
   },
 ];

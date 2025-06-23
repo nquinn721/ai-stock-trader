@@ -1,0 +1,112 @@
+/* NotificationToast.css */
+
+.notification-toast {
+  animation: slideInRight 0.3s ease-out;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  backdrop-filter: blur(10px);
+  border-radius: 8px !important;
+}
+
+.notification-toast.critical {
+  border-left: 4px solid #d32f2f !important;
+  animation: slideInRight 0.3s ease-out, pulseAlert 2s infinite;
+}
+
+.notification-toast.high {
+  border-left: 4px solid #f57c00 !important;
+}
+
+.notification-toast.medium {
+  border-left: 4px solid #1976d2 !important;
+}
+
+.notification-toast.low {
+  border-left: 4px solid #616161 !important;
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes pulseAlert {
+  0%, 100% {
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  }
+  50% {
+    box-shadow: 0 8px 32px rgba(211, 47, 47, 0.3);
+  }
+}
+
+/* Action buttons */
+.toast-action-btn {
+  padding: 6px 12px;
+  border-radius: 4px;
+  border: 1px solid;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  min-width: 80px;
+}
+
+.toast-action-btn.primary {
+  background: #1976d2;
+  color: white;
+  border-color: #1976d2;
+}
+
+.toast-action-btn.primary:hover {
+  background: #1565c0;
+  border-color: #1565c0;
+  transform: translateY(-1px);
+}
+
+.toast-action-btn.secondary {
+  background: transparent;
+  color: #666;
+  border-color: #ddd;
+}
+
+.toast-action-btn.secondary:hover {
+  background: #f5f5f5;
+  border-color: #ccc;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .notification-toast {
+    margin: 0 10px;
+    max-width: calc(100vw - 20px);
+  }
+  
+  .toast-action-btn {
+    font-size: 0.7rem;
+    padding: 4px 8px;
+    min-width: 60px;
+  }
+}
+
+/* Dark theme support */
+@media (prefers-color-scheme: dark) {
+  .notification-toast {
+    background: #2e2e2e !important;
+    color: #ffffff !important;
+  }
+  
+  .toast-action-btn.secondary {
+    color: #ccc;
+    border-color: #555;
+  }
+  
+  .toast-action-btn.secondary:hover {
+    background: #444;
+    border-color: #666;
+  }
+}

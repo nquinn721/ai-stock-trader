@@ -457,17 +457,17 @@ export class PaperTradingService {
    */
   async updatePortfolioRealTimePerformance(portfolioId: number): Promise<any> {
     const portfolio = await this.getPortfolio(portfolioId);
-    
+
     // Update all position values with current market prices
     await this.updateAllPositionValues(portfolio);
-    
+
     // Recalculate portfolio totals
     await this.updatePortfolioTotals(portfolio);
     await this.portfolioRepository.save(portfolio);
-    
+
     // Calculate enhanced performance metrics
     const performance = await this.calculateRealTimePerformance(portfolio);
-    
+
     return performance;
   }
 
@@ -497,9 +497,10 @@ export class PaperTradingService {
         const currentPrice = Number(stock.currentPrice);
         const currentValue = position.quantity * currentPrice;
         const unrealizedPnL = currentValue - Number(position.totalCost);
-        const unrealizedReturn = Number(position.totalCost) > 0 
-          ? (unrealizedPnL / Number(position.totalCost)) * 100 
-          : 0;
+        const unrealizedReturn =
+          Number(position.totalCost) > 0
+            ? (unrealizedPnL / Number(position.totalCost)) * 100
+            : 0;
 
         // Update position values
         position.currentValue = Math.round(currentValue * 100) / 100;
@@ -509,7 +510,9 @@ export class PaperTradingService {
         // Save position updates
         await this.positionRepository.save(position);
 
-        console.log(`📊 Updated position ${position.symbol}: $${currentValue.toFixed(2)} (${unrealizedReturn.toFixed(2)}%)`);
+        console.log(
+          `📊 Updated position ${position.symbol}: $${currentValue.toFixed(2)} (${unrealizedReturn.toFixed(2)}%)`,
+        );
       }
     } catch (error) {
       console.error(`Error updating position ${position.symbol}:`, error);
@@ -519,37 +522,51 @@ export class PaperTradingService {
   /**
    * Calculate enhanced real-time performance metrics
    */
-  private async calculateRealTimePerformance(portfolio: Portfolio): Promise<any> {
+  private async calculateRealTimePerformance(
+    portfolio: Portfolio,
+  ): Promise<any> {
     // Get today's opening portfolio value for day calculation
     const todayStart = new Date();
     todayStart.setHours(0, 0, 0, 0);
-    
+
     // Calculate day start value (portfolio value at market open)
-    const dayStartValue = await this.getPortfolioValueAtTime(portfolio.id, todayStart);
-    
+    const dayStartValue = await this.getPortfolioValueAtTime(
+      portfolio.id,
+      todayStart,
+    );
+
     const currentValue = portfolio.totalValue;
     const dayGain = currentValue - dayStartValue;
-    const dayGainPercent = dayStartValue > 0 ? (dayGain / dayStartValue) * 100 : 0;
+    const dayGainPercent =
+      dayStartValue > 0 ? (dayGain / dayStartValue) * 100 : 0;
 
     // Enhanced position details with real-time data
-    const enhancedPositions = portfolio.positions?.map(position => ({
-      symbol: position.symbol,
-      quantity: position.quantity,
-      averagePrice: Number(position.averagePrice),
-      currentValue: Number(position.currentValue) || Number(position.totalCost),
-      totalCost: Number(position.totalCost),
-      unrealizedPnL: Number(position.unrealizedPnL || 0),
-      unrealizedReturn: Number(position.unrealizedReturn || 0),
-      dayChange: this.calculatePositionDayChange(position),
-      dayChangePercent: this.calculatePositionDayChangePercent(position),
-      lastUpdated: new Date().toISOString(),
-    })) || [];
+    const enhancedPositions =
+      portfolio.positions?.map((position) => ({
+        symbol: position.symbol,
+        quantity: position.quantity,
+        averagePrice: Number(position.averagePrice),
+        currentValue:
+          Number(position.currentValue) || Number(position.totalCost),
+        totalCost: Number(position.totalCost),
+        unrealizedPnL: Number(position.unrealizedPnL || 0),
+        unrealizedReturn: Number(position.unrealizedReturn || 0),
+        dayChange: this.calculatePositionDayChange(position),
+        dayChangePercent: this.calculatePositionDayChangePercent(position),
+        lastUpdated: new Date().toISOString(),
+      })) || [];
 
     // Calculate portfolio allocation percentages
-    const totalInvestedValue = enhancedPositions.reduce((sum, pos) => sum + pos.currentValue, 0);
-    const positionsWithAllocation = enhancedPositions.map(position => ({
+    const totalInvestedValue = enhancedPositions.reduce(
+      (sum, pos) => sum + pos.currentValue,
+      0,
+    );
+    const positionsWithAllocation = enhancedPositions.map((position) => ({
       ...position,
-      allocationPercent: totalInvestedValue > 0 ? (position.currentValue / totalInvestedValue) * 100 : 0,
+      allocationPercent:
+        totalInvestedValue > 0
+          ? (position.currentValue / totalInvestedValue) * 100
+          : 0,
     }));
 
     return {
@@ -566,27 +583,32 @@ export class PaperTradingService {
       positions: positionsWithAllocation,
       summary: {
         totalPositions: positionsWithAllocation.length,
-        gainers: positionsWithAllocation.filter(p => p.unrealizedPnL > 0).length,
-        losers: positionsWithAllocation.filter(p => p.unrealizedPnL < 0).length,
+        gainers: positionsWithAllocation.filter((p) => p.unrealizedPnL > 0)
+          .length,
+        losers: positionsWithAllocation.filter((p) => p.unrealizedPnL < 0)
+          .length,
         topGainer: this.getTopPerformer(positionsWithAllocation, 'gain'),
         topLoser: this.getTopPerformer(positionsWithAllocation, 'loss'),
-      }
+      },
     };
   }
 
   /**
    * Get portfolio value at a specific time (for day calculations)
    */
-  private async getPortfolioValueAtTime(portfolioId: number, timestamp: Date): Promise<number> {
+  private async getPortfolioValueAtTime(
+    portfolioId: number,
+    timestamp: Date,
+  ): Promise<number> {
     try {
       // For simplicity, we'll use the previous day's closing value
       // In production, you might want to store hourly snapshots
       const portfolio = await this.getPortfolio(portfolioId);
-      
+
       // If timestamp is today's start, use yesterday's total value as approximation
       const yesterday = new Date(timestamp);
       yesterday.setDate(yesterday.getDate() - 1);
-      
+
       // For now, return portfolio's current value minus today's changes
       // This is a simplified calculation - in production you'd want to store daily snapshots
       return Number(portfolio.totalValue) - Number(portfolio.totalPnL * 0.1); // Rough approximation
@@ -612,7 +634,9 @@ export class PaperTradingService {
   private calculatePositionDayChangePercent(position: any): number {
     const dayChange = this.calculatePositionDayChange(position);
     const currentValue = Number(position.currentValue || position.totalCost);
-    return currentValue > 0 ? Math.round((dayChange / currentValue) * 100 * 100) / 100 : 0;
+    return currentValue > 0
+      ? Math.round((dayChange / currentValue) * 100 * 100) / 100
+      : 0;
   }
 
   /**
@@ -620,26 +644,29 @@ export class PaperTradingService {
    */
   private getTopPerformer(positions: any[], type: 'gain' | 'loss'): any {
     if (positions.length === 0) return null;
-    
+
     if (type === 'gain') {
-      return positions.reduce((prev, current) => 
-        (current.unrealizedReturn > prev.unrealizedReturn) ? current : prev
+      return positions.reduce((prev, current) =>
+        current.unrealizedReturn > prev.unrealizedReturn ? current : prev,
       );
     } else {
-      return positions.reduce((prev, current) => 
-        (current.unrealizedReturn < prev.unrealizedReturn) ? current : prev
+      return positions.reduce((prev, current) =>
+        current.unrealizedReturn < prev.unrealizedReturn ? current : prev,
       );
     }
   }
   /**
    * Batch update multiple portfolios for real-time tracking
    */
-  async updateMultiplePortfoliosRealTime(portfolioIds: number[]): Promise<any[]> {
+  async updateMultiplePortfoliosRealTime(
+    portfolioIds: number[],
+  ): Promise<any[]> {
     const results: any[] = [];
-    
+
     for (const portfolioId of portfolioIds) {
       try {
-        const performance = await this.updatePortfolioRealTimePerformance(portfolioId);
+        const performance =
+          await this.updatePortfolioRealTimePerformance(portfolioId);
         results.push(performance);
       } catch (error) {
         console.error(`Error updating portfolio ${portfolioId}:`, error);
@@ -650,24 +677,27 @@ export class PaperTradingService {
         });
       }
     }
-    
+
     return results;
   }
 
   /**
    * Get trade history for a specific position
    */
-  async getPositionTradeHistory(portfolioId: number, symbol: string): Promise<any[]> {
+  async getPositionTradeHistory(
+    portfolioId: number,
+    symbol: string,
+  ): Promise<any[]> {
     try {
       const trades = await this.tradeRepository.find({
-        where: { 
+        where: {
           portfolioId: portfolioId,
           symbol: symbol.toUpperCase(),
         },
         order: { executedAt: 'DESC' },
       });
 
-      return trades.map(trade => ({
+      return trades.map((trade) => ({
         id: trade.id,
         type: trade.type,
         quantity: trade.quantity,

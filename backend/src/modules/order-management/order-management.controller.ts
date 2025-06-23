@@ -1,0 +1,213 @@
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  ParseIntPipe,
+  Post,
+  Query,
+} from '@nestjs/common';
+import {
+  Order,
+  OrderSide,
+  OrderType,
+  TimeInForce,
+} from '../../entities/order.entity';
+import {
+  CreateOrderDto,
+  OrderManagementService,
+} from './order-management.service';
+
+export class CreateOrderRequestDto {
+  portfolioId: number;
+  symbol: string;
+  orderType: OrderType;
+  side: OrderSide;
+  quantity: number;
+  limitPrice?: number;
+  stopPrice?: number;
+  triggerPrice?: number;
+  timeInForce?: TimeInForce;
+  notes?: string;
+  expiryDate?: string; // ISO date string
+}
+
+export class CreateBracketOrderDto {
+  portfolioId: number;
+  symbol: string;
+  side: OrderSide;
+  quantity: number;
+  entryPrice: number;
+  stopLossPrice: number;
+  takeProfitPrice: number;
+}
+
+@Controller('order-management')
+export class OrderManagementController {
+  constructor(
+    private readonly orderManagementService: OrderManagementService,
+  ) {}
+
+  /**
+   * Create a new order
+   */
+  @Post('orders')
+  async createOrder(
+    @Body() createOrderRequest: CreateOrderRequestDto,
+  ): Promise<Order> {
+    const createOrderDto: CreateOrderDto = {
+      ...createOrderRequest,
+      expiryDate: createOrderRequest.expiryDate
+        ? new Date(createOrderRequest.expiryDate)
+        : undefined,
+    };
+
+    return this.orderManagementService.createOrder(createOrderDto);
+  }
+
+  /**
+   * Get all orders for a portfolio
+   */
+  @Get('portfolios/:portfolioId/orders')
+  async getOrdersByPortfolio(
+    @Param('portfolioId', ParseIntPipe) portfolioId: number,
+  ): Promise<Order[]> {
+    return this.orderManagementService.getOrdersByPortfolio(portfolioId);
+  }
+
+  /**
+   * Get active orders across all portfolios
+   */
+  @Get('orders/active')
+  async getActiveOrders(): Promise<Order[]> {
+    return this.orderManagementService.getActiveOrders();
+  }
+
+  /**
+   * Get a specific order by ID
+   */
+  @Get('orders/:orderId')
+  async getOrder(
+    @Param('orderId', ParseIntPipe) orderId: number,
+  ): Promise<Order> {
+    const orders = await this.orderManagementService.getActiveOrders();
+    const order = orders.find((o) => o.id === orderId);
+
+    if (!order) {
+      throw new Error(`Order ${orderId} not found`);
+    }
+
+    return order;
+  }
+
+  /**
+   * Cancel an order
+   */
+  @Delete('orders/:orderId')
+  async cancelOrder(
+    @Param('orderId', ParseIntPipe) orderId: number,
+    @Query('reason') reason?: string,
+  ): Promise<Order> {
+    return this.orderManagementService.cancelOrder(orderId, reason);
+  }
+
+  /**
+   * Create a bracket order (entry + stop loss + take profit)
+   */
+  @Post('orders/bracket')
+  async createBracketOrder(
+    @Body() bracketOrderDto: CreateBracketOrderDto,
+  ): Promise<{
+    entryOrder: Order;
+    stopLossOrder: Order;
+    takeProfitOrder: Order;
+  }> {
+    return this.orderManagementService.createBracketOrder(
+      bracketOrderDto.portfolioId,
+      bracketOrderDto.symbol,
+      bracketOrderDto.side,
+      bracketOrderDto.quantity,
+      bracketOrderDto.entryPrice,
+      bracketOrderDto.stopLossPrice,
+      bracketOrderDto.takeProfitPrice,
+    );
+  }
+
+  /**
+   * Get order execution history for a portfolio
+   */
+  @Get('portfolios/:portfolioId/orders/history')
+  async getOrderHistory(
+    @Param('portfolioId', ParseIntPipe) portfolioId: number,
+    @Query('limit') limit?: string,
+  ): Promise<Order[]> {
+    const orders =
+      await this.orderManagementService.getOrdersByPortfolio(portfolioId);
+    const limitNum = limit ? parseInt(limit, 10) : 50;
+
+    return orders.filter((order) => order.isExecuted).slice(0, limitNum);
+  }
+
+  /**
+   * Get pending orders for a portfolio
+   */
+  @Get('portfolios/:portfolioId/orders/pending')
+  async getPendingOrders(
+    @Param('portfolioId', ParseIntPipe) portfolioId: number,
+  ): Promise<Order[]> {
+    const orders =
+      await this.orderManagementService.getOrdersByPortfolio(portfolioId);
+    return orders.filter((order) => order.isPending);
+  }
+
+  /**
+   * Get order statistics for a portfolio
+   */
+  @Get('portfolios/:portfolioId/orders/statistics')
+  async getOrderStatistics(
+    @Param('portfolioId', ParseIntPipe) portfolioId: number,
+  ): Promise<{
+    totalOrders: number;
+    executedOrders: number;
+    pendingOrders: number;
+    cancelledOrders: number;
+    totalCommissions: number;
+    avgExecutionTime: number; // in minutes
+  }> {
+    const orders =
+      await this.orderManagementService.getOrdersByPortfolio(portfolioId);
+
+    const executedOrders = orders.filter((o) => o.isExecuted);
+    const pendingOrders = orders.filter((o) => o.isPending);
+    const cancelledOrders = orders.filter((o) => o.isCancelled);
+
+    const totalCommissions = executedOrders.reduce(
+      (sum, order) => sum + Number(order.commission || 0),
+      0,
+    );
+
+    // Calculate average execution time for executed orders
+    const executionTimes = executedOrders
+      .filter((order) => order.executedAt && order.createdAt)
+      .map((order) => {
+        const diff = order.executedAt!.getTime() - order.createdAt.getTime();
+        return diff / (1000 * 60); // Convert to minutes
+      });
+
+    const avgExecutionTime =
+      executionTimes.length > 0
+        ? executionTimes.reduce((sum, time) => sum + time, 0) /
+          executionTimes.length
+        : 0;
+
+    return {
+      totalOrders: orders.length,
+      executedOrders: executedOrders.length,
+      pendingOrders: pendingOrders.length,
+      cancelledOrders: cancelledOrders.length,
+      totalCommissions,
+      avgExecutionTime,
+    };
+  }
+}

@@ -5,6 +5,7 @@ import { useSocket } from "../context/SocketContext";
 import { Stock, TradingSignal } from "../types";
 import "./Dashboard.css";
 import EmptyState from "./EmptyState";
+import NotificationCenter from "./NotificationCenter";
 import PortfolioChart from "./PortfolioChart";
 import PortfolioSummary from "./PortfolioSummary";
 import QuickTrade from "./QuickTrade";
@@ -67,8 +68,7 @@ const Dashboard: React.FC = () => {
   }
 
   return (
-    <div className="dashboard">
-      <header className="dashboard-header">
+    <div className="dashboard">      <header className="dashboard-header">
         <h1>Stock Trading Dashboard</h1>
         <div className="header-info">
           <div
@@ -88,6 +88,7 @@ const Dashboard: React.FC = () => {
               Active Signals: {signals.filter((s) => s.isActive).length}
             </span>
           </div>
+          <NotificationCenter />
         </div>{" "}
       </header>{" "}
       {/* Paper Trading Section */}

@@ -7,14 +7,16 @@ import { Trade } from '../../entities/trade.entity';
 import { StockModule } from '../stock/stock.module';
 import { PaperTradingController } from './paper-trading.controller';
 import { PaperTradingService } from './paper-trading.service';
+import { PortfolioAnalyticsController } from './portfolio-analytics.controller';
+import { PortfolioAnalyticsService } from './portfolio-analytics.service';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Portfolio, Position, Trade, Stock]),
     StockModule,
   ],
-  controllers: [PaperTradingController],
-  providers: [PaperTradingService],
-  exports: [PaperTradingService],
+  controllers: [PaperTradingController, PortfolioAnalyticsController],
+  providers: [PaperTradingService, PortfolioAnalyticsService],
+  exports: [PaperTradingService, PortfolioAnalyticsService],
 })
 export class PaperTradingModule {}

@@ -1,8 +1,8 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React from "react";
 import { BreakoutStrategy } from "../types";
-import RiskManagement from "./RiskManagement";
 import "./BreakoutDisplay.css";
+import RiskManagement from "./RiskManagement";
 
 interface BreakoutDisplayProps {
   breakoutStrategy: BreakoutStrategy;
@@ -825,10 +825,10 @@ const BreakoutDisplay: React.FC<BreakoutDisplayProps> = ({
                   )
                 )}
               </div>
-            </div>          )}
+            </div>
+          )}
         </div>
       )}
-
       {/* Risk Management Analysis */}
       {breakoutStrategy.riskManagement && (
         <div className="risk-management-section">
@@ -839,7 +839,6 @@ const BreakoutDisplay: React.FC<BreakoutDisplayProps> = ({
           />
         </div>
       )}
-
       <div className="support-resistance">
         <div className="sr-level support">
           <span className="sr-label">Support:</span>

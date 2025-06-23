@@ -588,6 +588,47 @@
   }
 }
 
+/* Trading Tabs Styling */
+.trading-tabs-container {
+  margin-top: 20px;
+}
+
+.trading-tabs-container .MuiTabs-root {
+  background: rgba(30, 42, 64, 0.3);
+  border-radius: 12px;
+  padding: 4px;
+  margin-bottom: 24px;
+}
+
+.trading-tabs-container .MuiTab-root {
+  color: #94a3b8 !important;
+  font-weight: 600 !important;
+  text-transform: none !important;
+  border-radius: 8px !important;
+  margin: 0 4px !important;
+  min-height: 48px !important;
+  transition: all 0.3s ease !important;
+}
+
+.trading-tabs-container .MuiTab-root:hover {
+  background: rgba(59, 130, 246, 0.1) !important;
+  color: #e2e8f0 !important;
+}
+
+.trading-tabs-container .MuiTab-root.Mui-selected {
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8) !important;
+  color: white !important;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3) !important;
+}
+
+.trading-tabs-container .MuiTabs-indicator {
+  display: none !important;
+}
+
+.trading-tabs-container .MuiBox-root[role="tabpanel"] {
+  padding: 0 !important;
+}
+
 /* Mobile Responsiveness */
 @media (max-width: 768px) {
   .notifications-container {

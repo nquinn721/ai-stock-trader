@@ -9,7 +9,9 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
+import { OrderManagementService } from '../order-management/order-management.service';
 import { PaperTradingService } from '../paper-trading/paper-trading.service';
+import { PortfolioAnalyticsService } from '../paper-trading/portfolio-analytics.service';
 import { StockService } from '../stock/stock.service';
 
 @WebSocketGateway({
@@ -30,13 +32,22 @@ export class StockWebSocketGateway
 
   private clients: Map<string, Socket> = new Map();
   private portfolioSubscriptions: Map<string, Set<number>> = new Map(); // clientId -> portfolioIds
+  private notificationSubscriptions: Map<string, string> = new Map(); // clientId -> userId
 
   constructor(
     @Inject(forwardRef(() => StockService))
     private stockService: StockService,
     @Inject(forwardRef(() => PaperTradingService))
     private paperTradingService: PaperTradingService,
-  ) {}
+    @Inject(forwardRef(() => PortfolioAnalyticsService))
+    private portfolioAnalyticsService: PortfolioAnalyticsService,
+    @Inject(forwardRef(() => OrderManagementService))
+    private orderManagementService: OrderManagementService,
+  ) {
+    // Set the WebSocket gateway reference in the order management service
+    // to enable WebSocket event emission from the service
+    this.orderManagementService.setWebSocketGateway(this);
+  }
   handleConnection(client: Socket) {
     console.log(`Client connected: ${client.id}`);
     this.clients.set(client.id, client);
@@ -58,6 +69,7 @@ export class StockWebSocketGateway
     console.log(`Client disconnected: ${client.id}`);
     this.clients.delete(client.id);
     this.portfolioSubscriptions.delete(client.id);
+    this.notificationSubscriptions.delete(client.id);
   }
 
   @SubscribeMessage('subscribe_stocks')
@@ -211,7 +223,9 @@ export class StockWebSocketGateway
     try {
       // Use enhanced real-time performance tracking
       const enhancedPerformance =
-        await this.paperTradingService.updatePortfolioRealTimePerformance(portfolioId);
+        await this.paperTradingService.updatePortfolioRealTimePerformance(
+          portfolioId,
+        );
 
       if (client) {
         client.emit('portfolio_update', enhancedPerformance);
@@ -221,7 +235,9 @@ export class StockWebSocketGateway
           .emit('portfolio_update', enhancedPerformance);
       }
 
-      console.log(`📈 Sent enhanced portfolio update for portfolio ${portfolioId}`);
+      console.log(
+        `📈 Sent enhanced portfolio update for portfolio ${portfolioId}`,
+      );
     } catch (error) {
       console.error(
         `Error sending portfolio update for ${portfolioId}:`,
@@ -253,7 +269,10 @@ export class StockWebSocketGateway
 
       // Use batch update for better performance
       const portfolioIdsArray = Array.from(subscribedPortfolioIds);
-      const batchResults = await this.paperTradingService.updateMultiplePortfoliosRealTime(portfolioIdsArray);
+      const batchResults =
+        await this.paperTradingService.updateMultiplePortfoliosRealTime(
+          portfolioIdsArray,
+        );
 
       // Send individual updates to subscribed clients
       for (const result of batchResults) {
@@ -290,9 +309,13 @@ export class StockWebSocketGateway
     try {
       // Get both real-time and historical performance data
       const realTimePerformance =
-        await this.paperTradingService.updatePortfolioRealTimePerformance(data.portfolioId);
+        await this.paperTradingService.updatePortfolioRealTimePerformance(
+          data.portfolioId,
+        );
       const historicalPerformance =
-        await this.paperTradingService.getPortfolioPerformance(data.portfolioId);
+        await this.paperTradingService.getPortfolioPerformance(
+          data.portfolioId,
+        );
 
       const combinedData = {
         ...realTimePerformance,
@@ -302,7 +325,10 @@ export class StockWebSocketGateway
 
       client.emit('portfolio_performance_data', combinedData);
     } catch (error) {
-      console.error(`Error getting portfolio performance for ${data.portfolioId}:`, error);
+      console.error(
+        `Error getting portfolio performance for ${data.portfolioId}:`,
+        error,
+      );
       client.emit('portfolio_error', {
         portfolioId: data.portfolioId,
         message: 'Failed to fetch portfolio performance data',
@@ -322,8 +348,12 @@ export class StockWebSocketGateway
 
     try {
       // Get detailed position information
-      const portfolio = await this.paperTradingService.getPortfolio(data.portfolioId);
-      const position = portfolio.positions?.find(p => p.symbol === data.symbol.toUpperCase());
+      const portfolio = await this.paperTradingService.getPortfolio(
+        data.portfolioId,
+      );
+      const position = portfolio.positions?.find(
+        (p) => p.symbol === data.symbol.toUpperCase(),
+      );
 
       if (!position) {
         client.emit('position_error', {
@@ -336,10 +366,15 @@ export class StockWebSocketGateway
       }
 
       // Update position with latest market data
-      await this.paperTradingService.updatePortfolioRealTimePerformance(data.portfolioId);
+      await this.paperTradingService.updatePortfolioRealTimePerformance(
+        data.portfolioId,
+      );
 
       // Get position trade history
-      const trades = await this.paperTradingService.getPositionTradeHistory(data.portfolioId, data.symbol);
+      const trades = await this.paperTradingService.getPositionTradeHistory(
+        data.portfolioId,
+        data.symbol,
+      );
 
       const positionDetails = {
         portfolioId: data.portfolioId,
@@ -347,7 +382,8 @@ export class StockWebSocketGateway
         position: {
           quantity: position.quantity,
           averagePrice: Number(position.averagePrice),
-          currentValue: Number(position.currentValue) || Number(position.totalCost),
+          currentValue:
+            Number(position.currentValue) || Number(position.totalCost),
           totalCost: Number(position.totalCost),
           unrealizedPnL: Number(position.unrealizedPnL || 0),
           unrealizedReturn: Number(position.unrealizedReturn || 0),
@@ -366,6 +402,420 @@ export class StockWebSocketGateway
         message: 'Failed to fetch position details',
         timestamp: new Date().toISOString(),
       });
+    }
+  }
+
+  @SubscribeMessage('get_portfolio_analytics')
+  async handleGetPortfolioAnalytics(
+    @MessageBody() data: { portfolioId: number },
+    @ConnectedSocket() client: Socket,
+  ) {
+    console.log(
+      `Client ${client.id} requested analytics for portfolio ${data.portfolioId}`,
+    );
+
+    try {
+      const analytics =
+        await this.portfolioAnalyticsService.generatePortfolioAnalytics(
+          data.portfolioId,
+        );
+
+      client.emit('portfolio_analytics', {
+        portfolioId: data.portfolioId,
+        analytics,
+        timestamp: new Date().toISOString(),
+      });
+    } catch (error) {
+      console.error(`Error getting portfolio analytics:`, error);
+      client.emit('portfolio_analytics_error', {
+        portfolioId: data.portfolioId,
+        message: 'Failed to fetch portfolio analytics',
+        timestamp: new Date().toISOString(),
+      });
+    }
+  }
+
+  @SubscribeMessage('get_sector_allocation')
+  async handleGetSectorAllocation(
+    @MessageBody() data: { portfolioId: number },
+    @ConnectedSocket() client: Socket,
+  ) {
+    console.log(
+      `Client ${client.id} requested sector allocation for portfolio ${data.portfolioId}`,
+    );
+
+    try {
+      const analytics =
+        await this.portfolioAnalyticsService.generatePortfolioAnalytics(
+          data.portfolioId,
+        );
+
+      client.emit('sector_allocation', {
+        portfolioId: data.portfolioId,
+        sectorAllocation: analytics.sectorAllocation,
+        timestamp: new Date().toISOString(),
+      });
+    } catch (error) {
+      console.error(`Error getting sector allocation:`, error);
+      client.emit('sector_allocation_error', {
+        portfolioId: data.portfolioId,
+        message: 'Failed to fetch sector allocation',
+        timestamp: new Date().toISOString(),
+      });
+    }
+  }
+
+  @SubscribeMessage('get_performance_attribution')
+  async handleGetPerformanceAttribution(
+    @MessageBody() data: { portfolioId: number },
+    @ConnectedSocket() client: Socket,
+  ) {
+    console.log(
+      `Client ${client.id} requested performance attribution for portfolio ${data.portfolioId}`,
+    );
+
+    try {
+      const analytics =
+        await this.portfolioAnalyticsService.generatePortfolioAnalytics(
+          data.portfolioId,
+        );
+
+      client.emit('performance_attribution', {
+        portfolioId: data.portfolioId,
+        performanceAttribution: analytics.performanceAttribution,
+        timestamp: new Date().toISOString(),
+      });
+    } catch (error) {
+      console.error(`Error getting performance attribution:`, error);
+      client.emit('performance_attribution_error', {
+        portfolioId: data.portfolioId,
+        message: 'Failed to fetch performance attribution',
+        timestamp: new Date().toISOString(),
+      });
+    }
+  }
+
+  @SubscribeMessage('get_risk_metrics')
+  async handleGetRiskMetrics(
+    @MessageBody() data: { portfolioId: number },
+    @ConnectedSocket() client: Socket,
+  ) {
+    console.log(
+      `Client ${client.id} requested risk metrics for portfolio ${data.portfolioId}`,
+    );
+
+    try {
+      const analytics =
+        await this.portfolioAnalyticsService.generatePortfolioAnalytics(
+          data.portfolioId,
+        );
+
+      client.emit('risk_metrics', {
+        portfolioId: data.portfolioId,
+        riskMetrics: analytics.riskMetrics,
+        timestamp: new Date().toISOString(),
+      });
+    } catch (error) {
+      console.error(`Error getting risk metrics:`, error);
+      client.emit('risk_metrics_error', {
+        portfolioId: data.portfolioId,
+        message: 'Failed to fetch risk metrics',
+        timestamp: new Date().toISOString(),
+      });
+    }
+  }
+
+  @SubscribeMessage('get_benchmark_comparison')
+  async handleGetBenchmarkComparison(
+    @MessageBody() data: { portfolioId: number },
+    @ConnectedSocket() client: Socket,
+  ) {
+    console.log(
+      `Client ${client.id} requested benchmark comparison for portfolio ${data.portfolioId}`,
+    );
+
+    try {
+      const analytics =
+        await this.portfolioAnalyticsService.generatePortfolioAnalytics(
+          data.portfolioId,
+        );
+
+      client.emit('benchmark_comparison', {
+        portfolioId: data.portfolioId,
+        benchmarkComparison: analytics.benchmarkComparison,
+        timestamp: new Date().toISOString(),
+      });
+    } catch (error) {
+      console.error(`Error getting benchmark comparison:`, error);
+      client.emit('benchmark_comparison_error', {
+        portfolioId: data.portfolioId,
+        message: 'Failed to fetch benchmark comparison',
+        timestamp: new Date().toISOString(),
+      });
+    }
+  }
+
+  @SubscribeMessage('get_rebalancing_suggestions')
+  async handleGetRebalancingSuggestions(
+    @MessageBody() data: { portfolioId: number },
+    @ConnectedSocket() client: Socket,
+  ) {
+    console.log(
+      `Client ${client.id} requested rebalancing suggestions for portfolio ${data.portfolioId}`,
+    );
+
+    try {
+      const analytics =
+        await this.portfolioAnalyticsService.generatePortfolioAnalytics(
+          data.portfolioId,
+        );
+
+      client.emit('rebalancing_suggestions', {
+        portfolioId: data.portfolioId,
+        rebalancingSuggestions: analytics.rebalancingSuggestions,
+        timestamp: new Date().toISOString(),
+      });
+    } catch (error) {
+      console.error(`Error getting rebalancing suggestions:`, error);
+      client.emit('rebalancing_suggestions_error', {
+        portfolioId: data.portfolioId,
+        message: 'Failed to fetch rebalancing suggestions',
+        timestamp: new Date().toISOString(),
+      });
+    }
+  }
+
+  /**
+   * Broadcast analytics updates to all subscribed clients
+   */
+  async broadcastPortfolioAnalytics(portfolioId: number) {
+    try {
+      const analytics =
+        await this.portfolioAnalyticsService.generatePortfolioAnalytics(
+          portfolioId,
+        );
+
+      // Broadcast to all clients subscribed to this portfolio
+      for (const [
+        clientId,
+        portfolioIds,
+      ] of this.portfolioSubscriptions.entries()) {
+        if (portfolioIds.has(portfolioId)) {
+          const client = this.clients.get(clientId);
+          if (client) {
+            client.emit('portfolio_analytics_update', {
+              portfolioId,
+              analytics,
+              timestamp: new Date().toISOString(),
+            });
+          }
+        }
+      }
+    } catch (error) {
+      console.error(
+        `Error broadcasting portfolio analytics for ${portfolioId}:`,
+        error,
+      );
+    }
+  }
+  @SubscribeMessage('create_order')
+  async handleCreateOrder(
+    @MessageBody() orderData: any,
+    @ConnectedSocket() client: Socket,
+  ) {
+    console.log(`Client ${client.id} creating order`, orderData);
+
+    try {
+      // Validate required fields
+      if (
+        !orderData.portfolioId ||
+        !orderData.symbol ||
+        !orderData.orderType ||
+        !orderData.side ||
+        !orderData.quantity
+      ) {
+        client.emit('order_error', {
+          message: 'Missing required order fields',
+          details:
+            'portfolioId, symbol, orderType, side, and quantity are required',
+        });
+        return;
+      }
+
+      // Create order using the service DTO format
+      const order = await this.orderManagementService.createOrder(orderData);
+
+      // Emit order confirmation to client
+      client.emit('order_created', order);
+
+      // Broadcast new order to all clients
+      this.server.emit('order_book_update', order);
+
+      console.log(`Order created and broadcasted: ${order.id}`);
+    } catch (error) {
+      console.error('Error creating order:', error);
+      client.emit('order_error', {
+        message: 'Failed to create order',
+        details: error.message,
+      });
+    }
+  }
+  @SubscribeMessage('cancel_order')
+  async handleCancelOrder(
+    @MessageBody() data: { orderId: number },
+    @ConnectedSocket() client: Socket,
+  ) {
+    console.log(`Client ${client.id} canceling order ${data.orderId}`);
+
+    try {
+      // Cancel the order
+      const cancelledOrder = await this.orderManagementService.cancelOrder(
+        data.orderId,
+      );
+
+      // Emit cancellation confirmation to client
+      client.emit('order_canceled', { orderId: data.orderId });
+
+      // Broadcast order cancellation to all clients
+      this.server.emit('order_book_update', {
+        orderId: data.orderId,
+        status: 'canceled',
+      });
+
+      console.log(`Order canceled and broadcasted: ${data.orderId}`);
+    } catch (error) {
+      console.error('Error canceling order:', error);
+      client.emit('order_error', {
+        message: 'Failed to cancel order',
+        details: error.message,
+      });
+    }
+  }
+
+  @SubscribeMessage('get_order_book')
+  async handleGetOrderBook(@ConnectedSocket() client: Socket) {
+    console.log(`Client ${client.id} requested order book`);
+
+    try {
+      // Get the complete order book
+      const orderBook = await this.orderManagementService.getOrderBook();
+
+      // Send the order book to the client
+      client.emit('order_book_data', orderBook);
+    } catch (error) {
+      console.error('Error fetching order book:', error);
+      client.emit('order_error', {
+        message: 'Failed to fetch order book',
+        details: error.message,
+      });
+    }
+  }
+
+  // === Notification WebSocket Methods ===
+
+  @SubscribeMessage('subscribe_notifications')
+  handleSubscribeNotifications(
+    @MessageBody() data: { userId: string },
+    @ConnectedSocket() client: Socket,
+  ) {
+    console.log(`Client ${client.id} subscribed to notifications for user ${data.userId}`);
+    
+    // Store user subscription
+    this.notificationSubscriptions.set(client.id, data.userId);
+    
+    // Join user-specific room
+    client.join(`notifications_${data.userId}`);
+  }
+
+  @SubscribeMessage('unsubscribe_notifications')
+  handleUnsubscribeNotifications(@ConnectedSocket() client: Socket) {
+    const userId = this.notificationSubscriptions.get(client.id);
+    if (userId) {
+      console.log(`Client ${client.id} unsubscribed from notifications for user ${userId}`);
+      client.leave(`notifications_${userId}`);
+      this.notificationSubscriptions.delete(client.id);
+    }
+  }
+
+  /**
+   * Send notification to specific user
+   */
+  async sendNotificationToUser(userId: string, notification: any) {
+    try {
+      this.server.to(`notifications_${userId}`).emit('notification', {
+        type: 'new_notification',
+        data: notification,
+        timestamp: new Date().toISOString(),
+      });
+      console.log(`📢 Sent notification to user ${userId}: ${notification.title}`);
+    } catch (error) {
+      console.error(`Error sending notification to user ${userId}:`, error);
+    }
+  }
+
+  /**
+   * Send bulk notifications to user
+   */
+  async sendBulkNotificationsToUser(userId: string, notifications: any[]) {
+    try {
+      this.server.to(`notifications_${userId}`).emit('notifications_bulk', {
+        type: 'bulk_notifications',
+        data: notifications,
+        count: notifications.length,
+        timestamp: new Date().toISOString(),
+      });
+      console.log(`📢 Sent ${notifications.length} notifications to user ${userId}`);
+    } catch (error) {
+      console.error(`Error sending bulk notifications to user ${userId}:`, error);
+    }
+  }
+
+  /**
+   * Send notification status update
+   */
+  async sendNotificationStatusUpdate(userId: string, notificationId: number, status: string) {
+    try {
+      this.server.to(`notifications_${userId}`).emit('notification_status', {
+        type: 'status_update',
+        data: {
+          notificationId,
+          status,
+        },
+        timestamp: new Date().toISOString(),
+      });
+    } catch (error) {
+      console.error(`Error sending notification status update:`, error);
+    }
+  }
+
+  /**
+   * Send unread count update
+   */
+  async sendUnreadCountUpdate(userId: string, count: number) {
+    try {
+      this.server.to(`notifications_${userId}`).emit('unread_count', {
+        type: 'unread_count_update',
+        data: { count },
+        timestamp: new Date().toISOString(),
+      });
+    } catch (error) {
+      console.error(`Error sending unread count update:`, error);
+    }
+  }
+
+  /**
+   * Broadcast system-wide alert (high priority notifications)
+   */
+  async broadcastSystemAlert(alert: any) {
+    try {
+      this.server.emit('system_alert', {
+        type: 'system_alert',
+        data: alert,
+        timestamp: new Date().toISOString(),
+      });
+      console.log(`🚨 Broadcasted system alert: ${alert.title}`);
+    } catch (error) {
+      console.error(`Error broadcasting system alert:`, error);
     }
   }
 }

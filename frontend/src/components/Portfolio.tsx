@@ -3,7 +3,9 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { useSocket } from "../context/SocketContext";
 import { CreateTradeRequest, Portfolio } from "../types";
+import OrderManagement from "./OrderManagement";
 import "./Portfolio.css";
+import { PortfolioAnalyticsDashboard } from "./PortfolioAnalyticsDashboard";
 import PortfolioChart from "./PortfolioChart";
 import StockAutocomplete from "./StockAutocomplete";
 
@@ -63,20 +65,27 @@ const PortfolioComponent: React.FC<PortfolioProps> = ({
               totalReturn: portfolioUpdate.totalReturn || prev.totalReturn,
               currentCash: portfolioUpdate.currentCash || prev.currentCash,
               // Convert EnhancedPosition to Position for compatibility
-              positions: portfolioUpdate.positions?.map(pos => ({
-                id: prev.positions?.find(p => p.symbol === pos.symbol)?.id || 0,
-                portfolioId: portfolioId,
-                stockId: prev.positions?.find(p => p.symbol === pos.symbol)?.stockId || 0,
-                symbol: pos.symbol,
-                quantity: pos.quantity,
-                averagePrice: pos.averagePrice,
-                totalCost: pos.totalCost,
-                currentValue: pos.currentValue,
-                unrealizedPnL: pos.unrealizedPnL,
-                unrealizedReturn: pos.unrealizedReturn,
-                createdAt: prev.positions?.find(p => p.symbol === pos.symbol)?.createdAt || new Date().toISOString(),
-                updatedAt: new Date().toISOString(),
-              })) || prev.positions,
+              positions:
+                portfolioUpdate.positions?.map((pos) => ({
+                  id:
+                    prev.positions?.find((p) => p.symbol === pos.symbol)?.id ||
+                    0,
+                  portfolioId: portfolioId,
+                  stockId:
+                    prev.positions?.find((p) => p.symbol === pos.symbol)
+                      ?.stockId || 0,
+                  symbol: pos.symbol,
+                  quantity: pos.quantity,
+                  averagePrice: pos.averagePrice,
+                  totalCost: pos.totalCost,
+                  currentValue: pos.currentValue,
+                  unrealizedPnL: pos.unrealizedPnL,
+                  unrealizedReturn: pos.unrealizedReturn,
+                  createdAt:
+                    prev.positions?.find((p) => p.symbol === pos.symbol)
+                      ?.createdAt || new Date().toISOString(),
+                  updatedAt: new Date().toISOString(),
+                })) || prev.positions,
             }
           : prev
       );
@@ -300,7 +309,6 @@ const PortfolioComponent: React.FC<PortfolioProps> = ({
             </p>
           )}
         </div>
-
         <div className="trades-section">
           <h2>Recent Trades</h2>
           {portfolio.trades && portfolio.trades.length > 0 ? (
@@ -335,6 +343,18 @@ const PortfolioComponent: React.FC<PortfolioProps> = ({
               No trades yet. Execute your first trade to get started.
             </p>
           )}
+        </div>{" "}
+        {/* Portfolio Analytics Dashboard */}
+        <div className="analytics-section">
+          <h2>Portfolio Analytics</h2>
+          <PortfolioAnalyticsDashboard portfolioId={portfolioId} />
+        </div>
+        {/* Order Management Section */}
+        <div className="order-management-section">
+          <OrderManagement
+            portfolios={portfolio ? [portfolio] : []}
+            selectedPortfolioId={portfolioId}
+          />
         </div>
       </div>
       {showTradeForm && (

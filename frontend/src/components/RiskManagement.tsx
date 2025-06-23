@@ -1,5 +1,5 @@
-import React from 'react';
-import { RiskManagementRecommendation } from '../types';
+import React from "react";
+import { RiskManagementRecommendation } from "../types";
 
 interface RiskManagementProps {
   riskManagement: RiskManagementRecommendation;
@@ -14,45 +14,45 @@ const RiskManagement: React.FC<RiskManagementProps> = ({
 }) => {
   const getRiskColor = (recommendation: string) => {
     switch (recommendation) {
-      case 'PROCEED':
-        return 'text-green-600';
-      case 'REDUCE_SIZE':
-        return 'text-yellow-600';
-      case 'WAIT':
-        return 'text-orange-600';
-      case 'AVOID':
-        return 'text-red-600';
+      case "PROCEED":
+        return "text-green-600";
+      case "REDUCE_SIZE":
+        return "text-yellow-600";
+      case "WAIT":
+        return "text-orange-600";
+      case "AVOID":
+        return "text-red-600";
       default:
-        return 'text-gray-600';
+        return "text-gray-600";
     }
   };
 
   const getPortfolioRiskColor = (risk: string) => {
     switch (risk) {
-      case 'low_risk':
-        return 'text-green-600';
-      case 'moderate_risk':
-        return 'text-yellow-600';
-      case 'high_risk':
-        return 'text-orange-600';
-      case 'excessive_risk':
-        return 'text-red-600';
+      case "low_risk":
+        return "text-green-600";
+      case "moderate_risk":
+        return "text-yellow-600";
+      case "high_risk":
+        return "text-orange-600";
+      case "excessive_risk":
+        return "text-red-600";
       default:
-        return 'text-gray-600';
+        return "text-gray-600";
     }
   };
 
   const getRiskScoreColor = (score: number) => {
-    if (score >= 70) return 'text-green-600';
-    if (score >= 50) return 'text-yellow-600';
-    if (score >= 30) return 'text-orange-600';
-    return 'text-red-600';
+    if (score >= 70) return "text-green-600";
+    if (score >= 50) return "text-yellow-600";
+    if (score >= 30) return "text-orange-600";
+    return "text-red-600";
   };
 
   const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
     }).format(value);
   };
 
@@ -62,13 +62,19 @@ const RiskManagement: React.FC<RiskManagementProps> = ({
 
   return (
     <div className="bg-white p-6 rounded-lg shadow-lg">
-      <h3 className="text-lg font-semibold mb-4">Risk Management Analysis - {symbol}</h3>
-      
+      <h3 className="text-lg font-semibold mb-4">
+        Risk Management Analysis - {symbol}
+      </h3>
+
       {/* Overall Risk Score */}
       <div className="mb-6">
         <div className="flex items-center justify-between mb-2">
           <span className="font-medium">Risk Score</span>
-          <span className={`text-xl font-bold ${getRiskScoreColor(riskManagement.riskScore)}`}>
+          <span
+            className={`text-xl font-bold ${getRiskScoreColor(
+              riskManagement.riskScore
+            )}`}
+          >
             {riskManagement.riskScore}/100
           </span>
         </div>
@@ -76,12 +82,12 @@ const RiskManagement: React.FC<RiskManagementProps> = ({
           <div
             className={`h-2 rounded-full ${
               riskManagement.riskScore >= 70
-                ? 'bg-green-500'
+                ? "bg-green-500"
                 : riskManagement.riskScore >= 50
-                ? 'bg-yellow-500'
+                ? "bg-yellow-500"
                 : riskManagement.riskScore >= 30
-                ? 'bg-orange-500'
-                : 'bg-red-500'
+                ? "bg-orange-500"
+                : "bg-red-500"
             }`}
             style={{ width: `${riskManagement.riskScore}%` }}
           ></div>
@@ -92,7 +98,11 @@ const RiskManagement: React.FC<RiskManagementProps> = ({
       <div className="mb-6 p-4 bg-gray-50 rounded-lg">
         <div className="flex items-center justify-between mb-2">
           <span className="font-medium">Recommendation</span>
-          <span className={`text-lg font-bold ${getRiskColor(riskManagement.recommendation)}`}>
+          <span
+            className={`text-lg font-bold ${getRiskColor(
+              riskManagement.recommendation
+            )}`}
+          >
             {riskManagement.recommendation}
           </span>
         </div>
@@ -125,7 +135,9 @@ const RiskManagement: React.FC<RiskManagementProps> = ({
           <div className="bg-blue-50 p-3 rounded">
             <div className="text-sm text-gray-600">Portfolio Allocation</div>
             <div className="text-lg font-semibold text-blue-600">
-              {formatPercentage(riskManagement.positionSizing.portfolioAllocation)}
+              {formatPercentage(
+                riskManagement.positionSizing.portfolioAllocation
+              )}
             </div>
           </div>
           <div className="bg-blue-50 p-3 rounded">
@@ -150,7 +162,9 @@ const RiskManagement: React.FC<RiskManagementProps> = ({
           <div className="bg-green-50 p-3 rounded">
             <div className="text-sm text-gray-600">Break-Even Win Rate</div>
             <div className="text-lg font-semibold text-green-600">
-              {formatPercentage(riskManagement.riskReward.breakEvenProbability * 100)}
+              {formatPercentage(
+                riskManagement.riskReward.breakEvenProbability * 100
+              )}
             </div>
           </div>
           <div className="bg-green-50 p-3 rounded">
@@ -214,7 +228,8 @@ const RiskManagement: React.FC<RiskManagementProps> = ({
                     Target {index + 1}: {formatCurrency(target.price)}
                   </div>
                   <div className="text-sm text-gray-600">
-                    {target.reasoning} • {formatPercentage(target.percentage)} upside
+                    {target.reasoning} • {formatPercentage(target.percentage)}{" "}
+                    upside
                   </div>
                 </div>
                 <div className="text-right">
@@ -242,19 +257,27 @@ const RiskManagement: React.FC<RiskManagementProps> = ({
           <div className="bg-gray-50 p-3 rounded">
             <div className="text-sm text-gray-600">After Trade Exposure</div>
             <div className="text-lg font-semibold text-gray-700">
-              {formatPercentage(riskManagement.portfolioRisk.afterTradeExposure)}
+              {formatPercentage(
+                riskManagement.portfolioRisk.afterTradeExposure
+              )}
             </div>
           </div>
           <div className="bg-gray-50 p-3 rounded">
             <div className="text-sm text-gray-600">Portfolio Risk Level</div>
-            <div className={`text-lg font-semibold capitalize ${getPortfolioRiskColor(riskManagement.portfolioRisk.recommendation)}`}>
-              {riskManagement.portfolioRisk.recommendation.replace('_', ' ')}
+            <div
+              className={`text-lg font-semibold capitalize ${getPortfolioRiskColor(
+                riskManagement.portfolioRisk.recommendation
+              )}`}
+            >
+              {riskManagement.portfolioRisk.recommendation.replace("_", " ")}
             </div>
           </div>
           <div className="bg-gray-50 p-3 rounded">
             <div className="text-sm text-gray-600">Sector Concentration</div>
             <div className="text-lg font-semibold text-gray-700">
-              {formatPercentage(riskManagement.portfolioRisk.sectorConcentration)}
+              {formatPercentage(
+                riskManagement.portfolioRisk.sectorConcentration
+              )}
             </div>
           </div>
         </div>
