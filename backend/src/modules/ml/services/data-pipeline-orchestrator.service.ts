@@ -1,11 +1,11 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
 import { DataIngestionService } from './data-ingestion.service';
-import { FeaturePipelineService } from './feature-pipeline.service';
+import { DataPreprocessingService } from './data-preprocessing.service';
+import { DataStorageService } from './data-storage.service';
 import { DataValidationService } from './data-validation.service';
 import { DataVersioningService } from './data-versioning.service';
-import { DataStorageService } from './data-storage.service';
-import { DataPreprocessingService } from './data-preprocessing.service';
+import { FeaturePipelineService } from './feature-pipeline.service';
 
 export interface PipelineExecutionMetrics {
   totalDuration: number;
@@ -47,7 +47,9 @@ export class DataPipelineOrchestratorService {
   /**
    * Execute the complete data pipeline
    */
-  async executePipeline(config: PipelineConfig): Promise<PipelineExecutionMetrics> {
+  async executePipeline(
+    config: PipelineConfig,
+  ): Promise<PipelineExecutionMetrics> {
     if (this.isRunning) {
       throw new Error('Pipeline is already running');
     }
@@ -67,7 +69,9 @@ export class DataPipelineOrchestratorService {
     };
 
     try {
-      this.logger.log(`Starting data pipeline execution for ${config.symbols.length} symbols`);
+      this.logger.log(
+        `Starting data pipeline execution for ${config.symbols.length} symbols`,
+      );
 
       // Step 1: Data Ingestion
       if (config.enableHistorical || config.enableRealTime) {
@@ -76,7 +80,9 @@ export class DataPipelineOrchestratorService {
           const ingestionResults = await this.executeDataIngestion(config);
           metrics.recordsProcessed += ingestionResults.totalRecords;
           metrics.ingestionDuration = Date.now() - ingestionStart;
-          this.logger.log(`Data ingestion completed: ${ingestionResults.totalRecords} records`);
+          this.logger.log(
+            `Data ingestion completed: ${ingestionResults.totalRecords} records`,
+          );
         } catch (error) {
           metrics.errors.push(`Ingestion error: ${error.message}`);
           this.logger.error('Data ingestion failed', error);
@@ -90,7 +96,9 @@ export class DataPipelineOrchestratorService {
           const validationResults = await this.executeDataValidation(config);
           metrics.qualityScore = validationResults.overallScore;
           metrics.validationDuration = Date.now() - validationStart;
-          this.logger.log(`Data validation completed: ${validationResults.overallScore}% quality`);
+          this.logger.log(
+            `Data validation completed: ${validationResults.overallScore}% quality`,
+          );
         } catch (error) {
           metrics.errors.push(`Validation error: ${error.message}`);
           this.logger.error('Data validation failed', error);
@@ -104,7 +112,9 @@ export class DataPipelineOrchestratorService {
           const featureResults = await this.executeFeatureEngineering(config);
           metrics.featuresGenerated = featureResults.totalFeatures;
           metrics.featureDuration = Date.now() - featureStart;
-          this.logger.log(`Feature engineering completed: ${featureResults.totalFeatures} features`);
+          this.logger.log(
+            `Feature engineering completed: ${featureResults.totalFeatures} features`,
+          );
         } catch (error) {
           metrics.errors.push(`Feature engineering error: ${error.message}`);
           this.logger.error('Feature engineering failed', error);
@@ -134,7 +144,9 @@ export class DataPipelineOrchestratorService {
       }
 
       metrics.totalDuration = Date.now() - startTime;
-      this.logger.log(`Pipeline execution completed in ${metrics.totalDuration}ms`);
+      this.logger.log(
+        `Pipeline execution completed in ${metrics.totalDuration}ms`,
+      );
 
       return metrics;
     } finally {
@@ -145,54 +157,67 @@ export class DataPipelineOrchestratorService {
   /**
    * Execute data ingestion phase
    */
-  private async executeDataIngestion(config: PipelineConfig): Promise<{ totalRecords: number }> {
+  private async executeDataIngestion(
+    config: PipelineConfig,
+  ): Promise<{ totalRecords: number }> {
     let totalRecords = 0;
 
     for (const symbol of config.symbols) {
       try {
         if (config.enableHistorical) {
-          const historicalData = await this.dataIngestionService.ingestHistoricalData(
-            symbol,
-            '1y', // 1 year of historical data
-          );
+          const historicalData =
+            await this.dataIngestionService.ingestHistoricalData(
+              symbol,
+              '1y', // 1 year of historical data
+            );
           totalRecords += historicalData.length;
         }
 
         if (config.enableRealTime) {
-          const realtimeData = await this.dataIngestionService.ingestRealTimeData([symbol]);
+          const realtimeData =
+            await this.dataIngestionService.ingestRealTimeData([symbol]);
           totalRecords += realtimeData.length;
         }
       } catch (error) {
-        this.logger.warn(`Failed to ingest data for symbol ${symbol}: ${error.message}`);
+        this.logger.warn(
+          `Failed to ingest data for symbol ${symbol}: ${error.message}`,
+        );
       }
     }
 
     return { totalRecords };
-  }  /**
+  } /**
    * Execute data validation phase
    */
-  private async executeDataValidation(config: PipelineConfig): Promise<{ overallScore: number }> {
+  private async executeDataValidation(
+    config: PipelineConfig,
+  ): Promise<{ overallScore: number }> {
     let totalScore = 0;
     let validSymbols = 0;
 
     for (const symbol of config.symbols) {
       try {
         // Create sample market data for validation
-        const sampleData = [{
-          symbol,
-          timestamp: new Date(),
-          open: 100,
-          high: 105,
-          low: 98,
-          close: 102,
-          volume: 1000000,
-        }];
-        
-        const validationResult = await this.dataValidationService.validateMarketData(sampleData);
+        const sampleData = [
+          {
+            symbol,
+            timestamp: new Date(),
+            open: 100,
+            high: 105,
+            low: 98,
+            close: 102,
+            volume: 1000000,
+          },
+        ];
+
+        const validationResult =
+          await this.dataValidationService.validateMarketData(sampleData);
         totalScore += validationResult.overall_score;
         validSymbols++;
       } catch (error) {
-        this.logger.warn(`Failed to validate data for symbol ${symbol}: ${error.message}`);
+        this.logger.warn(
+          `Failed to validate data for symbol ${symbol}: ${error.message}`,
+        );
       }
     }
 
@@ -203,31 +228,40 @@ export class DataPipelineOrchestratorService {
   /**
    * Execute feature engineering phase
    */
-  private async executeFeatureEngineering(config: PipelineConfig): Promise<{ totalFeatures: number }> {
+  private async executeFeatureEngineering(
+    config: PipelineConfig,
+  ): Promise<{ totalFeatures: number }> {
     let totalFeatures = 0;
 
     for (const symbol of config.symbols) {
       try {
         // Create sample market data for feature engineering
-        const sampleData = [{
-          symbol,
-          timestamp: new Date(),
-          open: 100,
-          high: 105,
-          low: 98,
-          close: 102,
-          volume: 1000000,
-        }];
-        
-        const features = await this.featurePipelineService.extractFeatures(sampleData, '1d');
+        const sampleData = [
+          {
+            symbol,
+            timestamp: new Date(),
+            open: 100,
+            high: 105,
+            low: 98,
+            close: 102,
+            volume: 1000000,
+          },
+        ];
+
+        const features = await this.featurePipelineService.extractFeatures(
+          sampleData,
+          '1d',
+        );
         totalFeatures += Object.keys(features).length;
       } catch (error) {
-        this.logger.warn(`Failed to generate features for symbol ${symbol}: ${error.message}`);
+        this.logger.warn(
+          `Failed to generate features for symbol ${symbol}: ${error.message}`,
+        );
       }
     }
 
     return { totalFeatures };
-  }  /**
+  } /**
    * Execute data versioning phase
    */
   private async executeDataVersioning(
@@ -236,29 +270,42 @@ export class DataPipelineOrchestratorService {
   ): Promise<void> {
     try {
       const versionData = {
-        name: `pipeline-${Date.now()}`,
+        datasetName: `pipeline-${Date.now()}`,
         description: `Automated pipeline execution`,
-        features: [`${metrics.featuresGenerated} features generated`],
-        datasetInfo: {
-          symbols: config.symbols.length,
-          records: metrics.recordsProcessed,
-          qualityScore: metrics.qualityScore,
+        dataPath: `/data/pipeline-${Date.now()}.json`,
+        size: metrics.recordsProcessed * 1024, // Estimated size
+        rowCount: metrics.recordsProcessed,
+        columnCount: metrics.featuresGenerated,
+        metadata: {
+          features: [`${metrics.featuresGenerated} features generated`],
+          datasetInfo: {
+            symbols: config.symbols.length,
+            records: metrics.recordsProcessed,
+            qualityScore: metrics.qualityScore,
+          },
         },
+        tags: ['automated', 'pipeline', 'ml'],
       };
 
-      const version = await this.dataVersioningService.createDatasetVersion(versionData);
+      const version =
+        await this.dataVersioningService.createDatasetVersion(versionData);
       this.logger.log(`Created data version: ${version.id}`);
     } catch (error) {
       this.logger.warn(`Data versioning failed: ${error.message}`);
     }
-  }  /**
+  } /**
    * Execute storage optimization phase
    */
-  private async executeStorageOptimization(config: PipelineConfig): Promise<void> {
+  private async executeStorageOptimization(
+    config: PipelineConfig,
+  ): Promise<void> {
     try {
       // Optimize storage using available methods
-      const optimizationResult = await this.dataStorageService.optimizeMLQueries('training');
-      this.logger.log(`Storage optimization completed: query cache enabled: ${optimizationResult.enableQueryCache}`);
+      const optimizationResult =
+        await this.dataStorageService.optimizeMLQueries('training');
+      this.logger.log(
+        `Storage optimization completed: query cache enabled: ${optimizationResult.enableQueryCache}`,
+      );
     } catch (error) {
       this.logger.warn(`Storage optimization failed: ${error.message}`);
     }
@@ -269,9 +316,15 @@ export class DataPipelineOrchestratorService {
    */
   async getPipelineHealth(): Promise<{
     status: 'healthy' | 'warning' | 'critical';
-    components: Record<string, { status: string; lastCheck: Date; details?: string }>;
+    components: Record<
+      string,
+      { status: string; lastCheck: Date; details?: string }
+    >;
   }> {
-    const components: Record<string, { status: string; lastCheck: Date; details?: string }> = {};
+    const components: Record<
+      string,
+      { status: string; lastCheck: Date; details?: string }
+    > = {};
 
     try {
       // Basic health checks for all components
@@ -324,7 +377,9 @@ export class DataPipelineOrchestratorService {
   @Cron('0 */2 * * *')
   async scheduledPipelineExecution(): Promise<void> {
     if (this.isRunning) {
-      this.logger.warn('Skipping scheduled pipeline execution - already running');
+      this.logger.warn(
+        'Skipping scheduled pipeline execution - already running',
+      );
       return;
     }
 
@@ -343,7 +398,7 @@ export class DataPipelineOrchestratorService {
       const metrics = await this.executePipeline(config);
       this.logger.log(
         `Scheduled pipeline execution completed. Processed ${metrics.recordsProcessed} records, ` +
-        `generated ${metrics.featuresGenerated} features, quality score: ${metrics.qualityScore}%`,
+          `generated ${metrics.featuresGenerated} features, quality score: ${metrics.qualityScore}%`,
       );
     } catch (error) {
       this.logger.error('Scheduled pipeline execution failed', error);

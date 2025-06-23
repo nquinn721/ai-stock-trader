@@ -37,24 +37,48 @@ export class FeaturePipelineService {
   private readonly defaultConfig: FeaturePipelineConfig = {
     timeframes: ['1m', '5m', '15m', '1h', '1d'],
     indicators: [
-      'sma_10', 'sma_20', 'sma_50', 'sma_200',
-      'ema_12', 'ema_26', 'ema_50',
-      'rsi_14', 'rsi_21',
-      'macd', 'macd_signal', 'macd_histogram',
-      'bb_upper', 'bb_middle', 'bb_lower', 'bb_width',
-      'stoch_k', 'stoch_d',
-      'atr_14', 'atr_21',
-      'obv', 'ad_line',
-      'williams_r', 'cci',
-      'momentum_10', 'momentum_20',
-      'roc_10', 'roc_20',
-      'ppo', 'ppo_signal',
-      'tsi', 'ultimate_oscillator',
-      'vwap', 'volume_ratio',
-      'price_change_1d', 'price_change_5d',
-      'volatility_10d', 'volatility_20d',
-      'support_level', 'resistance_level',
-      'trend_strength', 'market_cap_rank'
+      'sma_10',
+      'sma_20',
+      'sma_50',
+      'sma_200',
+      'ema_12',
+      'ema_26',
+      'ema_50',
+      'rsi_14',
+      'rsi_21',
+      'macd',
+      'macd_signal',
+      'macd_histogram',
+      'bb_upper',
+      'bb_middle',
+      'bb_lower',
+      'bb_width',
+      'stoch_k',
+      'stoch_d',
+      'atr_14',
+      'atr_21',
+      'obv',
+      'ad_line',
+      'williams_r',
+      'cci',
+      'momentum_10',
+      'momentum_20',
+      'roc_10',
+      'roc_20',
+      'ppo',
+      'ppo_signal',
+      'tsi',
+      'ultimate_oscillator',
+      'vwap',
+      'volume_ratio',
+      'price_change_1d',
+      'price_change_5d',
+      'volatility_10d',
+      'volatility_20d',
+      'support_level',
+      'resistance_level',
+      'trend_strength',
+      'market_cap_rank',
     ],
     lookbackPeriods: [10, 20, 50, 100, 200],
     enableRealTime: true,
@@ -74,26 +98,39 @@ export class FeaturePipelineService {
     config: Partial<FeaturePipelineConfig> = {},
   ): Promise<FeatureSet[]> {
     const pipelineConfig = { ...this.defaultConfig, ...config };
-    
-    this.logger.debug(`Extracting features for ${symbol} with ${marketData.length} data points`);
+
+    this.logger.debug(
+      `Extracting features for ${symbol} with ${marketData.length} data points`,
+    );
 
     if (marketData.length < 200) {
-      this.logger.warn(`Insufficient data for ${symbol}: ${marketData.length} points (need at least 200)`);
+      this.logger.warn(
+        `Insufficient data for ${symbol}: ${marketData.length} points (need at least 200)`,
+      );
     }
 
     const featureSets: FeatureSet[] = [];
-    
+
     // Sort data by timestamp
-    const sortedData = marketData.sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
+    const sortedData = marketData.sort(
+      (a, b) => a.timestamp.getTime() - b.timestamp.getTime(),
+    );
 
     // Process each timeframe
     for (const timeframe of pipelineConfig.timeframes) {
       const timeframeData = this.aggregateToTimeframe(sortedData, timeframe);
-      const timeframeFeatures = await this.extractTimeframeFeatures(timeframeData, symbol, timeframe, pipelineConfig);
+      const timeframeFeatures = await this.extractTimeframeFeatures(
+        timeframeData,
+        symbol,
+        timeframe,
+        pipelineConfig,
+      );
       featureSets.push(...timeframeFeatures);
     }
 
-    this.logger.debug(`Generated ${featureSets.length} feature sets for ${symbol}`);
+    this.logger.debug(
+      `Generated ${featureSets.length} feature sets for ${symbol}`,
+    );
     return featureSets;
   }
 
@@ -116,21 +153,26 @@ export class FeaturePipelineService {
 
       // Price-based features
       this.addPriceFeatures(currentData, features, indicators, timeframe);
-      
+
       // Volume-based features
       this.addVolumeFeatures(currentData, features, indicators, timeframe);
-      
+
       // Technical indicators
       this.addTechnicalIndicators(currentData, features, indicators, timeframe);
-      
+
       // Volatility features
       this.addVolatilityFeatures(currentData, features, indicators, timeframe);
-      
+
       // Momentum features
       this.addMomentumFeatures(currentData, features, indicators, timeframe);
-      
+
       // Support/Resistance features
-      this.addSupportResistanceFeatures(currentData, features, indicators, timeframe);
+      this.addSupportResistanceFeatures(
+        currentData,
+        features,
+        indicators,
+        timeframe,
+      );
 
       // Market regime features
       const metadata = this.calculateMetadata(currentData);
@@ -157,18 +199,18 @@ export class FeaturePipelineService {
     indicators: TechnicalIndicator[],
     timeframe: string,
   ): void {
-    const closes = data.map(d => d.close);
-    const highs = data.map(d => d.high);
-    const lows = data.map(d => d.low);
+    const closes = data.map((d) => d.close);
+    const highs = data.map((d) => d.high);
+    const lows = data.map((d) => d.low);
     const currentPrice = closes[closes.length - 1];
     const timestamp = data[data.length - 1].timestamp;
 
     // Moving averages
-    [10, 20, 50, 200].forEach(period => {
+    [10, 20, 50, 200].forEach((period) => {
       if (closes.length >= period) {
         const sma = this.calculateSMA(closes, period);
         const ema = this.calculateEMA(closes, period);
-        
+
         features.set(`sma_${period}`, sma);
         features.set(`ema_${period}`, ema);
         features.set(`price_vs_sma_${period}`, (currentPrice - sma) / sma);
@@ -186,10 +228,13 @@ export class FeaturePipelineService {
     // High/Low ratios
     const high20 = Math.max(...highs.slice(-20));
     const low20 = Math.min(...lows.slice(-20));
-    features.set('price_position_20d', (currentPrice - low20) / (high20 - low20));
+    features.set(
+      'price_position_20d',
+      (currentPrice - low20) / (high20 - low20),
+    );
 
     // Price changes
-    [1, 5, 10, 20].forEach(period => {
+    [1, 5, 10, 20].forEach((period) => {
       if (closes.length > period) {
         const pastPrice = closes[closes.length - 1 - period];
         const change = (currentPrice - pastPrice) / pastPrice;
@@ -207,13 +252,13 @@ export class FeaturePipelineService {
     indicators: TechnicalIndicator[],
     timeframe: string,
   ): void {
-    const volumes = data.map(d => d.volume);
-    const closes = data.map(d => d.close);
+    const volumes = data.map((d) => d.volume);
+    const closes = data.map((d) => d.close);
     const currentVolume = volumes[volumes.length - 1];
     const timestamp = data[data.length - 1].timestamp;
 
     // Volume moving averages
-    [10, 20].forEach(period => {
+    [10, 20].forEach((period) => {
       if (volumes.length >= period) {
         const avgVolume = this.calculateSMA(volumes, period);
         features.set(`volume_ratio_${period}d`, currentVolume / avgVolume);
@@ -250,13 +295,13 @@ export class FeaturePipelineService {
     indicators: TechnicalIndicator[],
     timeframe: string,
   ): void {
-    const closes = data.map(d => d.close);
-    const highs = data.map(d => d.high);
-    const lows = data.map(d => d.low);
+    const closes = data.map((d) => d.close);
+    const highs = data.map((d) => d.high);
+    const lows = data.map((d) => d.low);
     const timestamp = data[data.length - 1].timestamp;
 
     // RSI
-    [14, 21].forEach(period => {
+    [14, 21].forEach((period) => {
       if (closes.length >= period + 1) {
         const rsi = this.calculateRSI(closes, period);
         features.set(`rsi_${period}`, rsi);
@@ -291,7 +336,10 @@ export class FeaturePipelineService {
       features.set('bb_middle', bb.middle);
       features.set('bb_lower', bb.lower);
       features.set('bb_width', (bb.upper - bb.lower) / bb.middle);
-      features.set('bb_position', (closes[closes.length - 1] - bb.lower) / (bb.upper - bb.lower));
+      features.set(
+        'bb_position',
+        (closes[closes.length - 1] - bb.lower) / (bb.upper - bb.lower),
+      );
     }
 
     // Stochastic
@@ -302,7 +350,7 @@ export class FeaturePipelineService {
     }
 
     // ATR
-    [14, 21].forEach(period => {
+    [14, 21].forEach((period) => {
       if (data.length >= period) {
         const atr = this.calculateATR(data, period);
         features.set(`atr_${period}`, atr);
@@ -331,9 +379,9 @@ export class FeaturePipelineService {
     indicators: TechnicalIndicator[],
     timeframe: string,
   ): void {
-    const closes = data.map(d => d.close);
+    const closes = data.map((d) => d.close);
 
-    [10, 20, 50].forEach(period => {
+    [10, 20, 50].forEach((period) => {
       if (closes.length >= period) {
         const volatility = this.calculateVolatility(closes, period);
         features.set(`volatility_${period}d`, volatility);
@@ -357,18 +405,19 @@ export class FeaturePipelineService {
     indicators: TechnicalIndicator[],
     timeframe: string,
   ): void {
-    const closes = data.map(d => d.close);
+    const closes = data.map((d) => d.close);
 
     // Momentum
-    [10, 20].forEach(period => {
+    [10, 20].forEach((period) => {
       if (closes.length >= period) {
-        const momentum = closes[closes.length - 1] / closes[closes.length - 1 - period] - 1;
+        const momentum =
+          closes[closes.length - 1] / closes[closes.length - 1 - period] - 1;
         features.set(`momentum_${period}`, momentum);
       }
     });
 
     // Rate of Change
-    [10, 20].forEach(period => {
+    [10, 20].forEach((period) => {
       if (closes.length >= period) {
         const roc = this.calculateROC(closes, period);
         features.set(`roc_${period}`, roc);
@@ -394,11 +443,17 @@ export class FeaturePipelineService {
     if (data.length >= 50) {
       const levels = this.calculateSupportResistanceLevels(data);
       const currentPrice = data[data.length - 1].close;
-      
+
       features.set('support_level', levels.support);
       features.set('resistance_level', levels.resistance);
-      features.set('distance_to_support', (currentPrice - levels.support) / currentPrice);
-      features.set('distance_to_resistance', (levels.resistance - currentPrice) / currentPrice);
+      features.set(
+        'distance_to_support',
+        (currentPrice - levels.support) / currentPrice,
+      );
+      features.set(
+        'distance_to_resistance',
+        (levels.resistance - currentPrice) / currentPrice,
+      );
     }
   }
 
@@ -406,29 +461,30 @@ export class FeaturePipelineService {
    * Calculate metadata
    */
   private calculateMetadata(data: MarketDataPoint[]): FeatureSet['metadata'] {
-    const closes = data.map(d => d.close);
-    const volumes = data.map(d => d.volume);
-    
+    const closes = data.map((d) => d.close);
+    const volumes = data.map((d) => d.volume);
+
     const currentVolume = volumes[volumes.length - 1];
     const avgVolume = volumes.slice(-20).reduce((a, b) => a + b, 0) / 20;
-    
+
     const volatility = this.calculateVolatility(closes, 20);
-    
+
     // Determine trend
     const sma20 = this.calculateSMA(closes, 20);
     const sma50 = this.calculateSMA(closes, 50);
     let trend: 'up' | 'down' | 'sideways' = 'sideways';
-    
+
     if (sma20 > sma50 * 1.02) trend = 'up';
     else if (sma20 < sma50 * 0.98) trend = 'down';
-    
+
     // Determine market regime
     const price = closes[closes.length - 1];
     const sma200 = this.calculateSMA(closes, 200);
     let marketRegime: 'bullish' | 'bearish' | 'neutral' = 'neutral';
-    
+
     if (price > sma200 * 1.05 && trend === 'up') marketRegime = 'bullish';
-    else if (price < sma200 * 0.95 && trend === 'down') marketRegime = 'bearish';
+    else if (price < sma200 * 0.95 && trend === 'down')
+      marketRegime = 'bearish';
 
     return {
       volume: currentVolume,
@@ -441,7 +497,10 @@ export class FeaturePipelineService {
   /**
    * Aggregate data to specific timeframe
    */
-  private aggregateToTimeframe(data: MarketDataPoint[], timeframe: string): MarketDataPoint[] {
+  private aggregateToTimeframe(
+    data: MarketDataPoint[],
+    timeframe: string,
+  ): MarketDataPoint[] {
     // For now, return original data - implement proper aggregation logic
     // This would group data points by timeframe (e.g., 5m, 1h) and create OHLCV bars
     return data;
@@ -456,118 +515,135 @@ export class FeaturePipelineService {
 
   private calculateEMA(values: number[], period: number): number {
     if (values.length < period) return values[values.length - 1] || 0;
-    
+
     const multiplier = 2 / (period + 1);
     let ema = this.calculateSMA(values.slice(0, period), period);
-    
+
     for (let i = period; i < values.length; i++) {
       ema = (values[i] - ema) * multiplier + ema;
     }
-    
+
     return ema;
   }
 
   private calculateRSI(closes: number[], period: number): number {
     if (closes.length < period + 1) return 50;
-    
+
     let gains = 0;
     let losses = 0;
-    
+
     for (let i = closes.length - period; i < closes.length; i++) {
       const change = closes[i] - closes[i - 1];
       if (change > 0) gains += change;
       else losses -= change;
     }
-    
+
     const avgGain = gains / period;
     const avgLoss = losses / period;
-    
+
     if (avgLoss === 0) return 100;
-    
+
     const rs = avgGain / avgLoss;
-    return 100 - (100 / (1 + rs));
+    return 100 - 100 / (1 + rs);
   }
 
-  private calculateMACD(closes: number[]): { macd: number; signal: number; histogram: number } {
+  private calculateMACD(closes: number[]): {
+    macd: number;
+    signal: number;
+    histogram: number;
+  } {
     const ema12 = this.calculateEMA(closes, 12);
     const ema26 = this.calculateEMA(closes, 26);
     const macd = ema12 - ema26;
-    
+
     // For signal line, we'd need to calculate EMA of MACD values
     // Simplified version:
     const signal = macd * 0.8; // Approximation
     const histogram = macd - signal;
-    
+
     return { macd, signal, histogram };
   }
 
-  private calculateBollingerBands(closes: number[], period: number, stdDev: number): {
-    upper: number; middle: number; lower: number;
+  private calculateBollingerBands(
+    closes: number[],
+    period: number,
+    stdDev: number,
+  ): {
+    upper: number;
+    middle: number;
+    lower: number;
   } {
     const middle = this.calculateSMA(closes, period);
-    const variance = closes.slice(-period).reduce((sum, value) => {
-      return sum + Math.pow(value - middle, 2);
-    }, 0) / period;
+    const variance =
+      closes.slice(-period).reduce((sum, value) => {
+        return sum + Math.pow(value - middle, 2);
+      }, 0) / period;
     const standardDeviation = Math.sqrt(variance);
-    
+
     return {
-      upper: middle + (standardDeviation * stdDev),
+      upper: middle + standardDeviation * stdDev,
       middle,
-      lower: middle - (standardDeviation * stdDev),
+      lower: middle - standardDeviation * stdDev,
     };
   }
 
-  private calculateStochastic(highs: number[], lows: number[], closes: number[], period: number): {
-    k: number; d: number;
+  private calculateStochastic(
+    highs: number[],
+    lows: number[],
+    closes: number[],
+    period: number,
+  ): {
+    k: number;
+    d: number;
   } {
     const recentHighs = highs.slice(-period);
     const recentLows = lows.slice(-period);
     const currentClose = closes[closes.length - 1];
-    
+
     const highestHigh = Math.max(...recentHighs);
     const lowestLow = Math.min(...recentLows);
-    
+
     const k = ((currentClose - lowestLow) / (highestHigh - lowestLow)) * 100;
     const d = k * 0.8; // Simplified - should be SMA of %K
-    
+
     return { k, d };
   }
   private calculateATR(data: MarketDataPoint[], period: number): number {
     if (data.length < period + 1) return 0;
-    
+
     const trueRanges: number[] = [];
     for (let i = 1; i < data.length; i++) {
       const high = data[i].high;
       const low = data[i].low;
       const prevClose = data[i - 1].close;
-      
+
       const tr = Math.max(
         high - low,
         Math.abs(high - prevClose),
-        Math.abs(low - prevClose)
+        Math.abs(low - prevClose),
       );
       trueRanges.push(tr);
     }
-    
+
     return this.calculateSMA(trueRanges, period);
   }
 
   private calculateVWAP(data: MarketDataPoint[]): number {
     let volumeSum = 0;
     let priceVolumeSum = 0;
-    
-    data.forEach(point => {
+
+    data.forEach((point) => {
       const typicalPrice = (point.high + point.low + point.close) / 3;
       priceVolumeSum += typicalPrice * point.volume;
       volumeSum += point.volume;
     });
-    
+
     return volumeSum > 0 ? priceVolumeSum / volumeSum : 0;
   }
 
   private calculateOBV(data: MarketDataPoint[]): number {
     let obv = 0;
-    
+
     for (let i = 1; i < data.length; i++) {
       if (data[i].close > data[i - 1].close) {
         obv += data[i].volume;
@@ -575,75 +651,86 @@ export class FeaturePipelineService {
         obv -= data[i].volume;
       }
     }
-    
+
     return obv;
   }
 
-  private calculateWilliamsR(highs: number[], lows: number[], closes: number[], period: number): number {
+  private calculateWilliamsR(
+    highs: number[],
+    lows: number[],
+    closes: number[],
+    period: number,
+  ): number {
     const recentHighs = highs.slice(-period);
     const recentLows = lows.slice(-period);
     const currentClose = closes[closes.length - 1];
-    
+
     const highestHigh = Math.max(...recentHighs);
     const lowestLow = Math.min(...recentLows);
-    
+
     return ((highestHigh - currentClose) / (highestHigh - lowestLow)) * -100;
   }
 
   private calculateCCI(data: MarketDataPoint[], period: number): number {
-    const typicalPrices = data.slice(-period).map(d => (d.high + d.low + d.close) / 3);
+    const typicalPrices = data
+      .slice(-period)
+      .map((d) => (d.high + d.low + d.close) / 3);
     const sma = this.calculateSMA(typicalPrices, period);
-    
-    const meanDeviation = typicalPrices.reduce((sum, tp) => sum + Math.abs(tp - sma), 0) / period;
+
+    const meanDeviation =
+      typicalPrices.reduce((sum, tp) => sum + Math.abs(tp - sma), 0) / period;
     const currentTP = typicalPrices[typicalPrices.length - 1];
-    
+
     return (currentTP - sma) / (0.015 * meanDeviation);
   }
   private calculateVolatility(closes: number[], period: number): number {
     if (closes.length < period) return 0;
-    
+
     const returns: number[] = [];
     for (let i = closes.length - period; i < closes.length - 1; i++) {
       returns.push(Math.log(closes[i + 1] / closes[i]));
     }
-    
+
     const mean = returns.reduce((a, b) => a + b, 0) / returns.length;
-    const variance = returns.reduce((sum, ret) => sum + Math.pow(ret - mean, 2), 0) / returns.length;
-    
+    const variance =
+      returns.reduce((sum, ret) => sum + Math.pow(ret - mean, 2), 0) /
+      returns.length;
+
     return Math.sqrt(variance * 252); // Annualized volatility
   }
 
   private calculateROC(closes: number[], period: number): number {
     if (closes.length < period + 1) return 0;
-    
+
     const current = closes[closes.length - 1];
     const past = closes[closes.length - 1 - period];
-    
+
     return ((current - past) / past) * 100;
   }
 
   private calculateTrendStrength(closes: number[]): number {
     if (closes.length < 20) return 0;
-    
+
     let upDays = 0;
     for (let i = closes.length - 19; i < closes.length; i++) {
       if (closes[i] > closes[i - 1]) upDays++;
     }
-    
+
     return (upDays / 19) * 2 - 1; // Range: -1 to 1
   }
 
   private calculateSupportResistanceLevels(data: MarketDataPoint[]): {
-    support: number; resistance: number;
+    support: number;
+    resistance: number;
   } {
-    const closes = data.map(d => d.close);
-    const highs = data.map(d => d.high);
-    const lows = data.map(d => d.low);
-    
+    const closes = data.map((d) => d.close);
+    const highs = data.map((d) => d.high);
+    const lows = data.map((d) => d.low);
+
     // Simplified support/resistance calculation
     const support = Math.min(...lows.slice(-50));
     const resistance = Math.max(...highs.slice(-50));
-    
+
     return { support, resistance };
   }
 }

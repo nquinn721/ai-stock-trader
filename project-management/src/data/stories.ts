@@ -493,23 +493,20 @@ export const stories: Story[] = [
     progress: 0,
     dependencies: [],
     createdDate: "2025-06-23",
-    completedDate: "2025-06-23",  },
+    completedDate: "2025-06-23",
+  },
 
-  // === ML INFRASTRUCTURE IMPLEMENTATION PHASE STORIES ===
-  
-  // S27 Phase 1: Foundation Infrastructure
+  // === ML INFRASTRUCTURE IMPLEMENTATION PHASE STORIES ===  // S27 Phase 1: Foundation Infrastructure
   {
     id: "S27A",
     title: "ML Infrastructure Foundation - Data Pipeline",
     description:
-      "Establish the foundational data pipeline for ML model training and inference. Create data ingestion services for historical and real-time market data, implement feature engineering pipeline with technical indicators calculation, establish data validation and quality checks, create data versioning and lineage tracking, and implement efficient data storage solutions optimized for ML workloads. Include automated data preprocessing, normalization, and feature extraction processes.",
-    status: "DONE",
+      "Establish the foundational data pipeline for ML model training and inference. Create data ingestion services for historical and real-time market data, implement feature engineering pipeline with technical indicators calculation, establish data validation and quality checks, create data versioning and lineage tracking, and implement efficient data storage solutions optimized for ML workloads. Include automated data preprocessing, normalization, and feature extraction processes.",    status: "DONE",
     priority: "High",
     epic: "E3",
     storyPoints: 13,
     sprint: 5,
-    assignee: "AI Assistant",
-    progress: 100,
+    assignee: "AI Assistant",    progress: 100,
     dependencies: ["S26"],
     createdDate: "2025-06-23",
     completedDate: "2025-06-23",
@@ -519,7 +516,7 @@ export const stories: Story[] = [
     title: "ML Model Training Infrastructure",
     description:
       "Set up comprehensive ML model training infrastructure including model training pipeline with automated hyperparameter tuning, cross-validation framework for model validation, experiment tracking and management system, model versioning and artifact storage, automated model evaluation and comparison tools, and integration with cloud computing resources for scalable training. Implement MLOps best practices for reproducible model development.",
-    status: "TODO",
+    status: "DONE",
     priority: "High",
     epic: "E3",
     storyPoints: 21,
@@ -528,13 +525,14 @@ export const stories: Story[] = [
     progress: 0,
     dependencies: ["S27A"],
     createdDate: "2025-06-23",
+    completedDate: "2025-06-23",
   },
   {
     id: "S27C",
     title: "Breakout Detection ML Model Implementation",
     description:
       "Develop and implement the breakout detection ML model using pattern recognition algorithms. Create feature engineering for price patterns, volume analysis, and technical indicators. Implement deep learning models (CNN/RNN) for pattern recognition, train models on historical market data with proper validation, integrate real-time inference capabilities, and establish model performance monitoring. Include backtesting framework and A/B testing infrastructure for model validation.",
-    status: "TODO",
+    status: "DONE",
     priority: "High",
     epic: "E3",
     storyPoints: 21,
@@ -543,13 +541,14 @@ export const stories: Story[] = [
     progress: 0,
     dependencies: ["S27B"],
     createdDate: "2025-06-23",
+    completedDate: "2025-06-23",
   },
   {
     id: "S27D",
     title: "Dynamic Risk Management ML System",
     description:
       "Implement ML-driven dynamic risk management system that adapts to market conditions. Develop risk assessment models using volatility prediction, correlation analysis, and portfolio optimization techniques. Create dynamic position sizing algorithms, implement adaptive stop-loss mechanisms, establish real-time risk monitoring and alerting, and integrate with existing portfolio management systems. Include stress testing and scenario analysis capabilities.",
-    status: "TODO",
+    status: "DONE",
     priority: "High",
     epic: "E3",
     storyPoints: 21,
@@ -558,6 +557,7 @@ export const stories: Story[] = [
     progress: 0,
     dependencies: ["S27C"],
     createdDate: "2025-06-23",
+    completedDate: "2025-06-23",
   },
   {
     id: "S27E",

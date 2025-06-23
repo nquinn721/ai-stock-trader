@@ -1,41 +1,39 @@
-import React, { useState, useEffect } from 'react';
 import {
+  Analytics as AnalyticsIcon,
+  Archive as ArchiveIcon,
+  Delete as DeleteIcon,
+  Download as DownloadIcon,
+  Search as SearchIcon,
+} from "@mui/icons-material";
+import {
+  Box,
+  Button,
   Card,
   CardContent,
   CardHeader,
-  Typography,
-  TextField,
-  Button,
-  Select,
-  MenuItem,
+  Checkbox,
+  Chip,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
   FormControl,
   InputLabel,
-  Chip,
-  Box,
-  Stack,
+  MenuItem,
+  Pagination,
+  Select,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  Checkbox,
-  Pagination,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Paper,
-} from '@mui/material';
-import {
-  Search as SearchIcon,
-  Download as DownloadIcon,
-  Delete as DeleteIcon,
-  Archive as ArchiveIcon,
-  Analytics as AnalyticsIcon,
-} from '@mui/icons-material';
-import { notificationService } from '../../services/notificationService';
-import { Notification, NotificationType } from '../../types/notification.types';
+  TextField,
+  Typography,
+} from "@mui/material";
+import React, { useEffect, useState } from "react";
+import { notificationService } from "../../services/notificationService";
+import { Notification, NotificationType } from "../../types/notification.types";
 
 interface NotificationManagementProps {
   userId: string;
@@ -53,23 +51,31 @@ interface NotificationAnalytics {
   dailyActivity: Array<{ date: string; count: number }>;
 }
 
-const NotificationManagement: React.FC<NotificationManagementProps> = ({ userId }) => {
+const NotificationManagement: React.FC<NotificationManagementProps> = ({
+  userId,
+}) => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [analytics, setAnalytics] = useState<NotificationAnalytics | null>(null);
-  const [selectedNotifications, setSelectedNotifications] = useState<string[]>([]);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [analytics, setAnalytics] = useState<NotificationAnalytics | null>(
+    null
+  );
+  const [selectedNotifications, setSelectedNotifications] = useState<string[]>(
+    []
+  );
+  const [searchQuery, setSearchQuery] = useState("");
   const [filters, setFilters] = useState({
-    type: '',
-    priority: '',
-    status: '',
-    dateFrom: '',
-    dateTo: '',
+    type: "",
+    priority: "",
+    status: "",
+    dateFrom: "",
+    dateTo: "",
   });
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(false);
   const [analyticsDialogOpen, setAnalyticsDialogOpen] = useState(false);
-  const [currentView, setCurrentView] = useState<'history' | 'search'>('history');
+  const [currentView, setCurrentView] = useState<"history" | "search">(
+    "history"
+  );
 
   useEffect(() => {
     loadNotificationHistory();
@@ -97,7 +103,7 @@ const NotificationManagement: React.FC<NotificationManagementProps> = ({ userId 
       setNotifications(result.notifications);
       setTotalPages(result.totalPages);
     } catch (error) {
-      console.error('Failed to load notification history:', error);
+      console.error("Failed to load notification history:", error);
     } finally {
       setLoading(false);
     }
@@ -105,22 +111,24 @@ const NotificationManagement: React.FC<NotificationManagementProps> = ({ userId 
 
   const loadAnalytics = async () => {
     try {
-      const analyticsData = await notificationService.getNotificationAnalytics(userId);
+      const analyticsData = await notificationService.getNotificationAnalytics(
+        userId
+      );
       setAnalytics(analyticsData);
     } catch (error) {
-      console.error('Failed to load analytics:', error);
+      console.error("Failed to load analytics:", error);
     }
   };
 
   const handleSearch = async () => {
     if (!searchQuery.trim()) {
-      setCurrentView('history');
+      setCurrentView("history");
       loadNotificationHistory();
       return;
     }
 
     setLoading(true);
-    setCurrentView('search');
+    setCurrentView("search");
     try {
       const result = await notificationService.searchNotifications(
         userId,
@@ -132,7 +140,7 @@ const NotificationManagement: React.FC<NotificationManagementProps> = ({ userId 
       setNotifications(result.notifications);
       setTotalPages(result.totalPages);
     } catch (error) {
-      console.error('Failed to search notifications:', error);
+      console.error("Failed to search notifications:", error);
     } finally {
       setLoading(false);
     }
@@ -142,16 +150,19 @@ const NotificationManagement: React.FC<NotificationManagementProps> = ({ userId 
     if (selectedNotifications.length === 0) return;
 
     try {
-      await notificationService.bulkDeleteNotifications(userId, selectedNotifications);
+      await notificationService.bulkDeleteNotifications(
+        userId,
+        selectedNotifications
+      );
       setSelectedNotifications([]);
-      if (currentView === 'history') {
+      if (currentView === "history") {
         loadNotificationHistory();
       } else {
         handleSearch();
       }
       loadAnalytics();
     } catch (error) {
-      console.error('Failed to bulk delete notifications:', error);
+      console.error("Failed to bulk delete notifications:", error);
     }
   };
 
@@ -159,20 +170,23 @@ const NotificationManagement: React.FC<NotificationManagementProps> = ({ userId 
     if (selectedNotifications.length === 0) return;
 
     try {
-      await notificationService.bulkArchiveNotifications(userId, selectedNotifications);
+      await notificationService.bulkArchiveNotifications(
+        userId,
+        selectedNotifications
+      );
       setSelectedNotifications([]);
-      if (currentView === 'history') {
+      if (currentView === "history") {
         loadNotificationHistory();
       } else {
         handleSearch();
       }
       loadAnalytics();
     } catch (error) {
-      console.error('Failed to bulk archive notifications:', error);
+      console.error("Failed to bulk archive notifications:", error);
     }
   };
 
-  const handleExport = async (format: 'json' | 'csv') => {
+  const handleExport = async (format: "json" | "csv") => {
     try {
       const filterData = {
         type: filters.type as NotificationType | undefined,
@@ -188,17 +202,26 @@ const NotificationManagement: React.FC<NotificationManagementProps> = ({ userId 
         filterData
       );
 
-      notificationService.downloadFile(result.data, result.filename, result.contentType);
+      notificationService.downloadFile(
+        result.data,
+        result.filename,
+        result.contentType
+      );
     } catch (error) {
-      console.error('Failed to export notifications:', error);
+      console.error("Failed to export notifications:", error);
     }
   };
 
-  const handleNotificationSelection = (notificationId: string, selected: boolean) => {
+  const handleNotificationSelection = (
+    notificationId: string,
+    selected: boolean
+  ) => {
     if (selected) {
-      setSelectedNotifications(prev => [...prev, notificationId]);
+      setSelectedNotifications((prev) => [...prev, notificationId]);
     } else {
-      setSelectedNotifications(prev => prev.filter(id => id !== notificationId));
+      setSelectedNotifications((prev) =>
+        prev.filter((id) => id !== notificationId)
+      );
     }
   };
 
@@ -208,11 +231,16 @@ const NotificationManagement: React.FC<NotificationManagementProps> = ({ userId 
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case 'critical': return 'error';
-      case 'high': return 'warning';
-      case 'medium': return 'info';
-      case 'low': return 'default';
-      default: return 'default';
+      case "critical":
+        return "error";
+      case "high":
+        return "warning";
+      case "medium":
+        return "info";
+      case "low":
+        return "default";
+      default:
+        return "default";
     }
   };
 
@@ -225,8 +253,8 @@ const NotificationManagement: React.FC<NotificationManagementProps> = ({ userId 
       {/* Analytics Summary */}
       {analytics && (
         <Card sx={{ mb: 3 }}>
-          <CardHeader 
-            title="Quick Stats" 
+          <CardHeader
+            title="Quick Stats"
             action={
               <Button
                 startIcon={<AnalyticsIcon />}
@@ -236,21 +264,25 @@ const NotificationManagement: React.FC<NotificationManagementProps> = ({ userId 
               </Button>
             }
           />
-          <CardContent>            <Box sx={{ display: 'flex', gap: 3 }}>
-              <Box sx={{ flex: 1, textAlign: 'center' }}>
+          <CardContent>
+            {" "}
+            <Box sx={{ display: "flex", gap: 3 }}>
+              <Box sx={{ flex: 1, textAlign: "center" }}>
                 <Typography variant="h6">{analytics.summary.total}</Typography>
                 <Typography variant="body2">Total Notifications</Typography>
               </Box>
-              <Box sx={{ flex: 1, textAlign: 'center' }}>
+              <Box sx={{ flex: 1, textAlign: "center" }}>
                 <Typography variant="h6">{analytics.summary.unread}</Typography>
                 <Typography variant="body2">Unread</Typography>
               </Box>
-              <Box sx={{ flex: 1, textAlign: 'center' }}>
+              <Box sx={{ flex: 1, textAlign: "center" }}>
                 <Typography variant="h6">{analytics.summary.recent}</Typography>
                 <Typography variant="body2">Recent (30 days)</Typography>
               </Box>
-              <Box sx={{ flex: 1, textAlign: 'center' }}>
-                <Typography variant="h6">{analytics.summary.readRate}%</Typography>
+              <Box sx={{ flex: 1, textAlign: "center" }}>
+                <Typography variant="h6">
+                  {analytics.summary.readRate}%
+                </Typography>
                 <Typography variant="body2">Read Rate</Typography>
               </Box>
             </Box>
@@ -260,14 +292,23 @@ const NotificationManagement: React.FC<NotificationManagementProps> = ({ userId 
 
       {/* Search and Filters */}
       <Card sx={{ mb: 3 }}>
-        <CardContent>          <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
-            <Box sx={{ flex: '1 1 300px', minWidth: '300px' }}>
+        <CardContent>
+          {" "}
+          <Box
+            sx={{
+              display: "flex",
+              gap: 2,
+              alignItems: "center",
+              flexWrap: "wrap",
+            }}
+          >
+            <Box sx={{ flex: "1 1 300px", minWidth: "300px" }}>
               <TextField
                 fullWidth
                 label="Search notifications"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+                onKeyPress={(e) => e.key === "Enter" && handleSearch()}
                 InputProps={{
                   endAdornment: (
                     <Button onClick={handleSearch} size="small">
@@ -277,12 +318,14 @@ const NotificationManagement: React.FC<NotificationManagementProps> = ({ userId 
                 }}
               />
             </Box>
-            <Box sx={{ flex: '1 1 150px', minWidth: '150px' }}>
+            <Box sx={{ flex: "1 1 150px", minWidth: "150px" }}>
               <FormControl fullWidth>
                 <InputLabel>Type</InputLabel>
                 <Select
                   value={filters.type}
-                  onChange={(e) => setFilters(prev => ({ ...prev, type: e.target.value }))}
+                  onChange={(e) =>
+                    setFilters((prev) => ({ ...prev, type: e.target.value }))
+                  }
                 >
                   <MenuItem value="">All</MenuItem>
                   <MenuItem value="trading_opportunity">Trading</MenuItem>
@@ -293,12 +336,17 @@ const NotificationManagement: React.FC<NotificationManagementProps> = ({ userId 
                 </Select>
               </FormControl>
             </Box>
-            <Box sx={{ flex: '1 1 150px', minWidth: '150px' }}>
+            <Box sx={{ flex: "1 1 150px", minWidth: "150px" }}>
               <FormControl fullWidth>
                 <InputLabel>Priority</InputLabel>
                 <Select
                   value={filters.priority}
-                  onChange={(e) => setFilters(prev => ({ ...prev, priority: e.target.value }))}
+                  onChange={(e) =>
+                    setFilters((prev) => ({
+                      ...prev,
+                      priority: e.target.value,
+                    }))
+                  }
                 >
                   <MenuItem value="">All</MenuItem>
                   <MenuItem value="critical">Critical</MenuItem>
@@ -308,23 +356,27 @@ const NotificationManagement: React.FC<NotificationManagementProps> = ({ userId 
                 </Select>
               </FormControl>
             </Box>
-            <Box sx={{ flex: '1 1 150px', minWidth: '150px' }}>
+            <Box sx={{ flex: "1 1 150px", minWidth: "150px" }}>
               <TextField
                 fullWidth
                 type="date"
                 label="From Date"
                 value={filters.dateFrom}
-                onChange={(e) => setFilters(prev => ({ ...prev, dateFrom: e.target.value }))}
+                onChange={(e) =>
+                  setFilters((prev) => ({ ...prev, dateFrom: e.target.value }))
+                }
                 InputLabelProps={{ shrink: true }}
               />
             </Box>
-            <Box sx={{ flex: '1 1 150px', minWidth: '150px' }}>
+            <Box sx={{ flex: "1 1 150px", minWidth: "150px" }}>
               <TextField
                 fullWidth
                 type="date"
                 label="To Date"
                 value={filters.dateTo}
-                onChange={(e) => setFilters(prev => ({ ...prev, dateTo: e.target.value }))}
+                onChange={(e) =>
+                  setFilters((prev) => ({ ...prev, dateTo: e.target.value }))
+                }
                 InputLabelProps={{ shrink: true }}
               />
             </Box>
@@ -336,7 +388,7 @@ const NotificationManagement: React.FC<NotificationManagementProps> = ({ userId 
       {selectedNotifications.length > 0 && (
         <Card sx={{ mb: 2 }}>
           <CardContent>
-            <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+            <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
               <Typography variant="body1">
                 {selectedNotifications.length} notifications selected
               </Typography>
@@ -357,14 +409,14 @@ const NotificationManagement: React.FC<NotificationManagementProps> = ({ userId 
               </Button>
               <Button
                 startIcon={<DownloadIcon />}
-                onClick={() => handleExport('json')}
+                onClick={() => handleExport("json")}
                 variant="outlined"
               >
                 Export JSON
               </Button>
               <Button
                 startIcon={<DownloadIcon />}
-                onClick={() => handleExport('csv')}
+                onClick={() => handleExport("csv")}
                 variant="outlined"
               >
                 Export CSV
@@ -383,11 +435,19 @@ const NotificationManagement: React.FC<NotificationManagementProps> = ({ userId 
                 <TableRow>
                   <TableCell padding="checkbox">
                     <Checkbox
-                      indeterminate={selectedNotifications.length > 0 && selectedNotifications.length < notifications.length}
-                      checked={notifications.length > 0 && selectedNotifications.length === notifications.length}
+                      indeterminate={
+                        selectedNotifications.length > 0 &&
+                        selectedNotifications.length < notifications.length
+                      }
+                      checked={
+                        notifications.length > 0 &&
+                        selectedNotifications.length === notifications.length
+                      }
                       onChange={(e) => {
                         if (e.target.checked) {
-                          setSelectedNotifications(notifications.map(n => n.id.toString()));
+                          setSelectedNotifications(
+                            notifications.map((n) => n.id.toString())
+                          );
                         } else {
                           setSelectedNotifications([]);
                         }
@@ -407,24 +467,37 @@ const NotificationManagement: React.FC<NotificationManagementProps> = ({ userId 
                   <TableRow key={notification.id}>
                     <TableCell padding="checkbox">
                       <Checkbox
-                        checked={selectedNotifications.includes(notification.id.toString())}
-                        onChange={(e) => handleNotificationSelection(notification.id.toString(), e.target.checked)}
+                        checked={selectedNotifications.includes(
+                          notification.id.toString()
+                        )}
+                        onChange={(e) =>
+                          handleNotificationSelection(
+                            notification.id.toString(),
+                            e.target.checked
+                          )
+                        }
                       />
                     </TableCell>
                     <TableCell>
                       <Chip label={notification.type} size="small" />
                     </TableCell>
                     <TableCell>
-                      <Chip 
-                        label={notification.priority} 
-                        size="small" 
+                      <Chip
+                        label={notification.priority}
+                        size="small"
                         color={getPriorityColor(notification.priority) as any}
                       />
                     </TableCell>
                     <TableCell>{notification.title}</TableCell>
-                    <TableCell>{notification.message?.substring(0, 100)}...</TableCell>
                     <TableCell>
-                      <Chip label={notification.status} size="small" variant="outlined" />
+                      {notification.message?.substring(0, 100)}...
+                    </TableCell>
+                    <TableCell>
+                      <Chip
+                        label={notification.status}
+                        size="small"
+                        variant="outlined"
+                      />
                     </TableCell>
                     <TableCell>{formatDate(notification.createdAt)}</TableCell>
                   </TableRow>
@@ -434,7 +507,7 @@ const NotificationManagement: React.FC<NotificationManagementProps> = ({ userId 
           </TableContainer>
 
           {totalPages > 1 && (
-            <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
+            <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
               <Pagination
                 count={totalPages}
                 page={page}
@@ -446,24 +519,48 @@ const NotificationManagement: React.FC<NotificationManagementProps> = ({ userId 
       </Card>
 
       {/* Analytics Dialog */}
-      <Dialog open={analyticsDialogOpen} onClose={() => setAnalyticsDialogOpen(false)} maxWidth="md" fullWidth>
+      <Dialog
+        open={analyticsDialogOpen}
+        onClose={() => setAnalyticsDialogOpen(false)}
+        maxWidth="md"
+        fullWidth
+      >
         <DialogTitle>Notification Analytics</DialogTitle>
         <DialogContent>
-          {analytics && (            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-              <Box sx={{ display: 'flex', gap: 3, flexWrap: 'wrap' }}>
-                <Box sx={{ flex: 1, minWidth: '250px' }}>
-                  <Typography variant="h6" gutterBottom>By Type</Typography>
+          {analytics && (
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
+              <Box sx={{ display: "flex", gap: 3, flexWrap: "wrap" }}>
+                <Box sx={{ flex: 1, minWidth: "250px" }}>
+                  <Typography variant="h6" gutterBottom>
+                    By Type
+                  </Typography>
                   {analytics.byType.map((item) => (
-                    <Box key={item.type} sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                    <Box
+                      key={item.type}
+                      sx={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        mb: 1,
+                      }}
+                    >
                       <Typography>{item.type}</Typography>
                       <Typography>{item.count}</Typography>
                     </Box>
                   ))}
                 </Box>
-                <Box sx={{ flex: 1, minWidth: '250px' }}>
-                  <Typography variant="h6" gutterBottom>By Priority</Typography>
+                <Box sx={{ flex: 1, minWidth: "250px" }}>
+                  <Typography variant="h6" gutterBottom>
+                    By Priority
+                  </Typography>
                   {analytics.byPriority.map((item) => (
-                    <Box key={item.priority} sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                    <Box
+                      key={item.priority}
+                      sx={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        mb: 1,
+                      }}
+                    >
                       <Typography>{item.priority}</Typography>
                       <Typography>{item.count}</Typography>
                     </Box>
@@ -471,10 +568,19 @@ const NotificationManagement: React.FC<NotificationManagementProps> = ({ userId 
                 </Box>
               </Box>
               <Box>
-                <Typography variant="h6" gutterBottom>Daily Activity (Last 30 Days)</Typography>
-                <Box sx={{ maxHeight: 200, overflow: 'auto' }}>
+                <Typography variant="h6" gutterBottom>
+                  Daily Activity (Last 30 Days)
+                </Typography>
+                <Box sx={{ maxHeight: 200, overflow: "auto" }}>
                   {analytics.dailyActivity.map((day) => (
-                    <Box key={day.date} sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                    <Box
+                      key={day.date}
+                      sx={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        mb: 1,
+                      }}
+                    >
                       <Typography>{day.date}</Typography>
                       <Typography>{day.count}</Typography>
                     </Box>

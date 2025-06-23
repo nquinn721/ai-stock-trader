@@ -580,30 +580,36 @@ export class NotificationController {
     @Query() query: any,
   ) {
     try {
-      const filter = {
-        userId,
+      const page = query.offset
+        ? Math.floor(
+            parseInt(query.offset) /
+              (query.limit ? parseInt(query.limit) : 100),
+          ) + 1
+        : 1;
+      const limit = query.limit ? parseInt(query.limit) : 100;
+
+      const filters = {
         type: query.type,
         priority: query.priority,
-        symbol: query.symbol,
-        fromDate: query.fromDate ? new Date(query.fromDate) : undefined,
-        toDate: query.toDate ? new Date(query.toDate) : undefined,
-        status: query.status || 'read,dismissed', // Default to completed notifications
-        limit: query.limit ? parseInt(query.limit) : 100,
-        offset: query.offset ? parseInt(query.offset) : 0,
-        sortBy: query.sortBy || 'createdAt',
-        sortOrder: query.sortOrder || 'DESC',
+        status: query.status,
+        dateFrom: query.fromDate ? new Date(query.fromDate) : undefined,
+        dateTo: query.toDate ? new Date(query.toDate) : undefined,
       };
 
-      const result =
-        await this.notificationService.getNotificationHistory(filter);
+      const result = await this.notificationService.getNotificationHistory(
+        userId,
+        page,
+        limit,
+        filters,
+      );
       return {
         success: true,
         data: result.notifications,
         total: result.total,
         pagination: {
-          limit: filter.limit,
-          offset: filter.offset,
-          hasMore: result.total > (filter.offset || 0) + (filter.limit || 100),
+          limit: limit,
+          offset: (page - 1) * limit,
+          hasMore: result.total > page * limit,
         },
       };
     } catch (error) {
@@ -634,18 +640,19 @@ export class NotificationController {
     },
   ) {
     try {
+      const page = searchRequest.offset
+        ? Math.floor(searchRequest.offset / (searchRequest.limit || 20)) + 1
+        : 1;
       const result = await this.notificationService.searchNotifications(
         searchRequest.userId,
         searchRequest.query,
-        searchRequest.filters,
+        page,
         searchRequest.limit,
-        searchRequest.offset,
       );
       return {
         success: true,
         data: result.notifications,
         total: result.total,
-        highlights: result.highlights,
       };
     } catch (error) {
       this.logger.error(
@@ -670,7 +677,7 @@ export class NotificationController {
     try {
       const result = await this.notificationService.bulkDeleteNotifications(
         body.userId,
-        body.notificationIds,
+        body.notificationIds.map((id) => id.toString()),
       );
       return {
         success: true,
@@ -702,8 +709,7 @@ export class NotificationController {
     try {
       const result = await this.notificationService.bulkArchiveNotifications(
         body.userId,
-        body.notificationIds,
-        body.archiveUntil,
+        body.notificationIds.map((id) => id.toString()),
       );
       return {
         success: true,
@@ -733,18 +739,19 @@ export class NotificationController {
   ) {
     try {
       const format = query.format || 'json'; // json, csv, xlsx
-      const filter = {
-        userId,
+
+      const filters = {
         type: query.type,
         priority: query.priority,
-        fromDate: query.fromDate ? new Date(query.fromDate) : undefined,
-        toDate: query.toDate ? new Date(query.toDate) : undefined,
         status: query.status,
+        dateFrom: query.fromDate ? new Date(query.fromDate) : undefined,
+        dateTo: query.toDate ? new Date(query.toDate) : undefined,
       };
 
       const exportData = await this.notificationService.exportNotifications(
-        filter,
+        userId,
         format,
+        filters,
       );
 
       return {
@@ -775,8 +782,8 @@ export class NotificationController {
   ) {
     try {
       const result = await this.notificationService.addTagsToNotification(
-        id,
         body.userId,
+        id.toString(),
         body.tags,
       );
       return {

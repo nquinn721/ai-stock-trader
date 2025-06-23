@@ -1,6 +1,4 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, EntityManager } from 'typeorm';
 
 export interface StorageConfiguration {
   timeSeriesOptimization: boolean;
@@ -71,8 +69,8 @@ export class DataStorageService {
     retentionPolicy: {
       realTimeData: '7d',
       historicalData: '5y',
-      aggregatedData: '10y'
-    }
+      aggregatedData: '10y',
+    },
   };
 
   private readonly mlConfig: MLWorkloadConfig = {
@@ -80,25 +78,26 @@ export class DataStorageService {
     featureStoreConfig: {
       enableRealTimeServing: true,
       cacheStrategy: 'hybrid',
-      precomputeFrequency: '5m'
+      precomputeFrequency: '5m',
     },
     modelArtifactStorage: {
       location: 'local',
       versioning: true,
-      compression: true
-    }
+      compression: true,
+    },
   };
 
-  constructor(
-    // Note: In a real implementation, this would use proper TypeORM entities
-    // For now, we'll simulate database operations
-  ) {}
+  constructor() // Note: In a real implementation, this would use proper TypeORM entities
+  // For now, we'll simulate database operations
+  {}
 
   /**
    * Initialize time-series optimized storage
    */
   async initializeTimeSeriesStorage(symbols: string[]): Promise<void> {
-    this.logger.log(`Initializing time-series storage for ${symbols.length} symbols`);
+    this.logger.log(
+      `Initializing time-series storage for ${symbols.length} symbols`,
+    );
 
     // Create partitioned tables for each symbol or time range
     for (const symbol of symbols) {
@@ -131,9 +130,9 @@ export class DataStorageService {
       maxTimestamp: new Date(),
       indexInfo: {
         primary: `idx_${symbol}_timestamp`,
-        secondary: [`idx_${symbol}_price`, `idx_${symbol}_volume`]
+        secondary: [`idx_${symbol}_price`, `idx_${symbol}_volume`],
       },
-      compressionRatio: 0.7
+      compressionRatio: 0.7,
     };
 
     // In production, this would create actual database partitions
@@ -153,27 +152,27 @@ export class DataStorageService {
         name: 'idx_symbol_timestamp_composite',
         columns: ['symbol', 'timestamp'],
         type: 'btree',
-        unique: false
+        unique: false,
       },
       {
         name: 'idx_timestamp_range',
         columns: ['timestamp'],
         type: 'btree',
         unique: false,
-        options: { fastLookup: true }
+        options: { fastLookup: true },
       },
       {
         name: 'idx_symbol_price_range',
         columns: ['symbol', 'close', 'timestamp'],
         type: 'btree',
-        unique: false
+        unique: false,
       },
       {
         name: 'idx_volume_analysis',
         columns: ['volume', 'timestamp'],
         type: 'btree',
-        unique: false
-      }
+        unique: false,
+      },
     ];
 
     // In production, this would create actual database indexes
@@ -195,38 +194,48 @@ export class DataStorageService {
         name: 'real_time_data_retention',
         table: 'real_time_market_data',
         retentionPeriod: this.defaultConfig.retentionPolicy.realTimeData,
-        archiveStrategy: 'compress_and_move'
+        archiveStrategy: 'compress_and_move',
       },
       {
         name: 'historical_data_retention',
         table: 'historical_market_data',
         retentionPeriod: this.defaultConfig.retentionPolicy.historicalData,
-        archiveStrategy: 'cold_storage'
+        archiveStrategy: 'cold_storage',
       },
       {
         name: 'aggregated_data_retention',
         table: 'aggregated_market_data',
         retentionPeriod: this.defaultConfig.retentionPolicy.aggregatedData,
-        archiveStrategy: 'permanent'
-      }
+        archiveStrategy: 'permanent',
+      },
     ];
 
     // In production, this would set up actual retention policies
-    this.logger.log(`Retention policies configured: ${policies.length} policies`);
+    this.logger.log(
+      `Retention policies configured: ${policies.length} policies`,
+    );
   }
 
   /**
    * Optimize query performance for ML workloads
    */
-  async optimizeMLQueries(queryType: 'training' | 'inference' | 'batch'): Promise<QueryOptimization> {
+  async optimizeMLQueries(
+    queryType: 'training' | 'inference' | 'batch',
+  ): Promise<QueryOptimization> {
     this.logger.log(`Optimizing queries for ML workload: ${queryType}`);
 
     const optimization: QueryOptimization = {
       useIndexHints: true,
       enableQueryCache: true,
       parallelExecution: queryType === 'batch',
-      batchSize: queryType === 'training' ? 10000 : queryType === 'batch' ? 50000 : 1000,
-      timeoutMs: queryType === 'inference' ? 100 : queryType === 'training' ? 30000 : 10000
+      batchSize:
+        queryType === 'training' ? 10000 : queryType === 'batch' ? 50000 : 1000,
+      timeoutMs:
+        queryType === 'inference'
+          ? 100
+          : queryType === 'training'
+            ? 30000
+            : 10000,
     };
 
     // Apply query optimizations
@@ -244,15 +253,22 @@ export class DataStorageService {
     symbols: string[],
     startDate: Date,
     endDate: Date,
-    features: string[]
+    features: string[],
   ): Promise<any[]> {
-    this.logger.log(`Fetching training data for ${symbols.length} symbols, ${features.length} features`);
+    this.logger.log(
+      `Fetching training data for ${symbols.length} symbols, ${features.length} features`,
+    );
 
     // Optimize query for training workload
     await this.optimizeMLQueries('training');
 
     // In production, this would execute optimized SQL queries
-    const mockData = this.generateMockTrainingData(symbols, startDate, endDate, features);
+    const mockData = this.generateMockTrainingData(
+      symbols,
+      startDate,
+      endDate,
+      features,
+    );
 
     this.logger.log(`Training data fetched: ${mockData.length} records`);
 
@@ -262,8 +278,13 @@ export class DataStorageService {
   /**
    * Get real-time features for inference
    */
-  async getInferenceFeatures(symbols: string[], features: string[]): Promise<any[]> {
-    this.logger.log(`Fetching inference features for ${symbols.length} symbols`);
+  async getInferenceFeatures(
+    symbols: string[],
+    features: string[],
+  ): Promise<any[]> {
+    this.logger.log(
+      `Fetching inference features for ${symbols.length} symbols`,
+    );
 
     // Optimize for low-latency inference
     await this.optimizeMLQueries('inference');
@@ -271,7 +292,9 @@ export class DataStorageService {
     // Use cached features if available
     const cachedFeatures = await this.getCachedFeatures(symbols, features);
     if (cachedFeatures.length > 0) {
-      this.logger.log(`Using cached features: ${cachedFeatures.length} records`);
+      this.logger.log(
+        `Using cached features: ${cachedFeatures.length} records`,
+      );
       return cachedFeatures;
     }
 
@@ -292,9 +315,11 @@ export class DataStorageService {
   async executeBatchProcessing(
     operation: 'aggregate' | 'transform' | 'validate',
     symbols: string[],
-    timeRange: { start: Date; end: Date }
+    timeRange: { start: Date; end: Date },
   ): Promise<any> {
-    this.logger.log(`Executing batch ${operation} for ${symbols.length} symbols`);
+    this.logger.log(
+      `Executing batch ${operation} for ${symbols.length} symbols`,
+    );
 
     // Optimize for batch processing
     await this.optimizeMLQueries('batch');
@@ -305,10 +330,12 @@ export class DataStorageService {
       timeRange,
       recordsProcessed: symbols.length * 1000, // Mock calculation
       processingTime: Math.floor(Math.random() * 1000) + 100, // Mock timing
-      status: 'completed'
+      status: 'completed',
     };
 
-    this.logger.log(`Batch processing completed: ${result.recordsProcessed} records processed`);
+    this.logger.log(
+      `Batch processing completed: ${result.recordsProcessed} records processed`,
+    );
 
     return result;
   }
@@ -320,10 +347,16 @@ export class DataStorageService {
     this.logger.log('Starting data lifecycle management');
 
     // Archive old real-time data
-    await this.archiveOldData('real_time_market_data', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000));
+    await this.archiveOldData(
+      'real_time_market_data',
+      new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
+    );
 
     // Compress historical data
-    await this.compressOldData('historical_market_data', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000));
+    await this.compressOldData(
+      'historical_market_data',
+      new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
+    );
 
     // Clean up temporary data
     await this.cleanupTemporaryData();
@@ -344,10 +377,12 @@ export class DataStorageService {
       avgQueryTime: 25, // ms
       cacheHitRate: 0.85, // 85%
       compressionRatio: 0.65, // 35% reduction
-      indexEfficiency: 0.92 // 92% efficiency
+      indexEfficiency: 0.92, // 92% efficiency
     };
 
-    this.logger.log(`Storage metrics collected: ${JSON.stringify(metrics, null, 2)}`);
+    this.logger.log(
+      `Storage metrics collected: ${JSON.stringify(metrics, null, 2)}`,
+    );
 
     return metrics;
   }
@@ -355,7 +390,9 @@ export class DataStorageService {
   /**
    * Optimize storage for specific ML use case
    */
-  async optimizeForMLUseCase(useCase: 'high_frequency' | 'deep_learning' | 'ensemble'): Promise<void> {
+  async optimizeForMLUseCase(
+    useCase: 'high_frequency' | 'deep_learning' | 'ensemble',
+  ): Promise<void> {
     this.logger.log(`Optimizing storage for ML use case: ${useCase}`);
 
     switch (useCase) {
@@ -375,22 +412,40 @@ export class DataStorageService {
 
   // Private helper methods
 
-  private async applyQueryOptimizations(optimization: QueryOptimization): Promise<void> {
+  private async applyQueryOptimizations(
+    optimization: QueryOptimization,
+  ): Promise<void> {
     // In production, this would apply actual database optimizations
-    this.logger.log(`Applying query optimizations: ${JSON.stringify(optimization)}`);
+    this.logger.log(
+      `Applying query optimizations: ${JSON.stringify(optimization)}`,
+    );
   }
 
-  private async getCachedFeatures(symbols: string[], features: string[]): Promise<any[]> {
+  private async getCachedFeatures(
+    symbols: string[],
+    features: string[],
+  ): Promise<any[]> {
     // In production, this would check Redis or memory cache
     return []; // No cache for mock implementation
   }
 
-  private async cacheFeatures(symbols: string[], features: string[], data: any[]): Promise<void> {
+  private async cacheFeatures(
+    symbols: string[],
+    features: string[],
+    data: any[],
+  ): Promise<void> {
     // In production, this would cache to Redis or memory
     this.logger.log(`Caching ${data.length} feature records`);
   }
-  private generateMockTrainingData(symbols: string[], startDate: Date, endDate: Date, features: string[]): any[] {
-    const days = Math.floor((endDate.getTime() - startDate.getTime()) / (24 * 60 * 60 * 1000));
+  private generateMockTrainingData(
+    symbols: string[],
+    startDate: Date,
+    endDate: Date,
+    features: string[],
+  ): any[] {
+    const days = Math.floor(
+      (endDate.getTime() - startDate.getTime()) / (24 * 60 * 60 * 1000),
+    );
     const data: any[] = [];
 
     for (const symbol of symbols) {
@@ -399,7 +454,7 @@ export class DataStorageService {
           symbol,
           timestamp: new Date(startDate.getTime() + i * 24 * 60 * 60 * 1000),
           close: 100 + Math.random() * 50,
-          volume: Math.floor(Math.random() * 1000000)
+          volume: Math.floor(Math.random() * 1000000),
         };
 
         // Add requested features
@@ -414,13 +469,16 @@ export class DataStorageService {
     return data;
   }
 
-  private generateMockInferenceData(symbols: string[], features: string[]): any[] {
-    return symbols.map(symbol => {
+  private generateMockInferenceData(
+    symbols: string[],
+    features: string[],
+  ): any[] {
+    return symbols.map((symbol) => {
       const record: any = {
         symbol,
         timestamp: new Date(),
         close: 100 + Math.random() * 50,
-        volume: Math.floor(Math.random() * 1000000)
+        volume: Math.floor(Math.random() * 1000000),
       };
 
       // Add requested features
@@ -432,13 +490,23 @@ export class DataStorageService {
     });
   }
 
-  private async archiveOldData(tableName: string, cutoffDate: Date): Promise<void> {
-    this.logger.log(`Archiving data older than ${cutoffDate.toISOString()} from ${tableName}`);
+  private async archiveOldData(
+    tableName: string,
+    cutoffDate: Date,
+  ): Promise<void> {
+    this.logger.log(
+      `Archiving data older than ${cutoffDate.toISOString()} from ${tableName}`,
+    );
     // In production, this would move old data to cold storage
   }
 
-  private async compressOldData(tableName: string, cutoffDate: Date): Promise<void> {
-    this.logger.log(`Compressing data older than ${cutoffDate.toISOString()} in ${tableName}`);
+  private async compressOldData(
+    tableName: string,
+    cutoffDate: Date,
+  ): Promise<void> {
+    this.logger.log(
+      `Compressing data older than ${cutoffDate.toISOString()} in ${tableName}`,
+    );
     // In production, this would apply compression to old data
   }
 

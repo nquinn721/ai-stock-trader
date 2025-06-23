@@ -86,7 +86,8 @@
         "completionRate": 100
       },
       "services": [
-        "MarketPredictionService",        "SignalGenerationService",
+        "MarketPredictionService",
+        "SignalGenerationService",
         "EnsembleSystemsService"
       ]
     },
@@ -126,7 +127,8 @@
       "status": "COMPLETED",
       "completionRate": 100,
       "stories": ["Testing stories 18-25"]
-    },    "Phase 3 (ML Infrastructure)": {
+    },
+    "Phase 3 (ML Infrastructure)": {
       "status": "COMPLETED",
       "completionRate": 100,
       "stories": ["S27", "S28", "S29", "S27A"]

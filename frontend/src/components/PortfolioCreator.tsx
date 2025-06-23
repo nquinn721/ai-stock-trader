@@ -1,17 +1,21 @@
-import React, { useState } from 'react';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { 
-  faChartLine, 
-  faRocket, 
-  faSeedling, 
-  faGraduationCap,
+import {
+  faChartLine,
   faCheck,
-  faExclamationTriangle
-} from '@fortawesome/free-solid-svg-icons';
-import './PortfolioCreator.css';
+  faExclamationTriangle,
+  faGraduationCap,
+  faRocket,
+  faSeedling,
+} from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import React, { useState } from "react";
+import "./PortfolioCreator.css";
 
 interface PortfolioType {
-  key: 'DAY_TRADING_PRO' | 'DAY_TRADING_STANDARD' | 'SMALL_ACCOUNT_BASIC' | 'MICRO_ACCOUNT_STARTER';
+  key:
+    | "DAY_TRADING_PRO"
+    | "DAY_TRADING_STANDARD"
+    | "SMALL_ACCOUNT_BASIC"
+    | "MICRO_ACCOUNT_STARTER";
   name: string;
   initialBalance: number;
   dayTradingEnabled: boolean;
@@ -25,100 +29,100 @@ interface PortfolioType {
 
 const PORTFOLIO_TYPES: PortfolioType[] = [
   {
-    key: 'DAY_TRADING_PRO',
-    name: 'Professional Day Trader',
+    key: "DAY_TRADING_PRO",
+    name: "Professional Day Trader",
     initialBalance: 50000,
     dayTradingEnabled: true,
-    description: 'For experienced traders with substantial capital',
+    description: "For experienced traders with substantial capital",
     minBalance: 25000,
     icon: faRocket,
     features: [
-      'Unlimited day trades',
-      'Advanced order types',
-      'Real-time margin calculations',
-      'Professional-grade tools',
-      'Priority customer support',
-      'Advanced risk management'
+      "Unlimited day trades",
+      "Advanced order types",
+      "Real-time margin calculations",
+      "Professional-grade tools",
+      "Priority customer support",
+      "Advanced risk management",
     ],
     restrictions: [
-      'Must maintain $25,000 minimum',
-      'Pattern Day Trading rules apply',
-      'Requires trading experience'
+      "Must maintain $25,000 minimum",
+      "Pattern Day Trading rules apply",
+      "Requires trading experience",
     ],
-    recommended: 'Experienced traders with $50k+ capital'
+    recommended: "Experienced traders with $50k+ capital",
   },
   {
-    key: 'DAY_TRADING_STANDARD',
-    name: 'Standard Day Trader',
+    key: "DAY_TRADING_STANDARD",
+    name: "Standard Day Trader",
     initialBalance: 30000,
     dayTradingEnabled: true,
-    description: 'Entry-level day trading with reduced capital requirements',
+    description: "Entry-level day trading with reduced capital requirements",
     minBalance: 25000,
     icon: faChartLine,
     features: [
-      'Unlimited day trades',
-      'Standard order types',
-      'Real-time data feeds',
-      'Basic risk management',
-      'Email support',
-      'Educational resources'
+      "Unlimited day trades",
+      "Standard order types",
+      "Real-time data feeds",
+      "Basic risk management",
+      "Email support",
+      "Educational resources",
     ],
     restrictions: [
-      'Must maintain $25,000 minimum',
-      'Pattern Day Trading rules apply',
-      'Limited to stocks only'
+      "Must maintain $25,000 minimum",
+      "Pattern Day Trading rules apply",
+      "Limited to stocks only",
     ],
-    recommended: 'New day traders with $30k+ capital'
+    recommended: "New day traders with $30k+ capital",
   },
   {
-    key: 'SMALL_ACCOUNT_BASIC',
-    name: 'Small Investor',
+    key: "SMALL_ACCOUNT_BASIC",
+    name: "Small Investor",
     initialBalance: 1000,
     dayTradingEnabled: false,
-    description: 'Perfect for small-scale investing and learning',
+    description: "Perfect for small-scale investing and learning",
     minBalance: 0,
     icon: faSeedling,
     features: [
-      'Buy and hold strategies',
-      'Basic order types',
-      'Educational content',
-      'Portfolio tracking',
-      'Community support',
-      'Low fees'
+      "Buy and hold strategies",
+      "Basic order types",
+      "Educational content",
+      "Portfolio tracking",
+      "Community support",
+      "Low fees",
     ],
     restrictions: [
-      'No day trading allowed',
-      '3 day trades per 5 business days max',
-      'T+2 settlement for cash accounts',
-      'Limited to stocks only'
+      "No day trading allowed",
+      "3 day trades per 5 business days max",
+      "T+2 settlement for cash accounts",
+      "Limited to stocks only",
     ],
-    recommended: 'Beginners with $1k-$10k capital'
+    recommended: "Beginners with $1k-$10k capital",
   },
   {
-    key: 'MICRO_ACCOUNT_STARTER',
-    name: 'Micro Starter',
+    key: "MICRO_ACCOUNT_STARTER",
+    name: "Micro Starter",
     initialBalance: 500,
     dayTradingEnabled: false,
-    description: 'Get started with minimal capital investment',
+    description: "Get started with minimal capital investment",
     minBalance: 0,
     icon: faGraduationCap,
     features: [
-      'Learn with real money',
-      'Fractional shares available',
-      'Basic portfolio tracking',
-      'Educational tutorials',
-      'Community forums',
-      'No minimum balance'
+      "Learn with real money",
+      "Fractional shares available",
+      "Basic portfolio tracking",
+      "Educational tutorials",
+      "Community forums",
+      "No minimum balance",
     ],
     restrictions: [
-      'No day trading allowed',
-      '3 day trades per 5 business days max',
-      'T+2 settlement for cash accounts',
-      'Limited order types',
-      'Stocks only'
+      "No day trading allowed",
+      "3 day trades per 5 business days max",
+      "T+2 settlement for cash accounts",
+      "Limited order types",
+      "Stocks only",
     ],
-    recommended: 'Complete beginners with $500-$1k'
-  }
+    recommended: "Complete beginners with $500-$1k",
+  },
 ];
 
 interface PortfolioCreatorProps {
@@ -128,11 +132,11 @@ interface PortfolioCreatorProps {
 
 const PortfolioCreator: React.FC<PortfolioCreatorProps> = ({
   onPortfolioCreated,
-  onCancel
+  onCancel,
 }) => {
   const [selectedType, setSelectedType] = useState<PortfolioType | null>(null);
-  const [customBalance, setCustomBalance] = useState<string>('');
-  const [userId] = useState('user-123'); // TODO: Get from auth context
+  const [customBalance, setCustomBalance] = useState<string>("");
+  const [userId] = useState("user-123"); // TODO: Get from auth context
   const [creating, setCreating] = useState(false);
   const [showDetails, setShowDetails] = useState<string | null>(null);
 
@@ -141,47 +145,52 @@ const PortfolioCreator: React.FC<PortfolioCreatorProps> = ({
 
     setCreating(true);
     try {
-      const initialBalance = customBalance ? 
-        parseFloat(customBalance) : 
-        selectedType.initialBalance;
+      const initialBalance = customBalance
+        ? parseFloat(customBalance)
+        : selectedType.initialBalance;
 
       // Validate minimum balance for day trading accounts
-      if (selectedType.dayTradingEnabled && initialBalance < selectedType.minBalance) {
-        alert(`Day trading accounts require minimum $${selectedType.minBalance.toLocaleString()} balance`);
+      if (
+        selectedType.dayTradingEnabled &&
+        initialBalance < selectedType.minBalance
+      ) {
+        alert(
+          `Day trading accounts require minimum $${selectedType.minBalance.toLocaleString()} balance`
+        );
         setCreating(false);
         return;
       }
 
-      const response = await fetch('/api/paper-trading/portfolios', {
-        method: 'POST',
+      const response = await fetch("/api/paper-trading/portfolios", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           userId,
           portfolioType: selectedType.key,
-          initialBalance
+          initialBalance,
         }),
       });
 
       if (!response.ok) {
-        throw new Error('Failed to create portfolio');
+        throw new Error("Failed to create portfolio");
       }
 
       const portfolio = await response.json();
       onPortfolioCreated(portfolio);
     } catch (error) {
-      console.error('Error creating portfolio:', error);
-      alert('Failed to create portfolio. Please try again.');
+      console.error("Error creating portfolio:", error);
+      alert("Failed to create portfolio. Please try again.");
     } finally {
       setCreating(false);
     }
   };
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
     }).format(amount);
@@ -191,18 +200,26 @@ const PortfolioCreator: React.FC<PortfolioCreatorProps> = ({
     <div className="portfolio-creator">
       <div className="portfolio-creator-header">
         <h1>Choose Your Trading Account</h1>
-        <p>Select the account type that best matches your trading style and experience level</p>
+        <p>
+          Select the account type that best matches your trading style and
+          experience level
+        </p>
       </div>
 
       <div className="portfolio-types-grid">
         {PORTFOLIO_TYPES.map((type) => (
           <div
             key={type.key}
-            className={`portfolio-type-card ${selectedType?.key === type.key ? 'selected' : ''}`}
+            className={`portfolio-type-card ${
+              selectedType?.key === type.key ? "selected" : ""
+            }`}
             onClick={() => setSelectedType(type)}
           >
             <div className="portfolio-type-header">
-              <FontAwesomeIcon icon={type.icon} className="portfolio-type-icon" />
+              <FontAwesomeIcon
+                icon={type.icon}
+                className="portfolio-type-icon"
+              />
               <h3>{type.name}</h3>
               <div className="portfolio-type-balance">
                 {formatCurrency(type.initialBalance)}
@@ -231,7 +248,7 @@ const PortfolioCreator: React.FC<PortfolioCreatorProps> = ({
                   setShowDetails(showDetails === type.key ? null : type.key);
                 }}
               >
-                {showDetails === type.key ? 'Hide Details' : 'View Details'}
+                {showDetails === type.key ? "Hide Details" : "View Details"}
               </button>
             </div>
 
@@ -248,7 +265,7 @@ const PortfolioCreator: React.FC<PortfolioCreatorProps> = ({
       {selectedType && (
         <div className="portfolio-configuration">
           <h3>Configure Your {selectedType.name} Account</h3>
-          
+
           <div className="configuration-section">
             <label>Initial Balance (Optional)</label>
             <div className="balance-input-group">
@@ -266,7 +283,8 @@ const PortfolioCreator: React.FC<PortfolioCreatorProps> = ({
               Default: {formatCurrency(selectedType.initialBalance)}
               {selectedType.minBalance > 0 && (
                 <span className="min-balance-note">
-                  {' '}(Minimum: {formatCurrency(selectedType.minBalance)})
+                  {" "}
+                  (Minimum: {formatCurrency(selectedType.minBalance)})
                 </span>
               )}
             </small>
@@ -278,8 +296,9 @@ const PortfolioCreator: React.FC<PortfolioCreatorProps> = ({
               <div>
                 <strong>Day Trading Rules Apply</strong>
                 <p>
-                  This account allows unlimited day trades but requires maintaining a minimum 
-                  balance of {formatCurrency(selectedType.minBalance)}. Pattern Day Trading 
+                  This account allows unlimited day trades but requires
+                  maintaining a minimum balance of{" "}
+                  {formatCurrency(selectedType.minBalance)}. Pattern Day Trading
                   rules enforced by the SEC will apply to your account.
                 </p>
               </div>
@@ -297,14 +316,20 @@ const PortfolioCreator: React.FC<PortfolioCreatorProps> = ({
                 <span>Starting Balance:</span>
                 <span>
                   {formatCurrency(
-                    customBalance ? parseFloat(customBalance) : selectedType.initialBalance
+                    customBalance
+                      ? parseFloat(customBalance)
+                      : selectedType.initialBalance
                   )}
                 </span>
               </div>
               <div className="summary-item">
                 <span>Day Trading:</span>
-                <span className={selectedType.dayTradingEnabled ? 'enabled' : 'disabled'}>
-                  {selectedType.dayTradingEnabled ? 'Enabled' : 'Disabled'}
+                <span
+                  className={
+                    selectedType.dayTradingEnabled ? "enabled" : "disabled"
+                  }
+                >
+                  {selectedType.dayTradingEnabled ? "Enabled" : "Disabled"}
                 </span>
               </div>
               <div className="summary-item">
@@ -320,14 +345,17 @@ const PortfolioCreator: React.FC<PortfolioCreatorProps> = ({
         <div className="portfolio-details-modal">
           <div className="modal-content">
             <div className="modal-header">
-              <h3>{PORTFOLIO_TYPES.find(t => t.key === showDetails)?.name} Details</h3>
+              <h3>
+                {PORTFOLIO_TYPES.find((t) => t.key === showDetails)?.name}{" "}
+                Details
+              </h3>
               <button onClick={() => setShowDetails(null)}>×</button>
             </div>
             <div className="modal-body">
               {(() => {
-                const type = PORTFOLIO_TYPES.find(t => t.key === showDetails);
+                const type = PORTFOLIO_TYPES.find((t) => t.key === showDetails);
                 if (!type) return null;
-                
+
                 return (
                   <>
                     <div className="details-section">
@@ -341,7 +369,7 @@ const PortfolioCreator: React.FC<PortfolioCreatorProps> = ({
                         ))}
                       </ul>
                     </div>
-                    
+
                     <div className="details-section">
                       <h4>Restrictions</h4>
                       <ul>
@@ -353,7 +381,7 @@ const PortfolioCreator: React.FC<PortfolioCreatorProps> = ({
                         ))}
                       </ul>
                     </div>
-                    
+
                     <div className="details-section">
                       <h4>Recommended For</h4>
                       <p>{type.recommended}</p>
@@ -375,7 +403,9 @@ const PortfolioCreator: React.FC<PortfolioCreatorProps> = ({
           onClick={handleCreatePortfolio}
           disabled={!selectedType || creating}
         >
-          {creating ? 'Creating...' : `Create ${selectedType?.name || 'Portfolio'}`}
+          {creating
+            ? "Creating..."
+            : `Create ${selectedType?.name || "Portfolio"}`}
         </button>
       </div>
     </div>

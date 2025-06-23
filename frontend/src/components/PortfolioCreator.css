@@ -487,34 +487,34 @@
   .portfolio-creator {
     padding: 20px;
   }
-  
+
   .portfolio-types-grid {
     grid-template-columns: 1fr;
     gap: 16px;
   }
-  
+
   .portfolio-type-card {
     padding: 20px;
   }
-  
+
   .portfolio-configuration {
     padding: 20px;
   }
-  
+
   .summary-items {
     gap: 8px;
   }
-  
+
   .summary-item {
     flex-direction: column;
     align-items: flex-start;
     gap: 4px;
   }
-  
+
   .portfolio-creator-actions {
     flex-direction: column;
   }
-  
+
   .modal-content {
     margin: 10px;
     max-height: 90vh;

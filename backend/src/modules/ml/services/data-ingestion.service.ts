@@ -1,8 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
-import axios, { AxiosResponse } from 'axios';
 import { ConfigService } from '@nestjs/config';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import axios, { AxiosResponse } from 'axios';
 
 export interface MarketDataPoint {
   symbol: string;
@@ -37,7 +35,8 @@ export interface IngestionMetrics {
 export class DataIngestionService {
   private readonly logger = new Logger(DataIngestionService.name);
   private readonly dataSources: Map<string, DataSource> = new Map();
-  private readonly requestQueues: Map<string, Array<() => Promise<any>>> = new Map();
+  private readonly requestQueues: Map<string, Array<() => Promise<any>>> =
+    new Map();
   private readonly metrics: Map<string, IngestionMetrics> = new Map();
 
   constructor(
@@ -64,7 +63,9 @@ export class DataIngestionService {
     });
 
     // Alpha Vantage (if configured)
-    const alphaVantageKey = this.configService.get<string>('ALPHA_VANTAGE_API_KEY');
+    const alphaVantageKey = this.configService.get<string>(
+      'ALPHA_VANTAGE_API_KEY',
+    );
     if (alphaVantageKey) {
       this.dataSources.set('alpha_vantage', {
         name: 'Alpha Vantage',
@@ -97,25 +98,50 @@ export class DataIngestionService {
    */
   async ingestHistoricalData(
     symbol: string,
-    period: '1d' | '5d' | '1mo' | '3mo' | '6mo' | '1y' | '2y' | '5y' | '10y' | 'max' = '1y',
-    interval: '1m' | '2m' | '5m' | '15m' | '30m' | '60m' | '90m' | '1h' | '1d' | '5d' | '1wk' | '1mo' | '3mo' = '1d',
+    period:
+      | '1d'
+      | '5d'
+      | '1mo'
+      | '3mo'
+      | '6mo'
+      | '1y'
+      | '2y'
+      | '5y'
+      | '10y'
+      | 'max' = '1y',
+    interval:
+      | '1m'
+      | '2m'
+      | '5m'
+      | '15m'
+      | '30m'
+      | '60m'
+      | '90m'
+      | '1h'
+      | '1d'
+      | '5d'
+      | '1wk'
+      | '1mo'
+      | '3mo' = '1d',
     source: string = 'yahoo_finance',
   ): Promise<MarketDataPoint[]> {
     const startTime = Date.now();
-    
+
     try {
-      this.logger.debug(`Ingesting historical data for ${symbol} from ${source}`);
-      
+      this.logger.debug(
+        `Ingesting historical data for ${symbol} from ${source}`,
+      );
+
       // Rate limiting check
       await this.enforceRateLimit(source);
-      
+
       const dataSource = this.dataSources.get(source);
       if (!dataSource || !dataSource.healthy) {
         throw new Error(`Data source ${source} is not available or unhealthy`);
       }
 
       let data: MarketDataPoint[];
-      
+
       switch (source) {
         case 'yahoo_finance':
           data = await this.ingestFromYahooFinance(symbol, period, interval);
@@ -131,26 +157,31 @@ export class DataIngestionService {
       const metrics = this.metrics.get(source)!;
       metrics.totalRecords += data.length;
       metrics.successfulRecords += data.length;
-      metrics.averageLatency = (metrics.averageLatency + (Date.now() - startTime)) / 2;
+      metrics.averageLatency =
+        (metrics.averageLatency + (Date.now() - startTime)) / 2;
       metrics.lastUpdateTime = new Date();
 
       // Store in database (TODO: implement when entities are ready)
       // await this.storeMarketData(data);
 
-      this.logger.log(`Successfully ingested ${data.length} records for ${symbol} from ${source}`);
+      this.logger.log(
+        `Successfully ingested ${data.length} records for ${symbol} from ${source}`,
+      );
       return data;
-
     } catch (error) {
       const metrics = this.metrics.get(source)!;
       metrics.failedRecords++;
       metrics.errors.push(`${new Date().toISOString()}: ${error.message}`);
-      
+
       // Keep only last 10 errors
       if (metrics.errors.length > 10) {
         metrics.errors = metrics.errors.slice(-10);
       }
 
-      this.logger.error(`Failed to ingest data for ${symbol} from ${source}:`, error);
+      this.logger.error(
+        `Failed to ingest data for ${symbol} from ${source}:`,
+        error,
+      );
       throw error;
     }
   }
@@ -158,21 +189,26 @@ export class DataIngestionService {
   /**
    * Ingest real-time market data
    */
-  async ingestRealTimeData(symbols: string[], source: string = 'yahoo_finance'): Promise<MarketDataPoint[]> {
+  async ingestRealTimeData(
+    symbols: string[],
+    source: string = 'yahoo_finance',
+  ): Promise<MarketDataPoint[]> {
     const startTime = Date.now();
-    
+
     try {
-      this.logger.debug(`Ingesting real-time data for ${symbols.length} symbols from ${source}`);
-      
+      this.logger.debug(
+        `Ingesting real-time data for ${symbols.length} symbols from ${source}`,
+      );
+
       await this.enforceRateLimit(source);
-      
+
       const dataSource = this.dataSources.get(source);
       if (!dataSource || !dataSource.healthy) {
         throw new Error(`Data source ${source} is not available or unhealthy`);
       }
 
       let data: MarketDataPoint[];
-      
+
       switch (source) {
         case 'yahoo_finance':
           data = await this.getRealTimeFromYahooFinance(symbols);
@@ -188,12 +224,14 @@ export class DataIngestionService {
       const metrics = this.metrics.get(source)!;
       metrics.totalRecords += data.length;
       metrics.successfulRecords += data.length;
-      metrics.averageLatency = (metrics.averageLatency + (Date.now() - startTime)) / 2;
+      metrics.averageLatency =
+        (metrics.averageLatency + (Date.now() - startTime)) / 2;
       metrics.lastUpdateTime = new Date();
 
-      this.logger.debug(`Successfully ingested real-time data for ${symbols.length} symbols`);
+      this.logger.debug(
+        `Successfully ingested real-time data for ${symbols.length} symbols`,
+      );
       return data;
-
     } catch (error) {
       const metrics = this.metrics.get(source)!;
       metrics.failedRecords++;
@@ -218,7 +256,8 @@ export class DataIngestionService {
     const response: AxiosResponse = await axios.get(url, {
       timeout: 10000,
       headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+        'User-Agent':
+          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
       },
     });
 
@@ -229,7 +268,7 @@ export class DataIngestionService {
     const result = response.data.chart.result[0];
     const timestamps = result.timestamp || [];
     const quote = result.indicators?.quote?.[0] || {};
-    
+
     return timestamps.map((timestamp: number, index: number) => ({
       symbol,
       timestamp: new Date(timestamp * 1000),
@@ -251,7 +290,7 @@ export class DataIngestionService {
     interval: string,
   ): Promise<MarketDataPoint[]> {
     const dataSource = this.dataSources.get('alpha_vantage')!;
-    
+
     // Map our interval to Alpha Vantage format
     let function_name = 'TIME_SERIES_DAILY';
     if (interval.includes('m')) {
@@ -269,23 +308,30 @@ export class DataIngestionService {
     }
 
     // Parse Alpha Vantage response format
-    const timeSeries = response.data['Time Series (Daily)'] || response.data['Time Series (1min)'] || {};
-    
-    return Object.entries(timeSeries).map(([timestamp, data]: [string, any]) => ({
-      symbol,
-      timestamp: new Date(timestamp),
-      open: parseFloat(data['1. open']),
-      high: parseFloat(data['2. high']),
-      low: parseFloat(data['3. low']),
-      close: parseFloat(data['4. close']),
-      volume: parseInt(data['5. volume']),
-    }));
+    const timeSeries =
+      response.data['Time Series (Daily)'] ||
+      response.data['Time Series (1min)'] ||
+      {};
+
+    return Object.entries(timeSeries).map(
+      ([timestamp, data]: [string, any]) => ({
+        symbol,
+        timestamp: new Date(timestamp),
+        open: parseFloat(data['1. open']),
+        high: parseFloat(data['2. high']),
+        low: parseFloat(data['3. low']),
+        close: parseFloat(data['4. close']),
+        volume: parseInt(data['5. volume']),
+      }),
+    );
   }
 
   /**
    * Get real-time data from Yahoo Finance
    */
-  private async getRealTimeFromYahooFinance(symbols: string[]): Promise<MarketDataPoint[]> {
+  private async getRealTimeFromYahooFinance(
+    symbols: string[],
+  ): Promise<MarketDataPoint[]> {
     const dataSource = this.dataSources.get('yahoo_finance')!;
     const symbolsStr = symbols.join(',');
     const url = `${dataSource.baseUrl}/${symbolsStr}?interval=1m&range=1d`;
@@ -293,7 +339,8 @@ export class DataIngestionService {
     const response: AxiosResponse = await axios.get(url, {
       timeout: 10000,
       headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+        'User-Agent':
+          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
       },
     });
 
@@ -306,7 +353,7 @@ export class DataIngestionService {
 
       const timestamps = result.timestamp || [];
       const quote = result.indicators?.quote?.[0] || {};
-      
+
       // Get the latest data point
       const latestIndex = timestamps.length - 1;
       if (latestIndex >= 0) {
@@ -328,13 +375,17 @@ export class DataIngestionService {
   /**
    * Get real-time data from Alpha Vantage
    */
-  private async getRealTimeFromAlphaVantage(symbols: string[]): Promise<MarketDataPoint[]> {
+  private async getRealTimeFromAlphaVantage(
+    symbols: string[],
+  ): Promise<MarketDataPoint[]> {
     // Alpha Vantage requires separate calls for each symbol
-    const promises = symbols.map(symbol => this.ingestFromAlphaVantage(symbol, '1d', '1m'));
+    const promises = symbols.map((symbol) =>
+      this.ingestFromAlphaVantage(symbol, '1d', '1m'),
+    );
     const results = await Promise.allSettled(promises);
-    
+
     const marketData: MarketDataPoint[] = [];
-    results.forEach(result => {
+    results.forEach((result) => {
       if (result.status === 'fulfilled' && result.value.length > 0) {
         // Get the latest data point
         marketData.push(result.value[result.value.length - 1]);
@@ -357,7 +408,7 @@ export class DataIngestionService {
     if (timeSinceLastRequest < minInterval) {
       const waitTime = minInterval - timeSinceLastRequest;
       this.logger.debug(`Rate limiting: waiting ${waitTime}ms for ${source}`);
-      await new Promise(resolve => setTimeout(resolve, waitTime));
+      await new Promise((resolve) => setTimeout(resolve, waitTime));
     }
 
     dataSource.lastRequest = new Date();
@@ -375,7 +426,10 @@ export class DataIngestionService {
           source.healthy = true;
         } catch (error) {
           source.healthy = false;
-          this.logger.warn(`Data source ${sourceKey} health check failed:`, error.message);
+          this.logger.warn(
+            `Data source ${sourceKey} health check failed:`,
+            error.message,
+          );
         }
       }
     }, 300000); // Check every 5 minutes
@@ -391,7 +445,11 @@ export class DataIngestionService {
   /**
    * Get data source status
    */
-  getDataSourceStatus(): Array<{ name: string; healthy: boolean; lastRequest: Date }> {
+  getDataSourceStatus(): Array<{
+    name: string;
+    healthy: boolean;
+    lastRequest: Date;
+  }> {
     return Array.from(this.dataSources.entries()).map(([key, source]) => ({
       name: source.name,
       healthy: source.healthy,

@@ -129,7 +129,7 @@ export class DataValidationService {
         check: (data: MarketDataPoint[]) => this.checkStatisticalOutliers(data),
         severity: 'info',
         category: 'statistical',
-      }
+      },
     );
 
     // Feature validation rules
@@ -154,20 +154,29 @@ export class DataValidationService {
         check: (data: FeatureSet[]) => this.checkNaNInfValues(data),
         severity: 'error',
         category: 'data_quality',
-      }
+      },
     );
 
-    this.logger.log(`Initialized ${this.validationRules.length} validation rules`);
+    this.logger.log(
+      `Initialized ${this.validationRules.length} validation rules`,
+    );
   }
 
   /**
    * Validate market data
    */
-  async validateMarketData(data: MarketDataPoint[], symbol?: string): Promise<DataQualityReport> {
-    this.logger.debug(`Validating market data: ${data.length} points${symbol ? ` for ${symbol}` : ''}`);
+  async validateMarketData(
+    data: MarketDataPoint[],
+    symbol?: string,
+  ): Promise<DataQualityReport> {
+    this.logger.debug(
+      `Validating market data: ${data.length} points${symbol ? ` for ${symbol}` : ''}`,
+    );
 
-    const marketDataRules = this.validationRules.filter(rule => 
-      ['data_quality', 'business_logic', 'technical', 'statistical'].includes(rule.category)
+    const marketDataRules = this.validationRules.filter((rule) =>
+      ['data_quality', 'business_logic', 'technical', 'statistical'].includes(
+        rule.category,
+      ),
     );
 
     return this.runValidation(data, marketDataRules, symbol);
@@ -176,11 +185,16 @@ export class DataValidationService {
   /**
    * Validate feature data
    */
-  async validateFeatureData(data: FeatureSet[], symbol?: string): Promise<DataQualityReport> {
-    this.logger.debug(`Validating feature data: ${data.length} feature sets${symbol ? ` for ${symbol}` : ''}`);
+  async validateFeatureData(
+    data: FeatureSet[],
+    symbol?: string,
+  ): Promise<DataQualityReport> {
+    this.logger.debug(
+      `Validating feature data: ${data.length} feature sets${symbol ? ` for ${symbol}` : ''}`,
+    );
 
-    const featureDataRules = this.validationRules.filter(rule => 
-      rule.name.includes('feature') || rule.name.includes('nan_inf')
+    const featureDataRules = this.validationRules.filter(
+      (rule) => rule.name.includes('feature') || rule.name.includes('nan_inf'),
     );
 
     return this.runValidation(data, featureDataRules, symbol);
@@ -189,7 +203,11 @@ export class DataValidationService {
   /**
    * Run validation rules against data
    */
-  private runValidation(data: any, rules: ValidationRule[], symbol?: string): DataQualityReport {
+  private runValidation(
+    data: any,
+    rules: ValidationRule[],
+    symbol?: string,
+  ): DataQualityReport {
     const results: Array<{
       rule_name: string;
       result: ValidationResult;
@@ -211,7 +229,7 @@ export class DataValidationService {
         });
 
         totalScore += result.score;
-        
+
         if (result.passed) {
           passedChecks++;
         } else {
@@ -254,7 +272,10 @@ export class DataValidationService {
   /**
    * Detect outliers in data
    */
-  detectOutliers(values: number[], threshold: number = 3): OutlierDetectionResult {
+  detectOutliers(
+    values: number[],
+    threshold: number = 3,
+  ): OutlierDetectionResult {
     if (values.length < 3) {
       return {
         outliers: [],
@@ -264,7 +285,9 @@ export class DataValidationService {
     }
 
     const mean = values.reduce((a, b) => a + b, 0) / values.length;
-    const variance = values.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / values.length;
+    const variance =
+      values.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) /
+      values.length;
     const stdDev = Math.sqrt(variance);
 
     const outliers = values
@@ -274,11 +297,12 @@ export class DataValidationService {
           index,
           value,
           z_score: zScore,
-          type: zScore > threshold * 1.5 ? 'extreme' as const : 'mild' as const,
+          type:
+            zScore > threshold * 1.5 ? ('extreme' as const) : ('mild' as const),
           is_outlier: zScore > threshold,
         };
       })
-      .filter(item => item.is_outlier)
+      .filter((item) => item.is_outlier)
       .map(({ is_outlier, ...rest }) => rest);
 
     const outlierPercentage = (outliers.length / values.length) * 100;
@@ -293,18 +317,24 @@ export class DataValidationService {
   /**
    * Impute missing data
    */
-  imputeMissingData(data: MarketDataPoint[], method: 'forward_fill' | 'backward_fill' | 'interpolate' = 'interpolate'): MarketDataPoint[] {
+  imputeMissingData(
+    data: MarketDataPoint[],
+    method: 'forward_fill' | 'backward_fill' | 'interpolate' = 'interpolate',
+  ): MarketDataPoint[] {
     if (data.length === 0) return data;
 
     const result = [...data];
 
     for (let i = 0; i < result.length; i++) {
       const point = result[i];
-      
+
       // Check for missing values (0 or undefined/null)
-      if (this.isMissingValue(point.open) || this.isMissingValue(point.high) || 
-          this.isMissingValue(point.low) || this.isMissingValue(point.close)) {
-        
+      if (
+        this.isMissingValue(point.open) ||
+        this.isMissingValue(point.high) ||
+        this.isMissingValue(point.low) ||
+        this.isMissingValue(point.close)
+      ) {
         switch (method) {
           case 'forward_fill':
             if (i > 0) {
@@ -328,50 +358,54 @@ export class DataValidationService {
 
   // Validation rule implementations
   private checkPositivePrices(data: MarketDataPoint[]): ValidationResult {
-    const negativeCount = data.filter(d => 
-      d.open <= 0 || d.high <= 0 || d.low <= 0 || d.close <= 0
+    const negativeCount = data.filter(
+      (d) => d.open <= 0 || d.high <= 0 || d.low <= 0 || d.close <= 0,
     ).length;
 
-    const score = 1 - (negativeCount / data.length);
-    
+    const score = 1 - negativeCount / data.length;
+
     return {
       passed: negativeCount === 0,
-      message: negativeCount === 0 
-        ? 'All prices are positive' 
-        : `Found ${negativeCount} data points with non-positive prices`,
+      message:
+        negativeCount === 0
+          ? 'All prices are positive'
+          : `Found ${negativeCount} data points with non-positive prices`,
       score,
       metadata: { negative_count: negativeCount },
     };
   }
 
   private checkNonNegativeVolume(data: MarketDataPoint[]): ValidationResult {
-    const negativeCount = data.filter(d => d.volume < 0).length;
-    const score = 1 - (negativeCount / data.length);
-    
+    const negativeCount = data.filter((d) => d.volume < 0).length;
+    const score = 1 - negativeCount / data.length;
+
     return {
       passed: negativeCount === 0,
-      message: negativeCount === 0 
-        ? 'All volumes are non-negative' 
-        : `Found ${negativeCount} data points with negative volumes`,
+      message:
+        negativeCount === 0
+          ? 'All volumes are non-negative'
+          : `Found ${negativeCount} data points with negative volumes`,
       score,
       metadata: { negative_volume_count: negativeCount },
     };
   }
 
   private checkOHLCLogic(data: MarketDataPoint[]): ValidationResult {
-    const violations = data.filter(d => 
-      d.high < Math.max(d.open, d.close) ||
-      d.low > Math.min(d.open, d.close) ||
-      d.high < d.low
+    const violations = data.filter(
+      (d) =>
+        d.high < Math.max(d.open, d.close) ||
+        d.low > Math.min(d.open, d.close) ||
+        d.high < d.low,
     ).length;
 
-    const score = 1 - (violations / data.length);
-    
+    const score = 1 - violations / data.length;
+
     return {
       passed: violations === 0,
-      message: violations === 0 
-        ? 'All OHLC relationships are logical' 
-        : `Found ${violations} OHLC logic violations`,
+      message:
+        violations === 0
+          ? 'All OHLC relationships are logical'
+          : `Found ${violations} OHLC logic violations`,
       score,
       metadata: { violations },
     };
@@ -379,7 +413,11 @@ export class DataValidationService {
 
   private checkPriceContinuity(data: MarketDataPoint[]): ValidationResult {
     if (data.length < 2) {
-      return { passed: true, message: 'Insufficient data for continuity check', score: 1 };
+      return {
+        passed: true,
+        message: 'Insufficient data for continuity check',
+        score: 1,
+      };
     }
 
     let extremeGaps = 0;
@@ -389,14 +427,14 @@ export class DataValidationService {
       const prevClose = data[i - 1].close;
       const currentOpen = data[i].open;
       const gap = Math.abs(currentOpen - prevClose) / prevClose;
-      
+
       if (gap > gapThreshold) {
         extremeGaps++;
       }
     }
 
-    const score = 1 - (extremeGaps / (data.length - 1));
-    
+    const score = 1 - extremeGaps / (data.length - 1);
+
     return {
       passed: extremeGaps / (data.length - 1) < 0.05, // Less than 5% extreme gaps
       message: `Found ${extremeGaps} extreme price gaps (>${(gapThreshold * 100).toFixed(1)}%)`,
@@ -408,12 +446,13 @@ export class DataValidationService {
   private checkDataSufficiency(data: MarketDataPoint[]): ValidationResult {
     const minRequired = 200; // Minimum points for reliable analysis
     const score = Math.min(data.length / minRequired, 1);
-    
+
     return {
       passed: data.length >= minRequired,
-      message: data.length >= minRequired 
-        ? `Sufficient data: ${data.length} points` 
-        : `Insufficient data: ${data.length}/${minRequired} points`,
+      message:
+        data.length >= minRequired
+          ? `Sufficient data: ${data.length} points`
+          : `Insufficient data: ${data.length}/${minRequired} points`,
       score,
       metadata: { data_points: data.length, minimum_required: minRequired },
     };
@@ -421,44 +460,50 @@ export class DataValidationService {
 
   private checkTimestampOrdering(data: MarketDataPoint[]): ValidationResult {
     let violations = 0;
-    
+
     for (let i = 1; i < data.length; i++) {
       if (data[i].timestamp < data[i - 1].timestamp) {
         violations++;
       }
     }
 
-    const score = 1 - (violations / Math.max(data.length - 1, 1));
-    
+    const score = 1 - violations / Math.max(data.length - 1, 1);
+
     return {
       passed: violations === 0,
-      message: violations === 0 
-        ? 'Timestamps are properly ordered' 
-        : `Found ${violations} timestamp ordering violations`,
+      message:
+        violations === 0
+          ? 'Timestamps are properly ordered'
+          : `Found ${violations} timestamp ordering violations`,
       score,
       metadata: { violations },
     };
   }
 
   private checkDuplicateTimestamps(data: MarketDataPoint[]): ValidationResult {
-    const timestamps = data.map(d => d.timestamp.getTime());
+    const timestamps = data.map((d) => d.timestamp.getTime());
     const uniqueTimestamps = new Set(timestamps);
     const duplicates = timestamps.length - uniqueTimestamps.size;
-    
-    const score = 1 - (duplicates / data.length);
-    
+
+    const score = 1 - duplicates / data.length;
+
     return {
       passed: duplicates === 0,
-      message: duplicates === 0 
-        ? 'No duplicate timestamps' 
-        : `Found ${duplicates} duplicate timestamps`,
+      message:
+        duplicates === 0
+          ? 'No duplicate timestamps'
+          : `Found ${duplicates} duplicate timestamps`,
       score,
       metadata: { duplicates },
     };
   }
   private checkDataGaps(data: MarketDataPoint[]): ValidationResult {
     if (data.length < 2) {
-      return { passed: true, message: 'Insufficient data for gap analysis', score: 1 };
+      return {
+        passed: true,
+        message: 'Insufficient data for gap analysis',
+        score: 1,
+      };
     }
 
     // Check for gaps larger than expected trading intervals
@@ -469,10 +514,12 @@ export class DataValidationService {
     }
 
     const medianInterval = this.calculateMedian(intervals);
-    const largeGaps = intervals.filter(interval => interval > medianInterval * 5).length;
-    
-    const score = 1 - (largeGaps / intervals.length);
-    
+    const largeGaps = intervals.filter(
+      (interval) => interval > medianInterval * 5,
+    ).length;
+
+    const score = 1 - largeGaps / intervals.length;
+
     return {
       passed: largeGaps / intervals.length < 0.1, // Less than 10% large gaps
       message: `Found ${largeGaps} large data gaps`,
@@ -482,14 +529,14 @@ export class DataValidationService {
   }
 
   private checkVolumeConsistency(data: MarketDataPoint[]): ValidationResult {
-    const volumes = data.map(d => d.volume).filter(v => v > 0);
+    const volumes = data.map((d) => d.volume).filter((v) => v > 0);
     if (volumes.length === 0) {
       return { passed: false, message: 'No valid volume data', score: 0 };
     }
 
     const outlierResult = this.detectOutliers(volumes);
     const score = outlierResult.clean_data_percentage / 100;
-    
+
     return {
       passed: outlierResult.outlier_percentage < 5, // Less than 5% outliers
       message: `Volume outliers: ${outlierResult.outlier_percentage.toFixed(1)}%`,
@@ -506,7 +553,7 @@ export class DataValidationService {
 
     const outlierResult = this.detectOutliers(returns);
     const score = outlierResult.clean_data_percentage / 100;
-    
+
     return {
       passed: outlierResult.outlier_percentage < 2, // Less than 2% extreme outliers
       message: `Price return outliers: ${outlierResult.outlier_percentage.toFixed(1)}%`,
@@ -520,12 +567,18 @@ export class DataValidationService {
       return { passed: false, message: 'No feature data provided', score: 0 };
     }
 
-    const expectedFeatures = ['sma_20', 'rsi_14', 'macd', 'bb_upper', 'volume_ratio_20d'];
+    const expectedFeatures = [
+      'sma_20',
+      'rsi_14',
+      'macd',
+      'bb_upper',
+      'volume_ratio_20d',
+    ];
     let totalMissing = 0;
     let totalChecks = 0;
 
-    data.forEach(featureSet => {
-      expectedFeatures.forEach(feature => {
+    data.forEach((featureSet) => {
+      expectedFeatures.forEach((feature) => {
         totalChecks++;
         if (!featureSet.features.has(feature)) {
           totalMissing++;
@@ -533,19 +586,24 @@ export class DataValidationService {
       });
     });
 
-    const score = 1 - (totalMissing / totalChecks);
-    
+    const score = 1 - totalMissing / totalChecks;
+
     return {
       passed: totalMissing === 0,
-      message: totalMissing === 0 
-        ? 'All expected features are present' 
-        : `Missing ${totalMissing}/${totalChecks} expected features`,
+      message:
+        totalMissing === 0
+          ? 'All expected features are present'
+          : `Missing ${totalMissing}/${totalChecks} expected features`,
       score,
       metadata: { missing_features: totalMissing, total_checks: totalChecks },
     };
   }
   private checkFeatureRanges(data: FeatureSet[]): ValidationResult {
-    const rangeViolations: Array<{ index: number; feature: string; value: number }> = [];
+    const rangeViolations: Array<{
+      index: number;
+      feature: string;
+      value: number;
+    }> = [];
 
     data.forEach((featureSet, index) => {
       featureSet.features.forEach((value, key) => {
@@ -556,13 +614,14 @@ export class DataValidationService {
     });
 
     const totalFeatures = data.reduce((sum, fs) => sum + fs.features.size, 0);
-    const score = 1 - (rangeViolations.length / totalFeatures);
-    
+    const score = 1 - rangeViolations.length / totalFeatures;
+
     return {
       passed: rangeViolations.length === 0,
-      message: rangeViolations.length === 0 
-        ? 'All features are within expected ranges' 
-        : `Found ${rangeViolations.length} features out of range`,
+      message:
+        rangeViolations.length === 0
+          ? 'All features are within expected ranges'
+          : `Found ${rangeViolations.length} features out of range`,
       score,
       metadata: { violations: rangeViolations.length },
     };
@@ -572,8 +631,8 @@ export class DataValidationService {
     let nanInfCount = 0;
     let totalFeatures = 0;
 
-    data.forEach(featureSet => {
-      featureSet.features.forEach(value => {
+    data.forEach((featureSet) => {
+      featureSet.features.forEach((value) => {
         totalFeatures++;
         if (!isFinite(value) || isNaN(value)) {
           nanInfCount++;
@@ -581,13 +640,14 @@ export class DataValidationService {
       });
     });
 
-    const score = 1 - (nanInfCount / totalFeatures);
-    
+    const score = 1 - nanInfCount / totalFeatures;
+
     return {
       passed: nanInfCount === 0,
-      message: nanInfCount === 0 
-        ? 'No NaN or infinite values found' 
-        : `Found ${nanInfCount} NaN/infinite values`,
+      message:
+        nanInfCount === 0
+          ? 'No NaN or infinite values found'
+          : `Found ${nanInfCount} NaN/infinite values`,
       score,
       metadata: { nan_inf_count: nanInfCount, total_features: totalFeatures },
     };
@@ -597,13 +657,13 @@ export class DataValidationService {
   private isFeatureOutOfRange(featureName: string, value: number): boolean {
     // Define expected ranges for common features
     const ranges: Record<string, [number, number]> = {
-      'rsi_14': [0, 100],
-      'rsi_21': [0, 100],
-      'bb_position': [0, 1],
-      'stoch_k': [0, 100],
-      'stoch_d': [0, 100],
-      'williams_r': [-100, 0],
-      'cci': [-300, 300],
+      rsi_14: [0, 100],
+      rsi_21: [0, 100],
+      bb_position: [0, 1],
+      stoch_k: [0, 100],
+      stoch_d: [0, 100],
+      williams_r: [-100, 0],
+      cci: [-300, 300],
     };
 
     if (featureName in ranges) {
@@ -619,7 +679,9 @@ export class DataValidationService {
     return value === 0 || value === undefined || value === null || isNaN(value);
   }
 
-  private fillFromPrevious(previous: MarketDataPoint): Partial<MarketDataPoint> {
+  private fillFromPrevious(
+    previous: MarketDataPoint,
+  ): Partial<MarketDataPoint> {
     return {
       open: previous.close,
       high: previous.close,
@@ -637,7 +699,10 @@ export class DataValidationService {
     };
   }
 
-  private interpolateValues(data: MarketDataPoint[], index: number): Partial<MarketDataPoint> {
+  private interpolateValues(
+    data: MarketDataPoint[],
+    index: number,
+  ): Partial<MarketDataPoint> {
     // Find nearest valid values before and after
     let beforeIndex = index - 1;
     let afterIndex = index + 1;
@@ -646,7 +711,10 @@ export class DataValidationService {
       beforeIndex--;
     }
 
-    while (afterIndex < data.length && this.isMissingValue(data[afterIndex].close)) {
+    while (
+      afterIndex < data.length &&
+      this.isMissingValue(data[afterIndex].close)
+    ) {
       afterIndex++;
     }
 
@@ -674,7 +742,7 @@ export class DataValidationService {
   private calculateMedian(values: number[]): number {
     const sorted = [...values].sort((a, b) => a - b);
     const mid = Math.floor(sorted.length / 2);
-    
+
     if (sorted.length % 2 === 0) {
       return (sorted[mid - 1] + sorted[mid]) / 2;
     } else {
@@ -682,30 +750,44 @@ export class DataValidationService {
     }
   }
 
-  private generateRecommendations(results: Array<{ rule_name: string; result: ValidationResult; severity: string }>): string[] {
+  private generateRecommendations(
+    results: Array<{
+      rule_name: string;
+      result: ValidationResult;
+      severity: string;
+    }>,
+  ): string[] {
     const recommendations: string[] = [];
 
     results.forEach(({ rule_name, result, severity }) => {
       if (!result.passed && severity === 'error') {
         switch (rule_name) {
           case 'price_positive':
-            recommendations.push('Remove or correct data points with non-positive prices');
+            recommendations.push(
+              'Remove or correct data points with non-positive prices',
+            );
             break;
           case 'ohlc_logical':
-            recommendations.push('Fix OHLC relationships (high ≥ max(open,close), low ≤ min(open,close))');
+            recommendations.push(
+              'Fix OHLC relationships (high ≥ max(open,close), low ≤ min(open,close))',
+            );
             break;
           case 'timestamp_ordering':
             recommendations.push('Sort data by timestamp in ascending order');
             break;
           case 'nan_inf_check':
-            recommendations.push('Replace NaN/infinite values with appropriate substitutes');
+            recommendations.push(
+              'Replace NaN/infinite values with appropriate substitutes',
+            );
             break;
         }
       }
     });
 
     if (recommendations.length === 0) {
-      recommendations.push('Data quality is good - no critical issues detected');
+      recommendations.push(
+        'Data quality is good - no critical issues detected',
+      );
     }
 
     return recommendations;

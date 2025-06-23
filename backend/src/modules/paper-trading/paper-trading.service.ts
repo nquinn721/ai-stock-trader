@@ -696,11 +696,11 @@ export class PaperTradingService {
    */
   async getMLPortfolioAnalysis(portfolioId: number): Promise<any> {
     try {
-      const portfolio = await this.getPortfolio(portfolioId);
-
-      // Get ML optimization recommendations
-      const mlOptimization =
-        await this.mlService.getPortfolioOptimization(portfolioId);
+      const portfolio = await this.getPortfolio(portfolioId); // Get ML optimization recommendations
+      const mlOptimization = await this.mlService.getPortfolioOptimization(
+        portfolioId,
+        [],
+      );
       // Get individual position risk assessments
       const positionRisks: any[] = [];
       if (portfolio.positions && portfolio.positions.length > 0) {

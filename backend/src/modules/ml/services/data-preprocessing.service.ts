@@ -45,7 +45,12 @@ export interface TransformationConfig {
     action: 'remove' | 'clip' | 'impute';
   };
   missingDataStrategy: {
-    method: 'forward_fill' | 'backward_fill' | 'interpolate' | 'median' | 'mean';
+    method:
+      | 'forward_fill'
+      | 'backward_fill'
+      | 'interpolate'
+      | 'median'
+      | 'mean';
     window?: number;
   };
   featureSelection: {
@@ -69,13 +74,17 @@ export class DataPreprocessingService {
   /**
    * Create a new preprocessing pipeline
    */
-  async createPipeline(pipeline: Omit<PreprocessingPipeline, 'id'>): Promise<PreprocessingPipeline> {
+  async createPipeline(
+    pipeline: Omit<PreprocessingPipeline, 'id'>,
+  ): Promise<PreprocessingPipeline> {
     const id = this.generatePipelineId();
     const newPipeline: PreprocessingPipeline = {
       id,
       ...pipeline,
       lastRun: undefined,
-      nextRun: pipeline.schedule ? this.calculateNextRun(pipeline.schedule) : undefined
+      nextRun: pipeline.schedule
+        ? this.calculateNextRun(pipeline.schedule)
+        : undefined,
     };
 
     this.pipelines.set(id, newPipeline);
@@ -87,7 +96,10 @@ export class DataPreprocessingService {
   /**
    * Execute preprocessing pipeline
    */
-  async executePipeline(pipelineId: string, inputData: any[]): Promise<PreprocessingJob> {
+  async executePipeline(
+    pipelineId: string,
+    inputData: any[],
+  ): Promise<PreprocessingJob> {
     this.logger.log(`Executing preprocessing pipeline: ${pipelineId}`);
 
     const pipeline = this.pipelines.get(pipelineId);
@@ -102,7 +114,7 @@ export class DataPreprocessingService {
       startTime: new Date(),
       inputRecords: inputData.length,
       outputRecords: 0,
-      metrics: {}
+      metrics: {},
     };
 
     this.jobs.set(job.id, job);
@@ -122,12 +134,14 @@ export class DataPreprocessingService {
         const stepStart = Date.now();
 
         processedData = await this.executeStep(step, processedData);
-        
+
         const stepDuration = Date.now() - stepStart;
         stepMetrics[`${step.name}_duration_ms`] = stepDuration;
         stepMetrics[`${step.name}_output_count`] = processedData.length;
 
-        this.logger.log(`Step completed: ${step.name} (${stepDuration}ms, ${processedData.length} records)`);
+        this.logger.log(
+          `Step completed: ${step.name} (${stepDuration}ms, ${processedData.length} records)`,
+        );
       }
 
       // Update job status
@@ -142,10 +156,11 @@ export class DataPreprocessingService {
         pipeline.nextRun = this.calculateNextRun(pipeline.schedule);
       }
 
-      this.logger.log(`Pipeline execution completed: ${pipelineId} (${job.inputRecords} -> ${job.outputRecords} records)`);
+      this.logger.log(
+        `Pipeline execution completed: ${pipelineId} (${job.inputRecords} -> ${job.outputRecords} records)`,
+      );
 
       return job;
-
     } catch (error) {
       job.status = 'failed';
       job.endTime = new Date();
@@ -161,9 +176,11 @@ export class DataPreprocessingService {
   async preprocessData(
     data: any[],
     config: TransformationConfig,
-    targetColumns: string[]
+    targetColumns: string[],
   ): Promise<{ data: any[]; metadata: any }> {
-    this.logger.log(`Preprocessing ${data.length} records with ${targetColumns.length} target columns`);
+    this.logger.log(
+      `Preprocessing ${data.length} records with ${targetColumns.length} target columns`,
+    );
 
     let processedData = [...data];
     const metadata: any = {
@@ -173,29 +190,45 @@ export class DataPreprocessingService {
       outlierCount: 0,
       imputedValues: 0,
       finalRecords: 0,
-      selectedFeatures: [] as string[]
+      selectedFeatures: [] as string[],
     };
 
     // 1. Handle missing data
-    const missingDataResult = await this.handleMissingData(processedData, config.missingDataStrategy, targetColumns);
+    const missingDataResult = await this.handleMissingData(
+      processedData,
+      config.missingDataStrategy,
+      targetColumns,
+    );
     processedData = missingDataResult.data;
     metadata.imputedValues = missingDataResult.imputedCount;
     metadata.transformations.push('missing_data_handling');
 
     // 2. Detect and handle outliers
-    const outlierResult = await this.handleOutliers(processedData, config.outlierHandling, targetColumns);
+    const outlierResult = await this.handleOutliers(
+      processedData,
+      config.outlierHandling,
+      targetColumns,
+    );
     processedData = outlierResult.data;
     metadata.outlierCount = outlierResult.outlierCount;
     metadata.transformations.push('outlier_handling');
 
     // 3. Normalize features
-    const normalizationResult = await this.normalizeFeatures(processedData, config.normalization, targetColumns);
+    const normalizationResult = await this.normalizeFeatures(
+      processedData,
+      config.normalization,
+      targetColumns,
+    );
     processedData = normalizationResult.data;
     metadata.transformations.push('normalization');
 
     // 4. Feature selection (if configured)
     if (config.featureSelection.method !== 'none') {
-      const featureSelectionResult = await this.selectFeatures(processedData, config.featureSelection, targetColumns);
+      const featureSelectionResult = await this.selectFeatures(
+        processedData,
+        config.featureSelection,
+        targetColumns,
+      );
       processedData = featureSelectionResult.data;
       metadata.transformations.push('feature_selection');
       metadata.selectedFeatures = featureSelectionResult.selectedFeatures;
@@ -204,7 +237,9 @@ export class DataPreprocessingService {
     metadata.finalRecords = processedData.length;
     metadata.droppedRecords = data.length - processedData.length;
 
-    this.logger.log(`Preprocessing completed: ${metadata.finalRecords} records, ${metadata.transformations.length} transformations`);
+    this.logger.log(
+      `Preprocessing completed: ${metadata.finalRecords} records, ${metadata.transformations.length} transformations`,
+    );
 
     return { data: processedData, metadata };
   }
@@ -212,81 +247,98 @@ export class DataPreprocessingService {
   /**
    * Create feature engineering pipeline
    */
-  async createFeatureEngineeringPipeline(symbols: string[]): Promise<PreprocessingPipeline> {
+  async createFeatureEngineeringPipeline(
+    symbols: string[],
+  ): Promise<PreprocessingPipeline> {
     const steps: PreprocessingStep[] = [
       {
         id: 'price_features',
         name: 'Price Feature Engineering',
         operation: 'calculate_price_features',
         parameters: {
-          features: ['returns', 'log_returns', 'price_change', 'volatility']
+          features: ['returns', 'log_returns', 'price_change', 'volatility'],
         },
         order: 1,
         isEnabled: true,
-        dependencies: []
+        dependencies: [],
       },
       {
         id: 'technical_indicators',
         name: 'Technical Indicators',
         operation: 'calculate_technical_indicators',
         parameters: {
-          indicators: ['sma_20', 'ema_12', 'rsi', 'macd', 'bollinger_bands']
+          indicators: ['sma_20', 'ema_12', 'rsi', 'macd', 'bollinger_bands'],
         },
         order: 2,
         isEnabled: true,
-        dependencies: ['price_features']
+        dependencies: ['price_features'],
       },
       {
         id: 'volume_features',
         name: 'Volume Features',
         operation: 'calculate_volume_features',
         parameters: {
-          features: ['volume_sma', 'volume_ratio', 'on_balance_volume']
+          features: ['volume_sma', 'volume_ratio', 'on_balance_volume'],
         },
         order: 3,
         isEnabled: true,
-        dependencies: []
+        dependencies: [],
       },
       {
         id: 'market_features',
         name: 'Market State Features',
         operation: 'calculate_market_features',
         parameters: {
-          features: ['market_regime', 'correlation_matrix', 'beta']
+          features: ['market_regime', 'correlation_matrix', 'beta'],
         },
         order: 4,
         isEnabled: true,
-        dependencies: ['technical_indicators', 'volume_features']
-      }
+        dependencies: ['technical_indicators', 'volume_features'],
+      },
     ];
 
     return await this.createPipeline({
       name: `Feature Engineering Pipeline - ${symbols.join(', ')}`,
       steps,
       inputSchema: {
-        required: ['symbol', 'timestamp', 'open', 'high', 'low', 'close', 'volume'],
-        optional: []
+        required: [
+          'symbol',
+          'timestamp',
+          'open',
+          'high',
+          'low',
+          'close',
+          'volume',
+        ],
+        optional: [],
       },
       outputSchema: {
         required: ['symbol', 'timestamp'],
-        features: steps.flatMap(step => Object.values(step.parameters.features || []))
+        features: steps.flatMap((step) =>
+          Object.values(step.parameters.features || []),
+        ),
       },
       schedule: '0 */15 * * * *', // Every 15 minutes
-      isActive: true
+      isActive: true,
     });
   }
 
   /**
    * Get pipeline status and metrics
    */
-  async getPipelineStatus(pipelineId: string): Promise<{ pipeline: PreprocessingPipeline; recentJobs: PreprocessingJob[] }> {
+  async getPipelineStatus(
+    pipelineId: string,
+  ): Promise<{
+    pipeline: PreprocessingPipeline;
+    recentJobs: PreprocessingJob[];
+  }> {
     const pipeline = this.pipelines.get(pipelineId);
     if (!pipeline) {
       throw new Error(`Pipeline not found: ${pipelineId}`);
     }
 
     const recentJobs = Array.from(this.jobs.values())
-      .filter(job => job.pipelineId === pipelineId)
+      .filter((job) => job.pipelineId === pipelineId)
       .sort((a, b) => b.startTime.getTime() - a.startTime.getTime())
       .slice(0, 10);
 
@@ -305,27 +357,35 @@ export class DataPreprocessingService {
     pipeline.schedule = schedule;
     pipeline.nextRun = this.calculateNextRun(schedule);
 
-    this.logger.log(`Pipeline scheduled: ${pipelineId} with schedule ${schedule}`);
+    this.logger.log(
+      `Pipeline scheduled: ${pipelineId} with schedule ${schedule}`,
+    );
   }
 
   /**
    * Monitor pipeline performance
    */
-  async getPipelineMetrics(pipelineId: string, timeRange: { start: Date; end: Date }): Promise<any> {
-    const jobs = Array.from(this.jobs.values())
-      .filter(job => 
-        job.pipelineId === pipelineId && 
-        job.startTime >= timeRange.start && 
-        job.startTime <= timeRange.end
-      );
+  async getPipelineMetrics(
+    pipelineId: string,
+    timeRange: { start: Date; end: Date },
+  ): Promise<any> {
+    const jobs = Array.from(this.jobs.values()).filter(
+      (job) =>
+        job.pipelineId === pipelineId &&
+        job.startTime >= timeRange.start &&
+        job.startTime <= timeRange.end,
+    );
 
     const metrics = {
       totalJobs: jobs.length,
-      successfulJobs: jobs.filter(job => job.status === 'completed').length,
-      failedJobs: jobs.filter(job => job.status === 'failed').length,
+      successfulJobs: jobs.filter((job) => job.status === 'completed').length,
+      failedJobs: jobs.filter((job) => job.status === 'failed').length,
       avgProcessingTime: this.calculateAverageProcessingTime(jobs),
       avgThroughput: this.calculateAverageThroughput(jobs),
-      errorRate: jobs.length > 0 ? jobs.filter(job => job.status === 'failed').length / jobs.length : 0
+      errorRate:
+        jobs.length > 0
+          ? jobs.filter((job) => job.status === 'failed').length / jobs.length
+          : 0,
     };
 
     return metrics;
@@ -333,7 +393,10 @@ export class DataPreprocessingService {
 
   // Private helper methods
 
-  private async executeStep(step: PreprocessingStep, data: any[]): Promise<any[]> {
+  private async executeStep(
+    step: PreprocessingStep,
+    data: any[],
+  ): Promise<any[]> {
     switch (step.operation) {
       case 'calculate_price_features':
         return this.calculatePriceFeatures(data, step.parameters);
@@ -356,14 +419,18 @@ export class DataPreprocessingService {
   private async handleMissingData(
     data: any[],
     strategy: TransformationConfig['missingDataStrategy'],
-    columns: string[]
+    columns: string[],
   ): Promise<{ data: any[]; imputedCount: number }> {
     let imputedCount = 0;
-    const processedData = data.map(record => {
+    const processedData = data.map((record) => {
       const newRecord = { ...record };
-      
+
       for (const column of columns) {
-        if (newRecord[column] === null || newRecord[column] === undefined || isNaN(newRecord[column])) {
+        if (
+          newRecord[column] === null ||
+          newRecord[column] === undefined ||
+          isNaN(newRecord[column])
+        ) {
           switch (strategy.method) {
             case 'forward_fill':
               // Implementation would use previous valid value
@@ -379,7 +446,7 @@ export class DataPreprocessingService {
           imputedCount++;
         }
       }
-      
+
       return newRecord;
     });
 
@@ -389,7 +456,7 @@ export class DataPreprocessingService {
   private async handleOutliers(
     data: any[],
     config: TransformationConfig['outlierHandling'],
-    columns: string[]
+    columns: string[],
   ): Promise<{ data: any[]; outlierCount: number }> {
     let outlierCount = 0;
 
@@ -397,7 +464,7 @@ export class DataPreprocessingService {
       return { data, outlierCount };
     }
 
-    const processedData = data.filter(record => {
+    const processedData = data.filter((record) => {
       for (const column of columns) {
         const value = record[column];
         if (this.isOutlier(value, data, column, config)) {
@@ -416,17 +483,22 @@ export class DataPreprocessingService {
   private async normalizeFeatures(
     data: any[],
     config: TransformationConfig['normalization'],
-    columns: string[]
+    columns: string[],
   ): Promise<{ data: any[] }> {
-    const processedData = data.map(record => {
+    const processedData = data.map((record) => {
       const newRecord = { ...record };
-      
+
       for (const column of columns) {
         if (typeof newRecord[column] === 'number') {
-          newRecord[column] = this.normalizeValue(newRecord[column], data, column, config);
+          newRecord[column] = this.normalizeValue(
+            newRecord[column],
+            data,
+            column,
+            config,
+          );
         }
       }
-      
+
       return newRecord;
     });
 
@@ -436,12 +508,15 @@ export class DataPreprocessingService {
   private async selectFeatures(
     data: any[],
     config: TransformationConfig['featureSelection'],
-    columns: string[]
+    columns: string[],
   ): Promise<{ data: any[]; selectedFeatures: string[] }> {
     // Simplified feature selection - in production would use statistical methods
-    const selectedFeatures = columns.slice(0, config.maxFeatures || columns.length);
-    
-    const processedData = data.map(record => {
+    const selectedFeatures = columns.slice(
+      0,
+      config.maxFeatures || columns.length,
+    );
+
+    const processedData = data.map((record) => {
       const newRecord: any = {};
       for (const feature of selectedFeatures) {
         newRecord[feature] = record[feature];
@@ -453,12 +528,12 @@ export class DataPreprocessingService {
   }
 
   private calculatePriceFeatures(data: any[], parameters: any): any[] {
-    return data.map(record => ({
+    return data.map((record) => ({
       ...record,
       returns: (record.close - record.open) / record.open,
       log_returns: Math.log(record.close / record.open),
       price_change: record.close - record.open,
-      volatility: Math.abs(record.high - record.low) / record.close
+      volatility: Math.abs(record.high - record.low) / record.close,
     }));
   }
 
@@ -469,7 +544,7 @@ export class DataPreprocessingService {
       sma_20: this.calculateSMA(data, index, 20),
       ema_12: this.calculateEMA(data, index, 12),
       rsi: Math.random() * 100, // Mock RSI
-      macd: Math.random() * 2 - 1 // Mock MACD
+      macd: Math.random() * 2 - 1, // Mock MACD
     }));
   }
 
@@ -477,16 +552,17 @@ export class DataPreprocessingService {
     return data.map((record, index) => ({
       ...record,
       volume_sma: this.calculateVolumeSMA(data, index, 20),
-      volume_ratio: record.volume / (this.calculateVolumeSMA(data, index, 20) || 1),
-      on_balance_volume: this.calculateOBV(data, index)
+      volume_ratio:
+        record.volume / (this.calculateVolumeSMA(data, index, 20) || 1),
+      on_balance_volume: this.calculateOBV(data, index),
     }));
   }
 
   private calculateMarketFeatures(data: any[], parameters: any): any[] {
-    return data.map(record => ({
+    return data.map((record) => ({
       ...record,
       market_regime: Math.random() > 0.5 ? 'trending' : 'ranging',
-      beta: 1 + Math.random() * 0.5 - 0.25
+      beta: 1 + Math.random() * 0.5 - 0.25,
     }));
   }
 
@@ -500,7 +576,12 @@ export class DataPreprocessingService {
     return data;
   }
 
-  private isOutlier(value: number, data: any[], column: string, config: any): boolean {
+  private isOutlier(
+    value: number,
+    data: any[],
+    column: string,
+    config: any,
+  ): boolean {
     if (config.method === 'z_score') {
       const mean = this.calculateColumnMean(data, column);
       const std = this.calculateColumnStd(data, column);
@@ -510,36 +591,56 @@ export class DataPreprocessingService {
     return false;
   }
 
-  private normalizeValue(value: number, data: any[], column: string, config: any): number {
+  private normalizeValue(
+    value: number,
+    data: any[],
+    column: string,
+    config: any,
+  ): number {
     if (config.method === 'min_max') {
-      const min = Math.min(...data.map(d => d[column]).filter(v => typeof v === 'number'));
-      const max = Math.max(...data.map(d => d[column]).filter(v => typeof v === 'number'));
+      const min = Math.min(
+        ...data.map((d) => d[column]).filter((v) => typeof v === 'number'),
+      );
+      const max = Math.max(
+        ...data.map((d) => d[column]).filter((v) => typeof v === 'number'),
+      );
       return (value - min) / (max - min);
     }
     return value;
   }
 
   private calculateColumnMean(data: any[], column: string): number {
-    const values = data.map(d => d[column]).filter(v => typeof v === 'number' && !isNaN(v));
+    const values = data
+      .map((d) => d[column])
+      .filter((v) => typeof v === 'number' && !isNaN(v));
     return values.reduce((sum, val) => sum + val, 0) / values.length || 0;
   }
 
   private calculateColumnMedian(data: any[], column: string): number {
-    const values = data.map(d => d[column]).filter(v => typeof v === 'number' && !isNaN(v)).sort((a, b) => a - b);
+    const values = data
+      .map((d) => d[column])
+      .filter((v) => typeof v === 'number' && !isNaN(v))
+      .sort((a, b) => a - b);
     const mid = Math.floor(values.length / 2);
-    return values.length % 2 === 0 ? (values[mid - 1] + values[mid]) / 2 : values[mid];
+    return values.length % 2 === 0
+      ? (values[mid - 1] + values[mid]) / 2
+      : values[mid];
   }
 
   private calculateColumnStd(data: any[], column: string): number {
     const mean = this.calculateColumnMean(data, column);
-    const values = data.map(d => d[column]).filter(v => typeof v === 'number' && !isNaN(v));
-    const variance = values.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / values.length;
+    const values = data
+      .map((d) => d[column])
+      .filter((v) => typeof v === 'number' && !isNaN(v));
+    const variance =
+      values.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) /
+      values.length;
     return Math.sqrt(variance);
   }
 
   private calculateSMA(data: any[], index: number, period: number): number {
     const start = Math.max(0, index - period + 1);
-    const values = data.slice(start, index + 1).map(d => d.close);
+    const values = data.slice(start, index + 1).map((d) => d.close);
     return values.reduce((sum, val) => sum + val, 0) / values.length;
   }
 
@@ -548,9 +649,13 @@ export class DataPreprocessingService {
     return this.calculateSMA(data, index, period);
   }
 
-  private calculateVolumeSMA(data: any[], index: number, period: number): number {
+  private calculateVolumeSMA(
+    data: any[],
+    index: number,
+    period: number,
+  ): number {
     const start = Math.max(0, index - period + 1);
-    const values = data.slice(start, index + 1).map(d => d.volume);
+    const values = data.slice(start, index + 1).map((d) => d.volume);
     return values.reduce((sum, val) => sum + val, 0) / values.length;
   }
 
@@ -568,22 +673,26 @@ export class DataPreprocessingService {
   }
 
   private calculateAverageProcessingTime(jobs: PreprocessingJob[]): number {
-    const completedJobs = jobs.filter(job => job.endTime);
+    const completedJobs = jobs.filter((job) => job.endTime);
     if (completedJobs.length === 0) return 0;
 
-    const totalTime = completedJobs.reduce((sum, job) => 
-      sum + (job.endTime!.getTime() - job.startTime.getTime()), 0);
-    
+    const totalTime = completedJobs.reduce(
+      (sum, job) => sum + (job.endTime!.getTime() - job.startTime.getTime()),
+      0,
+    );
+
     return totalTime / completedJobs.length;
   }
 
   private calculateAverageThroughput(jobs: PreprocessingJob[]): number {
-    const completedJobs = jobs.filter(job => job.endTime && job.outputRecords > 0);
+    const completedJobs = jobs.filter(
+      (job) => job.endTime && job.outputRecords > 0,
+    );
     if (completedJobs.length === 0) return 0;
 
     const totalThroughput = completedJobs.reduce((sum, job) => {
       const duration = job.endTime!.getTime() - job.startTime.getTime();
-      return sum + (job.outputRecords / (duration / 1000)); // records per second
+      return sum + job.outputRecords / (duration / 1000); // records per second
     }, 0);
 
     return totalThroughput / completedJobs.length;

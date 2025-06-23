@@ -1163,4 +1163,33 @@ export class MLService {
 
     return recommendations;
   }
+
+  /**
+   * Evaluate model performance over a specified time period
+   */
+  async evaluateModelPerformance(
+    modelName: string,
+    days: number,
+  ): Promise<any> {
+    this.logger.log(
+      `Evaluating performance of model ${modelName} over ${days} days`,
+    );
+
+    // Mock implementation - replace with actual model evaluation logic
+    return {
+      modelName,
+      evaluationPeriod: days,
+      accuracy: 0.75 + Math.random() * 0.2,
+      precision: 0.7 + Math.random() * 0.25,
+      recall: 0.65 + Math.random() * 0.3,
+      f1Score: 0.68 + Math.random() * 0.27,
+      sharpeRatio: 1.2 + Math.random() * 0.8,
+      maxDrawdown: -(Math.random() * 0.15),
+      totalReturns: Math.random() * 0.3 - 0.1,
+      winRate: 0.55 + Math.random() * 0.3,
+      averageReturn: Math.random() * 0.02,
+      volatility: 0.15 + Math.random() * 0.1,
+      evaluatedAt: new Date(),
+    };
+  }
 }

@@ -105,7 +105,10 @@ export class MLController {
   ): Promise<PortfolioOptimization> {
     try {
       this.logger.log(`Getting portfolio optimization for ${portfolioId}`);
-      return await this.mlService.getPortfolioOptimization(Number(portfolioId));
+      return await this.mlService.getPortfolioOptimization(
+        Number(portfolioId),
+        [],
+      );
     } catch (error) {
       this.logger.error(
         `Error getting portfolio optimization for ${portfolioId}:`,

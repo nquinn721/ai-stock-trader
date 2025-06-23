@@ -140,6 +140,8 @@ export class MLABTest {
 
   @Column({ length: 50 })
   variantModelId: string;
+  @Column({ type: 'int', default: 1000 })
+  minimumSampleSize: number;
 
   @Column({ type: 'decimal', precision: 3, scale: 2 })
   trafficSplit: number; // 0.5 = 50/50 split
