@@ -62,6 +62,7 @@ export interface BreakoutStrategy {
     volumeTrend: 'increasing' | 'decreasing' | 'stable';
     volumeStrength: 'high' | 'medium' | 'low';
   };
+  supportResistanceAnalysis?: SupportResistanceAnalysis;
   modelPredictions: {
     neuralNetwork: number;
     svmLike: number;
@@ -85,6 +86,41 @@ export interface VolumeSpike {
   volume: number;
   ratio: number; // Ratio compared to average volume
   significance: 'high' | 'medium' | 'low';
+}
+
+export interface SupportResistanceLevel {
+  price: number;
+  strength: 'strong' | 'moderate' | 'weak';
+  type: 'support' | 'resistance';
+  touches: number; // Number of times price has tested this level
+  confidence: number; // 0-1 confidence score
+  zone: {
+    upper: number;
+    lower: number;
+  };
+  timeframe: string;
+  lastTested: string;
+}
+
+export interface SupportResistanceAnalysis {
+  currentSupport: number;
+  currentResistance: number;
+  supportLevels: SupportResistanceLevel[];
+  resistanceLevels: SupportResistanceLevel[];
+  pivotPoints: {
+    pivot: number;
+    s1: number;
+    s2: number;
+    s3: number;
+    r1: number;
+    r2: number;
+    r3: number;
+  };
+  keyZones: {
+    price: number;
+    type: 'support' | 'resistance';
+    strength: number;
+  }[];
 }
 
 @Injectable()
@@ -131,8 +167,8 @@ export class BreakoutService {
         symbol,
       );
 
-      // Calculate support and resistance levels
-      const supportResistance = this.calculateSupportResistance(
+      // Calculate comprehensive support and resistance analysis
+      const supportResistanceAnalysis = this.calculateComprehensiveSupportResistance(
         historicalData,
         currentPrice,
       );
@@ -140,8 +176,8 @@ export class BreakoutService {
       return {
         signal: signal.direction,
         probability: signal.probability,
-        supportLevel: supportResistance.support,
-        resistanceLevel: supportResistance.resistance,
+        supportLevel: supportResistanceAnalysis.currentSupport,
+        resistanceLevel: supportResistanceAnalysis.currentResistance,
         currentTrend: technicalAnalysis.trend,
         volatility: technicalAnalysis.volatility,
         rsi: technicalAnalysis.rsi,
@@ -169,6 +205,7 @@ export class BreakoutService {
           volumeTrend: this.analyzeVolumeTrend(historicalData),
           volumeStrength: this.analyzeVolumeStrength(historicalData),
         },
+        supportResistanceAnalysis: supportResistanceAnalysis,
         modelPredictions,
       };
     } catch (error) {
@@ -209,6 +246,22 @@ export class BreakoutService {
         volumeSpikes: [],
         volumeTrend: 'stable',
         volumeStrength: 'low',
+      },
+      supportResistanceAnalysis: {
+        currentSupport: 0,
+        currentResistance: 0,
+        supportLevels: [],
+        resistanceLevels: [],
+        pivotPoints: {
+          pivot: 0,
+          s1: 0,
+          s2: 0,
+          s3: 0,
+          r1: 0,
+          r2: 0,
+          r3: 0,
+        },
+        keyZones: [],
       },
     };
   }
@@ -681,6 +734,356 @@ export class BreakoutService {
     const support = recentLows.slice(0, 3).reduce((sum, low) => sum + low, 0) / 3;
     
     return { support, resistance };
+  }
+
+  /**
+   * Calculate comprehensive support and resistance analysis
+   */
+  private calculateComprehensiveSupportResistance(
+    data: HistoricalData[],
+    currentPrice: number
+  ): SupportResistanceAnalysis {
+    if (!data || data.length < 20) {
+      const basicSupport = currentPrice * 0.95;
+      const basicResistance = currentPrice * 1.05;
+      
+      return {
+        currentSupport: basicSupport,
+        currentResistance: basicResistance,
+        supportLevels: [{
+          price: basicSupport,
+          strength: 'weak',
+          type: 'support',
+          touches: 0,
+          confidence: 0.3,
+          zone: { upper: basicSupport * 1.002, lower: basicSupport * 0.998 },
+          timeframe: 'daily',
+          lastTested: new Date().toISOString()
+        }],
+        resistanceLevels: [{
+          price: basicResistance,
+          strength: 'weak',
+          type: 'resistance',
+          touches: 0,
+          confidence: 0.3,
+          zone: { upper: basicResistance * 1.002, lower: basicResistance * 0.998 },
+          timeframe: 'daily',
+          lastTested: new Date().toISOString()
+        }],
+        pivotPoints: this.calculatePivotPoints(data),
+        keyZones: []
+      };
+    }
+
+    // Find pivot highs and lows
+    const pivotHighs = this.findPivotPoints(data, 'high');
+    const pivotLows = this.findPivotPoints(data, 'low');
+    
+    // Calculate support levels from pivot lows
+    const supportLevels = this.calculateSupportLevels(pivotLows, data, currentPrice);
+    
+    // Calculate resistance levels from pivot highs
+    const resistanceLevels = this.calculateResistanceLevels(pivotHighs, data, currentPrice);
+    
+    // Find current nearest support and resistance
+    const currentSupport = this.findNearestSupport(supportLevels, currentPrice);
+    const currentResistance = this.findNearestResistance(resistanceLevels, currentPrice);
+    
+    // Calculate pivot points for today
+    const pivotPoints = this.calculatePivotPoints(data);
+    
+    // Identify key zones
+    const keyZones = this.identifyKeyZones(supportLevels, resistanceLevels);
+
+    return {
+      currentSupport,
+      currentResistance,
+      supportLevels,
+      resistanceLevels,
+      pivotPoints,
+      keyZones
+    };
+  }
+
+  /**
+   * Find pivot points (local extremes) in price data
+   */
+  private findPivotPoints(data: HistoricalData[], type: 'high' | 'low'): Array<{price: number, date: string, index: number}> {
+    const pivots: Array<{price: number, date: string, index: number}> = [];
+    const lookback = 5; // Number of periods to look back/forward
+    
+    for (let i = lookback; i < data.length - lookback; i++) {
+      const current = type === 'high' ? data[i].high : data[i].low;
+      let isPivot = true;
+      
+      // Check if current point is higher/lower than surrounding points
+      for (let j = i - lookback; j <= i + lookback; j++) {
+        if (j === i) continue;
+        const compare = type === 'high' ? data[j].high : data[j].low;
+        
+        if (type === 'high' && current <= compare) {
+          isPivot = false;
+          break;
+        } else if (type === 'low' && current >= compare) {
+          isPivot = false;
+          break;
+        }
+      }
+      
+      if (isPivot) {
+        pivots.push({
+          price: current,
+          date: data[i].date,
+          index: i
+        });
+      }
+    }
+    
+    return pivots;
+  }
+
+  /**
+   * Calculate support levels from pivot lows
+   */
+  private calculateSupportLevels(
+    pivotLows: Array<{price: number, date: string, index: number}>,
+    data: HistoricalData[],
+    currentPrice: number
+  ): SupportResistanceLevel[] {
+    const levels: SupportResistanceLevel[] = [];
+    const priceGroups = this.groupPricesByProximity(pivotLows.map(p => p.price), 0.01); // 1% grouping
+    
+    for (const group of priceGroups) {
+      const avgPrice = group.reduce((sum, price) => sum + price, 0) / group.length;
+      const touches = group.length;
+      const confidence = Math.min(touches * 0.2, 1); // More touches = higher confidence
+      const strength = touches >= 3 ? 'strong' : touches >= 2 ? 'moderate' : 'weak';
+      
+      // Find last time this level was tested
+      const lastTested = this.findLastTestedDate(avgPrice, data, 'support');
+      
+      levels.push({
+        price: avgPrice,
+        strength: strength as 'strong' | 'moderate' | 'weak',
+        type: 'support',
+        touches,
+        confidence,
+        zone: {
+          upper: avgPrice * 1.005, // 0.5% zone
+          lower: avgPrice * 0.995
+        },
+        timeframe: 'daily',
+        lastTested
+      });
+    }
+    
+    // Sort by proximity to current price and strength
+    return levels
+      .filter(level => level.price < currentPrice) // Only support below current price
+      .sort((a, b) => {
+        const aDistance = Math.abs(currentPrice - a.price);
+        const bDistance = Math.abs(currentPrice - b.price);
+        return aDistance - bDistance; // Closest first
+      })
+      .slice(0, 5); // Top 5 support levels
+  }
+
+  /**
+   * Calculate resistance levels from pivot highs
+   */
+  private calculateResistanceLevels(
+    pivotHighs: Array<{price: number, date: string, index: number}>,
+    data: HistoricalData[],
+    currentPrice: number
+  ): SupportResistanceLevel[] {
+    const levels: SupportResistanceLevel[] = [];
+    const priceGroups = this.groupPricesByProximity(pivotHighs.map(p => p.price), 0.01);
+    
+    for (const group of priceGroups) {
+      const avgPrice = group.reduce((sum, price) => sum + price, 0) / group.length;
+      const touches = group.length;
+      const confidence = Math.min(touches * 0.2, 1);
+      const strength = touches >= 3 ? 'strong' : touches >= 2 ? 'moderate' : 'weak';
+      
+      const lastTested = this.findLastTestedDate(avgPrice, data, 'resistance');
+      
+      levels.push({
+        price: avgPrice,
+        strength: strength as 'strong' | 'moderate' | 'weak',
+        type: 'resistance',
+        touches,
+        confidence,
+        zone: {
+          upper: avgPrice * 1.005,
+          lower: avgPrice * 0.995
+        },
+        timeframe: 'daily',
+        lastTested
+      });
+    }
+    
+    return levels
+      .filter(level => level.price > currentPrice) // Only resistance above current price
+      .sort((a, b) => {
+        const aDistance = Math.abs(a.price - currentPrice);
+        const bDistance = Math.abs(b.price - currentPrice);
+        return aDistance - bDistance;
+      })
+      .slice(0, 5); // Top 5 resistance levels
+  }
+
+  /**
+   * Group prices by proximity (within specified percentage)
+   */
+  private groupPricesByProximity(prices: number[], proximityPercent: number): number[][] {
+    const groups: number[][] = [];
+    const sortedPrices = [...prices].sort((a, b) => a - b);
+    
+    for (const price of sortedPrices) {
+      let addedToGroup = false;
+      
+      for (const group of groups) {
+        const groupAvg = group.reduce((sum, p) => sum + p, 0) / group.length;
+        const distance = Math.abs(price - groupAvg) / groupAvg;
+        
+        if (distance <= proximityPercent) {
+          group.push(price);
+          addedToGroup = true;
+          break;
+        }
+      }
+      
+      if (!addedToGroup) {
+        groups.push([price]);
+      }
+    }
+    
+    return groups;
+  }
+
+  /**
+   * Find last time a price level was tested
+   */
+  private findLastTestedDate(level: number, data: HistoricalData[], type: 'support' | 'resistance'): string {
+    const tolerance = 0.01; // 1% tolerance
+    
+    for (let i = data.length - 1; i >= 0; i--) {
+      const candle = data[i];
+      const testPrice = type === 'support' ? candle.low : candle.high;
+      const distance = Math.abs(testPrice - level) / level;
+      
+      if (distance <= tolerance) {
+        return candle.date;
+      }
+    }
+    
+    return data[data.length - 1]?.date || new Date().toISOString();
+  }
+
+  /**
+   * Find nearest support level to current price
+   */
+  private findNearestSupport(supportLevels: SupportResistanceLevel[], currentPrice: number): number {
+    if (supportLevels.length === 0) {
+      return currentPrice * 0.95; // Default 5% below
+    }
+    
+    const nearestSupport = supportLevels
+      .filter(level => level.price < currentPrice)
+      .sort((a, b) => (currentPrice - a.price) - (currentPrice - b.price))[0];
+    
+    return nearestSupport ? nearestSupport.price : currentPrice * 0.95;
+  }
+
+  /**
+   * Find nearest resistance level to current price
+   */
+  private findNearestResistance(resistanceLevels: SupportResistanceLevel[], currentPrice: number): number {
+    if (resistanceLevels.length === 0) {
+      return currentPrice * 1.05; // Default 5% above
+    }
+    
+    const nearestResistance = resistanceLevels
+      .filter(level => level.price > currentPrice)
+      .sort((a, b) => (a.price - currentPrice) - (b.price - currentPrice))[0];
+    
+    return nearestResistance ? nearestResistance.price : currentPrice * 1.05;
+  }
+
+  /**
+   * Calculate pivot points for day trading
+   */
+  private calculatePivotPoints(data: HistoricalData[]): {
+    pivot: number;
+    s1: number;
+    s2: number;
+    s3: number;
+    r1: number;
+    r2: number;
+    r3: number;
+  } {
+    if (data.length === 0) {
+      const defaultPrice = 100;
+      return {
+        pivot: defaultPrice,
+        s1: defaultPrice * 0.99,
+        s2: defaultPrice * 0.98,
+        s3: defaultPrice * 0.97,
+        r1: defaultPrice * 1.01,
+        r2: defaultPrice * 1.02,
+        r3: defaultPrice * 1.03
+      };
+    }
+    
+    // Use yesterday's high, low, close for pivot calculation
+    const yesterday = data[data.length - 1];
+    const high = yesterday.high;
+    const low = yesterday.low;
+    const close = yesterday.close;
+    
+    const pivot = (high + low + close) / 3;
+    const r1 = (2 * pivot) - low;
+    const s1 = (2 * pivot) - high;
+    const r2 = pivot + (high - low);
+    const s2 = pivot - (high - low);
+    const r3 = high + 2 * (pivot - low);
+    const s3 = low - 2 * (high - pivot);
+    
+    return { pivot, s1, s2, s3, r1, r2, r3 };
+  }
+
+  /**
+   * Identify key zones combining support and resistance
+   */
+  private identifyKeyZones(
+    supportLevels: SupportResistanceLevel[],
+    resistanceLevels: SupportResistanceLevel[]
+  ): Array<{price: number, type: 'support' | 'resistance', strength: number}> {
+    const keyZones: Array<{price: number, type: 'support' | 'resistance', strength: number}> = [];
+    
+    // Add strong support levels as key zones
+    supportLevels
+      .filter(level => level.strength === 'strong' || level.confidence > 0.7)
+      .forEach(level => {
+        keyZones.push({
+          price: level.price,
+          type: 'support',
+          strength: level.confidence
+        });
+      });
+    
+    // Add strong resistance levels as key zones
+    resistanceLevels
+      .filter(level => level.strength === 'strong' || level.confidence > 0.7)
+      .forEach(level => {
+        keyZones.push({
+          price: level.price,
+          type: 'resistance',
+          strength: level.confidence
+        });
+      });
+    
+    return keyZones.sort((a, b) => b.strength - a.strength).slice(0, 8); // Top 8 key zones
   }
 
   /**

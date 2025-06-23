@@ -242,11 +242,11 @@
   .indicators-grid {
     grid-template-columns: repeat(2, 1fr);
   }
-  
+
   .technical-indicators {
     padding: 12px;
   }
-  
+
   .indicators-title {
     font-size: 13px;
   }
@@ -348,12 +348,148 @@
     grid-template-columns: 1fr;
     gap: 8px;
   }
-  
+
   .volume-row {
     padding: 6px 10px;
   }
-  
+
   .spike-item {
     padding: 4px 8px;
+  }
+}
+
+/* Support/Resistance Analysis Styles */
+.sr-analysis-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-top: 12px;
+}
+
+.sr-levels-container {
+  background: rgba(13, 17, 23, 0.4);
+  border-radius: 8px;
+  padding: 12px;
+  border-left: 3px solid #00c851;
+}
+
+.sr-levels-container.resistance {
+  border-left-color: #ff4444;
+}
+
+.sr-levels-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #f0f6fc;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.sr-level-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 8px;
+  margin-bottom: 4px;
+  background: rgba(22, 27, 34, 0.6);
+  border-radius: 4px;
+  border: 1px solid rgba(99, 102, 241, 0.2);
+}
+
+.sr-level-price {
+  font-weight: 600;
+  color: #f0f6fc;
+}
+
+.sr-level-strength {
+  font-size: 12px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+.sr-level-strength.strong {
+  background: rgba(0, 200, 81, 0.2);
+  color: #00c851;
+}
+
+.sr-level-strength.moderate {
+  background: rgba(255, 187, 51, 0.2);
+  color: #ffbb33;
+}
+
+.sr-level-strength.weak {
+  background: rgba(255, 68, 68, 0.2);
+  color: #ff4444;
+}
+
+.pivot-points-container {
+  grid-column: 1 / -1;
+  background: rgba(13, 17, 23, 0.4);
+  border-radius: 8px;
+  padding: 12px;
+  border-left: 3px solid #6366f1;
+  margin-top: 8px;
+}
+
+.pivot-points-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.pivot-point-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 6px;
+  background: rgba(22, 27, 34, 0.6);
+  border-radius: 4px;
+  border: 1px solid rgba(99, 102, 241, 0.2);
+}
+
+.pivot-point-label {
+  font-size: 11px;
+  color: #8b949e;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+.pivot-point-value {
+  font-size: 13px;
+  font-weight: 600;
+  color: #f0f6fc;
+  margin-top: 2px;
+}
+
+.pivot-point-item.pivot {
+  border-color: #6366f1;
+}
+
+.pivot-point-item.support {
+  border-color: #00c851;
+}
+
+.pivot-point-item.resistance {
+  border-color: #ff4444;
+}
+
+/* Responsive support/resistance analysis */
+@media (max-width: 768px) {
+  .sr-analysis-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .pivot-points-grid {
+    grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+    gap: 6px;
+  }
+
+  .sr-level-item {
+    padding: 4px 6px;
   }
 }

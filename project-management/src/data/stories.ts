@@ -234,13 +234,12 @@ export const stories: Story[] = [
     dependencies: [],
     createdDate: "2025-06-21",
     completedDate: "2025-06-22",
-  },
-  {
+  },  {
     id: "S16",
     title: "Implement Support/Resistance Level Detection",
     description:
       "Create algorithm to identify key support and resistance levels using historical price data. Day traders use these for entry/exit points and stop-loss placement.",
-    status: "TODO",
+    status: "DONE",
     priority: "High",
     epic: "E4",
     storyPoints: 4,
@@ -248,6 +247,7 @@ export const stories: Story[] = [
     progress: 0,
     dependencies: ["S14"],
     createdDate: "2025-06-21",
+    completedDate: "2025-06-22",
   },
   {
     id: "S17",

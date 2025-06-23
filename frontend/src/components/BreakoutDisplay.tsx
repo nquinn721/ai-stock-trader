@@ -378,6 +378,132 @@ const BreakoutDisplay: React.FC<BreakoutDisplayProps> = ({
         </div>
       )}
 
+      {/* Support/Resistance Analysis Section */}
+      {breakoutStrategy.supportResistanceAnalysis && (
+        <div className="section">
+          <h4 className="section-title">
+            <FontAwesomeIcon icon="chart-area" /> Support & Resistance Analysis
+          </h4>
+          
+          {/* Pivot Points */}
+          <div className="pivot-points">
+            <h5 className="subsection-title">Daily Pivot Points</h5>
+            <div className="pivot-grid">
+              <div className="pivot-item resistance">
+                <span className="pivot-label">R3:</span>
+                <span className="pivot-value">${formatPrice(breakoutStrategy.supportResistanceAnalysis.pivotPoints.r3)}</span>
+              </div>
+              <div className="pivot-item resistance">
+                <span className="pivot-label">R2:</span>
+                <span className="pivot-value">${formatPrice(breakoutStrategy.supportResistanceAnalysis.pivotPoints.r2)}</span>
+              </div>
+              <div className="pivot-item resistance">
+                <span className="pivot-label">R1:</span>
+                <span className="pivot-value">${formatPrice(breakoutStrategy.supportResistanceAnalysis.pivotPoints.r1)}</span>
+              </div>
+              <div className="pivot-item pivot">
+                <span className="pivot-label">Pivot:</span>
+                <span className="pivot-value">${formatPrice(breakoutStrategy.supportResistanceAnalysis.pivotPoints.pivot)}</span>
+              </div>
+              <div className="pivot-item support">
+                <span className="pivot-label">S1:</span>
+                <span className="pivot-value">${formatPrice(breakoutStrategy.supportResistanceAnalysis.pivotPoints.s1)}</span>
+              </div>
+              <div className="pivot-item support">
+                <span className="pivot-label">S2:</span>
+                <span className="pivot-value">${formatPrice(breakoutStrategy.supportResistanceAnalysis.pivotPoints.s2)}</span>
+              </div>
+              <div className="pivot-item support">
+                <span className="pivot-label">S3:</span>
+                <span className="pivot-value">${formatPrice(breakoutStrategy.supportResistanceAnalysis.pivotPoints.s3)}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Key Support Levels */}
+          {breakoutStrategy.supportResistanceAnalysis.supportLevels.length > 0 && (
+            <div className="sr-levels-section">
+              <h5 className="subsection-title">Key Support Levels</h5>
+              <div className="sr-levels-grid">
+                {breakoutStrategy.supportResistanceAnalysis.supportLevels.slice(0, 3).map((level, index) => (
+                  <div key={index} className={`sr-level-item support ${level.strength}`}>
+                    <div className="sr-level-price">
+                      ${formatPrice(level.price)}
+                    </div>
+                    <div className="sr-level-info">
+                      <span className={`sr-strength ${level.strength}`}>
+                        {level.strength.toUpperCase()}
+                      </span>
+                      <span className="sr-touches">
+                        {level.touches} touches
+                      </span>
+                      <span className="sr-confidence">
+                        {Math.round(level.confidence * 100)}% confidence
+                      </span>
+                    </div>
+                    <div className="sr-zone">
+                      Zone: ${formatPrice(level.zone.lower)} - ${formatPrice(level.zone.upper)}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Key Resistance Levels */}
+          {breakoutStrategy.supportResistanceAnalysis.resistanceLevels.length > 0 && (
+            <div className="sr-levels-section">
+              <h5 className="subsection-title">Key Resistance Levels</h5>
+              <div className="sr-levels-grid">
+                {breakoutStrategy.supportResistanceAnalysis.resistanceLevels.slice(0, 3).map((level, index) => (
+                  <div key={index} className={`sr-level-item resistance ${level.strength}`}>
+                    <div className="sr-level-price">
+                      ${formatPrice(level.price)}
+                    </div>
+                    <div className="sr-level-info">
+                      <span className={`sr-strength ${level.strength}`}>
+                        {level.strength.toUpperCase()}
+                      </span>
+                      <span className="sr-touches">
+                        {level.touches} touches
+                      </span>
+                      <span className="sr-confidence">
+                        {Math.round(level.confidence * 100)}% confidence
+                      </span>
+                    </div>
+                    <div className="sr-zone">
+                      Zone: ${formatPrice(level.zone.lower)} - ${formatPrice(level.zone.upper)}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Key Zones */}
+          {breakoutStrategy.supportResistanceAnalysis.keyZones.length > 0 && (
+            <div className="key-zones-section">
+              <h5 className="subsection-title">Critical Trading Zones</h5>
+              <div className="key-zones-grid">
+                {breakoutStrategy.supportResistanceAnalysis.keyZones.slice(0, 4).map((zone, index) => (
+                  <div key={index} className={`key-zone-item ${zone.type}`}>
+                    <div className="zone-price">
+                      ${formatPrice(zone.price)}
+                    </div>
+                    <div className="zone-type">
+                      {zone.type.toUpperCase()}
+                    </div>
+                    <div className="zone-strength">
+                      {Math.round(zone.strength * 100)}% strength
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
       <div className="support-resistance">
         <div className="sr-level support">
           <span className="sr-label">Support:</span>

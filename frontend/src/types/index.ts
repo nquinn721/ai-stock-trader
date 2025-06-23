@@ -34,6 +34,41 @@ export interface VolumeSpike {
   significance: 'high' | 'medium' | 'low';
 }
 
+export interface SupportResistanceLevel {
+  price: number;
+  strength: 'strong' | 'moderate' | 'weak';
+  type: 'support' | 'resistance';
+  touches: number; // Number of times price has tested this level
+  confidence: number; // 0-1 confidence score
+  zone: {
+    upper: number;
+    lower: number;
+  };
+  timeframe: string;
+  lastTested: string;
+}
+
+export interface SupportResistanceAnalysis {
+  currentSupport: number;
+  currentResistance: number;
+  supportLevels: SupportResistanceLevel[];
+  resistanceLevels: SupportResistanceLevel[];
+  pivotPoints: {
+    pivot: number;
+    s1: number;
+    s2: number;
+    s3: number;
+    r1: number;
+    r2: number;
+    r3: number;
+  };
+  keyZones: {
+    price: number;
+    type: 'support' | 'resistance';
+    strength: number;
+  }[];
+}
+
 export interface BreakoutStrategy {
   signal: "bullish" | "bearish" | "neutral";
   probability: number;
@@ -74,6 +109,7 @@ export interface BreakoutStrategy {
     volumeTrend: 'increasing' | 'decreasing' | 'stable';
     volumeStrength: 'high' | 'medium' | 'low';
   };
+  supportResistanceAnalysis?: SupportResistanceAnalysis;
   modelPredictions: {
     neuralNetwork: number;
     svmLike: number;
