@@ -12,11 +12,10 @@ import QuickTrade from "./QuickTrade";
 import StockCard from "./StockCard";
 
 const Dashboard: React.FC = () => {
-  const { isConnected, tradingSignals } = useSocket();
+  const { isConnected } = useSocket();
   const [stocksWithSignals, setStocksWithSignals] = useState<
     (Stock & { tradingSignal: TradingSignal | null })[]
   >([]);
-  const [signals, setSignals] = useState<TradingSignal[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedTimeframe, setSelectedTimeframe] = useState<
     "1D" | "1W" | "1M" | "3M" | "1Y"
@@ -25,12 +24,9 @@ const Dashboard: React.FC = () => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const topStock =
     stocksWithSignals.find((s) => s.changePercent && s.changePercent > 0) ||
-    stocksWithSignals[0];
-  useEffect(() => {
+    stocksWithSignals[0];  useEffect(() => {
     fetchStocksWithSignals();
-    fetchTradingSignals();
   }, []);
-
   const fetchStocksWithSignals = async () => {
     try {
       const response = await axios.get(
@@ -41,15 +37,6 @@ const Dashboard: React.FC = () => {
       console.error("Error fetching stocks with signals:", error);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const fetchTradingSignals = async () => {
-    try {
-      const response = await axios.get("http://localhost:8000/trading/signals");
-      setSignals(response.data);
-    } catch (error) {
-      console.error("Error fetching trading signals:", error);
     }
   };
   if (loading) {
@@ -83,12 +70,8 @@ const Dashboard: React.FC = () => {
               style={{ color: isConnected ? "#00C851" : "#ff4444" }}
             />
             {isConnected ? " Connected" : " Disconnected"}
-          </div>{" "}
-          <div className="stats">
+          </div>{" "}          <div className="stats">
             <span>Stocks: {stocksWithSignals.length}</span>
-            <span title="Trading signals that are currently valid and haven't expired or been replaced">
-              Active Signals: {signals.filter((s) => s.isActive).length}
-            </span>
           </div>
           <NotificationCenter />
         </div>{" "}
@@ -104,32 +87,7 @@ const Dashboard: React.FC = () => {
             onTimeframeChange={setSelectedTimeframe}
           />
         </div>{" "}
-        <QuickTrade />
-      </div>{" "}
-      <div className="trading-signals-summary">
-        <h2>Latest Trading Signals</h2>
-        {tradingSignals.length === 0 ? (
-          <div className="no-data-message">
-            <p>No trading signals available - Real API integration required</p>
-          </div>
-        ) : (
-          <div className="signals-grid">
-            {tradingSignals.slice(0, 3).map((signal, index) => (
-              <div key={index} className="signal-summary">
-                <div className="signal-stock">
-                  {signal.stock?.symbol || "Unknown"}
-                </div>
-                <div className={`signal-type ${signal.signal}`}>
-                  {signal.signal.toUpperCase()}
-                </div>
-                <div className="signal-conf">
-                  {(signal.confidence * 100).toFixed(1)}% confidence
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>{" "}
+        <QuickTrade />      </div>{" "}
       <div className="stocks-grid">
         {stocksWithSignals.map((stockWithSignal) => (
           <div key={stockWithSignal.id} className="stock-container">
