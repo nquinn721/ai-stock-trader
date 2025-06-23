@@ -1,13 +1,13 @@
 import { Module, forwardRef } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { WebsocketModule } from '../websocket/websocket.module';
+import {
+  NotificationEntity,
+  NotificationPreferenceEntity,
+  NotificationTemplateEntity,
+} from './entities/notification.entities';
 import { NotificationController } from './notification.controller';
 import { NotificationService } from './services/notification.service';
-import { 
-  NotificationEntity, 
-  NotificationPreferenceEntity, 
-  NotificationTemplateEntity 
-} from './entities/notification.entities';
-import { WebsocketModule } from '../websocket/websocket.module';
 
 @Module({
   imports: [

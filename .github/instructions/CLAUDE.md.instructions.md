@@ -12,6 +12,8 @@ This document provides quick reference guidelines for AI assistants working on t
 
 ⚠️ **IMPORTANT**: This is NOT a Python project - it's TypeScript/JavaScript with NestJS and React.
 
+⚠️ **CRITICAL**: When using run_in_terminal tool, NEVER open new terminals. Always use the existing terminal sessions. Commands should run in the current working directory context.
+
 ### Environment Requirements
 
 - **Shell**: PowerShell commands only
@@ -126,6 +128,8 @@ taskkill /F /PID <process_id>
 ## Development Workflow Standards
 
 ⚠️ **CRITICAL: PERSISTENT SERVER SETUP**
+
+⚠️ **CRITICAL: NO NEW TERMINALS** - When using run_in_terminal tool, NEVER open new terminal windows or sessions. Always use the existing terminal context provided by the tool. Commands should execute in the current working directory without spawning new processes.
 
 **Maintain two persistent terminal sessions:**
 

@@ -26,7 +26,7 @@
 }
 
 .notification-item.unread::before {
-  content: '';
+  content: "";
   position: absolute;
   left: 8px;
   top: 50%;
@@ -75,7 +75,8 @@
 
 /* Animations */
 @keyframes pulse-critical {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
     transform: translateY(-50%) scale(1);
   }
@@ -86,7 +87,8 @@
 }
 
 @keyframes pulse-high {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
     transform: translateY(-50%) scale(1);
   }
@@ -134,10 +136,15 @@
 }
 
 @keyframes bounce {
-  0%, 20%, 53%, 80%, 100% {
+  0%,
+  20%,
+  53%,
+  80%,
+  100% {
     transform: translate(50%, -50%) scale(1);
   }
-  40%, 43% {
+  40%,
+  43% {
     transform: translate(50%, -50%) scale(1.1);
   }
   70% {
@@ -157,15 +164,15 @@
     max-height: 100vh;
     border-radius: 0;
   }
-  
+
   .notification-item {
     padding: 12px 16px;
   }
-  
+
   .notification-item .MuiListItemText-primary {
     font-size: 0.9rem;
   }
-  
+
   .notification-item .MuiListItemText-secondary {
     font-size: 0.8rem;
   }
@@ -177,23 +184,23 @@
     background: #1e1e1e;
     color: #ffffff;
   }
-  
+
   .notification-item.unread {
     background: rgba(25, 118, 210, 0.1);
   }
-  
+
   .notification-item:hover {
     background: rgba(25, 118, 210, 0.15) !important;
   }
-  
+
   .notification-center .MuiBox-root::-webkit-scrollbar-track {
     background: #2e2e2e;
   }
-  
+
   .notification-center .MuiBox-root::-webkit-scrollbar-thumb {
     background: #4e4e4e;
   }
-  
+
   .notification-center .MuiBox-root::-webkit-scrollbar-thumb:hover {
     background: #6e6e6e;
   }

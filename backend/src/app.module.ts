@@ -22,10 +22,10 @@ import {
 } from './modules/ml/entities/ml.entities';
 import { MLModule } from './modules/ml/ml.module';
 import { NewsModule } from './modules/news/news.module';
-import { 
-  NotificationEntity, 
-  NotificationPreferenceEntity, 
-  NotificationTemplateEntity 
+import {
+  NotificationEntity,
+  NotificationPreferenceEntity,
+  NotificationTemplateEntity,
 } from './modules/notification/entities/notification.entities';
 import { NotificationModule } from './modules/notification/notification.module';
 import { OrderManagementModule } from './modules/order-management/order-management.module';
@@ -49,7 +49,8 @@ import { SeedService } from './services/seed.service';
         port: +configService.get('DATABASE_PORT'),
         username: configService.get('DATABASE_USERNAME'),
         password: configService.get('DATABASE_PASSWORD'),
-        database: configService.get('DATABASE_NAME'),        entities: [
+        database: configService.get('DATABASE_NAME'),
+        entities: [
           Stock,
           News,
           TradingSignal,
@@ -72,7 +73,8 @@ import { SeedService } from './services/seed.service';
       }),
       inject: [ConfigService],
     }),
-    TypeOrmModule.forFeature([Stock]),    StockModule,
+    TypeOrmModule.forFeature([Stock]),
+    StockModule,
     WebsocketModule,
     NewsModule,
     TradingModule,

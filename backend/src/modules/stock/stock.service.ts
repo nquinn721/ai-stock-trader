@@ -105,6 +105,22 @@ export class StockService {
         previousClose: 0,
         volume: 0,
       } as Stock,
+      {
+        id: 9,
+        symbol: 'CVNA',
+        name: 'Carvana Co.',
+        currentPrice: 0,
+        previousClose: 0,
+        volume: 0,
+      } as Stock,
+      {
+        id: 10,
+        symbol: 'CMG',
+        name: 'Chipotle Mexican Grill Inc.',
+        currentPrice: 0,
+        previousClose: 0,
+        volume: 0,
+      } as Stock,
     ];
     this.mockSignals = [];
     console.log('📊 Initialized stock symbols for live data tracking');

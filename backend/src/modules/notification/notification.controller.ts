@@ -1,28 +1,26 @@
-import { 
-  Body, 
-  Controller, 
-  Delete, 
-  Get, 
-  Param, 
-  Patch, 
-  Post, 
-  Query, 
-  UseGuards,
-  Logger,
-  ParseIntPipe,
+import {
+  Body,
+  Controller,
+  Get,
+  HttpException,
   HttpStatus,
-  HttpException
+  Logger,
+  Param,
+  ParseIntPipe,
+  Patch,
+  Post,
+  Query,
 } from '@nestjs/common';
-import { NotificationService } from './services/notification.service';
-import { 
-  CreateNotificationDto, 
-  NotificationFilter,
-  NotificationPreference
-} from './interfaces/notification.interfaces';
-import { 
-  NotificationType, 
-  NotificationPriority 
+import {
+  NotificationPriority,
+  NotificationType,
 } from './entities/notification.entities';
+import {
+  CreateNotificationDto,
+  NotificationFilter,
+  NotificationPreference,
+} from './interfaces/notification.interfaces';
+import { NotificationService } from './services/notification.service';
 
 @Controller('notifications')
 export class NotificationController {
@@ -33,23 +31,30 @@ export class NotificationController {
   // === Notification CRUD ===
 
   @Post()
-  async createNotification(@Body() createNotificationDto: CreateNotificationDto) {
+  async createNotification(
+    @Body() createNotificationDto: CreateNotificationDto,
+  ) {
     try {
-      const notification = await this.notificationService.createNotification(createNotificationDto);
+      const notification = await this.notificationService.createNotification(
+        createNotificationDto,
+      );
       return {
         success: true,
         data: notification,
         message: 'Notification created successfully',
       };
     } catch (error) {
-      this.logger.error(`Failed to create notification: ${error.message}`, error.stack);
+      this.logger.error(
+        `Failed to create notification: ${error.message}`,
+        error.stack,
+      );
       throw new HttpException(
-        { 
-          success: false, 
-          message: 'Failed to create notification', 
-          error: error.message 
+        {
+          success: false,
+          message: 'Failed to create notification',
+          error: error.message,
         },
-        HttpStatus.INTERNAL_SERVER_ERROR
+        HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
@@ -62,7 +67,9 @@ export class NotificationController {
         type: query.type as NotificationType,
         priority: query.priority as NotificationPriority,
         symbol: query.symbol,
-        portfolioId: query.portfolioId ? parseInt(query.portfolioId) : undefined,
+        portfolioId: query.portfolioId
+          ? parseInt(query.portfolioId)
+          : undefined,
         status: query.status,
         fromDate: query.fromDate ? new Date(query.fromDate) : undefined,
         toDate: query.toDate ? new Date(query.toDate) : undefined,
@@ -82,14 +89,17 @@ export class NotificationController {
         },
       };
     } catch (error) {
-      this.logger.error(`Failed to get notifications: ${error.message}`, error.stack);
+      this.logger.error(
+        `Failed to get notifications: ${error.message}`,
+        error.stack,
+      );
       throw new HttpException(
-        { 
-          success: false, 
-          message: 'Failed to get notifications', 
-          error: error.message 
+        {
+          success: false,
+          message: 'Failed to get notifications',
+          error: error.message,
         },
-        HttpStatus.INTERNAL_SERVER_ERROR
+        HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
@@ -103,14 +113,17 @@ export class NotificationController {
         data: { count },
       };
     } catch (error) {
-      this.logger.error(`Failed to get unread count: ${error.message}`, error.stack);
+      this.logger.error(
+        `Failed to get unread count: ${error.message}`,
+        error.stack,
+      );
       throw new HttpException(
-        { 
-          success: false, 
-          message: 'Failed to get unread count', 
-          error: error.message 
+        {
+          success: false,
+          message: 'Failed to get unread count',
+          error: error.message,
         },
-        HttpStatus.INTERNAL_SERVER_ERROR
+        HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
@@ -118,23 +131,28 @@ export class NotificationController {
   @Patch(':id/read')
   async markAsRead(
     @Param('id', ParseIntPipe) id: number,
-    @Body('userId') userId: string
+    @Body('userId') userId: string,
   ) {
     try {
       const success = await this.notificationService.markAsRead(id, userId);
       return {
         success,
-        message: success ? 'Notification marked as read' : 'Failed to mark as read',
+        message: success
+          ? 'Notification marked as read'
+          : 'Failed to mark as read',
       };
     } catch (error) {
-      this.logger.error(`Failed to mark notification as read: ${error.message}`, error.stack);
+      this.logger.error(
+        `Failed to mark notification as read: ${error.message}`,
+        error.stack,
+      );
       throw new HttpException(
-        { 
-          success: false, 
-          message: 'Failed to mark notification as read', 
-          error: error.message 
+        {
+          success: false,
+          message: 'Failed to mark notification as read',
+          error: error.message,
         },
-        HttpStatus.INTERNAL_SERVER_ERROR
+        HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
@@ -142,23 +160,31 @@ export class NotificationController {
   @Patch(':id/dismiss')
   async markAsDismissed(
     @Param('id', ParseIntPipe) id: number,
-    @Body('userId') userId: string
+    @Body('userId') userId: string,
   ) {
     try {
-      const success = await this.notificationService.markAsDismissed(id, userId);
+      const success = await this.notificationService.markAsDismissed(
+        id,
+        userId,
+      );
       return {
         success,
-        message: success ? 'Notification dismissed' : 'Failed to dismiss notification',
+        message: success
+          ? 'Notification dismissed'
+          : 'Failed to dismiss notification',
       };
     } catch (error) {
-      this.logger.error(`Failed to dismiss notification: ${error.message}`, error.stack);
+      this.logger.error(
+        `Failed to dismiss notification: ${error.message}`,
+        error.stack,
+      );
       throw new HttpException(
-        { 
-          success: false, 
-          message: 'Failed to dismiss notification', 
-          error: error.message 
+        {
+          success: false,
+          message: 'Failed to dismiss notification',
+          error: error.message,
         },
-        HttpStatus.INTERNAL_SERVER_ERROR
+        HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
@@ -168,20 +194,24 @@ export class NotificationController {
   @Get('preferences/:userId')
   async getUserPreferences(@Param('userId') userId: string) {
     try {
-      const preferences = await this.notificationService.getUserPreferences(userId);
+      const preferences =
+        await this.notificationService.getUserPreferences(userId);
       return {
         success: true,
         data: preferences,
       };
     } catch (error) {
-      this.logger.error(`Failed to get user preferences: ${error.message}`, error.stack);
+      this.logger.error(
+        `Failed to get user preferences: ${error.message}`,
+        error.stack,
+      );
       throw new HttpException(
-        { 
-          success: false, 
-          message: 'Failed to get user preferences', 
-          error: error.message 
+        {
+          success: false,
+          message: 'Failed to get user preferences',
+          error: error.message,
         },
-        HttpStatus.INTERNAL_SERVER_ERROR
+        HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
@@ -190,23 +220,32 @@ export class NotificationController {
   async updatePreference(
     @Param('userId') userId: string,
     @Param('type') type: NotificationType,
-    @Body() preference: Partial<NotificationPreference>
+    @Body() preference: Partial<NotificationPreference>,
   ) {
     try {
-      const success = await this.notificationService.updatePreference(userId, type, preference);
+      const success = await this.notificationService.updatePreference(
+        userId,
+        type,
+        preference,
+      );
       return {
         success,
-        message: success ? 'Preference updated successfully' : 'Failed to update preference',
+        message: success
+          ? 'Preference updated successfully'
+          : 'Failed to update preference',
       };
     } catch (error) {
-      this.logger.error(`Failed to update preference: ${error.message}`, error.stack);
+      this.logger.error(
+        `Failed to update preference: ${error.message}`,
+        error.stack,
+      );
       throw new HttpException(
-        { 
-          success: false, 
-          message: 'Failed to update preference', 
-          error: error.message 
+        {
+          success: false,
+          message: 'Failed to update preference',
+          error: error.message,
         },
-        HttpStatus.INTERNAL_SERVER_ERROR
+        HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
@@ -216,24 +255,31 @@ export class NotificationController {
   @Post('alerts/trading-opportunity')
   async createTradingOpportunityAlert(
     @Body('userId') userId: string,
-    @Body('alert') alert: any
+    @Body('alert') alert: any,
   ) {
     try {
-      const notification = await this.notificationService.createTradingOpportunityAlert(userId, alert);
+      const notification =
+        await this.notificationService.createTradingOpportunityAlert(
+          userId,
+          alert,
+        );
       return {
         success: true,
         data: notification,
         message: 'Trading opportunity alert created',
       };
     } catch (error) {
-      this.logger.error(`Failed to create trading opportunity alert: ${error.message}`, error.stack);
+      this.logger.error(
+        `Failed to create trading opportunity alert: ${error.message}`,
+        error.stack,
+      );
       throw new HttpException(
-        { 
-          success: false, 
-          message: 'Failed to create trading opportunity alert', 
-          error: error.message 
+        {
+          success: false,
+          message: 'Failed to create trading opportunity alert',
+          error: error.message,
         },
-        HttpStatus.INTERNAL_SERVER_ERROR
+        HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
@@ -241,24 +287,30 @@ export class NotificationController {
   @Post('alerts/pattern')
   async createPatternAlert(
     @Body('userId') userId: string,
-    @Body('alert') alert: any
+    @Body('alert') alert: any,
   ) {
     try {
-      const notification = await this.notificationService.createPatternAlert(userId, alert);
+      const notification = await this.notificationService.createPatternAlert(
+        userId,
+        alert,
+      );
       return {
         success: true,
         data: notification,
         message: 'Pattern alert created',
       };
     } catch (error) {
-      this.logger.error(`Failed to create pattern alert: ${error.message}`, error.stack);
+      this.logger.error(
+        `Failed to create pattern alert: ${error.message}`,
+        error.stack,
+      );
       throw new HttpException(
-        { 
-          success: false, 
-          message: 'Failed to create pattern alert', 
-          error: error.message 
+        {
+          success: false,
+          message: 'Failed to create pattern alert',
+          error: error.message,
         },
-        HttpStatus.INTERNAL_SERVER_ERROR
+        HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
@@ -266,24 +318,30 @@ export class NotificationController {
   @Post('alerts/technical')
   async createTechnicalAlert(
     @Body('userId') userId: string,
-    @Body('alert') alert: any
+    @Body('alert') alert: any,
   ) {
     try {
-      const notification = await this.notificationService.createTechnicalAlert(userId, alert);
+      const notification = await this.notificationService.createTechnicalAlert(
+        userId,
+        alert,
+      );
       return {
         success: true,
         data: notification,
         message: 'Technical alert created',
       };
     } catch (error) {
-      this.logger.error(`Failed to create technical alert: ${error.message}`, error.stack);
+      this.logger.error(
+        `Failed to create technical alert: ${error.message}`,
+        error.stack,
+      );
       throw new HttpException(
-        { 
-          success: false, 
-          message: 'Failed to create technical alert', 
-          error: error.message 
+        {
+          success: false,
+          message: 'Failed to create technical alert',
+          error: error.message,
         },
-        HttpStatus.INTERNAL_SERVER_ERROR
+        HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
@@ -291,24 +349,28 @@ export class NotificationController {
   @Post('alerts/risk-management')
   async createRiskManagementAlert(
     @Body('userId') userId: string,
-    @Body('alert') alert: any
+    @Body('alert') alert: any,
   ) {
     try {
-      const notification = await this.notificationService.createRiskManagementAlert(userId, alert);
+      const notification =
+        await this.notificationService.createRiskManagementAlert(userId, alert);
       return {
         success: true,
         data: notification,
         message: 'Risk management alert created',
       };
     } catch (error) {
-      this.logger.error(`Failed to create risk management alert: ${error.message}`, error.stack);
+      this.logger.error(
+        `Failed to create risk management alert: ${error.message}`,
+        error.stack,
+      );
       throw new HttpException(
-        { 
-          success: false, 
-          message: 'Failed to create risk management alert', 
-          error: error.message 
+        {
+          success: false,
+          message: 'Failed to create risk management alert',
+          error: error.message,
         },
-        HttpStatus.INTERNAL_SERVER_ERROR
+        HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
@@ -316,24 +378,28 @@ export class NotificationController {
   @Post('alerts/market-event')
   async createMarketEventAlert(
     @Body('userId') userId: string,
-    @Body('alert') alert: any
+    @Body('alert') alert: any,
   ) {
     try {
-      const notification = await this.notificationService.createMarketEventAlert(userId, alert);
+      const notification =
+        await this.notificationService.createMarketEventAlert(userId, alert);
       return {
         success: true,
         data: notification,
         message: 'Market event alert created',
       };
     } catch (error) {
-      this.logger.error(`Failed to create market event alert: ${error.message}`, error.stack);
+      this.logger.error(
+        `Failed to create market event alert: ${error.message}`,
+        error.stack,
+      );
       throw new HttpException(
-        { 
-          success: false, 
-          message: 'Failed to create market event alert', 
-          error: error.message 
+        {
+          success: false,
+          message: 'Failed to create market event alert',
+          error: error.message,
         },
-        HttpStatus.INTERNAL_SERVER_ERROR
+        HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
@@ -341,24 +407,28 @@ export class NotificationController {
   @Post('alerts/multi-timeframe')
   async createMultiTimeframeAlert(
     @Body('userId') userId: string,
-    @Body('alert') alert: any
+    @Body('alert') alert: any,
   ) {
     try {
-      const notification = await this.notificationService.createMultiTimeframeAlert(userId, alert);
+      const notification =
+        await this.notificationService.createMultiTimeframeAlert(userId, alert);
       return {
         success: true,
         data: notification,
         message: 'Multi-timeframe alert created',
       };
     } catch (error) {
-      this.logger.error(`Failed to create multi-timeframe alert: ${error.message}`, error.stack);
+      this.logger.error(
+        `Failed to create multi-timeframe alert: ${error.message}`,
+        error.stack,
+      );
       throw new HttpException(
-        { 
-          success: false, 
-          message: 'Failed to create multi-timeframe alert', 
-          error: error.message 
+        {
+          success: false,
+          message: 'Failed to create multi-timeframe alert',
+          error: error.message,
         },
-        HttpStatus.INTERNAL_SERVER_ERROR
+        HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
@@ -378,21 +448,25 @@ export class NotificationController {
   @Post('cleanup')
   async cleanupOldNotifications(@Body('daysOld') daysOld: number = 30) {
     try {
-      const cleaned = await this.notificationService.cleanupOldNotifications(daysOld);
+      const cleaned =
+        await this.notificationService.cleanupOldNotifications(daysOld);
       return {
         success: true,
         data: { cleaned },
         message: `Cleaned up ${cleaned} old notifications`,
       };
     } catch (error) {
-      this.logger.error(`Failed to cleanup notifications: ${error.message}`, error.stack);
+      this.logger.error(
+        `Failed to cleanup notifications: ${error.message}`,
+        error.stack,
+      );
       throw new HttpException(
-        { 
-          success: false, 
-          message: 'Failed to cleanup notifications', 
-          error: error.message 
+        {
+          success: false,
+          message: 'Failed to cleanup notifications',
+          error: error.message,
         },
-        HttpStatus.INTERNAL_SERVER_ERROR
+        HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
@@ -400,13 +474,19 @@ export class NotificationController {
   // === Bulk Operations ===
 
   @Post('bulk/mark-read')
-  async bulkMarkAsRead(@Body() body: { userId: string; notificationIds: number[] }) {
+  async bulkMarkAsRead(
+    @Body() body: { userId: string; notificationIds: number[] },
+  ) {
     try {
       const results = await Promise.allSettled(
-        body.notificationIds.map(id => this.notificationService.markAsRead(id, body.userId))
+        body.notificationIds.map((id) =>
+          this.notificationService.markAsRead(id, body.userId),
+        ),
       );
 
-      const successful = results.filter(r => r.status === 'fulfilled' && r.value === true).length;
+      const successful = results.filter(
+        (r) => r.status === 'fulfilled' && r.value === true,
+      ).length;
       const failed = results.length - successful;
 
       return {
@@ -415,26 +495,35 @@ export class NotificationController {
         message: `Marked ${successful} notifications as read`,
       };
     } catch (error) {
-      this.logger.error(`Failed to bulk mark as read: ${error.message}`, error.stack);
+      this.logger.error(
+        `Failed to bulk mark as read: ${error.message}`,
+        error.stack,
+      );
       throw new HttpException(
-        { 
-          success: false, 
-          message: 'Failed to bulk mark as read', 
-          error: error.message 
+        {
+          success: false,
+          message: 'Failed to bulk mark as read',
+          error: error.message,
         },
-        HttpStatus.INTERNAL_SERVER_ERROR
+        HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
 
   @Post('bulk/dismiss')
-  async bulkDismiss(@Body() body: { userId: string; notificationIds: number[] }) {
+  async bulkDismiss(
+    @Body() body: { userId: string; notificationIds: number[] },
+  ) {
     try {
       const results = await Promise.allSettled(
-        body.notificationIds.map(id => this.notificationService.markAsDismissed(id, body.userId))
+        body.notificationIds.map((id) =>
+          this.notificationService.markAsDismissed(id, body.userId),
+        ),
       );
 
-      const successful = results.filter(r => r.status === 'fulfilled' && r.value === true).length;
+      const successful = results.filter(
+        (r) => r.status === 'fulfilled' && r.value === true,
+      ).length;
       const failed = results.length - successful;
 
       return {
@@ -443,14 +532,17 @@ export class NotificationController {
         message: `Dismissed ${successful} notifications`,
       };
     } catch (error) {
-      this.logger.error(`Failed to bulk dismiss: ${error.message}`, error.stack);
+      this.logger.error(
+        `Failed to bulk dismiss: ${error.message}`,
+        error.stack,
+      );
       throw new HttpException(
-        { 
-          success: false, 
-          message: 'Failed to bulk dismiss', 
-          error: error.message 
+        {
+          success: false,
+          message: 'Failed to bulk dismiss',
+          error: error.message,
         },
-        HttpStatus.INTERNAL_SERVER_ERROR
+        HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }

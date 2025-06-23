@@ -718,11 +718,13 @@ export class StockWebSocketGateway
     @MessageBody() data: { userId: string },
     @ConnectedSocket() client: Socket,
   ) {
-    console.log(`Client ${client.id} subscribed to notifications for user ${data.userId}`);
-    
+    console.log(
+      `Client ${client.id} subscribed to notifications for user ${data.userId}`,
+    );
+
     // Store user subscription
     this.notificationSubscriptions.set(client.id, data.userId);
-    
+
     // Join user-specific room
     client.join(`notifications_${data.userId}`);
   }
@@ -731,7 +733,9 @@ export class StockWebSocketGateway
   handleUnsubscribeNotifications(@ConnectedSocket() client: Socket) {
     const userId = this.notificationSubscriptions.get(client.id);
     if (userId) {
-      console.log(`Client ${client.id} unsubscribed from notifications for user ${userId}`);
+      console.log(
+        `Client ${client.id} unsubscribed from notifications for user ${userId}`,
+      );
       client.leave(`notifications_${userId}`);
       this.notificationSubscriptions.delete(client.id);
     }
@@ -747,7 +751,9 @@ export class StockWebSocketGateway
         data: notification,
         timestamp: new Date().toISOString(),
       });
-      console.log(`📢 Sent notification to user ${userId}: ${notification.title}`);
+      console.log(
+        `📢 Sent notification to user ${userId}: ${notification.title}`,
+      );
     } catch (error) {
       console.error(`Error sending notification to user ${userId}:`, error);
     }
@@ -764,16 +770,25 @@ export class StockWebSocketGateway
         count: notifications.length,
         timestamp: new Date().toISOString(),
       });
-      console.log(`📢 Sent ${notifications.length} notifications to user ${userId}`);
+      console.log(
+        `📢 Sent ${notifications.length} notifications to user ${userId}`,
+      );
     } catch (error) {
-      console.error(`Error sending bulk notifications to user ${userId}:`, error);
+      console.error(
+        `Error sending bulk notifications to user ${userId}:`,
+        error,
+      );
     }
   }
 
   /**
    * Send notification status update
    */
-  async sendNotificationStatusUpdate(userId: string, notificationId: number, status: string) {
+  async sendNotificationStatusUpdate(
+    userId: string,
+    notificationId: number,
+    status: string,
+  ) {
     try {
       this.server.to(`notifications_${userId}`).emit('notification_status', {
         type: 'status_update',

@@ -1,4 +1,10 @@
-import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 
 export enum NotificationType {
   TRADING_OPPORTUNITY = 'trading_opportunity',
@@ -75,12 +81,14 @@ export class NotificationEntity {
     default: NotificationStatus.PENDING,
   })
   status: NotificationStatus;
-
-  @Column({ type: 'json' })
+  @Column({ type: 'json', nullable: true })
   deliveryChannels: DeliveryChannel[]; // Which channels to deliver through
 
   @Column({ type: 'json', nullable: true })
-  deliveryStatus: Record<DeliveryChannel, { sent: boolean; sentAt?: Date; error?: string }>; // Delivery tracking
+  deliveryStatus: Record<
+    DeliveryChannel,
+    { sent: boolean; sentAt?: Date; error?: string }
+  >; // Delivery tracking
 
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   confidenceScore: number; // For trading opportunities (0-100)
@@ -123,8 +131,7 @@ export class NotificationPreferenceEntity {
 
   @Column({ type: 'boolean', default: true })
   enabled: boolean;
-
-  @Column({ type: 'json', default: '[]' })
+  @Column({ type: 'json', nullable: true })
   deliveryChannels: DeliveryChannel[];
 
   @Column({

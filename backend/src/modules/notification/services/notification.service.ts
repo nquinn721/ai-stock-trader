@@ -1,30 +1,28 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Between, Repository } from 'typeorm';
-import { 
-  NotificationEntity, 
-  NotificationPreferenceEntity, 
-  NotificationTemplateEntity,
-  NotificationType,
+import {
+  DeliveryChannel,
+  NotificationEntity,
+  NotificationPreferenceEntity,
   NotificationPriority,
   NotificationStatus,
-  DeliveryChannel
+  NotificationTemplateEntity,
+  NotificationType,
 } from '../entities/notification.entities';
 import {
+  AlertDetector,
   CreateNotificationDto,
-  NotificationFilter,
-  NotificationPreference,
-  TradingOpportunityAlert,
-  PatternAlert,
-  TechnicalAlert,
-  RiskManagementAlert,
   MarketEventAlert,
   MultiTimeframeAlert,
+  NotificationFilter,
+  NotificationPreference,
+  PatternAlert,
+  RiskManagementAlert,
   Stock,
+  TechnicalAlert,
+  TradingOpportunityAlert,
   TradingSignal,
-  AlertDetector,
-  PatternDetectionResult,
-  TechnicalIndicatorResult
 } from '../interfaces/notification.interfaces';
 
 @Injectable()
@@ -45,38 +43,59 @@ export class NotificationService {
   }
 
   // === Core Notification Management ===
-  async createNotification(dto: CreateNotificationDto): Promise<NotificationEntity | null> {
+  async createNotification(
+    dto: CreateNotificationDto,
+  ): Promise<NotificationEntity | null> {
     try {
       // Check user preferences
-      const shouldSend = await this.shouldSendNotification(dto.userId, dto.type, dto.priority);
+      const shouldSend = await this.shouldSendNotification(
+        dto.userId,
+        dto.type,
+        dto.priority,
+      );
       if (!shouldSend) {
-        this.logger.debug(`Notification blocked by user preferences: ${dto.type} for user ${dto.userId}`);
+        this.logger.debug(
+          `Notification blocked by user preferences: ${dto.type} for user ${dto.userId}`,
+        );
         return null;
       }
 
       // Create notification entity
       const notification = this.notificationRepository.create({
         ...dto,
-        deliveryChannels: dto.deliveryChannels || [DeliveryChannel.IN_APP, DeliveryChannel.WEBSOCKET],
+        deliveryChannels: dto.deliveryChannels || [
+          DeliveryChannel.IN_APP,
+          DeliveryChannel.WEBSOCKET,
+        ],
         triggeredAt: new Date(),
       });
 
       const saved = await this.notificationRepository.save(notification);
-      this.logger.log(`Created notification ${saved.id} for user ${dto.userId}: ${dto.title}`);
+      this.logger.log(
+        `Created notification ${saved.id} for user ${dto.userId}: ${dto.title}`,
+      );
 
       return saved;
     } catch (error) {
-      this.logger.error(`Failed to create notification: ${error.message}`, error.stack);
+      this.logger.error(
+        `Failed to create notification: ${error.message}`,
+        error.stack,
+      );
       throw error;
     }
   }
 
-  async getNotifications(filter: NotificationFilter): Promise<{ notifications: NotificationEntity[]; total: number }> {
+  async getNotifications(
+    filter: NotificationFilter,
+  ): Promise<{ notifications: NotificationEntity[]; total: number }> {
     try {
-      const query = this.notificationRepository.createQueryBuilder('notification');
+      const query =
+        this.notificationRepository.createQueryBuilder('notification');
 
       if (filter.userId) {
-        query.andWhere('notification.userId = :userId', { userId: filter.userId });
+        query.andWhere('notification.userId = :userId', {
+          userId: filter.userId,
+        });
       }
 
       if (filter.type) {
@@ -84,19 +103,27 @@ export class NotificationService {
       }
 
       if (filter.priority) {
-        query.andWhere('notification.priority = :priority', { priority: filter.priority });
+        query.andWhere('notification.priority = :priority', {
+          priority: filter.priority,
+        });
       }
 
       if (filter.symbol) {
-        query.andWhere('notification.symbol = :symbol', { symbol: filter.symbol });
+        query.andWhere('notification.symbol = :symbol', {
+          symbol: filter.symbol,
+        });
       }
 
       if (filter.portfolioId) {
-        query.andWhere('notification.portfolioId = :portfolioId', { portfolioId: filter.portfolioId });
+        query.andWhere('notification.portfolioId = :portfolioId', {
+          portfolioId: filter.portfolioId,
+        });
       }
 
       if (filter.status) {
-        query.andWhere('notification.status = :status', { status: filter.status });
+        query.andWhere('notification.status = :status', {
+          status: filter.status,
+        });
       }
 
       if (filter.fromDate && filter.toDate) {
@@ -122,7 +149,10 @@ export class NotificationService {
 
       return { notifications, total };
     } catch (error) {
-      this.logger.error(`Failed to get notifications: ${error.message}`, error.stack);
+      this.logger.error(
+        `Failed to get notifications: ${error.message}`,
+        error.stack,
+      );
       throw error;
     }
   }
@@ -130,31 +160,40 @@ export class NotificationService {
     try {
       const result = await this.notificationRepository.update(
         { id: notificationId, userId },
-        { 
-          status: NotificationStatus.READ, 
-          readAt: new Date() 
-        }
+        {
+          status: NotificationStatus.READ,
+          readAt: new Date(),
+        },
       );
 
       return (result.affected ?? 0) > 0;
     } catch (error) {
-      this.logger.error(`Failed to mark notification as read: ${error.message}`, error.stack);
+      this.logger.error(
+        `Failed to mark notification as read: ${error.message}`,
+        error.stack,
+      );
       return false;
     }
   }
-  async markAsDismissed(notificationId: number, userId: string): Promise<boolean> {
+  async markAsDismissed(
+    notificationId: number,
+    userId: string,
+  ): Promise<boolean> {
     try {
       const result = await this.notificationRepository.update(
         { id: notificationId, userId },
-        { 
-          status: NotificationStatus.DISMISSED, 
-          dismissedAt: new Date() 
-        }
+        {
+          status: NotificationStatus.DISMISSED,
+          dismissedAt: new Date(),
+        },
       );
 
       return (result.affected ?? 0) > 0;
     } catch (error) {
-      this.logger.error(`Failed to mark notification as dismissed: ${error.message}`, error.stack);
+      this.logger.error(
+        `Failed to mark notification as dismissed: ${error.message}`,
+        error.stack,
+      );
       return false;
     }
   }
@@ -168,7 +207,10 @@ export class NotificationService {
         },
       });
     } catch (error) {
-      this.logger.error(`Failed to get unread count: ${error.message}`, error.stack);
+      this.logger.error(
+        `Failed to get unread count: ${error.message}`,
+        error.stack,
+      );
       return 0;
     }
   }
@@ -179,26 +221,36 @@ export class NotificationService {
     try {
       const preferences = await this.preferenceRepository.find({
         where: { userId },
-      });      return preferences.map(p => ({
+      });
+      return preferences.map((p) => ({
         userId: p.userId,
         type: p.notificationType,
         enabled: p.enabled,
         deliveryChannels: p.deliveryChannels,
         minimumPriority: p.minimumPriority,
         customThresholds: p.customThresholds,
-        quietHours: p.quietHours ? {
-          enabled: p.quietHours,
-          start: p.quietHoursStart || '',
-          end: p.quietHoursEnd || '',
-        } : undefined,
+        quietHours: p.quietHours
+          ? {
+              enabled: p.quietHours,
+              start: p.quietHoursStart || '',
+              end: p.quietHoursEnd || '',
+            }
+          : undefined,
       }));
     } catch (error) {
-      this.logger.error(`Failed to get user preferences: ${error.message}`, error.stack);
+      this.logger.error(
+        `Failed to get user preferences: ${error.message}`,
+        error.stack,
+      );
       return [];
     }
   }
 
-  async updatePreference(userId: string, type: NotificationType, preference: Partial<NotificationPreference>): Promise<boolean> {
+  async updatePreference(
+    userId: string,
+    type: NotificationType,
+    preference: Partial<NotificationPreference>,
+  ): Promise<boolean> {
     try {
       const existing = await this.preferenceRepository.findOne({
         where: { userId, notificationType: type },
@@ -207,11 +259,15 @@ export class NotificationService {
       if (existing) {
         await this.preferenceRepository.update(existing.id, {
           enabled: preference.enabled ?? existing.enabled,
-          deliveryChannels: preference.deliveryChannels ?? existing.deliveryChannels,
-          minimumPriority: preference.minimumPriority ?? existing.minimumPriority,
-          customThresholds: preference.customThresholds ?? existing.customThresholds,
+          deliveryChannels:
+            preference.deliveryChannels ?? existing.deliveryChannels,
+          minimumPriority:
+            preference.minimumPriority ?? existing.minimumPriority,
+          customThresholds:
+            preference.customThresholds ?? existing.customThresholds,
           quietHours: preference.quietHours?.enabled ?? existing.quietHours,
-          quietHoursStart: preference.quietHours?.start ?? existing.quietHoursStart,
+          quietHoursStart:
+            preference.quietHours?.start ?? existing.quietHoursStart,
           quietHoursEnd: preference.quietHours?.end ?? existing.quietHoursEnd,
         });
       } else {
@@ -219,8 +275,11 @@ export class NotificationService {
           userId,
           notificationType: type,
           enabled: preference.enabled ?? true,
-          deliveryChannels: preference.deliveryChannels ?? [DeliveryChannel.IN_APP],
-          minimumPriority: preference.minimumPriority ?? NotificationPriority.MEDIUM,
+          deliveryChannels: preference.deliveryChannels ?? [
+            DeliveryChannel.IN_APP,
+          ],
+          minimumPriority:
+            preference.minimumPriority ?? NotificationPriority.MEDIUM,
           customThresholds: preference.customThresholds,
           quietHours: preference.quietHours?.enabled ?? false,
           quietHoursStart: preference.quietHours?.start,
@@ -230,19 +289,29 @@ export class NotificationService {
 
       return true;
     } catch (error) {
-      this.logger.error(`Failed to update preference: ${error.message}`, error.stack);
+      this.logger.error(
+        `Failed to update preference: ${error.message}`,
+        error.stack,
+      );
       return false;
     }
   }
 
   // === Alert Generation ===
 
-  async createTradingOpportunityAlert(userId: string, alert: TradingOpportunityAlert): Promise<NotificationEntity | null> {
+  async createTradingOpportunityAlert(
+    userId: string,
+    alert: TradingOpportunityAlert,
+  ): Promise<NotificationEntity | null> {
     return await this.createNotification({
       userId,
       type: NotificationType.TRADING_OPPORTUNITY,
-      priority: alert.confidenceScore >= 80 ? NotificationPriority.HIGH : 
-               alert.confidenceScore >= 60 ? NotificationPriority.MEDIUM : NotificationPriority.LOW,
+      priority:
+        alert.confidenceScore >= 80
+          ? NotificationPriority.HIGH
+          : alert.confidenceScore >= 60
+            ? NotificationPriority.MEDIUM
+            : NotificationPriority.LOW,
       title: `${alert.type.replace('_', ' ').toUpperCase()} Signal: ${alert.symbol}`,
       message: `${alert.reason} | Price: $${alert.currentPrice} | Confidence: ${alert.confidenceScore}% | Timeframe: ${alert.timeframe}`,
       symbol: alert.symbol,
@@ -259,11 +328,17 @@ export class NotificationService {
     });
   }
 
-  async createPatternAlert(userId: string, alert: PatternAlert): Promise<NotificationEntity | null> {
+  async createPatternAlert(
+    userId: string,
+    alert: PatternAlert,
+  ): Promise<NotificationEntity | null> {
     return await this.createNotification({
       userId,
       type: NotificationType.PATTERN_ALERT,
-      priority: alert.strength >= 80 ? NotificationPriority.HIGH : NotificationPriority.MEDIUM,
+      priority:
+        alert.strength >= 80
+          ? NotificationPriority.HIGH
+          : NotificationPriority.MEDIUM,
       title: `Pattern Alert: ${alert.patternName} - ${alert.symbol}`,
       message: `${alert.type.replace('_', ' ')} detected for ${alert.symbol}. Current price: $${alert.currentPrice}, Key level: $${alert.keyLevel}`,
       symbol: alert.symbol,
@@ -279,9 +354,16 @@ export class NotificationService {
     });
   }
 
-  async createTechnicalAlert(userId: string, alert: TechnicalAlert): Promise<NotificationEntity | null> {
-    const priority = alert.severity === 'high' ? NotificationPriority.HIGH :
-                    alert.severity === 'medium' ? NotificationPriority.MEDIUM : NotificationPriority.LOW;
+  async createTechnicalAlert(
+    userId: string,
+    alert: TechnicalAlert,
+  ): Promise<NotificationEntity | null> {
+    const priority =
+      alert.severity === 'high'
+        ? NotificationPriority.HIGH
+        : alert.severity === 'medium'
+          ? NotificationPriority.MEDIUM
+          : NotificationPriority.LOW;
 
     return await this.createNotification({
       userId,
@@ -301,11 +383,17 @@ export class NotificationService {
     });
   }
 
-  async createRiskManagementAlert(userId: string, alert: RiskManagementAlert): Promise<NotificationEntity | null> {
+  async createRiskManagementAlert(
+    userId: string,
+    alert: RiskManagementAlert,
+  ): Promise<NotificationEntity | null> {
     return await this.createNotification({
       userId,
       type: NotificationType.RISK_MANAGEMENT,
-      priority: alert.type === 'margin_call' ? NotificationPriority.CRITICAL : NotificationPriority.HIGH,
+      priority:
+        alert.type === 'margin_call'
+          ? NotificationPriority.CRITICAL
+          : NotificationPriority.HIGH,
       title: `Risk Alert: ${alert.type.replace('_', ' ').toUpperCase()} - ${alert.symbol}`,
       message: `${alert.action.replace('_', ' ')} required. Current: $${alert.currentPrice}, Trigger: $${alert.triggerPrice}, Risk: $${alert.riskAmount}`,
       symbol: alert.symbol,
@@ -321,9 +409,16 @@ export class NotificationService {
     });
   }
 
-  async createMarketEventAlert(userId: string, alert: MarketEventAlert): Promise<NotificationEntity | null> {
-    const priority = alert.severity === 'high' ? NotificationPriority.HIGH :
-                    alert.severity === 'medium' ? NotificationPriority.MEDIUM : NotificationPriority.LOW;
+  async createMarketEventAlert(
+    userId: string,
+    alert: MarketEventAlert,
+  ): Promise<NotificationEntity | null> {
+    const priority =
+      alert.severity === 'high'
+        ? NotificationPriority.HIGH
+        : alert.severity === 'medium'
+          ? NotificationPriority.MEDIUM
+          : NotificationPriority.LOW;
 
     return await this.createNotification({
       userId,
@@ -343,11 +438,17 @@ export class NotificationService {
     });
   }
 
-  async createMultiTimeframeAlert(userId: string, alert: MultiTimeframeAlert): Promise<NotificationEntity | null> {
+  async createMultiTimeframeAlert(
+    userId: string,
+    alert: MultiTimeframeAlert,
+  ): Promise<NotificationEntity | null> {
     return await this.createNotification({
       userId,
       type: NotificationType.MULTI_TIMEFRAME,
-      priority: alert.confluence >= 80 ? NotificationPriority.HIGH : NotificationPriority.MEDIUM,
+      priority:
+        alert.confluence >= 80
+          ? NotificationPriority.HIGH
+          : NotificationPriority.MEDIUM,
       title: `Multi-Timeframe Alert: ${alert.type.replace('_', ' ')} - ${alert.symbol}`,
       message: `${alert.confluence}% confluence across ${alert.timeframes.length} timeframes`,
       symbol: alert.symbol,
@@ -364,7 +465,10 @@ export class NotificationService {
 
   // === Alert Detection & Processing ===
 
-  async detectAndCreateAlerts(stocks: Stock[], signals: TradingSignal[]): Promise<void> {
+  async detectAndCreateAlerts(
+    stocks: Stock[],
+    signals: TradingSignal[],
+  ): Promise<void> {
     if (this.isProcessing) {
       return; // Prevent concurrent processing
     }
@@ -378,8 +482,8 @@ export class NotificationService {
       // Process each stock with available detectors
       for (const stock of stocks) {
         try {
-          const stockSignals = signals.filter(s => s.symbol === stock.symbol);
-          
+          const stockSignals = signals.filter((s) => s.symbol === stock.symbol);
+
           // Run all alert detectors
           for (const [type, detector] of this.alertDetectors) {
             if (detector.isEnabled()) {
@@ -389,28 +493,39 @@ export class NotificationService {
           }
 
           // Custom detection logic for built-in alerts
-          const builtInAlerts = await this.detectBuiltInAlerts(stock, stockSignals);
+          const builtInAlerts = await this.detectBuiltInAlerts(
+            stock,
+            stockSignals,
+          );
           allAlerts.push(...builtInAlerts);
-
         } catch (error) {
-          this.logger.error(`Failed to detect alerts for ${stock.symbol}: ${error.message}`);
+          this.logger.error(
+            `Failed to detect alerts for ${stock.symbol}: ${error.message}`,
+          );
         }
       }
 
       // Create notifications in batch
       if (allAlerts.length > 0) {
         await this.createNotificationsBatch(allAlerts);
-        this.logger.log(`Created ${allAlerts.length} alerts in ${Date.now() - startTime}ms`);
+        this.logger.log(
+          `Created ${allAlerts.length} alerts in ${Date.now() - startTime}ms`,
+        );
       }
-
     } catch (error) {
-      this.logger.error(`Alert detection failed: ${error.message}`, error.stack);
+      this.logger.error(
+        `Alert detection failed: ${error.message}`,
+        error.stack,
+      );
     } finally {
       this.isProcessing = false;
     }
   }
 
-  private async detectBuiltInAlerts(stock: Stock, signals: TradingSignal[]): Promise<CreateNotificationDto[]> {
+  private async detectBuiltInAlerts(
+    stock: Stock,
+    signals: TradingSignal[],
+  ): Promise<CreateNotificationDto[]> {
     const alerts: CreateNotificationDto[] = [];
     const userId = 'default_user'; // For now, using default user
 
@@ -420,7 +535,10 @@ export class NotificationService {
         alerts.push({
           userId,
           type: NotificationType.MARKET_EVENT,
-          priority: Math.abs(stock.changePercent) >= 10 ? NotificationPriority.HIGH : NotificationPriority.MEDIUM,
+          priority:
+            Math.abs(stock.changePercent) >= 10
+              ? NotificationPriority.HIGH
+              : NotificationPriority.MEDIUM,
           title: `Significant Price Movement: ${stock.symbol}`,
           message: `${stock.symbol} moved ${stock.changePercent > 0 ? '+' : ''}${stock.changePercent.toFixed(2)}% to $${stock.currentPrice}`,
           symbol: stock.symbol,
@@ -434,7 +552,8 @@ export class NotificationService {
       }
 
       // Volume spike alerts
-      if (stock.volume && stock.volume > 1000000) { // Configurable threshold
+      if (stock.volume && stock.volume > 1000000) {
+        // Configurable threshold
         alerts.push({
           userId,
           type: NotificationType.TECHNICAL_ALERT,
@@ -455,7 +574,10 @@ export class NotificationService {
           alerts.push({
             userId,
             type: NotificationType.TRADING_OPPORTUNITY,
-            priority: signal.strength >= 85 ? NotificationPriority.HIGH : NotificationPriority.MEDIUM,
+            priority:
+              signal.strength >= 85
+                ? NotificationPriority.HIGH
+                : NotificationPriority.MEDIUM,
             title: `${signal.signal.toUpperCase()} Signal: ${signal.symbol}`,
             message: signal.reason,
             symbol: signal.symbol,
@@ -469,27 +591,36 @@ export class NotificationService {
           });
         }
       }
-
     } catch (error) {
-      this.logger.error(`Built-in alert detection failed for ${stock.symbol}: ${error.message}`);
+      this.logger.error(
+        `Built-in alert detection failed for ${stock.symbol}: ${error.message}`,
+      );
     }
 
     return alerts;
   }
 
-  private async createNotificationsBatch(alerts: CreateNotificationDto[]): Promise<void> {
+  private async createNotificationsBatch(
+    alerts: CreateNotificationDto[],
+  ): Promise<void> {
     try {
-      const notifications = alerts.map(alert => 
+      const notifications = alerts.map((alert) =>
         this.notificationRepository.create({
           ...alert,
-          deliveryChannels: alert.deliveryChannels || [DeliveryChannel.IN_APP, DeliveryChannel.WEBSOCKET],
+          deliveryChannels: alert.deliveryChannels || [
+            DeliveryChannel.IN_APP,
+            DeliveryChannel.WEBSOCKET,
+          ],
           triggeredAt: new Date(),
-        })
+        }),
       );
 
       await this.notificationRepository.save(notifications);
     } catch (error) {
-      this.logger.error(`Failed to create notifications batch: ${error.message}`, error.stack);
+      this.logger.error(
+        `Failed to create notifications batch: ${error.message}`,
+        error.stack,
+      );
       throw error;
     }
   }
@@ -497,9 +628,9 @@ export class NotificationService {
   // === Helper Methods ===
 
   private async shouldSendNotification(
-    userId: string, 
-    type: NotificationType, 
-    priority?: NotificationPriority
+    userId: string,
+    type: NotificationType,
+    priority?: NotificationPriority,
   ): Promise<boolean> {
     try {
       const preference = await this.preferenceRepository.findOne({
@@ -514,12 +645,19 @@ export class NotificationService {
         return false;
       }
 
-      if (priority && this.isPriorityLower(priority, preference.minimumPriority)) {
+      if (
+        priority &&
+        this.isPriorityLower(priority, preference.minimumPriority)
+      ) {
         return false;
       }
 
       // Check quiet hours
-      if (preference.quietHours && preference.quietHoursStart && preference.quietHoursEnd) {
+      if (
+        preference.quietHours &&
+        preference.quietHoursStart &&
+        preference.quietHoursEnd
+      ) {
         const now = new Date();
         const currentTime = now.getHours() * 100 + now.getMinutes();
         const startTime = this.parseTimeString(preference.quietHoursStart);
@@ -532,12 +670,17 @@ export class NotificationService {
 
       return true;
     } catch (error) {
-      this.logger.error(`Error checking notification permission: ${error.message}`);
+      this.logger.error(
+        `Error checking notification permission: ${error.message}`,
+      );
       return true; // Default to sending on error
     }
   }
 
-  private isPriorityLower(priority: NotificationPriority, minimum: NotificationPriority): boolean {
+  private isPriorityLower(
+    priority: NotificationPriority,
+    minimum: NotificationPriority,
+  ): boolean {
     const priorities = {
       [NotificationPriority.LOW]: 1,
       [NotificationPriority.MEDIUM]: 2,
@@ -569,13 +712,15 @@ export class NotificationService {
           type: NotificationType.TRADING_OPPORTUNITY,
           name: 'Trading Signal',
           titleTemplate: '{signal} Signal: {symbol}',
-          messageTemplate: '{reason} | Price: ${currentPrice} | Confidence: {confidenceScore}%',
+          messageTemplate:
+            '{reason} | Price: ${currentPrice} | Confidence: {confidenceScore}%',
         },
         {
           type: NotificationType.TECHNICAL_ALERT,
           name: 'Technical Indicator',
           titleTemplate: 'Technical Alert: {indicatorName} - {symbol}',
-          messageTemplate: '{alertType} detected. Current: {currentValue}, Threshold: {threshold}',
+          messageTemplate:
+            '{alertType} detected. Current: {currentValue}, Threshold: {threshold}',
         },
         // Add more default templates as needed
       ];
@@ -590,7 +735,9 @@ export class NotificationService {
         }
       }
     } catch (error) {
-      this.logger.error(`Failed to initialize default templates: ${error.message}`);
+      this.logger.error(
+        `Failed to initialize default templates: ${error.message}`,
+      );
     }
   }
 
@@ -609,7 +756,10 @@ export class NotificationService {
       this.logger.log(`Cleaned up ${result.affected} old notifications`);
       return result.affected || 0;
     } catch (error) {
-      this.logger.error(`Failed to cleanup old notifications: ${error.message}`, error.stack);
+      this.logger.error(
+        `Failed to cleanup old notifications: ${error.message}`,
+        error.stack,
+      );
       return 0;
     }
   }

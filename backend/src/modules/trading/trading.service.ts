@@ -71,8 +71,7 @@ export class TradingService {
    */
   async getRecentSignals(symbol: string, limit: number = 10): Promise<any[]> {
     console.log(`📊 No real trading signal data available for ${symbol}`);
-    return [];
-  } /**
+    return [];  } /**
    * Get all active trading signals
    */
   async getActiveSignals(): Promise<any[]> {
@@ -85,6 +84,8 @@ export class TradingService {
       'NVDA',
       'META',
       'NFLX',
+      'CVNA', // Carvana
+      'CMG',  // Chipotle Mexican Grill
     ];
     const signals: any[] = [];
 

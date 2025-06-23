@@ -23,10 +23,10 @@ export interface TradingSignal {
   reason: string;
   [key: string]: any;
 }
-import { 
-  DeliveryChannel, 
-  NotificationPriority, 
-  NotificationType 
+import {
+  DeliveryChannel,
+  NotificationPriority,
+  NotificationType,
 } from '../entities/notification.entities';
 
 export interface CreateNotificationDto {
@@ -70,7 +70,11 @@ export interface TradingOpportunityAlert {
 }
 
 export interface PatternAlert {
-  type: 'breakout_confirmed' | 'pattern_completion' | 'support_break' | 'resistance_break';
+  type:
+    | 'breakout_confirmed'
+    | 'pattern_completion'
+    | 'support_break'
+    | 'resistance_break';
   symbol: string;
   patternName: string;
   currentPrice: number;
@@ -81,7 +85,12 @@ export interface PatternAlert {
 }
 
 export interface TechnicalAlert {
-  type: 'rsi_overbought' | 'rsi_oversold' | 'macd_crossover' | 'bb_squeeze' | 'volume_spike';
+  type:
+    | 'rsi_overbought'
+    | 'rsi_oversold'
+    | 'macd_crossover'
+    | 'bb_squeeze'
+    | 'volume_spike';
   symbol: string;
   indicatorName: string;
   currentValue: number;
@@ -91,7 +100,11 @@ export interface TechnicalAlert {
 }
 
 export interface RiskManagementAlert {
-  type: 'stop_loss_trigger' | 'take_profit_target' | 'position_size_alert' | 'margin_call';
+  type:
+    | 'stop_loss_trigger'
+    | 'take_profit_target'
+    | 'position_size_alert'
+    | 'margin_call';
   symbol: string;
   portfolioId: number;
   currentPrice: number;
@@ -102,7 +115,11 @@ export interface RiskManagementAlert {
 }
 
 export interface MarketEventAlert {
-  type: 'news_sentiment_change' | 'earnings_announcement' | 'analyst_upgrade' | 'analyst_downgrade';
+  type:
+    | 'news_sentiment_change'
+    | 'earnings_announcement'
+    | 'analyst_upgrade'
+    | 'analyst_downgrade';
   symbol: string;
   event: string;
   impact: 'positive' | 'negative' | 'neutral';
@@ -156,7 +173,10 @@ export interface NotificationEngineConfig {
 
 // Alert detection interfaces
 export interface AlertDetector {
-  detect(stock: Stock, signals: TradingSignal[]): Promise<CreateNotificationDto[]>;
+  detect(
+    stock: Stock,
+    signals: TradingSignal[],
+  ): Promise<CreateNotificationDto[]>;
   getType(): NotificationType;
   isEnabled(): boolean;
 }
@@ -189,7 +209,11 @@ export interface SentimentAnalysisResult {
 
 // WebSocket notification events
 export interface NotificationEvent {
-  event: 'notification_created' | 'notification_updated' | 'notification_read' | 'notification_dismissed';
+  event:
+    | 'notification_created'
+    | 'notification_updated'
+    | 'notification_read'
+    | 'notification_dismissed';
   data: {
     notificationId: number;
     userId: string;

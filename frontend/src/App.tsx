@@ -1,8 +1,8 @@
 import "./App.css";
 import Dashboard from "./components/Dashboard";
-import { SocketProvider } from "./context/SocketContext";
-import { NotificationProvider } from "./context/NotificationContext";
 import NotificationToast from "./components/NotificationToast";
+import { NotificationProvider } from "./context/NotificationContext";
+import { SocketProvider } from "./context/SocketContext";
 import { rootStore } from "./stores/RootStore";
 import { StoreProvider } from "./stores/StoreContext";
 
