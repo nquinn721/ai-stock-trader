@@ -446,7 +446,8 @@ export const stories: Story[] = [
     progress: 0,
     dependencies: ["S28"],
     createdDate: "2025-06-23",
-  },  {
+  },
+  {
     id: "S30",
     title: "Notification History and Management System",
     description:
@@ -462,13 +463,12 @@ export const stories: Story[] = [
     createdDate: "2025-06-23",
     completedDate: "2025-06-23",
   },
-
   {
     id: "S33",
     title: "Remove Latest Trade Signals from Client",
     description:
       "Clean up the frontend by removing the latest trade signals display from the client dashboard. This includes removing the signals section from the main dashboard, cleaning up related UI components, removing unused signal display logic, and updating the dashboard layout to optimize space utilization. Ensure that real-time trading signals are still available through the appropriate trading interfaces but not cluttering the main dashboard view.",
-    status: "TODO",
+    status: "DONE",
     priority: "Low",
     epic: "E3",
     storyPoints: 2,
@@ -477,6 +477,7 @@ export const stories: Story[] = [
     progress: 0,
     dependencies: [],
     createdDate: "2025-06-23",
+    completedDate: "2025-06-23",
   },
   {
     id: "S34",

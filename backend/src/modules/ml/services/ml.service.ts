@@ -37,7 +37,8 @@ export class MLService {
     @InjectRepository(MLMetric)
     private mlMetricRepository: Repository<MLMetric>,
     @InjectRepository(MLModelPerformance)
-    private mlPerformanceRepository: Repository<MLModelPerformance>,    private featureEngineeringService: FeatureEngineeringService,
+    private mlPerformanceRepository: Repository<MLModelPerformance>,
+    private featureEngineeringService: FeatureEngineeringService,
     private mlInferenceService: MLInferenceService,
     private abTestingService: ABTestingService,
     private modelMonitoringService: ModelMonitoringService,
@@ -48,7 +49,9 @@ export class MLService {
     private signalGenerationService: SignalGenerationService,
     private ensembleSystemsService: EnsembleSystemsService,
   ) {
-    this.logger.log('🚀 ML Service initialized with Phase 1, 2, and 3 infrastructure');
+    this.logger.log(
+      '🚀 ML Service initialized with Phase 1, 2, and 3 infrastructure',
+    );
     this.initializePhase1Models();
   }
   /**
@@ -178,7 +181,7 @@ export class MLService {
   /**
    * Get sentiment analysis with enhanced NLP models
    * Phase 1 foundation for Phase 2 advanced sentiment analysis
-   */  /**
+   */ /**
    * Enhanced sentiment analysis with Phase 2 ML infrastructure
    * Integrates advanced NLP, multi-source analysis, and temporal features
    */
@@ -189,19 +192,21 @@ export class MLService {
   ): Promise<SentimentScore> {
     this.logger.log(`Getting enhanced sentiment analysis for ${symbol}`);
 
-    try {      // Use Phase 2 advanced sentiment analysis if available
+    try {
+      // Use Phase 2 advanced sentiment analysis if available
       if (this.sentimentAnalysisService) {
         // In real implementation, would fetch data based on sources and timeframe
         const newsData = []; // Would fetch news data
         const socialData = sources?.includes('social') ? [] : undefined;
         const analystData = sources?.includes('analyst') ? [] : undefined;
-        
-        const advancedResult = await this.sentimentAnalysisService.analyzeSentimentAdvanced(
-          symbol,
-          newsData,
-          socialData,
-          analystData,
-        );
+
+        const advancedResult =
+          await this.sentimentAnalysisService.analyzeSentimentAdvanced(
+            symbol,
+            newsData,
+            socialData,
+            analystData,
+          );
         return advancedResult;
       }
 
@@ -698,7 +703,7 @@ export class MLService {
   }
 
   // ==================== PHASE 2 (S28) METHODS ====================
-  
+
   /**
    * Get ML-enhanced portfolio optimization
    * Phase 2: Modern Portfolio Theory with ML enhancements
@@ -709,8 +714,10 @@ export class MLService {
     objectives: any = {},
     constraints: any = {},
   ): Promise<any> {
-    this.logger.log(`Getting portfolio optimization for portfolio ${portfolioId}`);
-    
+    this.logger.log(
+      `Getting portfolio optimization for portfolio ${portfolioId}`,
+    );
+
     try {
       return await this.portfolioOptimizationService.optimizePortfolio(
         portfolioId,
@@ -720,7 +727,7 @@ export class MLService {
       );
     } catch (error) {
       this.logger.error(`Error optimizing portfolio ${portfolioId}:`, error);
-      
+
       // Return basic diversification strategy as fallback
       return {
         success: false,
@@ -743,11 +750,11 @@ export class MLService {
     patternTypes?: string[],
   ): Promise<any> {
     this.logger.log(`Getting pattern recognition for ${symbol}`);
-      try {
+    try {
       // In real implementation, would fetch historical data
       const historicalData = []; // Would fetch historical data for the symbol
       const timeframes = timeframe ? [timeframe] : ['1D'];
-      
+
       return await this.patternRecognitionService.recognizePatterns(
         symbol,
         historicalData,
@@ -756,7 +763,7 @@ export class MLService {
       );
     } catch (error) {
       this.logger.error(`Error detecting patterns for ${symbol}:`, error);
-      
+
       // Return no patterns detected as fallback
       return {
         symbol,
@@ -779,12 +786,20 @@ export class MLService {
     options: any = {},
   ): Promise<any> {
     this.logger.log(`Getting comprehensive ML analysis for ${symbol}`);
-    
+
     try {
       // Parallel execution of all Phase 2 analyses
       const [sentiment, patterns, breakout] = await Promise.all([
-        this.getSentimentAnalysis(symbol, options.sentimentSources, options.timeframe),
-        this.getPatternRecognition(symbol, options.timeframe, options.patternTypes),
+        this.getSentimentAnalysis(
+          symbol,
+          options.sentimentSources,
+          options.timeframe,
+        ),
+        this.getPatternRecognition(
+          symbol,
+          options.timeframe,
+          options.patternTypes,
+        ),
         this.getBreakoutPrediction(symbol),
       ]);
 
@@ -814,10 +829,17 @@ export class MLService {
         breakout,
         portfolio: portfolioAnalysis,
         recommendation,
-        confidence: this.calculateOverallConfidence(sentiment, patterns, breakout),
+        confidence: this.calculateOverallConfidence(
+          sentiment,
+          patterns,
+          breakout,
+        ),
       };
     } catch (error) {
-      this.logger.error(`Error getting comprehensive analysis for ${symbol}:`, error);
+      this.logger.error(
+        `Error getting comprehensive analysis for ${symbol}:`,
+        error,
+      );
       throw error;
     }
   }
@@ -827,23 +849,25 @@ export class MLService {
    */
   private synthesizeRecommendation(analyses: any): any {
     const { sentiment, patterns, breakout } = analyses;
-    
+
     // Weight different factors
     const sentimentWeight = 0.3;
     const patternWeight = 0.4;
     const breakoutWeight = 0.3;
-    
+
     // Calculate weighted score
     const sentimentScore = (sentiment.overallSentiment || 0) * sentimentWeight;
-    const patternScore = (patterns.patterns?.length > 0 ? 0.7 : 0.3) * patternWeight;
-    const breakoutScore = (breakout.probability > 0.6 ? 0.8 : 0.4) * breakoutWeight;
-    
+    const patternScore =
+      (patterns.patterns?.length > 0 ? 0.7 : 0.3) * patternWeight;
+    const breakoutScore =
+      (breakout.probability > 0.6 ? 0.8 : 0.4) * breakoutWeight;
+
     const totalScore = sentimentScore + patternScore + breakoutScore;
-    
+
     let action = 'HOLD';
     if (totalScore > 0.6) action = 'BUY';
     else if (totalScore < 0.4) action = 'SELL';
-    
+
     return {
       action,
       score: totalScore,
@@ -857,21 +881,23 @@ export class MLService {
    */
   private generateRecommendationReasoning(analyses: any): string {
     const parts: string[] = [];
-    
+
     if (analyses.sentiment.overallSentiment > 0.6) {
       parts.push('Positive market sentiment detected');
     } else if (analyses.sentiment.overallSentiment < -0.4) {
       parts.push('Negative market sentiment detected');
     }
-    
+
     if (analyses.patterns.patterns?.length > 0) {
-      parts.push(`${analyses.patterns.patterns.length} technical patterns identified`);
+      parts.push(
+        `${analyses.patterns.patterns.length} technical patterns identified`,
+      );
     }
-    
+
     if (analyses.breakout.probability > 0.7) {
       parts.push('High probability breakout predicted');
     }
-    
+
     return parts.join('. ') || 'Mixed signals, holding position recommended';
   }
 
@@ -882,19 +908,19 @@ export class MLService {
     const sentiment = analyses.sentiment;
     const patterns = analyses.patterns;
     const breakout = analyses.breakout;
-    
+
     let riskScore = 0;
-    
+
     // Sentiment risk
     if (sentiment.confidence < 0.5) riskScore += 0.3;
     if (sentiment.volatilityPrediction > 0.3) riskScore += 0.2;
-    
+
     // Pattern risk
     if (patterns.patterns?.length === 0) riskScore += 0.2;
-    
+
     // Breakout risk
     if (breakout.confidence < 0.6) riskScore += 0.3;
-    
+
     if (riskScore > 0.7) return 'HIGH';
     if (riskScore > 0.4) return 'MEDIUM';
     return 'LOW';
@@ -903,9 +929,18 @@ export class MLService {
   /**
    * Calculate overall confidence from multiple analyses
    */
-  private calculateOverallConfidence(sentiment: any, patterns: any, breakout: any): number {
-    const weights = [sentiment.confidence, patterns.confidence || 0.5, breakout.confidence];
-    return weights.reduce((sum, weight) => sum + weight, 0) / weights.length;  }
+  private calculateOverallConfidence(
+    sentiment: any,
+    patterns: any,
+    breakout: any,
+  ): number {
+    const weights = [
+      sentiment.confidence,
+      patterns.confidence || 0.5,
+      breakout.confidence,
+    ];
+    return weights.reduce((sum, weight) => sum + weight, 0) / weights.length;
+  }
 
   // ==================== PHASE 3 (S29) METHODS ====================
 
@@ -913,10 +948,16 @@ export class MLService {
    * Phase 3 (S29) - Advanced Market Prediction
    * Generate comprehensive market predictions using ensemble systems
    */
-  async generateMarketPrediction(symbol: string, timeframe: string = '1h', horizon: number = 24): Promise<any> {
+  async generateMarketPrediction(
+    symbol: string,
+    timeframe: string = '1h',
+    horizon: number = 24,
+  ): Promise<any> {
     try {
-      this.logger.log(`🔮 Generating market prediction for ${symbol} (${timeframe}, ${horizon}h)`);
-      
+      this.logger.log(
+        `🔮 Generating market prediction for ${symbol} (${timeframe}, ${horizon}h)`,
+      );
+
       // Use simplified approach with existing methods
       const result = {
         symbol,
@@ -931,7 +972,7 @@ export class MLService {
           consensusStrength: 0.8,
         },
       };
-      
+
       this.logger.log(`✅ Market prediction generated for ${symbol}`);
       return result;
     } catch (error) {
@@ -946,18 +987,19 @@ export class MLService {
   async generateTradingSignals(
     symbol: string,
     portfolioContext?: any,
-    riskProfile?: string
+    riskProfile?: string,
   ): Promise<any> {
     try {
       this.logger.log(`⚡ Generating trading signals for ${symbol}`);
-      
+
       // Use signal generation service with correct method
-      const signals = await this.signalGenerationService.generateAdvancedSignals(
-        symbol,
-        portfolioContext || {},
-        riskProfile || 'MODERATE'
-      );
-      
+      const signals =
+        await this.signalGenerationService.generateAdvancedSignals(
+          symbol,
+          portfolioContext || {},
+          riskProfile || 'MODERATE',
+        );
+
       this.logger.log(`✅ Trading signals generated for ${symbol}`);
       return signals;
     } catch (error) {
@@ -970,21 +1012,29 @@ export class MLService {
    * Phase 3 (S29) - Comprehensive Market Analysis
    * Orchestrate all ML services for complete market analysis
    */
-  async performComprehensiveAnalysis(symbol: string, analysisType: string = 'full'): Promise<any> {
+  async performComprehensiveAnalysis(
+    symbol: string,
+    analysisType: string = 'full',
+  ): Promise<any> {
     try {
       this.logger.log(`🎯 Performing comprehensive analysis for ${symbol}`);
-      
+
       // Get market prediction
       const marketPrediction = await this.generateMarketPrediction(symbol);
-      
+
       // Get trading signals
       const tradingSignals = await this.generateTradingSignals(symbol);
-        // Get pattern analysis using existing method
-      const patternAnalysis = await this.patternRecognitionService.recognizePatterns(symbol, []);
-      
+      // Get pattern analysis using existing method
+      const patternAnalysis =
+        await this.patternRecognitionService.recognizePatterns(symbol, []);
+
       // Get sentiment analysis using existing method
-      const sentimentAnalysis = await this.sentimentAnalysisService.analyzeSentimentAdvanced(symbol, []);
-      
+      const sentimentAnalysis =
+        await this.sentimentAnalysisService.analyzeSentimentAdvanced(
+          symbol,
+          [],
+        );
+
       // Generate comprehensive result
       const result = {
         symbol,
@@ -1003,14 +1053,17 @@ export class MLService {
         recommendation: this.generateTradingRecommendation(
           marketPrediction,
           tradingSignals,
-          sentimentAnalysis
+          sentimentAnalysis,
         ),
       };
-      
+
       this.logger.log(`✅ Comprehensive analysis completed for ${symbol}`);
       return result;
     } catch (error) {
-      this.logger.error(`❌ Comprehensive analysis failed for ${symbol}:`, error);
+      this.logger.error(
+        `❌ Comprehensive analysis failed for ${symbol}:`,
+        error,
+      );
       throw error;
     }
   }
@@ -1022,9 +1075,10 @@ export class MLService {
   async monitorEnsemblePerformance(): Promise<any> {
     try {
       this.logger.log('📊 Monitoring ensemble system performance');
-        // Get model performance using existing method
-      const modelPerformance = await this.modelMonitoringService.getAllModelHealthReports();
-      
+      // Get model performance using existing method
+      const modelPerformance =
+        await this.modelMonitoringService.getAllModelHealthReports();
+
       // Generate comprehensive performance report
       const result = {
         timestamp: new Date(),
@@ -1034,9 +1088,10 @@ export class MLService {
           adaptationRate: 0.1,
         },
         modelPerformance,
-        recommendations: this.generatePerformanceRecommendations(modelPerformance),
+        recommendations:
+          this.generatePerformanceRecommendations(modelPerformance),
       };
-      
+
       this.logger.log('✅ Ensemble performance monitoring completed');
       return result;
     } catch (error) {
@@ -1049,23 +1104,40 @@ export class MLService {
    * Calculate ensemble confidence from multiple predictions
    */
   private calculateEnsembleConfidence(predictions: any[]): number {
-    const confidences = predictions.map(p => p.confidence || 0.5);
-    const avgConfidence = confidences.reduce((sum, conf) => sum + conf, 0) / confidences.length;
-    
+    const confidences = predictions.map((p) => p.confidence || 0.5);
+    const avgConfidence =
+      confidences.reduce((sum, conf) => sum + conf, 0) / confidences.length;
+
     // Apply ensemble bonus for consistency
-    const consistencyBonus = confidences.every(conf => Math.abs(conf - avgConfidence) < 0.2) ? 0.1 : 0;
-    
+    const consistencyBonus = confidences.every(
+      (conf) => Math.abs(conf - avgConfidence) < 0.2,
+    )
+      ? 0.1
+      : 0;
+
     return Math.min(avgConfidence + consistencyBonus, 1.0);
   }
 
   /**
    * Generate trading recommendation based on multiple analyses
    */
-  private generateTradingRecommendation(marketPrediction: any, tradingSignals: any, sentimentAnalysis: any): string {
-    const signals = [marketPrediction.prediction, tradingSignals.signal, sentimentAnalysis.sentiment];
-    const bullishCount = signals.filter(s => s === 'BUY' || s === 'BULLISH').length;
-    const bearishCount = signals.filter(s => s === 'SELL' || s === 'BEARISH').length;
-    
+  private generateTradingRecommendation(
+    marketPrediction: any,
+    tradingSignals: any,
+    sentimentAnalysis: any,
+  ): string {
+    const signals = [
+      marketPrediction.prediction,
+      tradingSignals.signal,
+      sentimentAnalysis.sentiment,
+    ];
+    const bullishCount = signals.filter(
+      (s) => s === 'BUY' || s === 'BULLISH',
+    ).length;
+    const bearishCount = signals.filter(
+      (s) => s === 'SELL' || s === 'BEARISH',
+    ).length;
+
     if (bullishCount > bearishCount) return 'BUY';
     if (bearishCount > bullishCount) return 'SELL';
     return 'HOLD';
@@ -1076,19 +1148,19 @@ export class MLService {
    */
   private generatePerformanceRecommendations(modelPerformance: any): string[] {
     const recommendations: string[] = [];
-    
+
     if (modelPerformance.overallHealth < 0.7) {
       recommendations.push('Consider retraining underperforming models');
     }
-    
+
     if (modelPerformance.driftDetected) {
       recommendations.push('Address model drift with fresh training data');
     }
-    
+
     if (recommendations.length === 0) {
       recommendations.push('Models are performing well');
     }
-    
+
     return recommendations;
   }
 }

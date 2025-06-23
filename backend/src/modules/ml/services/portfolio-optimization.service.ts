@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { MLModel, MLPrediction } from '../entities/ml.entities';
-import { PortfolioOptimization, RiskParameters } from '../interfaces/ml.interfaces';
+import { PortfolioOptimization } from '../interfaces/ml.interfaces';
 
 /**
  * S28B: Portfolio Optimization ML Service
@@ -123,7 +123,7 @@ export class PortfolioOptimizationService {
    * Get enhanced market data with ML features
    */
   private async getEnhancedMarketData(positions: any[]): Promise<any[]> {
-    const symbols = positions.map(p => p.symbol);
+    const symbols = positions.map((p) => p.symbol);
     const marketData: any[] = [];
 
     for (const symbol of symbols) {
@@ -163,7 +163,7 @@ export class PortfolioOptimizationService {
    * Get ML predictions for portfolio symbols
    */
   private async getMLPredictions(positions: any[]): Promise<any[]> {
-    const symbols = positions.map(p => p.symbol);
+    const symbols = positions.map((p) => p.symbol);
     const predictions: any[] = [];
 
     for (const symbol of symbols) {
@@ -176,10 +176,11 @@ export class PortfolioOptimizationService {
         });
 
         if (recentPredictions.length > 0) {
-          const avgConfidence = recentPredictions.reduce(
-            (sum, p) => sum + Number(p.confidence),
-            0,
-          ) / recentPredictions.length;
+          const avgConfidence =
+            recentPredictions.reduce(
+              (sum, p) => sum + Number(p.confidence),
+              0,
+            ) / recentPredictions.length;
 
           predictions.push({
             symbol,
@@ -208,7 +209,7 @@ export class PortfolioOptimizationService {
 
     for (const data of marketData) {
       const symbol = data.symbol;
-      const prediction = predictionsData.find(p => p.symbol === symbol);
+      const prediction = predictionsData.find((p) => p.symbol === symbol);
 
       // Base return from historical data
       const historicalReturn = this.calculateHistoricalReturn(data, horizon);
@@ -218,7 +219,8 @@ export class PortfolioOptimizationService {
       if (prediction && prediction.averageConfidence > 0.6) {
         // Higher confidence predictions get more weight
         const predictionWeight = prediction.averageConfidence * 0.3; // Max 30% adjustment
-        mlAdjustment = this.extractReturnPrediction(prediction) * predictionWeight;
+        mlAdjustment =
+          this.extractReturnPrediction(prediction) * predictionWeight;
       }
 
       // Fundamental analysis adjustment
@@ -228,10 +230,10 @@ export class PortfolioOptimizationService {
       const technicalAdjustment = this.calculateTechnicalAdjustment(data);
 
       // Combined expected return
-      expectedReturns[symbol] = 
-        historicalReturn * 0.4 + 
-        mlAdjustment * 0.3 + 
-        fundamentalAdjustment * 0.2 + 
+      expectedReturns[symbol] =
+        historicalReturn * 0.4 +
+        mlAdjustment * 0.3 +
+        fundamentalAdjustment * 0.2 +
         technicalAdjustment * 0.1;
     }
 
@@ -245,9 +247,11 @@ export class PortfolioOptimizationService {
     marketData: any[],
     horizon: number,
   ): Promise<number[][]> {
-    const symbols = marketData.map(d => d.symbol);
+    const symbols = marketData.map((d) => d.symbol);
     const n = symbols.length;
-    const covMatrix: number[][] = Array(n).fill(null).map(() => Array(n).fill(0));
+    const covMatrix: number[][] = Array(n)
+      .fill(null)
+      .map(() => Array(n).fill(0));
 
     // Market regime detection
     const marketRegime = await this.detectMarketRegime();
@@ -267,7 +271,7 @@ export class PortfolioOptimizationService {
           );
           const vol1 = marketData[i].volatility;
           const vol2 = marketData[j].volatility;
-          
+
           // Adjust correlation for regime
           const adjustedCorrelation = correlation * regimeAdjustment;
           covMatrix[i][j] = adjustedCorrelation * vol1 * vol2;
@@ -288,19 +292,21 @@ export class PortfolioOptimizationService {
     riskTolerance: number,
   ): Promise<{ allocation: Record<string, number>; confidence: number }> {
     const symbols = Object.keys(expectedReturns);
-    
+
     // Simulate RL agent state
     const state = {
       positions: currentPositions,
       marketConditions: await this.getMarketConditions(),
       riskTolerance,
       expectedReturns,
-      volatilities: symbols.map(s => Math.sqrt(covarianceMatrix[symbols.indexOf(s)][symbols.indexOf(s)])),
+      volatilities: symbols.map((s) =>
+        Math.sqrt(covarianceMatrix[symbols.indexOf(s)][symbols.indexOf(s)]),
+      ),
     };
 
     // Simulate RL action (position weights)
     const actions = await this.rlAgentPredict(state);
-    
+
     // Validate and normalize actions
     const allocation: Record<string, number> = {};
     let totalWeight = 0;
@@ -312,7 +318,7 @@ export class PortfolioOptimizationService {
 
     // Normalize to sum to 1
     if (totalWeight > 0) {
-      symbols.forEach(symbol => {
+      symbols.forEach((symbol) => {
         allocation[symbol] /= totalWeight;
       });
     }
@@ -335,7 +341,7 @@ export class PortfolioOptimizationService {
     const symbols = Object.keys(expectedReturns);
     const populationSize = 50;
     const generations = 20;
-    
+
     // Initialize population with RL solution as seed
     let population = this.initializePopulation(
       populationSize,
@@ -345,8 +351,13 @@ export class PortfolioOptimizationService {
 
     for (let gen = 0; gen < generations; gen++) {
       // Evaluate fitness
-      const fitness = population.map(individual => 
-        this.evaluateFitness(individual, expectedReturns, covarianceMatrix, constraints)
+      const fitness = population.map((individual) =>
+        this.evaluateFitness(
+          individual,
+          expectedReturns,
+          covarianceMatrix,
+          constraints,
+        ),
       );
 
       // Selection and crossover
@@ -355,10 +366,15 @@ export class PortfolioOptimizationService {
     }
 
     // Get best solution
-    const fitness = population.map(individual => 
-      this.evaluateFitness(individual, expectedReturns, covarianceMatrix, constraints)
+    const fitness = population.map((individual) =>
+      this.evaluateFitness(
+        individual,
+        expectedReturns,
+        covarianceMatrix,
+        constraints,
+      ),
     );
-    
+
     const bestIndex = fitness.indexOf(Math.max(...fitness));
     const bestIndividual = population[bestIndex];
 
@@ -385,7 +401,7 @@ export class PortfolioOptimizationService {
     maxDrawdown: number;
   }> {
     const symbols = Object.keys(allocation);
-    const weights = symbols.map(s => allocation[s]);
+    const weights = symbols.map((s) => allocation[s]);
 
     // Expected return
     const expectedReturn = symbols.reduce(
@@ -400,7 +416,7 @@ export class PortfolioOptimizationService {
         portfolioVariance += weights[i] * weights[j] * covarianceMatrix[i][j];
       }
     }
-    
+
     const volatility = Math.sqrt(portfolioVariance);
 
     // Risk-free rate (assumed 2% annually)
@@ -430,20 +446,29 @@ export class PortfolioOptimizationService {
     optimalAllocation: Record<string, number>,
     expectedReturns: Record<string, number>,
     riskMetrics: any,
-  ): Promise<Array<{
-    symbol: string;
-    currentWeight: number;
-    recommendedWeight: number;
-    confidence: number;
-    reasoning: string;
-  }>> {
+  ): Promise<
+    Array<{
+      symbol: string;
+      currentWeight: number;
+      recommendedWeight: number;
+      confidence: number;
+      reasoning: string;
+    }>
+  > {
     const recommendations: any[] = [];
-    const totalValue = currentPositions.reduce((sum, p) => sum + p.marketValue, 0);
+    const totalValue = currentPositions.reduce(
+      (sum, p) => sum + p.marketValue,
+      0,
+    );
 
-    for (const [symbol, recommendedWeight] of Object.entries(optimalAllocation)) {
-      const currentPosition = currentPositions.find(p => p.symbol === symbol);
-      const currentWeight = currentPosition ? currentPosition.marketValue / totalValue : 0;
-      
+    for (const [symbol, recommendedWeight] of Object.entries(
+      optimalAllocation,
+    )) {
+      const currentPosition = currentPositions.find((p) => p.symbol === symbol);
+      const currentWeight = currentPosition
+        ? currentPosition.marketValue / totalValue
+        : 0;
+
       const weightChange = recommendedWeight - currentWeight;
       const confidence = await this.calculateRecommendationConfidence(
         symbol,
@@ -467,21 +492,25 @@ export class PortfolioOptimizationService {
       });
     }
 
-    return recommendations.sort((a, b) => Math.abs(b.recommendedWeight - b.currentWeight) - Math.abs(a.recommendedWeight - a.currentWeight));
+    return recommendations.sort(
+      (a, b) =>
+        Math.abs(b.recommendedWeight - b.currentWeight) -
+        Math.abs(a.recommendedWeight - a.currentWeight),
+    );
   }
 
   // Helper methods
   private getSectorForSymbol(symbol: string): string {
     const sectorMap: Record<string, string> = {
-      'AAPL': 'Technology',
-      'GOOGL': 'Technology',
-      'MSFT': 'Technology',
-      'AMZN': 'Consumer Discretionary',
-      'TSLA': 'Consumer Discretionary',
-      'JPM': 'Financials',
-      'BAC': 'Financials',
-      'JNJ': 'Healthcare',
-      'PFE': 'Healthcare',
+      AAPL: 'Technology',
+      GOOGL: 'Technology',
+      MSFT: 'Technology',
+      AMZN: 'Consumer Discretionary',
+      TSLA: 'Consumer Discretionary',
+      JPM: 'Financials',
+      BAC: 'Financials',
+      JNJ: 'Healthcare',
+      PFE: 'Healthcare',
     };
     return sectorMap[symbol] || 'Unknown';
   }
@@ -496,17 +525,19 @@ export class PortfolioOptimizationService {
     const baseReturn = 0.08; // 8% base annual return
     const sectorAdjustment = this.getSectorAdjustment(data.sector);
     const volatilityAdjustment = -data.volatility * 0.1; // Penalty for high volatility
-    
-    return (baseReturn + sectorAdjustment + volatilityAdjustment) * (horizon / 365);
+
+    return (
+      (baseReturn + sectorAdjustment + volatilityAdjustment) * (horizon / 365)
+    );
   }
 
   private getSectorAdjustment(sector: string): number {
     const adjustments: Record<string, number> = {
-      'Technology': 0.02,
-      'Healthcare': 0.01,
+      Technology: 0.02,
+      Healthcare: 0.01,
       'Consumer Discretionary': 0.005,
-      'Financials': -0.005,
-      'Energy': -0.01,
+      Financials: -0.005,
+      Energy: -0.01,
     };
     return adjustments[sector] || 0;
   }
@@ -515,51 +546,51 @@ export class PortfolioOptimizationService {
     // Extract return prediction from ML model outputs
     const predictions = prediction.predictions;
     let avgPrediction = 0;
-    
+
     for (const pred of predictions) {
       if (pred.outputPrediction && pred.outputPrediction.expectedReturn) {
         avgPrediction += pred.outputPrediction.expectedReturn;
       }
     }
-    
+
     return predictions.length > 0 ? avgPrediction / predictions.length : 0;
   }
 
   private calculateFundamentalAdjustment(data: any): number {
     const { pe, pbv, roe, debt_to_equity } = data.fundamentals;
-    
+
     // Simple fundamental scoring
     let score = 0;
-    
+
     // P/E ratio (lower is better, but not too low)
     if (pe > 5 && pe < 20) score += 0.01;
     else if (pe >= 20 && pe < 30) score += 0.005;
     else score -= 0.005;
-    
+
     // ROE (higher is better)
     score += Math.min(roe * 0.1, 0.02);
-    
+
     // Debt to equity (lower is better)
     score -= Math.min(debt_to_equity * 0.005, 0.01);
-    
+
     return score;
   }
 
   private calculateTechnicalAdjustment(data: any): number {
     const { rsi, macd, momentum } = data.technicalIndicators;
-    
+
     let score = 0;
-    
+
     // RSI (30-70 is good range)
     if (rsi > 30 && rsi < 70) score += 0.005;
     else score -= 0.005;
-    
+
     // MACD momentum
     score += Math.max(-0.01, Math.min(0.01, macd * 0.01));
-    
+
     // Price momentum
     score += Math.max(-0.01, Math.min(0.01, momentum * 0.005));
-    
+
     return score;
   }
 
@@ -571,16 +602,20 @@ export class PortfolioOptimizationService {
 
   private getRegimeAdjustment(regime: string): number {
     const adjustments = {
-      'BULL': 0.9, // Lower volatility in bull market
-      'BEAR': 1.3, // Higher volatility in bear market
-      'NEUTRAL': 1.0,
+      BULL: 0.9, // Lower volatility in bull market
+      BEAR: 1.3, // Higher volatility in bear market
+      NEUTRAL: 1.0,
     };
     return adjustments[regime] || 1.0;
   }
 
-  private async getCorrelationBetweenAssets(symbol1: string, symbol2: string): Promise<number> {
+  private async getCorrelationBetweenAssets(
+    symbol1: string,
+    symbol2: string,
+  ): Promise<number> {
     // Simulate correlation calculation
-    const sameSector = this.getSectorForSymbol(symbol1) === this.getSectorForSymbol(symbol2);
+    const sameSector =
+      this.getSectorForSymbol(symbol1) === this.getSectorForSymbol(symbol2);
     return sameSector ? Math.random() * 0.6 + 0.3 : Math.random() * 0.4 - 0.1;
   }
 
@@ -596,18 +631,21 @@ export class PortfolioOptimizationService {
     // Simulate RL agent prediction
     const numAssets = state.positions.length;
     const actions: number[] = [];
-    
+
     for (let i = 0; i < numAssets; i++) {
       // Bias towards higher expected return assets
       const expectedReturn = Object.values(state.expectedReturns)[i] as number;
       const bias = Math.max(0, expectedReturn * 2); // Positive bias for good returns
       actions.push(Math.random() * 0.5 + bias);
     }
-    
+
     return actions;
   }
 
-  private async calculateRLConfidence(state: any, actions: number[]): Promise<number> {
+  private async calculateRLConfidence(
+    state: any,
+    actions: number[],
+  ): Promise<number> {
     // Calculate confidence based on state consistency
     return Math.random() * 0.3 + 0.6; // 60-90% confidence
   }
@@ -619,17 +657,17 @@ export class PortfolioOptimizationService {
   ): number[][] {
     const population: number[][] = [];
     const seedArray = Object.values(seedSolution);
-    
+
     // Add seed solution
     population.push([...seedArray]);
-    
+
     // Generate random solutions
     for (let i = 1; i < size; i++) {
       const individual: number[] = [];
       for (let j = 0; j < numAssets; j++) {
         individual.push(Math.random());
       }
-      
+
       // Normalize
       const sum = individual.reduce((a, b) => a + b, 0);
       if (sum > 0) {
@@ -637,10 +675,10 @@ export class PortfolioOptimizationService {
           individual[j] /= sum;
         }
       }
-      
+
       population.push(individual);
     }
-    
+
     return population;
   }
 
@@ -651,27 +689,28 @@ export class PortfolioOptimizationService {
     constraints: any,
   ): number {
     const symbols = Object.keys(expectedReturns);
-    
+
     // Expected return
     const expectedReturn = individual.reduce(
       (sum, weight, i) => sum + weight * expectedReturns[symbols[i]],
       0,
     );
-    
+
     // Portfolio risk
     let portfolioVariance = 0;
     for (let i = 0; i < individual.length; i++) {
       for (let j = 0; j < individual.length; j++) {
-        portfolioVariance += individual[i] * individual[j] * covarianceMatrix[i][j];
+        portfolioVariance +=
+          individual[i] * individual[j] * covarianceMatrix[i][j];
       }
     }
-    
+
     const risk = Math.sqrt(portfolioVariance);
-    
+
     // Sharpe ratio as fitness
     const riskFreeRate = 0.02;
     let fitness = (expectedReturn - riskFreeRate) / risk;
-    
+
     // Apply constraints penalties
     if (constraints) {
       // Max position size constraint
@@ -681,7 +720,7 @@ export class PortfolioOptimizationService {
           fitness *= 0.5; // Heavy penalty
         }
       }
-      
+
       // Diversification constraint
       if (constraints.minDiversification) {
         const diversification = this.calculateSimpleDiversification(individual);
@@ -690,45 +729,51 @@ export class PortfolioOptimizationService {
         }
       }
     }
-    
+
     return isFinite(fitness) ? fitness : -1000;
   }
 
-  private geneticOperations(population: number[][], fitness: number[]): number[][] {
+  private geneticOperations(
+    population: number[][],
+    fitness: number[],
+  ): number[][] {
     const newPopulation: number[][] = [];
     const populationSize = population.length;
-    
+
     // Elitism: keep best 10%
     const eliteCount = Math.floor(populationSize * 0.1);
     const sortedIndices = fitness
       .map((f, i) => ({ fitness: f, index: i }))
       .sort((a, b) => b.fitness - a.fitness)
-      .map(item => item.index);
-    
+      .map((item) => item.index);
+
     for (let i = 0; i < eliteCount; i++) {
       newPopulation.push([...population[sortedIndices[i]]]);
     }
-    
+
     // Crossover and mutation
     while (newPopulation.length < populationSize) {
       const parent1 = this.tournamentSelection(population, fitness);
       const parent2 = this.tournamentSelection(population, fitness);
-      
+
       const child = this.crossover(parent1, parent2);
       this.mutate(child);
       this.normalize(child);
-      
+
       newPopulation.push(child);
     }
-    
+
     return newPopulation;
   }
 
-  private tournamentSelection(population: number[][], fitness: number[]): number[] {
+  private tournamentSelection(
+    population: number[][],
+    fitness: number[],
+  ): number[] {
     const tournamentSize = 3;
     let best = -1;
     let bestFitness = -Infinity;
-    
+
     for (let i = 0; i < tournamentSize; i++) {
       const idx = Math.floor(Math.random() * population.length);
       if (fitness[idx] > bestFitness) {
@@ -736,24 +781,24 @@ export class PortfolioOptimizationService {
         best = idx;
       }
     }
-    
+
     return [...population[best]];
   }
 
   private crossover(parent1: number[], parent2: number[]): number[] {
     const child: number[] = [];
     const alpha = Math.random();
-    
+
     for (let i = 0; i < parent1.length; i++) {
       child.push(alpha * parent1[i] + (1 - alpha) * parent2[i]);
     }
-    
+
     return child;
   }
 
   private mutate(individual: number[]): void {
     const mutationRate = 0.1;
-    
+
     for (let i = 0; i < individual.length; i++) {
       if (Math.random() < mutationRate) {
         individual[i] += (Math.random() - 0.5) * 0.1;
@@ -790,24 +835,27 @@ export class PortfolioOptimizationService {
     marketData: any[],
   ): Promise<number> {
     const weights = Object.values(allocation);
-    const sectors = marketData.map(d => d.sector);
-    
+    const sectors = marketData.map((d) => d.sector);
+
     // Weight concentration penalty
     const hhi = weights.reduce((sum, w) => sum + w * w, 0);
     const concentrationScore = 1 - hhi;
-    
+
     // Sector diversification
     const sectorWeights: Record<string, number> = {};
     Object.entries(allocation).forEach(([symbol, weight]) => {
-      const data = marketData.find(d => d.symbol === symbol);
+      const data = marketData.find((d) => d.symbol === symbol);
       if (data) {
         sectorWeights[data.sector] = (sectorWeights[data.sector] || 0) + weight;
       }
     });
-    
-    const sectorHhi = Object.values(sectorWeights).reduce((sum, w) => sum + w * w, 0);
+
+    const sectorHhi = Object.values(sectorWeights).reduce(
+      (sum, w) => sum + w * w,
+      0,
+    );
     const sectorScore = 1 - sectorHhi;
-    
+
     return (concentrationScore + sectorScore) / 2;
   }
 
@@ -819,12 +867,12 @@ export class PortfolioOptimizationService {
         order: { createdAt: 'DESC' },
         take: 10,
       });
-      
+
       const accuracies = predictions
-        .filter(p => p.accuracy !== null && p.accuracy !== undefined)
-        .map(p => Number(p.accuracy));
-      
-      return accuracies.length > 0 
+        .filter((p) => p.accuracy !== null && p.accuracy !== undefined)
+        .map((p) => Number(p.accuracy));
+
+      return accuracies.length > 0
         ? accuracies.reduce((sum, acc) => sum + acc, 0) / accuracies.length
         : 0.5; // Default to 50%
     } catch (error) {
@@ -841,7 +889,7 @@ export class PortfolioOptimizationService {
     const recentAccuracy = await this.calculateRecentAccuracy(symbol);
     const returnConfidence = Math.min(1, Math.abs(expectedReturn) * 5); // Higher returns = higher confidence
     const changeConfidence = Math.min(1, Math.abs(weightChange) * 2); // Bigger changes need higher confidence
-    
+
     return (recentAccuracy + returnConfidence + changeConfidence) / 3;
   }
 
@@ -851,24 +899,34 @@ export class PortfolioOptimizationService {
     expectedReturn: number,
     riskMetrics: any,
   ): string {
-    const action = weightChange > 0.01 ? 'increase' : weightChange < -0.01 ? 'decrease' : 'maintain';
-    const returnDesc = expectedReturn > 0.05 ? 'high' : expectedReturn > 0 ? 'positive' : 'negative';
+    const action =
+      weightChange > 0.01
+        ? 'increase'
+        : weightChange < -0.01
+          ? 'decrease'
+          : 'maintain';
+    const returnDesc =
+      expectedReturn > 0.05
+        ? 'high'
+        : expectedReturn > 0
+          ? 'positive'
+          : 'negative';
     const changePercent = Math.abs(weightChange * 100).toFixed(1);
-    
+
     let reasoning = `${action.charAt(0).toUpperCase() + action.slice(1)} ${symbol} position`;
-    
+
     if (action !== 'maintain') {
       reasoning += ` by ${changePercent}%`;
     }
-    
+
     reasoning += ` based on ${returnDesc} expected returns`;
-    
+
     if (expectedReturn > 0.1) {
       reasoning += ' and strong fundamentals';
     } else if (expectedReturn < 0) {
       reasoning += ' and risk management concerns';
     }
-    
+
     if (riskMetrics.sharpeRatio > 1.5) {
       reasoning += '. Excellent risk-adjusted return potential.';
     } else if (riskMetrics.sharpeRatio < 0.5) {
@@ -876,7 +934,7 @@ export class PortfolioOptimizationService {
     } else {
       reasoning += '. Moderate risk-adjusted returns expected.';
     }
-    
+
     return reasoning;
   }
 
@@ -902,13 +960,18 @@ export class PortfolioOptimizationService {
           sharpeRatio: result.sharpeRatio,
           diversificationScore: result.diversificationScore,
         },
-        confidence: result.recommendations.reduce((sum, r) => sum + r.confidence, 0) / result.recommendations.length,
+        confidence:
+          result.recommendations.reduce((sum, r) => sum + r.confidence, 0) /
+          result.recommendations.length,
         executionTime: 0,
       });
 
       await this.mlPredictionRepository.save(prediction);
     } catch (error) {
-      this.logger.warn(`Failed to log portfolio optimization for ${portfolioId}:`, error);
+      this.logger.warn(
+        `Failed to log portfolio optimization for ${portfolioId}:`,
+        error,
+      );
     }
   }
 
@@ -919,14 +982,18 @@ export class PortfolioOptimizationService {
     portfolioId: number,
     currentPositions: any[],
   ): PortfolioOptimization {
-    const totalValue = currentPositions.reduce((sum, p) => sum + p.marketValue, 0);
-    
-    const recommendations = currentPositions.map(position => ({
+    const totalValue = currentPositions.reduce(
+      (sum, p) => sum + p.marketValue,
+      0,
+    );
+
+    const recommendations = currentPositions.map((position) => ({
       symbol: position.symbol,
       currentWeight: position.marketValue / totalValue,
       recommendedWeight: position.marketValue / totalValue, // No change
       confidence: 0.5,
-      reasoning: 'Fallback recommendation due to optimization error. Maintain current allocation.',
+      reasoning:
+        'Fallback recommendation due to optimization error. Maintain current allocation.',
     }));
 
     return {

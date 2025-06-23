@@ -552,7 +552,8 @@ export class NotificationController {
   @Get('analytics/:userId')
   async getNotificationAnalytics(@Param('userId') userId: string) {
     try {
-      const analytics = await this.notificationService.getNotificationAnalytics(userId);
+      const analytics =
+        await this.notificationService.getNotificationAnalytics(userId);
       return {
         success: true,
         data: analytics,
@@ -576,7 +577,7 @@ export class NotificationController {
   @Get('history/:userId')
   async getNotificationHistory(
     @Param('userId') userId: string,
-    @Query() query: any
+    @Query() query: any,
   ) {
     try {
       const filter = {
@@ -593,7 +594,8 @@ export class NotificationController {
         sortOrder: query.sortOrder || 'DESC',
       };
 
-      const result = await this.notificationService.getNotificationHistory(filter);
+      const result =
+        await this.notificationService.getNotificationHistory(filter);
       return {
         success: true,
         data: result.notifications,
@@ -622,13 +624,14 @@ export class NotificationController {
 
   @Post('search')
   async searchNotifications(
-    @Body() searchRequest: {
+    @Body()
+    searchRequest: {
       userId: string;
       query: string;
       filters?: any;
       limit?: number;
       offset?: number;
-    }
+    },
   ) {
     try {
       const result = await this.notificationService.searchNotifications(
@@ -636,7 +639,7 @@ export class NotificationController {
         searchRequest.query,
         searchRequest.filters,
         searchRequest.limit,
-        searchRequest.offset
+        searchRequest.offset,
       );
       return {
         success: true,
@@ -667,7 +670,7 @@ export class NotificationController {
     try {
       const result = await this.notificationService.bulkDeleteNotifications(
         body.userId,
-        body.notificationIds
+        body.notificationIds,
       );
       return {
         success: true,
@@ -675,10 +678,7 @@ export class NotificationController {
         message: `Deleted ${result.deleted} notifications`,
       };
     } catch (error) {
-      this.logger.error(
-        `Failed to bulk delete: ${error.message}`,
-        error.stack,
-      );
+      this.logger.error(`Failed to bulk delete: ${error.message}`, error.stack);
       throw new HttpException(
         {
           success: false,
@@ -692,13 +692,18 @@ export class NotificationController {
 
   @Post('bulk/archive')
   async bulkArchive(
-    @Body() body: { userId: string; notificationIds: number[]; archiveUntil?: Date },
+    @Body()
+    body: {
+      userId: string;
+      notificationIds: number[];
+      archiveUntil?: Date;
+    },
   ) {
     try {
       const result = await this.notificationService.bulkArchiveNotifications(
         body.userId,
         body.notificationIds,
-        body.archiveUntil
+        body.archiveUntil,
       );
       return {
         success: true,
@@ -724,7 +729,7 @@ export class NotificationController {
   @Get('export/:userId')
   async exportNotifications(
     @Param('userId') userId: string,
-    @Query() query: any
+    @Query() query: any,
   ) {
     try {
       const format = query.format || 'json'; // json, csv, xlsx
@@ -739,7 +744,7 @@ export class NotificationController {
 
       const exportData = await this.notificationService.exportNotifications(
         filter,
-        format
+        format,
       );
 
       return {
@@ -766,13 +771,13 @@ export class NotificationController {
   @Post(':id/tag')
   async addTag(
     @Param('id', ParseIntPipe) id: number,
-    @Body() body: { userId: string; tags: string[] }
+    @Body() body: { userId: string; tags: string[] },
   ) {
     try {
       const result = await this.notificationService.addTagsToNotification(
         id,
         body.userId,
-        body.tags
+        body.tags,
       );
       return {
         success: true,
@@ -780,10 +785,7 @@ export class NotificationController {
         message: 'Tags added successfully',
       };
     } catch (error) {
-      this.logger.error(
-        `Failed to add tags: ${error.message}`,
-        error.stack,
-      );
+      this.logger.error(`Failed to add tags: ${error.message}`, error.stack);
       throw new HttpException(
         {
           success: false,

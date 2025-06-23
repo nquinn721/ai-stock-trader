@@ -89,9 +89,8 @@ export class SentimentAnalysisService {
           social: socialSentiment?.score || 0,
           analyst: analystSentiment?.score || 0,
         },
-        volatilityPrediction: await this.predictVolatilityFromSentiment(
-          aggregatedSentiment,
-        ),
+        volatilityPrediction:
+          await this.predictVolatilityFromSentiment(aggregatedSentiment),
         timestamp: new Date(),
       };
 
@@ -122,12 +121,18 @@ export class SentimentAnalysisService {
     distribution: { positive: number; negative: number; neutral: number };
   }> {
     if (!newsData || newsData.length === 0) {
-      return { score: 0, confidence: 0, distribution: { positive: 0, negative: 0, neutral: 1 } };
+      return {
+        score: 0,
+        confidence: 0,
+        distribution: { positive: 0, negative: 0, neutral: 1 },
+      };
     }
 
     const sentimentScores: number[] = [];
     const confidenceScores: number[] = [];
-    let positive = 0, negative = 0, neutral = 0;
+    let positive = 0,
+      negative = 0,
+      neutral = 0;
 
     for (const article of newsData) {
       const articleSentiment = await this.analyzeFinancialText(
@@ -145,12 +150,13 @@ export class SentimentAnalysisService {
     // Weight recent articles more heavily
     const weightedScore = this.calculateWeightedSentiment(
       sentimentScores,
-      newsData.map(article => new Date(article.publishedAt || new Date())),
+      newsData.map((article) => new Date(article.publishedAt || new Date())),
     );
 
     return {
       score: weightedScore,
-      confidence: confidenceScores.reduce((a, b) => a + b, 0) / confidenceScores.length,
+      confidence:
+        confidenceScores.reduce((a, b) => a + b, 0) / confidenceScores.length,
       distribution: {
         positive: positive / newsData.length,
         negative: negative / newsData.length,
@@ -169,42 +175,69 @@ export class SentimentAnalysisService {
   }> {
     // Financial keywords and their sentiment weights
     const bullishKeywords = [
-      'beat earnings', 'exceed expectations', 'strong growth', 'record revenue',
-      'positive outlook', 'upgrade', 'buy rating', 'outperform', 'expansion',
-      'breakthrough', 'partnership', 'acquisition', 'dividend increase',
+      'beat earnings',
+      'exceed expectations',
+      'strong growth',
+      'record revenue',
+      'positive outlook',
+      'upgrade',
+      'buy rating',
+      'outperform',
+      'expansion',
+      'breakthrough',
+      'partnership',
+      'acquisition',
+      'dividend increase',
     ];
 
     const bearishKeywords = [
-      'miss earnings', 'below expectations', 'decline', 'loss', 'downgrade',
-      'sell rating', 'underperform', 'layoffs', 'investigation', 'lawsuit',
-      'regulatory action', 'debt concerns', 'bankruptcy', 'recession',
+      'miss earnings',
+      'below expectations',
+      'decline',
+      'loss',
+      'downgrade',
+      'sell rating',
+      'underperform',
+      'layoffs',
+      'investigation',
+      'lawsuit',
+      'regulatory action',
+      'debt concerns',
+      'bankruptcy',
+      'recession',
     ];
 
     const uncertaintyKeywords = [
-      'uncertain', 'volatile', 'guidance', 'pending', 'investigation',
-      'regulatory review', 'market conditions', 'economic headwinds',
+      'uncertain',
+      'volatile',
+      'guidance',
+      'pending',
+      'investigation',
+      'regulatory review',
+      'market conditions',
+      'economic headwinds',
     ];
 
     const textLower = text.toLowerCase();
-    
+
     let bullishScore = 0;
     let bearishScore = 0;
     let uncertaintyScore = 0;
 
     // Score based on keyword presence and context
-    bullishKeywords.forEach(keyword => {
+    bullishKeywords.forEach((keyword) => {
       if (textLower.includes(keyword)) {
         bullishScore += 1;
       }
     });
 
-    bearishKeywords.forEach(keyword => {
+    bearishKeywords.forEach((keyword) => {
       if (textLower.includes(keyword)) {
         bearishScore += 1;
       }
     });
 
-    uncertaintyKeywords.forEach(keyword => {
+    uncertaintyKeywords.forEach((keyword) => {
       if (textLower.includes(keyword)) {
         uncertaintyScore += 0.5;
       }
@@ -212,13 +245,12 @@ export class SentimentAnalysisService {
 
     // Calculate sentiment score (-1 to 1)
     const totalScore = bullishScore + bearishScore + uncertaintyScore;
-    const sentimentScore = totalScore > 0 
-      ? (bullishScore - bearishScore) / totalScore 
-      : 0;
+    const sentimentScore =
+      totalScore > 0 ? (bullishScore - bearishScore) / totalScore : 0;
 
     // Adjust for uncertainty
     const adjustedScore = sentimentScore * (1 - uncertaintyScore / 10);
-    
+
     // Calculate confidence based on signal strength
     const confidence = Math.min(totalScore / 5, 1); // Max confidence at 5+ signals
 
@@ -244,17 +276,22 @@ export class SentimentAnalysisService {
 
     for (const post of socialData) {
       const textSentiment = await this.analyzeFinancialText(post.text || '');
-      const engagement = (post.likes || 0) + (post.retweets || 0) + (post.comments || 0);
-      
+      const engagement =
+        (post.likes || 0) + (post.retweets || 0) + (post.comments || 0);
+
       sentimentScores.push(textSentiment.score);
       engagementWeights.push(Math.log(engagement + 1)); // Log scale for engagement
     }
 
     // Weighted average by engagement
     const totalWeight = engagementWeights.reduce((a, b) => a + b, 0);
-    const weightedScore = totalWeight > 0 
-      ? sentimentScores.reduce((sum, score, i) => sum + score * engagementWeights[i], 0) / totalWeight
-      : 0;
+    const weightedScore =
+      totalWeight > 0
+        ? sentimentScores.reduce(
+            (sum, score, i) => sum + score * engagementWeights[i],
+            0,
+          ) / totalWeight
+        : 0;
 
     const confidence = Math.min(socialData.length / 50, 1); // Confidence based on volume
 
@@ -284,18 +321,23 @@ export class SentimentAnalysisService {
 
       // Price target sentiment
       if (report.priceTarget && report.currentPrice) {
-        const priceTargetChange = (report.priceTarget - report.currentPrice) / report.currentPrice;
+        const priceTargetChange =
+          (report.priceTarget - report.currentPrice) / report.currentPrice;
         priceTargetChanges.push(priceTargetChange);
       }
     }
 
-    const avgRatingScore = ratingScores.reduce((a, b) => a + b, 0) / ratingScores.length;
-    const avgPriceTargetChange = priceTargetChanges.length > 0
-      ? priceTargetChanges.reduce((a, b) => a + b, 0) / priceTargetChanges.length
-      : 0;
+    const avgRatingScore =
+      ratingScores.reduce((a, b) => a + b, 0) / ratingScores.length;
+    const avgPriceTargetChange =
+      priceTargetChanges.length > 0
+        ? priceTargetChanges.reduce((a, b) => a + b, 0) /
+          priceTargetChanges.length
+        : 0;
 
     // Combine rating and price target sentiment
-    const combinedScore = (avgRatingScore + Math.tanh(avgPriceTargetChange * 2)) / 2;
+    const combinedScore =
+      (avgRatingScore + Math.tanh(avgPriceTargetChange * 2)) / 2;
 
     return {
       score: combinedScore,
@@ -309,12 +351,12 @@ export class SentimentAnalysisService {
   private convertRatingToScore(rating: string): number {
     const ratingMap: { [key: string]: number } = {
       'strong buy': 1,
-      'buy': 0.7,
-      'outperform': 0.5,
-      'hold': 0,
-      'neutral': 0,
-      'underperform': -0.5,
-      'sell': -0.7,
+      buy: 0.7,
+      outperform: 0.5,
+      hold: 0,
+      neutral: 0,
+      underperform: -0.5,
+      sell: -0.7,
       'strong sell': -1,
     };
 
@@ -330,16 +372,28 @@ export class SentimentAnalysisService {
     analystSentiment: any,
   ): { overallScore: number; confidence: number } {
     const sources = [
-      { score: newsSentiment.score, confidence: newsSentiment.confidence, weight: 0.5 },
-      { score: socialSentiment?.score || 0, confidence: socialSentiment?.confidence || 0, weight: 0.3 },
-      { score: analystSentiment?.score || 0, confidence: analystSentiment?.confidence || 0, weight: 0.2 },
+      {
+        score: newsSentiment.score,
+        confidence: newsSentiment.confidence,
+        weight: 0.5,
+      },
+      {
+        score: socialSentiment?.score || 0,
+        confidence: socialSentiment?.confidence || 0,
+        weight: 0.3,
+      },
+      {
+        score: analystSentiment?.score || 0,
+        confidence: analystSentiment?.confidence || 0,
+        weight: 0.2,
+      },
     ];
 
     let totalWeightedScore = 0;
     let totalWeight = 0;
     let totalConfidence = 0;
 
-    sources.forEach(source => {
+    sources.forEach((source) => {
       if (source.confidence > 0) {
         const effectiveWeight = source.weight * source.confidence;
         totalWeightedScore += source.score * effectiveWeight;
@@ -362,8 +416,10 @@ export class SentimentAnalysisService {
     newsData: any[],
   ): Promise<{ trend: number; momentum: number; decayFactor: number }> {
     // Sort news by date
-    const sortedNews = newsData.sort((a, b) => 
-      new Date(b.publishedAt || 0).getTime() - new Date(a.publishedAt || 0).getTime()
+    const sortedNews = newsData.sort(
+      (a, b) =>
+        new Date(b.publishedAt || 0).getTime() -
+        new Date(a.publishedAt || 0).getTime(),
     );
 
     const sentimentTimeSeries: { date: Date; sentiment: number }[] = [];
@@ -403,26 +459,37 @@ export class SentimentAnalysisService {
       earnings: ['earnings', 'revenue', 'profit', 'guidance', 'eps'],
       analyst: ['analyst', 'rating', 'upgrade', 'downgrade', 'target'],
       product: ['product', 'launch', 'innovation', 'technology', 'development'],
-      regulatory: ['regulatory', 'compliance', 'investigation', 'lawsuit', 'SEC'],
+      regulatory: [
+        'regulatory',
+        'compliance',
+        'investigation',
+        'lawsuit',
+        'SEC',
+      ],
       market: ['market', 'sector', 'industry', 'competition', 'share'],
     };
 
     const entitySentiments: any = {};
 
     for (const [entity, keywords] of Object.entries(entityTopics)) {
-      const relevantArticles = newsData.filter(article => 
-        keywords.some(keyword => 
-          (article.title + ' ' + (article.summary || '')).toLowerCase().includes(keyword)
-        )
+      const relevantArticles = newsData.filter((article) =>
+        keywords.some((keyword) =>
+          (article.title + ' ' + (article.summary || ''))
+            .toLowerCase()
+            .includes(keyword),
+        ),
       );
 
       if (relevantArticles.length > 0) {
         const sentiments = await Promise.all(
-          relevantArticles.map(article => 
-            this.analyzeFinancialText(article.title + ' ' + (article.summary || ''))
-          )
+          relevantArticles.map((article) =>
+            this.analyzeFinancialText(
+              article.title + ' ' + (article.summary || ''),
+            ),
+          ),
         );
-        entitySentiments[entity] = sentiments.reduce((sum, s) => sum + s.score, 0) / sentiments.length;
+        entitySentiments[entity] =
+          sentiments.reduce((sum, s) => sum + s.score, 0) / sentiments.length;
       } else {
         entitySentiments[entity] = 0;
       }
@@ -442,10 +509,15 @@ export class SentimentAnalysisService {
     // Market impact model based on sentiment strength, momentum, and entity coverage
     const sentimentStrength = Math.abs(aggregatedSentiment.overallScore);
     const momentum = Math.abs(temporalSentiment.momentum);
-    const entityCoverage = Object.values(entitySentiment).filter(score => Math.abs(score as number) > 0.1).length / 5;
+    const entityCoverage =
+      Object.values(entitySentiment).filter(
+        (score) => Math.abs(score as number) > 0.1,
+      ).length / 5;
 
     // Impact score (0-1)
-    const impactScore = (sentimentStrength * 0.4 + momentum * 0.3 + entityCoverage * 0.3) * aggregatedSentiment.confidence;
+    const impactScore =
+      (sentimentStrength * 0.4 + momentum * 0.3 + entityCoverage * 0.3) *
+      aggregatedSentiment.confidence;
 
     return Math.min(1, impactScore);
   }
@@ -470,7 +542,8 @@ export class SentimentAnalysisService {
     let totalWeight = 0;
 
     scores.forEach((score, i) => {
-      const hoursSincePublished = (now.getTime() - dates[i].getTime()) / (1000 * 60 * 60);
+      const hoursSincePublished =
+        (now.getTime() - dates[i].getTime()) / (1000 * 60 * 60);
       const weight = Math.exp(-hoursSincePublished / 24); // Exponential decay over 24 hours
       totalWeightedScore += score * weight;
       totalWeight += weight;
@@ -479,12 +552,14 @@ export class SentimentAnalysisService {
     return totalWeight > 0 ? totalWeightedScore / totalWeight : 0;
   }
 
-  private calculateSentimentTrend(timeSeries: { date: Date; sentiment: number }[]): number {
+  private calculateSentimentTrend(
+    timeSeries: { date: Date; sentiment: number }[],
+  ): number {
     if (timeSeries.length < 2) return 0;
 
     const recent = timeSeries.slice(0, Math.min(10, timeSeries.length));
     const x = recent.map((_, i) => i);
-    const y = recent.map(item => item.sentiment);
+    const y = recent.map((item) => item.sentiment);
 
     // Simple linear regression for trend
     const n = x.length;
@@ -497,7 +572,9 @@ export class SentimentAnalysisService {
     return isFinite(slope) ? slope : 0;
   }
 
-  private calculateSentimentMomentum(timeSeries: { date: Date; sentiment: number }[]): number {
+  private calculateSentimentMomentum(
+    timeSeries: { date: Date; sentiment: number }[],
+  ): number {
     if (timeSeries.length < 3) return 0;
 
     const recent = timeSeries.slice(0, 3);
@@ -505,12 +582,15 @@ export class SentimentAnalysisService {
     return momentum;
   }
 
-  private calculateTimeDecayFactor(timeSeries: { date: Date; sentiment: number }[]): number {
+  private calculateTimeDecayFactor(
+    timeSeries: { date: Date; sentiment: number }[],
+  ): number {
     if (timeSeries.length === 0) return 1;
 
     const now = new Date();
     const mostRecent = timeSeries[0].date;
-    const hoursSinceRecent = (now.getTime() - mostRecent.getTime()) / (1000 * 60 * 60);
+    const hoursSinceRecent =
+      (now.getTime() - mostRecent.getTime()) / (1000 * 60 * 60);
 
     // Decay factor: 1 for recent news, approaches 0 for old news
     return Math.exp(-hoursSinceRecent / 48); // 48-hour half-life
@@ -518,7 +598,10 @@ export class SentimentAnalysisService {
   /**
    * Log sentiment prediction for monitoring
    */
-  private async logSentimentPrediction(symbol: string, result: SentimentScore): Promise<void> {
+  private async logSentimentPrediction(
+    symbol: string,
+    result: SentimentScore,
+  ): Promise<void> {
     try {
       const prediction = this.mlPredictionRepository.create({
         modelId: 'sentiment-analysis-advanced-v2',
@@ -540,14 +623,20 @@ export class SentimentAnalysisService {
 
       await this.mlPredictionRepository.save(prediction);
     } catch (error) {
-      this.logger.warn(`Failed to log sentiment prediction for ${symbol}:`, error);
+      this.logger.warn(
+        `Failed to log sentiment prediction for ${symbol}:`,
+        error,
+      );
     }
   }
 
   /**
    * Fallback sentiment analysis for error cases
    */
-  private getFallbackSentiment(symbol: string, newsData: any[]): SentimentScore {
+  private getFallbackSentiment(
+    symbol: string,
+    newsData: any[],
+  ): SentimentScore {
     return {
       symbol,
       overallSentiment: 0,

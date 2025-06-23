@@ -759,12 +759,13 @@ export class NotificationService {
       this.logger.error(
         `Failed to cleanup old notifications: ${error.message}`,
         error.stack,
-      );      return 0;
+      );
+      return 0;
     }
   }
 
   // === S30: Notification History and Management ===
-  
+
   /**
    * Get notification analytics for a user
    */
@@ -776,17 +777,18 @@ export class NotificationService {
       // Get basic counts
       const totalNotifications = await this.notificationRepository.count({
         where: { userId },
-      });      const unreadCount = await this.notificationRepository.count({
-        where: { 
-          userId, 
-          status: NotificationStatus.PENDING 
+      });
+      const unreadCount = await this.notificationRepository.count({
+        where: {
+          userId,
+          status: NotificationStatus.PENDING,
         },
       });
 
       const recentNotifications = await this.notificationRepository.count({
-        where: { 
-          userId, 
-          createdAt: Between(thirtyDaysAgo, new Date()) 
+        where: {
+          userId,
+          createdAt: Between(thirtyDaysAgo, new Date()),
         },
       });
 
@@ -814,7 +816,9 @@ export class NotificationService {
         .select('DATE(notification.createdAt)', 'date')
         .addSelect('COUNT(*)', 'count')
         .where('notification.userId = :userId', { userId })
-        .andWhere('notification.createdAt >= :startDate', { startDate: thirtyDaysAgo })
+        .andWhere('notification.createdAt >= :startDate', {
+          startDate: thirtyDaysAgo,
+        })
         .groupBy('DATE(notification.createdAt)')
         .orderBy('date', 'ASC')
         .getRawMany();
@@ -824,17 +828,23 @@ export class NotificationService {
           total: totalNotifications,
           unread: unreadCount,
           recent: recentNotifications,
-          readRate: totalNotifications > 0 ? ((totalNotifications - unreadCount) / totalNotifications * 100).toFixed(2) : 0,
+          readRate:
+            totalNotifications > 0
+              ? (
+                  ((totalNotifications - unreadCount) / totalNotifications) *
+                  100
+                ).toFixed(2)
+              : 0,
         },
-        byType: typeStats.map(stat => ({
+        byType: typeStats.map((stat) => ({
           type: stat.type,
           count: parseInt(stat.count),
         })),
-        byPriority: priorityStats.map(stat => ({
+        byPriority: priorityStats.map((stat) => ({
           priority: stat.priority,
           count: parseInt(stat.count),
         })),
-        dailyActivity: dailyActivity.map(day => ({
+        dailyActivity: dailyActivity.map((day) => ({
           date: day.date,
           count: parseInt(day.count),
         })),
@@ -862,7 +872,7 @@ export class NotificationService {
       dateFrom?: Date;
       dateTo?: Date;
       tags?: string[];
-    }
+    },
   ): Promise<{
     notifications: NotificationEntity[];
     total: number;
@@ -876,22 +886,36 @@ export class NotificationService {
 
       // Apply filters
       if (filters?.type) {
-        queryBuilder.andWhere('notification.type = :type', { type: filters.type });
+        queryBuilder.andWhere('notification.type = :type', {
+          type: filters.type,
+        });
       }
       if (filters?.priority) {
-        queryBuilder.andWhere('notification.priority = :priority', { priority: filters.priority });
+        queryBuilder.andWhere('notification.priority = :priority', {
+          priority: filters.priority,
+        });
       }
       if (filters?.status) {
-        queryBuilder.andWhere('notification.status = :status', { status: filters.status });
+        queryBuilder.andWhere('notification.status = :status', {
+          status: filters.status,
+        });
       }
       if (filters?.dateFrom) {
-        queryBuilder.andWhere('notification.createdAt >= :dateFrom', { dateFrom: filters.dateFrom });
+        queryBuilder.andWhere('notification.createdAt >= :dateFrom', {
+          dateFrom: filters.dateFrom,
+        });
       }
       if (filters?.dateTo) {
-        queryBuilder.andWhere('notification.createdAt <= :dateTo', { dateTo: filters.dateTo });
-      }      if (filters?.tags && filters.tags.length > 0) {
+        queryBuilder.andWhere('notification.createdAt <= :dateTo', {
+          dateTo: filters.dateTo,
+        });
+      }
+      if (filters?.tags && filters.tags.length > 0) {
         // Use metadata field for tags since tags field doesn't exist
-        queryBuilder.andWhere('JSON_EXTRACT(notification.metadata, "$.tags") && :tags', { tags: filters.tags });
+        queryBuilder.andWhere(
+          'JSON_EXTRACT(notification.metadata, "$.tags") && :tags',
+          { tags: filters.tags },
+        );
       }
 
       // Get total count
@@ -926,7 +950,7 @@ export class NotificationService {
     userId: string,
     query: string,
     page: number = 1,
-    limit: number = 20
+    limit: number = 20,
   ): Promise<{
     notifications: NotificationEntity[];
     total: number;
@@ -939,7 +963,7 @@ export class NotificationService {
         .where('notification.userId = :userId', { userId })
         .andWhere(
           '(notification.title ILIKE :query OR notification.message ILIKE :query OR notification.metadata::text ILIKE :query)',
-          { query: `%${query}%` }
+          { query: `%${query}%` },
         );
 
       const total = await queryBuilder.getCount();
@@ -969,12 +993,12 @@ export class NotificationService {
    */
   async bulkDeleteNotifications(
     userId: string,
-    notificationIds: string[]
+    notificationIds: string[],
   ): Promise<{ deleted: number }> {
     try {
       // Convert string IDs to numbers
-      const numericIds = notificationIds.map(id => parseInt(id));
-      
+      const numericIds = notificationIds.map((id) => parseInt(id));
+
       const result = await this.notificationRepository
         .createQueryBuilder()
         .delete()
@@ -982,7 +1006,9 @@ export class NotificationService {
         .andWhere('userId = :userId', { userId })
         .execute();
 
-      this.logger.log(`Bulk deleted ${result.affected} notifications for user ${userId}`);
+      this.logger.log(
+        `Bulk deleted ${result.affected} notifications for user ${userId}`,
+      );
       return { deleted: result.affected || 0 };
     } catch (error) {
       this.logger.error(
@@ -998,12 +1024,12 @@ export class NotificationService {
    */
   async bulkArchiveNotifications(
     userId: string,
-    notificationIds: string[]
+    notificationIds: string[],
   ): Promise<{ archived: number }> {
     try {
       // Convert string IDs to numbers
-      const numericIds = notificationIds.map(id => parseInt(id));
-      
+      const numericIds = notificationIds.map((id) => parseInt(id));
+
       const result = await this.notificationRepository
         .createQueryBuilder()
         .update()
@@ -1015,7 +1041,9 @@ export class NotificationService {
         .andWhere('userId = :userId', { userId })
         .execute();
 
-      this.logger.log(`Bulk archived ${result.affected} notifications for user ${userId}`);
+      this.logger.log(
+        `Bulk archived ${result.affected} notifications for user ${userId}`,
+      );
       return { archived: result.affected || 0 };
     } catch (error) {
       this.logger.error(
@@ -1038,7 +1066,7 @@ export class NotificationService {
       status?: NotificationStatus;
       dateFrom?: Date;
       dateTo?: Date;
-    }
+    },
   ): Promise<{ data: any; filename: string; contentType: string }> {
     try {
       const queryBuilder = this.notificationRepository
@@ -1047,19 +1075,29 @@ export class NotificationService {
 
       // Apply filters (same as history method)
       if (filters?.type) {
-        queryBuilder.andWhere('notification.type = :type', { type: filters.type });
+        queryBuilder.andWhere('notification.type = :type', {
+          type: filters.type,
+        });
       }
       if (filters?.priority) {
-        queryBuilder.andWhere('notification.priority = :priority', { priority: filters.priority });
+        queryBuilder.andWhere('notification.priority = :priority', {
+          priority: filters.priority,
+        });
       }
       if (filters?.status) {
-        queryBuilder.andWhere('notification.status = :status', { status: filters.status });
+        queryBuilder.andWhere('notification.status = :status', {
+          status: filters.status,
+        });
       }
       if (filters?.dateFrom) {
-        queryBuilder.andWhere('notification.createdAt >= :dateFrom', { dateFrom: filters.dateFrom });
+        queryBuilder.andWhere('notification.createdAt >= :dateFrom', {
+          dateFrom: filters.dateFrom,
+        });
       }
       if (filters?.dateTo) {
-        queryBuilder.andWhere('notification.createdAt <= :dateTo', { dateTo: filters.dateTo });
+        queryBuilder.andWhere('notification.createdAt <= :dateTo', {
+          dateTo: filters.dateTo,
+        });
       }
 
       const notifications = await queryBuilder
@@ -1076,15 +1114,18 @@ export class NotificationService {
         };
       } else if (format === 'csv') {
         // Convert to CSV format
-        const csvHeader = 'ID,Type,Priority,Status,Title,Message,Created At,Read At,Dismissed At\n';
-        const csvRows = notifications.map(n => {
-          const title = (n.title || '').replace(/"/g, '""');
-          const message = (n.message || '').replace(/"/g, '""');
-          const createdAt = n.createdAt?.toISOString() || '';
-          const readAt = n.readAt?.toISOString() || '';
-          const dismissedAt = n.dismissedAt?.toISOString() || '';
-          return `"${n.id}","${n.type}","${n.priority}","${n.status}","${title}","${message}","${createdAt}","${readAt}","${dismissedAt}"`;
-        }).join('\n');
+        const csvHeader =
+          'ID,Type,Priority,Status,Title,Message,Created At,Read At,Dismissed At\n';
+        const csvRows = notifications
+          .map((n) => {
+            const title = (n.title || '').replace(/"/g, '""');
+            const message = (n.message || '').replace(/"/g, '""');
+            const createdAt = n.createdAt?.toISOString() || '';
+            const readAt = n.readAt?.toISOString() || '';
+            const dismissedAt = n.dismissedAt?.toISOString() || '';
+            return `"${n.id}","${n.type}","${n.priority}","${n.status}","${title}","${message}","${createdAt}","${readAt}","${dismissedAt}"`;
+          })
+          .join('\n');
 
         return {
           data: csvHeader + csvRows,
@@ -1105,10 +1146,10 @@ export class NotificationService {
 
   /**
    * Add tags to a notification
-   */  async addTagsToNotification(
+   */ async addTagsToNotification(
     userId: string,
     notificationId: string,
-    tags: string[]
+    tags: string[],
   ): Promise<NotificationEntity> {
     try {
       const notification = await this.notificationRepository.findOne({
@@ -1130,7 +1171,9 @@ export class NotificationService {
       };
       await this.notificationRepository.save(notification);
 
-      this.logger.log(`Added tags to notification ${notificationId} for user ${userId}`);
+      this.logger.log(
+        `Added tags to notification ${notificationId} for user ${userId}`,
+      );
       return notification;
     } catch (error) {
       this.logger.error(

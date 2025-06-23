@@ -32,7 +32,8 @@ import { SignalGenerationService } from './services/signal-generation.service';
       MLModelPerformance,
     ]),
   ],
-  controllers: [MLController],  providers: [
+  controllers: [MLController],
+  providers: [
     MLService,
     FeatureEngineeringService,
     MLInferenceService,
@@ -44,7 +45,8 @@ import { SignalGenerationService } from './services/signal-generation.service';
     MarketPredictionService,
     SignalGenerationService,
     EnsembleSystemsService,
-  ],  exports: [
+  ],
+  exports: [
     MLService,
     FeatureEngineeringService,
     MLInferenceService,
