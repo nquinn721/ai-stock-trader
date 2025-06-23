@@ -173,8 +173,37 @@
                                                   "marketPrediction":  true,
                                                   "signalGeneration":  true,
                                                   "ensembleSystems":  true,
-                                                  "metaLearning":  true,
-                                                  "uncertaintyQuantification":  true
-                                              }
+                                                  "metaLearning":  true,                                              "uncertaintyQuantification":  true
+                                          }
+                     },
+                    "S37":  {
+                                "id":  "S37",
+                                "title":  "Four Stock-Only Portfolios with Day Trading Rules",
+                                "status":  "COMPLETED",
+                                "priority":  "High",
+                                "storyPoints":  13,
+                                "assignee":  "Full Stack Team",
+                                "sprint":  "Sprint 6",
+                                "epic":  "User Experience Interface",
+                                "completedDate":  "2025-06-23",
+                                "acceptanceCriteria":  {
+                                                           "total":  13,
+                                                           "completed":  13,
+                                                           "completionRate":  100
+                                                       },
+                                "portfolioTypes":  [
+                                                 "Professional Day Trader ($50k)",
+                                                 "Standard Day Trader ($30k)",
+                                                 "Small Investor ($1k)",
+                                                 "Micro Investor ($500)"
+                                             ],
+                             "features":  {
+                                              "dayTradingRules":  true,
+                                              "secCompliance":  true,
+                                              "patternDayTrading":  true,
+                                              "stockOnlyPortfolios":  true,
+                                              "buyingPowerCalculation":  true,
+                                              "settlementTracking":  true
+                                          }
                          }
-}
+                }

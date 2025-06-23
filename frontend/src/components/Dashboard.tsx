@@ -7,6 +7,7 @@ import "./Dashboard.css";
 import EmptyState from "./EmptyState";
 import NotificationCenter from "./NotificationCenter";
 import PortfolioChart from "./PortfolioChart";
+import PortfolioCreator from "./PortfolioCreator";
 import PortfolioSummary from "./PortfolioSummary";
 import QuickTrade from "./QuickTrade";
 import StockCard from "./StockCard";
@@ -20,11 +21,14 @@ const Dashboard: React.FC = () => {
   const [selectedTimeframe, setSelectedTimeframe] = useState<
     "1D" | "1W" | "1M" | "3M" | "1Y"
   >("1M");
+  const [showPortfolioCreator, setShowPortfolioCreator] = useState(false);
+
   // Get top performing stock for main chart display
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const topStock =
     stocksWithSignals.find((s) => s.changePercent && s.changePercent > 0) ||
-    stocksWithSignals[0];  useEffect(() => {
+    stocksWithSignals[0];
+  useEffect(() => {
     fetchStocksWithSignals();
   }, []);
   const fetchStocksWithSignals = async () => {
@@ -39,6 +43,16 @@ const Dashboard: React.FC = () => {
       setLoading(false);
     }
   };
+
+  const handlePortfolioCreated = (portfolio: any) => {
+    console.log("Portfolio created:", portfolio);
+    setShowPortfolioCreator(false);
+    // Optionally refresh portfolio data or show success message
+  };
+
+  const handleCancelPortfolioCreation = () => {
+    setShowPortfolioCreator(false);
+  };
   if (loading) {
     return (
       <div className="dashboard">
@@ -51,6 +65,15 @@ const Dashboard: React.FC = () => {
           size="large"
         />
       </div>
+    );
+  }
+
+  if (showPortfolioCreator) {
+    return (
+      <PortfolioCreator
+        onPortfolioCreated={handlePortfolioCreated}
+        onCancel={handleCancelPortfolioCreation}
+      />
     );
   }
 
@@ -70,7 +93,8 @@ const Dashboard: React.FC = () => {
               style={{ color: isConnected ? "#00C851" : "#ff4444" }}
             />
             {isConnected ? " Connected" : " Disconnected"}
-          </div>{" "}          <div className="stats">
+          </div>{" "}
+          <div className="stats">
             <span>Stocks: {stocksWithSignals.length}</span>
           </div>
           <NotificationCenter />
@@ -79,7 +103,17 @@ const Dashboard: React.FC = () => {
       {/* Paper Trading Section */}
       <div className="paper-trading-section">
         <div className="portfolio-overview">
-          <PortfolioSummary />{" "}
+          <div className="portfolio-summary-header">
+            <PortfolioSummary />
+            <button
+              className="create-portfolio-btn"
+              onClick={() => setShowPortfolioCreator(true)}
+              title="Create a new portfolio with specific trading rules"
+            >
+              <FontAwesomeIcon icon="plus" />
+              Create Portfolio
+            </button>
+          </div>
           <PortfolioChart
             portfolioId={1}
             timeframe={selectedTimeframe}
@@ -87,7 +121,8 @@ const Dashboard: React.FC = () => {
             onTimeframeChange={setSelectedTimeframe}
           />
         </div>{" "}
-        <QuickTrade />      </div>{" "}
+        <QuickTrade />{" "}
+      </div>{" "}
       <div className="stocks-grid">
         {stocksWithSignals.map((stockWithSignal) => (
           <div key={stockWithSignal.id} className="stock-container">

@@ -12,7 +12,7 @@ import {
   InputLabel,
   Chip,
   Box,
-  Grid,
+  Stack,
   Table,
   TableBody,
   TableCell,
@@ -236,34 +236,32 @@ const NotificationManagement: React.FC<NotificationManagementProps> = ({ userId 
               </Button>
             }
           />
-          <CardContent>
-            <Grid container spacing={3}>
-              <Grid item xs={3}>
+          <CardContent>            <Box sx={{ display: 'flex', gap: 3 }}>
+              <Box sx={{ flex: 1, textAlign: 'center' }}>
                 <Typography variant="h6">{analytics.summary.total}</Typography>
                 <Typography variant="body2">Total Notifications</Typography>
-              </Grid>
-              <Grid item xs={3}>
+              </Box>
+              <Box sx={{ flex: 1, textAlign: 'center' }}>
                 <Typography variant="h6">{analytics.summary.unread}</Typography>
                 <Typography variant="body2">Unread</Typography>
-              </Grid>
-              <Grid item xs={3}>
+              </Box>
+              <Box sx={{ flex: 1, textAlign: 'center' }}>
                 <Typography variant="h6">{analytics.summary.recent}</Typography>
                 <Typography variant="body2">Recent (30 days)</Typography>
-              </Grid>
-              <Grid item xs={3}>
+              </Box>
+              <Box sx={{ flex: 1, textAlign: 'center' }}>
                 <Typography variant="h6">{analytics.summary.readRate}%</Typography>
                 <Typography variant="body2">Read Rate</Typography>
-              </Grid>
-            </Grid>
+              </Box>
+            </Box>
           </CardContent>
         </Card>
       )}
 
       {/* Search and Filters */}
       <Card sx={{ mb: 3 }}>
-        <CardContent>
-          <Grid container spacing={2} alignItems="center">
-            <Grid item xs={12} md={4}>
+        <CardContent>          <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
+            <Box sx={{ flex: '1 1 300px', minWidth: '300px' }}>
               <TextField
                 fullWidth
                 label="Search notifications"
@@ -278,8 +276,8 @@ const NotificationManagement: React.FC<NotificationManagementProps> = ({ userId 
                   ),
                 }}
               />
-            </Grid>
-            <Grid item xs={6} md={2}>
+            </Box>
+            <Box sx={{ flex: '1 1 150px', minWidth: '150px' }}>
               <FormControl fullWidth>
                 <InputLabel>Type</InputLabel>
                 <Select
@@ -294,8 +292,8 @@ const NotificationManagement: React.FC<NotificationManagementProps> = ({ userId 
                   <MenuItem value="market_event">Market Event</MenuItem>
                 </Select>
               </FormControl>
-            </Grid>
-            <Grid item xs={6} md={2}>
+            </Box>
+            <Box sx={{ flex: '1 1 150px', minWidth: '150px' }}>
               <FormControl fullWidth>
                 <InputLabel>Priority</InputLabel>
                 <Select
@@ -309,8 +307,8 @@ const NotificationManagement: React.FC<NotificationManagementProps> = ({ userId 
                   <MenuItem value="low">Low</MenuItem>
                 </Select>
               </FormControl>
-            </Grid>
-            <Grid item xs={6} md={2}>
+            </Box>
+            <Box sx={{ flex: '1 1 150px', minWidth: '150px' }}>
               <TextField
                 fullWidth
                 type="date"
@@ -319,8 +317,8 @@ const NotificationManagement: React.FC<NotificationManagementProps> = ({ userId 
                 onChange={(e) => setFilters(prev => ({ ...prev, dateFrom: e.target.value }))}
                 InputLabelProps={{ shrink: true }}
               />
-            </Grid>
-            <Grid item xs={6} md={2}>
+            </Box>
+            <Box sx={{ flex: '1 1 150px', minWidth: '150px' }}>
               <TextField
                 fullWidth
                 type="date"
@@ -329,8 +327,8 @@ const NotificationManagement: React.FC<NotificationManagementProps> = ({ userId 
                 onChange={(e) => setFilters(prev => ({ ...prev, dateTo: e.target.value }))}
                 InputLabelProps={{ shrink: true }}
               />
-            </Grid>
-          </Grid>
+            </Box>
+          </Box>
         </CardContent>
       </Card>
 
@@ -451,27 +449,28 @@ const NotificationManagement: React.FC<NotificationManagementProps> = ({ userId 
       <Dialog open={analyticsDialogOpen} onClose={() => setAnalyticsDialogOpen(false)} maxWidth="md" fullWidth>
         <DialogTitle>Notification Analytics</DialogTitle>
         <DialogContent>
-          {analytics && (
-            <Grid container spacing={3}>
-              <Grid item xs={12} md={6}>
-                <Typography variant="h6" gutterBottom>By Type</Typography>
-                {analytics.byType.map((item) => (
-                  <Box key={item.type} sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                    <Typography>{item.type}</Typography>
-                    <Typography>{item.count}</Typography>
-                  </Box>
-                ))}
-              </Grid>
-              <Grid item xs={12} md={6}>
-                <Typography variant="h6" gutterBottom>By Priority</Typography>
-                {analytics.byPriority.map((item) => (
-                  <Box key={item.priority} sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                    <Typography>{item.priority}</Typography>
-                    <Typography>{item.count}</Typography>
-                  </Box>
-                ))}
-              </Grid>
-              <Grid item xs={12}>
+          {analytics && (            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+              <Box sx={{ display: 'flex', gap: 3, flexWrap: 'wrap' }}>
+                <Box sx={{ flex: 1, minWidth: '250px' }}>
+                  <Typography variant="h6" gutterBottom>By Type</Typography>
+                  {analytics.byType.map((item) => (
+                    <Box key={item.type} sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                      <Typography>{item.type}</Typography>
+                      <Typography>{item.count}</Typography>
+                    </Box>
+                  ))}
+                </Box>
+                <Box sx={{ flex: 1, minWidth: '250px' }}>
+                  <Typography variant="h6" gutterBottom>By Priority</Typography>
+                  {analytics.byPriority.map((item) => (
+                    <Box key={item.priority} sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                      <Typography>{item.priority}</Typography>
+                      <Typography>{item.count}</Typography>
+                    </Box>
+                  ))}
+                </Box>
+              </Box>
+              <Box>
                 <Typography variant="h6" gutterBottom>Daily Activity (Last 30 Days)</Typography>
                 <Box sx={{ maxHeight: 200, overflow: 'auto' }}>
                   {analytics.dailyActivity.map((day) => (
@@ -481,8 +480,8 @@ const NotificationManagement: React.FC<NotificationManagementProps> = ({ userId 
                     </Box>
                   ))}
                 </Box>
-              </Grid>
-            </Grid>
+              </Box>
+            </Box>
           )}
         </DialogContent>
         <DialogActions>

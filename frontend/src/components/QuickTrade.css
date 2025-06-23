@@ -857,16 +857,16 @@
   .advanced-input-row {
     grid-template-columns: 1fr;
   }
-  
+
   .trade-tabs .tab {
     font-size: 13px;
     padding: 10px 16px;
   }
-  
+
   .advanced-trading-form {
     max-width: none;
   }
-  
+
   .risk-management-section {
     padding: 16px;
   }

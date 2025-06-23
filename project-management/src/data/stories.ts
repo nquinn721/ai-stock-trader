@@ -484,7 +484,7 @@ export const stories: Story[] = [
     title: "Advanced Trading Tab in Quick Trade Interface",
     description:
       "Add an advanced trading tab to the existing QuickTrade component with sophisticated trading features. Include advanced order types (stop-limit, trailing stop, bracket orders), technical analysis tools integration, position sizing calculator based on risk percentage, advanced charting with multiple timeframes, options trading interface (if applicable), and algorithmic trading strategy selection. Add real-time P&L tracking, risk metrics display, and trade execution analytics. Ensure proper validation and risk management controls.",
-    status: "TODO",
+    status: "DONE",
     priority: "Medium",
     epic: "E2",
     storyPoints: 8,
@@ -493,6 +493,7 @@ export const stories: Story[] = [
     progress: 0,
     dependencies: [],
     createdDate: "2025-06-23",
+    completedDate: "2025-06-23",
   },
 
   // === ML INFRASTRUCTURE IMPLEMENTATION PHASE STORIES ===
@@ -720,7 +721,7 @@ export const stories: Story[] = [
     title: "Four Stock-Only Portfolios with Day Trading Rules",
     description:
       "Implement four distinct stock-only portfolio types with SEC day trading compliance. Create Portfolio Templates: (1) Professional Day Trader ($50,000 starting capital, day trading enabled, pattern day trading rules apply), (2) Standard Day Trader ($30,000 starting capital, day trading enabled, pattern day trading rules apply), (3) Small Investor ($1,000 starting capital, day trading restricted, no pattern day trading), (4) Micro Investor ($500 starting capital, day trading restricted, no pattern day trading). All portfolios are STOCKS ONLY - no bonds, crypto, options, or other assets. Stock selection limited to available stock data from Yahoo Finance API. Day trading portfolios ($30k+) can execute unlimited day trades but must maintain 25k minimum equity. Non-day trading portfolios ($500-$1k) limited to 3 day trades per 5 business days. Implement SEC Pattern Day Trading Rule enforcement, day trade counting and tracking, business day calculations for rule resets, educational warnings about day trading restrictions, portfolio-specific buying power calculations, and settlement period tracking for cash accounts.",
-    status: "TODO",
+    status: "DONE",
     priority: "High",
     epic: "E2",
     storyPoints: 13,
@@ -729,6 +730,7 @@ export const stories: Story[] = [
     progress: 0,
     dependencies: [],
     createdDate: "2025-06-23",
+    completedDate: "2025-06-23",
   },
   {
     id: "S38",

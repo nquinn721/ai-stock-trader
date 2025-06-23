@@ -29,7 +29,7 @@ const QuickTrade: React.FC = observer(() => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const tradeStore = useTradeStore();
   const portfolioStore = usePortfolioStore();
-  const [activeTab, setActiveTab] = useState<'basic' | 'advanced'>('basic');
+  const [activeTab, setActiveTab] = useState<"basic" | "advanced">("basic");
   const [tradeForm, setTradeForm] = useState({
     symbol: "",
     type: "buy" as "buy" | "sell",
@@ -37,7 +37,12 @@ const QuickTrade: React.FC = observer(() => {
   });
   const [advancedForm, setAdvancedForm] = useState({
     symbol: "",
-    orderType: "market" as "market" | "limit" | "stop" | "stop-limit" | "trailing-stop",
+    orderType: "market" as
+      | "market"
+      | "limit"
+      | "stop"
+      | "stop-limit"
+      | "trailing-stop",
     side: "buy" as "buy" | "sell",
     quantity: "",
     limitPrice: "",
@@ -315,14 +320,14 @@ const QuickTrade: React.FC = observer(() => {
       {/* Tab Navigation */}
       <div className="trade-tabs">
         <button
-          className={`tab ${activeTab === 'basic' ? 'active' : ''}`}
-          onClick={() => setActiveTab('basic')}
+          className={`tab ${activeTab === "basic" ? "active" : ""}`}
+          onClick={() => setActiveTab("basic")}
         >
           Quick Trade
         </button>
         <button
-          className={`tab ${activeTab === 'advanced' ? 'active' : ''}`}
-          onClick={() => setActiveTab('advanced')}
+          className={`tab ${activeTab === "advanced" ? "active" : ""}`}
+          onClick={() => setActiveTab("advanced")}
         >
           Advanced Trading
         </button>
@@ -347,106 +352,107 @@ const QuickTrade: React.FC = observer(() => {
       )}
 
       {/* Basic Trading Tab */}
-      {activeTab === 'basic' && (
+      {activeTab === "basic" && (
         <div className="basic-trading-form">
           <h2>Quick Trade</h2>
-      <div className="quick-trade-form">
-        <div className="trade-input-group">
-          <StockAutocomplete
-            stocks={stocks.map((stock) => ({
-              symbol: stock.symbol,
-              name: stock.name,
-            }))}
-            value={tradeForm.symbol}
-            onChange={(symbol) => setTradeForm({ ...tradeForm, symbol })}
-            placeholder="Search stock symbol or name..."
-            disabled={executing}
-            className="symbol-autocomplete"
-          />
-          <input
-            type="number"
-            placeholder="Qty"
-            value={tradeForm.quantity}
-            onChange={(e) =>
-              setTradeForm({ ...tradeForm, quantity: e.target.value })
-            }
-            min="1"
-            max="10000"
-            className="quantity-input"
-            disabled={executing}
-          />
-        </div>
-
-        {/* Stock Price Display */}
-        {currentStock && (
-          <div className="stock-price-display">
-            <div className="price-info">
-              <span className="stock-symbol">{currentStock.symbol}</span>
-              <span className="stock-price">
-                {formatCurrency(currentStock.currentPrice)}
-              </span>
-              <span
-                className={`price-change ${
-                  currentStock.changePercent >= 0 ? "positive" : "negative"
-                }`}
-              >
-                {currentStock.changePercent >= 0 ? "+" : ""}
-                {currentStock.changePercent.toFixed(2)}%
-              </span>
+          <div className="quick-trade-form">
+            <div className="trade-input-group">
+              <StockAutocomplete
+                stocks={stocks.map((stock) => ({
+                  symbol: stock.symbol,
+                  name: stock.name,
+                }))}
+                value={tradeForm.symbol}
+                onChange={(symbol) => setTradeForm({ ...tradeForm, symbol })}
+                placeholder="Search stock symbol or name..."
+                disabled={executing}
+                className="symbol-autocomplete"
+              />
+              <input
+                type="number"
+                placeholder="Qty"
+                value={tradeForm.quantity}
+                onChange={(e) =>
+                  setTradeForm({ ...tradeForm, quantity: e.target.value })
+                }
+                min="1"
+                max="10000"
+                className="quantity-input"
+                disabled={executing}
+              />
             </div>
-            {tradeForm.quantity && parseInt(tradeForm.quantity) > 0 && (
-              <div className="trade-estimate">
-                <span>
-                  Estimated {tradeForm.type === "buy" ? "Cost" : "Proceeds"}:{" "}
-                </span>
-                <span className="estimate-amount">
-                  {formatCurrency(
-                    currentStock.currentPrice * parseInt(tradeForm.quantity)
-                  )}
-                </span>
+            {/* Stock Price Display */}
+            {currentStock && (
+              <div className="stock-price-display">
+                <div className="price-info">
+                  <span className="stock-symbol">{currentStock.symbol}</span>
+                  <span className="stock-price">
+                    {formatCurrency(currentStock.currentPrice)}
+                  </span>
+                  <span
+                    className={`price-change ${
+                      currentStock.changePercent >= 0 ? "positive" : "negative"
+                    }`}
+                  >
+                    {currentStock.changePercent >= 0 ? "+" : ""}
+                    {currentStock.changePercent.toFixed(2)}%
+                  </span>
+                </div>
+                {tradeForm.quantity && parseInt(tradeForm.quantity) > 0 && (
+                  <div className="trade-estimate">
+                    <span>
+                      Estimated {tradeForm.type === "buy" ? "Cost" : "Proceeds"}
+                      :{" "}
+                    </span>
+                    <span className="estimate-amount">
+                      {formatCurrency(
+                        currentStock.currentPrice * parseInt(tradeForm.quantity)
+                      )}
+                    </span>
+                  </div>
+                )}
               </div>
             )}
+            <div className="trade-type-buttons">
+              <button
+                className={`trade-type-btn buy ${
+                  tradeForm.type === "buy" ? "active" : ""
+                }`}
+                onClick={() => setTradeForm({ ...tradeForm, type: "buy" })}
+                disabled={executing}
+              >
+                BUY
+              </button>
+              <button
+                className={`trade-type-btn sell ${
+                  tradeForm.type === "sell" ? "active" : ""
+                }`}
+                onClick={() => setTradeForm({ ...tradeForm, type: "sell" })}
+                disabled={executing}
+              >
+                SELL
+              </button>
+            </div>{" "}
+            <button
+              className="execute-trade-btn"
+              onClick={handleTradeSubmit}
+              disabled={executing || !isValidTrade() || !portfolioId}
+            >
+              {executing
+                ? "Executing..."
+                : `${tradeForm.type.toUpperCase()} ${
+                    tradeForm.quantity || "0"
+                  } ${tradeForm.symbol || "Stock"}`}
+            </button>
           </div>
-        )}
-
-        <div className="trade-type-buttons">
-          <button
-            className={`trade-type-btn buy ${
-              tradeForm.type === "buy" ? "active" : ""
-            }`}
-            onClick={() => setTradeForm({ ...tradeForm, type: "buy" })}
-            disabled={executing}
-          >
-            BUY
-          </button>
-          <button
-            className={`trade-type-btn sell ${
-              tradeForm.type === "sell" ? "active" : ""
-            }`}
-            onClick={() => setTradeForm({ ...tradeForm, type: "sell" })}
-            disabled={executing}
-          >
-            SELL
-          </button>
-        </div>        <button
-          className="execute-trade-btn"
-          onClick={handleTradeSubmit}
-          disabled={executing || !isValidTrade() || !portfolioId}
-        >
-          {executing
-            ? "Executing..."
-            : `${tradeForm.type.toUpperCase()} ${tradeForm.quantity || "0"} ${
-                tradeForm.symbol || "Stock"              }`}
-        </button>
         </div>
-      </div>
       )}
 
       {/* Advanced Trading Tab */}
-      {activeTab === 'advanced' && (
+      {activeTab === "advanced" && (
         <div className="advanced-trading-form">
           <h2>Advanced Trading</h2>
-          
+
           {/* Stock Selection */}
           <div className="advanced-input-section">
             <label>Stock Symbol</label>
@@ -456,7 +462,9 @@ const QuickTrade: React.FC = observer(() => {
                 name: stock.name,
               }))}
               value={advancedForm.symbol}
-              onChange={(symbol) => setAdvancedForm({ ...advancedForm, symbol })}
+              onChange={(symbol) =>
+                setAdvancedForm({ ...advancedForm, symbol })
+              }
               placeholder="Search stock symbol or name..."
               disabled={executing}
               className="symbol-autocomplete"
@@ -468,7 +476,12 @@ const QuickTrade: React.FC = observer(() => {
             <label>Order Type</label>
             <select
               value={advancedForm.orderType}
-              onChange={(e) => setAdvancedForm({ ...advancedForm, orderType: e.target.value as any })}
+              onChange={(e) =>
+                setAdvancedForm({
+                  ...advancedForm,
+                  orderType: e.target.value as any,
+                })
+              }
               className="order-type-select"
             >
               <option value="market">Market Order</option>
@@ -485,14 +498,22 @@ const QuickTrade: React.FC = observer(() => {
               <label>Side</label>
               <div className="side-buttons">
                 <button
-                  className={`side-btn buy ${advancedForm.side === 'buy' ? 'active' : ''}`}
-                  onClick={() => setAdvancedForm({ ...advancedForm, side: 'buy' })}
+                  className={`side-btn buy ${
+                    advancedForm.side === "buy" ? "active" : ""
+                  }`}
+                  onClick={() =>
+                    setAdvancedForm({ ...advancedForm, side: "buy" })
+                  }
                 >
                   BUY
                 </button>
                 <button
-                  className={`side-btn sell ${advancedForm.side === 'sell' ? 'active' : ''}`}
-                  onClick={() => setAdvancedForm({ ...advancedForm, side: 'sell' })}
+                  className={`side-btn sell ${
+                    advancedForm.side === "sell" ? "active" : ""
+                  }`}
+                  onClick={() =>
+                    setAdvancedForm({ ...advancedForm, side: "sell" })
+                  }
                 >
                   SELL
                 </button>
@@ -503,7 +524,9 @@ const QuickTrade: React.FC = observer(() => {
               <input
                 type="number"
                 value={advancedForm.quantity}
-                onChange={(e) => setAdvancedForm({ ...advancedForm, quantity: e.target.value })}
+                onChange={(e) =>
+                  setAdvancedForm({ ...advancedForm, quantity: e.target.value })
+                }
                 placeholder="Shares"
                 min="1"
                 max="10000"
@@ -512,39 +535,56 @@ const QuickTrade: React.FC = observer(() => {
           </div>
 
           {/* Price Fields (conditional based on order type) */}
-          {(advancedForm.orderType === 'limit' || advancedForm.orderType === 'stop-limit') && (
+          {(advancedForm.orderType === "limit" ||
+            advancedForm.orderType === "stop-limit") && (
             <div className="advanced-input-section">
               <label>Limit Price</label>
               <input
                 type="number"
                 value={advancedForm.limitPrice}
-                onChange={(e) => setAdvancedForm({ ...advancedForm, limitPrice: e.target.value })}
+                onChange={(e) =>
+                  setAdvancedForm({
+                    ...advancedForm,
+                    limitPrice: e.target.value,
+                  })
+                }
                 placeholder="$0.00"
                 step="0.01"
               />
             </div>
           )}
 
-          {(advancedForm.orderType === 'stop' || advancedForm.orderType === 'stop-limit') && (
+          {(advancedForm.orderType === "stop" ||
+            advancedForm.orderType === "stop-limit") && (
             <div className="advanced-input-section">
               <label>Stop Price</label>
               <input
                 type="number"
                 value={advancedForm.stopPrice}
-                onChange={(e) => setAdvancedForm({ ...advancedForm, stopPrice: e.target.value })}
+                onChange={(e) =>
+                  setAdvancedForm({
+                    ...advancedForm,
+                    stopPrice: e.target.value,
+                  })
+                }
                 placeholder="$0.00"
                 step="0.01"
               />
             </div>
           )}
 
-          {advancedForm.orderType === 'trailing-stop' && (
+          {advancedForm.orderType === "trailing-stop" && (
             <div className="advanced-input-section">
               <label>Trail Amount ($)</label>
               <input
                 type="number"
                 value={advancedForm.trailAmount}
-                onChange={(e) => setAdvancedForm({ ...advancedForm, trailAmount: e.target.value })}
+                onChange={(e) =>
+                  setAdvancedForm({
+                    ...advancedForm,
+                    trailAmount: e.target.value,
+                  })
+                }
                 placeholder="$0.00"
                 step="0.01"
               />
@@ -556,7 +596,12 @@ const QuickTrade: React.FC = observer(() => {
             <label>Time in Force</label>
             <select
               value={advancedForm.timeInForce}
-              onChange={(e) => setAdvancedForm({ ...advancedForm, timeInForce: e.target.value as any })}
+              onChange={(e) =>
+                setAdvancedForm({
+                  ...advancedForm,
+                  timeInForce: e.target.value as any,
+                })
+              }
             >
               <option value="day">Day</option>
               <option value="gtc">Good Till Canceled (GTC)</option>
@@ -568,14 +613,19 @@ const QuickTrade: React.FC = observer(() => {
           {/* Risk Management */}
           <div className="risk-management-section">
             <h3>Risk Management</h3>
-            
+
             <div className="advanced-input-row">
               <div className="advanced-input-section">
                 <label>Position Size (% of Portfolio)</label>
                 <input
                   type="number"
                   value={advancedForm.riskPercent}
-                  onChange={(e) => setAdvancedForm({ ...advancedForm, riskPercent: e.target.value })}
+                  onChange={(e) =>
+                    setAdvancedForm({
+                      ...advancedForm,
+                      riskPercent: e.target.value,
+                    })
+                  }
                   placeholder="2"
                   min="0.1"
                   max="100"
@@ -587,7 +637,12 @@ const QuickTrade: React.FC = observer(() => {
                 <input
                   type="number"
                   value={advancedForm.stopLossPercent}
-                  onChange={(e) => setAdvancedForm({ ...advancedForm, stopLossPercent: e.target.value })}
+                  onChange={(e) =>
+                    setAdvancedForm({
+                      ...advancedForm,
+                      stopLossPercent: e.target.value,
+                    })
+                  }
                   placeholder="5"
                   min="0.1"
                   max="50"
@@ -602,7 +657,12 @@ const QuickTrade: React.FC = observer(() => {
                 <input
                   type="number"
                   value={advancedForm.takeProfitPercent}
-                  onChange={(e) => setAdvancedForm({ ...advancedForm, takeProfitPercent: e.target.value })}
+                  onChange={(e) =>
+                    setAdvancedForm({
+                      ...advancedForm,
+                      takeProfitPercent: e.target.value,
+                    })
+                  }
                   placeholder="10"
                   min="0.1"
                   max="100"
@@ -614,7 +674,12 @@ const QuickTrade: React.FC = observer(() => {
                   <input
                     type="checkbox"
                     checked={advancedForm.bracket}
-                    onChange={(e) => setAdvancedForm({ ...advancedForm, bracket: e.target.checked })}
+                    onChange={(e) =>
+                      setAdvancedForm({
+                        ...advancedForm,
+                        bracket: e.target.checked,
+                      })
+                    }
                   />
                   Bracket Order (Stop Loss + Take Profit)
                 </label>
@@ -629,11 +694,26 @@ const QuickTrade: React.FC = observer(() => {
               <div className="calculator-results">
                 <div className="calc-item">
                   <span>Recommended Position Size:</span>
-                  <span>{Math.floor((portfolio.totalValue * parseFloat(advancedForm.riskPercent)) / 100 / (stocks.find(s => s.symbol === advancedForm.symbol)?.currentPrice || 1))} shares</span>
+                  <span>
+                    {Math.floor(
+                      (portfolio.totalValue *
+                        parseFloat(advancedForm.riskPercent)) /
+                        100 /
+                        (stocks.find((s) => s.symbol === advancedForm.symbol)
+                          ?.currentPrice || 1)
+                    )}{" "}
+                    shares
+                  </span>
                 </div>
                 <div className="calc-item">
                   <span>Maximum Investment:</span>
-                  <span>{formatCurrency((portfolio.totalValue * parseFloat(advancedForm.riskPercent)) / 100)}</span>
+                  <span>
+                    {formatCurrency(
+                      (portfolio.totalValue *
+                        parseFloat(advancedForm.riskPercent)) /
+                        100
+                    )}
+                  </span>
                 </div>
               </div>
             </div>
@@ -645,7 +725,8 @@ const QuickTrade: React.FC = observer(() => {
             onClick={() => {
               addNotification({
                 type: "info",
-                message: "Advanced trading features are in development. Please use Quick Trade for now.",
+                message:
+                  "Advanced trading features are in development. Please use Quick Trade for now.",
               });
             }}
             disabled={executing}
