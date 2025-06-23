@@ -204,7 +204,8 @@ export const stories: Story[] = [
     progress: 0,
     dependencies: [],
     createdDate: "2025-06-21",
-    completedDate: "2025-06-22",  },
+    completedDate: "2025-06-22",
+  },
   // DAY TRADING ANALYSIS STORIES
   {
     id: "S14",
@@ -220,7 +221,8 @@ export const stories: Story[] = [
     dependencies: [],
     createdDate: "2025-06-21",
     completedDate: "2025-06-22",
-  },  {
+  },
+  {
     id: "S15",
     title: "Add Volume Analysis System",
     description:
@@ -234,7 +236,8 @@ export const stories: Story[] = [
     dependencies: [],
     createdDate: "2025-06-21",
     completedDate: "2025-06-22",
-  },  {
+  },
+  {
     id: "S16",
     title: "Implement Support/Resistance Level Detection",
     description:
@@ -248,13 +251,12 @@ export const stories: Story[] = [
     dependencies: ["S14"],
     createdDate: "2025-06-21",
     completedDate: "2025-06-22",
-  },
-  {
+  },  {
     id: "S17",
     title: "Add Momentum and Volatility Indicators",
     description:
       "Implement momentum oscillators (Stochastic, Williams %R) and volatility measures (ATR, volatility percentage). Critical for day trading timing decisions.",
-    status: "TODO",
+    status: "DONE",
     priority: "High",
     epic: "E4",
     storyPoints: 3,
@@ -262,6 +264,7 @@ export const stories: Story[] = [
     progress: 0,
     dependencies: ["S14"],
     createdDate: "2025-06-21",
+    completedDate: "2025-06-22",
   },
   {
     id: "S18",

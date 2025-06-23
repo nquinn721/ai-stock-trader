@@ -66,6 +66,15 @@
   backdrop-filter: blur(10px);
 }
 
+.signal-badge.small {
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: #000;
+}
+
 .signal-probability {
   font-size: 13px;
   color: #c9d1d9;
@@ -483,13 +492,145 @@
     grid-template-columns: 1fr;
     gap: 12px;
   }
-
+  
   .pivot-points-grid {
     grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
     gap: 6px;
   }
-
+  
   .sr-level-item {
     padding: 4px 6px;
+  }
+}
+
+/* Momentum & Volatility Indicators Styles */
+.momentum-volatility-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.momentum-indicator,
+.volatility-indicator {
+  background: rgba(13, 17, 23, 0.4);
+  border-radius: 8px;
+  padding: 12px;
+  border-left: 3px solid #6366f1;
+}
+
+.momentum-indicator {
+  border-left-color: #8b5cf6;
+}
+
+.volatility-indicator {
+  border-left-color: #f59e0b;
+}
+
+.indicator-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.indicator-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #f0f6fc;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.stochastic-values {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.stoch-k,
+.stoch-d {
+  font-size: 13px;
+  font-weight: 500;
+  color: #f0f6fc;
+  padding: 4px 8px;
+  background: rgba(22, 27, 34, 0.6);
+  border-radius: 4px;
+  border: 1px solid rgba(99, 102, 241, 0.2);
+}
+
+.williams-value {
+  font-size: 16px;
+  font-weight: 600;
+  color: #f0f6fc;
+  text-align: center;
+  padding: 8px;
+  background: rgba(22, 27, 34, 0.6);
+  border-radius: 4px;
+  border: 1px solid rgba(139, 92, 246, 0.2);
+}
+
+.atr-values {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.atr-absolute {
+  font-size: 16px;
+  font-weight: 600;
+  color: #f0f6fc;
+}
+
+.atr-normalized {
+  font-size: 12px;
+  color: #8b949e;
+  font-weight: 500;
+}
+
+.volatility-details {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.vol-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 8px;
+  background: rgba(22, 27, 34, 0.6);
+  border-radius: 4px;
+  border: 1px solid rgba(245, 158, 11, 0.2);
+}
+
+.vol-label {
+  font-size: 12px;
+  color: #8b949e;
+  font-weight: 500;
+}
+
+.vol-value {
+  font-size: 13px;
+  font-weight: 600;
+  color: #f0f6fc;
+}
+
+/* Responsive momentum & volatility */
+@media (max-width: 768px) {
+  .momentum-volatility-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  
+  .momentum-indicator,
+  .volatility-indicator {
+    padding: 8px;
+  }
+  
+  .stochastic-values {
+    flex-direction: column;
+    gap: 4px;
   }
 }

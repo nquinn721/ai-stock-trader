@@ -139,6 +139,32 @@ const BreakoutDisplay: React.FC<BreakoutDisplayProps> = ({
     return num.toLocaleString();
   };
 
+  const getOscillatorColor = (signal: string) => {
+    switch (signal) {
+      case "overbought":
+        return "#ff4444";
+      case "oversold":
+        return "#00C851";
+      case "neutral":
+        return "#ffbb33";
+      default:
+        return "#666";
+    }
+  };
+
+  const getVolatilityRegimeColor = (regime: string) => {
+    switch (regime) {
+      case "high":
+        return "#ff4444";
+      case "normal":
+        return "#ffbb33";
+      case "low":
+        return "#00C851";
+      default:
+        return "#666";
+    }
+  };
+
   return (
     <div className="breakout-display">
       {" "}
@@ -289,6 +315,101 @@ const BreakoutDisplay: React.FC<BreakoutDisplayProps> = ({
         </div>
       )}
 
+      {/* Momentum & Volatility Indicators Section */}
+      {breakoutStrategy.technicalIndicators && (
+        <div className="section">
+          <h4 className="section-title">
+            <FontAwesomeIcon icon="tachometer-alt" /> Momentum & Volatility
+          </h4>
+          <div className="momentum-volatility-grid">
+            {/* Stochastic Oscillator */}
+            {breakoutStrategy.technicalIndicators.stochastic && (
+              <div className="momentum-indicator">
+                <div className="indicator-header">
+                  <span className="indicator-name">Stochastic</span>
+                  <span 
+                    className="signal-badge small"
+                    style={{
+                      backgroundColor: getOscillatorColor(breakoutStrategy.technicalIndicators.stochastic.signal)
+                    }}
+                  >
+                    {breakoutStrategy.technicalIndicators.stochastic.signal}
+                  </span>
+                </div>
+                <div className="stochastic-values">
+                  <span className="stoch-k">%K: {breakoutStrategy.technicalIndicators.stochastic.k.toFixed(1)}</span>
+                  <span className="stoch-d">%D: {breakoutStrategy.technicalIndicators.stochastic.d.toFixed(1)}</span>
+                </div>
+              </div>
+            )}
+
+            {/* Williams %R */}
+            {breakoutStrategy.technicalIndicators.williamsR && (
+              <div className="momentum-indicator">
+                <div className="indicator-header">
+                  <span className="indicator-name">Williams %R</span>
+                  <span 
+                    className="signal-badge small"
+                    style={{
+                      backgroundColor: getOscillatorColor(breakoutStrategy.technicalIndicators.williamsR.signal)
+                    }}
+                  >
+                    {breakoutStrategy.technicalIndicators.williamsR.signal}
+                  </span>
+                </div>
+                <div className="williams-value">
+                  {breakoutStrategy.technicalIndicators.williamsR.value.toFixed(1)}%
+                </div>
+              </div>
+            )}
+
+            {/* ATR */}
+            {breakoutStrategy.technicalIndicators.atr && (
+              <div className="volatility-indicator">
+                <div className="indicator-header">
+                  <span className="indicator-name">ATR</span>
+                </div>
+                <div className="atr-values">
+                  <span className="atr-absolute">${breakoutStrategy.technicalIndicators.atr.value.toFixed(2)}</span>
+                  <span className="atr-normalized">({breakoutStrategy.technicalIndicators.atr.normalized.toFixed(2)}%)</span>
+                </div>
+              </div>
+            )}
+
+            {/* Volatility Indicators */}
+            {breakoutStrategy.technicalIndicators.volatilityIndicators && (
+              <div className="volatility-indicator">
+                <div className="indicator-header">
+                  <span className="indicator-name">Volatility Regime</span>
+                  <span 
+                    className="regime-badge"
+                    style={{
+                      backgroundColor: getVolatilityRegimeColor(breakoutStrategy.technicalIndicators.volatilityIndicators.regime)
+                    }}
+                  >
+                    {breakoutStrategy.technicalIndicators.volatilityIndicators.regime}
+                  </span>
+                </div>
+                <div className="volatility-details">
+                  <div className="vol-item">
+                    <span className="vol-label">Current:</span>
+                    <span className="vol-value">{breakoutStrategy.technicalIndicators.volatilityIndicators.historicalVolatility.toFixed(1)}%</span>
+                  </div>
+                  <div className="vol-item">
+                    <span className="vol-label">Average:</span>
+                    <span className="vol-value">{breakoutStrategy.technicalIndicators.volatilityIndicators.averageVolatility.toFixed(1)}%</span>
+                  </div>
+                  <div className="vol-item">
+                    <span className="vol-label">Rank:</span>
+                    <span className="vol-value">{breakoutStrategy.technicalIndicators.volatilityIndicators.volatilityRank.toFixed(0)}th</span>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Volume Analysis Section */}
       {breakoutStrategy.volumeAnalysis && (
         <div className="section">
@@ -375,132 +496,6 @@ const BreakoutDisplay: React.FC<BreakoutDisplayProps> = ({
               </div>
             )}
           </div>
-        </div>
-      )}
-
-      {/* Support/Resistance Analysis Section */}
-      {breakoutStrategy.supportResistanceAnalysis && (
-        <div className="section">
-          <h4 className="section-title">
-            <FontAwesomeIcon icon="chart-area" /> Support & Resistance Analysis
-          </h4>
-          
-          {/* Pivot Points */}
-          <div className="pivot-points">
-            <h5 className="subsection-title">Daily Pivot Points</h5>
-            <div className="pivot-grid">
-              <div className="pivot-item resistance">
-                <span className="pivot-label">R3:</span>
-                <span className="pivot-value">${formatPrice(breakoutStrategy.supportResistanceAnalysis.pivotPoints.r3)}</span>
-              </div>
-              <div className="pivot-item resistance">
-                <span className="pivot-label">R2:</span>
-                <span className="pivot-value">${formatPrice(breakoutStrategy.supportResistanceAnalysis.pivotPoints.r2)}</span>
-              </div>
-              <div className="pivot-item resistance">
-                <span className="pivot-label">R1:</span>
-                <span className="pivot-value">${formatPrice(breakoutStrategy.supportResistanceAnalysis.pivotPoints.r1)}</span>
-              </div>
-              <div className="pivot-item pivot">
-                <span className="pivot-label">Pivot:</span>
-                <span className="pivot-value">${formatPrice(breakoutStrategy.supportResistanceAnalysis.pivotPoints.pivot)}</span>
-              </div>
-              <div className="pivot-item support">
-                <span className="pivot-label">S1:</span>
-                <span className="pivot-value">${formatPrice(breakoutStrategy.supportResistanceAnalysis.pivotPoints.s1)}</span>
-              </div>
-              <div className="pivot-item support">
-                <span className="pivot-label">S2:</span>
-                <span className="pivot-value">${formatPrice(breakoutStrategy.supportResistanceAnalysis.pivotPoints.s2)}</span>
-              </div>
-              <div className="pivot-item support">
-                <span className="pivot-label">S3:</span>
-                <span className="pivot-value">${formatPrice(breakoutStrategy.supportResistanceAnalysis.pivotPoints.s3)}</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Key Support Levels */}
-          {breakoutStrategy.supportResistanceAnalysis.supportLevels.length > 0 && (
-            <div className="sr-levels-section">
-              <h5 className="subsection-title">Key Support Levels</h5>
-              <div className="sr-levels-grid">
-                {breakoutStrategy.supportResistanceAnalysis.supportLevels.slice(0, 3).map((level, index) => (
-                  <div key={index} className={`sr-level-item support ${level.strength}`}>
-                    <div className="sr-level-price">
-                      ${formatPrice(level.price)}
-                    </div>
-                    <div className="sr-level-info">
-                      <span className={`sr-strength ${level.strength}`}>
-                        {level.strength.toUpperCase()}
-                      </span>
-                      <span className="sr-touches">
-                        {level.touches} touches
-                      </span>
-                      <span className="sr-confidence">
-                        {Math.round(level.confidence * 100)}% confidence
-                      </span>
-                    </div>
-                    <div className="sr-zone">
-                      Zone: ${formatPrice(level.zone.lower)} - ${formatPrice(level.zone.upper)}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Key Resistance Levels */}
-          {breakoutStrategy.supportResistanceAnalysis.resistanceLevels.length > 0 && (
-            <div className="sr-levels-section">
-              <h5 className="subsection-title">Key Resistance Levels</h5>
-              <div className="sr-levels-grid">
-                {breakoutStrategy.supportResistanceAnalysis.resistanceLevels.slice(0, 3).map((level, index) => (
-                  <div key={index} className={`sr-level-item resistance ${level.strength}`}>
-                    <div className="sr-level-price">
-                      ${formatPrice(level.price)}
-                    </div>
-                    <div className="sr-level-info">
-                      <span className={`sr-strength ${level.strength}`}>
-                        {level.strength.toUpperCase()}
-                      </span>
-                      <span className="sr-touches">
-                        {level.touches} touches
-                      </span>
-                      <span className="sr-confidence">
-                        {Math.round(level.confidence * 100)}% confidence
-                      </span>
-                    </div>
-                    <div className="sr-zone">
-                      Zone: ${formatPrice(level.zone.lower)} - ${formatPrice(level.zone.upper)}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Key Zones */}
-          {breakoutStrategy.supportResistanceAnalysis.keyZones.length > 0 && (
-            <div className="key-zones-section">
-              <h5 className="subsection-title">Critical Trading Zones</h5>
-              <div className="key-zones-grid">
-                {breakoutStrategy.supportResistanceAnalysis.keyZones.slice(0, 4).map((zone, index) => (
-                  <div key={index} className={`key-zone-item ${zone.type}`}>
-                    <div className="zone-price">
-                      ${formatPrice(zone.price)}
-                    </div>
-                    <div className="zone-type">
-                      {zone.type.toUpperCase()}
-                    </div>
-                    <div className="zone-strength">
-                      {Math.round(zone.strength * 100)}% strength
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
         </div>
       )}
 

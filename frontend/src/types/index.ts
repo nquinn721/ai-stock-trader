@@ -99,6 +99,25 @@ export interface BreakoutStrategy {
       middle: number;
       lower: number;
     };
+    stochastic?: {
+      k: number;
+      d: number;
+      signal: 'overbought' | 'oversold' | 'neutral';
+    };
+    williamsR?: {
+      value: number;
+      signal: 'overbought' | 'oversold' | 'neutral';
+    };
+    atr?: {
+      value: number;
+      normalized: number; // ATR as percentage of price
+    };
+    volatilityIndicators?: {
+      historicalVolatility: number;
+      averageVolatility: number;
+      volatilityRank: number; // 0-100 percentile rank
+      regime: 'low' | 'normal' | 'high';
+    };
   };
   volumeAnalysis?: {
     currentVolume: number;

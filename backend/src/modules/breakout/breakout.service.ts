@@ -52,6 +52,25 @@ export interface BreakoutStrategy {
       middle: number;
       lower: number;
     };
+    stochastic?: {
+      k: number;
+      d: number;
+      signal: 'overbought' | 'oversold' | 'neutral';
+    };
+    williamsR?: {
+      value: number;
+      signal: 'overbought' | 'oversold' | 'neutral';
+    };
+    atr?: {
+      value: number;
+      normalized: number; // ATR as percentage of price
+    };
+    volatilityIndicators?: {
+      historicalVolatility: number;
+      averageVolatility: number;
+      volatilityRank: number; // 0-100 percentile rank
+      regime: 'low' | 'normal' | 'high';
+    };
   };
   volumeAnalysis?: {
     currentVolume: number;
@@ -195,6 +214,10 @@ export class BreakoutService {
           ema9: technicalAnalysis.ema9,
           macd: technicalAnalysis.macd,
           bollingerBands: technicalAnalysis.bollinger,
+          stochastic: technicalAnalysis.stochastic,
+          williamsR: technicalAnalysis.williamsR,
+          atr: technicalAnalysis.atr,
+          volatilityIndicators: technicalAnalysis.volatilityIndicators,
         },
         volumeAnalysis: {
           currentVolume: technicalAnalysis.volume,
@@ -297,6 +320,14 @@ export class BreakoutService {
     // Trend determination
     const trend = this.determineTrend(closes, sma20, sma50);
 
+    // Momentum indicators
+    const stochastic = this.calculateStochastic(data, 14, 3);
+    const williamsR = this.calculateWilliamsR(data, 14);
+    
+    // Volatility indicators
+    const atr = this.calculateATR(data, 14);
+    const volatilityIndicators = this.calculateVolatilityIndicators(data, 10, 50);
+
     return {
       rsi,
       sma20,
@@ -309,6 +340,10 @@ export class BreakoutService {
       bollinger,
       volatility,
       trend,
+      stochastic,
+      williamsR,
+      atr,
+      volatilityIndicators,
       bollingerPosition: this.getBollingerPosition(
         closes[closes.length - 1],
         bollinger,
@@ -704,6 +739,189 @@ export class BreakoutService {
     if (currentPrice >= bollinger.upper * 0.95) return 'upper';
     if (currentPrice <= bollinger.lower * 1.05) return 'lower';
     return 'middle';
+  }
+
+  /**
+   * Calculate Stochastic Oscillator (%K and %D)
+   */
+  private calculateStochastic(
+    data: HistoricalData[], 
+    kPeriod: number = 14, 
+    dPeriod: number = 3
+  ): { k: number; d: number; signal: 'overbought' | 'oversold' | 'neutral' } {
+    if (!data || data.length < kPeriod) {
+      return { k: 50, d: 50, signal: 'neutral' };
+    }
+
+    const highs = data.map(d => d.high);
+    const lows = data.map(d => d.low);
+    const closes = data.map(d => d.close);
+    
+    // Calculate %K values
+    const kValues: number[] = [];
+    
+    for (let i = kPeriod - 1; i < data.length; i++) {
+      const periodHighs = highs.slice(i - kPeriod + 1, i + 1);
+      const periodLows = lows.slice(i - kPeriod + 1, i + 1);
+      const currentClose = closes[i];
+      
+      const highestHigh = Math.max(...periodHighs);
+      const lowestLow = Math.min(...periodLows);
+      
+      const k = ((currentClose - lowestLow) / (highestHigh - lowestLow)) * 100;
+      kValues.push(k);
+    }
+    
+    const currentK = kValues[kValues.length - 1] || 50;
+    const currentD = this.calculateSMA(kValues.slice(-dPeriod), dPeriod);
+    
+    let signal: 'overbought' | 'oversold' | 'neutral' = 'neutral';
+    if (currentK > 80 && currentD > 80) signal = 'overbought';
+    else if (currentK < 20 && currentD < 20) signal = 'oversold';
+    
+    return {
+      k: Math.round(currentK * 100) / 100,
+      d: Math.round(currentD * 100) / 100,
+      signal
+    };
+  }
+
+  /**
+   * Calculate Williams %R
+   */
+  private calculateWilliamsR(
+    data: HistoricalData[], 
+    period: number = 14
+  ): { value: number; signal: 'overbought' | 'oversold' | 'neutral' } {
+    if (!data || data.length < period) {
+      return { value: -50, signal: 'neutral' };
+    }
+
+    const highs = data.map(d => d.high);
+    const lows = data.map(d => d.low);
+    const closes = data.map(d => d.close);
+    
+    const recentHighs = highs.slice(-period);
+    const recentLows = lows.slice(-period);
+    const currentClose = closes[closes.length - 1];
+    
+    const highestHigh = Math.max(...recentHighs);
+    const lowestLow = Math.min(...recentLows);
+    
+    const williamsR = ((highestHigh - currentClose) / (highestHigh - lowestLow)) * -100;
+    
+    let signal: 'overbought' | 'oversold' | 'neutral' = 'neutral';
+    if (williamsR > -20) signal = 'overbought';
+    else if (williamsR < -80) signal = 'oversold';
+    
+    return {
+      value: Math.round(williamsR * 100) / 100,
+      signal
+    };
+  }
+
+  /**
+   * Calculate Average True Range (ATR)
+   */
+  private calculateATR(
+    data: HistoricalData[], 
+    period: number = 14
+  ): { value: number; normalized: number } {
+    if (!data || data.length < period + 1) {
+      return { value: 0, normalized: 0 };
+    }
+
+    const trueRanges: number[] = [];
+    
+    for (let i = 1; i < data.length; i++) {
+      const current = data[i];
+      const previous = data[i - 1];
+      
+      const tr1 = current.high - current.low;
+      const tr2 = Math.abs(current.high - previous.close);
+      const tr3 = Math.abs(current.low - previous.close);
+      
+      const trueRange = Math.max(tr1, tr2, tr3);
+      trueRanges.push(trueRange);
+    }
+    
+    const atr = this.calculateSMA(trueRanges.slice(-period), period);
+    const currentPrice = data[data.length - 1].close;
+    const normalizedATR = (atr / currentPrice) * 100;
+    
+    return {
+      value: Math.round(atr * 100) / 100,
+      normalized: Math.round(normalizedATR * 100) / 100
+    };
+  }
+
+  /**
+   * Calculate comprehensive volatility indicators
+   */
+  private calculateVolatilityIndicators(
+    data: HistoricalData[], 
+    shortPeriod: number = 10,
+    longPeriod: number = 50
+  ): {
+    historicalVolatility: number;
+    averageVolatility: number;
+    volatilityRank: number;
+    regime: 'low' | 'normal' | 'high';
+  } {
+    if (!data || data.length < longPeriod) {
+      return {
+        historicalVolatility: 0,
+        averageVolatility: 0,
+        volatilityRank: 50,
+        regime: 'normal'
+      };
+    }
+
+    const closes = data.map(d => d.close);
+    
+    // Calculate returns
+    const returns: number[] = [];
+    for (let i = 1; i < closes.length; i++) {
+      returns.push((closes[i] - closes[i - 1]) / closes[i - 1]);
+    }
+    
+    // Calculate short-term historical volatility
+    const recentReturns = returns.slice(-shortPeriod);
+    const meanReturn = recentReturns.reduce((sum, ret) => sum + ret, 0) / recentReturns.length;
+    const variance = recentReturns.reduce((sum, ret) => sum + Math.pow(ret - meanReturn, 2), 0) / recentReturns.length;
+    const historicalVolatility = Math.sqrt(variance) * Math.sqrt(252) * 100; // Annualized
+    
+    // Calculate long-term average volatility
+    const longReturns = returns.slice(-longPeriod);
+    const longMeanReturn = longReturns.reduce((sum, ret) => sum + ret, 0) / longReturns.length;
+    const longVariance = longReturns.reduce((sum, ret) => sum + Math.pow(ret - longMeanReturn, 2), 0) / longReturns.length;
+    const averageVolatility = Math.sqrt(longVariance) * Math.sqrt(252) * 100;
+    
+    // Calculate volatility rank (percentile)
+    const volatilityHistory: number[] = [];
+    for (let i = shortPeriod; i < returns.length; i++) {
+      const periodReturns = returns.slice(i - shortPeriod, i);
+      const periodMean = periodReturns.reduce((sum, ret) => sum + ret, 0) / periodReturns.length;
+      const periodVariance = periodReturns.reduce((sum, ret) => sum + Math.pow(ret - periodMean, 2), 0) / periodReturns.length;
+      const periodVolatility = Math.sqrt(periodVariance) * Math.sqrt(252) * 100;
+      volatilityHistory.push(periodVolatility);
+    }
+    
+    const sortedVolatility = [...volatilityHistory].sort((a, b) => a - b);
+    const rank = sortedVolatility.findIndex(vol => vol >= historicalVolatility);
+    const volatilityRank = (rank / sortedVolatility.length) * 100;
+    
+    // Determine volatility regime
+    let regime: 'low' | 'normal' | 'high' = 'normal';
+    if (volatilityRank < 25) regime = 'low';
+    else if (volatilityRank > 75) regime = 'high';
+    
+    return {
+      historicalVolatility: Math.round(historicalVolatility * 100) / 100,
+      averageVolatility: Math.round(averageVolatility * 100) / 100,
+      volatilityRank: Math.round(volatilityRank * 100) / 100,
+      regime
+    };
   }
 
   /**
