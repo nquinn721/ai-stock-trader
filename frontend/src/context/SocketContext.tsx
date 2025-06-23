@@ -11,6 +11,8 @@ interface SocketContextType {
   portfolioUpdates: Map<number, PortfolioUpdate>;
   subscribeToPortfolio: (portfolioId: number) => void;
   unsubscribeFromPortfolio: (portfolioId: number) => void;
+  getPortfolioPerformance: (portfolioId: number) => Promise<any>;
+  getPositionDetails: (portfolioId: number, symbol: string) => Promise<any>;
 }
 
 const SocketContext = createContext<SocketContextType>({
@@ -22,6 +24,8 @@ const SocketContext = createContext<SocketContextType>({
   portfolioUpdates: new Map(),
   subscribeToPortfolio: () => {},
   unsubscribeFromPortfolio: () => {},
+  getPortfolioPerformance: async () => null,
+  getPositionDetails: async () => null,
 });
 
 export const useSocket = () => {
@@ -59,6 +63,79 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
       socket.emit("unsubscribe_portfolio", { portfolioId });
     }
   };
+  const getPortfolioPerformance = async (portfolioId: number): Promise<any> => {
+    return new Promise((resolve, reject) => {
+      if (!socket || !isConnected) {
+        reject(new Error("WebSocket not connected"));
+        return;
+      }
+
+      const timeoutId = setTimeout(() => {
+        socket.off("portfolio_performance_data");
+        socket.off("portfolio_error");
+        reject(new Error("Request timeout"));
+      }, 10000);
+
+      const handleResponse = (data: any) => {
+        clearTimeout(timeoutId);
+        socket.off("portfolio_performance_data");
+        socket.off("portfolio_error");
+        resolve(data);
+      };
+
+      const handleError = (error: any) => {
+        clearTimeout(timeoutId);
+        socket.off("portfolio_performance_data");
+        socket.off("portfolio_error");
+        reject(
+          new Error(
+            error.message || "Failed to fetch portfolio performance"
+          )
+        );
+      };
+
+      socket.once("portfolio_performance_data", handleResponse);
+      socket.once("portfolio_error", handleError);
+      socket.emit("get_portfolio_performance", { portfolioId });
+    });
+  };
+
+  const getPositionDetails = async (
+    portfolioId: number,
+    symbol: string
+  ): Promise<any> => {
+    return new Promise((resolve, reject) => {
+      if (!socket || !isConnected) {
+        reject(new Error("WebSocket not connected"));
+        return;
+      }
+
+      const timeoutId = setTimeout(() => {
+        socket.off("position_details");
+        socket.off("position_error");
+        reject(new Error("Request timeout"));
+      }, 10000);
+
+      const handleResponse = (data: any) => {
+        clearTimeout(timeoutId);
+        socket.off("position_details");
+        socket.off("position_error");
+        resolve(data);
+      };
+
+      const handleError = (error: any) => {
+        clearTimeout(timeoutId);
+        socket.off("position_details");
+        socket.off("position_error");
+        reject(new Error(error.message || "Failed to fetch position details"));
+      };
+
+      socket.once("position_details", handleResponse);
+      socket.once("position_error", handleError);
+      socket.emit("get_position_details", { portfolioId, symbol });
+    });
+  };
+
   useEffect(() => {
     const newSocket = io.connect("http://localhost:8000", {
       transports: ["websocket", "polling"],
@@ -153,6 +230,8 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
     portfolioUpdates,
     subscribeToPortfolio,
     unsubscribeFromPortfolio,
+    getPortfolioPerformance,
+    getPositionDetails,
   };
 
   return (

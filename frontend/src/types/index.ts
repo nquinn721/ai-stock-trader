@@ -387,14 +387,37 @@ export interface CreatePortfolioRequest {
 }
 export interface PortfolioUpdate {
   portfolioId: number;
+  timestamp: string;
   totalValue: number;
+  currentCash: number;
+  investedValue: number;
   totalPnL: number;
   totalReturn: number;
-  currentCash: number;
   dayGain: number;
   dayGainPercent: number;
-  timestamp: string;
-  positions: Position[];
+  dayStartValue: number;
+  positions: EnhancedPosition[];
+  summary?: {
+    totalPositions: number;
+    gainers: number;
+    losers: number;
+    topGainer: any;
+    topLoser: any;
+  };
+}
+
+export interface EnhancedPosition {
+  symbol: string;
+  quantity: number;
+  averagePrice: number;
+  currentValue: number;
+  totalCost: number;
+  unrealizedPnL: number;
+  unrealizedReturn: number;
+  dayChange: number;
+  dayChangePercent: number;
+  allocationPercent: number;
+  lastUpdated: string;
 }
 
 export interface SocketEvents {

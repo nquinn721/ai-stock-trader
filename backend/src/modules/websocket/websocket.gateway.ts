@@ -204,38 +204,24 @@ export class StockWebSocketGateway
     // Leave room for specific portfolio
     client.leave(`portfolio_${data.portfolioId}`);
   }
-
   /**
-   * Send portfolio performance update to specific client or room
+   * Send enhanced portfolio performance update to specific client or room
    */
   async sendPortfolioUpdate(portfolioId: number, client?: Socket) {
     try {
-      const performance =
-        await this.paperTradingService.getPortfolioPerformance(portfolioId);
-      const portfolio =
-        await this.paperTradingService.getPortfolio(portfolioId);
-
-      const portfolioUpdate = {
-        portfolioId,
-        totalValue: portfolio.totalValue,
-        totalPnL: portfolio.totalPnL,
-        totalReturn: portfolio.totalReturn,
-        currentCash: portfolio.currentCash,
-        dayGain: performance.dayGain || 0,
-        dayGainPercent: performance.dayGainPercent || 0,
-        timestamp: new Date().toISOString(),
-        positions: portfolio.positions || [],
-      };
+      // Use enhanced real-time performance tracking
+      const enhancedPerformance =
+        await this.paperTradingService.updatePortfolioRealTimePerformance(portfolioId);
 
       if (client) {
-        client.emit('portfolio_update', portfolioUpdate);
+        client.emit('portfolio_update', enhancedPerformance);
       } else {
         this.server
           .to(`portfolio_${portfolioId}`)
-          .emit('portfolio_update', portfolioUpdate);
+          .emit('portfolio_update', enhancedPerformance);
       }
 
-      console.log(`📈 Sent portfolio update for portfolio ${portfolioId}`);
+      console.log(`📈 Sent enhanced portfolio update for portfolio ${portfolioId}`);
     } catch (error) {
       console.error(
         `Error sending portfolio update for ${portfolioId}:`,
@@ -249,9 +235,8 @@ export class StockWebSocketGateway
       });
     }
   }
-
   /**
-   * Broadcast portfolio updates to all subscribed clients when stock prices change
+   * Enhanced broadcast portfolio updates to all subscribed clients when stock prices change
    */
   async broadcastPortfolioUpdates() {
     try {
@@ -262,18 +247,125 @@ export class StockWebSocketGateway
         portfolioIds.forEach((id) => subscribedPortfolioIds.add(id));
       }
 
-      // Send updates for each subscribed portfolio
-      for (const portfolioId of subscribedPortfolioIds) {
-        await this.sendPortfolioUpdate(portfolioId);
+      if (subscribedPortfolioIds.size === 0) {
+        return;
       }
 
-      if (subscribedPortfolioIds.size > 0) {
-        console.log(
-          `📊 Broadcasted portfolio updates for ${subscribedPortfolioIds.size} portfolios`,
-        );
+      // Use batch update for better performance
+      const portfolioIdsArray = Array.from(subscribedPortfolioIds);
+      const batchResults = await this.paperTradingService.updateMultiplePortfoliosRealTime(portfolioIdsArray);
+
+      // Send individual updates to subscribed clients
+      for (const result of batchResults) {
+        if (result.error) {
+          // Send error to clients
+          this.server
+            .to(`portfolio_${result.portfolioId}`)
+            .emit('portfolio_error', result);
+        } else {
+          // Send successful update
+          this.server
+            .to(`portfolio_${result.portfolioId}`)
+            .emit('portfolio_update', result);
+        }
       }
+
+      console.log(
+        `📊 Broadcasted enhanced portfolio updates for ${subscribedPortfolioIds.size} portfolios`,
+      );
     } catch (error) {
       console.error('Error broadcasting portfolio updates:', error);
+    }
+  }
+
+  @SubscribeMessage('get_portfolio_performance')
+  async handleGetPortfolioPerformance(
+    @MessageBody() data: { portfolioId: number },
+    @ConnectedSocket() client: Socket,
+  ) {
+    console.log(
+      `Client ${client.id} requested performance data for portfolio ${data.portfolioId}`,
+    );
+
+    try {
+      // Get both real-time and historical performance data
+      const realTimePerformance =
+        await this.paperTradingService.updatePortfolioRealTimePerformance(data.portfolioId);
+      const historicalPerformance =
+        await this.paperTradingService.getPortfolioPerformance(data.portfolioId);
+
+      const combinedData = {
+        ...realTimePerformance,
+        historical: historicalPerformance.performance || [],
+        metrics: historicalPerformance.metrics || {},
+      };
+
+      client.emit('portfolio_performance_data', combinedData);
+    } catch (error) {
+      console.error(`Error getting portfolio performance for ${data.portfolioId}:`, error);
+      client.emit('portfolio_error', {
+        portfolioId: data.portfolioId,
+        message: 'Failed to fetch portfolio performance data',
+        timestamp: new Date().toISOString(),
+      });
+    }
+  }
+
+  @SubscribeMessage('get_position_details')
+  async handleGetPositionDetails(
+    @MessageBody() data: { portfolioId: number; symbol: string },
+    @ConnectedSocket() client: Socket,
+  ) {
+    console.log(
+      `Client ${client.id} requested position details for ${data.symbol} in portfolio ${data.portfolioId}`,
+    );
+
+    try {
+      // Get detailed position information
+      const portfolio = await this.paperTradingService.getPortfolio(data.portfolioId);
+      const position = portfolio.positions?.find(p => p.symbol === data.symbol.toUpperCase());
+
+      if (!position) {
+        client.emit('position_error', {
+          portfolioId: data.portfolioId,
+          symbol: data.symbol,
+          message: 'Position not found',
+          timestamp: new Date().toISOString(),
+        });
+        return;
+      }
+
+      // Update position with latest market data
+      await this.paperTradingService.updatePortfolioRealTimePerformance(data.portfolioId);
+
+      // Get position trade history
+      const trades = await this.paperTradingService.getPositionTradeHistory(data.portfolioId, data.symbol);
+
+      const positionDetails = {
+        portfolioId: data.portfolioId,
+        symbol: data.symbol,
+        position: {
+          quantity: position.quantity,
+          averagePrice: Number(position.averagePrice),
+          currentValue: Number(position.currentValue) || Number(position.totalCost),
+          totalCost: Number(position.totalCost),
+          unrealizedPnL: Number(position.unrealizedPnL || 0),
+          unrealizedReturn: Number(position.unrealizedReturn || 0),
+          lastUpdated: new Date().toISOString(),
+        },
+        tradeHistory: trades,
+        timestamp: new Date().toISOString(),
+      };
+
+      client.emit('position_details', positionDetails);
+    } catch (error) {
+      console.error(`Error getting position details:`, error);
+      client.emit('position_error', {
+        portfolioId: data.portfolioId,
+        symbol: data.symbol,
+        message: 'Failed to fetch position details',
+        timestamp: new Date().toISOString(),
+      });
     }
   }
 }

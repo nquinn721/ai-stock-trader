@@ -21,8 +21,11 @@ const PortfolioComponent: React.FC<PortfolioProps> = ({
     subscribeToPortfolio,
     unsubscribeFromPortfolio,
     portfolioUpdates,
+    getPortfolioPerformance,
+    getPositionDetails,
   } = useSocket();
   const [portfolio, setPortfolio] = useState<Portfolio | null>(null);
+  const [enhancedPerformance, setEnhancedPerformance] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [tradeForm, setTradeForm] = useState({
     symbol: "",
@@ -31,9 +34,12 @@ const PortfolioComponent: React.FC<PortfolioProps> = ({
   });
   const [showTradeForm, setShowTradeForm] = useState(false);
   const [executing, setExecuting] = useState(false);
+  const [selectedPosition, setSelectedPosition] = useState<any>(null);
+  const [positionDetails, setPositionDetails] = useState<any>(null);
 
   useEffect(() => {
     fetchPortfolio();
+    fetchEnhancedPerformance();
     // Subscribe to real-time portfolio updates
     subscribeToPortfolio(portfolioId);
 
@@ -42,22 +48,37 @@ const PortfolioComponent: React.FC<PortfolioProps> = ({
       unsubscribeFromPortfolio(portfolioId);
     };
   }, [portfolioId, subscribeToPortfolio, unsubscribeFromPortfolio]);
-
   // Update portfolio with real-time data when available
   useEffect(() => {
     const portfolioUpdate = portfolioUpdates.get(portfolioId);
     if (portfolioUpdate && portfolio) {
+      // Enhanced real-time update with more detailed data
+      setEnhancedPerformance(portfolioUpdate);
       setPortfolio((prev) =>
         prev
           ? {
               ...prev,
-              totalValue: portfolioUpdate.totalValue,
-              totalPnL: portfolioUpdate.totalPnL,
-              totalReturn: portfolioUpdate.totalReturn,
-              currentCash: portfolioUpdate.currentCash,
-              positions: portfolioUpdate.positions,
+              totalValue: portfolioUpdate.totalValue || prev.totalValue,
+              totalPnL: portfolioUpdate.totalPnL || prev.totalPnL,
+              totalReturn: portfolioUpdate.totalReturn || prev.totalReturn,
+              currentCash: portfolioUpdate.currentCash || prev.currentCash,
+              // Convert EnhancedPosition to Position for compatibility
+              positions: portfolioUpdate.positions?.map(pos => ({
+                id: prev.positions?.find(p => p.symbol === pos.symbol)?.id || 0,
+                portfolioId: portfolioId,
+                stockId: prev.positions?.find(p => p.symbol === pos.symbol)?.stockId || 0,
+                symbol: pos.symbol,
+                quantity: pos.quantity,
+                averagePrice: pos.averagePrice,
+                totalCost: pos.totalCost,
+                currentValue: pos.currentValue,
+                unrealizedPnL: pos.unrealizedPnL,
+                unrealizedReturn: pos.unrealizedReturn,
+                createdAt: prev.positions?.find(p => p.symbol === pos.symbol)?.createdAt || new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+              })) || prev.positions,
             }
-          : null
+          : prev
       );
     }
   }, [portfolioUpdates, portfolioId, portfolio]);
@@ -74,6 +95,32 @@ const PortfolioComponent: React.FC<PortfolioProps> = ({
     } finally {
       setLoading(false);
     }
+  };
+
+  const fetchEnhancedPerformance = async () => {
+    try {
+      const performanceData = await getPortfolioPerformance(portfolioId);
+      setEnhancedPerformance(performanceData);
+      console.log("📊 Enhanced portfolio performance loaded:", performanceData);
+    } catch (error) {
+      console.error("Error fetching enhanced performance:", error);
+    }
+  };
+
+  const handlePositionClick = async (symbol: string) => {
+    try {
+      setSelectedPosition(symbol);
+      const details = await getPositionDetails(portfolioId, symbol);
+      setPositionDetails(details);
+      console.log(`📈 Position details for ${symbol}:`, details);
+    } catch (error) {
+      console.error(`Error fetching position details for ${symbol}:`, error);
+    }
+  };
+
+  const closePositionDetails = () => {
+    setSelectedPosition(null);
+    setPositionDetails(null);
   };
 
   const executeTrade = async () => {
