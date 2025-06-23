@@ -1,4 +1,6 @@
 import {
+  TaskAlt as CompleteIcon,
+  Delete as DeleteIcon,
   CheckCircle as DoneIcon,
   Business as EpicIcon,
   PauseCircleFilled as InProgressIcon,
@@ -6,14 +8,21 @@ import {
 } from "@mui/icons-material";
 import {
   Box,
+  Button,
   Card,
   CardContent,
   Chip,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  IconButton,
   LinearProgress,
   Stack,
+  Tooltip,
   Typography,
 } from "@mui/material";
-import React from "react";
+import React, { useState } from "react";
 import { epics } from "../data/epics";
 import { stories } from "../data/stories";
 import { Epic } from "../data/types";
@@ -48,7 +57,43 @@ const getStatusMeta = (status: string) => {
 };
 
 const EpicsView: React.FC = () => {
-  if (!epics.length) {
+  const [localEpics, setLocalEpics] = useState<Epic[]>(epics);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [epicToDelete, setEpicToDelete] = useState<string | null>(null);
+
+  const handleMarkComplete = (epicId: string) => {
+    setLocalEpics((prev) =>
+      prev.map((epic) =>
+        epic.id === epicId
+          ? {
+              ...epic,
+              status: "DONE" as const,
+              completedDate: new Date().toISOString().split("T")[0],
+            }
+          : epic
+      )
+    );
+  };
+
+  const handleDeleteEpic = (epicId: string) => {
+    setEpicToDelete(epicId);
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = () => {
+    if (epicToDelete) {
+      setLocalEpics((prev) => prev.filter((epic) => epic.id !== epicToDelete));
+      setEpicToDelete(null);
+    }
+    setDeleteDialogOpen(false);
+  };
+
+  const cancelDelete = () => {
+    setEpicToDelete(null);
+    setDeleteDialogOpen(false);
+  };
+
+  if (!localEpics.length) {
     return (
       <Box sx={{ mt: 6, textAlign: "center" }}>
         <Typography variant="h5" color="textSecondary">
@@ -70,7 +115,7 @@ const EpicsView: React.FC = () => {
           gap: 3,
         }}
       >
-        {epics.map((epic: Epic) => {
+        {localEpics.map((epic: Epic) => {
           const statusMeta = getStatusMeta(epic.status);
           const epicStories = stories.filter((story) => story.epic === epic.id);
           const completedStories = epicStories.filter(
@@ -107,6 +152,7 @@ const EpicsView: React.FC = () => {
               }}
             >
               <CardContent>
+                {" "}
                 <Stack direction="row" alignItems="center" spacing={1} mb={2}>
                   <EpicIcon sx={{ color: statusMeta.color, fontSize: 32 }} />
                   <Typography variant="h5" sx={{ flexGrow: 1 }}>
@@ -122,11 +168,49 @@ const EpicsView: React.FC = () => {
                     }}
                   />
                 </Stack>
-
+                {/* Management Actions */}
+                <Stack
+                  direction="row"
+                  spacing={1}
+                  mb={2}
+                  justifyContent="flex-end"
+                >
+                  {epic.status !== "DONE" && (
+                    <Tooltip title="Mark as Complete">
+                      <IconButton
+                        size="small"
+                        color="success"
+                        onClick={() => handleMarkComplete(epic.id)}
+                        sx={{
+                          backgroundColor: "rgba(76, 175, 80, 0.1)",
+                          "&:hover": {
+                            backgroundColor: "rgba(76, 175, 80, 0.2)",
+                          },
+                        }}
+                      >
+                        <CompleteIcon fontSize="small" />
+                      </IconButton>
+                    </Tooltip>
+                  )}
+                  <Tooltip title="Delete Epic">
+                    <IconButton
+                      size="small"
+                      color="error"
+                      onClick={() => handleDeleteEpic(epic.id)}
+                      sx={{
+                        backgroundColor: "rgba(244, 67, 54, 0.1)",
+                        "&:hover": {
+                          backgroundColor: "rgba(244, 67, 54, 0.2)",
+                        },
+                      }}
+                    >
+                      <DeleteIcon fontSize="small" />
+                    </IconButton>
+                  </Tooltip>
+                </Stack>
                 <Typography variant="body1" sx={{ mb: 2 }}>
                   {epic.description}
                 </Typography>
-
                 <Stack direction="row" spacing={1} mb={2} flexWrap="wrap">
                   <Chip
                     label={`ID: ${epic.id}`}
@@ -141,7 +225,6 @@ const EpicsView: React.FC = () => {
                   <Chip label={`${epicStories.length} Stories`} size="small" />
                   <Chip label={`${totalStoryPoints} Points`} size="small" />
                 </Stack>
-
                 {/* Story Progress */}
                 {epicStories.length > 0 && (
                   <Box sx={{ mb: 2 }}>
@@ -160,7 +243,6 @@ const EpicsView: React.FC = () => {
                     />
                   </Box>
                 )}
-
                 {/* Story Points Progress */}
                 {totalStoryPoints > 0 && (
                   <Box sx={{ mb: 2 }}>
@@ -180,7 +262,6 @@ const EpicsView: React.FC = () => {
                     />
                   </Box>
                 )}
-
                 {/* Story Status Breakdown */}
                 {epicStories.length > 0 && (
                   <Box sx={{ mb: 2 }}>
@@ -224,8 +305,7 @@ const EpicsView: React.FC = () => {
                       )}
                     </Stack>
                   </Box>
-                )}
-
+                )}{" "}
                 {/* Epic Stories */}
                 {epicStories.length > 0 && (
                   <Box>
@@ -251,11 +331,36 @@ const EpicsView: React.FC = () => {
                     </Stack>
                   </Box>
                 )}
+                {/* Completion Date */}
+                {epic.completedDate && (
+                  <Box mt={2}>
+                    <Typography variant="caption" color="success.main">
+                      Completed: {epic.completedDate}
+                    </Typography>
+                  </Box>
+                )}
               </CardContent>
             </Card>
           );
         })}
       </Box>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={deleteDialogOpen} onClose={cancelDelete}>
+        <DialogTitle>Confirm Delete</DialogTitle>
+        <DialogContent>
+          <Typography>
+            Are you sure you want to delete epic {epicToDelete}? This action
+            cannot be undone and may affect related stories.
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={cancelDelete}>Cancel</Button>
+          <Button onClick={confirmDelete} color="error" variant="contained">
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };

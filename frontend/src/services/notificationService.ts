@@ -32,9 +32,7 @@ class NotificationService {
     }
   }
 
-  async getNotifications(
-    filter: NotificationFilter = {}
-  ): Promise<{
+  async getNotifications(filter: NotificationFilter = {}): Promise<{
     notifications: Notification[];
     total: number;
     pagination: any;
@@ -54,21 +52,34 @@ class NotificationService {
       if (filter.toDate) params.append("toDate", filter.toDate.toISOString());
       if (filter.limit) params.append("limit", filter.limit.toString());
       if (filter.offset) params.append("offset", filter.offset.toString());
-
       const response = await axios.get(`${this.baseURL}?${params.toString()}`);
-      return response.data;
+
+      // Handle the structured response from backend
+      const backendResponse = response.data;
+      return {
+        notifications: Array.isArray(backendResponse.data)
+          ? backendResponse.data
+          : [],
+        total: backendResponse.total || 0,
+        pagination: backendResponse.pagination || {},
+      };
     } catch (error) {
       console.error("Failed to get notifications:", error);
-      throw error;
+      // Return safe defaults to prevent iteration errors
+      return {
+        notifications: [],
+        total: 0,
+        pagination: {},
+      };
     }
   }
-
   async getUnreadCount(userId: string): Promise<number> {
     try {
       const response = await axios.get(
         `${this.baseURL}/unread-count/${userId}`
       );
-      return response.data.data.count;
+      // Handle backend response structure
+      return response.data?.data?.count || 0;
     } catch (error) {
       console.error("Failed to get unread count:", error);
       return 0;

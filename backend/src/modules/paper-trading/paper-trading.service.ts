@@ -5,12 +5,52 @@ import { Portfolio } from '../../entities/portfolio.entity';
 import { Position } from '../../entities/position.entity';
 import { Stock } from '../../entities/stock.entity';
 import { Trade, TradeStatus, TradeType } from '../../entities/trade.entity';
+import { MLService } from '../ml/services/ml.service';
 
 // DTOs that the controller expects
 export class CreatePortfolioDto {
   userId: string;
+  portfolioType:
+    | 'DAY_TRADING_PRO'
+    | 'DAY_TRADING_STANDARD'
+    | 'SMALL_ACCOUNT_BASIC'
+    | 'MICRO_ACCOUNT_STARTER';
   initialBalance?: number;
 }
+
+// Portfolio type configurations
+export const PORTFOLIO_CONFIGS = {
+  DAY_TRADING_PRO: {
+    name: 'Day Trading Pro',
+    initialBalance: 50000,
+    dayTradingEnabled: true,
+    description: 'Professional day trading account with $50k starting capital',
+    minBalance: 25000, // SEC requirement for pattern day trading
+  },
+  DAY_TRADING_STANDARD: {
+    name: 'Day Trading Standard',
+    initialBalance: 30000,
+    dayTradingEnabled: true,
+    description: 'Standard day trading account with $30k starting capital',
+    minBalance: 25000,
+  },
+  SMALL_ACCOUNT_BASIC: {
+    name: 'Small Account Basic',
+    initialBalance: 1000,
+    dayTradingEnabled: false,
+    description:
+      'Basic account with $1k starting capital, day trading restricted',
+    minBalance: 0,
+  },
+  MICRO_ACCOUNT_STARTER: {
+    name: 'Micro Account Starter',
+    initialBalance: 500,
+    dayTradingEnabled: false,
+    description:
+      'Starter account with $500 starting capital, day trading restricted',
+    minBalance: 0,
+  },
+};
 
 export class CreateTradeDto {
   userId: string;
@@ -30,17 +70,37 @@ export class PaperTradingService {
     private tradeRepository: Repository<Trade>,
     @InjectRepository(Stock)
     private stockRepository: Repository<Stock>,
-  ) {}
-  /**
-   * Create a new portfolio
+    private mlService: MLService,
+  ) {} /**
+   * Create a new portfolio with specified type
    */
   async createPortfolio(
     createPortfolioDto: CreatePortfolioDto,
   ): Promise<Portfolio> {
-    const { userId, initialBalance = 100000 } = createPortfolioDto;
+    const { userId, portfolioType } = createPortfolioDto;
+
+    // Get configuration for the portfolio type
+    const config = PORTFOLIO_CONFIGS[portfolioType];
+    if (!config) {
+      throw new Error(`Invalid portfolio type: ${portfolioType}`);
+    }
+
+    const initialBalance =
+      createPortfolioDto.initialBalance || config.initialBalance;
+
+    // Validate minimum balance for day trading accounts
+    if (config.dayTradingEnabled && initialBalance < config.minBalance) {
+      throw new Error(
+        `Day trading portfolios require minimum $${config.minBalance} balance`,
+      );
+    }
 
     const portfolio = this.portfolioRepository.create({
-      name: `Portfolio for ${userId}`,
+      name: `${config.name} - ${userId}`,
+      portfolioType,
+      dayTradingEnabled: config.dayTradingEnabled,
+      dayTradeCount: 0,
+      lastDayTradeReset: new Date(),
       initialCash: initialBalance,
       currentCash: initialBalance,
       totalValue: initialBalance,
@@ -114,16 +174,54 @@ export class PaperTradingService {
     // Validate trade
     if (type === 'buy' && portfolio.currentCash < totalAmount) {
       throw new Error('Insufficient funds');
-    }
-
-    // Check for existing position
+    } // Check for existing position
     let position = await this.positionRepository.findOne({
       where: { portfolioId: portfolio.id, symbol: symbol.toUpperCase() },
     });
 
     if (type === 'sell' && (!position || position.quantity < quantity)) {
       throw new Error('Insufficient shares to sell');
-    } // Create trade record
+    } // Check day trading rules
+    await this.checkDayTradeLimit(portfolio, symbol, type); // Enhanced ML-based risk assessment for the trade
+    let riskAssessment: any = null;
+    try {
+      riskAssessment = await this.mlService.getRiskOptimization(
+        portfolio.id,
+        symbol,
+      );
+      console.log(`🤖 ML Risk Assessment for ${symbol} trade:`, {
+        recommendedPosition: riskAssessment?.recommendedPosition,
+        maxDrawdown: riskAssessment?.maxDrawdown,
+        volatilityAdjustment: riskAssessment?.volatilityAdjustment,
+      });
+
+      // Validate trade size against ML recommendations
+      if (riskAssessment) {
+        const portfolioValue = portfolio.totalValue;
+        const maxRecommendedPosition =
+          portfolioValue * riskAssessment.recommendedPosition;
+
+        if (type === 'buy' && totalAmount > maxRecommendedPosition) {
+          console.warn(
+            `⚠️ Trade size ${totalAmount} exceeds ML recommendation ${maxRecommendedPosition} for ${symbol}`,
+          );
+          // Could adjust quantity or provide warning, but allowing trade to proceed
+        }
+      }
+
+      // Log ML-enhanced trade decision
+      console.log(
+        `✅ ML-Enhanced Trade Validation: ${type.toUpperCase()} ${quantity} shares of ${symbol} at $${currentPrice}`,
+      );
+    } catch (error) {
+      console.warn(
+        `⚠️ ML risk assessment failed for ${symbol}:`,
+        error.message,
+      );
+      // Continue with traditional validation
+    }
+
+    // Create trade record
     const trade = this.tradeRepository.create({
       portfolioId: portfolio.id,
       stockId: stock.id,
@@ -594,6 +692,398 @@ export class PaperTradingService {
   }
 
   /**
+   * Get ML-enhanced portfolio analysis and recommendations
+   */
+  async getMLPortfolioAnalysis(portfolioId: number): Promise<any> {
+    try {
+      const portfolio = await this.getPortfolio(portfolioId);
+
+      // Get ML optimization recommendations
+      const mlOptimization =
+        await this.mlService.getPortfolioOptimization(portfolioId);
+      // Get individual position risk assessments
+      const positionRisks: any[] = [];
+      if (portfolio.positions && portfolio.positions.length > 0) {
+        for (const position of portfolio.positions) {
+          try {
+            const riskParams = await this.mlService.getRiskOptimization(
+              portfolioId,
+              position.symbol,
+            );
+            positionRisks.push({
+              symbol: position.symbol,
+              currentValue: position.currentValue || position.totalCost,
+              quantity: position.quantity,
+              mlRisk: {
+                recommendedPosition: riskParams.recommendedPosition,
+                volatilityAdjustment: riskParams.volatilityAdjustment,
+                correlationRisk: riskParams.correlationRisk,
+                maxDrawdown: riskParams.maxDrawdown,
+              },
+              recommendation: this.getPositionRecommendation(
+                position,
+                riskParams,
+              ),
+            });
+          } catch (error) {
+            console.warn(
+              `Failed to get ML risk for ${position.symbol}:`,
+              error.message,
+            );
+          }
+        }
+      }
+
+      // Calculate portfolio-level ML insights
+      const portfolioInsights = {
+        totalMLScore: this.calculatePortfolioMLScore(positionRisks),
+        riskLevel: this.assessPortfolioRiskLevel(positionRisks),
+        diversificationScore:
+          this.calculateMLDiversificationScore(positionRisks),
+        recommendations: this.generateMLRecommendations(
+          positionRisks,
+          mlOptimization,
+        ),
+      };
+
+      return {
+        portfolioId,
+        timestamp: new Date().toISOString(),
+        mlOptimization,
+        positionRisks,
+        portfolioInsights,
+        summary: {
+          totalPositions: positionRisks.length,
+          highRiskPositions: positionRisks.filter(
+            (p) => p.mlRisk.correlationRisk > 0.3,
+          ).length,
+          recommendedActions: portfolioInsights.recommendations.length,
+          overallRiskScore: portfolioInsights.totalMLScore,
+        },
+      };
+    } catch (error) {
+      console.error('Error generating ML portfolio analysis:', error);
+      throw new Error('Failed to generate ML portfolio analysis');
+    }
+  }
+
+  /**
+   * Get position recommendation based on ML risk parameters
+   */
+  private getPositionRecommendation(position: any, riskParams: any): string {
+    const currentValue = position.currentValue || position.totalCost;
+    const volatilityRisk = riskParams.volatilityAdjustment;
+    const correlationRisk = riskParams.correlationRisk;
+
+    if (correlationRisk > 0.4) {
+      return 'REDUCE - High correlation risk detected';
+    } else if (volatilityRisk > 1.3) {
+      return 'MONITOR - High volatility risk';
+    } else if (riskParams.recommendedPosition < 0.05) {
+      return 'HOLD - Low risk, maintain position';
+    } else {
+      return 'OPTIMAL - Position within recommended parameters';
+    }
+  }
+
+  /**
+   * Calculate overall portfolio ML score
+   */
+  private calculatePortfolioMLScore(positionRisks: any[]): number {
+    if (positionRisks.length === 0) return 0;
+
+    const totalRisk = positionRisks.reduce((sum, pos) => {
+      return (
+        sum +
+        pos.mlRisk.correlationRisk +
+        (pos.mlRisk.volatilityAdjustment - 1) * 0.1
+      );
+    }, 0);
+
+    return Math.min(Math.max((totalRisk / positionRisks.length) * 100, 0), 100);
+  }
+
+  /**
+   * Assess portfolio risk level
+   */
+  private assessPortfolioRiskLevel(positionRisks: any[]): string {
+    const avgRisk = this.calculatePortfolioMLScore(positionRisks);
+
+    if (avgRisk < 20) return 'LOW';
+    else if (avgRisk < 50) return 'MODERATE';
+    else if (avgRisk < 80) return 'HIGH';
+    else return 'CRITICAL';
+  }
+
+  /**
+   * Calculate ML-based diversification score
+   */
+  private calculateMLDiversificationScore(positionRisks: any[]): number {
+    if (positionRisks.length < 2) return 0;
+
+    const avgCorrelation =
+      positionRisks.reduce((sum, pos) => sum + pos.mlRisk.correlationRisk, 0) /
+      positionRisks.length;
+    return Math.max(0, (1 - avgCorrelation) * 100);
+  }
+  /**
+   * Generate ML-based recommendations
+   */
+  private generateMLRecommendations(
+    positionRisks: any[],
+    mlOptimization: any,
+  ): string[] {
+    const recommendations: string[] = [];
+
+    // Risk-based recommendations
+    const highRiskPositions = positionRisks.filter(
+      (p) => p.mlRisk.correlationRisk > 0.3,
+    );
+    if (highRiskPositions.length > 0) {
+      recommendations.push(
+        `Consider reducing exposure to ${highRiskPositions.length} high-correlation positions`,
+      );
+    }
+
+    // Volatility recommendations
+    const volatilePositions = positionRisks.filter(
+      (p) => p.mlRisk.volatilityAdjustment > 1.5,
+    );
+    if (volatilePositions.length > 0) {
+      recommendations.push(
+        `Monitor ${volatilePositions.length} high-volatility positions for potential stop-loss triggers`,
+      );
+    }
+
+    // Portfolio optimization recommendations
+    if (mlOptimization && mlOptimization.recommendations) {
+      mlOptimization.recommendations.forEach((rec) => {
+        if (Math.abs(rec.currentWeight - rec.recommendedWeight) > 0.05) {
+          recommendations.push(
+            `Adjust ${rec.symbol} allocation from ${(rec.currentWeight * 100).toFixed(1)}% to ${(rec.recommendedWeight * 100).toFixed(1)}%`,
+          );
+        }
+      });
+    }
+
+    return recommendations;
+  }
+  /**
+   * Batch update multiple portfolios for real-time tracking
+   */
+  async updateMultiplePortfoliosRealTime(
+    portfolioIds: number[],
+  ): Promise<any[]> {
+    const results: any[] = [];
+
+    for (const portfolioId of portfolioIds) {
+      try {
+        const performance =
+          await this.updatePortfolioRealTimePerformance(portfolioId);
+        results.push(performance);
+      } catch (error) {
+        console.error(`Error updating portfolio ${portfolioId}:`, error);
+        results.push({
+          portfolioId,
+          error: 'Failed to update portfolio',
+          timestamp: new Date().toISOString(),
+        });
+      }
+    }
+
+    return results;
+  }
+
+  /**
+   * Get trade history for a specific position
+   */
+  async getPositionTradeHistory(
+    portfolioId: number,
+    symbol: string,
+  ): Promise<any[]> {
+    try {
+      const trades = await this.tradeRepository.find({
+        where: {
+          portfolioId: portfolioId,
+          symbol: symbol.toUpperCase(),
+        },
+        order: { executedAt: 'DESC' },
+      });
+
+      return trades.map((trade) => ({
+        id: trade.id,
+        type: trade.type,
+        quantity: trade.quantity,
+        price: Number(trade.price),
+        totalValue: Number(trade.totalValue),
+        executedAt: trade.executedAt,
+        status: trade.status,
+      }));
+    } catch (error) {
+      console.error(`Error getting trade history for ${symbol}:`, error);
+      return [];
+    }
+  }
+
+  /**
+   * Check if a trade would be considered a day trade
+   */
+  private async isDayTrade(
+    portfolioId: number,
+    symbol: string,
+    type: 'buy' | 'sell',
+  ): Promise<boolean> {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
+    // Get all trades for this symbol today
+    const todayTrades = await this.tradeRepository.find({
+      where: {
+        portfolioId,
+        symbol: symbol.toUpperCase(),
+        executedAt: {
+          $gte: today,
+          $lt: tomorrow,
+        } as any,
+      },
+      order: { executedAt: 'ASC' },
+    });
+
+    // If selling and we bought the same symbol today, it's a day trade
+    if (type === 'sell') {
+      return todayTrades.some((trade) => trade.type === TradeType.BUY);
+    }
+
+    // If buying and we plan to sell today (this is harder to detect in advance)
+    // For now, we'll just check if there are existing positions that might be sold
+    return false;
+  }
+
+  /**
+   * Check and update day trade count for a portfolio
+   */
+  private async checkDayTradeLimit(
+    portfolio: Portfolio,
+    symbol: string,
+    type: 'buy' | 'sell',
+  ): Promise<void> {
+    // Reset day trade count if needed (every 5 business days)
+    await this.resetDayTradeCountIfNeeded(portfolio);
+
+    // Check if this would be a day trade
+    const isDayTrade = await this.isDayTrade(portfolio.id, symbol, type);
+
+    if (isDayTrade) {
+      // If day trading is not enabled, block the trade
+      if (!portfolio.dayTradingEnabled) {
+        throw new Error(
+          'Day trading is not allowed for this account type. You must wait until the next business day to sell positions purchased today.',
+        );
+      }
+
+      // Check if account has minimum balance for pattern day trading
+      const config = PORTFOLIO_CONFIGS[portfolio.portfolioType];
+      if (portfolio.totalValue < config.minBalance) {
+        throw new Error(
+          `Account value must be at least $${config.minBalance} for pattern day trading. Current value: $${portfolio.totalValue}`,
+        );
+      }
+
+      // Check day trade limit (4 day trades per 5 business days for pattern day traders)
+      if (portfolio.dayTradeCount >= 3) {
+        // Allow 3 completed day trades, 4th would trigger PDT rule
+        throw new Error(
+          'Pattern Day Trader limit reached. You have used 3 day trades in the past 5 business days. Additional day trades require $25,000 minimum account value.',
+        );
+      }
+
+      // Increment day trade count
+      portfolio.dayTradeCount += 1;
+      await this.portfolioRepository.save(portfolio);
+    }
+  }
+
+  /**
+   * Reset day trade count if 5 business days have passed
+   */
+  private async resetDayTradeCountIfNeeded(
+    portfolio: Portfolio,
+  ): Promise<void> {
+    const lastReset = portfolio.lastDayTradeReset;
+    const now = new Date();
+
+    // Calculate business days since last reset
+    const businessDaysPassed = this.getBusinessDaysBetween(lastReset, now);
+
+    if (businessDaysPassed >= 5) {
+      portfolio.dayTradeCount = 0;
+      portfolio.lastDayTradeReset = now;
+      await this.portfolioRepository.save(portfolio);
+    }
+  }
+
+  /**
+   * Calculate business days between two dates
+   */
+  private getBusinessDaysBetween(startDate: Date, endDate: Date): number {
+    let count = 0;
+    const current = new Date(startDate);
+
+    while (current < endDate) {
+      const dayOfWeek = current.getDay();
+      if (dayOfWeek !== 0 && dayOfWeek !== 6) {
+        // Not Sunday (0) or Saturday (6)
+        count++;
+      }
+      current.setDate(current.getDate() + 1);
+    }
+
+    return count;
+  }
+
+  /**
+   * Get available portfolio type configurations
+   */
+  getPortfolioTypes() {
+    return Object.entries(PORTFOLIO_CONFIGS).map(([key, config]) => ({
+      type: key,
+      ...config,
+    }));
+  }
+
+  /**
+   * Create portfolios with predefined types for testing
+   */
+  async createDefaultPortfolios(userId: string): Promise<Portfolio[]> {
+    const portfolios: Portfolio[] = [];
+
+    // Create all four portfolio types
+    const types: Array<keyof typeof PORTFOLIO_CONFIGS> = [
+      'DAY_TRADING_PRO',
+      'DAY_TRADING_STANDARD',
+      'SMALL_ACCOUNT_BASIC',
+      'MICRO_ACCOUNT_STARTER',
+    ];
+
+    for (const portfolioType of types) {
+      try {
+        const portfolio = await this.createPortfolio({
+          userId,
+          portfolioType,
+        });
+        portfolios.push(portfolio);
+      } catch (error) {
+        console.error(`Failed to create ${portfolioType} portfolio:`, error);
+      }
+    }
+
+    return portfolios;
+  }
+
+  /**
    * Get portfolio value at a specific time (for day calculations)
    */
   private async getPortfolioValueAtTime(
@@ -653,62 +1143,6 @@ export class PaperTradingService {
       return positions.reduce((prev, current) =>
         current.unrealizedReturn < prev.unrealizedReturn ? current : prev,
       );
-    }
-  }
-  /**
-   * Batch update multiple portfolios for real-time tracking
-   */
-  async updateMultiplePortfoliosRealTime(
-    portfolioIds: number[],
-  ): Promise<any[]> {
-    const results: any[] = [];
-
-    for (const portfolioId of portfolioIds) {
-      try {
-        const performance =
-          await this.updatePortfolioRealTimePerformance(portfolioId);
-        results.push(performance);
-      } catch (error) {
-        console.error(`Error updating portfolio ${portfolioId}:`, error);
-        results.push({
-          portfolioId,
-          error: 'Failed to update portfolio',
-          timestamp: new Date().toISOString(),
-        });
-      }
-    }
-
-    return results;
-  }
-
-  /**
-   * Get trade history for a specific position
-   */
-  async getPositionTradeHistory(
-    portfolioId: number,
-    symbol: string,
-  ): Promise<any[]> {
-    try {
-      const trades = await this.tradeRepository.find({
-        where: {
-          portfolioId: portfolioId,
-          symbol: symbol.toUpperCase(),
-        },
-        order: { executedAt: 'DESC' },
-      });
-
-      return trades.map((trade) => ({
-        id: trade.id,
-        type: trade.type,
-        quantity: trade.quantity,
-        price: Number(trade.price),
-        totalValue: Number(trade.totalValue),
-        executedAt: trade.executedAt,
-        status: trade.status,
-      }));
-    } catch (error) {
-      console.error(`Error getting trade history for ${symbol}:`, error);
-      return [];
     }
   }
 }

@@ -75,6 +75,12 @@ export interface SentimentScore {
   };
   impactScore: number; // 0 to 1
   timeDecay: number;
+  sources?: {
+    news: number;
+    social: number;
+    analyst: number;
+  };
+  volatilityPrediction?: number;
   timestamp: Date;
 }
 
@@ -173,4 +179,103 @@ export interface ABTestResult {
   confidence: number;
   recommendation: 'DEPLOY' | 'CONTINUE_TESTING' | 'REJECT';
   timestamp: Date;
+}
+
+// ==================== PHASE 3 (S29) INTERFACES ====================
+
+export interface MarketPrediction {
+  symbol: string;
+  timestamp: Date;
+  horizonPredictions: HorizonPrediction[];
+  ensemblePrediction: EnsemblePrediction;
+  uncertaintyBounds: UncertaintyBounds;
+  signals: TradingSignals;
+  confidence: number;
+  modelVersions: any;
+  executionTime: number;
+}
+
+export interface HorizonPrediction {
+  horizon: string;
+  predictions: ModelPrediction[];
+  ensemble: EnsemblePrediction;
+  confidence: number;
+  timestamp: Date;
+}
+
+export interface ModelPrediction {
+  modelId: string;
+  modelType: 'timeseries' | 'technical' | 'fundamental' | 'regime';
+  prediction: any;
+  weight: number;
+}
+
+export interface EnsemblePrediction {
+  returnPrediction: number;
+  priceTarget: number;
+  confidence: number;
+  horizonWeights?: number[];
+  ensembleMethod?: string;
+}
+
+export interface UncertaintyBounds {
+  prediction: number;
+  standardError: number;
+  confidenceIntervals: {
+    '68%': [number, number];
+    '95%': [number, number];
+    '99%': [number, number];
+  };
+  predictionInterval: [number, number];
+}
+
+export interface TradingSignals {
+  signal: 'STRONG_BUY' | 'BUY' | 'HOLD' | 'SELL' | 'STRONG_SELL';
+  strength: number;
+  reasoning: string;
+  thresholds: {
+    buyThreshold: number;
+    sellThreshold: number;
+    confidenceThreshold: number;
+    uncertaintyThreshold: number;
+  };
+  riskMetrics: {
+    maxDrawdown: number;
+    volatility: number;
+    sharpeRatio: number;
+  };
+  // Extended properties for Phase 3 advanced signals
+  factors?: any;
+  riskAssessment?: any;
+  timingAnalysis?: any;
+  positionSizing?: any;
+  levels?: any;
+  confidence?: number;
+  executionPriority?: 'LOW' | 'MEDIUM' | 'HIGH';
+  validUntil?: Date;
+  metadata?: {
+    generatedAt: Date;
+    version: string;
+    modelInputs: string[];
+    executionTime: number;
+  };
+}
+
+export interface AdvancedPatternRecognition {
+  symbol: string;
+  timeframes: string[];
+  patterns: DetectedPattern[];
+  confidence: number;
+  recommendation: 'BUY' | 'SELL' | 'HOLD';
+  explanation: string;
+  timestamp: Date;
+}
+
+export interface DetectedPattern {
+  type: string;
+  confidence: number;
+  timeframe: string;
+  description: string;
+  bullishness: number; // -1 to 1
+  reliability: number; // 0 to 1
 }

@@ -57,8 +57,8 @@ export class StockWebSocketGateway
       console.error(`Socket error for client ${client.id}:`, error);
     });
 
-    // Send initial stock data with error handling
-    this.sendStockUpdates(client).catch((error) => {
+    // Send initial data (stocks and portfolios) with error handling
+    this.sendInitialData(client).catch((error) => {
       console.error(
         `Failed to send initial data to client ${client.id}:`,
         error,
@@ -831,6 +831,234 @@ export class StockWebSocketGateway
       console.log(`🚨 Broadcasted system alert: ${alert.title}`);
     } catch (error) {
       console.error(`Error broadcasting system alert:`, error);
+    }
+  }
+
+  /**
+   * Send initial data (stocks and portfolios) to a newly connected client
+   */
+  async sendInitialData(client: Socket) {
+    try {
+      console.log(`Sending initial data to client ${client.id}`);
+
+      // Send stock data
+      const stocks = await this.stockService.getAllStocks();
+      if (stocks && stocks.length > 0) {
+        client.emit('stock_updates', stocks);
+        console.log(`Sent ${stocks.length} stocks to client ${client.id}`);
+      }
+
+      // Send all portfolios data
+      const portfolios = await this.paperTradingService.getPortfolios();
+      if (portfolios && portfolios.length > 0) {
+        client.emit('portfolios_update', portfolios);
+        console.log(
+          `Sent ${portfolios.length} portfolios to client ${client.id}`,
+        );
+
+        // Send detailed performance data for each portfolio
+        const portfolioPerformancePromises = portfolios.map(
+          async (portfolio) => {
+            try {
+              const enhancedPerformance =
+                await this.paperTradingService.updatePortfolioRealTimePerformance(
+                  portfolio.id,
+                );
+              return {
+                portfolioId: portfolio.id,
+                data: enhancedPerformance,
+              };
+            } catch (error) {
+              console.error(
+                `Error getting performance for portfolio ${portfolio.id}:`,
+                error,
+              );
+              return {
+                portfolioId: portfolio.id,
+                error: 'Failed to fetch performance data',
+              };
+            }
+          },
+        );
+
+        const portfolioPerformances = await Promise.all(
+          portfolioPerformancePromises,
+        );
+        client.emit('portfolios_performance_update', portfolioPerformances);
+        console.log(
+          `Sent performance data for ${portfolios.length} portfolios to client ${client.id}`,
+        );
+      }
+
+      console.log(`✅ Initial data sent successfully to client ${client.id}`);
+    } catch (error) {
+      console.error(
+        `Error sending initial data to client ${client.id}:`,
+        error,
+      );
+
+      // Send error events to client
+      client.emit('stock_error', {
+        message: 'Failed to fetch stock data',
+        timestamp: new Date().toISOString(),
+      });
+
+      client.emit('portfolios_error', {
+        message: 'Failed to fetch portfolio data',
+        timestamp: new Date().toISOString(),
+      });
+    }
+  }
+
+  /**
+   * Broadcast all portfolios data to all connected clients
+   * Useful when portfolios are created, deleted, or significantly modified
+   */
+  async broadcastAllPortfolios() {
+    try {
+      if (!this.server) {
+        console.warn('WebSocket server not initialized');
+        return;
+      }
+
+      // Get all portfolios
+      const portfolios = await this.paperTradingService.getPortfolios();
+
+      if (portfolios && portfolios.length > 0) {
+        // Send basic portfolio list to all clients
+        this.server.emit('portfolios_update', portfolios);
+
+        // Send detailed performance data for each portfolio
+        const portfolioPerformancePromises = portfolios.map(
+          async (portfolio) => {
+            try {
+              const enhancedPerformance =
+                await this.paperTradingService.updatePortfolioRealTimePerformance(
+                  portfolio.id,
+                );
+              return {
+                portfolioId: portfolio.id,
+                data: enhancedPerformance,
+              };
+            } catch (error) {
+              console.error(
+                `Error getting performance for portfolio ${portfolio.id}:`,
+                error,
+              );
+              return {
+                portfolioId: portfolio.id,
+                error: 'Failed to fetch performance data',
+              };
+            }
+          },
+        );
+
+        const portfolioPerformances = await Promise.all(
+          portfolioPerformancePromises,
+        );
+        this.server.emit(
+          'portfolios_performance_update',
+          portfolioPerformances,
+        );
+
+        console.log(
+          `📊 Broadcasted ${portfolios.length} portfolios with performance data to all clients`,
+        );
+      } else {
+        // Send empty portfolios list
+        this.server.emit('portfolios_update', []);
+        console.log('📊 Broadcasted empty portfolios list to all clients');
+      }
+    } catch (error) {
+      console.error('Error broadcasting all portfolios:', error);
+
+      // Send error to all clients
+      this.server.emit('portfolios_error', {
+        message: 'Failed to fetch portfolios data',
+        timestamp: new Date().toISOString(),
+      });
+    }
+  }
+
+  @SubscribeMessage('subscribe_portfolios')
+  handleSubscribePortfolios(@ConnectedSocket() client: Socket) {
+    console.log(`Client ${client.id} subscribed to all portfolios updates`);
+    this.sendAllPortfolios(client);
+  }
+
+  @SubscribeMessage('get_all_portfolios')
+  handleGetAllPortfolios(@ConnectedSocket() client: Socket) {
+    console.log(`Client ${client.id} requested all portfolios data`);
+    this.sendAllPortfolios(client);
+  }
+
+  /**
+   * Send all portfolios data to a specific client
+   */
+  async sendAllPortfolios(client: Socket) {
+    try {
+      console.log(`Sending all portfolios data to client ${client.id}`);
+
+      // Send all portfolios data
+      const portfolios = await this.paperTradingService.getPortfolios();
+      if (portfolios && portfolios.length > 0) {
+        client.emit('portfolios_update', portfolios);
+        console.log(
+          `Sent ${portfolios.length} portfolios to client ${client.id}`,
+        );
+
+        // Send detailed performance data for each portfolio
+        const portfolioPerformancePromises = portfolios.map(
+          async (portfolio) => {
+            try {
+              const enhancedPerformance =
+                await this.paperTradingService.updatePortfolioRealTimePerformance(
+                  portfolio.id,
+                );
+              return {
+                portfolioId: portfolio.id,
+                data: enhancedPerformance,
+              };
+            } catch (error) {
+              console.error(
+                `Error getting performance for portfolio ${portfolio.id}:`,
+                error,
+              );
+              return {
+                portfolioId: portfolio.id,
+                error: 'Failed to fetch performance data',
+              };
+            }
+          },
+        );
+
+        const portfolioPerformances = await Promise.all(
+          portfolioPerformancePromises,
+        );
+        client.emit('portfolios_performance_update', portfolioPerformances);
+        console.log(
+          `Sent performance data for ${portfolios.length} portfolios to client ${client.id}`,
+        );
+      } else {
+        // Send empty portfolios list
+        client.emit('portfolios_update', []);
+        console.log(`Sent empty portfolios list to client ${client.id}`);
+      }
+
+      console.log(
+        `✅ All portfolios data sent successfully to client ${client.id}`,
+      );
+    } catch (error) {
+      console.error(
+        `Error sending all portfolios data to client ${client.id}:`,
+        error,
+      );
+
+      // Send error event to client
+      client.emit('portfolios_error', {
+        message: 'Failed to fetch portfolios data',
+        timestamp: new Date().toISOString(),
+      });
     }
   }
 }

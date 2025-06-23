@@ -296,7 +296,8 @@ export const stories: Story[] = [
     progress: 0,
     dependencies: ["S14", "S15", "S16", "S17", "S18"],
     createdDate: "2025-06-21",
-  },  {
+  },
+  {
     id: "S20",
     title: "Implement Real-Time Notification System",
     description:
@@ -396,15 +397,17 @@ export const stories: Story[] = [
     epic: "E4",
     storyPoints: 5,
     assignee: "Data Science Team",
-    progress: 0,    dependencies: ["S22", "S23"],
+    progress: 0,
+    dependencies: ["S22", "S23"],
     createdDate: "2025-06-22",
     completedDate: "2025-06-22",
-  },  {
+  },
+  {
     id: "S27",
     title: "ML Infrastructure Implementation - Phase 1 Foundation",
     description:
       "Implement core ML infrastructure and high-impact models based on S26 audit findings. Build breakout detection ML model using neural networks with 30-40% accuracy improvement. Create dynamic risk management system with 25-35% volatility reduction. Establish feature engineering pipeline, A/B testing framework, and model monitoring with alerting. Set up GPU compute environment and model serving infrastructure. Expected ROI: 25-35% improvement in trading performance.",
-    status: "TODO", 
+    status: "TODO",
     priority: "High",
     epic: "E4",
     storyPoints: 13,
@@ -416,11 +419,11 @@ export const stories: Story[] = [
   },
   {
     id: "S28",
-    title: "ML Infrastructure Implementation - Phase 2 Intelligence", 
+    title: "ML Infrastructure Implementation - Phase 2 Intelligence",
     description:
       "Advanced ML analytics and optimization features. Implement sentiment analysis integration using NLP for financial news with 20-30% timing improvement. Build portfolio optimization algorithms using ML-enhanced Modern Portfolio Theory with 15-25% return improvement. Create advanced pattern recognition models using deep learning with 40-50% detection improvement. Develop performance attribution system with ML insights providing 25-35% strategy optimization.",
     status: "TODO",
-    priority: "High", 
+    priority: "High",
     epic: "E4",
     storyPoints: 13,
     sprint: 6,
@@ -436,7 +439,7 @@ export const stories: Story[] = [
       "Advanced predictive capabilities and ensemble systems. Build market prediction models using time series analysis and deep learning with 20-30% timing improvement. Create advanced signal generation using ensemble models with 35-45% signal accuracy improvement. Implement multi-model ensemble systems with real-time model updates and dynamic weighting. Establish ML center of excellence with automated model retraining and performance optimization.",
     status: "TODO",
     priority: "Medium",
-    epic: "E4", 
+    epic: "E4",
     storyPoints: 13,
     sprint: 7,
     assignee: "ML Engineering Team",
@@ -460,31 +463,16 @@ export const stories: Story[] = [
     createdDate: "2025-06-23",
   },
   {
-    id: "S31", 
+    id: "S31",
     title: "Enhanced Stock Cards with Expandable Categories",
     description:
       "Redesign stock cards to show summarized categories with expand/collapse functionality. Group stock information into categories: Price & Performance (current price, change, volume), Technical Indicators (RSI, MACD, moving averages), Fundamentals (P/E, market cap, dividend yield), and News & Sentiment (recent news count, sentiment score). Display category summaries by default with expand button to show detailed information. Add smooth animations for expand/collapse and optimize performance for large stock lists.",
     status: "TODO",
-    priority: "Medium", 
+    priority: "Medium",
     epic: "E3",
     storyPoints: 5,
     sprint: 3,
     assignee: "Frontend Team",
-    progress: 0,
-    dependencies: [],
-    createdDate: "2025-06-23",
-  },
-  {
-    id: "S32",
-    title: "Multiple Risk-Based Portfolio Management System",
-    description:
-      "Create multiple portfolio system with risk-based categorization. Implement 5 portfolio types: Conservative ($50k - 70% bonds, 30% blue-chip stocks), Moderate ($50k - 60% stocks, 40% bonds), Balanced ($50k - 50/50 stocks/bonds mix), Growth ($50k - 80% growth stocks, 20% bonds), and Aggressive ($50k - 95% high-growth/small-cap stocks, 5% cash). Each portfolio includes risk management strategy explanation, auto-rebalancing rules, and performance targets. Add portfolio comparison dashboard and risk assessment tools.",
-    status: "TODO",
-    priority: "High",
-    epic: "E2", 
-    storyPoints: 8,
-    sprint: 4,
-    assignee: "Backend Team",
     progress: 0,
     dependencies: [],
     createdDate: "2025-06-23",
@@ -499,7 +487,7 @@ export const stories: Story[] = [
     epic: "E3",
     storyPoints: 2,
     sprint: 3,
-    assignee: "Frontend Team", 
+    assignee: "Frontend Team",
     progress: 0,
     dependencies: [],
     createdDate: "2025-06-23",
@@ -509,19 +497,19 @@ export const stories: Story[] = [
     title: "Advanced Trading Tab in Quick Trade Interface",
     description:
       "Add an advanced trading tab to the existing QuickTrade component with sophisticated trading features. Include advanced order types (stop-limit, trailing stop, bracket orders), technical analysis tools integration, position sizing calculator based on risk percentage, advanced charting with multiple timeframes, options trading interface (if applicable), and algorithmic trading strategy selection. Add real-time P&L tracking, risk metrics display, and trade execution analytics. Ensure proper validation and risk management controls.",
-    status: "TODO", 
+    status: "TODO",
     priority: "Medium",
     epic: "E2",
     storyPoints: 8,
     sprint: 4,
     assignee: "Full Stack Team",
     progress: 0,
-    dependencies: ["S32"],
+    dependencies: [],
     createdDate: "2025-06-23",
   },
-  
+
   // === ML INFRASTRUCTURE IMPLEMENTATION PHASE STORIES ===
-  
+
   // S27 Phase 1: Foundation Infrastructure
   {
     id: "S27A",
@@ -529,7 +517,7 @@ export const stories: Story[] = [
     description:
       "Establish the foundational data pipeline for ML model training and inference. Create data ingestion services for historical and real-time market data, implement feature engineering pipeline with technical indicators calculation, establish data validation and quality checks, create data versioning and lineage tracking, and implement efficient data storage solutions optimized for ML workloads. Include automated data preprocessing, normalization, and feature extraction processes.",
     status: "TODO",
-    priority: "High", 
+    priority: "High",
     epic: "E3",
     storyPoints: 13,
     sprint: 5,
@@ -539,13 +527,13 @@ export const stories: Story[] = [
     createdDate: "2025-06-23",
   },
   {
-    id: "S27B", 
+    id: "S27B",
     title: "ML Model Training Infrastructure",
     description:
       "Set up comprehensive ML model training infrastructure including model training pipeline with automated hyperparameter tuning, cross-validation framework for model validation, experiment tracking and management system, model versioning and artifact storage, automated model evaluation and comparison tools, and integration with cloud computing resources for scalable training. Implement MLOps best practices for reproducible model development.",
     status: "TODO",
     priority: "High",
-    epic: "E3", 
+    epic: "E3",
     storyPoints: 21,
     sprint: 5,
     assignee: "ML Team",
@@ -563,7 +551,7 @@ export const stories: Story[] = [
     epic: "E3",
     storyPoints: 21,
     sprint: 5,
-    assignee: "ML Team", 
+    assignee: "ML Team",
     progress: 0,
     dependencies: ["S27B"],
     createdDate: "2025-06-23",
@@ -589,7 +577,7 @@ export const stories: Story[] = [
     description:
       "Establish comprehensive monitoring and testing framework for ML models in production. Implement model performance tracking, drift detection, and automated retraining triggers. Create A/B testing infrastructure for model comparison, establish champion/challenger model deployment patterns, implement real-time model health monitoring, and create alerting systems for model degradation. Include automated rollback capabilities and performance analytics dashboard.",
     status: "TODO",
-    priority: "High", 
+    priority: "High",
     epic: "E3",
     storyPoints: 13,
     sprint: 6,
@@ -598,15 +586,15 @@ export const stories: Story[] = [
     dependencies: ["S27D"],
     createdDate: "2025-06-23",
   },
-  
-  // S28 Phase 2: Intelligence Enhancement  
+
+  // S28 Phase 2: Intelligence Enhancement
   {
     id: "S28A",
     title: "Sentiment Analysis ML Integration",
     description:
       "Implement NLP-based sentiment analysis for market news and social media data. Create news data ingestion pipeline, implement sentiment scoring algorithms using transformer models, establish real-time sentiment monitoring, integrate sentiment signals with trading decisions, and create sentiment-based risk adjustments. Include multi-source sentiment aggregation and temporal sentiment analysis for improved timing.",
     status: "TODO",
-    priority: "Medium", 
+    priority: "Medium",
     epic: "E3",
     storyPoints: 21,
     sprint: 7,
@@ -625,14 +613,14 @@ export const stories: Story[] = [
     epic: "E3",
     storyPoints: 21,
     sprint: 7,
-    assignee: "ML Team", 
+    assignee: "ML Team",
     progress: 0,
     dependencies: ["S28A"],
     createdDate: "2025-06-23",
   },
   {
     id: "S28C",
-    title: "Advanced Pattern Recognition System", 
+    title: "Advanced Pattern Recognition System",
     description:
       "Implement deep learning-based pattern recognition for complex market patterns. Develop convolutional neural networks for chart pattern recognition, create sequence models for time series patterns, implement ensemble methods combining multiple pattern detection approaches, establish pattern confidence scoring, and integrate with trading signal generation. Include visualization tools for pattern analysis and validation.",
     status: "TODO",
@@ -643,7 +631,7 @@ export const stories: Story[] = [
     assignee: "ML Team",
     progress: 0,
     dependencies: ["S28B"],
-    createdDate: "2025-06-23", 
+    createdDate: "2025-06-23",
   },
   {
     id: "S28D",
@@ -651,7 +639,7 @@ export const stories: Story[] = [
     description:
       "Create ML-driven performance attribution system for detailed strategy analysis. Implement attribution models for factor analysis, sector allocation, and security selection. Develop machine learning models for identifying performance drivers, create automated performance reporting with ML insights, establish benchmark comparison algorithms, and integrate with portfolio analytics. Include predictive performance attribution and optimization recommendations.",
     status: "TODO",
-    priority: "Medium", 
+    priority: "Medium",
     epic: "E3",
     storyPoints: 13,
     sprint: 8,
@@ -660,10 +648,10 @@ export const stories: Story[] = [
     dependencies: ["S28C"],
     createdDate: "2025-06-23",
   },
-  
+
   // S29 Phase 3: Advanced Predictive Systems
   {
-    id: "S29A", 
+    id: "S29A",
     title: "Market Prediction ML Models",
     description:
       "Develop advanced machine learning models for market prediction using ensemble methods. Create LSTM/GRU networks for time series forecasting, implement transformer models for multi-variate prediction, establish ensemble methods combining multiple prediction approaches, create prediction confidence intervals and uncertainty quantification, and integrate with trading decision systems. Include regime-aware prediction models and adaptive forecasting.",
@@ -682,7 +670,7 @@ export const stories: Story[] = [
     title: "Advanced Signal Generation Ensemble",
     description:
       "Implement sophisticated ensemble system for trading signal generation combining multiple ML models. Create meta-learning algorithms for signal combination, implement dynamic signal weighting based on market conditions, establish signal conflict resolution mechanisms, create multi-timeframe signal fusion, and integrate with risk management systems. Include signal attribution and explainability features.",
-    status: "TODO", 
+    status: "TODO",
     priority: "Low",
     epic: "E3",
     storyPoints: 21,
@@ -699,7 +687,7 @@ export const stories: Story[] = [
       "Implement system for real-time ML model updates and online learning. Create incremental learning algorithms for model adaptation, implement streaming data processing for real-time feature updates, establish online model validation and deployment, create adaptive model selection based on market conditions, and integrate with existing ML infrastructure. Include automated model lifecycle management and performance optimization.",
     status: "TODO",
     priority: "Low",
-    epic: "E3", 
+    epic: "E3",
     storyPoints: 21,
     sprint: 10,
     assignee: "ML Team",
@@ -718,13 +706,13 @@ export const stories: Story[] = [
     storyPoints: 13,
     sprint: 10,
     assignee: "ML Team",
-    progress: 0, 
+    progress: 0,
     dependencies: ["S29C"],
     createdDate: "2025-06-23",
   },
-  
+
   // === UI/UX ENHANCEMENT STORIES ===
-  
+
   {
     id: "S35",
     title: "Notification History and Management System",
@@ -732,7 +720,7 @@ export const stories: Story[] = [
       "Extend the existing notification system with comprehensive history and management features. Create notification history storage and retrieval, implement notification search and filtering capabilities, add notification categories and tagging, create notification analytics and insights, implement notification archiving and cleanup, and add notification export functionality. Include user preferences for notification retention and advanced notification management tools.",
     status: "TODO",
     priority: "Medium",
-    epic: "E2", 
+    epic: "E2",
     storyPoints: 8,
     sprint: 5,
     assignee: "Frontend Team",
@@ -741,25 +729,10 @@ export const stories: Story[] = [
     createdDate: "2025-06-23",
   },
   {
-    id: "S36",
-    title: "Enhanced Stock Cards with Expandable Categories",
-    description:
-      "Redesign stock cards to display categorized information with expand/collapse functionality. Create summary view showing key metrics (price, change, volume), implement expandable sections for technical analysis, fundamental data, news sentiment, analyst ratings, and trading signals. Add interactive charts within cards, implement smart categorization of information, create customizable card layouts, and ensure responsive design. Include smooth animations and optimal information hierarchy.",
-    status: "TODO",
-    priority: "Medium", 
-    epic: "E2",
-    storyPoints: 8,
-    sprint: 5,
-    assignee: "Frontend Team",
-    progress: 0,
-    dependencies: [],
-    createdDate: "2025-06-23",
-  },
-  {
     id: "S37",
-    title: "Multiple Portfolio Management System",
+    title: "Four Stock-Only Portfolios with Day Trading Rules",
     description:
-      "Implement comprehensive multiple portfolio management with risk-based portfolio templates. Create portfolio templates: Conservative ($50k, 70% bonds/30% stocks), Moderate ($50k, 60% stocks/40% bonds), Aggressive ($50k, 80% stocks/20% bonds), Very Risky ($50k, growth stocks/crypto/options). Each portfolio includes investment strategy explanation, automatic rebalancing logic, risk management rules, performance tracking, and portfolio-specific analytics. Add portfolio comparison tools and switching capabilities.",
+      "Implement four distinct stock-only portfolio types with SEC day trading compliance. Create Portfolio Templates: (1) Professional Day Trader ($50,000 starting capital, day trading enabled, pattern day trading rules apply), (2) Standard Day Trader ($30,000 starting capital, day trading enabled, pattern day trading rules apply), (3) Small Investor ($1,000 starting capital, day trading restricted, no pattern day trading), (4) Micro Investor ($500 starting capital, day trading restricted, no pattern day trading). All portfolios are STOCKS ONLY - no bonds, crypto, options, or other assets. Stock selection limited to available stock data from Yahoo Finance API. Day trading portfolios ($30k+) can execute unlimited day trades but must maintain 25k minimum equity. Non-day trading portfolios ($500-$1k) limited to 3 day trades per 5 business days. Implement SEC Pattern Day Trading Rule enforcement, day trade counting and tracking, business day calculations for rule resets, educational warnings about day trading restrictions, portfolio-specific buying power calculations, and settlement period tracking for cash accounts.",
     status: "TODO",
     priority: "High",
     epic: "E2",
@@ -780,7 +753,7 @@ export const stories: Story[] = [
     epic: "E2",
     storyPoints: 3,
     sprint: 6,
-    assignee: "Frontend Team", 
+    assignee: "Frontend Team",
     progress: 0,
     dependencies: [],
     createdDate: "2025-06-23",

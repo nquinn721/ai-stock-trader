@@ -51,14 +51,57 @@ const PriceChart: React.FC<PriceChartProps> = ({
     const isOpen = isWeekday && hour >= 9 && hour < 16;
 
     return { isOpen };
-  }, []);
+  }, []); // Fetch historical data from backend
+  const fetchHistoricalData = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      console.log(`📊 Fetching historical data for ${symbol}`);
+      const response = await fetch(
+        `http://localhost:8000/stocks/${symbol}/history?period=${period}`
+      );
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log(`📊 Received historical data for ${symbol}:`, data);
+      if (data && Array.isArray(data)) {
+        const pricePoints: PricePoint[] = data.map(
+          (point: any, index: number) => ({
+            time: point.date || `${Date.now() - (data.length - index) * 60000}`,
+            timestamp: point.date
+              ? new Date(point.date).getTime()
+              : Date.now() - (data.length - index) * 60000,
+            price: point.close || point.price || currentPrice,
+            volume: point.volume,
+          })
+        );
+
+        setPriceHistory(pricePoints);
+        console.log(`📊 Set ${pricePoints.length} price points for ${symbol}`);
+      } else {
+        console.warn(`📊 Invalid data format for ${symbol}:`, data);
+        setPriceHistory([]);
+      }
+    } catch (error) {
+      console.error(`📊 Error fetching historical data for ${symbol}:`, error);
+      setPriceHistory([]);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [symbol, period, currentPrice]);
   useEffect(() => {
     setMarketSession(checkMarketHours());
+    fetchHistoricalData();
 
-    // No real price data available
-    console.log(`📊 No real price data available for ${symbol}`);
-    setPriceHistory([]);
-    setIsLoading(false);
+    // Set up periodic refresh for live data
+    if (showRealTime) {
+      const refreshInterval = setInterval(() => {
+        fetchHistoricalData();
+      }, interval);
+      intervalRef.current = refreshInterval;
+    }
+
     return () => {
       // eslint-disable-next-line react-hooks/exhaustive-deps
       const currentInterval = intervalRef.current;
@@ -72,7 +115,14 @@ const PriceChart: React.FC<PriceChartProps> = ({
       }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentPrice, symbol, showRealTime, interval, period, checkMarketHours]);
+  }, [
+    symbol,
+    period,
+    fetchHistoricalData,
+    checkMarketHours,
+    showRealTime,
+    interval,
+  ]);
 
   const renderChart = () => {
     if (isLoading) {

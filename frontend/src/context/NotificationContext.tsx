@@ -180,7 +180,6 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
   }, [socket, userId, isSubscribed]);
 
   // === API Actions ===
-
   const getNotifications = useCallback(
     async (filter: NotificationFilter = {}) => {
       try {
@@ -192,15 +191,22 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
           offset: filter.offset || 0,
         });
 
+        // Ensure result.notifications is always an array
+        const notifications = Array.isArray(result.notifications)
+          ? result.notifications
+          : [];
+
         if (filter.offset === 0) {
           // Replace notifications for new search
-          setNotifications(result.notifications);
+          setNotifications(notifications);
         } else {
           // Append for pagination
-          setNotifications((prev) => [...prev, ...result.notifications]);
+          setNotifications((prev) => [...prev, ...notifications]);
         }
       } catch (error) {
         console.error("Failed to get notifications:", error);
+        // Set empty array on error to prevent iteration issues
+        setNotifications([]);
       } finally {
         setIsLoading(false);
       }

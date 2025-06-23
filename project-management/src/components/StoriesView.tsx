@@ -1,5 +1,7 @@
 import {
   Block as BlockedIcon,
+  TaskAlt as CompleteIcon,
+  Delete as DeleteIcon,
   CheckCircle as DoneIcon,
   PauseCircleFilled as PauseCircleFilledIcon,
   RadioButtonUnchecked as TodoIcon,
@@ -7,16 +9,23 @@ import {
 import {
   Avatar,
   Box,
+  Button,
   Card,
   CardContent,
   Chip,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  IconButton,
   LinearProgress,
   Stack,
   Tooltip,
   Typography,
 } from "@mui/material";
-import React from "react";
+import React, { useState } from "react";
 import { stories } from "../data/stories";
+import { Story } from "../data/types";
 
 const getStatusMeta = (status: string) => {
   switch (status) {
@@ -60,7 +69,46 @@ const getPriorityColor = (priority: string) => {
 };
 
 const StoriesView: React.FC = () => {
-  if (!stories.length) {
+  const [localStories, setLocalStories] = useState<Story[]>(stories);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [storyToDelete, setStoryToDelete] = useState<string | null>(null);
+
+  const handleMarkComplete = (storyId: string) => {
+    setLocalStories((prev) =>
+      prev.map((story) =>
+        story.id === storyId
+          ? {
+              ...story,
+              status: "DONE" as const,
+              progress: 100,
+              completedDate: new Date().toISOString().split("T")[0],
+            }
+          : story
+      )
+    );
+  };
+
+  const handleDeleteStory = (storyId: string) => {
+    setStoryToDelete(storyId);
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = () => {
+    if (storyToDelete) {
+      setLocalStories((prev) =>
+        prev.filter((story) => story.id !== storyToDelete)
+      );
+      setStoryToDelete(null);
+    }
+    setDeleteDialogOpen(false);
+  };
+
+  const cancelDelete = () => {
+    setStoryToDelete(null);
+    setDeleteDialogOpen(false);
+  };
+
+  if (!localStories.length) {
     return (
       <Box sx={{ mt: 6, textAlign: "center" }}>
         <Typography variant="h5" color="textSecondary">
@@ -82,7 +130,8 @@ const StoriesView: React.FC = () => {
           gap: 3,
         }}
       >
-        {stories.map((story) => {
+        {" "}
+        {localStories.map((story) => {
           const statusMeta = getStatusMeta(story.status);
           return (
             <Card
@@ -103,6 +152,48 @@ const StoriesView: React.FC = () => {
                     color={getPriorityColor(story.priority) as any}
                   />
                 </Stack>
+
+                {/* Management Actions */}
+                <Stack
+                  direction="row"
+                  spacing={1}
+                  mb={2}
+                  justifyContent="flex-end"
+                >
+                  {story.status !== "DONE" && (
+                    <Tooltip title="Mark as Complete">
+                      <IconButton
+                        size="small"
+                        color="success"
+                        onClick={() => handleMarkComplete(story.id)}
+                        sx={{
+                          backgroundColor: "rgba(76, 175, 80, 0.1)",
+                          "&:hover": {
+                            backgroundColor: "rgba(76, 175, 80, 0.2)",
+                          },
+                        }}
+                      >
+                        <CompleteIcon fontSize="small" />
+                      </IconButton>
+                    </Tooltip>
+                  )}
+                  <Tooltip title="Delete Story">
+                    <IconButton
+                      size="small"
+                      color="error"
+                      onClick={() => handleDeleteStory(story.id)}
+                      sx={{
+                        backgroundColor: "rgba(244, 67, 54, 0.1)",
+                        "&:hover": {
+                          backgroundColor: "rgba(244, 67, 54, 0.2)",
+                        },
+                      }}
+                    >
+                      <DeleteIcon fontSize="small" />
+                    </IconButton>
+                  </Tooltip>
+                </Stack>
+
                 <Typography
                   variant="body2"
                   color="textSecondary"
@@ -167,11 +258,35 @@ const StoriesView: React.FC = () => {
                     </Stack>
                   </Box>
                 )}
+                {story.completedDate && (
+                  <Box mt={1}>
+                    <Typography variant="caption" color="success.main">
+                      Completed: {story.completedDate}
+                    </Typography>
+                  </Box>
+                )}
               </CardContent>
             </Card>
           );
         })}
       </Box>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={deleteDialogOpen} onClose={cancelDelete}>
+        <DialogTitle>Confirm Delete</DialogTitle>
+        <DialogContent>
+          <Typography>
+            Are you sure you want to delete story {storyToDelete}? This action
+            cannot be undone.
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={cancelDelete}>Cancel</Button>
+          <Button onClick={confirmDelete} color="error" variant="contained">
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };

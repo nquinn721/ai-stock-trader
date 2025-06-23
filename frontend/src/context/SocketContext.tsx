@@ -20,8 +20,10 @@ interface SocketContextType {
   tradingSignals: TradingSignal[];
   news: News[];
   portfolioUpdates: Map<number, PortfolioUpdate>;
+  allPortfolios: any[];
   subscribeToPortfolio: (portfolioId: number) => void;
   unsubscribeFromPortfolio: (portfolioId: number) => void;
+  requestAllPortfolios: () => void;
   getPortfolioPerformance: (portfolioId: number) => Promise<any>;
   getPositionDetails: (portfolioId: number, symbol: string) => Promise<any>;
   getPortfolioAnalytics: (portfolioId: number) => Promise<PortfolioAnalytics>;
@@ -47,8 +49,10 @@ const SocketContext = createContext<SocketContextType>({
   tradingSignals: [],
   news: [],
   portfolioUpdates: new Map(),
+  allPortfolios: [],
   subscribeToPortfolio: () => {},
   unsubscribeFromPortfolio: () => {},
+  requestAllPortfolios: () => {},
   getPortfolioPerformance: async () => null,
   getPositionDetails: async () => null,
   getPortfolioAnalytics: async () => ({} as PortfolioAnalytics),
@@ -84,6 +88,7 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
   const [portfolioUpdates, setPortfolioUpdates] = useState<
     Map<number, PortfolioUpdate>
   >(new Map());
+  const [allPortfolios, setAllPortfolios] = useState<any[]>([]);
 
   const subscribeToPortfolio = (portfolioId: number) => {
     if (socket && isConnected) {
@@ -91,11 +96,17 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
       socket.emit("subscribe_portfolio", { portfolioId });
     }
   };
-
   const unsubscribeFromPortfolio = (portfolioId: number) => {
     if (socket && isConnected) {
       console.log(`📉 Unsubscribing from portfolio ${portfolioId}`);
       socket.emit("unsubscribe_portfolio", { portfolioId });
+    }
+  };
+
+  const requestAllPortfolios = () => {
+    if (socket && isConnected) {
+      console.log("📊 Requesting all portfolios");
+      socket.emit("subscribe_all_portfolios");
     }
   };
   const getPortfolioPerformance = async (portfolioId: number): Promise<any> => {
@@ -393,11 +404,12 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
       reconnectionDelay: 1000,
       reconnectionAttempts: 5,
     });
-
     newSocket.on("connect", () => {
       console.log("✅ Connected to WebSocket server");
       setIsConnected(true);
       newSocket.emit("subscribe_stocks");
+      // Request all portfolios on connection
+      newSocket.emit("subscribe_all_portfolios");
     });
 
     newSocket.on("disconnect", (reason) => {
@@ -454,13 +466,31 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
         return newMap;
       });
     });
-
     newSocket.on(
       "portfolio_error",
       (error: { portfolioId: number; message: string; timestamp: string }) => {
         console.error(`❌ Portfolio error for ${error.portfolioId}:`, error);
       }
     );
+
+    // Handle new portfolio events
+    newSocket.on("portfolios_update", (data: any[]) => {
+      console.log(
+        "📊 Received all portfolios update:",
+        data.length,
+        "portfolios"
+      );
+      setAllPortfolios(data);
+    });
+
+    newSocket.on("portfolios_performance_update", (data: any[]) => {
+      console.log(
+        "📈 Received all portfolios performance update:",
+        data.length,
+        "portfolios"
+      );
+      setAllPortfolios(data);
+    });
 
     setSocket(newSocket);
     return () => {
@@ -498,8 +528,10 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
     tradingSignals,
     news,
     portfolioUpdates,
+    allPortfolios,
     subscribeToPortfolio,
     unsubscribeFromPortfolio,
+    requestAllPortfolios,
     getPortfolioPerformance,
     getPositionDetails,
     getPortfolioAnalytics,

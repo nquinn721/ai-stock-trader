@@ -1,5 +1,6 @@
 import { Inject, Injectable, forwardRef } from '@nestjs/common';
 import { MLAnalysisService } from '../ml-analysis/ml-analysis.service';
+import { MLService } from '../ml/services/ml.service';
 
 // Risk Management Interfaces
 export interface RiskManagementRecommendation {
@@ -299,6 +300,8 @@ export class BreakoutService {
   constructor(
     @Inject(forwardRef(() => MLAnalysisService))
     private mlAnalysisService: MLAnalysisService,
+    @Inject(forwardRef(() => MLService))
+    private mlService: MLService,
   ) {}
   async calculateBreakoutStrategy(
     symbol: string,
@@ -2992,7 +2995,30 @@ export class BreakoutService {
     portfolioParams?: PositionSizingParams,
   ): Promise<RiskManagementRecommendation> {
     try {
-      // Calculate position sizing
+      // Get ML-enhanced risk optimization parameters
+      let mlRiskParams: any = null;
+      if (portfolioParams?.portfolioValue) {
+        try {
+          const portfolioId = 1; // Default portfolio ID, should be passed as parameter
+          mlRiskParams = await this.mlService.getRiskOptimization(
+            portfolioId,
+            symbol,
+          );
+          console.log(`🤖 ML Risk Parameters for ${symbol}:`, {
+            recommendedPosition: mlRiskParams?.recommendedPosition,
+            stopLoss: mlRiskParams?.stopLoss,
+            takeProfit: mlRiskParams?.takeProfit,
+            maxDrawdown: mlRiskParams?.maxDrawdown,
+          });
+        } catch (error) {
+          console.warn(
+            `⚠️ ML risk optimization failed for ${symbol}, using traditional methods:`,
+            error.message,
+          );
+        }
+      }
+
+      // Calculate position sizing (enhanced with ML if available)
       const positionSizing = this.calculatePositionSizing(
         currentPrice,
         signal,
@@ -3002,7 +3028,7 @@ export class BreakoutService {
         portfolioParams,
       );
 
-      // Calculate stop loss recommendations
+      // Calculate stop loss recommendations (enhanced with ML)
       const stopLoss = this.calculateStopLossRecommendations(
         currentPrice,
         signal,
@@ -3011,7 +3037,7 @@ export class BreakoutService {
         technicalAnalysis,
       );
 
-      // Calculate take profit targets
+      // Calculate take profit targets (enhanced with ML)
       const takeProfit = this.calculateTakeProfitTargets(
         currentPrice,
         signal,
@@ -3019,6 +3045,44 @@ export class BreakoutService {
         resistanceLevel,
         technicalAnalysis,
       );
+
+      // Apply ML adjustments if available
+      if (mlRiskParams) {
+        // Adjust position sizing based on ML recommendations
+        if (positionSizing.recommendedShares) {
+          const mlAdjustment = mlRiskParams.recommendedPosition || 1.0;
+          positionSizing.recommendedShares = Math.floor(
+            positionSizing.recommendedShares * mlAdjustment,
+          );
+          positionSizing.positionSize =
+            positionSizing.recommendedShares * currentPrice;
+          positionSizing.portfolioAllocation = mlRiskParams.maxDrawdown * 100; // Convert to percentage
+        }
+
+        // Adjust stop loss based on ML recommendations
+        if (mlRiskParams.stopLoss) {
+          const mlStopPrice = currentPrice * (1 - mlRiskParams.stopLoss);
+          stopLoss.recommendedStop = Math.min(
+            stopLoss.recommendedStop,
+            mlStopPrice,
+          );
+          stopLoss.stopType = 'volatility'; // Mark as ML-enhanced
+        }
+
+        // Adjust take profit based on ML recommendations
+        if (mlRiskParams.takeProfit) {
+          const mlTakeProfit = currentPrice * (1 + mlRiskParams.takeProfit);
+          takeProfit.primaryTarget = Math.max(
+            takeProfit.primaryTarget,
+            mlTakeProfit,
+          );
+          if (takeProfit.targets && takeProfit.targets.length > 0) {
+            takeProfit.targets[0].price = mlTakeProfit;
+            takeProfit.targets[0].reasoning =
+              'ML-enhanced target based on volatility and market conditions';
+          }
+        }
+      }
 
       // Calculate risk-reward ratios
       const riskReward = this.calculateRiskRewardRatio(

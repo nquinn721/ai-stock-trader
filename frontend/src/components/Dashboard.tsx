@@ -68,7 +68,9 @@ const Dashboard: React.FC = () => {
   }
 
   return (
-    <div className="dashboard">      <header className="dashboard-header">
+    <div className="dashboard">
+      {" "}
+      <header className="dashboard-header">
         <h1>Stock Trading Dashboard</h1>
         <div className="header-info">
           <div

@@ -11,9 +11,20 @@ import {
 export class Portfolio {
   @PrimaryGeneratedColumn()
   id: number;
-
   @Column({ type: 'varchar', length: 100 })
   name: string;
+
+  @Column({ type: 'varchar', length: 50, default: 'BASIC' })
+  portfolioType: string; // DAY_TRADING_PRO, DAY_TRADING_STANDARD, SMALL_ACCOUNT_BASIC, MICRO_ACCOUNT_STARTER
+
+  @Column({ type: 'boolean', default: false })
+  dayTradingEnabled: boolean;
+
+  @Column({ type: 'int', default: 0 })
+  dayTradeCount: number; // Tracks day trades in rolling 5 business day period
+
+  @Column({ type: 'date', nullable: true })
+  lastDayTradeReset: Date; // Last time day trade count was reset
 
   @Column({ type: 'decimal', precision: 15, scale: 2, default: 100000 })
   initialCash: number;
