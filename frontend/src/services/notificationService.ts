@@ -291,6 +291,217 @@ class NotificationService {
     }
   }
 
+  // === S30: Notification History and Management ===
+
+  /**
+   * Get notification analytics for a user
+   */
+  async getNotificationAnalytics(userId: string): Promise<{
+    summary: {
+      total: number;
+      unread: number;
+      recent: number;
+      readRate: string;
+    };
+    byType: Array<{ type: string; count: number }>;
+    byPriority: Array<{ priority: string; count: number }>;
+    dailyActivity: Array<{ date: string; count: number }>;
+  }> {
+    try {
+      const response = await axios.get(`${this.baseURL}/analytics`, {
+        params: { userId },
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Failed to get notification analytics:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get notification history with filtering and pagination
+   */
+  async getNotificationHistory(
+    userId: string,
+    page: number = 1,
+    limit: number = 20,
+    filters?: {
+      type?: NotificationType;
+      priority?: string;
+      status?: string;
+      dateFrom?: Date;
+      dateTo?: Date;
+      tags?: string[];
+    }
+  ): Promise<{
+    notifications: Notification[];
+    total: number;
+    page: number;
+    totalPages: number;
+  }> {
+    try {
+      const params = new URLSearchParams();
+      params.append("userId", userId);
+      params.append("page", page.toString());
+      params.append("limit", limit.toString());
+
+      if (filters?.type) params.append("type", filters.type);
+      if (filters?.priority) params.append("priority", filters.priority);
+      if (filters?.status) params.append("status", filters.status);
+      if (filters?.dateFrom) params.append("dateFrom", filters.dateFrom.toISOString());
+      if (filters?.dateTo) params.append("dateTo", filters.dateTo.toISOString());
+      if (filters?.tags) filters.tags.forEach(tag => params.append("tags", tag));
+
+      const response = await axios.get(`${this.baseURL}/history`, { params });
+      return response.data;
+    } catch (error) {
+      console.error("Failed to get notification history:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * Search notifications by content or metadata
+   */
+  async searchNotifications(
+    userId: string,
+    query: string,
+    page: number = 1,
+    limit: number = 20
+  ): Promise<{
+    notifications: Notification[];
+    total: number;
+    page: number;
+    totalPages: number;
+  }> {
+    try {
+      const params = new URLSearchParams();
+      params.append("userId", userId);
+      params.append("query", query);
+      params.append("page", page.toString());
+      params.append("limit", limit.toString());
+
+      const response = await axios.get(`${this.baseURL}/search`, { params });
+      return response.data;
+    } catch (error) {
+      console.error("Failed to search notifications:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * Bulk delete notifications
+   */
+  async bulkDeleteNotifications(
+    userId: string,
+    notificationIds: string[]
+  ): Promise<{ deleted: number }> {
+    try {
+      const response = await axios.delete(`${this.baseURL}/bulk/delete`, {
+        data: { userId, notificationIds },
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Failed to bulk delete notifications:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * Bulk archive notifications (mark as dismissed)
+   */
+  async bulkArchiveNotifications(
+    userId: string,
+    notificationIds: string[]
+  ): Promise<{ archived: number }> {
+    try {
+      const response = await axios.post(`${this.baseURL}/bulk/archive`, {
+        userId,
+        notificationIds,
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Failed to bulk archive notifications:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * Export notifications to various formats
+   */
+  async exportNotifications(
+    userId: string,
+    format: 'json' | 'csv' = 'json',
+    filters?: {
+      type?: NotificationType;
+      priority?: string;
+      status?: string;
+      dateFrom?: Date;
+      dateTo?: Date;
+    }
+  ): Promise<{ data: any; filename: string; contentType: string }> {
+    try {
+      const params = new URLSearchParams();
+      params.append("userId", userId);
+      params.append("format", format);
+
+      if (filters?.type) params.append("type", filters.type);
+      if (filters?.priority) params.append("priority", filters.priority);
+      if (filters?.status) params.append("status", filters.status);
+      if (filters?.dateFrom) params.append("dateFrom", filters.dateFrom.toISOString());
+      if (filters?.dateTo) params.append("dateTo", filters.dateTo.toISOString());
+
+      const response = await axios.get(`${this.baseURL}/export`, {
+        params,
+        responseType: 'blob' // Handle file downloads
+      });
+
+      return {
+        data: response.data,
+        filename: response.headers['content-disposition']?.split('filename=')[1] || `notifications.${format}`,
+        contentType: response.headers['content-type'] || (format === 'csv' ? 'text/csv' : 'application/json'),
+      };
+    } catch (error) {
+      console.error("Failed to export notifications:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * Add tags to a notification
+   */
+  async addTagsToNotification(
+    userId: string,
+    notificationId: string,
+    tags: string[]
+  ): Promise<Notification> {
+    try {
+      const response = await axios.post(`${this.baseURL}/${notificationId}/tags`, {
+        userId,
+        tags,
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Failed to add tags to notification:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * Download exported file helper
+   */
+  downloadFile(data: Blob, filename: string, contentType: string): void {
+    const blob = new Blob([data], { type: contentType });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+  }
+
   // === Utility Methods ===
 
   async healthCheck(): Promise<boolean> {

@@ -759,8 +759,385 @@ export class NotificationService {
       this.logger.error(
         `Failed to cleanup old notifications: ${error.message}`,
         error.stack,
+      );      return 0;
+    }
+  }
+
+  // === S30: Notification History and Management ===
+  
+  /**
+   * Get notification analytics for a user
+   */
+  async getNotificationAnalytics(userId: string): Promise<any> {
+    try {
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+      // Get basic counts
+      const totalNotifications = await this.notificationRepository.count({
+        where: { userId },
+      });      const unreadCount = await this.notificationRepository.count({
+        where: { 
+          userId, 
+          status: NotificationStatus.PENDING 
+        },
+      });
+
+      const recentNotifications = await this.notificationRepository.count({
+        where: { 
+          userId, 
+          createdAt: Between(thirtyDaysAgo, new Date()) 
+        },
+      });
+
+      // Get notifications by type
+      const typeStats = await this.notificationRepository
+        .createQueryBuilder('notification')
+        .select('notification.type', 'type')
+        .addSelect('COUNT(*)', 'count')
+        .where('notification.userId = :userId', { userId })
+        .groupBy('notification.type')
+        .getRawMany();
+
+      // Get notifications by priority
+      const priorityStats = await this.notificationRepository
+        .createQueryBuilder('notification')
+        .select('notification.priority', 'priority')
+        .addSelect('COUNT(*)', 'count')
+        .where('notification.userId = :userId', { userId })
+        .groupBy('notification.priority')
+        .getRawMany();
+
+      // Get daily activity for last 30 days
+      const dailyActivity = await this.notificationRepository
+        .createQueryBuilder('notification')
+        .select('DATE(notification.createdAt)', 'date')
+        .addSelect('COUNT(*)', 'count')
+        .where('notification.userId = :userId', { userId })
+        .andWhere('notification.createdAt >= :startDate', { startDate: thirtyDaysAgo })
+        .groupBy('DATE(notification.createdAt)')
+        .orderBy('date', 'ASC')
+        .getRawMany();
+
+      return {
+        summary: {
+          total: totalNotifications,
+          unread: unreadCount,
+          recent: recentNotifications,
+          readRate: totalNotifications > 0 ? ((totalNotifications - unreadCount) / totalNotifications * 100).toFixed(2) : 0,
+        },
+        byType: typeStats.map(stat => ({
+          type: stat.type,
+          count: parseInt(stat.count),
+        })),
+        byPriority: priorityStats.map(stat => ({
+          priority: stat.priority,
+          count: parseInt(stat.count),
+        })),
+        dailyActivity: dailyActivity.map(day => ({
+          date: day.date,
+          count: parseInt(day.count),
+        })),
+      };
+    } catch (error) {
+      this.logger.error(
+        `Failed to get notification analytics for user ${userId}: ${error.message}`,
+        error.stack,
       );
-      return 0;
+      throw error;
+    }
+  }
+
+  /**
+   * Get notification history with filtering and pagination
+   */
+  async getNotificationHistory(
+    userId: string,
+    page: number = 1,
+    limit: number = 20,
+    filters?: {
+      type?: NotificationType;
+      priority?: NotificationPriority;
+      status?: NotificationStatus;
+      dateFrom?: Date;
+      dateTo?: Date;
+      tags?: string[];
+    }
+  ): Promise<{
+    notifications: NotificationEntity[];
+    total: number;
+    page: number;
+    totalPages: number;
+  }> {
+    try {
+      const queryBuilder = this.notificationRepository
+        .createQueryBuilder('notification')
+        .where('notification.userId = :userId', { userId });
+
+      // Apply filters
+      if (filters?.type) {
+        queryBuilder.andWhere('notification.type = :type', { type: filters.type });
+      }
+      if (filters?.priority) {
+        queryBuilder.andWhere('notification.priority = :priority', { priority: filters.priority });
+      }
+      if (filters?.status) {
+        queryBuilder.andWhere('notification.status = :status', { status: filters.status });
+      }
+      if (filters?.dateFrom) {
+        queryBuilder.andWhere('notification.createdAt >= :dateFrom', { dateFrom: filters.dateFrom });
+      }
+      if (filters?.dateTo) {
+        queryBuilder.andWhere('notification.createdAt <= :dateTo', { dateTo: filters.dateTo });
+      }      if (filters?.tags && filters.tags.length > 0) {
+        // Use metadata field for tags since tags field doesn't exist
+        queryBuilder.andWhere('JSON_EXTRACT(notification.metadata, "$.tags") && :tags', { tags: filters.tags });
+      }
+
+      // Get total count
+      const total = await queryBuilder.getCount();
+
+      // Apply pagination and get results
+      const notifications = await queryBuilder
+        .orderBy('notification.createdAt', 'DESC')
+        .skip((page - 1) * limit)
+        .take(limit)
+        .getMany();
+
+      return {
+        notifications,
+        total,
+        page,
+        totalPages: Math.ceil(total / limit),
+      };
+    } catch (error) {
+      this.logger.error(
+        `Failed to get notification history for user ${userId}: ${error.message}`,
+        error.stack,
+      );
+      throw error;
+    }
+  }
+
+  /**
+   * Search notifications by content or metadata
+   */
+  async searchNotifications(
+    userId: string,
+    query: string,
+    page: number = 1,
+    limit: number = 20
+  ): Promise<{
+    notifications: NotificationEntity[];
+    total: number;
+    page: number;
+    totalPages: number;
+  }> {
+    try {
+      const queryBuilder = this.notificationRepository
+        .createQueryBuilder('notification')
+        .where('notification.userId = :userId', { userId })
+        .andWhere(
+          '(notification.title ILIKE :query OR notification.message ILIKE :query OR notification.metadata::text ILIKE :query)',
+          { query: `%${query}%` }
+        );
+
+      const total = await queryBuilder.getCount();
+
+      const notifications = await queryBuilder
+        .orderBy('notification.createdAt', 'DESC')
+        .skip((page - 1) * limit)
+        .take(limit)
+        .getMany();
+
+      return {
+        notifications,
+        total,
+        page,
+        totalPages: Math.ceil(total / limit),
+      };
+    } catch (error) {
+      this.logger.error(
+        `Failed to search notifications for user ${userId}: ${error.message}`,
+        error.stack,
+      );
+      throw error;
+    }
+  }
+  /**
+   * Bulk delete notifications
+   */
+  async bulkDeleteNotifications(
+    userId: string,
+    notificationIds: string[]
+  ): Promise<{ deleted: number }> {
+    try {
+      // Convert string IDs to numbers
+      const numericIds = notificationIds.map(id => parseInt(id));
+      
+      const result = await this.notificationRepository
+        .createQueryBuilder()
+        .delete()
+        .where('id IN (:...ids)', { ids: numericIds })
+        .andWhere('userId = :userId', { userId })
+        .execute();
+
+      this.logger.log(`Bulk deleted ${result.affected} notifications for user ${userId}`);
+      return { deleted: result.affected || 0 };
+    } catch (error) {
+      this.logger.error(
+        `Failed to bulk delete notifications for user ${userId}: ${error.message}`,
+        error.stack,
+      );
+      throw error;
+    }
+  }
+
+  /**
+   * Bulk archive notifications (mark as dismissed)
+   */
+  async bulkArchiveNotifications(
+    userId: string,
+    notificationIds: string[]
+  ): Promise<{ archived: number }> {
+    try {
+      // Convert string IDs to numbers
+      const numericIds = notificationIds.map(id => parseInt(id));
+      
+      const result = await this.notificationRepository
+        .createQueryBuilder()
+        .update()
+        .set({
+          status: NotificationStatus.DISMISSED,
+          dismissedAt: new Date(),
+        })
+        .where('id IN (:...ids)', { ids: numericIds })
+        .andWhere('userId = :userId', { userId })
+        .execute();
+
+      this.logger.log(`Bulk archived ${result.affected} notifications for user ${userId}`);
+      return { archived: result.affected || 0 };
+    } catch (error) {
+      this.logger.error(
+        `Failed to bulk archive notifications for user ${userId}: ${error.message}`,
+        error.stack,
+      );
+      throw error;
+    }
+  }
+
+  /**
+   * Export notifications to various formats
+   */
+  async exportNotifications(
+    userId: string,
+    format: 'json' | 'csv' = 'json',
+    filters?: {
+      type?: NotificationType;
+      priority?: NotificationPriority;
+      status?: NotificationStatus;
+      dateFrom?: Date;
+      dateTo?: Date;
+    }
+  ): Promise<{ data: any; filename: string; contentType: string }> {
+    try {
+      const queryBuilder = this.notificationRepository
+        .createQueryBuilder('notification')
+        .where('notification.userId = :userId', { userId });
+
+      // Apply filters (same as history method)
+      if (filters?.type) {
+        queryBuilder.andWhere('notification.type = :type', { type: filters.type });
+      }
+      if (filters?.priority) {
+        queryBuilder.andWhere('notification.priority = :priority', { priority: filters.priority });
+      }
+      if (filters?.status) {
+        queryBuilder.andWhere('notification.status = :status', { status: filters.status });
+      }
+      if (filters?.dateFrom) {
+        queryBuilder.andWhere('notification.createdAt >= :dateFrom', { dateFrom: filters.dateFrom });
+      }
+      if (filters?.dateTo) {
+        queryBuilder.andWhere('notification.createdAt <= :dateTo', { dateTo: filters.dateTo });
+      }
+
+      const notifications = await queryBuilder
+        .orderBy('notification.createdAt', 'DESC')
+        .getMany();
+
+      const dateStr = new Date().toISOString().split('T')[0];
+
+      if (format === 'json') {
+        return {
+          data: JSON.stringify(notifications, null, 2),
+          filename: `notifications-${dateStr}.json`,
+          contentType: 'application/json',
+        };
+      } else if (format === 'csv') {
+        // Convert to CSV format
+        const csvHeader = 'ID,Type,Priority,Status,Title,Message,Created At,Read At,Dismissed At\n';
+        const csvRows = notifications.map(n => {
+          const title = (n.title || '').replace(/"/g, '""');
+          const message = (n.message || '').replace(/"/g, '""');
+          const createdAt = n.createdAt?.toISOString() || '';
+          const readAt = n.readAt?.toISOString() || '';
+          const dismissedAt = n.dismissedAt?.toISOString() || '';
+          return `"${n.id}","${n.type}","${n.priority}","${n.status}","${title}","${message}","${createdAt}","${readAt}","${dismissedAt}"`;
+        }).join('\n');
+
+        return {
+          data: csvHeader + csvRows,
+          filename: `notifications-${dateStr}.csv`,
+          contentType: 'text/csv',
+        };
+      }
+
+      throw new Error(`Unsupported export format: ${format}`);
+    } catch (error) {
+      this.logger.error(
+        `Failed to export notifications for user ${userId}: ${error.message}`,
+        error.stack,
+      );
+      throw error;
+    }
+  }
+
+  /**
+   * Add tags to a notification
+   */  async addTagsToNotification(
+    userId: string,
+    notificationId: string,
+    tags: string[]
+  ): Promise<NotificationEntity> {
+    try {
+      const notification = await this.notificationRepository.findOne({
+        where: { id: parseInt(notificationId), userId },
+      });
+
+      if (!notification) {
+        throw new Error('Notification not found');
+      }
+
+      // Use metadata field to store tags since tags field doesn't exist in entity
+      const existingMetadata = notification.metadata || {};
+      const existingTags = existingMetadata.tags || [];
+      const uniqueTags = [...new Set([...existingTags, ...tags])];
+
+      notification.metadata = {
+        ...existingMetadata,
+        tags: uniqueTags,
+      };
+      await this.notificationRepository.save(notification);
+
+      this.logger.log(`Added tags to notification ${notificationId} for user ${userId}`);
+      return notification;
+    } catch (error) {
+      this.logger.error(
+        `Failed to add tags to notification ${notificationId} for user ${userId}: ${error.message}`,
+        error.stack,
+      );
+      throw error;
     }
   }
 }

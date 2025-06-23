@@ -407,7 +407,7 @@ export const stories: Story[] = [
     title: "ML Infrastructure Implementation - Phase 1 Foundation",
     description:
       "Implement core ML infrastructure and high-impact models based on S26 audit findings. Build breakout detection ML model using neural networks with 30-40% accuracy improvement. Create dynamic risk management system with 25-35% volatility reduction. Establish feature engineering pipeline, A/B testing framework, and model monitoring with alerting. Set up GPU compute environment and model serving infrastructure. Expected ROI: 25-35% improvement in trading performance.",
-    status: "TODO",
+    status: "DONE",
     priority: "High",
     epic: "E4",
     storyPoints: 13,
@@ -422,7 +422,7 @@ export const stories: Story[] = [
     title: "ML Infrastructure Implementation - Phase 2 Intelligence",
     description:
       "Advanced ML analytics and optimization features. Implement sentiment analysis integration using NLP for financial news with 20-30% timing improvement. Build portfolio optimization algorithms using ML-enhanced Modern Portfolio Theory with 15-25% return improvement. Create advanced pattern recognition models using deep learning with 40-50% detection improvement. Develop performance attribution system with ML insights providing 25-35% strategy optimization.",
-    status: "TODO",
+    status: "DONE",
     priority: "High",
     epic: "E4",
     storyPoints: 13,
@@ -437,7 +437,7 @@ export const stories: Story[] = [
     title: "ML Infrastructure Implementation - Phase 3 Advanced Systems",
     description:
       "Advanced predictive capabilities and ensemble systems. Build market prediction models using time series analysis and deep learning with 20-30% timing improvement. Create advanced signal generation using ensemble models with 35-45% signal accuracy improvement. Implement multi-model ensemble systems with real-time model updates and dynamic weighting. Establish ML center of excellence with automated model retraining and performance optimization.",
-    status: "TODO",
+    status: "DONE",
     priority: "Medium",
     epic: "E4",
     storyPoints: 13,
@@ -446,13 +446,12 @@ export const stories: Story[] = [
     progress: 0,
     dependencies: ["S28"],
     createdDate: "2025-06-23",
-  },
-  {
+  },  {
     id: "S30",
     title: "Notification History and Management System",
     description:
       "Extend the notification system (S20) with comprehensive history and management features. Create notification history page showing past alerts with filtering by type, date, and priority. Add notification management dashboard for users to view, delete, and organize notifications. Implement notification analytics showing alert performance and user engagement metrics. Add bulk actions for notification cleanup and archiving. Include search functionality and export capabilities for notification data.",
-    status: "TODO",
+    status: "DONE",
     priority: "Medium",
     epic: "E3",
     storyPoints: 5,
@@ -461,22 +460,9 @@ export const stories: Story[] = [
     progress: 0,
     dependencies: ["S20"],
     createdDate: "2025-06-23",
+    completedDate: "2025-06-23",
   },
-  {
-    id: "S31",
-    title: "Enhanced Stock Cards with Expandable Categories",
-    description:
-      "Redesign stock cards to show summarized categories with expand/collapse functionality. Group stock information into categories: Price & Performance (current price, change, volume), Technical Indicators (RSI, MACD, moving averages), Fundamentals (P/E, market cap, dividend yield), and News & Sentiment (recent news count, sentiment score). Display category summaries by default with expand button to show detailed information. Add smooth animations for expand/collapse and optimize performance for large stock lists.",
-    status: "TODO",
-    priority: "Medium",
-    epic: "E3",
-    storyPoints: 5,
-    sprint: 3,
-    assignee: "Frontend Team",
-    progress: 0,
-    dependencies: [],
-    createdDate: "2025-06-23",
-  },
+
   {
     id: "S33",
     title: "Remove Latest Trade Signals from Client",

@@ -546,4 +546,252 @@ export class NotificationController {
       );
     }
   }
+
+  // === S30: Notification History and Management Features ===
+
+  @Get('analytics/:userId')
+  async getNotificationAnalytics(@Param('userId') userId: string) {
+    try {
+      const analytics = await this.notificationService.getNotificationAnalytics(userId);
+      return {
+        success: true,
+        data: analytics,
+      };
+    } catch (error) {
+      this.logger.error(
+        `Failed to get notification analytics: ${error.message}`,
+        error.stack,
+      );
+      throw new HttpException(
+        {
+          success: false,
+          message: 'Failed to get notification analytics',
+          error: error.message,
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  @Get('history/:userId')
+  async getNotificationHistory(
+    @Param('userId') userId: string,
+    @Query() query: any
+  ) {
+    try {
+      const filter = {
+        userId,
+        type: query.type,
+        priority: query.priority,
+        symbol: query.symbol,
+        fromDate: query.fromDate ? new Date(query.fromDate) : undefined,
+        toDate: query.toDate ? new Date(query.toDate) : undefined,
+        status: query.status || 'read,dismissed', // Default to completed notifications
+        limit: query.limit ? parseInt(query.limit) : 100,
+        offset: query.offset ? parseInt(query.offset) : 0,
+        sortBy: query.sortBy || 'createdAt',
+        sortOrder: query.sortOrder || 'DESC',
+      };
+
+      const result = await this.notificationService.getNotificationHistory(filter);
+      return {
+        success: true,
+        data: result.notifications,
+        total: result.total,
+        pagination: {
+          limit: filter.limit,
+          offset: filter.offset,
+          hasMore: result.total > (filter.offset || 0) + (filter.limit || 100),
+        },
+      };
+    } catch (error) {
+      this.logger.error(
+        `Failed to get notification history: ${error.message}`,
+        error.stack,
+      );
+      throw new HttpException(
+        {
+          success: false,
+          message: 'Failed to get notification history',
+          error: error.message,
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  @Post('search')
+  async searchNotifications(
+    @Body() searchRequest: {
+      userId: string;
+      query: string;
+      filters?: any;
+      limit?: number;
+      offset?: number;
+    }
+  ) {
+    try {
+      const result = await this.notificationService.searchNotifications(
+        searchRequest.userId,
+        searchRequest.query,
+        searchRequest.filters,
+        searchRequest.limit,
+        searchRequest.offset
+      );
+      return {
+        success: true,
+        data: result.notifications,
+        total: result.total,
+        highlights: result.highlights,
+      };
+    } catch (error) {
+      this.logger.error(
+        `Failed to search notifications: ${error.message}`,
+        error.stack,
+      );
+      throw new HttpException(
+        {
+          success: false,
+          message: 'Failed to search notifications',
+          error: error.message,
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  @Post('bulk/delete')
+  async bulkDelete(
+    @Body() body: { userId: string; notificationIds: number[] },
+  ) {
+    try {
+      const result = await this.notificationService.bulkDeleteNotifications(
+        body.userId,
+        body.notificationIds
+      );
+      return {
+        success: true,
+        data: result,
+        message: `Deleted ${result.deleted} notifications`,
+      };
+    } catch (error) {
+      this.logger.error(
+        `Failed to bulk delete: ${error.message}`,
+        error.stack,
+      );
+      throw new HttpException(
+        {
+          success: false,
+          message: 'Failed to bulk delete notifications',
+          error: error.message,
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  @Post('bulk/archive')
+  async bulkArchive(
+    @Body() body: { userId: string; notificationIds: number[]; archiveUntil?: Date },
+  ) {
+    try {
+      const result = await this.notificationService.bulkArchiveNotifications(
+        body.userId,
+        body.notificationIds,
+        body.archiveUntil
+      );
+      return {
+        success: true,
+        data: result,
+        message: `Archived ${result.archived} notifications`,
+      };
+    } catch (error) {
+      this.logger.error(
+        `Failed to bulk archive: ${error.message}`,
+        error.stack,
+      );
+      throw new HttpException(
+        {
+          success: false,
+          message: 'Failed to bulk archive notifications',
+          error: error.message,
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  @Get('export/:userId')
+  async exportNotifications(
+    @Param('userId') userId: string,
+    @Query() query: any
+  ) {
+    try {
+      const format = query.format || 'json'; // json, csv, xlsx
+      const filter = {
+        userId,
+        type: query.type,
+        priority: query.priority,
+        fromDate: query.fromDate ? new Date(query.fromDate) : undefined,
+        toDate: query.toDate ? new Date(query.toDate) : undefined,
+        status: query.status,
+      };
+
+      const exportData = await this.notificationService.exportNotifications(
+        filter,
+        format
+      );
+
+      return {
+        success: true,
+        data: exportData,
+        filename: `notifications_${userId}_${new Date().toISOString().split('T')[0]}.${format}`,
+      };
+    } catch (error) {
+      this.logger.error(
+        `Failed to export notifications: ${error.message}`,
+        error.stack,
+      );
+      throw new HttpException(
+        {
+          success: false,
+          message: 'Failed to export notifications',
+          error: error.message,
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  @Post(':id/tag')
+  async addTag(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() body: { userId: string; tags: string[] }
+  ) {
+    try {
+      const result = await this.notificationService.addTagsToNotification(
+        id,
+        body.userId,
+        body.tags
+      );
+      return {
+        success: true,
+        data: result,
+        message: 'Tags added successfully',
+      };
+    } catch (error) {
+      this.logger.error(
+        `Failed to add tags: ${error.message}`,
+        error.stack,
+      );
+      throw new HttpException(
+        {
+          success: false,
+          message: 'Failed to add tags',
+          error: error.message,
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
 }
