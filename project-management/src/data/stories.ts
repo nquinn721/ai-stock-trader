@@ -508,7 +508,7 @@ export const stories: Story[] = [
     storyPoints: 13,
     sprint: 5,
     assignee: "AI Assistant",
-    progress: 40,
+    progress: 85,
     dependencies: ["S26"],
     createdDate: "2025-06-23",
   },
