@@ -266,7 +266,8 @@ export const stories: Story[] = [
     dependencies: ["S14"],
     createdDate: "2025-06-21",
     completedDate: "2025-06-22",
-  },  {
+  },
+  {
     id: "S18",
     title: "Create Pattern Recognition System",
     description:
@@ -281,16 +282,16 @@ export const stories: Story[] = [
     createdDate: "2025-06-21",
     completedDate: "2025-06-22",
   },
-  // LIVE RECOMMENDATIONS SYSTEM
   {
+    // LIVE RECOMMENDATIONS SYSTEM  {
     id: "S19",
     title: "Build AI-Powered Trading Recommendations Engine",
     description:
-      "Create ML-based system combining technical indicators, news sentiment, analyst ratings, and pattern recognition to generate real-time buy/sell recommendations with confidence scores.",
+      "Create comprehensive ML-based trading recommendations system integrating ALL implemented indicators and analysis: TECHNICAL INDICATORS (RSI 14-period momentum, MACD 12/26/9 trend-following, Bollinger Bands 20/2 volatility bands, SMA 20/50/200 trend analysis, EMA 9/12/26 exponential smoothing, Stochastic %K/%D 14/3 momentum oscillator, Williams %R 14-period momentum, ATR 14-period volatility measure, Historical/Average Volatility with regime detection), VOLUME ANALYSIS (VWAP intraday benchmark, Volume spike detection with strength analysis, Volume trend analysis increasing/decreasing/stable, Volume confirmation for breakouts), SUPPORT/RESISTANCE (Multi-level support/resistance identification, Pivot points classical/Fibonacci, Key level breakout detection, Comprehensive S/R analysis with strength scoring), PATTERN RECOGNITION (Candlestick patterns: Doji, Hammer, Engulfing, Star formations; Chart patterns: Double Top/Bottom, Head & Shoulders, Triangle/Wedge/Flag/Pennant formations with AI confidence scoring), BREAKOUT ANALYSIS (Trend direction detection upward/downward/sideways, Volatility-based breakout confirmation, Momentum scoring with acceleration analysis), ADVANCED ML FEATURES (Neural Network predictions, SVM-like classification, Ensemble model weighting, LSTM sequence analysis, Transformer attention mechanisms, Mean reversion vs momentum scoring, Fractal dimension analysis, Hurst exponent calculation, Volatility clustering detection), NEWS & SENTIMENT (Real-time news fetching and analysis, Financial sentiment lexicon with 50+ terms, Social sentiment scoring, News impact on price correlation), RISK MANAGEMENT (Dynamic position sizing recommendations, Stop-loss/take-profit level calculation, Risk/reward ratio optimization, Portfolio correlation analysis), and MARKET MICROSTRUCTURE (Bid-ask spread proxy, Order flow inference, Market structure analysis, Relative strength calculations). System integrates 8 modules (breakout, ml-analysis, news, trading, stock, order-management, paper-trading, websocket) to generate real-time BUY/SELL/HOLD/WATCH recommendations with confidence scores 0-1, entry/exit price levels, risk parameters, detailed reasoning, and multi-timeframe analysis (1m/5m/1h/1d).",
     status: "TODO",
     priority: "Critical",
     epic: "E5",
-    storyPoints: 8,
+    storyPoints: 15,
     assignee: "Jack",
     progress: 0,
     dependencies: ["S14", "S15", "S16", "S17", "S18"],
@@ -300,22 +301,21 @@ export const stories: Story[] = [
     id: "S20",
     title: "Implement Real-Time Notification System",
     description:
-      "Create live notification system in client that alerts users to buy/sell opportunities, stop-loss triggers, and market events based on AI recommendations.",
+      "Create comprehensive real-time notification system that alerts users to: Trading Opportunities (buy/sell signals from S19 recommendation engine with confidence scores), Pattern Alerts (breakout confirmations, pattern completions, support/resistance breaks), Technical Alerts (RSI overbought/oversold, MACD crossovers, Bollinger Band squeezes, volume spikes), Risk Management (stop-loss triggers, take-profit targets, position sizing alerts), Market Events (news sentiment changes, earnings announcements, analyst upgrades/downgrades), and Multi-timeframe Alerts (1m scalping opportunities, 5m momentum shifts, 1h trend changes). Features: Customizable alert thresholds, priority-based notifications, push notifications, email alerts, in-app notifications, alert history, and smart filtering to prevent notification overload.",
     status: "TODO",
     priority: "Critical",
     epic: "E5",
-    storyPoints: 5,
+    storyPoints: 6,
     assignee: "Alice",
     progress: 0,
     dependencies: ["S19"],
     createdDate: "2025-06-21",
-  },
-  {
+  },  {
     id: "S21",
     title: "Add Risk Management Integration",
     description:
       "Integrate position sizing, risk/reward ratios, and portfolio risk assessment into recommendation system. Include stop-loss and take-profit suggestions.",
-    status: "TODO",
+    status: "DONE",
     priority: "High",
     epic: "E5",
     storyPoints: 4,
@@ -323,7 +323,8 @@ export const stories: Story[] = [
     progress: 0,
     dependencies: ["S19"],
     createdDate: "2025-06-21",
-  }, // PORTFOLIO LIVE DATA VERIFICATION
+    completedDate: "2025-06-22",
+  },// PORTFOLIO LIVE DATA VERIFICATION
   {
     id: "S22",
     title: "Audit Portfolio Data Sources",

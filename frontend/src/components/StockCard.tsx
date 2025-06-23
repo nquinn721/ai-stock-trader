@@ -135,12 +135,12 @@ const StockCard: React.FC<StockCardProps> = ({ stock, signal }) => {
             </div>
           </>
         )}
-      </div>
-      {/* Breakout Strategy Section */}
+      </div>      {/* Breakout Strategy Section */}
       {stock.breakoutStrategy && (
         <BreakoutDisplay
           breakoutStrategy={stock.breakoutStrategy}
           symbol={stock.symbol}
+          currentPrice={stock.currentPrice}
         />
       )}
       {/* Day Trading Patterns Section */}

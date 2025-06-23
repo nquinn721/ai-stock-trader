@@ -1,16 +1,19 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React from "react";
 import { BreakoutStrategy } from "../types";
+import RiskManagement from "./RiskManagement";
 import "./BreakoutDisplay.css";
 
 interface BreakoutDisplayProps {
   breakoutStrategy: BreakoutStrategy;
   symbol: string;
+  currentPrice: number;
 }
 
 const BreakoutDisplay: React.FC<BreakoutDisplayProps> = ({
   breakoutStrategy,
   symbol,
+  currentPrice,
 }) => {
   const getSignalColor = (signal: string) => {
     switch (signal) {
@@ -822,10 +825,21 @@ const BreakoutDisplay: React.FC<BreakoutDisplayProps> = ({
                   )
                 )}
               </div>
-            </div>
-          )}
+            </div>          )}
         </div>
       )}
+
+      {/* Risk Management Analysis */}
+      {breakoutStrategy.riskManagement && (
+        <div className="risk-management-section">
+          <RiskManagement
+            riskManagement={breakoutStrategy.riskManagement}
+            currentPrice={currentPrice}
+            symbol={symbol}
+          />
+        </div>
+      )}
+
       <div className="support-resistance">
         <div className="sr-level support">
           <span className="sr-label">Support:</span>

@@ -1,6 +1,82 @@
 import { Inject, Injectable, forwardRef } from '@nestjs/common';
 import { MLAnalysisService } from '../ml-analysis/ml-analysis.service';
 
+// Risk Management Interfaces
+export interface RiskManagementRecommendation {
+  positionSizing: {
+    recommendedShares: number;
+    positionSize: number; // dollar amount
+    portfolioAllocation: number; // percentage
+    maxRiskAmount: number; // maximum loss if stopped out
+    riskPercentage: number; // risk as % of portfolio
+  };
+  riskReward: {
+    riskAmount: number;
+    rewardAmount: number;
+    riskRewardRatio: number; // reward/risk ratio
+    breakEvenProbability: number; // minimum win rate needed
+    expectedValue: number; // mathematical expectation
+  };
+  stopLoss: {
+    price: number;
+    percentage: number; // distance from entry
+    atrBasedStop: number; // ATR-based stop loss
+    technicalStop: number; // based on support/resistance
+    recommendedStop: number; // final recommendation
+    stopType: 'technical' | 'atr' | 'percentage' | 'volatility';
+  };
+  takeProfit: {
+    targets: Array<{
+      price: number;
+      percentage: number;
+      probability: number;
+      reasoning: string;
+    }>;
+    primaryTarget: number;
+    conservativeTarget: number;
+    aggressiveTarget: number;
+  };
+  portfolioRisk: {
+    currentExposure: number; // current portfolio risk %
+    afterTradeExposure: number; // risk % after this trade
+    correlationRisk: number; // risk from correlated positions
+    sectorConcentration: number; // concentration in this sector
+    recommendation:
+      | 'low_risk'
+      | 'moderate_risk'
+      | 'high_risk'
+      | 'excessive_risk';
+  };
+  riskScore: number; // 0-100 overall risk score
+  recommendation: 'PROCEED' | 'REDUCE_SIZE' | 'WAIT' | 'AVOID';
+  reasoning: string[];
+}
+
+export interface PositionSizingParams {
+  portfolioValue: number;
+  riskPercentage: number; // 1-2% typical
+  entryPrice: number;
+  stopPrice: number;
+  maxPositionSize?: number; // maximum position size limit
+  existingPositions?: Array<{
+    symbol: string;
+    value: number;
+    sector?: string;
+  }>;
+}
+
+export interface PortfolioRiskAssessment {
+  totalValue: number;
+  totalRisk: number; // sum of all position risks
+  riskPercentage: number; // risk as % of portfolio
+  correlationMatrix: { [symbol: string]: { [symbol2: string]: number } };
+  sectorExposure: { [sector: string]: number };
+  volatilityScore: number;
+  sharpeRatio: number;
+  maxDrawdown: number;
+  recommendation: string;
+}
+
 export interface CandlestickPattern {
   type:
     | 'doji'
@@ -164,6 +240,7 @@ export interface BreakoutStrategy {
     momentum: number;
     meanReversion: number;
   };
+  riskManagement?: RiskManagementRecommendation;
 }
 
 export interface HistoricalData {
@@ -275,6 +352,16 @@ export class BreakoutService {
         symbol,
       );
 
+      // Calculate risk management recommendations
+      const riskManagement = await this.calculateRiskManagement(
+        symbol,
+        currentPrice,
+        signal.direction,
+        supportResistanceAnalysis.currentSupport,
+        supportResistanceAnalysis.currentResistance,
+        technicalAnalysis,
+      );
+
       return {
         signal: signal.direction,
         probability: signal.probability,
@@ -314,6 +401,7 @@ export class BreakoutService {
         },
         supportResistanceAnalysis: supportResistanceAnalysis,
         modelPredictions,
+        riskManagement,
       };
     } catch (error) {
       console.error(`Error in calculateBreakoutStrategy for ${symbol}:`, error);
@@ -371,6 +459,7 @@ export class BreakoutService {
         },
         keyZones: [],
       },
+      riskManagement: this.getDefaultRiskManagementRecommendation(),
     };
   }
 
@@ -1282,7 +1371,7 @@ export class BreakoutService {
           lower: avgPrice * 0.995,
         },
         timeframe: 'daily',
-        lastTested,
+        lastTested: new Date().toISOString(),
       });
     }
 
@@ -2887,6 +2976,532 @@ export class BreakoutService {
       },
       aiPatternScore: 0.5,
       recommendedAction: 'hold',
+    };
+  }
+
+  /**
+   * Calculate comprehensive risk management recommendations
+   */
+  async calculateRiskManagement(
+    symbol: string,
+    currentPrice: number,
+    signal: 'bullish' | 'bearish' | 'neutral',
+    supportLevel: number,
+    resistanceLevel: number,
+    technicalAnalysis: any,
+    portfolioParams?: PositionSizingParams,
+  ): Promise<RiskManagementRecommendation> {
+    try {
+      // Calculate position sizing
+      const positionSizing = this.calculatePositionSizing(
+        currentPrice,
+        signal,
+        supportLevel,
+        resistanceLevel,
+        technicalAnalysis,
+        portfolioParams,
+      );
+
+      // Calculate stop loss recommendations
+      const stopLoss = this.calculateStopLossRecommendations(
+        currentPrice,
+        signal,
+        supportLevel,
+        resistanceLevel,
+        technicalAnalysis,
+      );
+
+      // Calculate take profit targets
+      const takeProfit = this.calculateTakeProfitTargets(
+        currentPrice,
+        signal,
+        supportLevel,
+        resistanceLevel,
+        technicalAnalysis,
+      );
+
+      // Calculate risk-reward ratios
+      const riskReward = this.calculateRiskRewardRatio(
+        currentPrice,
+        stopLoss.recommendedStop,
+        takeProfit.primaryTarget,
+        positionSizing.positionSize,
+      );
+
+      // Assess portfolio risk
+      const portfolioRisk = this.assessPortfolioRisk(
+        positionSizing,
+        portfolioParams,
+      );
+
+      // Calculate overall risk score
+      const riskScore = this.calculateOverallRiskScore(
+        riskReward,
+        portfolioRisk,
+        technicalAnalysis,
+        signal,
+      );
+
+      // Generate recommendation and reasoning
+      const { recommendation, reasoning } = this.generateRiskRecommendation(
+        riskScore,
+        portfolioRisk,
+        riskReward,
+        signal,
+      );
+
+      return {
+        positionSizing,
+        riskReward,
+        stopLoss,
+        takeProfit,
+        portfolioRisk,
+        riskScore,
+        recommendation,
+        reasoning,
+      };
+    } catch (error) {
+      console.error('Error calculating risk management:', error);
+      return this.getDefaultRiskManagementRecommendation();
+    }
+  }
+
+  /**
+   * Calculate position sizing based on risk parameters
+   */
+  private calculatePositionSizing(
+    currentPrice: number,
+    signal: 'bullish' | 'bearish' | 'neutral',
+    supportLevel: number,
+    resistanceLevel: number,
+    technicalAnalysis: any,
+    portfolioParams?: PositionSizingParams,
+  ): RiskManagementRecommendation['positionSizing'] {
+    const defaultPortfolioValue = 100000; // Default portfolio value
+    const defaultRiskPercentage = 2; // Default 2% risk
+
+    const portfolioValue =
+      portfolioParams?.portfolioValue || defaultPortfolioValue;
+    const riskPercentage =
+      portfolioParams?.riskPercentage || defaultRiskPercentage;
+
+    // Calculate stop distance
+    let stopDistance: number;
+    if (signal === 'bullish') {
+      stopDistance = Math.abs(currentPrice - supportLevel);
+    } else if (signal === 'bearish') {
+      stopDistance = Math.abs(resistanceLevel - currentPrice);
+    } else {
+      stopDistance = currentPrice * 0.02; // 2% default stop
+    }
+
+    // Adjust stop distance based on volatility
+    if (technicalAnalysis.atr) {
+      const atrDistance = technicalAnalysis.atr.value;
+      stopDistance = Math.max(stopDistance, atrDistance * 1.5);
+    }
+
+    // Calculate maximum risk amount
+    const maxRiskAmount = (portfolioValue * riskPercentage) / 100;
+
+    // Calculate recommended shares
+    const recommendedShares = Math.floor(maxRiskAmount / stopDistance);
+
+    // Calculate position size
+    const positionSize = recommendedShares * currentPrice;
+
+    // Calculate portfolio allocation
+    const portfolioAllocation = (positionSize / portfolioValue) * 100;
+
+    return {
+      recommendedShares,
+      positionSize,
+      portfolioAllocation,
+      maxRiskAmount,
+      riskPercentage: (maxRiskAmount / portfolioValue) * 100,
+    };
+  }
+
+  /**
+   * Calculate stop loss recommendations
+   */
+  private calculateStopLossRecommendations(
+    currentPrice: number,
+    signal: 'bullish' | 'bearish' | 'neutral',
+    supportLevel: number,
+    resistanceLevel: number,
+    technicalAnalysis: any,
+  ): RiskManagementRecommendation['stopLoss'] {
+    let technicalStop: number;
+    let percentageStop: number;
+    let atrBasedStop: number;
+
+    // Technical stop based on support/resistance
+    if (signal === 'bullish') {
+      technicalStop = supportLevel * 0.99; // Slightly below support
+      percentageStop = currentPrice * 0.98; // 2% stop
+    } else if (signal === 'bearish') {
+      technicalStop = resistanceLevel * 1.01; // Slightly above resistance
+      percentageStop = currentPrice * 1.02; // 2% stop
+    } else {
+      technicalStop = currentPrice * 0.98;
+      percentageStop = currentPrice * 0.98;
+    }
+
+    // ATR-based stop
+    if (technicalAnalysis.atr) {
+      const atrValue = technicalAnalysis.atr.value;
+      if (signal === 'bullish') {
+        atrBasedStop = currentPrice - atrValue * 2;
+      } else if (signal === 'bearish') {
+        atrBasedStop = currentPrice + atrValue * 2;
+      } else {
+        atrBasedStop = currentPrice - atrValue * 1.5;
+      }
+    } else {
+      atrBasedStop = percentageStop;
+    }
+
+    // Choose the most conservative stop (furthest from current price)
+    let recommendedStop: number;
+    let stopType: 'technical' | 'atr' | 'percentage' | 'volatility';
+
+    if (signal === 'bullish') {
+      recommendedStop = Math.min(technicalStop, atrBasedStop, percentageStop);
+      if (recommendedStop === technicalStop) stopType = 'technical';
+      else if (recommendedStop === atrBasedStop) stopType = 'atr';
+      else stopType = 'percentage';
+    } else {
+      recommendedStop = Math.max(technicalStop, atrBasedStop, percentageStop);
+      if (recommendedStop === technicalStop) stopType = 'technical';
+      else if (recommendedStop === atrBasedStop) stopType = 'atr';
+      else stopType = 'percentage';
+    }
+
+    const percentage =
+      Math.abs((currentPrice - recommendedStop) / currentPrice) * 100;
+
+    return {
+      price: recommendedStop,
+      percentage,
+      atrBasedStop,
+      technicalStop,
+      recommendedStop,
+      stopType,
+    };
+  }
+
+  /**
+   * Calculate take profit targets
+   */
+  private calculateTakeProfitTargets(
+    currentPrice: number,
+    signal: 'bullish' | 'bearish' | 'neutral',
+    supportLevel: number,
+    resistanceLevel: number,
+    technicalAnalysis: any,
+  ): RiskManagementRecommendation['takeProfit'] {
+    const targets: Array<{
+      price: number;
+      percentage: number;
+      probability: number;
+      reasoning: string;
+    }> = [];
+
+    if (signal === 'bullish') {
+      // Conservative target (nearby resistance)
+      const conservativeTarget = resistanceLevel;
+      targets.push({
+        price: conservativeTarget,
+        percentage: ((conservativeTarget - currentPrice) / currentPrice) * 100,
+        probability: 0.7,
+        reasoning: 'Nearby resistance level',
+      });
+
+      // Primary target (extended move)
+      const primaryTarget =
+        currentPrice + (resistanceLevel - currentPrice) * 1.5;
+      targets.push({
+        price: primaryTarget,
+        percentage: ((primaryTarget - currentPrice) / currentPrice) * 100,
+        probability: 0.5,
+        reasoning: 'Extended breakout target',
+      });
+
+      // Aggressive target (momentum continuation)
+      const aggressiveTarget =
+        currentPrice + (resistanceLevel - currentPrice) * 2.5;
+      targets.push({
+        price: aggressiveTarget,
+        percentage: ((aggressiveTarget - currentPrice) / currentPrice) * 100,
+        probability: 0.3,
+        reasoning: 'Strong momentum continuation',
+      });
+
+      return {
+        targets,
+        primaryTarget,
+        conservativeTarget,
+        aggressiveTarget,
+      };
+    } else if (signal === 'bearish') {
+      // Conservative target (nearby support)
+      const conservativeTarget = supportLevel;
+      targets.push({
+        price: conservativeTarget,
+        percentage: ((currentPrice - conservativeTarget) / currentPrice) * 100,
+        probability: 0.7,
+        reasoning: 'Nearby support level',
+      });
+
+      // Primary target (extended move)
+      const primaryTarget = currentPrice - (currentPrice - supportLevel) * 1.5;
+      targets.push({
+        price: primaryTarget,
+        percentage: ((currentPrice - primaryTarget) / currentPrice) * 100,
+        probability: 0.5,
+        reasoning: 'Extended breakdown target',
+      });
+
+      // Aggressive target (momentum continuation)
+      const aggressiveTarget =
+        currentPrice - (currentPrice - supportLevel) * 2.5;
+      targets.push({
+        price: aggressiveTarget,
+        percentage: ((currentPrice - aggressiveTarget) / currentPrice) * 100,
+        probability: 0.3,
+        reasoning: 'Strong momentum continuation',
+      });
+
+      return {
+        targets,
+        primaryTarget,
+        conservativeTarget,
+        aggressiveTarget,
+      };
+    } else {
+      // Neutral signal - minimal targets
+      const conservativeTarget = currentPrice * 1.01;
+      const primaryTarget = currentPrice * 1.02;
+      const aggressiveTarget = currentPrice * 1.03;
+
+      targets.push({
+        price: conservativeTarget,
+        percentage: 1,
+        probability: 0.5,
+        reasoning: 'Minimal upside in neutral market',
+      });
+
+      return {
+        targets,
+        primaryTarget,
+        conservativeTarget,
+        aggressiveTarget,
+      };
+    }
+  }
+
+  /**
+   * Calculate risk-reward ratios
+   */
+  private calculateRiskRewardRatio(
+    currentPrice: number,
+    stopPrice: number,
+    targetPrice: number,
+    positionSize: number,
+  ): RiskManagementRecommendation['riskReward'] {
+    const riskAmount =
+      Math.abs(currentPrice - stopPrice) * (positionSize / currentPrice);
+    const rewardAmount =
+      Math.abs(targetPrice - currentPrice) * (positionSize / currentPrice);
+
+    const riskRewardRatio = riskAmount > 0 ? rewardAmount / riskAmount : 0;
+
+    // Calculate break-even probability (minimum win rate needed)
+    const breakEvenProbability =
+      riskRewardRatio > 0 ? 1 / (1 + riskRewardRatio) : 0.5;
+
+    // Calculate expected value (assuming 50% win rate)
+    const winRate = 0.5;
+    const expectedValue = winRate * rewardAmount - (1 - winRate) * riskAmount;
+
+    return {
+      riskAmount,
+      rewardAmount,
+      riskRewardRatio,
+      breakEvenProbability,
+      expectedValue,
+    };
+  }
+
+  /**
+   * Assess portfolio risk
+   */
+  private assessPortfolioRisk(
+    positionSizing: RiskManagementRecommendation['positionSizing'],
+    portfolioParams?: PositionSizingParams,
+  ): RiskManagementRecommendation['portfolioRisk'] {
+    const defaultExposure = 0;
+    const currentExposure = defaultExposure; // Would calculate from existing positions
+
+    const afterTradeExposure = currentExposure + positionSizing.riskPercentage;
+
+    // Calculate correlation risk (simplified)
+    const correlationRisk = 0.1; // Would calculate from existing positions
+
+    // Calculate sector concentration (simplified)
+    const sectorConcentration = positionSizing.portfolioAllocation;
+
+    let recommendation:
+      | 'low_risk'
+      | 'moderate_risk'
+      | 'high_risk'
+      | 'excessive_risk';
+    if (afterTradeExposure < 5) recommendation = 'low_risk';
+    else if (afterTradeExposure < 10) recommendation = 'moderate_risk';
+    else if (afterTradeExposure < 20) recommendation = 'high_risk';
+    else recommendation = 'excessive_risk';
+
+    return {
+      currentExposure,
+      afterTradeExposure,
+      correlationRisk,
+      sectorConcentration,
+      recommendation,
+    };
+  }
+
+  /**
+   * Calculate overall risk score
+   */
+  private calculateOverallRiskScore(
+    riskReward: RiskManagementRecommendation['riskReward'],
+    portfolioRisk: RiskManagementRecommendation['portfolioRisk'],
+    technicalAnalysis: any,
+    signal: 'bullish' | 'bearish' | 'neutral',
+  ): number {
+    let score = 50; // Start with neutral score
+
+    // Risk-reward component (30% weight)
+    if (riskReward.riskRewardRatio > 3) score += 15;
+    else if (riskReward.riskRewardRatio > 2) score += 10;
+    else if (riskReward.riskRewardRatio > 1) score += 5;
+    else score -= 10;
+
+    // Portfolio risk component (25% weight)
+    if (portfolioRisk.recommendation === 'low_risk') score += 10;
+    else if (portfolioRisk.recommendation === 'moderate_risk') score += 5;
+    else if (portfolioRisk.recommendation === 'high_risk') score -= 5;
+    else score -= 15;
+
+    // Technical analysis component (25% weight)
+    if (technicalAnalysis.volatility < 0.2) score += 5;
+    else if (technicalAnalysis.volatility > 0.4) score -= 5;
+
+    if (technicalAnalysis.rsi < 30 || technicalAnalysis.rsi > 70) score += 5;
+    else if (technicalAnalysis.rsi > 40 && technicalAnalysis.rsi < 60)
+      score += 3;
+
+    // Signal strength component (20% weight)
+    if (signal !== 'neutral') score += 10;
+
+    return Math.max(0, Math.min(100, score));
+  }
+
+  /**
+   * Generate risk recommendation and reasoning
+   */
+  private generateRiskRecommendation(
+    riskScore: number,
+    portfolioRisk: RiskManagementRecommendation['portfolioRisk'],
+    riskReward: RiskManagementRecommendation['riskReward'],
+    signal: 'bullish' | 'bearish' | 'neutral',
+  ): {
+    recommendation: RiskManagementRecommendation['recommendation'];
+    reasoning: string[];
+  } {
+    const reasoning: string[] = [];
+    let recommendation: RiskManagementRecommendation['recommendation'];
+
+    if (riskScore >= 70) {
+      recommendation = 'PROCEED';
+      reasoning.push(
+        'High confidence setup with favorable risk-reward profile',
+      );
+    } else if (riskScore >= 50) {
+      recommendation = 'REDUCE_SIZE';
+      reasoning.push('Moderate setup - consider reducing position size');
+    } else if (riskScore >= 30) {
+      recommendation = 'WAIT';
+      reasoning.push('Low confidence setup - wait for better opportunity');
+    } else {
+      recommendation = 'AVOID';
+      reasoning.push('Poor risk-reward profile - avoid this trade');
+    }
+
+    // Add specific reasoning based on components
+    if (riskReward.riskRewardRatio < 1) {
+      reasoning.push('Risk-reward ratio is unfavorable');
+    } else if (riskReward.riskRewardRatio > 2) {
+      reasoning.push('Excellent risk-reward ratio');
+    }
+
+    if (portfolioRisk.recommendation === 'excessive_risk') {
+      reasoning.push('Excessive portfolio risk exposure');
+    } else if (portfolioRisk.recommendation === 'low_risk') {
+      reasoning.push('Low portfolio risk exposure');
+    }
+
+    if (signal === 'neutral') {
+      reasoning.push('Neutral market signal reduces conviction');
+    }
+
+    return { recommendation, reasoning };
+  }
+
+  /**
+   * Get default risk management recommendation
+   */
+  private getDefaultRiskManagementRecommendation(): RiskManagementRecommendation {
+    return {
+      positionSizing: {
+        recommendedShares: 0,
+        positionSize: 0,
+        portfolioAllocation: 0,
+        maxRiskAmount: 0,
+        riskPercentage: 0,
+      },
+      riskReward: {
+        riskAmount: 0,
+        rewardAmount: 0,
+        riskRewardRatio: 0,
+        breakEvenProbability: 0.5,
+        expectedValue: 0,
+      },
+      stopLoss: {
+        price: 0,
+        percentage: 2,
+        atrBasedStop: 0,
+        technicalStop: 0,
+        recommendedStop: 0,
+        stopType: 'percentage',
+      },
+      takeProfit: {
+        targets: [],
+        primaryTarget: 0,
+        conservativeTarget: 0,
+        aggressiveTarget: 0,
+      },
+      portfolioRisk: {
+        currentExposure: 0,
+        afterTradeExposure: 0,
+        correlationRisk: 0,
+        sectorConcentration: 0,
+        recommendation: 'moderate_risk',
+      },
+      riskScore: 50,
+      recommendation: 'WAIT',
+      reasoning: ['Insufficient data for risk assessment'],
     };
   }
 }

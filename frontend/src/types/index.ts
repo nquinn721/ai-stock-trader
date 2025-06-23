@@ -136,12 +136,58 @@ export interface SupportResistanceAnalysis {
     r1: number;
     r2: number;
     r3: number;
-  };
-  keyZones: {
+  };  keyZones: {
     price: number;
     type: "support" | "resistance";
     strength: number;
   }[];
+}
+
+// Risk Management Interfaces
+export interface RiskManagementRecommendation {
+  positionSizing: {
+    recommendedShares: number;
+    positionSize: number; // dollar amount
+    portfolioAllocation: number; // percentage
+    maxRiskAmount: number; // maximum loss if stopped out
+    riskPercentage: number; // risk as % of portfolio
+  };
+  riskReward: {
+    riskAmount: number;
+    rewardAmount: number;
+    riskRewardRatio: number; // reward/risk ratio
+    breakEvenProbability: number; // minimum win rate needed
+    expectedValue: number; // mathematical expectation
+  };
+  stopLoss: {
+    price: number;
+    percentage: number; // distance from entry
+    atrBasedStop: number; // ATR-based stop loss
+    technicalStop: number; // based on support/resistance
+    recommendedStop: number; // final recommendation
+    stopType: "technical" | "atr" | "percentage" | "volatility";
+  };
+  takeProfit: {
+    targets: Array<{
+      price: number;
+      percentage: number;
+      probability: number;
+      reasoning: string;
+    }>;
+    primaryTarget: number;
+    conservativeTarget: number;
+    aggressiveTarget: number;
+  };
+  portfolioRisk: {
+    currentExposure: number; // current portfolio risk %
+    afterTradeExposure: number; // risk % after this trade
+    correlationRisk: number; // risk from correlated positions
+    sectorConcentration: number; // concentration in this sector
+    recommendation: "low_risk" | "moderate_risk" | "high_risk" | "excessive_risk";
+  };
+  riskScore: number; // 0-100 overall risk score
+  recommendation: "PROCEED" | "REDUCE_SIZE" | "WAIT" | "AVOID";
+  reasoning: string[];
 }
 
 export interface BreakoutStrategy {
@@ -212,6 +258,7 @@ export interface BreakoutStrategy {
     momentum: number;
     meanReversion: number;
   };
+  riskManagement?: RiskManagementRecommendation;
 }
 
 export interface NewsArticle {
