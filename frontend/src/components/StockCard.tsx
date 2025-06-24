@@ -8,6 +8,7 @@ import {
   YAxis,
 } from "recharts";
 import { Stock, TradingSignal } from "../types";
+import RecommendationWidget from "./RecommendationWidget";
 import "./StockCard.css";
 import StockModal from "./StockModal";
 
@@ -176,7 +177,7 @@ const StockCard: React.FC<StockCardProps> = ({ stock, signal }) => {
             >
               {stock.breakoutStrategy?.rsi?.toFixed(0) || "--"}
             </span>
-          </div>
+          </div>{" "}
           <div className="indicator-badge">
             <span className="badge-label">Signal</span>
             <span
@@ -187,6 +188,14 @@ const StockCard: React.FC<StockCardProps> = ({ stock, signal }) => {
               {stock.breakoutStrategy?.signal?.charAt(0).toUpperCase() || "?"}
             </span>
           </div>
+          {/* AI Recommendation Widget */}
+          <RecommendationWidget
+            symbol={stock.symbol}
+            currentPrice={stock.currentPrice}
+            compact={true}
+            className="card-recommendation"
+            onRecommendationClick={() => setIsModalOpen(true)}
+          />
         </div>
 
         <div className="view-full-details compact">

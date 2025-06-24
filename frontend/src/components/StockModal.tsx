@@ -10,6 +10,7 @@ import {
   YAxis,
 } from "recharts";
 import { Stock } from "../types";
+import RecommendationPanel from "./RecommendationPanel";
 import "./StockModal_new.css";
 
 interface StockModalProps {
@@ -24,6 +25,7 @@ const StockModal: React.FC<StockModalProps> = ({ stock, isOpen, onClose }) => {
     riskAnalysis: false,
     dayTrading: false,
     advanced: false,
+    aiRecommendation: false,
   });
 
   // Prevent body scroll when modal is open
@@ -264,7 +266,6 @@ const StockModal: React.FC<StockModalProps> = ({ stock, isOpen, onClose }) => {
               </div>
             </div>
           </div>
-
           {/* Chart Section */}
           <div className="dashboard-row">
             <div className="chart-section">
@@ -312,10 +313,44 @@ const StockModal: React.FC<StockModalProps> = ({ stock, isOpen, onClose }) => {
                 </ResponsiveContainer>
               </div>
             </div>
-          </div>
-
+          </div>{" "}
           {/* Expandable Sections */}
           <div className="expandable-sections">
+            {/* AI Recommendation Section */}
+            <div className="expandable-section">
+              <div
+                className="section-toggle"
+                onClick={() => toggleSection("aiRecommendation")}
+              >
+                <div className="toggle-header">
+                  <span className="toggle-icon">🤖</span>
+                  <h3>AI-Powered Recommendation</h3>
+                  <span
+                    className={`chevron ${
+                      expandedSections.aiRecommendation ? "expanded" : ""
+                    }`}
+                  >
+                    ▼
+                  </span>
+                </div>
+              </div>
+              {expandedSections.aiRecommendation && (
+                <div className="section-content">
+                  <RecommendationPanel
+                    symbol={stock.symbol}
+                    currentPrice={stock.currentPrice}
+                    portfolioContext={{
+                      currentHoldings: 0, // Could be passed from parent
+                      availableCash: 10000, // Could be from user portfolio
+                      riskTolerance: "MEDIUM",
+                    }}
+                    showEnhanced={true}
+                    className="modal-recommendation"
+                  />
+                </div>
+              )}
+            </div>
+
             {/* Breakout Analysis Section */}
             <div className="expandable-section">
               <div

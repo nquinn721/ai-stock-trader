@@ -389,6 +389,604 @@ export class ModelMonitoringService {
     }
   }
 
+  /**
+   * Detect model drift based on performance metrics
+   */
+  async detectModelDrift(modelId: string): Promise<{
+    hasDrift: boolean;
+    driftScore: number;
+    affectedFeatures: string[];
+  }> {
+    this.logger.log(`Detecting drift for model: ${modelId}`);
+
+    try {
+      // Get recent metrics (last 7 days)
+      const recentMetrics = await this.getModelMetrics(modelId, 7);
+
+      // Get baseline metrics (previous 30 days)
+      const baselineMetrics = await this.getModelMetrics(modelId, 30);
+
+      // Calculate drift score based on accuracy difference
+      const driftScore = Math.abs(
+        recentMetrics.accuracy - baselineMetrics.accuracy,
+      );
+      const hasDrift = driftScore > 0.1; // 10% threshold
+
+      // Mock affected features for now
+      const affectedFeatures = hasDrift
+        ? ['price_volatility', 'volume_trend']
+        : [];
+
+      return {
+        hasDrift,
+        driftScore,
+        affectedFeatures,
+      };
+    } catch (error) {
+      this.logger.error(`Error detecting drift for model ${modelId}:`, error);
+      return { hasDrift: false, driftScore: 0, affectedFeatures: [] };
+    }
+  }
+
+  /**
+   * S27E: Advanced Model Monitoring Features
+   */
+
+  /**
+   * Champion/Challenger model deployment tracking
+   */
+  async setupChampionChallengerTest(
+    championModelId: string,
+    challengerModelId: string,
+    trafficSplit: number = 0.1,
+    testDuration: number = 7, // days
+  ): Promise<{
+    testId: string;
+    champion: string;
+    challenger: string;
+    trafficSplit: number;
+    startDate: Date;
+    endDate: Date;
+  }> {
+    const testId = `cc_test_${Date.now()}`;
+    const startDate = new Date();
+    const endDate = new Date(Date.now() + testDuration * 24 * 60 * 60 * 1000);
+
+    this.logger.log(
+      `Setting up Champion/Challenger test: ${championModelId} vs ${challengerModelId} (${trafficSplit * 100}% traffic to challenger)`,
+    );
+
+    // Store test configuration (in real implementation, use database)
+    const testConfig = {
+      testId,
+      champion: championModelId,
+      challenger: challengerModelId,
+      trafficSplit,
+      startDate,
+      endDate,
+      status: 'ACTIVE',
+      metrics: {
+        champion: { predictions: 0, accuracy: 0, latency: 0 },
+        challenger: { predictions: 0, accuracy: 0, latency: 0 },
+      },
+    };
+
+    this.logger.log(`Champion/Challenger test ${testId} started`);
+    return testConfig;
+  }
+
+  /**
+   * Evaluate champion vs challenger performance
+   */
+  async evaluateChampionChallenger(testId: string): Promise<{
+    testId: string;
+    duration: number;
+    results: {
+      champion: {
+        accuracy: number;
+        latency: number;
+        predictions: number;
+        winRate: number;
+      };
+      challenger: {
+        accuracy: number;
+        latency: number;
+        predictions: number;
+        winRate: number;
+      };
+    };
+    recommendation: 'KEEP_CHAMPION' | 'PROMOTE_CHALLENGER' | 'EXTEND_TEST';
+    confidence: number;
+    reasons: string[];
+  }> {
+    this.logger.log(`Evaluating Champion/Challenger test: ${testId}`);
+
+    // Mock evaluation results - replace with actual test data analysis
+    const championResults = {
+      accuracy: 0.85 + Math.random() * 0.1,
+      latency: 50 + Math.random() * 20,
+      predictions: Math.floor(9000 + Math.random() * 2000),
+      winRate: 0.6 + Math.random() * 0.2,
+    };
+
+    const challengerResults = {
+      accuracy: 0.87 + Math.random() * 0.08,
+      latency: 45 + Math.random() * 25,
+      predictions: Math.floor(900 + Math.random() * 200),
+      winRate: 0.65 + Math.random() * 0.25,
+    };
+
+    const accuracyImprovement =
+      challengerResults.accuracy - championResults.accuracy;
+    const latencyImprovement =
+      championResults.latency - challengerResults.latency;
+    const sufficientSampleSize = challengerResults.predictions > 500;
+
+    let recommendation: 'KEEP_CHAMPION' | 'PROMOTE_CHALLENGER' | 'EXTEND_TEST' =
+      'KEEP_CHAMPION';
+    let confidence = 0.5;
+    const reasons: string[] = [];
+
+    if (!sufficientSampleSize) {
+      recommendation = 'EXTEND_TEST';
+      reasons.push('Insufficient sample size for challenger model');
+      confidence = 0.3;
+    } else if (accuracyImprovement > 0.02 && latencyImprovement > 0) {
+      recommendation = 'PROMOTE_CHALLENGER';
+      reasons.push('Challenger shows significant accuracy improvement');
+      reasons.push('Challenger has better latency');
+      confidence = 0.85;
+    } else if (accuracyImprovement > 0.01) {
+      recommendation = 'PROMOTE_CHALLENGER';
+      reasons.push('Challenger shows meaningful accuracy improvement');
+      confidence = 0.75;
+    } else if (Math.abs(accuracyImprovement) < 0.005) {
+      recommendation = 'EXTEND_TEST';
+      reasons.push('Performance difference is not statistically significant');
+      confidence = 0.4;
+    } else {
+      reasons.push('Champion maintains superior performance');
+      confidence = 0.8;
+    }
+
+    return {
+      testId,
+      duration: 7, // days
+      results: { champion: championResults, challenger: challengerResults },
+      recommendation,
+      confidence,
+      reasons,
+    };
+  }
+
+  /**
+   * Automated retraining trigger evaluation
+   */
+  async evaluateRetrainingTriggers(modelId: string): Promise<{
+    shouldRetrain: boolean;
+    urgency: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+    triggers: Array<{
+      type:
+        | 'PERFORMANCE_DRIFT'
+        | 'DATA_DRIFT'
+        | 'CONCEPT_DRIFT'
+        | 'ERROR_RATE'
+        | 'ACCURACY_DROP';
+      severity: number;
+      description: string;
+      threshold: number;
+      current: number;
+    }>;
+    recommendedAction: string;
+    estimatedRetrainingTime: number; // hours
+  }> {
+    this.logger.log(`Evaluating retraining triggers for model: ${modelId}`);
+
+    const triggers: any[] = [];
+    let maxSeverity = 0;
+
+    // Check performance drift
+    const driftResult = await this.detectModelDrift(modelId);
+    if (driftResult.hasDrift) {
+      triggers.push({
+        type: 'PERFORMANCE_DRIFT',
+        severity: driftResult.driftScore,
+        description:
+          'Model performance has drifted beyond acceptable thresholds',
+        threshold: 0.3,
+        current: driftResult.driftScore,
+      });
+      maxSeverity = Math.max(maxSeverity, driftResult.driftScore);
+    } // Check recent accuracy
+    const recentMetrics = await this.getModelMetrics(modelId, 24);
+    const accuracyThreshold = 0.8;
+    if (recentMetrics.accuracy < accuracyThreshold) {
+      const severity =
+        (accuracyThreshold - recentMetrics.accuracy) / accuracyThreshold;
+      triggers.push({
+        type: 'ACCURACY_DROP',
+        severity,
+        description: 'Model accuracy has dropped below acceptable levels',
+        threshold: accuracyThreshold,
+        current: recentMetrics.accuracy,
+      });
+      maxSeverity = Math.max(maxSeverity, severity);
+    }
+
+    // Check error rate
+    const errorRate = Math.random() * 0.1; // Mock error rate
+    const errorThreshold = 0.05;
+    if (errorRate > errorThreshold) {
+      const severity = (errorRate - errorThreshold) / errorThreshold;
+      triggers.push({
+        type: 'ERROR_RATE',
+        severity,
+        description: 'Model error rate has exceeded acceptable levels',
+        threshold: errorThreshold,
+        current: errorRate,
+      });
+      maxSeverity = Math.max(maxSeverity, severity);
+    }
+
+    // Determine urgency and recommendations
+    let urgency: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' = 'LOW';
+    let recommendedAction = 'Continue monitoring';
+    let estimatedRetrainingTime = 4;
+
+    if (maxSeverity > 0.8) {
+      urgency = 'CRITICAL';
+      recommendedAction = 'Immediate retraining required';
+      estimatedRetrainingTime = 2;
+    } else if (maxSeverity > 0.6) {
+      urgency = 'HIGH';
+      recommendedAction = 'Schedule retraining within 24 hours';
+      estimatedRetrainingTime = 3;
+    } else if (maxSeverity > 0.4) {
+      urgency = 'MEDIUM';
+      recommendedAction = 'Schedule retraining within 1 week';
+      estimatedRetrainingTime = 4;
+    } else if (triggers.length > 0) {
+      urgency = 'LOW';
+      recommendedAction = 'Monitor closely, consider retraining';
+      estimatedRetrainingTime = 6;
+    }
+
+    return {
+      shouldRetrain: triggers.length > 0 && maxSeverity > 0.3,
+      urgency,
+      triggers,
+      recommendedAction,
+      estimatedRetrainingTime,
+    };
+  }
+
+  /**
+   * Automated rollback capability
+   */
+  async executeModelRollback(
+    currentModelId: string,
+    previousModelId: string,
+    reason: string,
+  ): Promise<{
+    success: boolean;
+    rollbackId: string;
+    timestamp: Date;
+    fromVersion: string;
+    toVersion: string;
+    reason: string;
+    verificationResults: {
+      healthCheck: boolean;
+      performanceTest: boolean;
+      errorRate: number;
+    };
+  }> {
+    const rollbackId = `rollback_${Date.now()}`;
+    this.logger.warn(
+      `Executing model rollback: ${currentModelId} -> ${previousModelId}. Reason: ${reason}`,
+    );
+
+    // Simulate rollback process
+    await this.simulateDelay(2000); // Simulate deployment time
+
+    // Verify rollback success
+    const verificationResults = {
+      healthCheck: true,
+      performanceTest: Math.random() > 0.1, // 90% success rate
+      errorRate: Math.random() * 0.02, // Low error rate after rollback
+    };
+
+    const success =
+      verificationResults.healthCheck && verificationResults.performanceTest;
+
+    if (success) {
+      this.logger.log(`Model rollback ${rollbackId} completed successfully`);
+    } else {
+      this.logger.error(`Model rollback ${rollbackId} failed verification`);
+    }
+
+    return {
+      success,
+      rollbackId,
+      timestamp: new Date(),
+      fromVersion: currentModelId,
+      toVersion: previousModelId,
+      reason,
+      verificationResults,
+    };
+  }
+
+  /**
+   * Real-time model health monitoring dashboard
+   */
+  async getRealtimeMonitoringDashboard(modelId: string): Promise<{
+    modelInfo: {
+      id: string;
+      name: string;
+      version: string;
+      deployedAt: Date;
+      status: 'HEALTHY' | 'WARNING' | 'DEGRADED' | 'FAILED';
+    };
+    realTimeMetrics: {
+      requestsPerSecond: number;
+      averageLatency: number;
+      errorRate: number;
+      accuracy: number;
+      memoryUsage: number;
+      cpuUsage: number;
+    };
+    alerts: Array<{
+      id: string;
+      type: string;
+      severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+      message: string;
+      timestamp: Date;
+      acknowledged: boolean;
+    }>;
+    performanceTrends: {
+      last24Hours: Array<{
+        timestamp: Date;
+        accuracy: number;
+        latency: number;
+        throughput: number;
+      }>;
+    };
+    deploymentInfo: {
+      currentTrafficPercentage: number;
+      canaryDeployment: boolean;
+      championChallengerTest: {
+        active: boolean;
+        testId?: string;
+        trafficSplit?: number;
+      };
+    };
+  }> {
+    this.logger.log(
+      `Generating real-time monitoring dashboard for model: ${modelId}`,
+    );
+
+    // Generate mock real-time data
+    const realTimeMetrics = {
+      requestsPerSecond: 50 + Math.random() * 100,
+      averageLatency: 45 + Math.random() * 30,
+      errorRate: Math.random() * 0.05,
+      accuracy: 0.85 + Math.random() * 0.1,
+      memoryUsage: 60 + Math.random() * 20, // percentage
+      cpuUsage: 40 + Math.random() * 30, // percentage
+    };
+
+    // Determine model status
+    let status: 'HEALTHY' | 'WARNING' | 'DEGRADED' | 'FAILED' = 'HEALTHY';
+    if (realTimeMetrics.errorRate > 0.03 || realTimeMetrics.accuracy < 0.8) {
+      status = 'DEGRADED';
+    } else if (
+      realTimeMetrics.averageLatency > 100 ||
+      realTimeMetrics.errorRate > 0.01
+    ) {
+      status = 'WARNING';
+    }
+
+    // Generate performance trends
+    const performanceTrends = {
+      last24Hours: Array.from({ length: 24 }, (_, i) => ({
+        timestamp: new Date(Date.now() - (23 - i) * 60 * 60 * 1000),
+        accuracy: 0.85 + Math.random() * 0.1,
+        latency: 45 + Math.random() * 20,
+        throughput: 80 + Math.random() * 40,
+      })),
+    }; // Generate alerts
+    const alerts: Array<{
+      id: string;
+      type: string;
+      severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+      message: string;
+      timestamp: Date;
+      acknowledged: boolean;
+    }> = [];
+    if (status !== 'HEALTHY') {
+      alerts.push({
+        id: `alert_${Date.now()}`,
+        type: 'PERFORMANCE',
+        severity: status === 'DEGRADED' ? 'HIGH' : 'MEDIUM',
+        message: `Model ${modelId} performance has ${status.toLowerCase()}`,
+        timestamp: new Date(),
+        acknowledged: false,
+      });
+    }
+
+    return {
+      modelInfo: {
+        id: modelId,
+        name: `Model-${modelId.slice(-4)}`,
+        version: 'v1.2.3',
+        deployedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000), // 5 days ago
+        status,
+      },
+      realTimeMetrics,
+      alerts,
+      performanceTrends,
+      deploymentInfo: {
+        currentTrafficPercentage: 100,
+        canaryDeployment: false,
+        championChallengerTest: {
+          active: Math.random() > 0.7,
+          testId: Math.random() > 0.7 ? `cc_test_${Date.now()}` : undefined,
+          trafficSplit: Math.random() > 0.7 ? 0.1 : undefined,
+        },
+      },
+    };
+  }
+
+  /**
+   * Generate comprehensive monitoring report
+   */
+  async generateMonitoringReport(
+    modelId: string,
+    timeRangeHours: number = 24,
+  ): Promise<{
+    summary: {
+      modelId: string;
+      reportPeriod: { start: Date; end: Date };
+      overallHealth: 'EXCELLENT' | 'GOOD' | 'FAIR' | 'POOR';
+      keyFindings: string[];
+    };
+    performance: {
+      averageAccuracy: number;
+      averageLatency: number;
+      totalPredictions: number;
+      errorRate: number;
+      uptime: number;
+    };
+    drift: {
+      detected: boolean;
+      score: number;
+      affectedFeatures: string[];
+      recommendation: string;
+    };
+    alerts: {
+      total: number;
+      bySeverity: Record<string, number>;
+      resolved: number;
+      open: number;
+    };
+    recommendations: Array<{
+      priority: 'HIGH' | 'MEDIUM' | 'LOW';
+      action: string;
+      description: string;
+      estimatedImpact: string;
+    }>;
+  }> {
+    this.logger.log(
+      `Generating comprehensive monitoring report for model: ${modelId}`,
+    );
+
+    const endTime = new Date();
+    const startTime = new Date(
+      endTime.getTime() - timeRangeHours * 60 * 60 * 1000,
+    ); // Gather performance data
+    const metrics = await this.getModelMetrics(modelId, timeRangeHours);
+    const averageAccuracy = metrics.accuracy;
+    const averageLatency = Math.random() * 100 + 50; // Mock latency in ms
+    const totalPredictions = Math.floor(Math.random() * 10000) + 5000;
+    const errorRate = Math.random() * 0.03;
+    const uptime = Math.random() * 10 + 95; // 95-99% uptime
+
+    // Assess drift
+    const driftResult = await this.detectModelDrift(modelId);
+
+    // Determine overall health
+    let overallHealth: 'EXCELLENT' | 'GOOD' | 'FAIR' | 'POOR' = 'GOOD';
+    const keyFindings: string[] = [];
+
+    if (averageAccuracy > 0.9 && errorRate < 0.01 && uptime > 99) {
+      overallHealth = 'EXCELLENT';
+      keyFindings.push('Model performing exceptionally well');
+    } else if (averageAccuracy < 0.8 || errorRate > 0.05 || uptime < 95) {
+      overallHealth = 'POOR';
+      keyFindings.push('Model requires immediate attention');
+    } else if (averageAccuracy < 0.85 || errorRate > 0.02 || uptime < 98) {
+      overallHealth = 'FAIR';
+      keyFindings.push('Model performance below expectations');
+    }
+
+    if (driftResult.hasDrift) {
+      keyFindings.push(
+        `Model drift detected (score: ${driftResult.driftScore.toFixed(3)})`,
+      );
+    } // Generate recommendations
+    const recommendations: Array<{
+      priority: 'HIGH' | 'MEDIUM' | 'LOW';
+      action: string;
+      description: string;
+      estimatedImpact: string;
+    }> = [];
+    if (averageAccuracy < 0.85) {
+      recommendations.push({
+        priority: 'HIGH' as const,
+        action: 'Retrain model with recent data',
+        description: 'Model accuracy has declined and requires retraining',
+        estimatedImpact: 'Improve accuracy by 5-10%',
+      });
+    }
+
+    if (driftResult.hasDrift) {
+      recommendations.push({
+        priority: 'MEDIUM' as const,
+        action: 'Investigate and address data drift',
+        description: 'Feature distributions have changed significantly',
+        estimatedImpact: 'Stabilize model performance',
+      });
+    }
+
+    if (averageLatency > 100) {
+      recommendations.push({
+        priority: 'LOW' as const,
+        action: 'Optimize model inference pipeline',
+        description: 'Response times could be improved',
+        estimatedImpact: 'Reduce latency by 20-30%',
+      });
+    }
+
+    return {
+      summary: {
+        modelId,
+        reportPeriod: { start: startTime, end: endTime },
+        overallHealth,
+        keyFindings,
+      },
+      performance: {
+        averageAccuracy,
+        averageLatency,
+        totalPredictions,
+        errorRate,
+        uptime,
+      },
+      drift: {
+        detected: driftResult.hasDrift,
+        score: driftResult.driftScore,
+        affectedFeatures: driftResult.affectedFeatures,
+        recommendation: driftResult.hasDrift
+          ? 'Consider retraining with recent data'
+          : 'Continue monitoring',
+      },
+      alerts: {
+        total: Math.floor(Math.random() * 10),
+        bySeverity: {
+          CRITICAL: Math.floor(Math.random() * 2),
+          HIGH: Math.floor(Math.random() * 3),
+          MEDIUM: Math.floor(Math.random() * 4),
+          LOW: Math.floor(Math.random() * 5),
+        },
+        resolved: Math.floor(Math.random() * 8),
+        open: Math.floor(Math.random() * 3),
+      },
+      recommendations,
+    };
+  }
+
+  private async simulateDelay(ms: number): Promise<void> {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+
   // Private helper methods
 
   private async calculateCurrentAccuracy(modelId: string): Promise<number> {

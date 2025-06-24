@@ -16,13 +16,17 @@ import {
   RiskParameters,
   SentimentScore,
 } from './interfaces/ml.interfaces';
+import { IntelligentRecommendationService } from './services/intelligent-recommendation.service';
 import { MLService } from './services/ml.service';
 
 @Controller('ml')
 export class MLController {
   private readonly logger = new Logger(MLController.name);
 
-  constructor(private readonly mlService: MLService) {}
+  constructor(
+    private readonly mlService: MLService,
+    private readonly intelligentRecommendationService: IntelligentRecommendationService,
+  ) {}
 
   /**
    * Get breakout prediction for a symbol
@@ -265,6 +269,168 @@ export class MLController {
         timestamp: new Date(),
         error: error.message,
       };
+    }
+  }
+
+  /**
+   * S19: Generate AI-powered trading recommendation for a symbol
+   */
+  @Post('recommendation/:symbol')
+  async generateRecommendation(
+    @Param('symbol') symbol: string,
+    @Body()
+    request: {
+      currentPrice: number;
+      portfolioContext?: {
+        currentHoldings: number;
+        availableCash: number;
+        riskTolerance: 'LOW' | 'MEDIUM' | 'HIGH';
+      };
+      timeHorizon?: '1D' | '1W' | '1M';
+      preferences?: {
+        maxRisk: number;
+        preferredSectors?: string[];
+        excludePatterns?: string[];
+      };
+    },
+  ): Promise<any> {
+    try {
+      this.logger.log(`S19: Generating AI recommendation for ${symbol}`);
+
+      const recommendationRequest = {
+        symbol: symbol.toUpperCase(),
+        ...request,
+      };
+
+      return await this.intelligentRecommendationService.generateRecommendation(
+        recommendationRequest,
+      );
+    } catch (error) {
+      this.logger.error(
+        `S19: Error generating recommendation for ${symbol}:`,
+        error,
+      );
+      throw new HttpException(
+        'Failed to generate AI trading recommendation',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  /**
+   * S19: Generate batch AI-powered trading recommendations
+   */
+  @Post('recommendations/batch')
+  async generateBatchRecommendations(
+    @Body()
+    requests: Array<{
+      symbol: string;
+      currentPrice: number;
+      portfolioContext?: {
+        currentHoldings: number;
+        availableCash: number;
+        riskTolerance: 'LOW' | 'MEDIUM' | 'HIGH';
+      };
+      timeHorizon?: '1D' | '1W' | '1M';
+      preferences?: {
+        maxRisk: number;
+        preferredSectors?: string[];
+        excludePatterns?: string[];
+      };
+    }>,
+  ): Promise<any> {
+    try {
+      this.logger.log(
+        `S19: Generating ${requests.length} batch AI recommendations`,
+      );
+      const recommendationRequests = requests.map((req) => ({
+        ...req,
+        symbol: req.symbol.toUpperCase(),
+      }));
+
+      return await this.intelligentRecommendationService.generateBatchRecommendations(
+        recommendationRequests,
+      );
+    } catch (error) {
+      this.logger.error('S19: Error generating batch recommendations:', error);
+      throw new HttpException(
+        'Failed to generate batch AI trading recommendations',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  /**
+   * S19: Get detailed explanation for a trading recommendation
+   */
+  @Get('recommendation/:symbol/explanation')
+  async getRecommendationExplanation(
+    @Param('symbol') symbol: string,
+  ): Promise<any> {
+    try {
+      this.logger.log(`S19: Getting recommendation explanation for ${symbol}`);
+      return await this.intelligentRecommendationService.getRecommendationExplanation(
+        symbol.toUpperCase(),
+      );
+    } catch (error) {
+      this.logger.error(
+        `S19: Error getting recommendation explanation for ${symbol}:`,
+        error,
+      );
+      throw new HttpException(
+        'Failed to get recommendation explanation',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  /**
+   * S19+S29B: Generate enhanced AI recommendation with ensemble signals
+   */
+  @Post('recommendation/enhanced/:symbol')
+  async generateEnhancedRecommendation(
+    @Param('symbol') symbol: string,
+    @Body()
+    request: {
+      currentPrice: number;
+      portfolioContext?: {
+        currentHoldings: number;
+        availableCash: number;
+        riskTolerance: 'LOW' | 'MEDIUM' | 'HIGH';
+      };
+      timeHorizon?: '1D' | '1W' | '1M';
+      preferences?: {
+        maxRisk: number;
+        preferredSectors?: string[];
+        excludePatterns?: string[];
+      };
+      ensembleOptions?: {
+        timeframes?: string[];
+        includeConflictResolution?: boolean;
+        ensembleMethod?: 'voting' | 'averaging' | 'stacking' | 'meta_learning';
+        confidenceThreshold?: number;
+        enableRealTimeStream?: boolean;
+      };
+    },
+  ): Promise<any> {
+    try {
+      this.logger.log(
+        `S19+S29B: Generating enhanced AI recommendation for ${symbol}`,
+      );
+      return await this.mlService.generateEnhancedIntelligentRecommendation(
+        symbol.toUpperCase(),
+        request.currentPrice,
+        request,
+      );
+    } catch (error) {
+      this.logger.error(
+        `S19+S29B: Error generating enhanced recommendation for ${symbol}:`,
+        error,
+      );
+      throw new HttpException(
+        'Failed to generate enhanced AI trading recommendation',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 }

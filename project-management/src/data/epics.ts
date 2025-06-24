@@ -47,4 +47,13 @@ export const epics: Epic[] = [
     owner: "AI Team",
     createdDate: "2025-06-21",
   },
+  {
+    id: "E28",
+    title: "ML Trading Enhancement",
+    description:
+      "Enhance the trading platform with advanced machine learning capabilities including sentiment analysis, portfolio optimization, and pattern recognition to improve trading decision-making and portfolio performance.",
+    status: "IN_PROGRESS",
+    owner: "AI Assistant",
+    createdDate: "2025-06-23",
+  },
 ];

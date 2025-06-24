@@ -18,12 +18,14 @@ import {
 import { ABTestingService } from './ab-testing.service';
 import { EnsembleSystemsService } from './ensemble-systems.service';
 import { FeatureEngineeringService } from './feature-engineering.service';
+import { IntelligentRecommendationService } from './intelligent-recommendation.service';
 import { MarketPredictionService } from './market-prediction.service';
 import { MLInferenceService } from './ml-inference.service';
 import { ModelMonitoringService } from './model-monitoring.service';
 import { PatternRecognitionService } from './pattern-recognition.service';
 import { PortfolioOptimizationService } from './portfolio-optimization.service';
 import { SentimentAnalysisService } from './sentiment-analysis.service';
+import { SentimentMonitoringService } from './sentiment-monitoring.service';
 import { SignalGenerationService } from './signal-generation.service';
 
 @Injectable()
@@ -43,11 +45,13 @@ export class MLService {
     private abTestingService: ABTestingService,
     private modelMonitoringService: ModelMonitoringService,
     private sentimentAnalysisService: SentimentAnalysisService,
+    private sentimentMonitoringService: SentimentMonitoringService,
     private portfolioOptimizationService: PortfolioOptimizationService,
     private patternRecognitionService: PatternRecognitionService,
     private marketPredictionService: MarketPredictionService,
     private signalGenerationService: SignalGenerationService,
     private ensembleSystemsService: EnsembleSystemsService,
+    private intelligentRecommendationService: IntelligentRecommendationService,
   ) {
     this.logger.log(
       '🚀 ML Service initialized with Phase 1, 2, and 3 infrastructure',
@@ -1163,7 +1167,6 @@ export class MLService {
 
     return recommendations;
   }
-
   /**
    * Evaluate model performance over a specified time period
    */
@@ -1191,5 +1194,729 @@ export class MLService {
       volatility: 0.15 + Math.random() * 0.1,
       evaluatedAt: new Date(),
     };
+  }
+
+  /**
+   * S19: Generate AI-powered trading recommendation using the unified engine
+   * This method orchestrates all ML capabilities through the IntelligentRecommendationService
+   */
+  async generateIntelligentRecommendation(
+    symbol: string,
+    currentPrice: number,
+    portfolioContext?: {
+      currentHoldings: number;
+      availableCash: number;
+      riskTolerance: 'LOW' | 'MEDIUM' | 'HIGH';
+    },
+    timeHorizon: '1D' | '1W' | '1M' = '1D',
+    preferences?: {
+      maxRisk: number;
+      preferredSectors?: string[];
+      excludePatterns?: string[];
+    },
+  ): Promise<any> {
+    try {
+      this.logger.log(
+        `🎯 S19: Generating intelligent recommendation for ${symbol}`,
+      );
+
+      const request = {
+        symbol: symbol.toUpperCase(),
+        currentPrice,
+        portfolioContext,
+        timeHorizon,
+        preferences,
+      };
+
+      const recommendation =
+        await this.intelligentRecommendationService.generateRecommendation(
+          request,
+        );
+
+      this.logger.log(
+        `✅ S19: Intelligent recommendation generated for ${symbol}: ${recommendation.action}`,
+      );
+      return recommendation;
+    } catch (error) {
+      this.logger.error(
+        `❌ S19: Intelligent recommendation failed for ${symbol}:`,
+        error,
+      );
+      throw error;
+    }
+  }
+
+  /**
+   * S19: Get detailed explanation for the AI recommendation
+   */
+  async getRecommendationExplanation(symbol: string): Promise<any> {
+    try {
+      this.logger.log(
+        `📖 S19: Getting recommendation explanation for ${symbol}`,
+      );
+      return await this.intelligentRecommendationService.getRecommendationExplanation(
+        symbol.toUpperCase(),
+      );
+    } catch (error) {
+      this.logger.error(`❌ S19: Explanation failed for ${symbol}:`, error);
+      throw error;
+    }
+  }
+
+  // ============================================================================
+  // S27E: ML Model Monitoring and A/B Testing Framework Methods
+  // ============================================================================
+
+  /**
+   * Get real-time monitoring dashboard data for a specific model
+   */
+  async getRealtimeMonitoringDashboard(modelId: string): Promise<any> {
+    this.logger.log(
+      `Getting real-time monitoring dashboard for model ${modelId}`,
+    );
+
+    try {
+      return await this.modelMonitoringService.getRealtimeMonitoringDashboard(
+        modelId,
+      );
+    } catch (error) {
+      this.logger.error(
+        `Error getting real-time dashboard for model ${modelId}:`,
+        error,
+      );
+      throw new Error(
+        `Failed to get real-time monitoring dashboard: ${error.message}`,
+      );
+    }
+  }
+  /**
+   * Monitor the health of a specific model
+   */
+  async monitorModelHealth(modelId: string): Promise<any> {
+    this.logger.log(`Monitoring health for model ${modelId}`);
+
+    try {
+      return await this.modelMonitoringService.getModelHealthReport(modelId);
+    } catch (error) {
+      this.logger.error(`Error monitoring health for model ${modelId}:`, error);
+      throw new Error(`Failed to monitor model health: ${error.message}`);
+    }
+  }
+
+  /**
+   * Evaluate if a model needs retraining based on performance triggers
+   */
+  async evaluateRetrainingTriggers(modelId: string): Promise<any> {
+    this.logger.log(`Evaluating retraining triggers for model ${modelId}`);
+
+    try {
+      return await this.modelMonitoringService.evaluateRetrainingTriggers(
+        modelId,
+      );
+    } catch (error) {
+      this.logger.error(
+        `Error evaluating retraining triggers for model ${modelId}:`,
+        error,
+      );
+      throw new Error(
+        `Failed to evaluate retraining triggers: ${error.message}`,
+      );
+    }
+  }
+
+  /**
+   * Execute model rollback to a previous version
+   */
+  async executeModelRollback(
+    modelId: string,
+    targetVersion: string,
+    reason: string,
+  ): Promise<any> {
+    this.logger.log(
+      `Executing rollback for model ${modelId} to version ${targetVersion}`,
+    );
+
+    try {
+      return await this.modelMonitoringService.executeModelRollback(
+        modelId,
+        targetVersion,
+        reason,
+      );
+    } catch (error) {
+      this.logger.error(`Error rolling back model ${modelId}:`, error);
+      throw new Error(`Failed to execute model rollback: ${error.message}`);
+    }
+  }
+  /**
+   * Generate comprehensive monitoring report for specified time period
+   */
+  async generateMonitoringReport(
+    modelId: string,
+    startDate: Date,
+    endDate: Date,
+    includeDetails: boolean = true,
+  ): Promise<any> {
+    this.logger.log(`Generating monitoring report for model ${modelId}`);
+
+    try {
+      // Calculate time range in hours from start and end dates
+      const timeRangeHours =
+        Math.abs(endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60);
+
+      return await this.modelMonitoringService.generateMonitoringReport(
+        modelId,
+        timeRangeHours,
+      );
+    } catch (error) {
+      this.logger.error(
+        `Error generating monitoring report for model ${modelId}:`,
+        error,
+      );
+      throw new Error(`Failed to generate monitoring report: ${error.message}`);
+    }
+  }
+  /**
+   * Setup champion/challenger test between two models
+   */
+  async setupChampionChallengerTest(config: {
+    championModelId: string;
+    challengerModelId: string;
+    trafficSplit: number;
+    duration: number;
+    successMetrics: string[];
+  }): Promise<any> {
+    this.logger.log(
+      `Setting up champion/challenger test between ${config.championModelId} and ${config.challengerModelId}`,
+    );
+
+    try {
+      return await this.modelMonitoringService.setupChampionChallengerTest(
+        config.championModelId,
+        config.challengerModelId,
+        config.trafficSplit,
+        config.duration,
+      );
+    } catch (error) {
+      this.logger.error(`Error setting up champion/challenger test:`, error);
+      throw new Error(
+        `Failed to setup champion/challenger test: ${error.message}`,
+      );
+    }
+  }
+
+  /**
+   * Evaluate champion/challenger test results
+   */
+  async evaluateChampionChallenger(testId: string): Promise<any> {
+    this.logger.log(`Evaluating champion/challenger test ${testId}`);
+
+    try {
+      return await this.modelMonitoringService.evaluateChampionChallenger(
+        testId,
+      );
+    } catch (error) {
+      this.logger.error(
+        `Error evaluating champion/challenger test ${testId}:`,
+        error,
+      );
+      throw new Error(
+        `Failed to evaluate champion/challenger test: ${error.message}`,
+      );
+    }
+  }
+  /**
+   * Create a multivariate A/B test
+   */
+  async createMultivariateTest(config: {
+    name: string;
+    variables: Array<{
+      name: string;
+      variants: Array<{ id: string; value: any; weight: number }>;
+    }>;
+    targetMetric: string;
+    duration: number;
+    sampleSize: number;
+  }): Promise<any> {
+    this.logger.log(`Creating multivariate test: ${config.name}`);
+
+    try {
+      // Transform the config to match the service signature
+      const serviceConfig = {
+        testName: config.name,
+        models: config.variables.flatMap((variable) =>
+          variable.variants.map((variant) => ({
+            id: variant.id,
+            name: `${variable.name}_${variant.id}`,
+            trafficAllocation: variant.weight,
+          })),
+        ),
+        successMetrics: [config.targetMetric],
+        duration: config.duration,
+        confidenceLevel: 0.95, // Default confidence level
+        minimumDetectableEffect: 0.05, // Default minimum detectable effect
+      };
+
+      return await this.abTestingService.createMultivariateTest(serviceConfig);
+    } catch (error) {
+      this.logger.error(`Error creating multivariate test:`, error);
+      throw new Error(`Failed to create multivariate test: ${error.message}`);
+    }
+  }
+
+  /**
+   * Analyze multivariate test results
+   */
+  async analyzeMultivariateTest(testId: string): Promise<any> {
+    this.logger.log(`Analyzing multivariate test ${testId}`);
+
+    try {
+      return await this.abTestingService.analyzeMultivariateTest(testId);
+    } catch (error) {
+      this.logger.error(`Error analyzing multivariate test ${testId}:`, error);
+      throw new Error(`Failed to analyze multivariate test: ${error.message}`);
+    }
+  }
+
+  /**
+   * Evaluate sequential test for early stopping
+   */
+  async evaluateSequentialTest(testId: string): Promise<any> {
+    this.logger.log(`Evaluating sequential test ${testId}`);
+
+    try {
+      return await this.abTestingService.evaluateSequentialTest(testId);
+    } catch (error) {
+      this.logger.error(`Error evaluating sequential test ${testId}:`, error);
+      throw new Error(`Failed to evaluate sequential test: ${error.message}`);
+    }
+  }
+
+  /**
+   * Update bandit algorithm allocation based on performance
+   */
+  async updateBanditAllocation(testId: string): Promise<any> {
+    this.logger.log(`Updating bandit allocation for test ${testId}`);
+
+    try {
+      return await this.abTestingService.updateBanditAllocation(testId);
+    } catch (error) {
+      this.logger.error(
+        `Error updating bandit allocation for test ${testId}:`,
+        error,
+      );
+      throw new Error(`Failed to update bandit allocation: ${error.message}`);
+    }
+  }
+  /**
+   * Perform meta-analysis across multiple A/B tests
+   */
+  async performMetaAnalysis(testIds: string[]): Promise<any> {
+    this.logger.log(`Performing meta-analysis on tests: ${testIds.join(', ')}`);
+
+    try {
+      return await this.abTestingService.performMetaAnalysis(testIds);
+    } catch (error) {
+      this.logger.error(`Error performing meta-analysis:`, error);
+      throw new Error(`Failed to perform meta-analysis: ${error.message}`);
+    }
+  }
+
+  // ================== S28A: Sentiment Monitoring ML Integration ==================
+  /**
+   * Get real-time sentiment monitoring for a symbol
+   */
+  async getSentimentMonitoring(symbol: string): Promise<any> {
+    this.logger.log(`Getting sentiment monitoring for ${symbol}`);
+
+    try {
+      const currentSentiment =
+        await this.sentimentMonitoringService.getCurrentSentiment(symbol);
+      const sentimentHistory =
+        await this.sentimentMonitoringService.getSentimentHistory(symbol, 20);
+      const alerts =
+        await this.sentimentMonitoringService.getActiveAlerts(symbol);
+      const signals =
+        await this.sentimentMonitoringService.getTradingSignals(symbol);
+
+      return {
+        symbol,
+        currentSentiment,
+        history: sentimentHistory,
+        alerts,
+        signals,
+        timestamp: new Date(),
+      };
+    } catch (error) {
+      this.logger.error(
+        `Error getting sentiment monitoring for ${symbol}:`,
+        error,
+      );
+      throw new Error(`Failed to get sentiment monitoring: ${error.message}`);
+    }
+  }
+
+  /**
+   * Get sentiment alerts
+   */
+  async getSentimentAlerts(): Promise<any[]> {
+    this.logger.log('Getting sentiment alerts');
+
+    try {
+      return await this.sentimentMonitoringService.getActiveAlerts();
+    } catch (error) {
+      this.logger.error('Error getting sentiment alerts:', error);
+      throw new Error(`Failed to get sentiment alerts: ${error.message}`);
+    }
+  }
+
+  /**
+   * Get sentiment-based trading signals
+   */
+  async getSentimentTradingSignals(symbol: string): Promise<any> {
+    this.logger.log(`Getting sentiment trading signals for ${symbol}`);
+
+    try {
+      const signals =
+        await this.sentimentMonitoringService.getTradingSignals(symbol);
+      return signals;
+    } catch (error) {
+      this.logger.error(
+        `Error getting sentiment trading signals for ${symbol}:`,
+        error,
+      );
+      throw new Error(
+        `Failed to get sentiment trading signals: ${error.message}`,
+      );
+    }
+  }
+
+  /**
+   * Start real-time sentiment monitoring for a symbol
+   */
+  async startSentimentMonitoring(
+    symbol: string,
+  ): Promise<{ success: boolean; message: string }> {
+    this.logger.log(`Starting sentiment monitoring for ${symbol}`);
+
+    try {
+      // The monitoring service runs on a cron schedule, so we just confirm it's active
+      const currentSentiment =
+        await this.sentimentMonitoringService.getCurrentSentiment(symbol);
+      return {
+        success: true,
+        message: `Sentiment monitoring is active for ${symbol}. Current sentiment: ${currentSentiment?.overallSentiment || 'N/A'}`,
+      };
+    } catch (error) {
+      this.logger.error(
+        `Error starting sentiment monitoring for ${symbol}:`,
+        error,
+      );
+      throw new Error(`Failed to start sentiment monitoring: ${error.message}`);
+    }
+  }
+
+  /**
+   * Stop real-time sentiment monitoring for a symbol
+   */
+  async stopSentimentMonitoring(
+    symbol: string,
+  ): Promise<{ success: boolean; message: string }> {
+    this.logger.log(`Stopping sentiment monitoring for ${symbol}`);
+
+    try {
+      // The monitoring service runs on a global cron schedule
+      // In a real implementation, you might maintain a list of symbols to monitor
+      return {
+        success: true,
+        message: `Sentiment monitoring acknowledgment for ${symbol}. Note: Global monitoring continues via scheduled tasks.`,
+      };
+    } catch (error) {
+      this.logger.error(
+        `Error stopping sentiment monitoring for ${symbol}:`,
+        error,
+      );
+      throw new Error(`Failed to stop sentiment monitoring: ${error.message}`);
+    }
+  }
+
+  /**
+   * Get sentiment trend analysis for a symbol
+   */
+  async getSentimentTrends(symbol: string, hours: number = 24): Promise<any> {
+    this.logger.log(
+      `Getting sentiment trends for ${symbol} over ${hours} hours`,
+    );
+
+    try {
+      const sentimentHistory =
+        await this.sentimentMonitoringService.getSentimentHistory(
+          symbol,
+          Math.floor(hours * 12),
+        ); // 12 readings per hour (every 5 min)
+
+      // Calculate trends from history
+      const trends = this.calculateSentimentTrends(sentimentHistory, hours);
+
+      return {
+        symbol,
+        timeframe: `${hours} hours`,
+        trends,
+        history: sentimentHistory,
+        timestamp: new Date(),
+      };
+    } catch (error) {
+      this.logger.error(`Error getting sentiment trends for ${symbol}:`, error);
+      throw new Error(`Failed to get sentiment trends: ${error.message}`);
+    }
+  }
+
+  /**
+   * Helper method to calculate sentiment trends
+   */
+  private calculateSentimentTrends(
+    history: SentimentScore[],
+    hours: number,
+  ): any {
+    if (history.length < 2) {
+      return {
+        direction: 'INSUFFICIENT_DATA',
+        magnitude: 0,
+        volatility: 0,
+        confidence: 0,
+      };
+    }
+
+    const recent = history.slice(0, Math.floor(history.length / 2));
+    const older = history.slice(Math.floor(history.length / 2));
+
+    const recentAvg =
+      recent.reduce((sum, s) => sum + s.overallSentiment, 0) / recent.length;
+    const olderAvg =
+      older.reduce((sum, s) => sum + s.overallSentiment, 0) / older.length;
+
+    const direction =
+      recentAvg > olderAvg
+        ? 'IMPROVING'
+        : recentAvg < olderAvg
+          ? 'DECLINING'
+          : 'STABLE';
+    const magnitude = Math.abs(recentAvg - olderAvg);
+
+    // Calculate volatility as standard deviation
+    const allValues = history.map((h) => h.overallSentiment);
+    const mean =
+      allValues.reduce((sum, val) => sum + val, 0) / allValues.length;
+    const variance =
+      allValues.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) /
+      allValues.length;
+    const volatility = Math.sqrt(variance);
+
+    return {
+      direction,
+      magnitude,
+      volatility,
+      confidence: Math.min(1, history.length / (hours * 12)), // Confidence based on data availability
+    };
+  }
+
+  /**
+   * S28B: Get advanced ML-enhanced portfolio optimization
+   * Includes regime detection, multi-objective optimization, and rebalancing triggers
+   */
+  async getAdvancedPortfolioOptimization(
+    portfolioId: number,
+    currentPositions: any[],
+    objectives: {
+      riskTolerance: number;
+      returnTarget?: number;
+      esgWeight?: number;
+      liquidityRequirement?: number;
+      taxEfficiency?: number;
+    },
+    constraints: {
+      maxPositionSize?: number;
+      sectorLimits?: Record<string, number>;
+      excludeSymbols?: string[];
+      minDiversification?: number;
+      rebalanceFrequency?: 'daily' | 'weekly' | 'monthly' | 'quarterly';
+    },
+  ): Promise<any> {
+    this.logger.log(
+      `🎯 S28B: Getting advanced portfolio optimization for portfolio ${portfolioId}`,
+    );
+
+    try {
+      return await this.portfolioOptimizationService.optimizePortfolioAdvanced(
+        portfolioId,
+        currentPositions,
+        objectives,
+        constraints,
+      );
+    } catch (error) {
+      this.logger.error(
+        `Error in advanced portfolio optimization for ${portfolioId}:`,
+        error,
+      );
+
+      // Return enhanced fallback strategy
+      return {
+        success: false,
+        message: 'Using enhanced fallback optimization strategy',
+        recommendations: [],
+        expectedReturn: 0.08,
+        expectedRisk: 0.15,
+        sharpeRatio: 0.53,
+        diversificationScore: 0.7,
+        timestamp: new Date(),
+        multiObjectiveScore: 0.6,
+        regimeAnalysis: {
+          currentRegime: 'sideways',
+          regimeConfidence: 0.6,
+          expectedRegimeChange: 45,
+          marketStress: 0.3,
+        },
+        rebalancingTriggers: [],
+        esgScore: objectives.esgWeight ? 0.5 : undefined,
+        taxEfficiency: objectives.taxEfficiency ? 0.5 : undefined,
+      };
+    }
+  }
+
+  /**
+   * S29B: Advanced Signal Generation Ensemble
+   * Generate ensemble trading signals using multi-model, multi-timeframe, meta-learning
+   */
+  async generateEnsembleTradingSignals(
+    symbol: string,
+    options: {
+      timeframes?: string[];
+      includeConflictResolution?: boolean;
+      ensembleMethod?: 'voting' | 'averaging' | 'stacking' | 'meta_learning';
+      confidenceThreshold?: number;
+      enableRealTimeStream?: boolean;
+    } = {},
+  ): Promise<any> {
+    try {
+      this.logger.log(
+        `⚡ S29B: Generating ensemble trading signals for ${symbol}`,
+      );
+      const result = await this.signalGenerationService.generateEnsembleSignals(
+        symbol,
+        options,
+      );
+      this.logger.log(
+        `✅ S29B: Ensemble trading signals generated for ${symbol}`,
+      );
+      return result;
+    } catch (error) {
+      this.logger.error(
+        `❌ S29B: Ensemble signal generation failed for ${symbol}:`,
+        error,
+      );
+      throw error;
+    }
+  }
+
+  /**
+   * S19 + S29B Integration: Generate intelligent recommendation enhanced with ensemble signals
+   * This method combines the power of S19's AI recommendation engine with S29B's ensemble signals
+   */
+  async generateEnhancedIntelligentRecommendation(
+    symbol: string,
+    currentPrice: number,
+    options: {
+      portfolioContext?: {
+        currentHoldings: number;
+        availableCash: number;
+        riskTolerance: 'LOW' | 'MEDIUM' | 'HIGH';
+      };
+      timeHorizon?: '1D' | '1W' | '1M';
+      preferences?: {
+        maxRisk: number;
+        preferredSectors?: string[];
+        excludePatterns?: string[];
+      };
+      ensembleOptions?: {
+        timeframes?: string[];
+        includeConflictResolution?: boolean;
+        ensembleMethod?: 'voting' | 'averaging' | 'stacking' | 'meta_learning';
+        confidenceThreshold?: number;
+        enableRealTimeStream?: boolean;
+      };
+    } = {},
+  ): Promise<any> {
+    try {
+      this.logger.log(
+        `🚀 S19+S29B: Generating enhanced intelligent recommendation for ${symbol}`,
+      );
+
+      // Step 1: Generate ensemble trading signals (S29B)
+      const ensembleSignals = await this.generateEnsembleTradingSignals(
+        symbol,
+        options.ensembleOptions || {},
+      );
+
+      // Step 2: Generate AI-powered recommendation (S19)
+      const intelligentRecommendation =
+        await this.generateIntelligentRecommendation(
+          symbol,
+          currentPrice,
+          options.portfolioContext,
+          options.timeHorizon || '1D',
+          options.preferences,
+        );
+
+      // Step 3: Synthesize and enhance the recommendation with ensemble insights
+      const enhancedRecommendation = {
+        ...intelligentRecommendation,
+        ensembleSignals,
+        enhancedMetrics: {
+          ...intelligentRecommendation.metrics,
+          ensembleConfidence: ensembleSignals.overallConfidence || 0.5,
+          signalStrength: ensembleSignals.signalStrength || 0.5,
+          conflictResolution:
+            ensembleSignals.conflictAnalysis || 'NO_CONFLICTS',
+        },
+        compositeScore: this.calculateCompositeScore(
+          intelligentRecommendation,
+          ensembleSignals,
+        ),
+        integrationMetadata: {
+          s19Used: true,
+          s29bUsed: true,
+          integrationTimestamp: new Date(),
+          integrationMethod: 'enhanced_synthesis',
+        },
+      };
+
+      this.logger.log(
+        `✅ S19+S29B: Enhanced recommendation completed for ${symbol} - Action: ${enhancedRecommendation.action}, Composite Score: ${enhancedRecommendation.compositeScore}`,
+      );
+      return enhancedRecommendation;
+    } catch (error) {
+      this.logger.error(
+        `❌ S19+S29B: Enhanced recommendation failed for ${symbol}:`,
+        error,
+      );
+      throw error;
+    }
+  }
+
+  /**
+   * Calculate a composite score combining S19 and S29B insights
+   */
+  private calculateCompositeScore(
+    recommendation: any,
+    ensembleSignals: any,
+  ): number {
+    const s19Weight = 0.6; // S19 has higher weight as it's the unified engine
+    const s29bWeight = 0.4; // S29B provides supporting ensemble evidence
+
+    const s19Score = recommendation.confidence || 0.5;
+    const s29bScore = ensembleSignals.overallConfidence || 0.5;
+
+    return (
+      Math.round((s19Score * s19Weight + s29bScore * s29bWeight) * 100) / 100
+    );
   }
 }

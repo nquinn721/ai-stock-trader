@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { NewsModule } from '../news/news.module';
 import {
   MLABTest,
   MLFeatureImportance,
@@ -22,6 +23,7 @@ import { EnsembleSystemsService } from './services/ensemble-systems.service';
 import { ExperimentTrackingService } from './services/experiment-tracking.service';
 import { FeatureEngineeringService } from './services/feature-engineering.service';
 import { FeaturePipelineService } from './services/feature-pipeline.service';
+import { IntelligentRecommendationService } from './services/intelligent-recommendation.service';
 import { MarketPredictionService } from './services/market-prediction.service';
 import { MLInferenceService } from './services/ml-inference.service';
 import { MLService } from './services/ml.service';
@@ -29,11 +31,14 @@ import { ModelMonitoringService } from './services/model-monitoring.service';
 import { ModelTrainingService } from './services/model-training.service';
 import { PatternRecognitionService } from './services/pattern-recognition.service';
 import { PortfolioOptimizationService } from './services/portfolio-optimization.service';
+import { RealTimeModelUpdateService } from './services/real-time-model-update.service';
 import { SentimentAnalysisService } from './services/sentiment-analysis.service';
+import { SentimentMonitoringService } from './services/sentiment-monitoring.service';
 import { SignalGenerationService } from './services/signal-generation.service';
 
 @Module({
   imports: [
+    NewsModule,
     TypeOrmModule.forFeature([
       MLModel,
       MLPrediction,
@@ -51,11 +56,14 @@ import { SignalGenerationService } from './services/signal-generation.service';
     ABTestingService,
     ModelMonitoringService,
     SentimentAnalysisService,
+    SentimentMonitoringService,
     PortfolioOptimizationService,
     PatternRecognitionService,
     MarketPredictionService,
     SignalGenerationService,
     EnsembleSystemsService,
+    // S29C Real-time Model Updates
+    RealTimeModelUpdateService,
     // S27A Data Pipeline Services
     DataIngestionService,
     FeaturePipelineService,
@@ -68,9 +76,10 @@ import { SignalGenerationService } from './services/signal-generation.service';
     ModelTrainingService,
     ExperimentTrackingService,
     // S27C Breakout Detection ML Model
-    BreakoutDetectionService,
-    // S27D Dynamic Risk Management ML System
+    BreakoutDetectionService, // S27D Dynamic Risk Management ML System
     DynamicRiskManagementService,
+    // S19 Intelligent Recommendation Engine
+    IntelligentRecommendationService,
   ],
   exports: [
     MLService,
@@ -79,11 +88,14 @@ import { SignalGenerationService } from './services/signal-generation.service';
     ABTestingService,
     ModelMonitoringService,
     SentimentAnalysisService,
+    SentimentMonitoringService,
     PortfolioOptimizationService,
     PatternRecognitionService,
     MarketPredictionService,
     SignalGenerationService,
-    EnsembleSystemsService, // S27A Data Pipeline Services
+    EnsembleSystemsService, // S29C Real-time Model Updates
+    RealTimeModelUpdateService,
+    // S27A Data Pipeline Services
     DataIngestionService,
     FeaturePipelineService,
     DataValidationService,
@@ -95,9 +107,10 @@ import { SignalGenerationService } from './services/signal-generation.service';
     ModelTrainingService,
     ExperimentTrackingService,
     // S27C Breakout Detection ML Model
-    BreakoutDetectionService,
-    // S27D Dynamic Risk Management ML System
+    BreakoutDetectionService, // S27D Dynamic Risk Management ML System
     DynamicRiskManagementService,
+    // S19 Intelligent Recommendation Engine
+    IntelligentRecommendationService,
   ],
 })
 export class MLModule {}
