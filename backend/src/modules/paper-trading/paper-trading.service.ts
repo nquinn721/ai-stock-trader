@@ -6,35 +6,25 @@ import { Position } from '../../entities/position.entity';
 import { Stock } from '../../entities/stock.entity';
 import { Trade, TradeStatus, TradeType } from '../../entities/trade.entity';
 import { MLService } from '../ml/services/ml.service';
-
-// DTOs that the controller expects
-export class CreatePortfolioDto {
-  userId: string;
-  portfolioType:
-    | 'DAY_TRADING_PRO'
-    | 'DAY_TRADING_STANDARD'
-    | 'SMALL_ACCOUNT_BASIC'
-    | 'MICRO_ACCOUNT_STARTER';
-  initialBalance?: number;
-}
+import { CreatePortfolioDto, PortfolioType } from './dto/create-portfolio.dto';
 
 // Portfolio type configurations
 export const PORTFOLIO_CONFIGS = {
-  DAY_TRADING_PRO: {
+  [PortfolioType.DAY_TRADING_PRO]: {
     name: 'Day Trading Pro',
     initialBalance: 50000,
     dayTradingEnabled: true,
     description: 'Professional day trading account with $50k starting capital',
     minBalance: 25000, // SEC requirement for pattern day trading
   },
-  DAY_TRADING_STANDARD: {
+  [PortfolioType.DAY_TRADING_STANDARD]: {
     name: 'Day Trading Standard',
     initialBalance: 30000,
     dayTradingEnabled: true,
     description: 'Standard day trading account with $30k starting capital',
     minBalance: 25000,
   },
-  SMALL_ACCOUNT_BASIC: {
+  [PortfolioType.SMALL_ACCOUNT_BASIC]: {
     name: 'Small Account Basic',
     initialBalance: 1000,
     dayTradingEnabled: false,
@@ -42,7 +32,7 @@ export const PORTFOLIO_CONFIGS = {
       'Basic account with $1k starting capital, day trading restricted',
     minBalance: 0,
   },
-  MICRO_ACCOUNT_STARTER: {
+  [PortfolioType.MICRO_ACCOUNT_STARTER]: {
     name: 'Micro Account Starter',
     initialBalance: 500,
     dayTradingEnabled: false,
@@ -71,45 +61,51 @@ export class PaperTradingService {
     @InjectRepository(Stock)
     private stockRepository: Repository<Stock>,
     private mlService: MLService,
-  ) {} /**
+  ) {}
+  /**
    * Create a new portfolio with specified type
-   */
-  async createPortfolio(
+   */ async createPortfolio(
     createPortfolioDto: CreatePortfolioDto,
   ): Promise<Portfolio> {
-    const { userId, portfolioType } = createPortfolioDto;
+    try {
+      const { userId, portfolioType } = createPortfolioDto;
 
-    // Get configuration for the portfolio type
-    const config = PORTFOLIO_CONFIGS[portfolioType];
-    if (!config) {
-      throw new Error(`Invalid portfolio type: ${portfolioType}`);
+      // Get configuration for the portfolio type
+      const config = PORTFOLIO_CONFIGS[portfolioType];
+      if (!config) {
+        throw new Error(`Invalid portfolio type: ${portfolioType}`);
+      }
+
+      const initialBalance =
+        createPortfolioDto.initialBalance || config.initialBalance;
+
+      // Validate minimum balance for day trading accounts
+      if (config.dayTradingEnabled && initialBalance < config.minBalance) {
+        throw new Error(
+          `Day trading portfolios require minimum $${config.minBalance} balance`,
+        );
+      }
+      const portfolio = this.portfolioRepository.create({
+        name: `${config.name} - ${userId}`,
+        portfolioType: portfolioType as string,
+        dayTradingEnabled: config.dayTradingEnabled,
+        dayTradeCount: 0,
+        lastDayTradeReset: config.dayTradingEnabled
+          ? new Date()
+          : (null as any),
+        initialCash: initialBalance,
+        currentCash: initialBalance,
+        totalValue: initialBalance,
+        totalPnL: 0,
+        totalReturn: 0,
+        isActive: true,
+      });
+
+      return await this.portfolioRepository.save(portfolio);
+    } catch (error) {
+      console.error('Error creating portfolio:', error);
+      throw error;
     }
-
-    const initialBalance =
-      createPortfolioDto.initialBalance || config.initialBalance;
-
-    // Validate minimum balance for day trading accounts
-    if (config.dayTradingEnabled && initialBalance < config.minBalance) {
-      throw new Error(
-        `Day trading portfolios require minimum $${config.minBalance} balance`,
-      );
-    }
-
-    const portfolio = this.portfolioRepository.create({
-      name: `${config.name} - ${userId}`,
-      portfolioType,
-      dayTradingEnabled: config.dayTradingEnabled,
-      dayTradeCount: 0,
-      lastDayTradeReset: new Date(),
-      initialCash: initialBalance,
-      currentCash: initialBalance,
-      totalValue: initialBalance,
-      totalPnL: 0,
-      totalReturn: 0,
-      isActive: true,
-    });
-
-    return await this.portfolioRepository.save(portfolio);
   }
   async getPortfolios(): Promise<Portfolio[]> {
     return await this.portfolioRepository.find({
@@ -1058,14 +1054,12 @@ export class PaperTradingService {
    * Create portfolios with predefined types for testing
    */
   async createDefaultPortfolios(userId: string): Promise<Portfolio[]> {
-    const portfolios: Portfolio[] = [];
-
-    // Create all four portfolio types
-    const types: Array<keyof typeof PORTFOLIO_CONFIGS> = [
-      'DAY_TRADING_PRO',
-      'DAY_TRADING_STANDARD',
-      'SMALL_ACCOUNT_BASIC',
-      'MICRO_ACCOUNT_STARTER',
+    const portfolios: Portfolio[] = []; // Create all four portfolio types
+    const types: PortfolioType[] = [
+      PortfolioType.DAY_TRADING_PRO,
+      PortfolioType.DAY_TRADING_STANDARD,
+      PortfolioType.SMALL_ACCOUNT_BASIC,
+      PortfolioType.MICRO_ACCOUNT_STARTER,
     ];
 
     for (const portfolioType of types) {

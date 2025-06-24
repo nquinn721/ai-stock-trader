@@ -6,6 +6,9 @@ export interface SentimentData {
   lastUpdated?: string;
 }
 
+// Export recommendation types
+export * from "./recommendation.types";
+
 // Pattern Recognition Interfaces
 export interface CandlestickPattern {
   type:
@@ -335,6 +338,10 @@ export interface TradingSignal {
 export interface Portfolio {
   id: number;
   name: string;
+  portfolioType?: string; // DAY_TRADING_PRO, DAY_TRADING_STANDARD, SMALL_ACCOUNT_BASIC, MICRO_ACCOUNT_STARTER
+  dayTradingEnabled?: boolean;
+  dayTradeCount?: number;
+  lastDayTradeReset?: string;
   initialCash: number;
   currentCash: number;
   totalValue: number;

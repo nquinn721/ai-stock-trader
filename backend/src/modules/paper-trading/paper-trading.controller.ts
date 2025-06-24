@@ -1,11 +1,8 @@
 import { Body, Controller, Delete, Get, Param, Post } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { StockWebSocketGateway } from '../websocket/websocket.gateway';
-import {
-  CreatePortfolioDto,
-  CreateTradeDto,
-  PaperTradingService,
-} from './paper-trading.service';
+import { CreatePortfolioDto } from './dto/create-portfolio.dto';
+import { CreateTradeDto, PaperTradingService } from './paper-trading.service';
 
 @ApiTags('paper-trading')
 @Controller('paper-trading')

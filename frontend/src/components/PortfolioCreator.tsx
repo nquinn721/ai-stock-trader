@@ -160,18 +160,20 @@ const PortfolioCreator: React.FC<PortfolioCreatorProps> = ({
         setCreating(false);
         return;
       }
-
-      const response = await fetch("/api/paper-trading/portfolios", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          userId,
-          portfolioType: selectedType.key,
-          initialBalance,
-        }),
-      });
+      const response = await fetch(
+        "http://localhost:8000/paper-trading/portfolios",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            userId,
+            portfolioType: selectedType.key,
+            initialBalance,
+          }),
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Failed to create portfolio");
