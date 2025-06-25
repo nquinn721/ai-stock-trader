@@ -2,6 +2,8 @@ import React, { ReactElement } from 'react';
 import { render, RenderOptions } from '@testing-library/react';
 import { StoreProvider } from '../stores/StoreContext';
 import { RootStore } from '../stores/RootStore';
+import { NotificationProvider } from '../context/NotificationContext';
+import { SocketProvider } from '../context/SocketContext';
 
 // Mock FontAwesome icons
 jest.mock('@fortawesome/react-fontawesome', () => ({
@@ -17,6 +19,19 @@ jest.mock('@fortawesome/react-fontawesome', () => ({
 jest.mock('../context/NotificationContext', () => ({
   NotificationProvider: ({ children }: { children: React.ReactNode }) => children,
   useNotification: () => ({
+    notifications: [],
+    unreadCount: 0,
+    isLoading: false,
+    preferences: [],
+    getNotifications: jest.fn(),
+    markAsRead: jest.fn(),
+    markAsDismissed: jest.fn(),
+    bulkMarkAsRead: jest.fn(),
+    bulkMarkAsDismissed: jest.fn(),
+    updatePreferences: jest.fn(),
+    clearNotifications: jest.fn(),
+  }),
+  useNotifications: () => ({
     notifications: [],
     unreadCount: 0,
     isLoading: false,
@@ -59,9 +74,48 @@ jest.mock('../context/SocketContext', () => ({
   }),
 }));
 
+// Mock the recommendation service
+jest.mock('../services/recommendationService', () => ({
+  __esModule: true,
+  default: {
+    getQuickRecommendation: jest.fn().mockResolvedValue({
+      recommendation: 'HOLD',
+      confidence: 0.75,
+      reasoning: 'Market conditions are neutral'
+    }),
+  },
+}));
+
+// Mock axios specifically for API calls
+jest.mock('axios', () => ({
+  get: jest.fn().mockResolvedValue({ data: [] }),
+  post: jest.fn().mockResolvedValue({ data: {} }),
+  put: jest.fn().mockResolvedValue({ data: {} }),
+  delete: jest.fn().mockResolvedValue({ data: {} }),
+  create: jest.fn().mockReturnValue({
+    get: jest.fn().mockResolvedValue({ data: [] }),
+    post: jest.fn().mockResolvedValue({ data: {} }),
+    put: jest.fn().mockResolvedValue({ data: {} }),
+    delete: jest.fn().mockResolvedValue({ data: {} }),
+    interceptors: {
+      request: { use: jest.fn(), eject: jest.fn() },
+      response: { use: jest.fn(), eject: jest.fn() },
+    },
+  }),
+  interceptors: {
+    request: { use: jest.fn(), eject: jest.fn() },
+    response: { use: jest.fn(), eject: jest.fn() },
+  },
+}));
+
 // Create a mock RootStore for testing
 const createMockStore = (): RootStore => {
   const mockStore = new RootStore();
+  
+  // Ensure all stores are properly initialized
+  mockStore.stockStore.stocks = mockStore.stockStore.stocks || [];
+  mockStore.portfolioStore.portfolios = mockStore.portfolioStore.portfolios || [];
+  
   return mockStore;
 };
 
@@ -76,7 +130,11 @@ const AllTheProviders: React.FC<AllTheProvidersProps> = ({
 }) => {
   return (
     <StoreProvider store={store}>
-      {children}
+      <NotificationProvider>
+        <SocketProvider>
+          {children}
+        </SocketProvider>
+      </NotificationProvider>
     </StoreProvider>
   );
 };

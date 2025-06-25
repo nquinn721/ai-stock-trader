@@ -46,10 +46,10 @@ describe("Store Integration Tests", () => {
       expect(portfolioStore.isLoading).toBe(false);
       expect(portfolioStore.portfolio).toBeNull();
 
-      await portfolioStore.fetchPortfolio(1);
+      await portfolioStore.initializeDefaultPortfolio();
 
       expect(portfolioStore.isLoading).toBe(false);
-      expect(portfolioStore.portfolio).toEqual(mockPortfolio);
+      expect(portfolioStore.currentPortfolio).toEqual(mockPortfolio);
       expect(portfolioStore.positions).toEqual(mockPortfolio.positions);
       expect(portfolioStore.error).toBeNull();
     });
@@ -58,10 +58,10 @@ describe("Store Integration Tests", () => {
       const mockError = new Error("Failed to fetch portfolio");
       jest.spyOn(apiStore, "get").mockRejectedValue(mockError);
 
-      await portfolioStore.fetchPortfolio(1);
+      await portfolioStore.initializeDefaultPortfolio();
 
       expect(portfolioStore.isLoading).toBe(false);
-      expect(portfolioStore.portfolio).toBeNull();
+      expect(portfolioStore.currentPortfolio).toBeNull();
       expect(portfolioStore.error).toBe("Failed to fetch portfolio");
     });
 
@@ -129,7 +129,7 @@ describe("Store Integration Tests", () => {
       };
 
       jest.spyOn(apiStore, "get").mockResolvedValue(mockPortfolio);
-      await portfolioStore.fetchPortfolio(1);
+      await portfolioStore.initializeDefaultPortfolio();
 
       expect(portfolioStore.totalCash).toBe(50000);
       expect(portfolioStore.totalEquity).toBe(16100); // 1600 + 14500
@@ -322,18 +322,18 @@ describe("Store Integration Tests", () => {
       };
 
       jest.spyOn(apiStore, "get").mockResolvedValue(mockPortfolio);
-      await portfolioStore.fetchPortfolio(1);
+      await portfolioStore.initializeDefaultPortfolio();
 
       // Update stock price
       portfolioStore.updatePositionPrice("AAPL", 155.0); // Portfolio should reflect updated position value
       const updatedPosition = portfolioStore.positions.find(
         (p) => p.symbol === "AAPL"
       );
-      expect(updatedPosition?.marketValue).toBe(1550.0); // 10 shares * 155.0
+      expect(updatedPosition?.currentValue).toBe(1550.0); // 10 shares * 155.0
     });
 
     it("should handle concurrent API calls without race conditions", async () => {
-      const portfolioPromise = portfolioStore.fetchPortfolio(1);
+      const portfolioPromise = portfolioStore.initializeDefaultPortfolio();
       const stocksPromise = stockStore.fetchStocks();
 
       // Mock different response times
@@ -406,7 +406,7 @@ describe("Store Integration Tests", () => {
         ],
       };
       jest.spyOn(apiStore, "get").mockResolvedValue(mockPortfolio);
-      await portfolioStore.fetchPortfolio(1);
+      await portfolioStore.initializeDefaultPortfolio();
 
       const initialValue = portfolioStore.totalEquity;
 

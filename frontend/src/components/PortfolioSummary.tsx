@@ -8,12 +8,16 @@ const PortfolioSummary: React.FC = observer(() => {
   const portfolioStore = usePortfolioStore();
 
   useEffect(() => {
-    // Fetch portfolio for test user (ID: 1)
-    portfolioStore.fetchPortfolio(1);
+    // Initialize portfolio if not already loaded
+    if (!portfolioStore.currentPortfolio) {
+      portfolioStore.initializeDefaultPortfolio();
+    }
 
     // Listen for portfolio updates from QuickTrade
     const handlePortfolioUpdate = () => {
-      portfolioStore.fetchPortfolio(1);
+      if (portfolioStore.selectedPortfolioId) {
+        portfolioStore.fetchPortfolioById(portfolioStore.selectedPortfolioId);
+      }
     };
 
     window.addEventListener("portfolio-updated", handlePortfolioUpdate);
@@ -54,7 +58,7 @@ const PortfolioSummary: React.FC = observer(() => {
         size="medium"
         action={{
           label: "Retry",
-          onClick: () => portfolioStore.fetchPortfolio(1),
+          onClick: () => portfolioStore.initializeDefaultPortfolio(),
           variant: "primary",
         }}
       />
@@ -69,7 +73,7 @@ const PortfolioSummary: React.FC = observer(() => {
         size="medium"
         action={{
           label: "Load Portfolio",
-          onClick: () => portfolioStore.fetchPortfolio(1),
+          onClick: () => portfolioStore.initializeDefaultPortfolio(),
           variant: "primary",
         }}
       />
@@ -136,12 +140,12 @@ const PortfolioSummary: React.FC = observer(() => {
                   </span>
                   <span
                     className={`position-pnl ${
-                      Number(position.unrealizedPnl) >= 0
+                      Number(position.unrealizedPnL) >= 0
                         ? "positive"
                         : "negative"
                     }`}
                   >
-                    {formatCurrency(position.unrealizedPnl)}
+                    {formatCurrency(position.unrealizedPnL)}
                   </span>
                 </div>
               </div>

@@ -140,7 +140,8 @@ describe("StockCard Component", () => {
 
     render(<StockCard stock={stockWithZeros} />);
 
-    expect(screen.getByText(/0\.00/)).toBeInTheDocument();
+    expect(screen.getAllByText(/0\.00/)).toHaveLength(2); // Price and change percent
+    expect(screen.getByText("AAPL")).toBeInTheDocument(); // Symbol should still be there
   });
 
   test("displays HOLD signal", () => {

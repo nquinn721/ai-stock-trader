@@ -76,14 +76,14 @@ const QuickTrade: React.FC = observer(() => {
   const [portfolio, setPortfolio] = useState<any>(null);
 
   useEffect(() => {
-    // Fetch portfolio data on component mount
-    portfolioStore.fetchPortfolio(1);
+    // Initialize default portfolio on component mount
+    portfolioStore.initializeDefaultPortfolio();
   }, [portfolioStore]);
 
   useEffect(() => {
     // Listen for portfolio updates from other components
     const handlePortfolioUpdate = () => {
-      portfolioStore.fetchPortfolio(1);
+      portfolioStore.initializeDefaultPortfolio();
     };
 
     window.addEventListener("portfolio-updated", handlePortfolioUpdate);
@@ -93,7 +93,7 @@ const QuickTrade: React.FC = observer(() => {
 
   // Memoized current stock price
   const currentStock = useMemo(() => {
-    return stocks.find((stock) => stock.symbol === tradeForm.symbol);
+    return stocks?.find((stock) => stock.symbol === tradeForm.symbol);
   }, [stocks, tradeForm.symbol]);
 
   // Add notification helper
@@ -375,7 +375,7 @@ const QuickTrade: React.FC = observer(() => {
                 Stock Symbol
               </label>
               <StockAutocomplete
-                stocks={stocks.map((stock) => ({
+                stocks={(stocks || []).map((stock) => ({
                   symbol: stock.symbol,
                   name: stock.name,
                 }))}
@@ -508,7 +508,7 @@ const QuickTrade: React.FC = observer(() => {
           <div className="advanced-input-section">
             <label>Stock Symbol</label>
             <StockAutocomplete
-              stocks={stocks.map((stock) => ({
+              stocks={(stocks || []).map((stock) => ({
                 symbol: stock.symbol,
                 name: stock.name,
               }))}
@@ -750,7 +750,7 @@ const QuickTrade: React.FC = observer(() => {
                       (portfolio.totalValue *
                         parseFloat(advancedForm.riskPercent)) /
                         100 /
-                        (stocks.find((s) => s.symbol === advancedForm.symbol)
+                        ((stocks || []).find((s) => s.symbol === advancedForm.symbol)
                           ?.currentPrice || 1)
                     )}{" "}
                     shares

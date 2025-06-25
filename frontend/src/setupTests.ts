@@ -5,12 +5,19 @@
 import '@testing-library/jest-dom';
 
 // Mock axios to prevent real network requests
+import axios from 'axios';
 jest.mock('axios');
+const mockedAxios = axios as jest.Mocked<typeof axios>;
+
+// Set up default axios mock responses
+mockedAxios.get.mockResolvedValue({ data: [] });
+mockedAxios.post.mockResolvedValue({ data: {} });
+mockedAxios.put.mockResolvedValue({ data: {} });
+mockedAxios.delete.mockResolvedValue({ data: {} });
 
 // Mock Socket.IO
 jest.mock('socket.io-client', () => ({
-  __esModule: true,
-  default: jest.fn(() => ({
+  connect: jest.fn(() => ({
     connect: jest.fn(),
     disconnect: jest.fn(),
     on: jest.fn(),

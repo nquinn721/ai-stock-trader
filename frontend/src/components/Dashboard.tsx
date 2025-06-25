@@ -61,16 +61,16 @@ const Dashboard: React.FC = observer(() => {
   // Initialize data on component mount
   useEffect(() => {
     stockStore.fetchStocksWithSignals();
-    // For now, we'll assume user ID 1 - this should come from auth context later
-    portfolioStore.fetchPortfolio(1);
+    // Initialize with the first available portfolio or create default
+    portfolioStore.initializeDefaultPortfolio();
   }, [stockStore, portfolioStore]);
 
   // Update stocks when socket data changes
   useEffect(() => {
-    if (stockStore.stocks.length === 0 && !stockStore.isLoading) {
-      stockStore.fetchStocksWithSignals();
+    if ((stockStore?.stocks?.length || 0) === 0 && !stockStore?.isLoading) {
+      stockStore?.fetchStocksWithSignals();
     }
-  }, [stockStore.stocks.length, stockStore.isLoading, stockStore]);
+  }, [stockStore?.stocks?.length, stockStore?.isLoading, stockStore]);
 
   // Update clock every second
   useEffect(() => {
@@ -157,7 +157,7 @@ const Dashboard: React.FC = observer(() => {
     console.log("Portfolio created:", portfolio);
     setShowPortfolioCreator(false);
     // Refresh portfolio data
-    portfolioStore.fetchPortfolio(1);
+    portfolioStore.initializeDefaultPortfolio();
   };
 
   const handleCancelPortfolioCreation = () => {

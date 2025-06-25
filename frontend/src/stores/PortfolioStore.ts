@@ -14,7 +14,8 @@ export interface PerformanceData {
 
 export class PortfolioStore {
   portfolio: Portfolio | null = null;
-  portfolios: Portfolio[] = []; // Add portfolios array
+  portfolios: Portfolio[] = [];
+  selectedPortfolioId: number | null = null; // Track the currently selected portfolio
   positions: Position[] = [];
   performanceHistory: PerformanceData[] = [];
   isLoading = false;
@@ -22,6 +23,43 @@ export class PortfolioStore {
 
   constructor(private apiStore: ApiStore) {
     makeAutoObservable(this);
+  }
+
+  // Get the current portfolio (selected or first available)
+  get currentPortfolio(): Portfolio | null {
+    if (this.selectedPortfolioId && this.portfolios.length > 0) {
+      return (
+        this.portfolios.find((p) => p.id === this.selectedPortfolioId) ||
+        this.portfolios[0]
+      );
+    }
+    return this.portfolios.length > 0 ? this.portfolios[0] : null;
+  }
+
+  // Set the selected portfolio
+  setSelectedPortfolio(portfolioId: number) {
+    runInAction(() => {
+      this.selectedPortfolioId = portfolioId;
+      // Update the current portfolio object
+      this.portfolio = this.portfolios.find((p) => p.id === portfolioId) || null;
+    });
+  }
+
+  // Initialize with first available portfolio or create default
+  async initializeDefaultPortfolio() {
+    try {
+      await this.fetchPortfolios();
+      if (this.portfolios.length > 0) {
+        // Select the first portfolio
+        this.setSelectedPortfolio(this.portfolios[0].id);
+        await this.fetchPortfolioById(this.portfolios[0].id);
+      } else {
+        // No portfolios exist, the backend will create a default one
+        console.log("No portfolios found, backend will create default portfolio");
+      }
+    } catch (error) {
+      console.error("Error initializing portfolio:", error);
+    }
   }
 
   async fetchPortfolio(userId: number) {
@@ -178,6 +216,27 @@ export class PortfolioStore {
     } catch (error: any) {
       runInAction(() => {
         this.error = error.message || "Failed to execute trade";
+        this.isLoading = false;
+      });
+      throw error;
+    }
+  }
+
+  async deletePortfolio(portfolioId: number) {
+    runInAction(() => {
+      this.isLoading = true;
+      this.error = null;
+    });
+    try {
+      await this.apiStore.delete(`/paper-trading/portfolios/${portfolioId}`);
+      runInAction(() => {
+        this.isLoading = false;
+        // Remove from local portfolios array
+        this.portfolios = this.portfolios.filter(p => p.id !== portfolioId);
+      });
+    } catch (error: any) {
+      runInAction(() => {
+        this.error = error.message || "Failed to delete portfolio";
         this.isLoading = false;
       });
       throw error;
