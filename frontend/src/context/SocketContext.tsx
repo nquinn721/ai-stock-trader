@@ -397,7 +397,7 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
   };
 
   useEffect(() => {
-    const newSocket = io.connect("http://localhost:3001", {
+    const newSocket = io.connect("http://localhost:8000", {
       transports: ["websocket", "polling"],
       timeout: 20000,
       reconnection: true,

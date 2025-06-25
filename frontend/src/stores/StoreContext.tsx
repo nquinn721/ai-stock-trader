@@ -25,3 +25,5 @@ export const usePortfolioStore = () => useStore().portfolioStore;
 export const useTradeStore = () => useStore().tradeStore;
 export const useWebSocketStore = () => useStore().webSocketStore;
 export const useApiStore = () => useStore().apiStore;
+export const useRecommendationStore = () => useStore().recommendationStore;
+export const useUserStore = () => useStore().userStore;

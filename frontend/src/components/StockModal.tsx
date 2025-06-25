@@ -571,16 +571,6 @@ const StockModal: React.FC<StockModalProps> = observer(
                             color: "#ffa502",
                             curve: "linear",
                           },
-                          // SMA 20 line (day trading trend)
-                          {
-                            data: chartData.map(
-                              () =>
-                                liveMetrics?.sma20 || stock.currentPrice * 0.99
-                            ),
-                            label: "SMA 20",
-                            color: "#3742fa",
-                            curve: "linear",
-                          },
                           // VWAP line (key day trading level)
                           {
                             data: chartData.map(
@@ -588,28 +578,6 @@ const StockModal: React.FC<StockModalProps> = observer(
                             ),
                             label: "VWAP",
                             color: "#a55eea",
-                            curve: "linear",
-                          },
-                          // Bollinger Upper (breakout level)
-                          {
-                            data: chartData.map(
-                              () =>
-                                liveMetrics?.bollinger.upper ||
-                                stock.currentPrice * 1.04
-                            ),
-                            label: "BB Upper",
-                            color: "#26de81",
-                            curve: "linear",
-                          },
-                          // Bollinger Lower (bounce level)
-                          {
-                            data: chartData.map(
-                              () =>
-                                liveMetrics?.bollinger.lower ||
-                                stock.currentPrice * 0.96
-                            ),
-                            label: "BB Lower",
-                            color: "#fd79a8",
                             curve: "linear",
                           },
                         ]}
@@ -674,19 +642,16 @@ const StockModal: React.FC<StockModalProps> = observer(
                     <h5>Day Trading Patterns:</h5>
                     <div className="patterns-grid">
                       <div className="pattern-item">
-                        <strong>Support/Resistance:</strong> Key bounce and
-                        breakout levels
+                        <strong>Price Action:</strong> Real-time stock price movement throughout the trading day
                       </div>
                       <div className="pattern-item">
-                        <strong>VWAP:</strong> Volume-weighted average price
-                        (institutional level)
+                        <strong>Support Level:</strong> Key price floor where buyers typically step in
                       </div>
                       <div className="pattern-item">
-                        <strong>Bollinger Bands:</strong> Volatility and mean
-                        reversion zones
+                        <strong>Resistance Level:</strong> Key price ceiling where sellers typically emerge
                       </div>
                       <div className="pattern-item">
-                        <strong>SMA 20:</strong> Short-term trend direction
+                        <strong>VWAP:</strong> Volume-weighted average price - institutional trading benchmark
                       </div>
                     </div>
                   </div>

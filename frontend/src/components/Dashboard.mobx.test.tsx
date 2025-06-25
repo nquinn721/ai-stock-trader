@@ -8,7 +8,7 @@ import { RootStore } from "../stores/RootStore";
 // Mock the MobX stores
 const mockStockStore = {
   stocks: [] as any[],
-  stocksWithSignals: [] as any[],
+  get stocksWithSignals() { return this.stocks.map((stock: any) => ({ ...stock, tradingSignal: null })); },
   tradingSignals: [] as any[],
   isLoading: false,
   error: null,
@@ -30,6 +30,7 @@ const mockPortfolioStore = {
   fetchPortfolio: jest.fn(),
   fetchPortfolios: jest.fn(),
   createPortfolio: jest.fn(),
+  initializeDefaultPortfolio: jest.fn().mockResolvedValue(undefined),
 };
 
 const mockWebSocketStore = {

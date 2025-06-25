@@ -121,6 +121,166 @@ export class StockService {
         previousClose: 0,
         volume: 0,
       } as Stock,
+      {
+        id: 11,
+        symbol: 'DIS',
+        name: 'The Walt Disney Company',
+        currentPrice: 0,
+        previousClose: 0,
+        volume: 0,
+      } as Stock,
+      {
+        id: 12,
+        symbol: 'CRM',
+        name: 'Salesforce Inc.',
+        currentPrice: 0,
+        previousClose: 0,
+        volume: 0,
+      } as Stock,
+      {
+        id: 13,
+        symbol: 'PYPL',
+        name: 'PayPal Holdings Inc.',
+        currentPrice: 0,
+        previousClose: 0,
+        volume: 0,
+      } as Stock,
+      {
+        id: 14,
+        symbol: 'ADBE',
+        name: 'Adobe Inc.',
+        currentPrice: 0,
+        previousClose: 0,
+        volume: 0,
+      } as Stock,
+      {
+        id: 15,
+        symbol: 'INTC',
+        name: 'Intel Corporation',
+        currentPrice: 0,
+        previousClose: 0,
+        volume: 0,
+      } as Stock,
+      {
+        id: 16,
+        symbol: 'AMD',
+        name: 'Advanced Micro Devices Inc.',
+        currentPrice: 0,
+        previousClose: 0,
+        volume: 0,
+      } as Stock,
+      {
+        id: 17,
+        symbol: 'ORCL',
+        name: 'Oracle Corporation',
+        currentPrice: 0,
+        previousClose: 0,
+        volume: 0,
+      } as Stock,
+      {
+        id: 18,
+        symbol: 'WMT',
+        name: 'Walmart Inc.',
+        currentPrice: 0,
+        previousClose: 0,
+        volume: 0,
+      } as Stock,
+      {
+        id: 19,
+        symbol: 'HD',
+        name: 'The Home Depot Inc.',
+        currentPrice: 0,
+        previousClose: 0,
+        volume: 0,
+      } as Stock,
+      {
+        id: 20,
+        symbol: 'PG',
+        name: 'Procter & Gamble Co.',
+        currentPrice: 0,
+        previousClose: 0,
+        volume: 0,
+      } as Stock,
+      {
+        id: 21,
+        symbol: 'KO',
+        name: 'The Coca-Cola Company',
+        currentPrice: 0,
+        previousClose: 0,
+        volume: 0,
+      } as Stock,
+      {
+        id: 22,
+        symbol: 'PEP',
+        name: 'PepsiCo Inc.',
+        currentPrice: 0,
+        previousClose: 0,
+        volume: 0,
+      } as Stock,
+      {
+        id: 23,
+        symbol: 'V',
+        name: 'Visa Inc.',
+        currentPrice: 0,
+        previousClose: 0,
+        volume: 0,
+      } as Stock,
+      {
+        id: 24,
+        symbol: 'MA',
+        name: 'Mastercard Incorporated',
+        currentPrice: 0,
+        previousClose: 0,
+        volume: 0,
+      } as Stock,
+      {
+        id: 25,
+        symbol: 'UNH',
+        name: 'UnitedHealth Group Inc.',
+        currentPrice: 0,
+        previousClose: 0,
+        volume: 0,
+      } as Stock,
+      {
+        id: 26,
+        symbol: 'BAC',
+        name: 'Bank of America Corp.',
+        currentPrice: 0,
+        previousClose: 0,
+        volume: 0,
+      } as Stock,
+      {
+        id: 27,
+        symbol: 'XOM',
+        name: 'Exxon Mobil Corporation',
+        currentPrice: 0,
+        previousClose: 0,
+        volume: 0,
+      } as Stock,
+      {
+        id: 28,
+        symbol: 'CVX',
+        name: 'Chevron Corporation',
+        currentPrice: 0,
+        previousClose: 0,
+        volume: 0,
+      } as Stock,
+      {
+        id: 29,
+        symbol: 'LLY',
+        name: 'Eli Lilly and Company',
+        currentPrice: 0,
+        previousClose: 0,
+        volume: 0,
+      } as Stock,
+      {
+        id: 30,
+        symbol: 'ABBV',
+        name: 'AbbVie Inc.',
+        currentPrice: 0,
+        previousClose: 0,
+        volume: 0,
+      } as Stock,
     ];
     this.mockSignals = [];
     console.log('📊 Initialized stock symbols for live data tracking');
@@ -732,19 +892,19 @@ export class StockService {
     let confidence: number;
     let reasoning: string;
 
-    const adjustedChange = changePercent + timeBasedFactor * 10;
+    const adjustedChange = changePercent + timeBasedFactor * 2; // Reduced from 10 to 2
     const volumeWeight = volumeRatio > 1.2 ? 0.2 : volumeRatio < 0.8 ? -0.1 : 0;
     const finalScore = adjustedChange + volumeWeight * 5;
 
-    // More balanced thresholds
-    if (finalScore > 3.0) {
+    // More balanced thresholds - increased thresholds to reduce buy bias
+    if (finalScore > 1.5) {
       signal = SignalType.BUY;
       confidence = Math.min(0.85, 0.4 + Math.abs(finalScore) * 0.08);
-      reasoning = `Strong bullish momentum: ${finalScore.toFixed(1)}% with ${volumeRatio > 1.2 ? 'high' : 'normal'} volume`;
-    } else if (finalScore < -3.0) {
+      reasoning = `Bullish momentum: ${finalScore.toFixed(1)}% with ${volumeRatio > 1.2 ? 'high' : 'normal'} volume`;
+    } else if (finalScore < -1.5) {
       signal = SignalType.SELL;
       confidence = Math.min(0.85, 0.4 + Math.abs(finalScore) * 0.08);
-      reasoning = `Strong bearish pressure: ${finalScore.toFixed(1)}% decline with ${volumeRatio > 1.2 ? 'high' : 'normal'} volume`;
+      reasoning = `Bearish pressure: ${finalScore.toFixed(1)}% decline with ${volumeRatio > 1.2 ? 'high' : 'normal'} volume`;
     } else {
       signal = SignalType.HOLD;
       confidence = 0.2 + Math.random() * 0.4; // Lower base confidence for hold signals

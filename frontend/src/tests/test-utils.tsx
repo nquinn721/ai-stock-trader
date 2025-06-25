@@ -15,6 +15,23 @@ jest.mock('@fortawesome/react-fontawesome', () => ({
   },
 }));
 
+// Mock FontAwesome icons library
+jest.mock('@fortawesome/free-solid-svg-icons', () => ({
+  faChevronUp: { prefix: 'fas', iconName: 'chevron-up' },
+  faChevronDown: { prefix: 'fas', iconName: 'chevron-down' },
+  faSearch: { prefix: 'fas', iconName: 'search' },
+  faArrowUp: { prefix: 'fas', iconName: 'arrow-up' },
+  faArrowDown: { prefix: 'fas', iconName: 'arrow-down' },
+  faBolt: { prefix: 'fas', iconName: 'bolt' },
+  faCalculator: { prefix: 'fas', iconName: 'calculator' },
+  faChartLine: { prefix: 'fas', iconName: 'chart-line' },
+  faCogs: { prefix: 'fas', iconName: 'cogs' },
+  faHashtag: { prefix: 'fas', iconName: 'hashtag' },
+  faSpinner: { prefix: 'fas', iconName: 'spinner' },
+  faWallet: { prefix: 'fas', iconName: 'wallet' },
+  faZap: { prefix: 'fas', iconName: 'zap' },
+}));
+
 // Mock the NotificationContext
 jest.mock('../context/NotificationContext', () => ({
   NotificationProvider: ({ children }: { children: React.ReactNode }) => children,
@@ -64,13 +81,13 @@ jest.mock('../context/SocketContext', () => ({
     getPositionDetails: jest.fn(),
     getPortfolioAnalytics: jest.fn(),
     getSectorAllocation: jest.fn(),
+    getPerformanceAttribution: jest.fn(),
     getRiskMetrics: jest.fn(),
     getBenchmarkComparison: jest.fn(),
-    getPerformanceAttribution: jest.fn(),
-    placeOrder: jest.fn(),
-    executeOrder: jest.fn(),
-    addToWatchlist: jest.fn(),
-    removeFromWatchlist: jest.fn(),
+    getRebalancingSuggestions: jest.fn(),
+    createOrder: jest.fn(),
+    cancelOrder: jest.fn(),
+    getOrderBook: jest.fn(),
   }),
 }));
 
@@ -116,6 +133,19 @@ const createMockStore = (): RootStore => {
   mockStore.stockStore.stocks = mockStore.stockStore.stocks || [];
   mockStore.portfolioStore.portfolios = mockStore.portfolioStore.portfolios || [];
   
+  // Mock the initializeDefaultPortfolio method if it doesn't exist
+  if (!mockStore.portfolioStore.initializeDefaultPortfolio) {
+    mockStore.portfolioStore.initializeDefaultPortfolio = jest.fn().mockResolvedValue(undefined);
+  }
+  
+  // Mock stocksWithSignals if it doesn't exist
+  if (!mockStore.stockStore.stocksWithSignals) {
+    Object.defineProperty(mockStore.stockStore, 'stocksWithSignals', {
+      get: () => mockStore.stockStore.stocks.map(stock => ({ ...stock, tradingSignal: null })),
+      configurable: true
+    });
+  }
+  
   return mockStore;
 };
 
@@ -157,12 +187,6 @@ export const renderWithStoreProvider = (ui: React.ReactElement, options = {}) =>
   return customRender(ui, options);
 };
 
-// Mock FontAwesome icons
-jest.mock('@fortawesome/react-fontawesome', () => ({
-  FontAwesomeIcon: ({ icon, ...props }: any) => (
-    <i data-testid={`fa-icon-${icon}`} {...props} />
-  ),
-}));
 
 // Re-export everything
 export * from '@testing-library/react';
