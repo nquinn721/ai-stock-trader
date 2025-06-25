@@ -21,7 +21,7 @@ export class WebSocketStore {
     makeAutoObservable(this);
   }
 
-  connect(url: string = "http://localhost:8000") {
+  connect(url: string = "http://localhost:3001") {
     if (this.socket?.connected || this.isConnecting) {
       return;
     }

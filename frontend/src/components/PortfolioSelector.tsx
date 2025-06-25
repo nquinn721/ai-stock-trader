@@ -1,46 +1,41 @@
+import {
+  faBolt,
+  faBriefcase,
+  faChartLine,
+  faCircle,
+  faClock,
+  faExclamationTriangle,
+  faPauseCircle,
+  faPlus,
+} from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import axios from "axios";
-import React, { useEffect, useState } from "react";
+import { observer } from "mobx-react-lite";
+import React, { useEffect } from "react";
 import { Portfolio } from "../types";
+import { usePortfolioStore } from "../stores/StoreContext";
 import EmptyState from "./EmptyState";
 import "./PortfolioSelector.css";
 
 interface PortfolioSelectorProps {
   selectedPortfolioId?: number;
-  onPortfolioSelect: (portfolio: Portfolio) => void;
+  onPortfolioSelect?: (portfolio: Portfolio) => void;
   onCreatePortfolio: () => void;
   onViewDetails?: (portfolio: Portfolio) => void;
 }
 
-const PortfolioSelector: React.FC<PortfolioSelectorProps> = ({
+const PortfolioSelector: React.FC<PortfolioSelectorProps> = observer(({
   selectedPortfolioId,
   onPortfolioSelect,
   onCreatePortfolio,
   onViewDetails,
 }) => {
-  const [portfolios, setPortfolios] = useState<Portfolio[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const portfolioStore = usePortfolioStore();
 
   useEffect(() => {
-    fetchPortfolios();
-  }, []);
+    portfolioStore.fetchPortfolios();
+  }, [portfolioStore]);
 
-  const fetchPortfolios = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const response = await axios.get(
-        "http://localhost:8000/paper-trading/portfolios"
-      );
-      setPortfolios(response.data);
-    } catch (err) {
-      console.error("Error fetching portfolios:", err);
-      setError("Failed to load portfolios");
-    } finally {
-      setLoading(false);
-    }
-  };
+  // Remove the old fetchPortfolios function - using store method instead
 
   const formatCurrency = (amount: number | string | null | undefined) => {
     const numValue = Number(amount) || 0;
@@ -85,12 +80,12 @@ const PortfolioSelector: React.FC<PortfolioSelectorProps> = ({
     }
   };
 
-  if (loading) {
+  if (portfolioStore.isLoading) {
     return (
       <div className="portfolio-selector">
         <EmptyState
           type="loading"
-          icon={<FontAwesomeIcon icon="clock" />}
+          icon={<FontAwesomeIcon icon={faClock} />}
           title="Loading Portfolios"
           description="Fetching your trading portfolios..."
           size="medium"
@@ -99,30 +94,30 @@ const PortfolioSelector: React.FC<PortfolioSelectorProps> = ({
     );
   }
 
-  if (error) {
+  if (portfolioStore.error) {
     return (
       <div className="portfolio-selector">
         <EmptyState
           type="error"
-          icon={<FontAwesomeIcon icon="exclamation-triangle" />}
+          icon={<FontAwesomeIcon icon={faExclamationTriangle} />}
           title="Error Loading Portfolios"
-          description={error}
+          description={portfolioStore.error}
           size="medium"
           action={{
             label: "Retry",
-            onClick: fetchPortfolios,
+            onClick: () => portfolioStore.fetchPortfolios(),
           }}
         />
       </div>
     );
   }
 
-  if (portfolios.length === 0) {
+  if (portfolioStore.portfolios.length === 0) {
     return (
       <div className="portfolio-selector">
         <EmptyState
           type="no-data"
-          icon={<FontAwesomeIcon icon="briefcase" />}
+          icon={<FontAwesomeIcon icon={faBriefcase} />}
           title="No Portfolios Found"
           description="Create your first portfolio to start paper trading"
           size="medium"
@@ -144,20 +139,15 @@ const PortfolioSelector: React.FC<PortfolioSelectorProps> = ({
           onClick={onCreatePortfolio}
           title="Create a new portfolio"
         >
-          <FontAwesomeIcon icon="plus" />
+          <FontAwesomeIcon icon={faPlus} />
           New
         </button>
       </div>
 
       <div className="portfolios-grid">
-        {portfolios.map((portfolio) => (
-          <div
-            key={portfolio.id}
-            className={`portfolio-card ${
-              selectedPortfolioId === portfolio.id ? "selected" : ""
-            }`}
-            onClick={() => onPortfolioSelect(portfolio)}
-          >
+        {" "}
+        {portfolioStore.portfolios.map((portfolio: Portfolio) => (
+          <div key={portfolio.id} className="portfolio-card">
             <div className="portfolio-card-header">
               <div className="portfolio-icon">
                 <FontAwesomeIcon
@@ -173,7 +163,6 @@ const PortfolioSelector: React.FC<PortfolioSelectorProps> = ({
                 </span>
               </div>
             </div>
-
             <div className="portfolio-metrics">
               <div className="metric">
                 <span className="metric-label">Total Value</span>
@@ -203,10 +192,11 @@ const PortfolioSelector: React.FC<PortfolioSelectorProps> = ({
                   {formatPercent(portfolio.totalReturn)}
                 </span>
               </div>
-            </div>            <div className="portfolio-status">
+            </div>{" "}
+            <div className="portfolio-status">
               <div className="status-indicator">
                 <FontAwesomeIcon
-                  icon={portfolio.isActive ? "circle" : "pause-circle"}
+                  icon={portfolio.isActive ? faCircle : faPauseCircle}
                   className={portfolio.isActive ? "active" : "inactive"}
                 />
                 {portfolio.isActive ? "Active" : "Inactive"}
@@ -214,12 +204,11 @@ const PortfolioSelector: React.FC<PortfolioSelectorProps> = ({
 
               {portfolio.dayTradingEnabled && (
                 <div className="day-trading-badge">
-                  <FontAwesomeIcon icon="bolt" />
+                  <FontAwesomeIcon icon={faBolt} />
                   Day Trading
                 </div>
               )}
             </div>
-
             {/* Portfolio Actions */}
             <div className="portfolio-actions">
               {onViewDetails && (
@@ -231,22 +220,16 @@ const PortfolioSelector: React.FC<PortfolioSelectorProps> = ({
                   }}
                   title="View detailed portfolio performance and positions"
                 >
-                  <FontAwesomeIcon icon="chart-line" />
+                  <FontAwesomeIcon icon={faChartLine} />
                   View Details
                 </button>
-              )}
+              )}{" "}
             </div>
-
-            {selectedPortfolioId === portfolio.id && (
-              <div className="selected-indicator">
-                <FontAwesomeIcon icon="check-circle" />
-              </div>
-            )}
           </div>
         ))}
       </div>
     </div>
   );
-};
+});
 
 export default PortfolioSelector;

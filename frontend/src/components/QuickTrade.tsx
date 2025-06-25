@@ -1,4 +1,17 @@
-import axios from "axios";
+import {
+  faArrowDown,
+  faArrowUp,
+  faBolt,
+  faCalculator,
+  faChartLine,
+  faCogs,
+  faHashtag,
+  faSearch,
+  faSpinner,
+  faWallet,
+  faZap,
+} from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { observer } from "mobx-react-lite";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useSocket } from "../context/SocketContext";
@@ -102,27 +115,19 @@ const QuickTrade: React.FC = observer(() => {
   const fetchPortfolioId = async () => {
     try {
       setPortfolioLoading(true);
-      const response = await axios.get(
-        "http://localhost:8000/paper-trading/portfolios",
-        { timeout: 10000 }
-      );
-      const portfolios = response.data;
-
-      if (portfolios.length > 0) {
-        const portfolioId = portfolios[0].id;
+      await portfolioStore.fetchPortfolios();
+      
+      if (portfolioStore.portfolios.length > 0) {
+        const portfolioId = portfolioStore.portfolios[0].id;
         setPortfolioId(portfolioId);
         await fetchPortfolioDetails(portfolioId);
       } else {
         // Create a default portfolio if none exists
-        const createResponse = await axios.post(
-          "http://localhost:8000/paper-trading/portfolios",
-          {
-            name: "Quick Trade Portfolio",
-            initialCash: 100000,
-          },
-          { timeout: 10000 }
-        );
-        const newPortfolioId = createResponse.data.id;
+        const newPortfolio = await portfolioStore.createPortfolio({
+          name: "Quick Trade Portfolio",
+          initialCash: 100000,
+        });
+        const newPortfolioId = newPortfolio.id;
         setPortfolioId(newPortfolioId);
         await fetchPortfolioDetails(newPortfolioId);
 
@@ -156,15 +161,15 @@ const QuickTrade: React.FC = observer(() => {
     if (!targetId) return;
 
     try {
-      const response = await axios.get(
-        `http://localhost:8000/paper-trading/portfolios/${targetId}`,
-        { timeout: 10000 }
-      );
-      setPortfolio({
-        id: response.data.id,
-        currentCash: response.data.currentCash,
-        totalValue: response.data.totalValue,
-      });
+      await portfolioStore.fetchPortfolio(targetId);
+      const portfolio = portfolioStore.portfolio;
+      if (portfolio) {
+        setPortfolio({
+          id: portfolio.id,
+          currentCash: portfolio.currentCash,
+          totalValue: portfolio.totalValue,
+        });
+      }
     } catch (error) {
       console.error("Error fetching portfolio details:", error);
     }
@@ -199,9 +204,7 @@ const QuickTrade: React.FC = observer(() => {
         return;
       }
 
-      await axios.post("http://localhost:8000/paper-trading/trade", tradeData, {
-        timeout: 15000,
-      });
+      await portfolioStore.executeTrade(tradeData);
 
       // Reset form and hide confirmation
       setTradeForm({ symbol: "", type: "buy", quantity: "" });
@@ -316,47 +319,61 @@ const QuickTrade: React.FC = observer(() => {
           ))}
         </div>
       )}
-
+      {/* Header with Portfolio Info */}
+      <div className="trade-header">
+        <div className="trade-title">
+          <FontAwesomeIcon icon={faBolt} />
+          <span>Quick Trading</span>
+        </div>
+        {portfolio && (
+          <div className="portfolio-info">
+            <div className="portfolio-metric">
+              <FontAwesomeIcon icon={faWallet} />
+              <div className="metric-content">
+                <span className="metric-label">Cash</span>
+                <span className="metric-value">
+                  {formatCurrency(portfolio.currentCash)}
+                </span>
+              </div>
+            </div>
+            <div className="portfolio-metric">
+              <FontAwesomeIcon icon={faChartLine} />
+              <div className="metric-content">
+                <span className="metric-label">Total</span>
+                <span className="metric-value">
+                  {formatCurrency(portfolio.totalValue)}
+                </span>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
       {/* Tab Navigation */}
       <div className="trade-tabs">
         <button
           className={`tab ${activeTab === "basic" ? "active" : ""}`}
           onClick={() => setActiveTab("basic")}
         >
-          Quick Trade
+          <FontAwesomeIcon icon={faZap} />
+          Quick
         </button>
         <button
           className={`tab ${activeTab === "advanced" ? "active" : ""}`}
           onClick={() => setActiveTab("advanced")}
         >
-          Advanced Trading
+          <FontAwesomeIcon icon={faCogs} />
+          Advanced
         </button>
-      </div>
-
-      {/* Portfolio Summary */}
-      {portfolio && (
-        <div className="portfolio-summary">
-          <div className="portfolio-stat">
-            <span className="stat-label">Available Cash</span>
-            <span className="stat-value">
-              {formatCurrency(portfolio.currentCash)}
-            </span>
-          </div>
-          <div className="portfolio-stat">
-            <span className="stat-label">Total Value</span>
-            <span className="stat-value">
-              {formatCurrency(portfolio.totalValue)}
-            </span>
-          </div>
-        </div>
-      )}
-
+      </div>{" "}
       {/* Basic Trading Tab */}
       {activeTab === "basic" && (
-        <div className="basic-trading-form">
-          <h2>Quick Trade</h2>
-          <div className="quick-trade-form">
-            <div className="trade-input-group">
+        <div className="trading-form">
+          <div className="form-row">
+            <div className="form-group">
+              <label className="form-label">
+                <FontAwesomeIcon icon={faSearch} />
+                Stock Symbol
+              </label>
               <StockAutocomplete
                 stocks={stocks.map((stock) => ({
                   symbol: stock.symbol,
@@ -364,13 +381,19 @@ const QuickTrade: React.FC = observer(() => {
                 }))}
                 value={tradeForm.symbol}
                 onChange={(symbol) => setTradeForm({ ...tradeForm, symbol })}
-                placeholder="Search stock symbol or name..."
+                placeholder="Search symbol or name..."
                 disabled={executing}
                 className="symbol-autocomplete"
               />
+            </div>
+            <div className="form-group quantity-group">
+              <label className="form-label">
+                <FontAwesomeIcon icon={faHashtag} />
+                Quantity
+              </label>
               <input
                 type="number"
-                placeholder="Qty"
+                placeholder="Shares"
                 value={tradeForm.quantity}
                 onChange={(e) =>
                   setTradeForm({ ...tradeForm, quantity: e.target.value })
@@ -381,12 +404,18 @@ const QuickTrade: React.FC = observer(() => {
                 disabled={executing}
               />
             </div>
-            {/* Stock Price Display */}
-            {currentStock && (
-              <div className="stock-price-display">
-                <div className="price-info">
+          </div>
+
+          {/* Stock Info Display */}
+          {currentStock && (
+            <div className="stock-info-card">
+              <div className="stock-header">
+                <div className="stock-identity">
                   <span className="stock-symbol">{currentStock.symbol}</span>
-                  <span className="stock-price">
+                  <span className="stock-name">{currentStock.name}</span>
+                </div>
+                <div className="stock-price">
+                  <span className="current-price">
                     {formatCurrency(currentStock.currentPrice)}
                   </span>
                   <span
@@ -394,15 +423,23 @@ const QuickTrade: React.FC = observer(() => {
                       currentStock.changePercent >= 0 ? "positive" : "negative"
                     }`}
                   >
+                    <i
+                      className={`fas fa-arrow-${
+                        currentStock.changePercent >= 0 ? "up" : "down"
+                      }`}
+                    ></i>
                     {currentStock.changePercent >= 0 ? "+" : ""}
                     {currentStock.changePercent.toFixed(2)}%
                   </span>
                 </div>
-                {tradeForm.quantity && parseInt(tradeForm.quantity) > 0 && (
-                  <div className="trade-estimate">
-                    <span>
+              </div>
+
+              {tradeForm.quantity && parseInt(tradeForm.quantity) > 0 && (
+                <div className="trade-estimate">
+                  <div className="estimate-row">
+                    <span className="estimate-label">
+                      <FontAwesomeIcon icon={faCalculator} />
                       Estimated {tradeForm.type === "buy" ? "Cost" : "Proceeds"}
-                      :{" "}
                     </span>
                     <span className="estimate-amount">
                       {formatCurrency(
@@ -410,9 +447,13 @@ const QuickTrade: React.FC = observer(() => {
                       )}
                     </span>
                   </div>
-                )}
-              </div>
-            )}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Trading Actions */}
+          <div className="trading-actions">
             <div className="trade-type-buttons">
               <button
                 className={`trade-type-btn buy ${
@@ -421,6 +462,7 @@ const QuickTrade: React.FC = observer(() => {
                 onClick={() => setTradeForm({ ...tradeForm, type: "buy" })}
                 disabled={executing}
               >
+                <FontAwesomeIcon icon={faArrowUp} />
                 BUY
               </button>
               <button
@@ -430,24 +472,33 @@ const QuickTrade: React.FC = observer(() => {
                 onClick={() => setTradeForm({ ...tradeForm, type: "sell" })}
                 disabled={executing}
               >
+                <FontAwesomeIcon icon={faArrowDown} />
                 SELL
               </button>
-            </div>{" "}
+            </div>
+
             <button
               className="execute-trade-btn"
               onClick={handleTradeSubmit}
               disabled={executing || !isValidTrade() || !portfolioId}
             >
-              {executing
-                ? "Executing..."
-                : `${tradeForm.type.toUpperCase()} ${
+              {executing ? (
+                <>
+                  <FontAwesomeIcon icon={faSpinner} spin />
+                  Executing...
+                </>
+              ) : (
+                <>
+                  <FontAwesomeIcon icon={faBolt} />
+                  {`${tradeForm.type.toUpperCase()} ${
                     tradeForm.quantity || "0"
-                  } ${tradeForm.symbol || "Stock"}`}
+                  } ${tradeForm.symbol || "STOCK"}`}
+                </>
+              )}
             </button>
           </div>
         </div>
       )}
-
       {/* Advanced Trading Tab */}
       {activeTab === "advanced" && (
         <div className="advanced-trading-form">
@@ -735,7 +786,6 @@ const QuickTrade: React.FC = observer(() => {
           </button>
         </div>
       )}
-
       {/* Confirmation Dialog */}
       {showConfirmation && currentStock && (
         <div className="confirmation-overlay">

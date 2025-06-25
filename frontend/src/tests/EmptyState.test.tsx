@@ -66,7 +66,7 @@ describe("EmptyState Component", () => {
 
     const button = screen.getByText("Secondary Action");
     expect(button).toBeInTheDocument();
-    expect(button).toHaveClass("secondary");
+    expect(button).toHaveClass("empty-state__action--secondary");
   });
 
   test("applies custom className", () => {
@@ -79,15 +79,15 @@ describe("EmptyState Component", () => {
   test("applies size variants", () => {
     const { rerender } = render(<EmptyState {...defaultProps} size="small" />);
     let container = screen.getByText("Test Title").closest(".empty-state");
-    expect(container).toHaveClass("small");
+    expect(container).toHaveClass("empty-state--small");
 
     rerender(<EmptyState {...defaultProps} size="medium" />);
     container = screen.getByText("Test Title").closest(".empty-state");
-    expect(container).toHaveClass("medium");
+    expect(container).toHaveClass("empty-state--medium");
 
     rerender(<EmptyState {...defaultProps} size="large" />);
     container = screen.getByText("Test Title").closest(".empty-state");
-    expect(container).toHaveClass("large");
+    expect(container).toHaveClass("empty-state--large");
   });
 
   test("applies type variants", () => {
@@ -106,7 +106,7 @@ describe("EmptyState Component", () => {
       );
 
       const container = screen.getByText("Test Title").closest(".empty-state");
-      expect(container).toHaveClass(type);
+      expect(container).toHaveClass(`empty-state--${type}`);
 
       unmount();
     });
@@ -129,29 +129,29 @@ describe("EmptyState Component", () => {
     render(<EmptyState {...defaultProps} type="loading" />);
 
     const container = screen.getByText("Test Title").closest(".empty-state");
-    expect(container).toHaveClass("loading");
+    expect(container).toHaveClass("empty-state--loading");
   });
 
   test("handles error type with appropriate styling", () => {
     render(<EmptyState {...defaultProps} type="error" />);
 
     const container = screen.getByText("Test Title").closest(".empty-state");
-    expect(container).toHaveClass("error");
+    expect(container).toHaveClass("empty-state--error");
   });
 
   test("handles portfolio type with appropriate styling", () => {
     render(<EmptyState {...defaultProps} type="portfolio" />);
 
     const container = screen.getByText("Test Title").closest(".empty-state");
-    expect(container).toHaveClass("portfolio");
+    expect(container).toHaveClass("empty-state--portfolio");
   });
 
   test("uses default props correctly", () => {
     render(<EmptyState title="Default Test" />);
 
     const container = screen.getByText("Default Test").closest(".empty-state");
-    expect(container).toHaveClass("medium"); // default size
-    expect(container).toHaveClass("general"); // default type
+    expect(container).toHaveClass("empty-state--medium"); // default size
+    expect(container).toHaveClass("empty-state--general"); // default type
   });
 
   test("action button has correct accessibility attributes", () => {
@@ -177,8 +177,8 @@ describe("EmptyState Component", () => {
     const title = screen.getByText("Test Title");
     const description = screen.getByText("Test description");
 
-    expect(title).toHaveClass("empty-state-title");
-    expect(description).toHaveClass("empty-state-description");
+    expect(title).toHaveClass("empty-state__title");
+    expect(description).toHaveClass("empty-state__description");
   });
 
   test("handles complex icon types", () => {
@@ -222,12 +222,12 @@ describe("EmptyState Component", () => {
 
     const button = screen.getByText("Complete Action");
     expect(button).toBeInTheDocument();
-    expect(button).toHaveClass("primary");
+    expect(button).toHaveClass("empty-state__action--primary");
 
     const container = screen.getByText("Complete Test").closest(".empty-state");
     expect(container).toHaveClass("complete-test");
-    expect(container).toHaveClass("large");
-    expect(container).toHaveClass("no-data");
+    expect(container).toHaveClass("empty-state--large");
+    expect(container).toHaveClass("empty-state--no-data");
 
     fireEvent.click(button);
     expect(mockAction).toHaveBeenCalledTimes(1);

@@ -1,10 +1,15 @@
 import { render, screen, waitFor } from "@testing-library/react";
+import axios from "axios";
 import React from "react";
 import Dashboard from "../components/Dashboard";
 import PortfolioSummary from "../components/PortfolioSummary";
 import QuickTrade from "../components/QuickTrade";
 import { SocketProvider } from "../context/SocketContext";
 import { usePortfolioStore } from "../stores/StoreContext";
+
+// Mock axios
+jest.mock("axios");
+const mockedAxios = axios as jest.Mocked<typeof axios>;
 
 // Mock the stores
 jest.mock("../stores/StoreContext");
@@ -33,8 +38,7 @@ describe("EmptyState Integration Tests", () => {
   describe("Dashboard EmptyState Integration", () => {
     test("shows EmptyState when no stock data is available", async () => {
       // Mock axios to return empty data
-      const axios = require("axios");
-      axios.get.mockResolvedValue({ data: [] });
+      mockedAxios.get.mockResolvedValue({ data: [] });
 
       render(
         <SocketProvider>
@@ -54,8 +58,7 @@ describe("EmptyState Integration Tests", () => {
 
     test("shows loading EmptyState initially", () => {
       // Mock axios to never resolve (simulate loading)
-      const axios = require("axios");
-      axios.get.mockImplementation(() => new Promise(() => {}));
+      mockedAxios.get.mockImplementation(() => new Promise(() => {}));
 
       render(
         <SocketProvider>
@@ -183,8 +186,7 @@ describe("EmptyState Integration Tests", () => {
   describe("QuickTrade EmptyState Integration", () => {
     test("shows loading EmptyState when portfolio is loading", () => {
       // Mock axios to simulate loading state
-      const axios = require("axios");
-      axios.get.mockImplementation(() => new Promise(() => {}));
+      mockedAxios.get.mockImplementation(() => new Promise(() => {}));
 
       render(<QuickTrade />);
 
@@ -197,8 +199,7 @@ describe("EmptyState Integration Tests", () => {
 
   describe("EmptyState Accessibility", () => {
     test("EmptyState components are accessible", async () => {
-      const axios = require("axios");
-      axios.get.mockResolvedValue({ data: [] });
+      mockedAxios.get.mockResolvedValue({ data: [] });
 
       render(
         <SocketProvider>
@@ -254,7 +255,7 @@ describe("EmptyState Integration Tests", () => {
       const emptyState = screen
         .getByText("Loading Portfolio")
         .closest(".empty-state");
-      expect(emptyState).toHaveClass("loading");
+      expect(emptyState).toHaveClass("empty-state--loading");
     });
   });
 });

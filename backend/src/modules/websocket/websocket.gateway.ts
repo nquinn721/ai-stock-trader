@@ -16,7 +16,7 @@ import { StockService } from '../stock/stock.service';
 
 @WebSocketGateway({
   cors: {
-    origin: ['http://localhost:3000', 'http://localhost:8000'], // Frontend on 3000, backend on 8000
+    origin: ['http://localhost:3000', 'http://localhost:3001'], // Frontend on 3000, backend on 3001
     credentials: true,
   },
   transports: ['websocket', 'polling'],
@@ -307,15 +307,21 @@ export class StockWebSocketGateway
     );
 
     try {
+      // Ensure default portfolio exists if none specified
+      let portfolioId = data.portfolioId;
+      if (!portfolioId) {
+        const defaultPortfolio =
+          await this.paperTradingService.ensureDefaultPortfolio();
+        portfolioId = defaultPortfolio.id;
+      }
+
       // Get both real-time and historical performance data
       const realTimePerformance =
         await this.paperTradingService.updatePortfolioRealTimePerformance(
-          data.portfolioId,
+          portfolioId,
         );
       const historicalPerformance =
-        await this.paperTradingService.getPortfolioPerformance(
-          data.portfolioId,
-        );
+        await this.paperTradingService.getPortfolioPerformance(portfolioId);
 
       const combinedData = {
         ...realTimePerformance,
@@ -347,10 +353,17 @@ export class StockWebSocketGateway
     );
 
     try {
+      // Ensure default portfolio exists if none specified
+      let portfolioId = data.portfolioId;
+      if (!portfolioId) {
+        const defaultPortfolio =
+          await this.paperTradingService.ensureDefaultPortfolio();
+        portfolioId = defaultPortfolio.id;
+      }
+
       // Get detailed position information
-      const portfolio = await this.paperTradingService.getPortfolio(
-        data.portfolioId,
-      );
+      const portfolio =
+        await this.paperTradingService.getPortfolio(portfolioId);
       const position = portfolio.positions?.find(
         (p) => p.symbol === data.symbol.toUpperCase(),
       );

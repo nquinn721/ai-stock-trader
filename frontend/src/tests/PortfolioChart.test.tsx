@@ -1,13 +1,14 @@
 import "@testing-library/jest-dom";
-import { render, screen, waitFor } from "@testing-library/react";
+import { screen, waitFor } from "@testing-library/react";
 import PortfolioChart from "../components/PortfolioChart";
+import { renderWithStoreProvider } from "./test-utils";
 
 // Mock the CSS import
 jest.mock("../components/PortfolioChart.css", () => ({}));
 
 describe("PortfolioChart Component", () => {
   test("renders portfolio chart with default props", async () => {
-    render(<PortfolioChart portfolioId={1} />);
+    renderWithStoreProvider(<PortfolioChart portfolioId={1} />);
 
     // Check if loading state appears first
     expect(screen.getByText("Loading performance data...")).toBeInTheDocument();
@@ -22,7 +23,7 @@ describe("PortfolioChart Component", () => {
   });
 
   test("renders with custom timeframe", async () => {
-    render(<PortfolioChart portfolioId={1} timeframe="1W" />);
+    renderWithStoreProvider(<PortfolioChart portfolioId={1} timeframe="1W" />);
 
     await waitFor(
       () => {
@@ -39,7 +40,7 @@ describe("PortfolioChart Component", () => {
   test("handles timeframe changes", async () => {
     const mockOnTimeframeChange = jest.fn();
 
-    render(
+    renderWithStoreProvider(
       <PortfolioChart
         portfolioId={1}
         timeframe="1M"
@@ -62,7 +63,7 @@ describe("PortfolioChart Component", () => {
   });
 
   test("displays performance metrics", async () => {
-    render(<PortfolioChart portfolioId={1} />);
+    renderWithStoreProvider(<PortfolioChart portfolioId={1} />);
 
     await waitFor(
       () => {
@@ -76,7 +77,7 @@ describe("PortfolioChart Component", () => {
   });
 
   test("renders metric selector buttons", async () => {
-    render(<PortfolioChart portfolioId={1} />);
+    renderWithStoreProvider(<PortfolioChart portfolioId={1} />);
 
     await waitFor(
       () => {

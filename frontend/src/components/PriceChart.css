@@ -154,24 +154,20 @@
 
 .chart-loading {
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  text-align: center;
-  color: #94a3b8;
+  color: #8b949e;
   font-size: 14px;
-  padding: 40px 20px;
-  min-height: 120px;
 }
 
 .loading-spinner {
-  width: 32px;
-  height: 32px;
-  border: 3px solid rgba(99, 102, 241, 0.3);
-  border-top: 3px solid #6366f1;
+  width: 16px;
+  height: 16px;
+  border: 2px solid #30363d;
+  border-top: 2px solid #58a6ff;
   border-radius: 50%;
   animation: spin 1s linear infinite;
-  margin-bottom: 12px;
+  margin-right: 8px;
 }
 
 @keyframes spin {
@@ -476,4 +472,15 @@
 
 .price-chart-small .time-range {
   font-size: 10px; /* Smaller font for time range */
+}
+
+/* Pattern markers */
+.pattern-marker {
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.pattern-marker:hover {
+  transform: scale(1.2);
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.5)) !important;
 }

@@ -1,15 +1,15 @@
-import axios from "axios";
+import { observer } from "mobx-react-lite";
 import React, { useEffect, useState } from "react";
 import { CreatePortfolioRequest, Portfolio } from "../types";
+import { usePortfolioStore } from "../stores/StoreContext";
 import "./PortfolioList.css";
 
 interface PortfolioListProps {
   onSelectPortfolio: (portfolioId: number) => void;
 }
 
-const PortfolioList: React.FC<PortfolioListProps> = ({ onSelectPortfolio }) => {
-  const [portfolios, setPortfolios] = useState<Portfolio[]>([]);
-  const [loading, setLoading] = useState(true);
+const PortfolioList: React.FC<PortfolioListProps> = observer(({ onSelectPortfolio }) => {
+  const portfolioStore = usePortfolioStore();
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [createForm, setCreateForm] = useState({
     name: "",
@@ -18,8 +18,8 @@ const PortfolioList: React.FC<PortfolioListProps> = ({ onSelectPortfolio }) => {
   const [creating, setCreating] = useState(false);
 
   useEffect(() => {
-    fetchPortfolios();
-  }, []);
+    portfolioStore.fetchPortfolios();
+  }, [portfolioStore]);
 
   const fetchPortfolios = async () => {
     try {
@@ -43,15 +43,14 @@ const PortfolioList: React.FC<PortfolioListProps> = ({ onSelectPortfolio }) => {
         initialCash: parseFloat(createForm.initialCash),
       };
 
-      await axios.post(
-        "http://localhost:8000/paper-trading/portfolios",
-        portfolioData
-      );
+      await portfolioStore.createPortfolio({
+        name: portfolioData.name,
+        initialCash: portfolioData.initialCash || 100000,
+      });
 
       // Reset form and refresh portfolios
       setCreateForm({ name: "", initialCash: "100000" });
       setShowCreateForm(false);
-      await fetchPortfolios();
     } catch (error: any) {
       console.error("Error creating portfolio:", error);
       window.alert(error.response?.data?.message || "Error creating portfolio");

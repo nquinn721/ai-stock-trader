@@ -1,3 +1,11 @@
+import {
+  faBriefcase,
+  faChartLine,
+  faExclamationTriangle,
+  faInbox,
+  faSearch,
+  faSpinner,
+} from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React from "react";
 import "./EmptyState.css";
@@ -62,17 +70,17 @@ const EmptyState: React.FC<EmptyStateProps> = ({
   const getDefaultIcon = () => {
     switch (type) {
       case "no-data":
-        return <FontAwesomeIcon icon="chart-line" />;
+        return <FontAwesomeIcon icon={faChartLine} />;
       case "loading":
-        return <FontAwesomeIcon icon="spinner" spin />;
+        return <FontAwesomeIcon icon={faSpinner} spin />;
       case "error":
-        return <FontAwesomeIcon icon="exclamation-triangle" />;
+        return <FontAwesomeIcon icon={faExclamationTriangle} />;
       case "search":
-        return <FontAwesomeIcon icon="search" />;
+        return <FontAwesomeIcon icon={faSearch} />;
       case "portfolio":
-        return <FontAwesomeIcon icon="briefcase" />;
+        return <FontAwesomeIcon icon={faBriefcase} />;
       default:
-        return <FontAwesomeIcon icon="inbox" />;
+        return <FontAwesomeIcon icon={faInbox} />;
     }
   };
 

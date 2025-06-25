@@ -72,8 +72,10 @@ import {
   faRandom,
   faRefresh,
   faRetweet,
+  faRocket,
   faSave,
   faSearch,
+  faSeedling,
   faShare,
   faSignOutAlt,
   faSort,
@@ -107,6 +109,8 @@ library.add(
   faExchangeAlt,
   faPiggyBank,
   faBroadcastTower,
+  faRocket,
+  faSeedling,
 
   // Navigation and UI
   faHome,

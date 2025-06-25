@@ -1,6 +1,7 @@
 import "@testing-library/jest-dom";
-import { render, screen, waitFor } from "@testing-library/react";
+import { screen, waitFor } from "@testing-library/react";
 import PriceChart from "../components/PriceChart";
+import { renderWithStoreProvider } from "./test-utils";
 
 // Mock the CSS import
 jest.mock("../components/PriceChart.css", () => ({}));
@@ -13,7 +14,7 @@ describe("PriceChart Component", () => {
   };
 
   test("renders price chart with default props", async () => {
-    render(<PriceChart {...defaultProps} />);
+    renderWithStoreProvider(<PriceChart {...defaultProps} />);
 
     expect(screen.getByText("AAPL")).toBeInTheDocument();
     expect(screen.getByText("1H")).toBeInTheDocument();
@@ -28,7 +29,7 @@ describe("PriceChart Component", () => {
   });
 
   test("displays real-time indicator when market is open", async () => {
-    render(<PriceChart {...defaultProps} showRealTime={true} />);
+    renderWithStoreProvider(<PriceChart {...defaultProps} showRealTime={true} />);
 
     await waitFor(
       () => {
@@ -39,7 +40,7 @@ describe("PriceChart Component", () => {
   });
 
   test("shows negative price change styling", async () => {
-    render(<PriceChart {...defaultProps} changePercent={-1.5} />);
+    renderWithStoreProvider(<PriceChart {...defaultProps} changePercent={-1.5} />);
 
     await waitFor(
       () => {
@@ -51,7 +52,7 @@ describe("PriceChart Component", () => {
   });
 
   test("shows positive price change styling", async () => {
-    render(<PriceChart {...defaultProps} />);
+    renderWithStoreProvider(<PriceChart {...defaultProps} />);
 
     await waitFor(
       () => {
@@ -63,14 +64,14 @@ describe("PriceChart Component", () => {
   });
 
   test("renders with custom height", async () => {
-    render(<PriceChart {...defaultProps} height={200} />);
+    renderWithStoreProvider(<PriceChart {...defaultProps} height={200} />);
 
     const chartContainer = screen.getByText("AAPL").closest(".price-chart");
     expect(chartContainer).toHaveStyle("height: 200px");
   });
 
   test("displays volume information", async () => {
-    render(<PriceChart {...defaultProps} />);
+    renderWithStoreProvider(<PriceChart {...defaultProps} />);
 
     await waitFor(
       () => {
@@ -81,7 +82,7 @@ describe("PriceChart Component", () => {
   });
 
   test("renders different time periods", async () => {
-    render(<PriceChart {...defaultProps} period="1D" />);
+    renderWithStoreProvider(<PriceChart {...defaultProps} period="1D" />);
 
     expect(screen.getByText("1D")).toBeInTheDocument();
   });

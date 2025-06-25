@@ -1,4 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
+import { observer } from "mobx-react-lite";
+import { DayTradingPattern } from "../types";
+import { useStockStore } from "../stores/StoreContext";
 import "./PriceChart.css";
 
 interface PriceChartProps {
@@ -9,6 +12,8 @@ interface PriceChartProps {
   showRealTime?: boolean;
   interval?: number; // Update interval in milliseconds
   period?: "1H" | "1D" | "1W" | "1M";
+  patterns?: DayTradingPattern[]; // Today's trading patterns
+  onPatternClick?: (pattern: DayTradingPattern) => void; // Pattern click handler
 }
 
 interface PricePoint {
@@ -24,7 +29,7 @@ interface MarketSession {
   nextClose?: Date;
 }
 
-const PriceChart: React.FC<PriceChartProps> = ({
+const PriceChart: React.FC<PriceChartProps> = observer(({
   symbol,
   currentPrice,
   changePercent,
@@ -32,16 +37,20 @@ const PriceChart: React.FC<PriceChartProps> = ({
   showRealTime = true,
   interval = 10000, // 10 seconds default - reduced from 5
   period = "1H",
+  patterns = [],
+  onPatternClick,
 }) => {
+  const stockStore = useStockStore();
   const [priceHistory, setPriceHistory] = useState<PricePoint[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [marketSession, setMarketSession] = useState<MarketSession>({
     isOpen: true,
   });
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
+  const [initialLoadComplete, setInitialLoadComplete] = useState(false);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const wsRef = useRef<WebSocket | null>(null);
+  const lastPriceRef = useRef<number>(currentPrice);
 
   // Check if market is open (simplified - assumes 9:30 AM - 4:00 PM EST)
   const checkMarketHours = useCallback((): MarketSession => {
@@ -51,24 +60,28 @@ const PriceChart: React.FC<PriceChartProps> = ({
     const isOpen = isWeekday && hour >= 9 && hour < 16;
 
     return { isOpen };
-  }, []); // Fetch historical data from backend
+  }, []); // Fetch historical data from backend - enhanced for today's data
   const fetchHistoricalData = useCallback(async () => {
     try {
       setIsLoading(true);
       console.log(`📊 Fetching historical data for ${symbol}`);
-      const response = await fetch(
-        `http://localhost:8000/stocks/${symbol}/history?period=${period}`
-      );
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
 
-      const data = await response.json();
+      // For today's data, use period=1D, otherwise use the specified period
+      const requestPeriod = period === "1H" ? "1D" : period;
+      
+      const data = await stockStore.fetchStockHistory(symbol, requestPeriod);
       console.log(`📊 Received historical data for ${symbol}:`, data);
+
       if (data && Array.isArray(data)) {
         const pricePoints: PricePoint[] = data.map(
           (point: any, index: number) => ({
-            time: point.date || `${Date.now() - (data.length - index) * 60000}`,
+            time: point.date
+              ? new Date(point.date).toLocaleTimeString("en-US", {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  hour12: false,
+                })
+              : `${Date.now() - (data.length - index) * 60000}`,
             timestamp: point.date
               ? new Date(point.date).getTime()
               : Date.now() - (data.length - index) * 60000,
@@ -78,6 +91,7 @@ const PriceChart: React.FC<PriceChartProps> = ({
         );
 
         setPriceHistory(pricePoints);
+        setInitialLoadComplete(true);
         console.log(`📊 Set ${pricePoints.length} price points for ${symbol}`);
       } else {
         console.warn(`📊 Invalid data format for ${symbol}:`, data);
@@ -89,23 +103,64 @@ const PriceChart: React.FC<PriceChartProps> = ({
     } finally {
       setIsLoading(false);
     }
-  }, [symbol, period, currentPrice]);
+  }, [symbol, period, currentPrice, stockStore]);
+
+  // Append new price data point (for incremental updates)
+  const appendNewPriceData = useCallback((newPrice: number) => {
+    const now = new Date();
+    const newPricePoint: PricePoint = {
+      time: now.toLocaleTimeString("en-US", {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+      }),
+      timestamp: now.getTime(),
+      price: newPrice,
+      volume: Math.floor(Math.random() * 1000000), // Would come from real WebSocket data
+    };
+
+    setPriceHistory((prevHistory) => {
+      // Keep only last 100 points for performance
+      const updatedHistory = [...prevHistory, newPricePoint].slice(-100);
+      return updatedHistory;
+    });
+
+    setLastUpdate(now);
+    lastPriceRef.current = newPrice;
+  }, []);
+
+  // Check for price changes and append new data
+  useEffect(() => {
+    if (
+      initialLoadComplete &&
+      currentPrice !== lastPriceRef.current &&
+      currentPrice > 0
+    ) {
+      appendNewPriceData(currentPrice);
+    }
+  }, [currentPrice, initialLoadComplete, appendNewPriceData]);
   useEffect(() => {
     setMarketSession(checkMarketHours());
-    fetchHistoricalData();
 
-    // Set up periodic refresh for live data
-    if (showRealTime) {
+    // Only fetch historical data on initial load
+    if (!initialLoadComplete) {
+      fetchHistoricalData();
+    }
+
+    // Set up periodic refresh for live data - but only append new prices, don't reload all
+    if (showRealTime && initialLoadComplete) {
       const refreshInterval = setInterval(() => {
-        fetchHistoricalData();
+        // In a real implementation, this would come from WebSocket
+        // For now, we'll just check if currentPrice changed
+        if (currentPrice !== lastPriceRef.current && currentPrice > 0) {
+          appendNewPriceData(currentPrice);
+        }
       }, interval);
       intervalRef.current = refreshInterval;
     }
 
     return () => {
-      // eslint-disable-next-line react-hooks/exhaustive-deps
       const currentInterval = intervalRef.current;
-      // eslint-disable-next-line react-hooks/exhaustive-deps
       const currentWs = wsRef.current;
       if (currentInterval) {
         clearInterval(currentInterval);
@@ -114,7 +169,6 @@ const PriceChart: React.FC<PriceChartProps> = ({
         currentWs.close();
       }
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     symbol,
     period,
@@ -122,6 +176,9 @@ const PriceChart: React.FC<PriceChartProps> = ({
     checkMarketHours,
     showRealTime,
     interval,
+    initialLoadComplete,
+    currentPrice,
+    appendNewPriceData,
   ]);
 
   const renderChart = () => {
@@ -304,6 +361,78 @@ const PriceChart: React.FC<PriceChartProps> = ({
               opacity="0.6"
             />
           )}
+          {/* Pattern markers */}
+          {patterns
+            .filter(
+              (pattern) => pattern.type !== "none" && pattern.confidence > 0.3
+            )
+            .map((pattern, index) => {
+              // Calculate position for pattern marker
+              const markerIndex = Math.floor(
+                (priceHistory.length * (0.3 + index * 0.2)) %
+                  priceHistory.length
+              );
+              const dataPoint = priceHistory[markerIndex];
+
+              if (!dataPoint) return null;
+
+              const x =
+                padding +
+                (markerIndex / (priceHistory.length - 1)) *
+                  (width - 2 * padding);
+              const y =
+                svgHeight -
+                padding -
+                ((dataPoint.price - minPrice) / priceRange) *
+                  (svgHeight - 2 * padding);
+
+              const patternColor =
+                pattern.direction === "bullish"
+                  ? "#10b981"
+                  : pattern.direction === "bearish"
+                  ? "#ef4444"
+                  : "#f59e0b";
+
+              return (
+                <g key={`pattern-${index}`}>
+                  {/* Pattern marker circle */}
+                  <circle
+                    cx={x}
+                    cy={y - 15}
+                    r="6"
+                    fill={patternColor}
+                    stroke="#fff"
+                    strokeWidth="2"
+                    className="pattern-marker"
+                    style={{
+                      cursor: onPatternClick ? "pointer" : "default",
+                      filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.3))",
+                    }}
+                    onClick={() => onPatternClick && onPatternClick(pattern)}
+                  />
+
+                  {/* Pattern type icon */}
+                  <text
+                    x={x}
+                    y={y - 12}
+                    textAnchor="middle"
+                    fontSize="8"
+                    fill="#fff"
+                    fontWeight="bold"
+                    style={{ pointerEvents: "none" }}
+                  >
+                    {pattern.type.charAt(0).toUpperCase()}
+                  </text>
+
+                  {/* Pattern confidence tooltip */}
+                  <title>
+                    {`${pattern.type.replace("_", " ").toUpperCase()} - ${
+                      pattern.direction
+                    } - ${(pattern.confidence * 100).toFixed(0)}% confidence`}
+                  </title>
+                </g>
+              );
+            })}
         </svg>
 
         <div className="chart-info">
@@ -376,6 +505,6 @@ const PriceChart: React.FC<PriceChartProps> = ({
       </div>
     </div>
   );
-};
+});
 
 export default PriceChart;

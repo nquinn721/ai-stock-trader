@@ -1,6 +1,7 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import axios from "axios";
+import { observer } from "mobx-react-lite";
 import React, { useEffect, useState } from "react";
+import { usePortfolioStore } from "../stores/StoreContext";
 import { Portfolio, Position, Trade } from "../types";
 import EmptyState from "./EmptyState";
 import PortfolioChart from "./PortfolioChart";
@@ -32,16 +33,23 @@ interface PortfolioPerformance {
   };
 }
 
-const PortfolioDetailsModal: React.FC<PortfolioDetailsModalProps> = ({
+const PortfolioDetailsModal: React.FC<PortfolioDetailsModalProps> = observer(({
   portfolio,
   isOpen,
   onClose,
 }) => {
-  const [activeTab, setActiveTab] = useState<"overview" | "positions" | "history">("overview");
-  const [performance, setPerformance] = useState<PortfolioPerformance | null>(null);
+  const portfolioStore = usePortfolioStore();
+  const [activeTab, setActiveTab] = useState<
+    "overview" | "positions" | "history"
+  >("overview");
+  const [performance, setPerformance] = useState<PortfolioPerformance | null>(
+    null
+  );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedTimeframe, setSelectedTimeframe] = useState<"1D" | "1W" | "1M" | "3M" | "1Y">("1M");
+  const [selectedTimeframe, setSelectedTimeframe] = useState<
+    "1D" | "1W" | "1M" | "3M" | "1Y"
+  >("1M");
 
   useEffect(() => {
     if (isOpen && portfolio) {
@@ -53,24 +61,20 @@ const PortfolioDetailsModal: React.FC<PortfolioDetailsModalProps> = ({
     try {
       setLoading(true);
       setError(null);
-      
+
       // Fetch portfolio performance data
-      const performanceResponse = await axios.get(
-        `http://localhost:8000/paper-trading/portfolios/${portfolio.id}/performance`
-      );
-      
+      const performanceResponse = await portfolioStore.fetchPortfolioPerformance(portfolio.id);
+
       // Fetch portfolio details with positions and trades
-      const detailsResponse = await axios.get(
-        `http://localhost:8000/paper-trading/portfolios/${portfolio.id}`
-      );
-      
-      const portfolioData = detailsResponse.data;
+      const detailsResponse = await portfolioStore.fetchPortfolioById(portfolio.id);
+
+      const portfolioData = detailsResponse;
       const positions = portfolioData.positions || [];
       const trades = portfolioData.trades || [];
-      
+
       // Calculate analytics
       const analytics = calculateAnalytics(positions, trades);
-        setPerformance({
+      setPerformance({
         totalValue: portfolio.totalValue,
         totalPnL: portfolio.totalPnL,
         totalReturn: portfolio.totalReturn,
@@ -93,33 +97,45 @@ const PortfolioDetailsModal: React.FC<PortfolioDetailsModalProps> = ({
   };
 
   const calculateAnalytics = (positions: Position[], trades: Trade[]) => {
-    const bestPerformer = positions.reduce((best, pos) => 
-      !best || pos.unrealizedPnL > best.unrealizedPnL ? pos : best, null as Position | null
+    const bestPerformer = positions.reduce(
+      (best, pos) =>
+        !best || pos.unrealizedPnL > best.unrealizedPnL ? pos : best,
+      null as Position | null
     );
-    
-    const worstPerformer = positions.reduce((worst, pos) => 
-      !worst || pos.unrealizedPnL < worst.unrealizedPnL ? pos : worst, null as Position | null
+
+    const worstPerformer = positions.reduce(
+      (worst, pos) =>
+        !worst || pos.unrealizedPnL < worst.unrealizedPnL ? pos : worst,
+      null as Position | null
     );
-    
-    const executedTrades = trades.filter(trade => trade.status === "executed");
-    const winningTrades = executedTrades.filter(trade => {
+
+    const executedTrades = trades.filter(
+      (trade) => trade.status === "executed"
+    );
+    const winningTrades = executedTrades.filter((trade) => {
       // For sell trades, calculate if they were profitable
       if (trade.type === "sell") {
-        const buyTrades = executedTrades.filter(t => 
-          t.symbol === trade.symbol && t.type === "buy" && 
-          new Date(t.executedAt) < new Date(trade.executedAt)
+        const buyTrades = executedTrades.filter(
+          (t) =>
+            t.symbol === trade.symbol &&
+            t.type === "buy" &&
+            new Date(t.executedAt) < new Date(trade.executedAt)
         );
         if (buyTrades.length > 0) {
-          const avgBuyPrice = buyTrades.reduce((sum, t) => sum + t.price, 0) / buyTrades.length;
+          const avgBuyPrice =
+            buyTrades.reduce((sum, t) => sum + t.price, 0) / buyTrades.length;
           return trade.price > avgBuyPrice;
         }
       }
       return false;
     });
-    
+
     const losingTrades = executedTrades.length - winningTrades.length;
-    const winRate = executedTrades.length > 0 ? (winningTrades.length / executedTrades.length) * 100 : 0;
-    
+    const winRate =
+      executedTrades.length > 0
+        ? (winningTrades.length / executedTrades.length) * 100
+        : 0;
+
     return {
       bestPerformer,
       worstPerformer,
@@ -128,7 +144,7 @@ const PortfolioDetailsModal: React.FC<PortfolioDetailsModalProps> = ({
       losingTrades,
       winRate,
       averageGain: 0, // Would need more complex calculation
-      averageLoss: 0,  // Would need more complex calculation
+      averageLoss: 0, // Would need more complex calculation
     };
   };
 
@@ -234,20 +250,35 @@ const PortfolioDetailsModal: React.FC<PortfolioDetailsModalProps> = ({
                       </div>
                       <div className="metric-card">
                         <span className="metric-label">Total P&L</span>
-                        <span className={`metric-value large ${performance.totalPnL >= 0 ? "positive" : "negative"}`}>
+                        <span
+                          className={`metric-value large ${
+                            performance.totalPnL >= 0 ? "positive" : "negative"
+                          }`}
+                        >
                           {formatCurrency(performance.totalPnL)}
                         </span>
                       </div>
                       <div className="metric-card">
                         <span className="metric-label">Total Return</span>
-                        <span className={`metric-value large ${performance.totalReturn >= 0 ? "positive" : "negative"}`}>
+                        <span
+                          className={`metric-value large ${
+                            performance.totalReturn >= 0
+                              ? "positive"
+                              : "negative"
+                          }`}
+                        >
                           {formatPercent(performance.totalReturn)}
                         </span>
                       </div>
                       <div className="metric-card">
                         <span className="metric-label">Day Gain</span>
-                        <span className={`metric-value ${performance.dayGain >= 0 ? "positive" : "negative"}`}>
-                          {formatCurrency(performance.dayGain)} ({formatPercent(performance.dayGainPercent)})
+                        <span
+                          className={`metric-value ${
+                            performance.dayGain >= 0 ? "positive" : "negative"
+                          }`}
+                        >
+                          {formatCurrency(performance.dayGain)} (
+                          {formatPercent(performance.dayGainPercent)})
                         </span>
                       </div>
                     </div>
@@ -271,22 +302,32 @@ const PortfolioDetailsModal: React.FC<PortfolioDetailsModalProps> = ({
                       <div className="analytics-grid">
                         <div className="analytics-card">
                           <span className="analytics-label">Total Trades</span>
-                          <span className="analytics-value">{performance.analytics.totalTrades}</span>
-                        </div>
-                        <div className="analytics-card">
-                          <span className="analytics-label">Win Rate</span>
-                          <span className="analytics-value">{performance.analytics.winRate.toFixed(1)}%</span>
-                        </div>
-                        <div className="analytics-card">
-                          <span className="analytics-label">Best Performer</span>
                           <span className="analytics-value">
-                            {performance.analytics.bestPerformer?.symbol || "N/A"}
+                            {performance.analytics.totalTrades}
                           </span>
                         </div>
                         <div className="analytics-card">
-                          <span className="analytics-label">Worst Performer</span>
+                          <span className="analytics-label">Win Rate</span>
                           <span className="analytics-value">
-                            {performance.analytics.worstPerformer?.symbol || "N/A"}
+                            {performance.analytics.winRate.toFixed(1)}%
+                          </span>
+                        </div>
+                        <div className="analytics-card">
+                          <span className="analytics-label">
+                            Best Performer
+                          </span>
+                          <span className="analytics-value">
+                            {performance.analytics.bestPerformer?.symbol ||
+                              "N/A"}
+                          </span>
+                        </div>
+                        <div className="analytics-card">
+                          <span className="analytics-label">
+                            Worst Performer
+                          </span>
+                          <span className="analytics-value">
+                            {performance.analytics.worstPerformer?.symbol ||
+                              "N/A"}
                           </span>
                         </div>
                       </div>
@@ -326,10 +367,22 @@ const PortfolioDetailsModal: React.FC<PortfolioDetailsModalProps> = ({
                                 <td>{position.quantity}</td>
                                 <td>{formatCurrency(position.averagePrice)}</td>
                                 <td>{formatCurrency(position.currentValue)}</td>
-                                <td className={position.unrealizedPnL >= 0 ? "positive" : "negative"}>
+                                <td
+                                  className={
+                                    position.unrealizedPnL >= 0
+                                      ? "positive"
+                                      : "negative"
+                                  }
+                                >
                                   {formatCurrency(position.unrealizedPnL)}
                                 </td>
-                                <td className={position.unrealizedReturn >= 0 ? "positive" : "negative"}>
+                                <td
+                                  className={
+                                    position.unrealizedReturn >= 0
+                                      ? "positive"
+                                      : "negative"
+                                  }
+                                >
                                   {formatPercent(position.unrealizedReturn)}
                                 </td>
                               </tr>
@@ -367,28 +420,36 @@ const PortfolioDetailsModal: React.FC<PortfolioDetailsModalProps> = ({
                           </thead>
                           <tbody>
                             {performance.trades
-                              .sort((a, b) => new Date(b.executedAt).getTime() - new Date(a.executedAt).getTime())
+                              .sort(
+                                (a, b) =>
+                                  new Date(b.executedAt).getTime() -
+                                  new Date(a.executedAt).getTime()
+                              )
                               .map((trade) => (
-                              <tr key={trade.id}>
-                                <td>{formatDate(trade.executedAt)}</td>
-                                <td className="symbol-cell">
-                                  <strong>{trade.symbol}</strong>
-                                </td>
-                                <td>
-                                  <span className={`trade-type ${trade.type}`}>
-                                    {trade.type.toUpperCase()}
-                                  </span>
-                                </td>
-                                <td>{trade.quantity}</td>
-                                <td>{formatCurrency(trade.price)}</td>
-                                <td>{formatCurrency(trade.totalValue)}</td>
-                                <td>
-                                  <span className={`trade-status ${trade.status}`}>
-                                    {trade.status}
-                                  </span>
-                                </td>
-                              </tr>
-                            ))}
+                                <tr key={trade.id}>
+                                  <td>{formatDate(trade.executedAt)}</td>
+                                  <td className="symbol-cell">
+                                    <strong>{trade.symbol}</strong>
+                                  </td>
+                                  <td>
+                                    <span
+                                      className={`trade-type ${trade.type}`}
+                                    >
+                                      {trade.type.toUpperCase()}
+                                    </span>
+                                  </td>
+                                  <td>{trade.quantity}</td>
+                                  <td>{formatCurrency(trade.price)}</td>
+                                  <td>{formatCurrency(trade.totalValue)}</td>
+                                  <td>
+                                    <span
+                                      className={`trade-status ${trade.status}`}
+                                    >
+                                      {trade.status}
+                                    </span>
+                                  </td>
+                                </tr>
+                              ))}
                           </tbody>
                         </table>
                       </div>
@@ -402,6 +463,6 @@ const PortfolioDetailsModal: React.FC<PortfolioDetailsModalProps> = ({
       </div>
     </div>
   );
-};
+});
 
 export default PortfolioDetailsModal;

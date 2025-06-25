@@ -1,68 +1,169 @@
+import { library } from "@fortawesome/fontawesome-svg-core";
+import {
+  faArrowDown,
+  faArrowTrendDown,
+  faArrowTrendUp,
+  faArrowUp,
+  faChartLine,
+  faCircle,
+  faClock,
+  faDollarSign,
+  faExchangeAlt,
+  faEye,
+  faSignal,
+  faVolumeHigh,
+} from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import axios from "axios";
+import { observer } from "mobx-react-lite";
 import React, { useEffect, useState } from "react";
-import { useSocket } from "../context/SocketContext";
-import { Portfolio, Stock, TradingSignal } from "../types";
+import {
+  usePortfolioStore,
+  useStockStore,
+  useWebSocketStore,
+} from "../stores/StoreContext";
+import { Portfolio } from "../types";
 import "./Dashboard.css";
 import EmptyState from "./EmptyState";
 import NotificationCenter from "./NotificationCenter";
-import PortfolioChart from "./PortfolioChart";
 import PortfolioCreator from "./PortfolioCreator";
 import PortfolioDetailsModal from "./PortfolioDetailsModal";
 import PortfolioSelector from "./PortfolioSelector";
 import QuickTrade from "./QuickTrade";
 import StockCard from "./StockCard";
 
-const Dashboard: React.FC = () => {
-  const { isConnected } = useSocket();
-  const [stocksWithSignals, setStocksWithSignals] = useState<
-    (Stock & { tradingSignal: TradingSignal | null })[]
-  >([]);
-  const [loading, setLoading] = useState(true);
-  const [selectedTimeframe, setSelectedTimeframe] = useState<
-    "1D" | "1W" | "1M" | "3M" | "1Y"
-  >("1M");
-  const [showPortfolioCreator, setShowPortfolioCreator] = useState(false);  const [selectedPortfolio, setSelectedPortfolio] = useState<Portfolio | null>(
-    null
-  );
+// Add icons to library
+library.add(
+  faArrowTrendUp,
+  faArrowTrendDown,
+  faChartLine,
+  faDollarSign,
+  faExchangeAlt,
+  faVolumeHigh,
+  faEye,
+  faSignal,
+  faClock,
+  faArrowUp,
+  faArrowDown,
+  faCircle
+);
+
+const Dashboard: React.FC = observer(() => {
+  const stockStore = useStockStore();
+  const portfolioStore = usePortfolioStore();
+  const webSocketStore = useWebSocketStore();
+
+  const [showPortfolioCreator, setShowPortfolioCreator] = useState(false);
   const [showPortfolioDetails, setShowPortfolioDetails] = useState(false);
-  const [portfolioForDetails, setPortfolioForDetails] = useState<Portfolio | null>(null);
+  const [portfolioForDetails, setPortfolioForDetails] =
+    useState<Portfolio | null>(null);
+  const [currentTime, setCurrentTime] = useState(new Date());
+
+  // Initialize data on component mount
+  useEffect(() => {
+    stockStore.fetchStocksWithSignals();
+    // For now, we'll assume user ID 1 - this should come from auth context later
+    portfolioStore.fetchPortfolio(1);
+  }, [stockStore, portfolioStore]);
+
+  // Update stocks when socket data changes
+  useEffect(() => {
+    if (stockStore.stocks.length === 0 && !stockStore.isLoading) {
+      stockStore.fetchStocksWithSignals();
+    }
+  }, [stockStore.stocks.length, stockStore.isLoading, stockStore]);
+
+  // Update clock every second
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, []);
+
+  // Calculate market analytics
+  const marketAnalytics = React.useMemo(() => {
+    const stocksWithSignals = stockStore.stocksWithSignals;
+
+    if (stocksWithSignals.length === 0) {
+      return {
+        totalStocks: 0,
+        gainers: 0,
+        losers: 0,
+        avgChange: 0,
+        totalVolume: 0,
+        totalMarketCap: 0,
+        buySignals: 0,
+        sellSignals: 0,
+        holdSignals: 0,
+        topGainer: null,
+        topLoser: null,
+      };
+    }
+
+    const gainers = stocksWithSignals.filter((s) => s.changePercent > 0);
+    const losers = stocksWithSignals.filter((s) => s.changePercent < 0);
+    const avgChange =
+      stocksWithSignals.reduce((sum, s) => sum + s.changePercent, 0) /
+      stocksWithSignals.length;
+    const totalVolume = stocksWithSignals.reduce(
+      (sum, s) => sum + (s.volume || 0),
+      0
+    );
+    const totalMarketCap = stocksWithSignals.reduce(
+      (sum, s) => sum + (s.marketCap || 0),
+      0
+    );
+
+    const signals = stocksWithSignals.reduce(
+      (acc, s) => {
+        if (s.tradingSignal) {
+          acc[s.tradingSignal.signal]++;
+        }
+        return acc;
+      },
+      { buy: 0, sell: 0, hold: 0 }
+    );
+
+    const topGainer = [...stocksWithSignals].sort(
+      (a, b) => b.changePercent - a.changePercent
+    )[0];
+    const topLoser = [...stocksWithSignals].sort(
+      (a, b) => a.changePercent - b.changePercent
+    )[0];
+
+    return {
+      totalStocks: stocksWithSignals.length,
+      gainers: gainers.length,
+      losers: losers.length,
+      avgChange,
+      totalVolume,
+      totalMarketCap,
+      buySignals: signals.buy,
+      sellSignals: signals.sell,
+      holdSignals: signals.hold,
+      topGainer,
+      topLoser,
+    };
+  }, [stockStore.stocksWithSignals]);
 
   // Get top performing stock for main chart display
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const topStock =
-    stocksWithSignals.find((s) => s.changePercent && s.changePercent > 0) ||
-    stocksWithSignals[0];
-  useEffect(() => {
-    fetchStocksWithSignals();
-  }, []);
-  const fetchStocksWithSignals = async () => {
-    try {
-      const response = await axios.get(
-        "http://localhost:8000/stocks/with-signals/all"
-      );
-      setStocksWithSignals(response.data);
-    } catch (error) {
-      console.error("Error fetching stocks with signals:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+    stockStore.stocksWithSignals.find(
+      (s) => s.changePercent && s.changePercent > 0
+    ) || stockStore.stocksWithSignals[0];
 
   const handlePortfolioCreated = (portfolio: any) => {
     console.log("Portfolio created:", portfolio);
     setShowPortfolioCreator(false);
-    setSelectedPortfolio(portfolio);
-    // Optionally refresh portfolio data or show success message
+    // Refresh portfolio data
+    portfolioStore.fetchPortfolio(1);
   };
 
   const handleCancelPortfolioCreation = () => {
     setShowPortfolioCreator(false);
   };
 
-  const handlePortfolioSelect = (portfolio: Portfolio) => {
-    setSelectedPortfolio(portfolio);
-  };
   const handleCreatePortfolio = () => {
     setShowPortfolioCreator(true);
   };
@@ -76,6 +177,10 @@ const Dashboard: React.FC = () => {
     setShowPortfolioDetails(false);
     setPortfolioForDetails(null);
   };
+  const isConnected = webSocketStore.isConnected;
+  const stocksWithSignals = stockStore.stocksWithSignals;
+  const loading = stockStore.isLoading;
+
   if (loading) {
     return (
       <div className="dashboard">
@@ -99,12 +204,19 @@ const Dashboard: React.FC = () => {
       />
     );
   }
-
   return (
     <div className="dashboard">
       {" "}
+      {/* Header */}
       <header className="dashboard-header">
-        <h1>Trading Dashboard</h1>
+        <div className="header-left">
+          <h1>Trading Dashboard</h1>
+          <div className="market-time">
+            <FontAwesomeIcon icon={faClock} />
+            <span>{currentTime.toLocaleTimeString()}</span>
+            <span className="date">{currentTime.toLocaleDateString()}</span>
+          </div>
+        </div>
         <div className="header-info">
           <div className="stats">
             <span>{stocksWithSignals.length} stocks</span>
@@ -119,58 +231,194 @@ const Dashboard: React.FC = () => {
           </div>
           <NotificationCenter />
         </div>
-      </header>{" "}
-      {/* Paper Trading Section */}
-      <div className="paper-trading-section">        {/* Portfolio Selector */}
-        <PortfolioSelector
-          selectedPortfolioId={selectedPortfolio?.id}
-          onPortfolioSelect={handlePortfolioSelect}
-          onCreatePortfolio={handleCreatePortfolio}
-          onViewDetails={handleViewPortfolioDetails}
-        />
+      </header>
+      {/* Market Overview Cards */}
+      <div className="market-overview">
+        <div className="metric-card">
+          <div className="metric-icon">
+            <FontAwesomeIcon icon={faChartLine} />
+          </div>
+          <div className="metric-content">
+            <div className="metric-value">{marketAnalytics.totalStocks}</div>
+            <div className="metric-label">Total Stocks</div>
+          </div>
+        </div>
 
-        {/* Portfolio Overview - Show only if a portfolio is selected */}
-        {selectedPortfolio && (
-          <div className="portfolio-overview">
-            <div className="portfolio-summary-header">
-              <div className="selected-portfolio-info">
-                <h3>Portfolio Performance: {selectedPortfolio.name}</h3>
-                <span className="portfolio-type-badge">
-                  {selectedPortfolio.portfolioType || "BASIC"}
-                </span>
-              </div>
+        <div className="metric-card positive">
+          <div className="metric-icon">
+            <FontAwesomeIcon icon={faArrowTrendUp} />
+          </div>
+          <div className="metric-content">
+            <div className="metric-value">{marketAnalytics.gainers}</div>
+            <div className="metric-label">Gainers</div>
+          </div>
+        </div>
+
+        <div className="metric-card negative">
+          <div className="metric-icon">
+            <FontAwesomeIcon icon={faArrowTrendDown} />
+          </div>
+          <div className="metric-content">
+            <div className="metric-value">{marketAnalytics.losers}</div>
+            <div className="metric-label">Losers</div>
+          </div>
+        </div>
+
+        <div
+          className={`metric-card ${
+            marketAnalytics.avgChange >= 0 ? "positive" : "negative"
+          }`}
+        >
+          <div className="metric-icon">
+            <FontAwesomeIcon
+              icon={marketAnalytics.avgChange >= 0 ? faArrowUp : faArrowDown}
+            />
+          </div>
+          <div className="metric-content">
+            <div className="metric-value">
+              {marketAnalytics.avgChange.toFixed(2)}%
             </div>
-            <PortfolioChart
-              portfolioId={selectedPortfolio.id}
-              timeframe={selectedTimeframe}
-              height={240}
-              onTimeframeChange={setSelectedTimeframe}
-            />
+            <div className="metric-label">Avg Change</div>
           </div>
-        )}
+        </div>
 
-        <QuickTrade />
+        <div className="metric-card">
+          <div className="metric-icon">
+            <FontAwesomeIcon icon={faVolumeHigh} />
+          </div>
+          <div className="metric-content">
+            <div className="metric-value">
+              {(marketAnalytics.totalVolume / 1000000).toFixed(1)}M
+            </div>
+            <div className="metric-label">Total Volume</div>
+          </div>
+        </div>
+
+        <div className="metric-card">
+          <div className="metric-icon">
+            <FontAwesomeIcon icon={faDollarSign} />
+          </div>
+          <div className="metric-content">
+            <div className="metric-value">
+              ${(marketAnalytics.totalMarketCap / 1000000000).toFixed(1)}B
+            </div>
+            <div className="metric-label">Market Cap</div>
+          </div>
+        </div>
       </div>
-      <div className="stocks-grid">
-        {stocksWithSignals.map((stockWithSignal) => (
-          <div key={stockWithSignal.id} className="stock-container">
-            {" "}
-            <StockCard
-              stock={stockWithSignal}
-              signal={stockWithSignal.tradingSignal || undefined}
+      {/* Trading Signals Summary */}
+      <div className="signals-overview">
+        <h3>
+          <FontAwesomeIcon icon={faSignal} /> Trading Signals
+        </h3>
+        <div className="signals-grid">
+          <div className="signal-card buy">
+            <div className="signal-count">{marketAnalytics.buySignals}</div>
+            <div className="signal-label">Buy Signals</div>
+          </div>
+          <div className="signal-card sell">
+            <div className="signal-count">{marketAnalytics.sellSignals}</div>
+            <div className="signal-label">Sell Signals</div>
+          </div>
+          <div className="signal-card hold">
+            <div className="signal-count">{marketAnalytics.holdSignals}</div>
+            <div className="signal-label">Hold Signals</div>
+          </div>
+        </div>
+      </div>
+      {/* Top Movers */}
+      {(marketAnalytics.topGainer || marketAnalytics.topLoser) && (
+        <div className="top-movers">
+          <h3>
+            <FontAwesomeIcon icon={faEye} /> Top Movers
+          </h3>
+          <div className="movers-grid">
+            {marketAnalytics.topGainer && (
+              <div className="mover-card positive">
+                <div className="mover-header">
+                  <FontAwesomeIcon icon={faArrowTrendUp} />
+                  <span>Top Gainer</span>
+                </div>
+                <div className="mover-symbol">
+                  {marketAnalytics.topGainer.symbol}
+                </div>
+                <div className="mover-change">
+                  +{marketAnalytics.topGainer.changePercent.toFixed(2)}%
+                </div>
+                <div className="mover-price">
+                  ${marketAnalytics.topGainer.currentPrice.toFixed(2)}
+                </div>
+              </div>
+            )}
+            {marketAnalytics.topLoser && (
+              <div className="mover-card negative">
+                <div className="mover-header">
+                  <FontAwesomeIcon icon={faArrowTrendDown} />
+                  <span>Top Loser</span>
+                </div>
+                <div className="mover-symbol">
+                  {marketAnalytics.topLoser.symbol}
+                </div>
+                <div className="mover-change">
+                  {marketAnalytics.topLoser.changePercent.toFixed(2)}%
+                </div>
+                <div className="mover-price">
+                  ${marketAnalytics.topLoser.currentPrice.toFixed(2)}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+      {/* Paper Trading Section */}
+      <div className="paper-trading-section">
+        <h3>
+          <FontAwesomeIcon icon={faExchangeAlt} /> Paper Trading
+        </h3>
+        <div className="trading-row">
+          {/* Portfolio Selector */}
+          <div className="portfolios-container">
+            <PortfolioSelector
+              onCreatePortfolio={handleCreatePortfolio}
+              onViewDetails={handleViewPortfolioDetails}
             />
           </div>
-        ))}{" "}
-      </div>{" "}
-      {stocksWithSignals.length === 0 && (
+
+          {/* Quick Trade */}
+          <div className="quick-trade-container">
+            <QuickTrade />
+          </div>
+        </div>
+      </div>
+      {/* Stocks Grid */}
+      <div className="stocks-section">
+        <h3>
+          <FontAwesomeIcon icon={faChartLine} /> Live Stocks
+        </h3>
+        <div className="stocks-grid">
+          {stocksWithSignals.map((stockWithSignal) => (
+            <div key={stockWithSignal.id} className="stock-container">
+              <StockCard
+                stock={stockWithSignal}
+                signal={stockWithSignal.tradingSignal || undefined}
+              />
+            </div>
+          ))}
+        </div>
+      </div>
+      {stocksWithSignals.length === 0 && !loading && (
         <EmptyState
           type="no-data"
           icon={<FontAwesomeIcon icon="chart-line" />}
-          title="No Stock Data Available"
-          description="Real stock market API integration is required to display live stock data. Please configure API keys for Yahoo Finance, Alpha Vantage, or similar services."
+          title={isConnected ? "Waiting for Stock Data" : "No Connection"}
+          description={
+            isConnected
+              ? "Connected to server. Waiting for live stock data to be broadcasted..."
+              : "Please check your connection to the trading server."
+          }
           size="large"
-        />      )}
-      
+        />
+      )}
       {/* Portfolio Details Modal */}
       {showPortfolioDetails && portfolioForDetails && (
         <PortfolioDetailsModal
@@ -181,6 +429,6 @@ const Dashboard: React.FC = () => {
       )}
     </div>
   );
-};
+});
 
 export default Dashboard;

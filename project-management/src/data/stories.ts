@@ -711,37 +711,67 @@ export const stories: Story[] = [
     completedDate: "2025-06-23",
   },
 
-  // === UI/UX ENHANCEMENT STORIES ===
+  // === NEW SPRINT 5 ENHANCEMENT STORIES ===
 
   {
-    id: "S35",
-    title: "Notification History and Management System",
+    id: "S30A",
+    title: "Comprehensive Unit Testing Upgrade",
     description:
-      "Extend the existing notification system with comprehensive history and management features. Create notification history storage and retrieval, implement notification search and filtering capabilities, add notification categories and tagging, create notification analytics and insights, implement notification archiving and cleanup, and add notification export functionality. Include user preferences for notification retention and advanced notification management tools.",
+      "Upgrade and expand unit testing coverage throughout the entire application to achieve 95%+ coverage across all modules. Update existing tests, add missing test cases, and implement comprehensive testing patterns for all services, controllers, components, and utilities. Include backend testing for all services and controllers with 95%+ coverage, frontend testing for all React components and hooks, integration tests for complex service interactions, mock external API calls, test error handling and edge cases, performance testing for critical endpoints, and create reusable testing utilities and helpers.",
     status: "TODO",
-    priority: "Medium",
-    epic: "E2",
+    priority: "High",
+    epic: "E1", // Testing & Quality Assurance
     storyPoints: 8,
     sprint: 5,
-    assignee: "Frontend Team",
-    progress: 0,
-    dependencies: ["S20"],
-    createdDate: "2025-06-23",
-  },
-  {
-    id: "S37",
-    title: "Four Stock-Only Portfolios with Day Trading Rules",
-    description:
-      "Implement four distinct stock-only portfolio types with SEC day trading compliance. Create Portfolio Templates: (1) Professional Day Trader ($50,000 starting capital, day trading enabled, pattern day trading rules apply), (2) Standard Day Trader ($30,000 starting capital, day trading enabled, pattern day trading rules apply), (3) Small Investor ($1,000 starting capital, day trading restricted, no pattern day trading), (4) Micro Investor ($500 starting capital, day trading restricted, no pattern day trading). All portfolios are STOCKS ONLY - no bonds, crypto, options, or other assets. Stock selection limited to available stock data from Yahoo Finance API. Day trading portfolios ($30k+) can execute unlimited day trades but must maintain 25k minimum equity. Non-day trading portfolios ($500-$1k) limited to 3 day trades per 5 business days. Implement SEC Pattern Day Trading Rule enforcement, day trade counting and tracking, business day calculations for rule resets, educational warnings about day trading restrictions, portfolio-specific buying power calculations, and settlement period tracking for cash accounts.",
-    status: "DONE",
-    priority: "High",
-    epic: "E2",
-    storyPoints: 13,
-    sprint: 6,
-    assignee: "Full Stack Team",
+    assignee: "Development Team",
     progress: 0,
     dependencies: [],
-    createdDate: "2025-06-23",
-    completedDate: "2025-06-23",
+    createdDate: "2025-06-24",
+  },
+  {
+    id: "S30B",
+    title: "MobX State Management Migration",
+    description:
+      "Migrate all service calls and data logic from React components to centralized MobX stores. Create centralized stores for stock data, portfolio operations, AI recommendations, user preferences, and WebSocket management. Move all API calls from components to stores, implement intelligent caching strategies, add offline-first capabilities, migrate WebSocket handling to stores, implement proper loading states management, add optimistic updates for better UX, and create data synchronization mechanisms. Update all React components to use MobX stores and remove direct API calls.",
+    status: "DONE",
+    priority: "High",
+    epic: "E2", // Frontend Architecture Enhancement
+    storyPoints: 13,
+    sprint: 5,
+    assignee: "Development Team",
+    progress: 0,
+    dependencies: ["S30A"],
+    createdDate: "2025-06-24",
+    completedDate: "2025-06-24",
+  },
+  {
+    id: "S30C",
+    title: "Automated Trading System Backend",
+    description:
+      "Create a comprehensive automated trading system that executes trades based on AI recommendations and user-defined portfolio rules. Create AutoTradingService for trade execution logic, implement portfolio rule engine for trade validation, create automated order management system, implement risk management and position sizing, add comprehensive trade logging and audit trails, create automated trading scheduler and job queue, implement emergency stop mechanisms, integrate with existing RecommendationService, connect with portfolio management system, and implement real-time market data processing with WebSocket notifications.",
+    status: "TODO",
+    priority: "High",
+    epic: "E28", // Automated Trading & AI Enhancement
+    storyPoints: 21,
+    sprint: 5,
+    assignee: "Development Team",
+    progress: 0,
+    dependencies: ["S30B"],
+    createdDate: "2025-06-24",
+  },
+  {
+    id: "S30D",
+    title: "Automated Trading Frontend Interface",
+    description:
+      "Create a comprehensive frontend interface for the automated trading system, allowing users to configure trading rules, start/stop automated trading sessions per portfolio or globally, and monitor automated trading performance in real-time. Create TradingRulesManager component for rule configuration, implement rule builder with drag-and-drop interface, add rule templates for common strategies, create AutoTradingDashboard for session management, implement per-portfolio and global trading controls, add emergency stop functionality, display live trading activity feed, show real-time P&L tracking, implement trade execution notifications, and create comprehensive trading performance analytics.",
+    status: "TODO",
+    priority: "High",
+    epic: "E28", // Automated Trading & AI Enhancement
+    storyPoints: 13,
+    sprint: 6,
+    assignee: "Development Team",
+    progress: 0,
+    dependencies: ["S30C"],
+    createdDate: "2025-06-24",
   },
 ];

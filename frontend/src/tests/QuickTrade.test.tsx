@@ -1,6 +1,7 @@
 import "@testing-library/jest-dom";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, screen } from "@testing-library/react";
 import QuickTrade from "../components/QuickTrade";
+import { renderWithStoreProvider } from "./test-utils";
 
 // Mock Socket Context
 jest.mock("../context/SocketContext", () => ({
@@ -27,13 +28,13 @@ jest.mock("axios");
 
 describe("QuickTrade Component", () => {
   test("renders quick trade form", () => {
-    render(<QuickTrade />);
+    renderWithStoreProvider(<QuickTrade />);
     expect(screen.getByText("Quick Trade")).toBeInTheDocument();
     expect(screen.getByDisplayValue("Select Symbol")).toBeInTheDocument();
   });
 
   test("shows validation errors for invalid inputs", () => {
-    render(<QuickTrade />);
+    renderWithStoreProvider(<QuickTrade />);
 
     // Try to submit without selecting symbol
     const executeButton = screen.getByRole("button", { name: /BUY 0 Stock/i });
@@ -41,7 +42,7 @@ describe("QuickTrade Component", () => {
   });
 
   test("enables execute button when form is valid", () => {
-    render(<QuickTrade />);
+    renderWithStoreProvider(<QuickTrade />);
 
     // Select a stock
     const symbolSelect = screen.getByDisplayValue("Select Symbol");

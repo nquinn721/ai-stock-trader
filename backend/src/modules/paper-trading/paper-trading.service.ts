@@ -61,7 +61,27 @@ export class PaperTradingService {
     @InjectRepository(Stock)
     private stockRepository: Repository<Stock>,
     private mlService: MLService,
-  ) {}
+  ) {
+    // Initialize default portfolio after service startup
+    this.initializeService();
+  }
+
+  /**
+   * Initialize the service and ensure default portfolio exists
+   */
+  private async initializeService() {
+    try {
+      // Small delay to allow database connection to be established
+      setTimeout(async () => {
+        await this.ensureDefaultPortfolio();
+        console.log(
+          '📊 Paper trading service initialized with default portfolio',
+        );
+      }, 2000);
+    } catch (error) {
+      console.error('Error initializing paper trading service:', error);
+    }
+  }
   /**
    * Create a new portfolio with specified type
    */ async createPortfolio(
@@ -121,7 +141,28 @@ export class PaperTradingService {
     });
 
     if (!portfolio) {
-      throw new Error('Portfolio not found');
+      // Check if there are any portfolios at all
+      const portfolios = await this.getPortfolios();
+
+      if (portfolios.length === 0) {
+        // No portfolios exist, create a default one
+        console.log('📊 No portfolios found, creating default portfolio...');
+        const defaultPortfolio = await this.createPortfolio({
+          userId: 'default-user',
+          portfolioType: PortfolioType.SMALL_ACCOUNT_BASIC,
+        });
+        console.log(
+          `✅ Created default portfolio with ID: ${defaultPortfolio.id}`,
+        );
+        return defaultPortfolio;
+      } else {
+        // Portfolios exist but requested ID not found, return the first active portfolio
+        console.log(
+          `⚠️ Portfolio ID ${id} not found, returning first available portfolio`,
+        );
+        await this.updatePositionValues(portfolios[0]);
+        return portfolios[0];
+      }
     }
 
     // Calculate current values for positions
@@ -1138,5 +1179,26 @@ export class PaperTradingService {
         current.unrealizedReturn < prev.unrealizedReturn ? current : prev,
       );
     }
+  }
+
+  /**
+   * Ensure there's always at least one default portfolio available
+   */
+  async ensureDefaultPortfolio(): Promise<Portfolio> {
+    const portfolios = await this.getPortfolios();
+
+    if (portfolios.length === 0) {
+      console.log('📊 No portfolios found, creating default portfolio...');
+      const defaultPortfolio = await this.createPortfolio({
+        userId: 'default-user',
+        portfolioType: PortfolioType.SMALL_ACCOUNT_BASIC,
+      });
+      console.log(
+        `✅ Created default portfolio with ID: ${defaultPortfolio.id}`,
+      );
+      return defaultPortfolio;
+    }
+
+    return portfolios[0];
   }
 }

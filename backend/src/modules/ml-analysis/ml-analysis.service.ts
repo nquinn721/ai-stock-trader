@@ -101,9 +101,9 @@ export class MLAnalysisService {
       return {
         confidence: enhancedConfidence,
         direction:
-          finalPrediction > 0.15
+          finalPrediction > 0.25
             ? 'bullish'
-            : finalPrediction < -0.15
+            : finalPrediction < -0.25
               ? 'bearish'
               : 'neutral',
         probability: Math.abs(finalPrediction),
@@ -1265,15 +1265,35 @@ export class MLAnalysisService {
     xgboost: number;
     rf: number;
   } {
-    // Simulate dynamic weights based on recent model performance
-    // In production, this would use actual performance metrics
-    const volatilityFactor = Math.sin(Date.now() / 300000); // 5-minute cycles
+    // More balanced dynamic weights based on time and market conditions
+    const timeComponent = Date.now() / 600000; // 10-minute cycles
+    const marketVolatility =
+      Math.sin(timeComponent) * Math.cos(timeComponent * 0.7);
+
+    // Ensure weights are more balanced and sum to 1
+    const baseWeights = {
+      cnn: 0.25,
+      lstm: 0.25,
+      xgboost: 0.25,
+      rf: 0.25,
+    };
+
+    // Small adjustments based on simulated market conditions
+    const adjustments = {
+      cnn: marketVolatility * 0.05,
+      lstm: -marketVolatility * 0.03,
+      xgboost: Math.abs(marketVolatility) * 0.02,
+      rf: (1 - Math.abs(marketVolatility)) * 0.02,
+    };
 
     return {
-      cnn: 0.3 + volatilityFactor * 0.1,
-      lstm: 0.35 - volatilityFactor * 0.05,
-      xgboost: 0.2 + Math.abs(volatilityFactor) * 0.1,
-      rf: 0.15 + (1 - Math.abs(volatilityFactor)) * 0.1,
+      cnn: Math.max(0.15, Math.min(0.35, baseWeights.cnn + adjustments.cnn)),
+      lstm: Math.max(0.15, Math.min(0.35, baseWeights.lstm + adjustments.lstm)),
+      xgboost: Math.max(
+        0.15,
+        Math.min(0.35, baseWeights.xgboost + adjustments.xgboost),
+      ),
+      rf: Math.max(0.15, Math.min(0.35, baseWeights.rf + adjustments.rf)),
     };
   }
 
@@ -1292,12 +1312,14 @@ export class MLAnalysisService {
     baseOutput: number,
     attentionWeights: number[],
   ): number {
-    // Apply attention-weighted adjustment
+    // Apply more balanced attention-weighted adjustment
     const attentionSum = attentionWeights.reduce(
       (sum, weight) => sum + weight,
       0,
     );
-    const attentionBoost = attentionSum > 0.5 ? 0.2 : -0.1; // High attention = boost
+    // More neutral attention boost - doesn't favor bullish signals
+    const attentionBoost =
+      attentionSum > 0.6 ? 0.1 : attentionSum < 0.4 ? -0.1 : 0;
 
     return baseOutput + attentionBoost * Math.abs(baseOutput);
   }

@@ -1,28 +1,11 @@
 import { makeAutoObservable, runInAction } from "mobx";
+import { TradingSignal as BaseTradingSignal, Stock } from "../types";
 import { apiStore } from "./ApiStore";
 import { webSocketStore } from "./WebSocketStore";
 
-export interface Stock {
-  id: number;
-  symbol: string;
-  name: string;
-  currentPrice: number;
-  changeAmount: number;
-  changePercent: number;
-  volume: number;
-  marketCap: number;
-  peRatio: number;
-  updatedAt: string;
-}
-
-export interface TradingSignal {
-  id: number;
-  symbol: string;
-  signal: "buy" | "sell" | "hold";
-  confidence: number;
-  reasoning: string;
-  isActive: boolean;
-  createdAt: string;
+// Extended TradingSignal interface that includes symbol for easier lookup
+export interface TradingSignal extends BaseTradingSignal {
+  symbol?: string; // Make symbol optional to extend the base interface
 }
 
 export class StockStore {
@@ -98,23 +81,32 @@ export class StockStore {
       >("/stocks/with-signals/all");
 
       runInAction(() => {
+        // Map the API response to our Stock interface
         this.stocks = stocksWithSignals.map((stock) => ({
           id: stock.id,
           symbol: stock.symbol,
           name: stock.name,
+          sector: stock.sector || "",
+          description: stock.description || "",
           currentPrice: stock.currentPrice,
-          changeAmount: stock.changeAmount,
+          previousClose: stock.previousClose || stock.currentPrice,
           changePercent: stock.changePercent,
           volume: stock.volume,
           marketCap: stock.marketCap,
-          peRatio: stock.peRatio,
+          createdAt: stock.createdAt || stock.updatedAt,
           updatedAt: stock.updatedAt,
+          sentiment: stock.sentiment,
+          recentNews: stock.recentNews,
+          breakoutStrategy: stock.breakoutStrategy,
         }));
 
-        // Extract trading signals
+        // Extract trading signals and add symbol for easier lookup
         const signals = stocksWithSignals
           .filter((stock) => stock.tradingSignal)
-          .map((stock) => stock.tradingSignal!);
+          .map((stock) => ({
+            ...stock.tradingSignal!,
+            symbol: stock.symbol, // Add symbol for easier lookup
+          }));
 
         this.tradingSignals = signals;
         this.lastUpdated = new Date();
@@ -145,6 +137,42 @@ export class StockStore {
             ? error.message
             : "Failed to fetch trading signals";
       });
+    }
+  }
+
+  async fetchStockDetails(symbol: string): Promise<Stock | null> {
+    try {
+      const stockData = await apiStore.get<Stock>(`/stocks/${symbol}`);
+      return stockData;
+    } catch (error) {
+      runInAction(() => {
+        this.error =
+          error instanceof Error
+            ? error.message
+            : `Failed to fetch details for ${symbol}`;
+      });
+      return null;
+    }
+  }
+
+  async fetchStockHistory(
+    symbol: string,
+    period: string = "1d",
+    interval: string = "5m"
+  ): Promise<any[]> {
+    try {
+      const historyData = await apiStore.get<any[]>(
+        `/stocks/${symbol}/history?period=${period}&interval=${interval}`
+      );
+      return historyData || [];
+    } catch (error) {
+      runInAction(() => {
+        this.error =
+          error instanceof Error
+            ? error.message
+            : `Failed to fetch history for ${symbol}`;
+      });
+      return [];
     }
   }
 
@@ -210,6 +238,18 @@ export class StockStore {
 
   get totalMarketCap(): number {
     return this.stocks.reduce((sum, stock) => sum + stock.marketCap, 0);
+  }
+
+  get stocksWithSignals(): (Stock & { tradingSignal: TradingSignal | null })[] {
+    return this.stocks.map((stock) => {
+      const signal = this.tradingSignals.find(
+        (signal) => signal.symbol === stock.symbol && signal.isActive
+      );
+      return {
+        ...stock,
+        tradingSignal: signal || null,
+      };
+    });
   }
 }
 

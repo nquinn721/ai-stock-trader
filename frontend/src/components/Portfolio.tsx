@@ -1,7 +1,12 @@
+import {
+  faArrowLeft,
+  faBroadcastTower,
+} from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import axios from "axios";
+import { observer } from "mobx-react-lite";
 import React, { useEffect, useState } from "react";
 import { useSocket } from "../context/SocketContext";
+import { usePortfolioStore } from "../stores/StoreContext";
 import { CreateTradeRequest, Portfolio } from "../types";
 import OrderManagement from "./OrderManagement";
 import "./Portfolio.css";
@@ -14,10 +19,11 @@ interface PortfolioProps {
   onBack: () => void;
 }
 
-const PortfolioComponent: React.FC<PortfolioProps> = ({
+const PortfolioComponent: React.FC<PortfolioProps> = observer(({
   portfolioId,
   onBack,
 }) => {
+  const portfolioStore = usePortfolioStore();
   const {
     stocks,
     subscribeToPortfolio,
@@ -95,10 +101,8 @@ const PortfolioComponent: React.FC<PortfolioProps> = ({
   const fetchPortfolio = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(
-        `http://localhost:8000/paper-trading/portfolios/${portfolioId}`
-      );
-      setPortfolio(response.data);
+      const data = await portfolioStore.fetchPortfolioById(portfolioId);
+      setPortfolio(data);
     } catch (error) {
       console.error("Error fetching portfolio:", error);
     } finally {
@@ -142,7 +146,7 @@ const PortfolioComponent: React.FC<PortfolioProps> = ({
         quantity: parseInt(tradeForm.quantity),
       };
 
-      await axios.post("http://localhost:8000/paper-trading/trade", tradeData);
+      await portfolioStore.executeTrade(tradeData);
 
       // Reset form and refresh portfolio
       setTradeForm({ symbol: "", type: "buy", quantity: "" });
@@ -190,13 +194,13 @@ const PortfolioComponent: React.FC<PortfolioProps> = ({
       {" "}
       <div className="portfolio-header">
         <button className="back-button" onClick={onBack}>
-          <FontAwesomeIcon icon="arrow-left" /> Back to Portfolios
+          <FontAwesomeIcon icon={faArrowLeft} /> Back to Portfolios
         </button>
         <div className="header-content">
           <h1>{portfolio.name}</h1>
           {portfolioUpdates.get(portfolioId) && (
             <span className="real-time-indicator">
-              <FontAwesomeIcon icon="broadcast-tower" className="pulse" />
+              <FontAwesomeIcon icon={faBroadcastTower} className="pulse" />
               Live
             </span>
           )}
@@ -438,6 +442,6 @@ const PortfolioComponent: React.FC<PortfolioProps> = ({
       )}
     </div>
   );
-};
+});
 
 export default PortfolioComponent;

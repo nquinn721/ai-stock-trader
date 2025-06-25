@@ -1,31 +1,6 @@
 import { makeAutoObservable, runInAction } from "mobx";
 import { ApiStore } from "./ApiStore";
-
-export interface Position {
-  id: number;
-  symbol: string;
-  quantity: number;
-  averagePrice: number;
-  currentPrice: number;
-  marketValue: number;
-  unrealizedPnl: number;
-  unrealizedPnlPercent: number;
-}
-
-export interface Portfolio {
-  id: number;
-  name: string;
-  initialCash: number;
-  currentCash: number;
-  totalValue: number;
-  totalPnL: number;
-  totalReturn: number;
-  isActive: boolean;
-  positions: Position[];
-  trades: any[];
-  createdAt: string;
-  updatedAt: string;
-}
+import { Portfolio, Position } from "../types";
 
 export interface PerformanceData {
   date: string;
@@ -39,6 +14,7 @@ export interface PerformanceData {
 
 export class PortfolioStore {
   portfolio: Portfolio | null = null;
+  portfolios: Portfolio[] = []; // Add portfolios array
   positions: Position[] = [];
   performanceHistory: PerformanceData[] = [];
   isLoading = false;
@@ -67,6 +43,30 @@ export class PortfolioStore {
         this.error = error.message || "Failed to fetch portfolio";
         this.isLoading = false;
       });
+    }
+  }
+
+  async fetchPortfolioById(portfolioId: number) {
+    runInAction(() => {
+      this.isLoading = true;
+      this.error = null;
+    });
+    try {
+      const response = (await this.apiStore.get(
+        `/paper-trading/portfolios/${portfolioId}`
+      )) as Portfolio;
+      runInAction(() => {
+        this.portfolio = response;
+        this.positions = response.positions || [];
+        this.isLoading = false;
+      });
+      return response;
+    } catch (error: any) {
+      runInAction(() => {
+        this.error = error.message || "Failed to fetch portfolio";
+        this.isLoading = false;
+      });
+      throw error;
     }
   }
   async fetchPositions(userId: number) {
@@ -112,22 +112,95 @@ export class PortfolioStore {
     }
   }
 
+  async fetchPortfolioPerformance(portfolioId: number) {
+    try {
+      const response = await this.apiStore.get(
+        `/paper-trading/portfolios/${portfolioId}/performance`
+      ) as any;
+      return response;
+    } catch (error: any) {
+      throw new Error(error.message || "Failed to fetch portfolio performance");
+    }
+  }
+
+  async fetchPortfolios() {
+    runInAction(() => {
+      this.isLoading = true;
+      this.error = null;
+    });
+    try {
+      const response = await this.apiStore.get('/paper-trading/portfolios') as Portfolio[];
+      runInAction(() => {
+        this.portfolios = response || [];
+        this.isLoading = false;
+      });
+    } catch (error: any) {
+      runInAction(() => {
+        this.error = error.message || "Failed to fetch portfolios";
+        this.isLoading = false;
+      });
+    }
+  }
+
+  async createPortfolio(portfolioData: { name: string; initialCash: number }) {
+    runInAction(() => {
+      this.isLoading = true;
+      this.error = null;
+    });
+    try {
+      const response = await this.apiStore.post('/paper-trading/portfolios', portfolioData) as Portfolio;
+      runInAction(() => {
+        this.isLoading = false;
+      });
+      // Refresh portfolios list
+      await this.fetchPortfolios();
+      return response;
+    } catch (error: any) {
+      runInAction(() => {
+        this.error = error.message || "Failed to create portfolio";
+        this.isLoading = false;
+      });
+      throw error;
+    }
+  }
+
+  async executeTrade(tradeData: any) {
+    runInAction(() => {
+      this.isLoading = true;
+      this.error = null;
+    });
+    try {
+      const response = await this.apiStore.post('/paper-trading/trade', tradeData);
+      runInAction(() => {
+        this.isLoading = false;
+      });
+      return response;
+    } catch (error: any) {
+      runInAction(() => {
+        this.error = error.message || "Failed to execute trade";
+        this.isLoading = false;
+      });
+      throw error;
+    }
+  }
+
   updatePositionPrice(symbol: string, price: number) {
     runInAction(() => {
       const position = this.positions.find((p) => p.symbol === symbol);
       if (position) {
-        position.currentPrice = price;
-        position.marketValue = position.quantity * price;
-        position.unrealizedPnl =
-          position.marketValue - position.quantity * position.averagePrice;
-        position.unrealizedPnlPercent =
-          (position.unrealizedPnl /
+        // Add currentPrice to position (extend interface)
+        (position as any).currentPrice = price;
+        position.currentValue = position.quantity * price;
+        position.unrealizedPnL =
+          position.currentValue - position.quantity * position.averagePrice;
+        (position as any).unrealizedPnlPercent =
+          (position.unrealizedPnL /
             (position.quantity * position.averagePrice)) *
           100;
       } // Update portfolio totals
       if (this.portfolio) {
         const totalEquity = this.positions.reduce(
-          (sum, pos) => sum + pos.marketValue,
+          (sum, pos) => sum + pos.currentValue,
           0
         );
         this.portfolio.totalValue = this.portfolio.currentCash + totalEquity;
@@ -143,13 +216,13 @@ export class PortfolioStore {
   }
 
   get totalEquity() {
-    return this.positions.reduce((sum, pos) => sum + pos.marketValue, 0);
+    return this.positions.reduce((sum, pos) => sum + pos.currentValue, 0);
   }
 
   get dayChange() {
     // Calculate day change based on positions
     return this.positions.reduce((sum, pos) => {
-      const dayChange = (pos.currentPrice - pos.averagePrice) * pos.quantity;
+      const dayChange = ((pos as any).currentPrice - pos.averagePrice) * pos.quantity;
       return sum + dayChange;
     }, 0);
   }
@@ -188,6 +261,7 @@ export class PortfolioStore {
   reset() {
     runInAction(() => {
       this.portfolio = null;
+      this.portfolios = []; // Reset portfolios array
       this.positions = [];
       this.performanceHistory = [];
       this.isLoading = false;

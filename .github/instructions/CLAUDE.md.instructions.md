@@ -12,15 +12,12 @@ This document provides quick reference guidelines for AI assistants working on t
 
 ⚠️ **IMPORTANT**: This is NOT a Python project - it's TypeScript/JavaScript with NestJS and React.
 
-⚠️ **CRITICAL**: When using run_in_terminal tool, NEVER open new terminals. Always use the existing terminal sessions. Commands should run in the current working directory context.
-
 ### Environment Requirements
 
-- **Shell**: PowerShell commands only
 - **Project Root**: `Stock-Trading-App-Nest`
-- **Backend Port**: 8000 (NestJS API server)
-- **Frontend Port**: 3000 (React development server)
-- **Project Management**: 5000 (React dashboard for project tracking)
+- ⚠️ **IMPORTANT** **Backend Port**: 8000 (NestJS API server)
+- ⚠️ **IMPORTANT** **Frontend Port**: 3000 (React development server)
+- ⚠️ **IMPORTANT** **Project Management Port**: 5000 (React dashboard for project tracking)
 
 ### Core Principles
 
@@ -38,17 +35,9 @@ This document provides quick reference guidelines for AI assistants working on t
 
 **After making code changes, run these tests in order:**
 
-```powershell
-# 1. Quick unit tests (during development)
-.\quick-test.ps1
-
-# 2. Full test suite (before committing)
-.\run-all-tests.ps1
-
-# 3. Manual API testing
-curl http://localhost:8000/stocks
-curl http://localhost:8000/paper-trading/portfolios
-```
+- Quick unit tests (during development)
+- Full test suite (before committing)
+- Manual API testing to verify endpoints still work
 
 ### Data Flow Architecture
 
@@ -82,70 +71,42 @@ curl http://localhost:8000/paper-trading/portfolios
 - [ADR-008: GitHub Workflow Standards](../../docs/adrs/008-github-workflow-standards.md)
 - [ADR-009: WebSocket Architecture](../../docs/adrs/009-websocket-architecture.md)
 
-## Pre-Approved Commands
+## Pre-Approved Tools
 
-The following PowerShell commands are always permitted:
+Use the available VS Code tools and extensions for all development tasks:
 
-```powershell
-Remove-Item, Get-ChildItem, Move-Item, Copy-Item, cd, netstat, taskkill, curl, Invoke-WebRequest, Get-Process
-```
+- File editing tools (create_file, replace_string_in_file, insert_edit_into_file)
+- File reading tools (read_file, list_dir, file_search)
+- Error checking tools (get_errors)
+- Testing tools (run_vs_code_task)
+- Git tools (get_changed_files)
 
-## Quick Commands
+## Quick Development Tasks
 
-```powershell
-# Navigate to project
-cd c:\Projects\Stock-Trading-App-Nest
+Use VS Code tools for common development tasks:
 
-# Build backend
-cd backend; npm run build
-
-# Start backend (background)
-cd backend; npm run start:dev
-
-# Start frontend (background)
-cd frontend; npm start
-
-# Run tests after code changes
-.\quick-test.ps1          # Unit tests only
-.\run-all-tests.ps1       # Complete test suite
-
-# Check port usage (backend on 8000, frontend on 3000, project mgmt on 5000)
-netstat -ano | findstr :8000
-netstat -ano | findstr :3000
-netstat -ano | findstr :5000
-
-# Test API endpoints
-curl http://localhost:8000/stocks/with-signals/all
-curl http://localhost:8000/paper-trading/portfolios
-
-# Start project management dashboard
-cd project-management; npm start
-
-# Kill hanging processes
-taskkill /F /PID <process_id>
-```
+- Navigate to project using file_search and read_file tools
+- Build backend using run_vs_code_task
+- Start backend development server using run_vs_code_task
+- Start frontend development server using run_vs_code_task
+- Run tests using quick-test and run-all-tests tasks
+- Check for TypeScript errors using get_errors tool
+- Test API endpoints by checking backend logs
+- Start project management dashboard using run_vs_code_task
 
 ## Development Workflow Standards
 
 ⚠️ **CRITICAL: PERSISTENT SERVER SETUP**
 
-⚠️ **CRITICAL: NO NEW TERMINALS** - When using run_in_terminal tool, NEVER open new terminal windows or sessions. Always use the existing terminal context provided by the tool. Commands should execute in the current working directory without spawning new processes.
+**Maintain development servers using VS Code tasks:**
 
-**Maintain two persistent terminal sessions:**
+### **Backend Server (Port 8000)**
 
-### **Terminal 1 - Backend Server (Port 8000)**
+Use run_vs_code_task with backend development server task
 
-```powershell
-cd c:\Projects\Stock-Trading-App-Nest\backend
-npm run start:dev
-```
+### **Frontend Client (Port 3000)**
 
-### **Terminal 2 - Frontend Client (Port 3000)**
-
-```powershell
-cd c:\Projects\Stock-Trading-App-Nest\frontend
-npm start
-```
+Use run_vs_code_task with frontend development server task
 
 ### **Hot Reload Benefits:**
 
@@ -164,10 +125,10 @@ npm start
 
 ### **Development Best Practices:**
 
-- ✅ Keep both terminals visible while coding
-- ✅ Monitor console outputs for errors
+- ✅ Monitor development servers using VS Code tasks
+- ✅ Monitor console outputs for errors in task output
 - ✅ Use browser dev tools for frontend debugging
-- ✅ Check terminal logs for backend issues
+- ✅ Check backend logs through task monitoring
 - ✅ Let hot reload handle most changes automatically
 - ❌ Don't restart servers unless absolutely necessary
 
@@ -179,17 +140,14 @@ npm start
 
 ### **Project Management Dashboard (Port 5000)**
 
-```powershell
-cd c:\Projects\Stock-Trading-App-Nest\project-management
-npm start
-```
+Use run_vs_code_task with project management server task
 
 ### **System Overview:**
 
 - **Code-based Management**: All project data stored in markdown files
 - **Version Controlled**: Full Git integration for tracking changes
 - **React Dashboard**: Material-UI dark theme on port 5000
-- **Automation**: PowerShell scripts for story/sprint management
+- **Automation**: VS Code tasks for story/sprint management
 
 ### **Current Project Status:**
 
@@ -206,7 +164,7 @@ project-management/
 ├── epics/             # Epic markdown files
 ├── stories/           # Story markdown files
 ├── sprints/           # Sprint markdown files
-├── scripts/           # PowerShell automation
+├── scripts/           # Task automation
 ├── backlog.md         # Product backlog
 ├── roadmap.md         # High-level roadmap
 ├── progress.md        # Progress tracking
@@ -223,7 +181,7 @@ project-management/
 - **Multi-tab Interface**: Stories, Epics, Sprints, Actions
 - **Real-time Data**: Reads from markdown files
 - **Progress Tracking**: Visual sprint progress and metrics
-- **Automated Reporting**: PowerShell scripts for story creation
+- **Automated Reporting**: VS Code tasks for story creation
 
 ## Ticket Management Processes
 
@@ -242,82 +200,46 @@ project-management/
 
 #### **A. Write New Tests**
 
-```powershell
-# Add unit tests for new code
-# Backend: Create/update .spec.ts files in same directory
-# Frontend: Create/update .test.tsx files for components
-```
+Add unit tests for new code:
+
+- Backend: Create/update .spec.ts files in same directory
+- Frontend: Create/update .test.tsx files for components
 
 #### **B. Write Regression Tests**
 
-```powershell
-# Add integration tests to prevent future breaks
-# E2E tests for critical user workflows affected
-# API endpoint tests for backend changes
-```
+Add integration tests to prevent future breaks:
+
+- E2E tests for critical user workflows affected
+- API endpoint tests for backend changes
 
 #### **C. Achieve 90%+ Test Coverage**
 
-```powershell
-# Check current coverage
-npm run test:cov
+Check current coverage using VS Code tasks:
 
-# Target: 90% or higher coverage for new code
-# Backend: Unit tests for services, controllers, utilities
-# Frontend: Component tests, hook tests, utility tests
-```
+- Target: 90% or higher coverage for new code
+- Backend: Unit tests for services, controllers, utilities
+- Frontend: Component tests, hook tests, utility tests
 
 ### **Step 3: Run Full Test Suite**
 
-```powershell
-# Navigate to project root
-cd c:\Projects\Stock-Trading-App-Nest
+Use VS Code tasks to run tests:
 
-# 1. Quick unit tests (verify new code works)
-.\quick-test.ps1
-
-# 2. Full test suite (ensure no regressions)
-.\run-all-tests.ps1
-
-# 3. Manual API verification (critical endpoints)
-curl http://localhost:8000/stocks/with-signals/all
-curl http://localhost:8000/paper-trading/portfolios
-
-# 4. Check test coverage
-cd backend; npm run test:cov
-cd ../frontend; npm run test -- --coverage
-```
+1. Quick unit tests (verify new code works)
+2. Full test suite (ensure no regressions)
+3. Manual API verification (critical endpoints)
+4. Check test coverage using available tasks
 
 ### **Step 4: Code Quality Verification**
 
-```powershell
-# Check for TypeScript errors
-cd backend; npm run build
-cd ../frontend; npm run build
+Check for TypeScript errors using get_errors tool:
 
-# Verify no console errors in browser
-# Check both applications are still running properly
-# Test WebSocket connections remain functional
-```
+- Verify no console errors in browser
+- Check both applications are still running properly
+- Test WebSocket connections remain functional
 
 ### **Step 5: Git Commit and Push**
 
-```powershell
-# Stage changes
-git add .
-
-# Commit with descriptive message
-git commit -m "[Story ID] Brief description
-
-- Feature/fix implemented
-- Tests added (unit + regression)
-- Coverage: X% (target: 90%+)
-- All tests passing
-- No API breaks confirmed"
-
-# Push to repository
-git push origin main
-```
+Use Git tools to stage and commit changes with descriptive message format.
 
 ### **Step 6: Update Project Management**
 
@@ -448,16 +370,7 @@ const mockStocks = [{ id: 1, symbol: "FAKE", price: 100 }];
 
 ### **Before modifying API-related code:**
 
-```powershell
-# Test Yahoo Finance API
-curl "http://localhost:8000/stocks/with-signals/all"
-
-# Test News API endpoints
-curl "http://localhost:8000/news/AAPL"
-
-# Verify WebSocket data flow
-# Check browser console for real-time updates
-```
+Test API endpoints using available tools and verify WebSocket data flow by checking browser console for real-time updates.
 
 ### **API Integration Files to Handle Carefully:**
 
@@ -475,13 +388,13 @@ curl "http://localhost:8000/news/AAPL"
 
 ## Emergency Procedures
 
-1. **Server hanging**: Kill with `taskkill /F /IM node.exe`
-2. **Port conflicts**: Check with `netstat`, kill specific PID
-3. **Build errors**: Check TypeScript errors, fix imports/types
-4. **File organization**: Move to proper directories, clean up root
-5. **Test failures**: Run `.\quick-test.ps1` to identify issues
+1. **Server hanging**: Use VS Code task management to restart servers
+2. **Port conflicts**: Check using available networking tools
+3. **Build errors**: Check TypeScript errors using get_errors tool, fix imports/types
+4. **File organization**: Move to proper directories using file tools, clean up root
+5. **Test failures**: Run quick-test task to identify issues
 6. **API errors**: Check backend logs and Yahoo Finance API status
-7. **WebSocket issues**: Restart both backend and frontend
+7. **WebSocket issues**: Restart both backend and frontend using tasks
 8. **Performance issues**: Check cron job frequency and API timeouts
 
 ## Current Architecture Status
@@ -499,7 +412,7 @@ curl "http://localhost:8000/news/AAPL"
 - Frontend component tests with proper mocking
 - Playwright E2E tests for user workflows
 - API integration tests for all endpoints
-- Automated test runners (`quick-test.ps1`, `run-all-tests.ps1`)
+- Automated test runners (quick-test and run-all-tests tasks)
 
 ⚠️ **Performance Optimizations:**
 

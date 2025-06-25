@@ -118,7 +118,7 @@ const StockAutocomplete: React.FC<StockAutocompleteProps> = ({
       const highlighted = dropdownRef.current.children[
         highlightedIndex
       ] as HTMLElement;
-      if (highlighted) {
+      if (highlighted && highlighted.scrollIntoView) {
         highlighted.scrollIntoView({
           block: "nearest",
           behavior: "smooth",
