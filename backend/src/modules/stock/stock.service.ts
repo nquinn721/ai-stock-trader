@@ -37,6 +37,11 @@ export class StockService {
     console.log(
       '📊 Stock service initialized - will fetch live data from Yahoo Finance',
     );
+
+    // Fetch initial stock prices after a short delay to ensure all services are ready
+    setTimeout(() => {
+      this.performInitialUpdate();
+    }, 5000); // 5 second delay
   }
   private initializeMockData() {
     // Initialize with popular stock symbols for live data tracking
@@ -426,11 +431,6 @@ export class StockService {
     const stocks = this.mockStocks; // Get all tracked stocks
     const connectedClients = this.websocketGateway.getConnectedClientsCount();
 
-    if (connectedClients === 0) {
-      console.log('⏸️ No clients connected, skipping price update');
-      return;
-    }
-
     console.log(
       `🔄 Updating live prices for ${stocks.length} stocks (${connectedClients} clients connected)...`,
     );
@@ -447,11 +447,15 @@ export class StockService {
       }
     }
 
-    // Broadcast all updated stocks to clients via WebSocket
-    if (successCount > 0) {
+    // Broadcast all updated stocks to clients via WebSocket (only if there are clients)
+    if (successCount > 0 && connectedClients > 0) {
       await this.websocketGateway.broadcastAllStockUpdates();
       console.log(
         `✅ Updated ${successCount}/${stocks.length} stocks and broadcasted to ${connectedClients} clients`,
+      );
+    } else if (successCount > 0) {
+      console.log(
+        `✅ Updated ${successCount}/${stocks.length} stocks (no clients to broadcast to)`,
       );
     } else {
       console.log('⚠️ No stocks were successfully updated');
@@ -1068,6 +1072,24 @@ export class StockService {
         error: `Failed to analyze patterns: ${error.message}`,
         patternRecognition: null,
       };
+    }
+  }
+
+  /**
+   * Perform initial stock price update to ensure data is available immediately
+   */
+  async performInitialUpdate(): Promise<void> {
+    console.log('🚀 Performing initial stock price update...');
+    try {
+      await this.updateAllStockPrices();
+      const stocksWithPrices = this.mockStocks.filter(
+        (stock) => stock.currentPrice > 0,
+      );
+      console.log(
+        `✅ Initial update complete: ${stocksWithPrices.length}/${this.mockStocks.length} stocks have current prices`,
+      );
+    } catch (error) {
+      console.error('❌ Error during initial stock price update:', error);
     }
   }
 }
