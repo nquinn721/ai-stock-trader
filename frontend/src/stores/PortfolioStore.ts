@@ -1,6 +1,6 @@
 import { makeAutoObservable, runInAction } from "mobx";
-import { ApiStore } from "./ApiStore";
 import { Portfolio, Position } from "../types";
+import { ApiStore } from "./ApiStore";
 
 export interface PerformanceData {
   date: string;
@@ -36,12 +36,24 @@ export class PortfolioStore {
     return this.portfolios.length > 0 ? this.portfolios[0] : null;
   }
 
+  // Computed properties for portfolio metrics
+  get totalReturn(): number {
+    const value = this.currentPortfolio?.totalPnL;
+    return typeof value === "number" && !isNaN(value) ? value : 0;
+  }
+
+  get totalReturnPercent(): number {
+    const value = this.currentPortfolio?.totalReturn;
+    return typeof value === "number" && !isNaN(value) ? value : 0;
+  }
+
   // Set the selected portfolio
   setSelectedPortfolio(portfolioId: number) {
     runInAction(() => {
       this.selectedPortfolioId = portfolioId;
       // Update the current portfolio object
-      this.portfolio = this.portfolios.find((p) => p.id === portfolioId) || null;
+      this.portfolio =
+        this.portfolios.find((p) => p.id === portfolioId) || null;
     });
   }
 
@@ -55,7 +67,9 @@ export class PortfolioStore {
         await this.fetchPortfolioById(this.portfolios[0].id);
       } else {
         // No portfolios exist, the backend will create a default one
-        console.log("No portfolios found, backend will create default portfolio");
+        console.log(
+          "No portfolios found, backend will create default portfolio"
+        );
       }
     } catch (error) {
       console.error("Error initializing portfolio:", error);
@@ -112,34 +126,48 @@ export class PortfolioStore {
     await this.fetchPortfolio(userId);
   }
 
-  async fetchPerformanceHistory(userId: number, period: string = "1M") {
+  async fetchPerformanceHistory(portfolioId: number, period: string = "1M") {
     runInAction(() => {
       this.isLoading = true;
       this.error = null;
     });
     try {
       const response = (await this.apiStore.get(
-        `/paper-trading/portfolios/${userId}/performance?period=${period}`
+        `/paper-trading/portfolios/${portfolioId}/performance?period=${period}`
       )) as any;
       runInAction(() => {
+        // Handle different possible response structures
+        let performanceData = [];
+        if (Array.isArray(response)) {
+          // Direct array response
+          performanceData = response;
+        } else if (
+          response.performance &&
+          Array.isArray(response.performance)
+        ) {
+          // Wrapped in performance property
+          performanceData = response.performance;
+        } else if (response.data && Array.isArray(response.data)) {
+          // Wrapped in data property
+          performanceData = response.data;
+        }
+
         // Transform the performance data to ensure numbers are numbers
-        this.performanceHistory = (response.performance || []).map(
-          (point: any) => ({
-            date: point.date,
-            timestamp: point.timestamp,
-            totalValue:
-              typeof point.totalValue === "string"
-                ? parseFloat(point.totalValue)
-                : point.totalValue,
-            cash:
-              typeof point.cash === "string"
-                ? parseFloat(point.cash)
-                : point.cash,
-            investedValue: point.investedValue,
-            dayChange: point.dayChange,
-            dayChangePercent: point.dayChangePercent,
-          })
-        );
+        this.performanceHistory = performanceData.map((point: any) => ({
+          date: point.date,
+          timestamp: point.timestamp,
+          totalValue:
+            typeof point.totalValue === "string"
+              ? parseFloat(point.totalValue)
+              : point.totalValue,
+          cash:
+            typeof point.cash === "string"
+              ? parseFloat(point.cash)
+              : point.cash,
+          investedValue: point.investedValue,
+          dayChange: point.dayChange,
+          dayChangePercent: point.dayChangePercent,
+        }));
         this.isLoading = false;
       });
     } catch (error: any) {
@@ -152,9 +180,9 @@ export class PortfolioStore {
 
   async fetchPortfolioPerformance(portfolioId: number) {
     try {
-      const response = await this.apiStore.get(
+      const response = (await this.apiStore.get(
         `/paper-trading/portfolios/${portfolioId}/performance`
-      ) as any;
+      )) as any;
       return response;
     } catch (error: any) {
       throw new Error(error.message || "Failed to fetch portfolio performance");
@@ -167,9 +195,24 @@ export class PortfolioStore {
       this.error = null;
     });
     try {
-      const response = await this.apiStore.get('/paper-trading/portfolios') as Portfolio[];
+      const response = (await this.apiStore.get(
+        "/paper-trading/portfolios"
+      )) as any;
       runInAction(() => {
-        this.portfolios = response || [];
+        // Handle different possible response structures
+        let portfoliosData = [];
+        if (Array.isArray(response)) {
+          // Direct array response
+          portfoliosData = response;
+        } else if (response.data && Array.isArray(response.data)) {
+          // Wrapped in data property
+          portfoliosData = response.data;
+        } else if (response.portfolios && Array.isArray(response.portfolios)) {
+          // Wrapped in portfolios property
+          portfoliosData = response.portfolios;
+        }
+
+        this.portfolios = portfoliosData;
         this.isLoading = false;
       });
     } catch (error: any) {
@@ -186,7 +229,10 @@ export class PortfolioStore {
       this.error = null;
     });
     try {
-      const response = await this.apiStore.post('/paper-trading/portfolios', portfolioData) as Portfolio;
+      const response = (await this.apiStore.post(
+        "/paper-trading/portfolios",
+        portfolioData
+      )) as Portfolio;
       runInAction(() => {
         this.isLoading = false;
       });
@@ -208,7 +254,10 @@ export class PortfolioStore {
       this.error = null;
     });
     try {
-      const response = await this.apiStore.post('/paper-trading/trade', tradeData);
+      const response = await this.apiStore.post(
+        "/paper-trading/trade",
+        tradeData
+      );
       runInAction(() => {
         this.isLoading = false;
       });
@@ -232,7 +281,7 @@ export class PortfolioStore {
       runInAction(() => {
         this.isLoading = false;
         // Remove from local portfolios array
-        this.portfolios = this.portfolios.filter(p => p.id !== portfolioId);
+        this.portfolios = this.portfolios.filter((p) => p.id !== portfolioId);
       });
     } catch (error: any) {
       runInAction(() => {
@@ -267,40 +316,70 @@ export class PortfolioStore {
     });
   }
 
-  get totalPortfolioValue() {
-    return this.portfolio?.totalValue || 0;
-  }
-  get totalCash() {
-    return this.portfolio?.currentCash || 0;
+  get totalPortfolioValue(): number {
+    const value = this.portfolio?.totalValue;
+    return typeof value === "number" && !isNaN(value) ? value : 0;
   }
 
-  get totalEquity() {
-    return this.positions.reduce((sum, pos) => sum + pos.currentValue, 0);
+  get totalCash(): number {
+    const value = this.portfolio?.currentCash;
+    return typeof value === "number" && !isNaN(value) ? value : 0;
   }
 
-  get dayChange() {
-    // Calculate day change based on positions
+  get totalEquity(): number {
     return this.positions.reduce((sum, pos) => {
-      const dayChange = ((pos as any).currentPrice - pos.averagePrice) * pos.quantity;
-      return sum + dayChange;
+      const currentValue =
+        typeof pos.currentValue === "number" && !isNaN(pos.currentValue)
+          ? pos.currentValue
+          : 0;
+      return sum + currentValue;
     }, 0);
   }
 
-  get dayChangePercent() {
-    const totalInvested = this.positions.reduce(
-      (sum, pos) => sum + pos.averagePrice * pos.quantity,
-      0
-    );
-    return totalInvested > 0 ? (this.dayChange / totalInvested) * 100 : 0;
+  get dayChange(): number {
+    // Calculate day change based on positions
+    return this.positions.reduce((sum, pos) => {
+      const currentPrice = (pos as any).currentPrice;
+      const avgPrice = pos.averagePrice;
+      const quantity = pos.quantity;
+
+      if (
+        typeof currentPrice === "number" &&
+        !isNaN(currentPrice) &&
+        typeof avgPrice === "number" &&
+        !isNaN(avgPrice) &&
+        typeof quantity === "number" &&
+        !isNaN(quantity)
+      ) {
+        const dayChange = (currentPrice - avgPrice) * quantity;
+        return sum + dayChange;
+      }
+      return sum;
+    }, 0);
   }
 
-  get totalReturn() {
-    return this.portfolio?.totalReturn || 0;
-  }
+  get dayChangePercent(): number {
+    const totalInvested = this.positions.reduce((sum, pos) => {
+      const avgPrice = pos.averagePrice;
+      const quantity = pos.quantity;
 
-  get totalReturnPercent() {
-    const initialValue = this.portfolio?.initialCash || 0;
-    return initialValue > 0 ? (this.totalReturn / initialValue) * 100 : 0;
+      if (
+        typeof avgPrice === "number" &&
+        !isNaN(avgPrice) &&
+        typeof quantity === "number" &&
+        !isNaN(quantity)
+      ) {
+        return sum + avgPrice * quantity;
+      }
+      return sum;
+    }, 0);
+
+    const dayChangeValue = this.dayChange;
+    return totalInvested > 0 &&
+      typeof dayChangeValue === "number" &&
+      !isNaN(dayChangeValue)
+      ? (dayChangeValue / totalInvested) * 100
+      : 0;
   }
 
   get topPositions() {

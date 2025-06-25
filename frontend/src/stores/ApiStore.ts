@@ -63,7 +63,12 @@ export class ApiStore {
         `${this.config.baseURL}${url}`,
         { timeout: this.config.timeout }
       );
-      return response.data;
+      // Ensure response exists before accessing data
+      if (!response) {
+        throw new Error("No response received from API");
+      }
+      // Handle cases where response.data might be undefined
+      return response.data !== undefined ? response.data : ({} as T);
     } catch (error) {
       this.handleError(error);
       throw error;
@@ -77,7 +82,12 @@ export class ApiStore {
         data,
         { timeout: this.config.timeout }
       );
-      return response.data;
+      // Ensure response exists before accessing data
+      if (!response) {
+        throw new Error("No response received from API");
+      }
+      // Handle cases where response.data might be undefined
+      return response.data !== undefined ? response.data : ({} as T);
     } catch (error) {
       this.handleError(error);
       throw error;
@@ -91,7 +101,12 @@ export class ApiStore {
         data,
         { timeout: this.config.timeout }
       );
-      return response.data;
+      // Ensure response exists before accessing data
+      if (!response) {
+        throw new Error("No response received from API");
+      }
+      // Handle cases where response.data might be undefined
+      return response.data !== undefined ? response.data : ({} as T);
     } catch (error) {
       this.handleError(error);
       throw error;
@@ -104,7 +119,12 @@ export class ApiStore {
         `${this.config.baseURL}${url}`,
         { timeout: this.config.timeout }
       );
-      return response.data;
+      // Ensure response exists before accessing data
+      if (!response) {
+        throw new Error("No response received from API");
+      }
+      // Handle cases where response.data might be undefined
+      return response.data !== undefined ? response.data : ({} as T);
     } catch (error) {
       this.handleError(error);
       throw error;
