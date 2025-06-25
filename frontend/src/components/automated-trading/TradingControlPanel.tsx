@@ -18,6 +18,7 @@ export const TradingControlPanel: React.FC<TradingControlPanelProps> = observer(
       string | null
     >(null);
     const [emergencyStopReason, setEmergencyStopReason] = useState("");
+    const [showEmergencyModal, setShowEmergencyModal] = useState(false);
 
     useEffect(() => {
       autoTradingStore.loadTradingSessions();
@@ -99,16 +100,18 @@ export const TradingControlPanel: React.FC<TradingControlPanelProps> = observer(
     };
 
     const handleEmergencyStop = async () => {
-      const reason =
-        window.prompt("Emergency stop reason (optional):") ||
-        "Manual emergency stop";
-      if (
-        window.confirm(
-          "EMERGENCY STOP: This will immediately stop all trading activity. Continue?"
-        )
-      ) {
-        await autoTradingStore.emergencyStop();
-      }
+      setShowEmergencyModal(true);
+    };
+
+    const confirmEmergencyStop = async () => {
+      await autoTradingStore.emergencyStop();
+      setShowEmergencyModal(false);
+      setEmergencyStopReason("");
+    };
+
+    const cancelEmergencyStop = () => {
+      setShowEmergencyModal(false);
+      setEmergencyStopReason("");
     };
 
     const getActiveSessionsCount = () => {
@@ -204,9 +207,12 @@ export const TradingControlPanel: React.FC<TradingControlPanelProps> = observer(
               className="emergency-btn"
               onClick={handleEmergencyStop}
               disabled={autoTradingStore.isLoading}
+              aria-label="Emergency stop all trading activity"
+              title="Immediately stop all automated trading sessions"
+              data-testid="emergency-stop-button"
             >
-              <span className="icon">🚨</span>
-              Emergency Stop
+              <span className="icon" role="img" aria-label="Emergency alert">🚨</span>
+              <span>Emergency Stop</span>
             </button>
           </div>
         </div>
@@ -452,6 +458,67 @@ export const TradingControlPanel: React.FC<TradingControlPanelProps> = observer(
               <div className="modal-body">
                 <p>Trading configuration settings will be implemented here.</p>
                 {selectedPortfolioId && <p>Portfolio: {selectedPortfolioId}</p>}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {showEmergencyModal && (
+          <div className="modal-overlay emergency-modal-overlay">
+            <div className="modal-content emergency-modal-content">
+              <div className="modal-header emergency-modal-header">
+                <div className="emergency-modal-title">
+                  <span className="emergency-icon" role="img" aria-label="Warning">⚠️</span>
+                  <h3>EMERGENCY STOP CONFIRMATION</h3>
+                </div>
+                <button 
+                  onClick={cancelEmergencyStop}
+                  className="modal-close-btn"
+                  aria-label="Close emergency stop dialog"
+                >×</button>
+              </div>
+              <div className="modal-body emergency-modal-body">
+                <div className="emergency-warning">
+                  <p><strong>This action will immediately stop ALL automated trading activities.</strong></p>
+                  <div className="emergency-details">
+                    <ul>
+                      <li>All pending orders will be cancelled</li>
+                      <li>All active trading sessions will be terminated</li>
+                      <li>No new trades will be executed until manually restarted</li>
+                    </ul>
+                  </div>
+                </div>
+                
+                <div className="emergency-reason-section">
+                  <label htmlFor="emergency-reason">
+                    <strong>Reason for emergency stop (optional):</strong>
+                  </label>
+                  <textarea
+                    id="emergency-reason"
+                    value={emergencyStopReason}
+                    onChange={(e) => setEmergencyStopReason(e.target.value)}
+                    placeholder="Enter reason for emergency stop (e.g., market volatility, system issue, etc.)"
+                    maxLength={200}
+                    rows={3}
+                  />
+                </div>
+
+                <div className="emergency-actions">
+                  <button 
+                    onClick={cancelEmergencyStop}
+                    className="btn-secondary emergency-cancel-btn"
+                  >
+                    Cancel
+                  </button>
+                  <button 
+                    onClick={confirmEmergencyStop}
+                    className="btn-danger emergency-confirm-btn"
+                    disabled={autoTradingStore.isLoading}
+                  >
+                    <span className="confirm-icon" role="img" aria-label="Stop">🛑</span>
+                    {autoTradingStore.isLoading ? 'Stopping...' : 'CONFIRM EMERGENCY STOP'}
+                  </button>
+                </div>
               </div>
             </div>
           </div>
