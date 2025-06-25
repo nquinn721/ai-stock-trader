@@ -1,7 +1,11 @@
-import React, { useState, useEffect } from "react";
 import { observer } from "mobx-react-lite";
+import React, { useEffect, useState } from "react";
 import { useAutoTradingStore } from "../../stores/StoreContext";
-import { TradingRule, RuleCondition, RuleAction } from "../../types/autoTrading.types";
+import {
+  RuleAction,
+  RuleCondition,
+  TradingRule,
+} from "../../types/autoTrading.types";
 import "./RuleBuilder.css";
 
 interface RuleBuilderProps {
@@ -27,7 +31,7 @@ const FIELD_OPTIONS = [
   { value: "portfolio.dailyPnL", label: "Daily P&L" },
   { value: "portfolio.cash", label: "Available Cash" },
   { value: "time", label: "Time of Day" },
-  { value: "dayOfWeek", label: "Day of Week" }
+  { value: "dayOfWeek", label: "Day of Week" },
 ];
 
 const OPERATOR_OPTIONS = [
@@ -35,7 +39,7 @@ const OPERATOR_OPTIONS = [
   { value: "not_equals", label: "Not Equals" },
   { value: "greater_than", label: "Greater Than" },
   { value: "less_than", label: "Less Than" },
-  { value: "contains", label: "Contains" }
+  { value: "contains", label: "Contains" },
 ];
 
 const ACTION_TYPE_OPTIONS = [
@@ -43,13 +47,13 @@ const ACTION_TYPE_OPTIONS = [
   { value: "sell", label: "Sell" },
   { value: "stop_loss", label: "Set Stop Loss" },
   { value: "take_profit", label: "Set Take Profit" },
-  { value: "notify", label: "Send Notification" }
+  { value: "notify", label: "Send Notification" },
 ];
 
 const SIZING_METHOD_OPTIONS = [
   { value: "fixed", label: "Fixed Amount" },
   { value: "percentage", label: "Percentage of Portfolio" },
-  { value: "kelly_criterion", label: "Kelly Criterion" }
+  { value: "kelly_criterion", label: "Kelly Criterion" },
 ];
 
 const RuleBuilder: React.FC<RuleBuilderProps> = observer(
@@ -62,7 +66,7 @@ const RuleBuilder: React.FC<RuleBuilderProps> = observer(
       description: "",
       ruleType: "entry" as "entry" | "exit" | "risk",
       priority: 1,
-      isActive: true
+      isActive: true,
     });
 
     const [conditions, setConditions] = useState<RuleCondition[]>([]);
@@ -77,7 +81,7 @@ const RuleBuilder: React.FC<RuleBuilderProps> = observer(
           description: rule.description || "",
           ruleType: rule.ruleType,
           priority: rule.priority,
-          isActive: rule.isActive
+          isActive: rule.isActive,
         });
         setConditions(rule.conditions || []);
         setActions(rule.actions || []);
@@ -88,7 +92,7 @@ const RuleBuilder: React.FC<RuleBuilderProps> = observer(
           description: "",
           ruleType: "entry",
           priority: 1,
-          isActive: true
+          isActive: true,
         });
         setConditions([]);
         setActions([]);
@@ -108,15 +112,22 @@ const RuleBuilder: React.FC<RuleBuilderProps> = observer(
         field: "price",
         operator: "greater_than",
         value: "",
-        logicalOperator: conditions.length > 0 ? "AND" : undefined
+        logicalOperator: conditions.length > 0 ? "AND" : undefined,
       };
       setConditions([...conditions, newCondition]);
     };
 
     // Update condition
-    const updateCondition = (index: number, field: keyof RuleCondition, value: any) => {
+    const updateCondition = (
+      index: number,
+      field: keyof RuleCondition,
+      value: any
+    ) => {
       const updatedConditions = [...conditions];
-      updatedConditions[index] = { ...updatedConditions[index], [field]: value };
+      updatedConditions[index] = {
+        ...updatedConditions[index],
+        [field]: value,
+      };
       setConditions(updatedConditions);
     };
 
@@ -134,28 +145,36 @@ const RuleBuilder: React.FC<RuleBuilderProps> = observer(
         parameters: {
           sizingMethod: "percentage",
           sizeValue: 10,
-          maxPositionSize: 100000
-        }
+          maxPositionSize: 100000,
+        },
       };
       setActions([...actions, newAction]);
     };
 
     // Update action
-    const updateAction = (index: number, field: keyof RuleAction, value: any) => {
+    const updateAction = (
+      index: number,
+      field: keyof RuleAction,
+      value: any
+    ) => {
       const updatedActions = [...actions];
       updatedActions[index] = { ...updatedActions[index], [field]: value };
       setActions(updatedActions);
     };
 
     // Update action parameters
-    const updateActionParameter = (index: number, param: string, value: any) => {
+    const updateActionParameter = (
+      index: number,
+      param: string,
+      value: any
+    ) => {
       const updatedActions = [...actions];
       updatedActions[index] = {
         ...updatedActions[index],
         parameters: {
           ...updatedActions[index].parameters,
-          [param]: value
-        }
+          [param]: value,
+        },
       };
       setActions(updatedActions);
     };
@@ -192,8 +211,12 @@ const RuleBuilder: React.FC<RuleBuilderProps> = observer(
       // Validate actions
       actions.forEach((action, index) => {
         if (["buy", "sell"].includes(action.type)) {
-          if (!action.parameters.sizeValue || action.parameters.sizeValue <= 0) {
-            newErrors[`action_${index}_size`] = "Size value must be greater than 0";
+          if (
+            !action.parameters.sizeValue ||
+            action.parameters.sizeValue <= 0
+          ) {
+            newErrors[`action_${index}_size`] =
+              "Size value must be greater than 0";
           }
         }
       });
@@ -219,7 +242,7 @@ const RuleBuilder: React.FC<RuleBuilderProps> = observer(
         conditions: conditions,
         actions: actions,
         createdAt: rule?.createdAt || new Date(),
-        updatedAt: new Date()
+        updatedAt: new Date(),
       };
 
       try {
@@ -237,7 +260,9 @@ const RuleBuilder: React.FC<RuleBuilderProps> = observer(
 
     return (
       <div className="rule-builder">
-        {errors.general && <div className="error-message">{errors.general}</div>}
+        {errors.general && (
+          <div className="error-message">{errors.general}</div>
+        )}
 
         {/* Basic Information */}
         <div className="form-section">
@@ -249,7 +274,9 @@ const RuleBuilder: React.FC<RuleBuilderProps> = observer(
                 id="ruleName"
                 type="text"
                 value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, name: e.target.value })
+                }
                 placeholder="Enter rule name"
                 className={errors.name ? "error" : ""}
               />
@@ -260,7 +287,9 @@ const RuleBuilder: React.FC<RuleBuilderProps> = observer(
               <select
                 id="ruleType"
                 value={formData.ruleType}
-                onChange={(e) => setFormData({ ...formData, ruleType: e.target.value as any })}
+                onChange={(e) =>
+                  setFormData({ ...formData, ruleType: e.target.value as any })
+                }
               >
                 <option value="entry">Entry Rule</option>
                 <option value="exit">Exit Rule</option>
@@ -278,7 +307,12 @@ const RuleBuilder: React.FC<RuleBuilderProps> = observer(
                 min="1"
                 max="10"
                 value={formData.priority}
-                onChange={(e) => setFormData({ ...formData, priority: parseInt(e.target.value) })}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    priority: parseInt(e.target.value),
+                  })
+                }
               />
             </div>
             <div className="form-group checkbox-group">
@@ -286,7 +320,9 @@ const RuleBuilder: React.FC<RuleBuilderProps> = observer(
                 <input
                   type="checkbox"
                   checked={formData.isActive}
-                  onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, isActive: e.target.checked })
+                  }
                 />
                 Active Rule
               </label>
@@ -298,7 +334,9 @@ const RuleBuilder: React.FC<RuleBuilderProps> = observer(
             <textarea
               id="description"
               value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, description: e.target.value })
+              }
               placeholder="Describe what this rule does"
               rows={3}
             />
@@ -308,12 +346,20 @@ const RuleBuilder: React.FC<RuleBuilderProps> = observer(
         {/* Conditions */}
         <div className="form-section">
           <div className="section-header">
-            <h4>Conditions {conditions.length > 0 && `(${conditions.length})`}</h4>
-            <button type="button" className="btn-secondary" onClick={addCondition}>
+            <h4>
+              Conditions {conditions.length > 0 && `(${conditions.length})`}
+            </h4>
+            <button
+              type="button"
+              className="btn-secondary"
+              onClick={addCondition}
+            >
               Add Condition
             </button>
           </div>
-          {errors.conditions && <span className="error-text">{errors.conditions}</span>}
+          {errors.conditions && (
+            <span className="error-text">{errors.conditions}</span>
+          )}
 
           {conditions.map((condition, index) => (
             <div key={condition.id} className="condition-row">
@@ -321,7 +367,9 @@ const RuleBuilder: React.FC<RuleBuilderProps> = observer(
                 <div className="logical-operator">
                   <select
                     value={condition.logicalOperator || "AND"}
-                    onChange={(e) => updateCondition(index, "logicalOperator", e.target.value)}
+                    onChange={(e) =>
+                      updateCondition(index, "logicalOperator", e.target.value)
+                    }
                   >
                     <option value="AND">AND</option>
                     <option value="OR">OR</option>
@@ -332,7 +380,9 @@ const RuleBuilder: React.FC<RuleBuilderProps> = observer(
               <div className="condition-fields">
                 <select
                   value={condition.field}
-                  onChange={(e) => updateCondition(index, "field", e.target.value)}
+                  onChange={(e) =>
+                    updateCondition(index, "field", e.target.value)
+                  }
                 >
                   {FIELD_OPTIONS.map((option) => (
                     <option key={option.value} value={option.value}>
@@ -343,7 +393,9 @@ const RuleBuilder: React.FC<RuleBuilderProps> = observer(
 
                 <select
                   value={condition.operator}
-                  onChange={(e) => updateCondition(index, "operator", e.target.value)}
+                  onChange={(e) =>
+                    updateCondition(index, "operator", e.target.value)
+                  }
                 >
                   {OPERATOR_OPTIONS.map((option) => (
                     <option key={option.value} value={option.value}>
@@ -355,7 +407,9 @@ const RuleBuilder: React.FC<RuleBuilderProps> = observer(
                 <input
                   type="text"
                   value={condition.value}
-                  onChange={(e) => updateCondition(index, "value", e.target.value)}
+                  onChange={(e) =>
+                    updateCondition(index, "value", e.target.value)
+                  }
                   placeholder="Value"
                   className={errors[`condition_${index}_value`] ? "error" : ""}
                 />
@@ -370,7 +424,9 @@ const RuleBuilder: React.FC<RuleBuilderProps> = observer(
                 </button>
               </div>
               {errors[`condition_${index}_value`] && (
-                <span className="error-text">{errors[`condition_${index}_value`]}</span>
+                <span className="error-text">
+                  {errors[`condition_${index}_value`]}
+                </span>
               )}
             </div>
           ))}
@@ -384,7 +440,9 @@ const RuleBuilder: React.FC<RuleBuilderProps> = observer(
               Add Action
             </button>
           </div>
-          {errors.actions && <span className="error-text">{errors.actions}</span>}
+          {errors.actions && (
+            <span className="error-text">{errors.actions}</span>
+          )}
 
           {actions.map((action, index) => (
             <div key={action.id} className="action-row">
@@ -416,7 +474,13 @@ const RuleBuilder: React.FC<RuleBuilderProps> = observer(
                     <label>Sizing Method:</label>
                     <select
                       value={action.parameters.sizingMethod || "percentage"}
-                      onChange={(e) => updateActionParameter(index, "sizingMethod", e.target.value)}
+                      onChange={(e) =>
+                        updateActionParameter(
+                          index,
+                          "sizingMethod",
+                          e.target.value
+                        )
+                      }
                     >
                       {SIZING_METHOD_OPTIONS.map((option) => (
                         <option key={option.value} value={option.value}>
@@ -432,12 +496,24 @@ const RuleBuilder: React.FC<RuleBuilderProps> = observer(
                       type="number"
                       step="0.01"
                       value={action.parameters.sizeValue || ""}
-                      onChange={(e) => updateActionParameter(index, "sizeValue", parseFloat(e.target.value))}
-                      placeholder={action.parameters.sizingMethod === "percentage" ? "%" : "$"}
+                      onChange={(e) =>
+                        updateActionParameter(
+                          index,
+                          "sizeValue",
+                          parseFloat(e.target.value)
+                        )
+                      }
+                      placeholder={
+                        action.parameters.sizingMethod === "percentage"
+                          ? "%"
+                          : "$"
+                      }
                       className={errors[`action_${index}_size`] ? "error" : ""}
                     />
                     {errors[`action_${index}_size`] && (
-                      <span className="error-text">{errors[`action_${index}_size`]}</span>
+                      <span className="error-text">
+                        {errors[`action_${index}_size`]}
+                      </span>
                     )}
                   </div>
 
@@ -446,7 +522,13 @@ const RuleBuilder: React.FC<RuleBuilderProps> = observer(
                     <input
                       type="number"
                       value={action.parameters.maxPositionSize || ""}
-                      onChange={(e) => updateActionParameter(index, "maxPositionSize", parseFloat(e.target.value))}
+                      onChange={(e) =>
+                        updateActionParameter(
+                          index,
+                          "maxPositionSize",
+                          parseFloat(e.target.value)
+                        )
+                      }
                       placeholder="Maximum $ amount"
                     />
                   </div>
@@ -458,7 +540,13 @@ const RuleBuilder: React.FC<RuleBuilderProps> = observer(
                         type="number"
                         step="0.01"
                         value={action.parameters.limitPrice || ""}
-                        onChange={(e) => updateActionParameter(index, "limitPrice", parseFloat(e.target.value))}
+                        onChange={(e) =>
+                          updateActionParameter(
+                            index,
+                            "limitPrice",
+                            parseFloat(e.target.value)
+                          )
+                        }
                         placeholder="Limit price"
                       />
                     </div>
@@ -474,7 +562,13 @@ const RuleBuilder: React.FC<RuleBuilderProps> = observer(
                       type="number"
                       step="0.01"
                       value={action.parameters.stopPrice || ""}
-                      onChange={(e) => updateActionParameter(index, "stopPrice", parseFloat(e.target.value))}
+                      onChange={(e) =>
+                        updateActionParameter(
+                          index,
+                          "stopPrice",
+                          parseFloat(e.target.value)
+                        )
+                      }
                       placeholder="Stop price"
                     />
                   </div>
@@ -495,7 +589,11 @@ const RuleBuilder: React.FC<RuleBuilderProps> = observer(
             onClick={handleSave}
             disabled={autoTradingStore.isLoading}
           >
-            {autoTradingStore.isLoading ? "Saving..." : rule ? "Update Rule" : "Create Rule"}
+            {autoTradingStore.isLoading
+              ? "Saving..."
+              : rule
+              ? "Update Rule"
+              : "Create Rule"}
           </button>
         </div>
       </div>

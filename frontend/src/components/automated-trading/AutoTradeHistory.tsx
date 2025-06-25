@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
 import { observer } from "mobx-react-lite";
+import React, { useEffect, useState } from "react";
 import { useAutoTradingStore } from "../../stores/StoreContext";
 import { AutoTrade } from "../../types/autoTrading.types";
 import "./AutoTradeHistory.css";
@@ -12,13 +12,26 @@ interface AutoTradeHistoryProps {
 const AutoTradeHistory: React.FC<AutoTradeHistoryProps> = observer(
   ({ portfolioId, maxItems = 50 }) => {
     const autoTradingStore = useAutoTradingStore();
-    const [filterStatus, setFilterStatus] = useState<"all" | "executed" | "pending" | "failed">("all");
-    const [sortBy, setSortBy] = useState<"timestamp" | "symbol" | "pnl">("timestamp");
+    const [filterStatus, setFilterStatus] = useState<
+      "all" | "executed" | "pending" | "failed"
+    >("all");
+    const [sortBy, setSortBy] = useState<"timestamp" | "symbol" | "pnl">(
+      "timestamp"
+    );
     const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
 
     // Mock data for demonstration - in real app this would come from the store
     const generateMockTrades = (): AutoTrade[] => {
-      const symbols = ["AAPL", "GOOGL", "MSFT", "TSLA", "AMZN", "META", "NFLX", "NVDA"];
+      const symbols = [
+        "AAPL",
+        "GOOGL",
+        "MSFT",
+        "TSLA",
+        "AMZN",
+        "META",
+        "NFLX",
+        "NVDA",
+      ];
       const statuses: AutoTrade["status"][] = ["executed", "pending", "failed"];
       const trades: AutoTrade[] = [];
 
@@ -43,13 +56,20 @@ const AutoTradeHistory: React.FC<AutoTradeHistoryProps> = observer(
           price,
           status,
           pnl: status === "executed" ? pnl : undefined,
-          executedAt: status === "executed" ? new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000) : undefined,
-          createdAt: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000),
-          reason: `Automated ${action} based on rule trigger`
+          executedAt:
+            status === "executed"
+              ? new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000)
+              : undefined,
+          createdAt: new Date(
+            Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000
+          ),
+          reason: `Automated ${action} based on rule trigger`,
         });
       }
 
-      return trades.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+      return trades.sort(
+        (a, b) => b.createdAt.getTime() - a.createdAt.getTime()
+      );
     };
 
     const [trades, setTrades] = useState<AutoTrade[]>([]);
@@ -60,13 +80,13 @@ const AutoTradeHistory: React.FC<AutoTradeHistoryProps> = observer(
     }, [portfolioId, maxItems]);
 
     const filteredAndSortedTrades = trades
-      .filter(trade => {
+      .filter((trade) => {
         if (filterStatus === "all") return true;
         return trade.status === filterStatus;
       })
       .sort((a, b) => {
         let comparison = 0;
-        
+
         switch (sortBy) {
           case "timestamp":
             comparison = a.createdAt.getTime() - b.createdAt.getTime();
@@ -80,16 +100,20 @@ const AutoTradeHistory: React.FC<AutoTradeHistoryProps> = observer(
             comparison = aPnl - bPnl;
             break;
         }
-        
+
         return sortOrder === "asc" ? comparison : -comparison;
       });
 
     const getStatusColor = (status: AutoTrade["status"]) => {
       switch (status) {
-        case "executed": return "success";
-        case "pending": return "warning";
-        case "failed": return "error";
-        default: return "default";
+        case "executed":
+          return "success";
+        case "pending":
+          return "warning";
+        case "failed":
+          return "error";
+        default:
+          return "default";
       }
     };
 
@@ -99,7 +123,7 @@ const AutoTradeHistory: React.FC<AutoTradeHistoryProps> = observer(
 
     const formatPnL = (pnl?: number) => {
       if (pnl === undefined) return "—";
-      const formatted = `$${Math.abs(pnl).toFixed(2)}`;
+      const formatted = `$${Math.abs(Number(pnl) || 0).toFixed(2)}`;
       return pnl >= 0 ? `+${formatted}` : `-${formatted}`;
     };
 
@@ -108,30 +132,36 @@ const AutoTradeHistory: React.FC<AutoTradeHistoryProps> = observer(
         month: "short",
         day: "numeric",
         hour: "2-digit",
-        minute: "2-digit"
+        minute: "2-digit",
       });
     };
 
     const totalPnL = trades
-      .filter(t => t.status === "executed" && t.pnl !== undefined)
+      .filter((t) => t.status === "executed" && t.pnl !== undefined)
       .reduce((sum, t) => sum + (t.pnl || 0), 0);
 
-    const executedTrades = trades.filter(t => t.status === "executed").length;
-    const pendingTrades = trades.filter(t => t.status === "pending").length;
-    const failedTrades = trades.filter(t => t.status === "failed").length;
+    const executedTrades = trades.filter((t) => t.status === "executed").length;
+    const pendingTrades = trades.filter((t) => t.status === "pending").length;
+    const failedTrades = trades.filter((t) => t.status === "failed").length;
 
     return (
       <div className="auto-trade-history">
         <div className="history-header">
           <div className="header-title">
             <h3>Auto Trade History</h3>
-            <span className="trade-count">{filteredAndSortedTrades.length} trades</span>
+            <span className="trade-count">
+              {filteredAndSortedTrades.length} trades
+            </span>
           </div>
 
           <div className="header-stats">
             <div className="stat">
               <span className="stat-label">Total P&L</span>
-              <span className={`stat-value ${totalPnL >= 0 ? "positive" : "negative"}`}>
+              <span
+                className={`stat-value ${
+                  totalPnL >= 0 ? "positive" : "negative"
+                }`}
+              >
                 {formatPnL(totalPnL)}
               </span>
             </div>
@@ -226,7 +256,9 @@ const AutoTradeHistory: React.FC<AutoTradeHistoryProps> = observer(
                       <span className="symbol">{trade.symbol}</span>
                     </td>
                     <td className="action-cell">
-                      <span className={`action ${getActionColor(trade.action)}`}>
+                      <span
+                        className={`action ${getActionColor(trade.action)}`}
+                      >
                         {trade.action.toUpperCase()}
                       </span>
                     </td>
@@ -234,18 +266,28 @@ const AutoTradeHistory: React.FC<AutoTradeHistoryProps> = observer(
                       {trade.quantity.toLocaleString()}
                     </td>
                     <td className="price-cell">
-                      ${trade.price.toFixed(2)}
+                      ${Number(trade.price || 0).toFixed(2)}
                     </td>
                     <td className="value-cell">
                       ${(trade.quantity * trade.price).toLocaleString()}
                     </td>
                     <td className="pnl-cell">
-                      <span className={`pnl ${trade.pnl !== undefined ? (trade.pnl >= 0 ? "positive" : "negative") : ""}`}>
+                      <span
+                        className={`pnl ${
+                          trade.pnl !== undefined
+                            ? trade.pnl >= 0
+                              ? "positive"
+                              : "negative"
+                            : ""
+                        }`}
+                      >
                         {formatPnL(trade.pnl)}
                       </span>
                     </td>
                     <td className="status-cell">
-                      <span className={`status ${getStatusColor(trade.status)}`}>
+                      <span
+                        className={`status ${getStatusColor(trade.status)}`}
+                      >
                         {trade.status}
                       </span>
                     </td>

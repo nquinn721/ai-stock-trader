@@ -280,7 +280,8 @@ const TradingRulesManager: React.FC<TradingRulesManagerProps> = observer(
                               : "negative"
                           }
                         >
-                          {rule.performance.successRate.toFixed(1)}%
+                          {Number(rule.performance.successRate || 0).toFixed(1)}
+                          %
                         </span>
                       </div>
                       <div className="perf-stat">
@@ -292,7 +293,7 @@ const TradingRulesManager: React.FC<TradingRulesManagerProps> = observer(
                               : "negative"
                           }
                         >
-                          ${rule.performance.totalPnL.toFixed(2)}
+                          ${Number(rule.performance.totalPnL || 0).toFixed(2)}
                         </span>
                       </div>
                       <div className="perf-stat">

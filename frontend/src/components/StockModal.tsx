@@ -604,7 +604,7 @@ const StockModal: React.FC<StockModalProps> = observer(
                       </div>
                       <div className="info-item">
                         <strong>Current Price:</strong> $
-                        {stock.currentPrice?.toFixed(2) || 'N/A'}
+                        {stock.currentPrice?.toFixed(2) || "N/A"}
                       </div>
                       <div className="info-item">
                         <strong>Last Updated:</strong>{" "}

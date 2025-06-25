@@ -199,7 +199,9 @@ const QuickTrade: React.FC = observer(() => {
           type: "error",
           message: `Insufficient funds. Need $${estimatedTotal.toFixed(
             2
-          )}, but only have $${portfolio.currentCash.toFixed(2)} available.`,
+          )}, but only have $${Number(portfolio.currentCash || 0).toFixed(
+            2
+          )} available.`,
         });
         return;
       }

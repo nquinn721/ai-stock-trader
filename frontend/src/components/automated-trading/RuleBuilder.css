@@ -287,17 +287,17 @@
   .form-row {
     grid-template-columns: 1fr;
   }
-  
+
   .condition-fields {
     grid-template-columns: 1fr;
     gap: 8px;
   }
-  
+
   .param-row {
     grid-template-columns: 1fr;
     gap: 4px;
   }
-  
+
   .param-row label {
     font-size: 11px;
   }

@@ -119,7 +119,7 @@ export const TradingControlPanel: React.FC<TradingControlPanelProps> = observer(
 
     const getTotalPnL = () => {
       return autoTradingStore.tradingSessions.reduce((total, session) => {
-        return total + (session.performance?.totalPnL || 0);
+        return total + (Number(session.performance?.totalPnL) || 0);
       }, 0);
     };
 
@@ -141,7 +141,7 @@ export const TradingControlPanel: React.FC<TradingControlPanelProps> = observer(
                     getTotalPnL() >= 0 ? "positive" : "negative"
                   }`}
                 >
-                  ${getTotalPnL().toFixed(2)}
+                  ${Number(getTotalPnL()).toFixed(2)}
                 </span>
               </div>
               <div className="stat">
@@ -248,13 +248,13 @@ export const TradingControlPanel: React.FC<TradingControlPanelProps> = observer(
                       <div className="detail">
                         <label>Value:</label>
                         <span>
-                          ${portfolio.totalValue?.toFixed(2) || "0.00"}
+                          ${Number(portfolio.totalValue || 0).toFixed(2)}
                         </span>
                       </div>
                       <div className="detail">
                         <label>Cash:</label>
                         <span>
-                          ${portfolio.currentCash?.toFixed(2) || "0.00"}
+                          ${Number(portfolio.currentCash || 0).toFixed(2)}
                         </span>
                       </div>
                       <div className="detail">
@@ -303,8 +303,9 @@ export const TradingControlPanel: React.FC<TradingControlPanelProps> = observer(
                             }
                           >
                             $
-                            {session.performance?.totalPnL?.toFixed(2) ||
-                              "0.00"}
+                            {Number(session.performance?.totalPnL || 0).toFixed(
+                              2
+                            )}
                           </span>
                         </div>
                         {session.lastTradeTime && (

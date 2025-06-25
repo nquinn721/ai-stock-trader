@@ -301,23 +301,23 @@
     gap: 12px;
     align-items: stretch;
   }
-  
+
   .filter-group,
   .sort-group {
     justify-content: space-between;
   }
-  
+
   .header-stats {
     grid-template-columns: repeat(2, 1fr);
     gap: 12px;
   }
-  
+
   .trades-table th,
   .trades-table td {
     padding: 8px;
     font-size: 12px;
   }
-  
+
   .trade-count {
     font-size: 11px;
   }
@@ -327,17 +327,17 @@
   .header-stats {
     grid-template-columns: 1fr;
   }
-  
+
   .header-title {
     flex-direction: column;
     align-items: flex-start;
     gap: 8px;
   }
-  
+
   .trades-table {
     font-size: 11px;
   }
-  
+
   .trades-table th,
   .trades-table td {
     padding: 6px;

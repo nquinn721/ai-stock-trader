@@ -193,7 +193,7 @@ const TradingSessionMonitor: React.FC = observer(() => {
                 metrics.successRate >= 60 ? "positive" : "negative"
               }`}
             >
-              {metrics.successRate.toFixed(1)}%
+              {Number(metrics.successRate || 0).toFixed(1)}%
             </div>
             <div className="metric-label">Success Rate</div>
           </div>
@@ -490,7 +490,10 @@ const TradingSessionMonitor: React.FC = observer(() => {
                                 : "negative"
                             }
                           >
-                            {session.performance.successRate.toFixed(1)}%
+                            {Number(
+                              session.performance.successRate || 0
+                            ).toFixed(1)}
+                            %
                           </span>
                         </div>
                         <div className="metric">

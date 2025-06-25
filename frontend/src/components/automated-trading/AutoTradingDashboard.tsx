@@ -18,12 +18,12 @@ import {
   usePortfolioStore,
 } from "../../stores/StoreContext";
 import { Portfolio } from "../../types";
+import AutoTradeHistory from "./AutoTradeHistory";
 import "./AutoTradingDashboard.css";
 import TradingControlPanel from "./TradingControlPanel";
+import TradingPerformanceChart from "./TradingPerformanceChart";
 import TradingRulesManager from "./TradingRulesManager";
 import TradingSessionMonitor from "./TradingSessionMonitor";
-import TradingPerformanceChart from "./TradingPerformanceChart";
-import AutoTradeHistory from "./AutoTradeHistory";
 
 interface AutoTradingDashboardProps {
   portfolios: Portfolio[];

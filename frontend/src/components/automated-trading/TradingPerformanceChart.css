@@ -161,16 +161,16 @@
     gap: 16px;
     align-items: flex-start;
   }
-  
+
   .chart-metrics {
     grid-template-columns: repeat(2, 1fr);
     gap: 12px;
   }
-  
+
   .chart-container {
     height: 250px;
   }
-  
+
   .time-range-btn {
     padding: 4px 8px;
     font-size: 11px;
@@ -181,11 +181,11 @@
   .chart-metrics {
     grid-template-columns: 1fr;
   }
-  
+
   .metric-value {
     font-size: 14px;
   }
-  
+
   .chart-container {
     height: 200px;
   }

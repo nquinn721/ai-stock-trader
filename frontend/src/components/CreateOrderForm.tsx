@@ -155,7 +155,8 @@ export default function CreateOrderForm({
           >
             {portfolios.map((portfolio) => (
               <MenuItem key={portfolio.id} value={portfolio.id}>
-                {portfolio.name} (${portfolio.totalValue?.toFixed(2) || "0.00"})
+                {portfolio.name} ($
+                {Number(portfolio.totalValue || 0).toFixed(2)})
               </MenuItem>
             ))}
           </TextField>
