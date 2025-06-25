@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable, forwardRef } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -15,7 +15,9 @@ export class OrderService {
     private orderRepository: Repository<Order>,
     @InjectRepository(Stock)
     private stockRepository: Repository<Stock>,
+    @Inject(forwardRef(() => PaperTradingService))
     private paperTradingService: PaperTradingService,
+    @Inject(forwardRef(() => StockWebSocketGateway))
     private websocketGateway: StockWebSocketGateway,
   ) {}
 

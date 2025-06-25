@@ -749,7 +749,7 @@ export const stories: Story[] = [
     title: "Automated Trading System Backend",
     description:
       "Create a comprehensive automated trading system that executes trades based on AI recommendations and user-defined portfolio rules. Create AutoTradingService for trade execution logic, implement portfolio rule engine for trade validation, create automated order management system, implement risk management and position sizing, add comprehensive trade logging and audit trails, create automated trading scheduler and job queue, implement emergency stop mechanisms, integrate with existing RecommendationService, connect with portfolio management system, and implement real-time market data processing with WebSocket notifications.",
-    status: "TODO",
+    status: "DONE",
     priority: "High",
     epic: "E28", // Automated Trading & AI Enhancement
     storyPoints: 21,
@@ -764,7 +764,7 @@ export const stories: Story[] = [
     title: "Automated Trading Frontend Interface",
     description:
       "Create a comprehensive frontend interface for the automated trading system, allowing users to configure trading rules, start/stop automated trading sessions per portfolio or globally, and monitor automated trading performance in real-time. Create TradingRulesManager component for rule configuration, implement rule builder with drag-and-drop interface, add rule templates for common strategies, create AutoTradingDashboard for session management, implement per-portfolio and global trading controls, add emergency stop functionality, display live trading activity feed, show real-time P&L tracking, implement trade execution notifications, and create comprehensive trading performance analytics.",
-    status: "TODO",
+    status: "DONE",
     priority: "High",
     epic: "E28", // Automated Trading & AI Enhancement
     storyPoints: 13,

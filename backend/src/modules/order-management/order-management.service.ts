@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger, forwardRef } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, LessThan, Repository } from 'typeorm';
@@ -51,6 +51,7 @@ export class OrderManagementService {
     private positionRepository: Repository<Position>,
     @InjectRepository(Stock)
     private stockRepository: Repository<Stock>,
+    @Inject(forwardRef(() => PaperTradingService))
     private paperTradingService: PaperTradingService,
   ) {
     // Initialize WebSocket gateway as null, will be set via setter to avoid circular dependency

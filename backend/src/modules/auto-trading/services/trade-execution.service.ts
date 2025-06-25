@@ -139,7 +139,7 @@ export class TradeExecutionService {
         if (portfolio.currentCash < totalCost) {
           return {
             isValid: false,
-            reason: `Insufficient funds. Required: $${totalCost.toFixed(2)}, Available: $${portfolio.currentCash.toFixed(2)}`,
+            reason: `Insufficient funds. Required: $${totalCost.toFixed(2)}, Available: $${Number(portfolio.currentCash || 0).toFixed(2)}`,
           };
         }
       }
