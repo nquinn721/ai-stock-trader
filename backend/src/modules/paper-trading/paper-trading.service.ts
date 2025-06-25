@@ -7,6 +7,7 @@ import { Stock } from '../../entities/stock.entity';
 import { Trade, TradeStatus, TradeType } from '../../entities/trade.entity';
 import { MLService } from '../ml/services/ml.service';
 import { CreatePortfolioDto, PortfolioType } from './dto/create-portfolio.dto';
+import { MarketHoursService } from '../../utils/market-hours.service';
 
 // Portfolio type configurations
 export const PORTFOLIO_CONFIGS = {
@@ -61,6 +62,7 @@ export class PaperTradingService {
     @InjectRepository(Stock)
     private stockRepository: Repository<Stock>,
     private mlService: MLService,
+    private marketHoursService: MarketHoursService,
   ) {
     // Initialize default portfolio after service startup
     this.initializeService();
@@ -185,6 +187,9 @@ export class PaperTradingService {
   }
   async executeTrade(createTradeDto: CreateTradeDto): Promise<Trade> {
     const { userId, symbol, type, quantity } = createTradeDto;
+
+    // Validate market hours before executing trade
+    this.marketHoursService.validateTradingHours(true);
 
     // Find user's portfolio
     const portfolio = await this.portfolioRepository.findOne({

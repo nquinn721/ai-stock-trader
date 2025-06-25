@@ -43,6 +43,44 @@ export class CreateBracketOrderDto {
   takeProfitPrice: number;
 }
 
+export class CreateTrailingStopDto {
+  portfolioId: number;
+  symbol: string;
+  quantity: number;
+  trailAmount?: number;
+  trailPercent?: number;
+}
+
+export class CreateOCOOrderDto {
+  portfolioId: number;
+  symbol: string;
+  quantity: number;
+  limitPrice: number;
+  stopPrice: number;
+}
+
+export class CreateConditionalOrderDto {
+  portfolioId: number;
+  symbol: string;
+  orderType: OrderType;
+  side: OrderSide;
+  quantity: number;
+  limitPrice?: number;
+  stopPrice?: number;
+  triggerPrice?: number;
+  timeInForce?: TimeInForce;
+  notes?: string;
+  conditionalTriggers: Array<{
+    id: string;
+    type: 'price' | 'time' | 'indicator' | 'volume';
+    condition: 'greater_than' | 'less_than' | 'equals' | 'between';
+    value: number | string;
+    value2?: number;
+    field: string;
+    logicalOperator?: 'AND' | 'OR';
+  }>;
+}
+
 @Controller('order-management')
 export class OrderManagementController {
   constructor(
@@ -209,5 +247,68 @@ export class OrderManagementController {
       totalCommissions,
       avgExecutionTime,
     };
+  }
+
+  /**
+   * Create a trailing stop order
+   */
+  @Post('orders/trailing-stop')
+  async createTrailingStopOrder(
+    @Body() trailingStopDto: CreateTrailingStopDto,
+  ): Promise<Order> {
+    return this.orderManagementService.createTrailingStopOrder(
+      trailingStopDto.portfolioId,
+      trailingStopDto.symbol,
+      trailingStopDto.quantity,
+      trailingStopDto.trailAmount,
+      trailingStopDto.trailPercent,
+    );
+  }
+
+  /**
+   * Create an OCO (One-Cancels-Other) order pair
+   */
+  @Post('orders/oco')
+  async createOCOOrder(
+    @Body() ocoOrderDto: CreateOCOOrderDto,
+  ): Promise<{ limitOrder: Order; stopOrder: Order }> {
+    return this.orderManagementService.createOCOOrder(
+      ocoOrderDto.portfolioId,
+      ocoOrderDto.symbol,
+      ocoOrderDto.quantity,
+      ocoOrderDto.limitPrice,
+      ocoOrderDto.stopPrice,
+    );
+  }
+
+  /**
+   * Create a conditional order with triggers
+   */
+  @Post('orders/conditional')
+  async createConditionalOrder(
+    @Body() conditionalOrderDto: CreateConditionalOrderDto,
+  ): Promise<Order> {
+    return this.orderManagementService.createConditionalOrder(
+      conditionalOrderDto,
+      conditionalOrderDto.conditionalTriggers,
+    );
+  }
+
+  /**
+   * Cancel an OCO order group
+   */
+  @Delete('orders/oco/:ocoGroupId')
+  async cancelOCOGroup(
+    @Param('ocoGroupId') ocoGroupId: string,
+  ): Promise<Order[]> {
+    return this.orderManagementService.cancelOCOGroup(ocoGroupId);
+  }
+
+  /**
+   * Get the order book (all active orders)
+   */
+  @Get('orders/book')
+  async getOrderBook(): Promise<Order[]> {
+    return this.orderManagementService.getOrderBook();
   }
 }

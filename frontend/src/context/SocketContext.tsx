@@ -24,6 +24,7 @@ interface SocketContextType {
   subscribeToPortfolio: (portfolioId: number) => void;
   unsubscribeFromPortfolio: (portfolioId: number) => void;
   requestAllPortfolios: () => void;
+  subscribeToSelectiveStocks: (symbols: string[]) => void;
   getPortfolioPerformance: (portfolioId: number) => Promise<any>;
   getPositionDetails: (portfolioId: number, symbol: string) => Promise<any>;
   getPortfolioAnalytics: (portfolioId: number) => Promise<PortfolioAnalytics>;
@@ -53,6 +54,7 @@ const SocketContext = createContext<SocketContextType>({
   subscribeToPortfolio: () => {},
   unsubscribeFromPortfolio: () => {},
   requestAllPortfolios: () => {},
+  subscribeToSelectiveStocks: () => {},
   getPortfolioPerformance: async () => null,
   getPositionDetails: async () => null,
   getPortfolioAnalytics: async () => ({} as PortfolioAnalytics),
@@ -107,6 +109,13 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
     if (socket && isConnected) {
       console.log("📊 Requesting all portfolios");
       socket.emit("subscribe_all_portfolios");
+    }
+  };
+
+  const subscribeToSelectiveStocks = (symbols: string[]) => {
+    if (socket && isConnected) {
+      console.log("📊 Subscribing to selective stocks:", symbols);
+      socket.emit("subscribe_selective_stocks", { symbols });
     }
   };
   const getPortfolioPerformance = async (portfolioId: number): Promise<any> => {
@@ -427,6 +436,31 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
       setStocks(data);
     });
 
+    // Handle batched stock updates
+    newSocket.on("stock_updates_batch", (data: { updates: Stock[][]; count: number; timestamp: string }) => {
+      console.log("📊 Received batched stock updates:", data.count, "batches");
+      // Flatten all batched updates
+      const allStocks = data.updates.flat();
+      // Remove duplicates by symbol (keep latest)
+      const stocksMap = new Map();
+      allStocks.forEach(stock => stocksMap.set(stock.symbol, stock));
+      setStocks(Array.from(stocksMap.values()));
+    });
+
+    // Handle selective stock updates
+    newSocket.on("selective_stock_updates", (data: { stocks: Stock[]; timestamp: string; initial?: boolean }) => {
+      console.log("📊 Received selective stock updates:", data.stocks.length, "stocks", data.initial ? "(initial)" : "");
+      if (data.initial) {
+        setStocks(data.stocks);
+      } else {
+        setStocks(prev => {
+          const stocksMap = new Map(prev.map(s => [s.symbol, s]));
+          data.stocks.forEach(stock => stocksMap.set(stock.symbol, stock));
+          return Array.from(stocksMap.values());
+        });
+      }
+    });
+
     newSocket.on(
       "stock_error",
       (error: { message: string; timestamp: string }) => {
@@ -445,6 +479,21 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
         );
       }
     );
+
+    // Handle batched stock updates
+    newSocket.on("stock_update_batch", (data: { updates: Array<{ symbol: string; data: Stock }>; count: number; timestamp: string }) => {
+      console.log("📈 Received batched stock updates:", data.count, "updates");
+      setStocks(prev => {
+        const stocksMap = new Map(prev.map(s => [s.symbol, s]));
+        data.updates.forEach(({ symbol, data: stockData }) => {
+          const existing = stocksMap.get(symbol);
+          if (existing) {
+            stocksMap.set(symbol, { ...existing, ...stockData });
+          }
+        });
+        return Array.from(stocksMap.values());
+      });
+    });
 
     newSocket.on("trading_signal", (signal: TradingSignal) => {
       console.log("🔔 New trading signal:", signal);
@@ -531,7 +580,7 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
     allPortfolios,
     subscribeToPortfolio,
     unsubscribeFromPortfolio,
-    requestAllPortfolios,
+    requestAllPortfolios,\n    subscribeToSelectiveStocks,
     getPortfolioPerformance,
     getPositionDetails,
     getPortfolioAnalytics,

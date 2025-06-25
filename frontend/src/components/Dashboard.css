@@ -1224,3 +1224,72 @@
   outline: 2px solid rgba(59, 130, 246, 0.5);
   outline-offset: 2px;
 }
+
+/* Header navigation buttons */
+.auto-trading-btn,
+.analytics-btn {
+  background: linear-gradient(
+    135deg,
+    rgba(59, 130, 246, 0.1) 0%,
+    rgba(139, 92, 246, 0.1) 100%
+  );
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  border-radius: 12px;
+  padding: 12px 20px;
+  color: #f0f6fc;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  backdrop-filter: blur(10px);
+}
+
+.auto-trading-btn:hover,
+.analytics-btn:hover {
+  background: linear-gradient(
+    135deg,
+    rgba(59, 130, 246, 0.2) 0%,
+    rgba(139, 92, 246, 0.2) 100%
+  );
+  border-color: rgba(59, 130, 246, 0.5);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(59, 130, 246, 0.2);
+}
+
+.auto-trading-btn:active,
+.analytics-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.back-button {
+  background: linear-gradient(
+    135deg,
+    rgba(148, 163, 184, 0.1) 0%,
+    rgba(100, 116, 139, 0.1) 100%
+  );
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  border-radius: 8px;
+  padding: 8px 16px;
+  color: #94a3b8;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(10px);
+  margin-top: 8px;
+}
+
+.back-button:hover {
+  background: linear-gradient(
+    135deg,
+    rgba(148, 163, 184, 0.2) 0%,
+    rgba(100, 116, 139, 0.2) 100%
+  );
+  border-color: rgba(148, 163, 184, 0.5);
+  color: #f1f5f9;
+}

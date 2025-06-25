@@ -32,6 +32,7 @@ import PortfolioSelector from "./PortfolioSelector";
 import QuickTrade from "./QuickTrade";
 import StockCard from "./StockCard";
 import AutoTradingDashboard from "./automated-trading/AutoTradingDashboard";
+import { PortfolioAnalyticsDashboard } from "./PortfolioAnalyticsDashboard";
 
 // Add icons to library
 library.add(
@@ -61,6 +62,7 @@ const Dashboard: React.FC = observer(() => {
     useState<Portfolio | null>(null);
   const [currentTime, setCurrentTime] = useState(new Date());
   const [showAutoTrading, setShowAutoTrading] = useState(false);
+  const [showPortfolioAnalytics, setShowPortfolioAnalytics] = useState(false);
 
   // Initialize data on component mount
   useEffect(() => {
@@ -219,6 +221,34 @@ const Dashboard: React.FC = observer(() => {
     );
   }
 
+  if (showPortfolioAnalytics) {
+    return (
+      <div className="dashboard">
+        <header className="dashboard-header">
+          <div className="header-left">
+            <h1>Portfolio Analytics</h1>
+            <button
+              className="back-button"
+              onClick={() => setShowPortfolioAnalytics(false)}
+            >
+              ← Back to Dashboard
+            </button>
+          </div>
+        </header>
+        {portfolioStore.currentPortfolio ? (
+          <PortfolioAnalyticsDashboard portfolioId={portfolioStore.currentPortfolio.id} />
+        ) : (
+          <div style={{ padding: '20px', textAlign: 'center' }}>
+            <p>Please select a portfolio to view analytics.</p>
+            <button onClick={() => setShowPortfolioAnalytics(false)}>
+              Go Back to Select Portfolio
+            </button>
+          </div>
+        )}
+      </div>
+    );
+  }
+
   if (showPortfolioCreator) {
     return (
       <PortfolioCreator
@@ -248,6 +278,14 @@ const Dashboard: React.FC = observer(() => {
           >
             <FontAwesomeIcon icon={faRobot} />
             Auto Trading
+          </button>
+          <button
+            className="analytics-btn"
+            onClick={() => setShowPortfolioAnalytics(true)}
+            title="View Portfolio Analytics"
+          >
+            <FontAwesomeIcon icon={faChartLine} />
+            Analytics
           </button>
           <div className="stats">
             <span>{stocksWithSignals.length} stocks</span>

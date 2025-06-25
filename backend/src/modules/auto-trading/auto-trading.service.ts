@@ -5,6 +5,7 @@ import { Repository } from 'typeorm';
 import { PaperTradingService } from '../paper-trading/paper-trading.service';
 import { StockService } from '../stock/stock.service';
 import { StockWebSocketGateway } from '../websocket/websocket.gateway';
+import { MarketHoursService } from '../../utils/market-hours.service';
 import {
   CreateTradingRuleDto,
   UpdateTradingRuleDto,
@@ -43,6 +44,7 @@ export class AutoTradingService {
     private readonly stockService: StockService,
     private readonly paperTradingService: PaperTradingService,
     private readonly websocketGateway: StockWebSocketGateway,
+    private readonly marketHoursService: MarketHoursService,
   ) {}
 
   // Trading Rules Management

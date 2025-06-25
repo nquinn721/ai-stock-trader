@@ -1,14 +1,16 @@
 import { Inject, Injectable, Logger, forwardRef } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, LessThan, Repository } from 'typeorm';
+import { In, LessThan, Not, Repository } from 'typeorm';
 import {
+  ConditionalTrigger,
   Order,
   OrderSide,
   OrderStatus,
   OrderType,
   TimeInForce,
 } from '../../entities/order.entity';
+import { MarketHoursService } from '../../utils/market-hours.service';
 import { Portfolio } from '../../entities/portfolio.entity';
 import { Position } from '../../entities/position.entity';
 import { Stock } from '../../entities/stock.entity';
@@ -27,6 +29,14 @@ export interface CreateOrderDto {
   notes?: string;
   expiryDate?: Date;
   parentOrderId?: number;
+  // Advanced order features
+  trailAmount?: number;
+  trailPercent?: number;
+  ocoGroupId?: string;
+  conditionalTriggers?: ConditionalTrigger[];
+  profitTargetPrice?: number;
+  stopLossPrice?: number;
+  routingDestination?: string;
 }
 
 export interface OrderExecutionResult {
@@ -53,6 +63,7 @@ export class OrderManagementService {
     private stockRepository: Repository<Stock>,
     @Inject(forwardRef(() => PaperTradingService))
     private paperTradingService: PaperTradingService,
+    private marketHoursService: MarketHoursService,
   ) {
     // Initialize WebSocket gateway as null, will be set via setter to avoid circular dependency
     this.webSocketGateway = null;
@@ -72,6 +83,9 @@ export class OrderManagementService {
    */
   async createOrder(createOrderDto: CreateOrderDto): Promise<Order> {
     try {
+      // Validate market hours before creating order
+      this.marketHoursService.validateTradingHours(true);
+
       // Validate portfolio exists
       const portfolio = await this.portfolioRepository.findOne({
         where: { id: createOrderDto.portfolioId },
@@ -104,6 +118,14 @@ export class OrderManagementService {
         notes: createOrderDto.notes,
         expiryDate: createOrderDto.expiryDate,
         parentOrderId: createOrderDto.parentOrderId,
+        // Advanced order features
+        trailAmount: createOrderDto.trailAmount,
+        trailPercent: createOrderDto.trailPercent,
+        ocoGroupId: createOrderDto.ocoGroupId,
+        conditionalTriggers: createOrderDto.conditionalTriggers,
+        profitTargetPrice: createOrderDto.profitTargetPrice,
+        stopLossPrice: createOrderDto.stopLossPrice,
+        routingDestination: createOrderDto.routingDestination,
         status: OrderStatus.PENDING,
       });
 
@@ -187,6 +209,11 @@ export class OrderManagementService {
   @Cron('*/30 * * * * *') // Every 30 seconds
   async monitorAndTriggerOrders(): Promise<void> {
     try {
+      // Skip monitoring if market is closed
+      if (!this.marketHoursService.isMarketOpen()) {
+        return;
+      }
+
       const activeOrders = await this.getActiveOrders();
       const stocks = await this.stockRepository.find();
       const stockPriceMap = new Map(
@@ -271,6 +298,13 @@ export class OrderManagementService {
           triggerReason = `Stop limit executed at ${currentPrice} (limit: ${order.limitPrice})`;
         }
         break;
+
+      case OrderType.TRAILING_STOP:
+        if (currentPrice <= Number(order.stopPrice)) {
+          shouldTrigger = true;
+          triggerReason = `Trailing stop triggered at ${currentPrice} (stop: ${order.stopPrice})`;
+        }
+        break;
     }
 
     if (shouldTrigger) {
@@ -287,6 +321,9 @@ export class OrderManagementService {
     reason?: string,
   ): Promise<OrderExecutionResult> {
     try {
+      // Validate market hours before executing order
+      this.marketHoursService.validateTradingHours(true);
+
       // Get current market price if not provided
       if (!executionPrice) {
         const stock = await this.stockRepository.findOne({
@@ -322,6 +359,9 @@ export class OrderManagementService {
         this.logger.log(
           `Order executed: ${order.id} - ${order.symbol} ${order.side} ${order.quantity} @ ${executionPrice} (${reason || 'Market order'})`,
         );
+
+        // Handle OCO order cancellation
+        await this.handleOCOExecution(order);
 
         // Emit WebSocket event for order execution
         if (this.webSocketGateway) {
@@ -454,6 +494,18 @@ export class OrderManagementService {
           );
         }
         break;
+
+      case OrderType.TRAILING_STOP:
+        if (!order.trailAmount && !order.trailPercent) {
+          throw new Error('Either trail amount or trail percent required for trailing stop orders');
+        }
+        break;
+
+      case OrderType.BRACKET:
+        if (!order.profitTargetPrice || !order.stopLossPrice) {
+          throw new Error('Both profit target and stop loss prices required for bracket orders');
+        }
+        break;
     }
   }
 
@@ -548,5 +600,277 @@ export class OrderManagementService {
         createdAt: 'DESC',
       },
     });
+  }
+
+  /**
+   * Create trailing stop order
+   */
+  async createTrailingStopOrder(
+    portfolioId: number,
+    symbol: string,
+    quantity: number,
+    trailAmount?: number,
+    trailPercent?: number,
+  ): Promise<Order> {
+    if (!trailAmount && !trailPercent) {
+      throw new Error('Either trail amount or trail percent must be specified');
+    }
+
+    const stock = await this.stockRepository.findOne({
+      where: { symbol },
+    });
+    
+    if (!stock) {
+      throw new Error(`Stock ${symbol} not found`);
+    }
+
+    const currentPrice = Number(stock.currentPrice);
+    
+    return this.createOrder({
+      portfolioId,
+      symbol,
+      orderType: OrderType.TRAILING_STOP,
+      side: OrderSide.SELL,
+      quantity,
+      trailAmount,
+      trailPercent,
+      stopPrice: currentPrice - (trailAmount || (currentPrice * (trailPercent || 0) / 100)),
+      notes: `Trailing stop - ${trailAmount ? `$${trailAmount}` : `${trailPercent}%`} trail`,
+    });
+  }
+
+  /**
+   * Create OCO (One-Cancels-Other) order pair
+   */
+  async createOCOOrder(
+    portfolioId: number,
+    symbol: string,
+    quantity: number,
+    limitPrice: number,
+    stopPrice: number,
+  ): Promise<{ limitOrder: Order; stopOrder: Order }> {
+    const ocoGroupId = `oco_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+    const limitOrder = await this.createOrder({
+      portfolioId,
+      symbol,
+      orderType: OrderType.LIMIT,
+      side: OrderSide.SELL,
+      quantity,
+      limitPrice,
+      ocoGroupId,
+      notes: 'OCO order - limit leg',
+    });
+
+    const stopOrder = await this.createOrder({
+      portfolioId,
+      symbol,
+      orderType: OrderType.STOP_LOSS,
+      side: OrderSide.SELL,
+      quantity,
+      stopPrice,
+      ocoGroupId,
+      notes: 'OCO order - stop leg',
+    });
+
+    return { limitOrder, stopOrder };
+  }
+
+  /**
+   * Create conditional order with multiple triggers
+   */
+  async createConditionalOrder(
+    orderDto: CreateOrderDto,
+    triggers: ConditionalTrigger[],
+  ): Promise<Order> {
+    return this.createOrder({
+      ...orderDto,
+      conditionalTriggers: triggers,
+      notes: `${orderDto.notes || ''} - Conditional order with ${triggers.length} trigger(s)`,
+    });
+  }
+
+  /**
+   * Update trailing stop high water mark
+   */
+  private async updateTrailingStops(symbol: string, currentPrice: number): Promise<void> {
+    const trailingStops = await this.orderRepository.find({
+      where: {
+        symbol,
+        orderType: OrderType.TRAILING_STOP,
+        status: OrderStatus.PENDING,
+      },
+    });
+
+    for (const order of trailingStops) {
+      const highWaterMark = Number(order.highWaterMark || currentPrice);
+      
+      if (currentPrice > highWaterMark) {
+        // Update high water mark and adjust stop price
+        order.highWaterMark = currentPrice;
+        
+        let newStopPrice: number;
+        if (order.trailAmount) {
+          newStopPrice = currentPrice - Number(order.trailAmount);
+        } else if (order.trailPercent) {
+          newStopPrice = currentPrice * (1 - Number(order.trailPercent) / 100);
+        } else {
+          continue;
+        }
+
+        order.stopPrice = Math.max(Number(order.stopPrice), newStopPrice);
+        await this.orderRepository.save(order);
+      }
+    }
+  }
+
+  /**
+   * Check conditional triggers for orders
+   */
+  private async checkConditionalTriggers(order: Order, marketData: any): Promise<boolean> {
+    if (!order.conditionalTriggers || order.conditionalTriggers.length === 0) {
+      return false;
+    }
+
+    const results: boolean[] = [];
+    
+    for (const trigger of order.conditionalTriggers) {
+      let triggerMet = false;
+      const value = this.getFieldValue(marketData, trigger.field);
+      
+      switch (trigger.condition) {
+        case 'greater_than':
+          triggerMet = value > Number(trigger.value);
+          break;
+        case 'less_than':
+          triggerMet = value < Number(trigger.value);
+          break;
+        case 'equals':
+          triggerMet = value === Number(trigger.value);
+          break;
+        case 'between':
+          triggerMet = value >= Number(trigger.value) && value <= Number(trigger.value2 || 0);
+          break;
+      }
+      
+      results.push(triggerMet);
+    }
+
+    // Process logical operators
+    let finalResult = results[0];
+    for (let i = 1; i < results.length; i++) {
+      const trigger = order.conditionalTriggers[i];
+      if (trigger.logicalOperator === 'OR') {
+        finalResult = finalResult || results[i];
+      } else {
+        finalResult = finalResult && results[i];
+      }
+    }
+
+    return finalResult;
+  }
+
+  /**
+   * Get field value from market data
+   */
+  private getFieldValue(marketData: any, field: string): number {
+    switch (field) {
+      case 'price':
+        return marketData.currentPrice || 0;
+      case 'volume':
+        return marketData.volume || 0;
+      case 'change':
+        return marketData.change || 0;
+      case 'changePercent':
+        return marketData.changePercent || 0;
+      default:
+        return 0;
+    }
+  }
+
+  /**
+   * Cancel OCO order group
+   */
+  async cancelOCOGroup(ocoGroupId: string): Promise<Order[]> {
+    const orders = await this.orderRepository.find({
+      where: { ocoGroupId },
+    });
+
+    const cancelledOrders: Order[] = [];
+    for (const order of orders) {
+      if (order.status === OrderStatus.PENDING || order.status === OrderStatus.TRIGGERED) {
+        const cancelled = await this.cancelOrder(order.id, 'OCO group cancelled');
+        cancelledOrders.push(cancelled);
+      }
+    }
+
+    return cancelledOrders;
+  }
+
+  /**
+   * Handle OCO order execution (cancel other orders in group)
+   */
+  private async handleOCOExecution(executedOrder: Order): Promise<void> {
+    if (!executedOrder.ocoGroupId) return;
+
+    const otherOrders = await this.orderRepository.find({
+      where: {
+        ocoGroupId: executedOrder.ocoGroupId,
+        id: Not(executedOrder.id),
+        status: In([OrderStatus.PENDING, OrderStatus.TRIGGERED]),
+      },
+    });
+
+    for (const order of otherOrders) {
+      await this.cancelOrder(order.id, 'OCO - other order executed');
+    }
+  }
+
+  /**
+   * Enhanced monitoring with advanced order types (runs every 30 seconds)
+   */
+  @Cron('*/30 * * * * *')
+  async monitorAdvancedOrders(): Promise<void> {
+    try {
+      // Skip monitoring if market is closed
+      if (!this.marketHoursService.isMarketOpen()) {
+        return;
+      }
+
+      const activeOrders = await this.getActiveOrders();
+      const stocks = await this.stockRepository.find();
+      const stockDataMap = new Map(
+        stocks.map((s) => [s.symbol, {
+          currentPrice: Number(s.currentPrice),
+          volume: Number(s.volume || 0),
+          change: Number(s.change || 0),
+          changePercent: Number(s.changePercent || 0),
+        }]),
+      );
+
+      for (const order of activeOrders) {
+        const marketData = stockDataMap.get(order.symbol);
+        if (!marketData) continue;
+
+        // Update trailing stops first
+        if (order.orderType === OrderType.TRAILING_STOP) {
+          await this.updateTrailingStops(order.symbol, marketData.currentPrice);
+        }
+
+        // Check conditional triggers
+        if (order.conditionalTriggers && order.conditionalTriggers.length > 0) {
+          const triggered = await this.checkConditionalTriggers(order, marketData);
+          if (triggered) {
+            await this.executeOrder(order, marketData.currentPrice, 'Conditional trigger activated');
+            continue;
+          }
+        }
+
+        // Standard order trigger checking
+        await this.checkOrderTrigger(order, marketData.currentPrice);
+      }
+    } catch (error) {
+      this.logger.error('Error monitoring advanced orders:', error);
+    }
   }
 }

@@ -118,12 +118,9 @@ export class AutoTradingStore {
   // Actions
   private async loadInitialData() {
     try {
-      await Promise.all([
-        this.fetchTradingRules(),
-        this.fetchTradingSessions(),
-        this.fetchTradingPerformance(),
-        this.fetchActiveTrades(),
-      ]);
+      // All auto-trading endpoints require portfolioId or sessionId parameters
+      // Data will be loaded when a specific portfolio/session is selected
+      console.log('AutoTradingStore initialized - data will be loaded when portfolio is selected');
     } catch (error) {
       console.error("Failed to load initial auto trading data:", error);
     }
@@ -157,9 +154,14 @@ export class AutoTradingStore {
 
   async fetchTradingRules(portfolioId?: string): Promise<void> {
     try {
-      const endpoint = portfolioId
-        ? `/auto-trading/rules/${portfolioId}`
-        : "/auto-trading/rules";
+      if (!portfolioId) {
+        console.warn('fetchTradingRules called without portfolioId, skipping API call');
+        runInAction(() => {
+          this.tradingRules = [];
+        });
+        return;
+      }
+      const endpoint = `/auto-trading/rules/${portfolioId}`;
       const response = await this.apiStore.get(endpoint);
 
       runInAction(() => {
@@ -310,9 +312,14 @@ export class AutoTradingStore {
 
   async fetchTradingSessions(portfolioId?: string): Promise<void> {
     try {
-      const endpoint = portfolioId
-        ? `/auto-trading/sessions/${portfolioId}`
-        : "/auto-trading/sessions";
+      if (!portfolioId) {
+        console.warn('fetchTradingSessions called without portfolioId, skipping API call');
+        runInAction(() => {
+          this.tradingSessions = [];
+        });
+        return;
+      }
+      const endpoint = `/auto-trading/sessions/${portfolioId}`;
       const response = await this.apiStore.get(endpoint);
 
       runInAction(() => {
@@ -429,9 +436,16 @@ export class AutoTradingStore {
   }
 
   // Trade Management
-  async fetchActiveTrades(): Promise<void> {
+  async fetchActiveTrades(portfolioId?: string): Promise<void> {
     try {
-      const response = await this.apiStore.get("/auto-trading/trades/active");
+      if (!portfolioId) {
+        console.warn('fetchActiveTrades called without portfolioId, skipping API call');
+        runInAction(() => {
+          this.activeTrades = [];
+        });
+        return;
+      }
+      const response = await this.apiStore.get(`/auto-trading/trades/${portfolioId}?status=active`);
 
       runInAction(() => {
         this.activeTrades = (response as any).data;
@@ -466,9 +480,16 @@ export class AutoTradingStore {
     }
   }
 
-  async fetchTradingPerformance(): Promise<void> {
+  async fetchTradingPerformance(sessionId?: string): Promise<void> {
     try {
-      const response = await this.apiStore.get("/auto-trading/performance");
+      if (!sessionId) {
+        console.warn('fetchTradingPerformance called without sessionId, skipping API call');
+        runInAction(() => {
+          this.tradingPerformance = null;
+        });
+        return;
+      }
+      const response = await this.apiStore.get(`/auto-trading/sessions/${sessionId}/performance`);
 
       runInAction(() => {
         this.tradingPerformance = (response as any).data;
@@ -655,8 +676,8 @@ export class AutoTradingStore {
     return this.fetchTradingSessions(portfolioId);
   }
 
-  async loadActiveTrades(): Promise<void> {
-    return this.fetchActiveTrades();
+  async loadActiveTrades(portfolioId?: string): Promise<void> {
+    return this.fetchActiveTrades(portfolioId);
   }
 
   // Additional methods for portfolio trading control

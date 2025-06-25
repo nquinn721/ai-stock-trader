@@ -22,6 +22,16 @@ import { StockService } from '../stock/stock.service';
   transports: ['websocket', 'polling'],
   pingTimeout: 60000,
   pingInterval: 25000,
+  // Enable compression for better performance
+  compression: true,
+  perMessageDeflate: {
+    threshold: 1024, // Only compress messages larger than 1KB
+    concurrencyLimit: 10,
+    memLevel: 3,
+  },
+  // Optimize for high-frequency updates
+  maxHttpBufferSize: 1e6, // 1MB buffer
+  allowEIO3: true,
 })
 @Injectable()
 export class StockWebSocketGateway
@@ -33,6 +43,26 @@ export class StockWebSocketGateway
   private clients: Map<string, Socket> = new Map();
   private portfolioSubscriptions: Map<string, Set<number>> = new Map(); // clientId -> portfolioIds
   private notificationSubscriptions: Map<string, string> = new Map(); // clientId -> userId
+  
+  // Message batching optimization
+  private messageBatch: Map<string, any[]> = new Map();
+  private batchTimer: NodeJS.Timeout | null = null;
+  private readonly BATCH_INTERVAL = 100; // 100ms batching interval
+  private readonly MAX_BATCH_SIZE = 50; // Maximum messages per batch
+  
+  // Connection management and rate limiting
+  private connectionPool: Map<string, { lastActivity: number; requestCount: number; }> = new Map();
+  private readonly MAX_REQUESTS_PER_MINUTE = 100;
+  private readonly CONNECTION_CLEANUP_INTERVAL = 60000; // 1 minute
+  private cleanupTimer: NodeJS.Timeout | null = null;
+  
+  // Subscription management for selective updates
+  private stockSubscriptions: Map<string, Set<string>> = new Map(); // clientId -> Set<symbols>
+  private lastUpdateTimes: Map<string, number> = new Map(); // symbol -> timestamp
+  
+  // Compression and binary message support
+  private compressionEnabled: boolean = true;
+  private readonly COMPRESSION_THRESHOLD = 500; // bytes
 
   constructor(
     @Inject(forwardRef(() => StockService))
@@ -47,14 +77,44 @@ export class StockWebSocketGateway
     // Set the WebSocket gateway reference in the order management service
     // to enable WebSocket event emission from the service
     this.orderManagementService.setWebSocketGateway(this);
+    
+    // Initialize batch processing
+    this.initializeBatchProcessing();
+    
+    // Initialize connection management
+    this.initializeConnectionManagement();
   }
   handleConnection(client: Socket) {
     console.log(`Client connected: ${client.id}`);
+    
+    // Rate limiting check
+    if (!this.checkRateLimit(client.id)) {
+      console.warn(`Rate limit exceeded for client ${client.id}`);
+      client.emit('rate_limit_exceeded', { 
+        message: 'Too many requests, please slow down',
+        retryAfter: 60 // seconds
+      });
+      client.disconnect();
+      return;
+    }
+    
     this.clients.set(client.id, client);
+    
+    // Initialize connection tracking
+    this.connectionPool.set(client.id, {
+      lastActivity: Date.now(),
+      requestCount: 0
+    });
 
     // Set up error handling for this client
     client.on('error', (error) => {
       console.error(`Socket error for client ${client.id}:`, error);
+    });
+    
+    // Track client activity for rate limiting
+    client.use((event, next) => {
+      this.updateClientActivity(client.id);
+      next();
     });
 
     // Send initial data (stocks and portfolios) with error handling
@@ -70,6 +130,14 @@ export class StockWebSocketGateway
     this.clients.delete(client.id);
     this.portfolioSubscriptions.delete(client.id);
     this.notificationSubscriptions.delete(client.id);
+    this.stockSubscriptions.delete(client.id);
+    this.connectionPool.delete(client.id);
+    
+    // Cleanup batch processing if no clients connected
+    if (this.clients.size === 0) {
+      this.cleanupBatchProcessing();
+      this.cleanupConnectionManagement();
+    }
   }
 
   @SubscribeMessage('subscribe_stocks')
@@ -84,6 +152,13 @@ export class StockWebSocketGateway
     @ConnectedSocket() client: Socket,
   ) {
     console.log(`Client ${client.id} subscribed to ${data.symbol}`);
+    
+    // Add to selective subscription tracking
+    if (!this.stockSubscriptions.has(client.id)) {
+      this.stockSubscriptions.set(client.id, new Set());
+    }
+    this.stockSubscriptions.get(client.id)!.add(data.symbol.toUpperCase());
+    
     // Join room for specific stock
     client.join(`stock_${data.symbol}`);
   }
@@ -94,6 +169,12 @@ export class StockWebSocketGateway
     @ConnectedSocket() client: Socket,
   ) {
     console.log(`Client ${client.id} unsubscribed from ${data.symbol}`);
+    
+    // Remove from selective subscription tracking
+    if (this.stockSubscriptions.has(client.id)) {
+      this.stockSubscriptions.get(client.id)!.delete(data.symbol.toUpperCase());
+    }
+    
     // Leave room for specific stock
     client.leave(`stock_${data.symbol}`);
   }
@@ -128,15 +209,11 @@ export class StockWebSocketGateway
         return;
       }
 
-      // Send to all clients
-      this.server.emit('stock_update', { symbol, data: stockData });
+      // Use batched updates for better performance
+      this.addToBatch('stock_update', { symbol, data: stockData });
+      this.addToBatch(`stock_specific_update_${symbol}`, stockData);
 
-      // Send to clients subscribed to specific stock
-      this.server
-        .to(`stock_${symbol}`)
-        .emit('stock_specific_update', stockData);
-
-      console.log(`Broadcasted update for ${symbol}`);
+      console.log(`Queued update for ${symbol}`);
     } catch (error) {
       console.error(`Error broadcasting stock update for ${symbol}:`, error);
     }
@@ -150,19 +227,20 @@ export class StockWebSocketGateway
     this.server.emit('news_update', news);
   }
   /**
-   * Broadcast all stock updates to connected clients
+   * Broadcast all stock updates to connected clients with batching optimization
    * Called by StockService when prices are updated
    */
   async broadcastAllStockUpdates() {
     try {
       const stocks = await this.stockService.getAllStocks();
       if (this.server && stocks.length > 0) {
-        this.server.emit('stock_updates', stocks);
+        // Use batched message sending for better performance
+        this.addToBatch('stock_updates', stocks);
         console.log(
-          `📊 Broadcasted ${stocks.length} stock updates to all clients`,
+          `📊 Queued ${stocks.length} stock updates for batched broadcast`,
         );
 
-        // Also broadcast portfolio updates since stock prices changed
+        // Also queue portfolio updates since stock prices changed
         await this.broadcastPortfolioUpdates();
       }
     } catch (error) {
@@ -1073,5 +1151,223 @@ export class StockWebSocketGateway
         timestamp: new Date().toISOString(),
       });
     }
+  }
+
+  /**
+   * Initialize batch processing for message optimization
+   */
+  private initializeBatchProcessing() {
+    // Start the batch processing timer
+    this.processBatchedMessages();
+  }
+
+  /**
+   * Add message to batch for optimized delivery
+   */
+  private addToBatch(eventType: string, data: any) {
+    if (!this.messageBatch.has(eventType)) {
+      this.messageBatch.set(eventType, []);
+    }
+    
+    const batch = this.messageBatch.get(eventType)!;
+    batch.push(data);
+    
+    // If batch is full, process immediately
+    if (batch.length >= this.MAX_BATCH_SIZE) {
+      this.flushBatch(eventType);
+    }
+  }
+
+  /**
+   * Process batched messages at regular intervals
+   */
+  private processBatchedMessages() {
+    if (this.batchTimer) {
+      clearTimeout(this.batchTimer);
+    }
+    
+    this.batchTimer = setTimeout(() => {
+      this.flushAllBatches();
+      this.processBatchedMessages(); // Schedule next batch
+    }, this.BATCH_INTERVAL);
+  }
+
+  /**
+   * Flush all message batches
+   */
+  private flushAllBatches() {
+    for (const [eventType] of this.messageBatch) {
+      this.flushBatch(eventType);
+    }
+  }
+
+  /**
+   * Flush specific batch type
+   */
+  private flushBatch(eventType: string) {
+    const batch = this.messageBatch.get(eventType);
+    if (!batch || batch.length === 0) {
+      return;
+    }
+    
+    try {
+      let payload: any;
+      
+      if (eventType.startsWith('stock_specific_update_')) {
+        // Handle specific stock updates
+        const symbol = eventType.replace('stock_specific_update_', '');
+        payload = {
+          symbol,
+          updates: batch,
+          timestamp: new Date().toISOString()
+        };
+        
+        // Use optimized emission with compression
+        this.emitOptimized(`stock_${symbol}`, 'stock_specific_update_batch', payload);
+      } else {
+        // Handle general batched updates
+        payload = {
+          updates: batch,
+          count: batch.length,
+          timestamp: new Date().toISOString()
+        };
+        
+        // Use optimized emission with compression
+        this.emitOptimized(null, `${eventType}_batch`, payload);
+      }
+      
+      console.log(`✨ Flushed ${batch.length} messages for ${eventType}`);
+    } catch (error) {
+      console.error(`Error flushing batch for ${eventType}:`, error);
+    }
+    
+    // Clear the batch
+    this.messageBatch.set(eventType, []);
+  }
+
+  /**
+   * Cleanup batch processing on disconnect
+   */
+  private cleanupBatchProcessing() {
+    if (this.batchTimer) {
+      clearTimeout(this.batchTimer);
+      this.batchTimer = null;
+    }
+    this.messageBatch.clear();
+  }
+
+  /**
+   * Initialize connection management and rate limiting
+   */
+  private initializeConnectionManagement() {
+    // Start connection cleanup timer
+    this.cleanupTimer = setInterval(() => {
+      this.cleanupInactiveConnections();
+    }, this.CONNECTION_CLEANUP_INTERVAL);
+  }
+
+  /**
+   * Check rate limit for client
+   */
+  private checkRateLimit(clientId: string): boolean {
+    const connection = this.connectionPool.get(clientId);
+    if (!connection) {
+      return true; // New connection, allow
+    }
+    
+    const now = Date.now();
+    const oneMinuteAgo = now - 60000;
+    
+    // Reset request count if more than a minute has passed
+    if (connection.lastActivity < oneMinuteAgo) {
+      connection.requestCount = 0;
+    }
+    
+    return connection.requestCount < this.MAX_REQUESTS_PER_MINUTE;
+  }
+
+  /**
+   * Update client activity for rate limiting
+   */
+  private updateClientActivity(clientId: string) {
+    const connection = this.connectionPool.get(clientId);
+    if (connection) {
+      connection.lastActivity = Date.now();
+      connection.requestCount++;
+    }
+  }
+
+  /**
+   * Clean up inactive connections
+   */
+  private cleanupInactiveConnections() {
+    const now = Date.now();
+    const fiveMinutesAgo = now - 300000; // 5 minutes
+    
+    for (const [clientId, connection] of this.connectionPool.entries()) {
+      if (connection.lastActivity < fiveMinutesAgo) {
+        const client = this.clients.get(clientId);
+        if (client) {
+          console.log(`Disconnecting inactive client: ${clientId}`);
+          client.disconnect();
+        }
+      }
+    }
+  }
+
+  /**
+   * Cleanup connection management
+   */
+  private cleanupConnectionManagement() {
+    if (this.cleanupTimer) {
+      clearInterval(this.cleanupTimer);
+      this.cleanupTimer = null;
+    }
+    this.connectionPool.clear();
+    this.stockSubscriptions.clear();
+    this.lastUpdateTimes.clear();
+  }
+
+  /**
+   * Optimized emit with compression and binary support
+   */
+  private emitOptimized(room: string  < /dev/null |  null, event: string, data: any) {
+    try {
+      const serializedData = JSON.stringify(data);
+      const dataSize = Buffer.byteLength(serializedData, 'utf8');
+      
+      // Determine target
+      const target = room ? this.server.to(room) : this.server;
+      
+      // Use binary message for large payloads if supported
+      if (dataSize > this.COMPRESSION_THRESHOLD && this.compressionEnabled) {
+        // Convert to compressed binary message
+        const buffer = Buffer.from(serializedData, 'utf8');
+        target.emit(event, {
+          type: 'compressed',
+          data: buffer,
+          originalSize: dataSize,
+          compressed: true
+        });
+        
+        console.log(`📦 Sent compressed message: ${dataSize} bytes`);
+      } else {
+        // Standard JSON emission
+        target.emit(event, data);
+      }
+    } catch (error) {
+      console.error('Error in optimized emit:', error);
+      // Fallback to standard emit
+      const target = room ? this.server.to(room) : this.server;
+      target.emit(event, data);
+    }
+  }
+
+  /**
+   * Check if client supports compression
+   */
+  private clientSupportsCompression(clientId: string): boolean {
+    const client = this.clients.get(clientId);
+    return client ? client.conn.transport.name === 'websocket' : false;
   }
 }

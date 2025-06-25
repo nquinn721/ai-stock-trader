@@ -11,12 +11,35 @@ import { Portfolio } from './portfolio.entity';
 import { Position } from './position.entity';
 import { Stock } from './stock.entity';
 
+export interface ConditionalTrigger {
+  id: string;
+  type: 'price' | 'time' | 'indicator' | 'volume';
+  condition: 'greater_than' | 'less_than' | 'equals' | 'between';
+  value: number | string;
+  value2?: number; // For 'between' conditions
+  field: string; // e.g., 'price', 'volume', 'rsi', etc.
+  logicalOperator?: 'AND' | 'OR';
+}
+
+export interface ExecutionReport {
+  timestamp: Date;
+  quantity: number;
+  price: number;
+  commission: number;
+  venue: string;
+  executionId: string;
+}
+
 export enum OrderType {
   MARKET = 'market',
   LIMIT = 'limit',
   STOP_LOSS = 'stop_loss',
   TAKE_PROFIT = 'take_profit',
   STOP_LIMIT = 'stop_limit',
+  TRAILING_STOP = 'trailing_stop',
+  BRACKET = 'bracket',
+  OCO = 'oco', // One-Cancels-Other
+  IF_TOUCHED = 'if_touched',
   ENTRY = 'entry', // Legacy support
 }
 
@@ -162,6 +185,74 @@ export class Order {
   @ManyToOne(() => Order, { nullable: true })
   @JoinColumn({ name: 'parent_order_id' })
   parentOrder: Order;
+
+  // Advanced order features
+  @Column({
+    type: 'decimal',
+    precision: 10,
+    scale: 4,
+    nullable: true,
+  })
+  trailAmount: number; // For trailing stops
+
+  @Column({
+    type: 'decimal',
+    precision: 10,
+    scale: 4,
+    nullable: true,
+  })
+  trailPercent: number; // For percentage-based trailing stops
+
+  @Column({
+    type: 'decimal',
+    precision: 10,
+    scale: 2,
+    nullable: true,
+  })
+  highWaterMark: number; // Tracks highest price for trailing stops
+
+  // OCO (One-Cancels-Other) order group
+  @Column({ type: 'uuid', nullable: true })
+  ocoGroupId: string;
+
+  // Conditional order triggers
+  @Column({ type: 'json', nullable: true })
+  conditionalTriggers: ConditionalTrigger[];
+
+  // Bracket order components
+  @Column({
+    type: 'decimal',
+    precision: 10,
+    scale: 2,
+    nullable: true,
+  })
+  profitTargetPrice: number;
+
+  @Column({
+    type: 'decimal',
+    precision: 10,
+    scale: 2,
+    nullable: true,
+  })
+  stopLossPrice: number;
+
+  // Order routing and execution
+  @Column({ length: 50, nullable: true })
+  routingDestination: string;
+
+  @Column({
+    type: 'decimal',
+    precision: 10,
+    scale: 6,
+    nullable: true,
+  })
+  avgExecutionPrice: number;
+
+  @Column({ type: 'int', default: 0 })
+  fillCount: number;
+
+  @Column({ type: 'json', nullable: true })
+  executionReports: ExecutionReport[];
 
   // Legacy support
   @Column({ nullable: true })

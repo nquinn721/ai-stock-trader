@@ -11,6 +11,7 @@ import { WebsocketModule } from '../websocket/websocket.module';
 import { OrderManagementController } from './order-management.controller';
 import { OrderManagementService } from './order-management.service';
 import { OrderService } from './order.service';
+import { OrderExecutionEngine } from './services/order-execution-engine.service';
 
 @Module({
   imports: [
@@ -20,7 +21,7 @@ import { OrderService } from './order.service';
     forwardRef(() => WebsocketModule), // For websocket communication
   ],
   controllers: [OrderManagementController],
-  providers: [OrderManagementService, OrderService],
-  exports: [OrderManagementService, OrderService],
+  providers: [OrderManagementService, OrderService, OrderExecutionEngine],
+  exports: [OrderManagementService, OrderService, OrderExecutionEngine],
 })
 export class OrderManagementModule {}
