@@ -54,11 +54,20 @@ const PortfolioChart: React.FC<PortfolioChartProps> = observer(
 
     const fetchPortfolioPerformance = useCallback(async () => {
       try {
+        console.log("🔍 Fetching portfolio performance for ID:", portfolioId);
         // Fetch performance history from MobX store
         await portfolioStore.fetchPerformanceHistory(
           portfolioId,
           currentTimeframe
-        ); // Transform MobX store data to chart format
+        );
+
+        console.log(
+          "📊 Performance history loaded:",
+          portfolioStore.performanceHistory.length,
+          "points"
+        );
+
+        // Transform MobX store data to chart format
         if (portfolioStore.performanceHistory.length > 0) {
           const transformedData: ChartData = {
             performanceHistory: portfolioStore.performanceHistory.map(
@@ -81,14 +90,20 @@ const PortfolioChart: React.FC<PortfolioChartProps> = observer(
               worstDay: 0, // Would need to calculate or fetch from backend
             },
           };
+          console.log(
+            "✅ Chart data transformed successfully:",
+            transformedData
+          );
           setChartData(transformedData);
         } else {
+          console.log("📊 No performance history, using mock data");
           // Fallback to mock data if no performance history
           const mockData: ChartData = generateMockPerformanceData();
           setChartData(mockData);
         }
       } catch (error) {
         console.error("⚠️ Portfolio Chart Error:", error);
+        console.log("📊 Error occurred, using mock data fallback");
         // Fallback to mock data
         const mockData: ChartData = generateMockPerformanceData();
         setChartData(mockData);
@@ -226,9 +241,10 @@ const PortfolioChart: React.FC<PortfolioChartProps> = observer(
         <div className="chart-container">
           <svg
             width="100%"
-            height={chartHeight}
+            height="240"
             viewBox="0 0 100 100"
             className="portfolio-chart-svg"
+            preserveAspectRatio="xMidYMid meet"
           >
             {/* Grid lines */}
             <defs>
