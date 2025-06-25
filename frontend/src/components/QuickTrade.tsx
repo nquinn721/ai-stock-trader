@@ -116,7 +116,7 @@ const QuickTrade: React.FC = observer(() => {
     try {
       setPortfolioLoading(true);
       await portfolioStore.fetchPortfolios();
-      
+
       if (portfolioStore.portfolios.length > 0) {
         const portfolioId = portfolioStore.portfolios[0].id;
         setPortfolioId(portfolioId);
@@ -750,8 +750,9 @@ const QuickTrade: React.FC = observer(() => {
                       (portfolio.totalValue *
                         parseFloat(advancedForm.riskPercent)) /
                         100 /
-                        ((stocks || []).find((s) => s.symbol === advancedForm.symbol)
-                          ?.currentPrice || 1)
+                        ((stocks || []).find(
+                          (s) => s.symbol === advancedForm.symbol
+                        )?.currentPrice || 1)
                     )}{" "}
                     shares
                   </span>

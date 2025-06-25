@@ -1,3 +1,4 @@
+import { observer } from "mobx-react-lite";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   Line,
@@ -8,9 +9,8 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { observer } from "mobx-react-lite";
-import { DayTradingPattern, Stock, TradingSignal } from "../types";
 import { useStockStore } from "../stores/StoreContext";
+import { DayTradingPattern, Stock, TradingSignal } from "../types";
 import RecommendationWidget from "./RecommendationWidget";
 import "./StockCard.css";
 import StockModal from "./StockModal";
@@ -63,7 +63,7 @@ const StockCard: React.FC<StockCardProps> = observer(({ stock, signal }) => {
       setIsLoading(true);
       console.log(`📊 Fetching today's historical data for ${stock.symbol}`);
 
-      const data = await stockStore.fetchStockHistory(stock.symbol, '1D');
+      const data = await stockStore.fetchStockHistory(stock.symbol, "1D");
       console.log(`📊 Received historical data for ${stock.symbol}:`, data);
 
       if (data && Array.isArray(data) && data.length > 0) {
