@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Order, OrderStatus, OrderType, OrderSide } from '../../../entities/order.entity';
+import { Order, OrderSide, OrderStatus } from '../../../entities/order.entity';
 import { Portfolio } from '../../../entities/portfolio.entity';
 import { Position } from '../../../entities/position.entity';
 import { Stock } from '../../../entities/stock.entity';
@@ -64,7 +64,7 @@ export class OrderExecutionService {
       }
 
       const currentPrice = Number(stock.currentPrice);
-      
+
       // Apply routing strategy
       const executionPrice = await this.calculateExecutionPrice(
         currentPrice,
@@ -73,13 +73,14 @@ export class OrderExecutionService {
       );
 
       // Check for partial fills based on market conditions
-      const { executedQuantity, partialFill } = await this.determineExecutionQuantity(
-        order,
-        routingOptions,
-      );
+      const { executedQuantity, partialFill } =
+        await this.determineExecutionQuantity(order, routingOptions);
 
       // Calculate commission
-      const commission = this.calculateCommission(executedQuantity, executionPrice);
+      const commission = this.calculateCommission(
+        executedQuantity,
+        executionPrice,
+      );
 
       // Execute the trade
       const result = await this.paperTradingService.executeTrade({
@@ -115,7 +116,7 @@ export class OrderExecutionService {
         executionId: `exec_${Date.now()}_${order.id}`,
         venue: routingOptions?.routingStrategy || 'default',
         timestamp: new Date(),
-        message: partialFill 
+        message: partialFill
           ? `Partial fill: ${executedQuantity}/${order.quantity} shares executed`
           : 'Order fully executed',
       };
@@ -140,11 +141,13 @@ export class OrderExecutionService {
     routingOptions?: OrderRoutingOptions,
   ): Promise<ExecutionResult> {
     try {
-      this.logger.log(`Attempting to execute limit order ${order.id} at $${order.limitPrice}`);
+      this.logger.log(
+        `Attempting to execute limit order ${order.id} at $${order.limitPrice}`,
+      );
 
       // Check if limit order can be executed
       const canExecute = this.canExecuteLimitOrder(order, currentPrice);
-      
+
       if (!canExecute) {
         return {
           success: false,
@@ -162,17 +165,19 @@ export class OrderExecutionService {
       }
 
       // Execute at limit price or better
-      const executionPrice = order.side === OrderSide.BUY
-        ? Math.min(Number(order.limitPrice), currentPrice)
-        : Math.max(Number(order.limitPrice), currentPrice);
+      const executionPrice =
+        order.side === OrderSide.BUY
+          ? Math.min(Number(order.limitPrice), currentPrice)
+          : Math.max(Number(order.limitPrice), currentPrice);
 
       // Determine execution quantity (may be partial)
-      const { executedQuantity, partialFill } = await this.determineExecutionQuantity(
-        order,
-        routingOptions,
-      );
+      const { executedQuantity, partialFill } =
+        await this.determineExecutionQuantity(order, routingOptions);
 
-      const commission = this.calculateCommission(executedQuantity, executionPrice);
+      const commission = this.calculateCommission(
+        executedQuantity,
+        executionPrice,
+      );
 
       // Execute the trade
       const result = await this.paperTradingService.executeTrade({
@@ -208,7 +213,7 @@ export class OrderExecutionService {
         executionId: `exec_${Date.now()}_${order.id}`,
         venue: routingOptions?.routingStrategy || 'default',
         timestamp: new Date(),
-        message: partialFill 
+        message: partialFill
           ? `Partial fill: ${executedQuantity}/${order.quantity} shares executed`
           : 'Limit order fully executed',
       };
@@ -227,7 +232,9 @@ export class OrderExecutionService {
     routingOptions?: OrderRoutingOptions,
   ): Promise<ExecutionResult> {
     try {
-      this.logger.log(`Executing stop order ${order.id} - stop price: $${order.stopPrice}`);
+      this.logger.log(
+        `Executing stop order ${order.id} - stop price: $${order.stopPrice}`,
+      );
 
       // Convert to market order at current price
       return this.executeMarketOrder(order, routingOptions);
@@ -246,7 +253,9 @@ export class OrderExecutionService {
     routingOptions?: OrderRoutingOptions,
   ): Promise<ExecutionResult> {
     try {
-      this.logger.log(`Executing stop-limit order ${order.id} - limit: $${order.limitPrice}`);
+      this.logger.log(
+        `Executing stop-limit order ${order.id} - limit: $${order.limitPrice}`,
+      );
 
       // Convert to limit order execution
       return this.executeLimitOrder(order, currentPrice, routingOptions);
@@ -312,27 +321,33 @@ export class OrderExecutionService {
     }
 
     // Simulate market liquidity constraints
-    const availableLiquidity = await this.getAvailableLiquidity(order.symbol, totalQuantity);
-    
+    const availableLiquidity = await this.getAvailableLiquidity(
+      order.symbol,
+      totalQuantity,
+    );
+
     if (availableLiquidity >= totalQuantity) {
       return { executedQuantity: totalQuantity, partialFill: false };
     }
 
     // Partial fill scenario
     const executedQuantity = Math.max(1, Math.floor(availableLiquidity));
-    return { 
-      executedQuantity, 
-      partialFill: executedQuantity < totalQuantity 
+    return {
+      executedQuantity,
+      partialFill: executedQuantity < totalQuantity,
     };
   }
 
   /**
    * Simulate available market liquidity
    */
-  private async getAvailableLiquidity(symbol: string, requestedQuantity: number): Promise<number> {
+  private async getAvailableLiquidity(
+    symbol: string,
+    requestedQuantity: number,
+  ): Promise<number> {
     // In a real system, this would check order book depth
     // For paper trading, we'll simulate based on typical market conditions
-    
+
     // Large orders (>1000 shares) may face liquidity constraints
     if (requestedQuantity > 1000) {
       // Simulate 80-95% fill rate for large orders
@@ -379,7 +394,8 @@ export class OrderExecutionService {
       venue: string;
     },
   ): Promise<void> {
-    const { executedPrice, executedQuantity, commission, partialFill, venue } = executionDetails;
+    const { executedPrice, executedQuantity, commission, partialFill, venue } =
+      executionDetails;
 
     // Update order execution fields
     order.executedPrice = executedPrice;
@@ -433,13 +449,14 @@ export class OrderExecutionService {
     }
 
     // Calculate execution quality metrics
-    const priceImprovement = order.limitPrice 
+    const priceImprovement = order.limitPrice
       ? Math.abs(Number(order.executedPrice) - Number(order.limitPrice))
       : 0;
 
-    const executionSpeed = order.executedAt && order.createdAt
-      ? (order.executedAt.getTime() - order.createdAt.getTime()) / 1000 // seconds
-      : 0;
+    const executionSpeed =
+      order.executedAt && order.createdAt
+        ? (order.executedAt.getTime() - order.createdAt.getTime()) / 1000 // seconds
+        : 0;
 
     const fillRate = Number(order.executedQuantity) / Number(order.quantity);
 

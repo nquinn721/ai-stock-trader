@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Order, OrderSide, OrderType } from '../../../entities/order.entity';
+import { Order, OrderSide } from '../../../entities/order.entity';
 import { Portfolio } from '../../../entities/portfolio.entity';
 import { Position } from '../../../entities/position.entity';
 import { Stock } from '../../../entities/stock.entity';
@@ -59,7 +59,10 @@ export class OrderRiskManagementService {
   /**
    * Validate order against risk management rules
    */
-  async validateOrderRisk(order: Order, customLimits?: Partial<OrderRiskLimits>): Promise<RiskValidationResult> {
+  async validateOrderRisk(
+    order: Order,
+    customLimits?: Partial<OrderRiskLimits>,
+  ): Promise<RiskValidationResult> {
     try {
       const riskLimits = { ...this.DEFAULT_RISK_LIMITS, ...customLimits };
       const violations: string[] = [];
@@ -84,7 +87,8 @@ export class OrderRiskManagementService {
       }
 
       const currentPrice = Number(stock.currentPrice);
-      const orderValue = Number(order.quantity) * (Number(order.limitPrice) || currentPrice);
+      const orderValue =
+        Number(order.quantity) * (Number(order.limitPrice) || currentPrice);
 
       // 1. Validate order size limits
       const orderSizeCheck = this.validateOrderSize(orderValue, riskLimits);
@@ -199,7 +203,11 @@ export class OrderRiskManagementService {
     order: Order,
     orderValue: number,
     riskLimits: OrderRiskLimits,
-  ): Promise<{ violations: string[]; recommendations: string[]; riskScore: number }> {
+  ): Promise<{
+    violations: string[];
+    recommendations: string[];
+    riskScore: number;
+  }> {
     const violations: string[] = [];
     const recommendations: string[] = [];
     let riskScore = 0;
@@ -241,7 +249,11 @@ export class OrderRiskManagementService {
     order: Order,
     orderValue: number,
     riskLimits: OrderRiskLimits,
-  ): Promise<{ violations: string[]; recommendations: string[]; riskScore: number }> {
+  ): Promise<{
+    violations: string[];
+    recommendations: string[];
+    riskScore: number;
+  }> {
     const violations: string[] = [];
     const recommendations: string[] = [];
     let riskScore = 0;
@@ -251,16 +263,18 @@ export class OrderRiskManagementService {
       where: { portfolioId: portfolio.id, symbol: order.symbol },
     });
 
-    const currentPositionValue = currentPosition 
+    const currentPositionValue = currentPosition
       ? Number(currentPosition.quantity) * Number(currentPosition.currentPrice)
       : 0;
 
-    const proposedPositionValue = order.side === OrderSide.BUY
-      ? currentPositionValue + orderValue
-      : currentPositionValue - orderValue;
+    const proposedPositionValue =
+      order.side === OrderSide.BUY
+        ? currentPositionValue + orderValue
+        : currentPositionValue - orderValue;
 
     const portfolioValue = Number(portfolio.totalValue);
-    const proposedConcentration = (proposedPositionValue / portfolioValue) * 100;
+    const proposedConcentration =
+      (proposedPositionValue / portfolioValue) * 100;
 
     // Check concentration limits
     if (proposedConcentration > riskLimits.maxPortfolioConcentration) {
@@ -268,7 +282,10 @@ export class OrderRiskManagementService {
         `Proposed position would represent ${proposedConcentration.toFixed(1)}% of portfolio, exceeding limit of ${riskLimits.maxPortfolioConcentration}%`,
       );
       riskScore += 20;
-    } else if (proposedConcentration > riskLimits.maxPortfolioConcentration * 0.8) {
+    } else if (
+      proposedConcentration >
+      riskLimits.maxPortfolioConcentration * 0.8
+    ) {
       recommendations.push(
         `High concentration warning: Position would be ${proposedConcentration.toFixed(1)}% of portfolio`,
       );
@@ -294,7 +311,11 @@ export class OrderRiskManagementService {
     order: Order,
     orderValue: number,
     riskLimits: OrderRiskLimits,
-  ): Promise<{ violations: string[]; recommendations: string[]; riskScore: number }> {
+  ): Promise<{
+    violations: string[];
+    recommendations: string[];
+    riskScore: number;
+  }> {
     const violations: string[] = [];
     const recommendations: string[] = [];
     let riskScore = 0;
@@ -313,7 +334,7 @@ export class OrderRiskManagementService {
     // Count day trades for today
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    
+
     const todayOrders = await this.orderRepository.find({
       where: {
         portfolioId: portfolio.id,
@@ -341,7 +362,11 @@ export class OrderRiskManagementService {
     order: Order,
     orderValue: number,
     riskLimits: OrderRiskLimits,
-  ): Promise<{ violations: string[]; recommendations: string[]; riskScore: number }> {
+  ): Promise<{
+    violations: string[];
+    recommendations: string[];
+    riskScore: number;
+  }> {
     const violations: string[] = [];
     const recommendations: string[] = [];
     let riskScore = 0;
@@ -397,7 +422,8 @@ export class OrderRiskManagementService {
     const requestedValue = Number(order.quantity) * currentPrice;
 
     // Calculate position size based on portfolio percentage
-    const maxPositionValue = portfolioValue * (riskLimits.maxPortfolioConcentration / 100);
+    const maxPositionValue =
+      portfolioValue * (riskLimits.maxPortfolioConcentration / 100);
     const maxQuantity = Math.floor(maxPositionValue / currentPrice);
 
     if (Number(order.quantity) > maxQuantity) {
@@ -429,8 +455,8 @@ export class OrderRiskManagementService {
   private countDayTrades(orders: Order[]): number {
     // Group orders by symbol and count round trips
     const symbolOrders = new Map<string, Order[]>();
-    
-    orders.forEach(order => {
+
+    orders.forEach((order) => {
       if (!symbolOrders.has(order.symbol)) {
         symbolOrders.set(order.symbol, []);
       }
@@ -438,11 +464,12 @@ export class OrderRiskManagementService {
     });
 
     let dayTradeCount = 0;
-    
+
     for (const [symbol, symbolOrderList] of symbolOrders) {
       // Sort by execution time
-      symbolOrderList.sort((a, b) => 
-        (a.executedAt?.getTime() || 0) - (b.executedAt?.getTime() || 0)
+      symbolOrderList.sort(
+        (a, b) =>
+          (a.executedAt?.getTime() || 0) - (b.executedAt?.getTime() || 0),
       );
 
       // Count round trips (buy -> sell or sell -> buy on same day)
@@ -452,12 +479,16 @@ export class OrderRiskManagementService {
       for (const order of symbolOrderList) {
         if (order.executedAt) {
           const prevPosition = position;
-          position += order.side === OrderSide.BUY 
-            ? Number(order.executedQuantity) 
-            : -Number(order.executedQuantity);
+          position +=
+            order.side === OrderSide.BUY
+              ? Number(order.executedQuantity)
+              : -Number(order.executedQuantity);
 
           // Check if this created a round trip
-          if ((prevPosition > 0 && position <= 0) || (prevPosition < 0 && position >= 0)) {
+          if (
+            (prevPosition > 0 && position <= 0) ||
+            (prevPosition < 0 && position >= 0)
+          ) {
             trades++;
           }
         }
@@ -475,8 +506,11 @@ export class OrderRiskManagementService {
   private calculateDailyPnL(orders: Order[]): number {
     return orders.reduce((pnl, order) => {
       if (order.executedPrice && order.executedQuantity) {
-        const tradeValue = Number(order.executedQuantity) * Number(order.executedPrice);
-        return order.side === OrderSide.BUY ? pnl - tradeValue : pnl + tradeValue;
+        const tradeValue =
+          Number(order.executedQuantity) * Number(order.executedPrice);
+        return order.side === OrderSide.BUY
+          ? pnl - tradeValue
+          : pnl + tradeValue;
       }
       return pnl;
     }, 0);
@@ -508,14 +542,15 @@ export class OrderRiskManagementService {
     }
 
     const currentPrice = Number(stock.currentPrice);
-    const currentExposure = currentPosition 
+    const currentExposure = currentPosition
       ? Number(currentPosition.quantity) * currentPrice
       : 0;
 
     const proposedChange = proposedQuantity * currentPrice;
-    const proposedExposure = side === OrderSide.BUY
-      ? currentExposure + proposedChange
-      : currentExposure - proposedChange;
+    const proposedExposure =
+      side === OrderSide.BUY
+        ? currentExposure + proposedChange
+        : currentExposure - proposedChange;
 
     const portfolioValue = Number(portfolio.totalValue);
     const concentrationRisk = (proposedExposure / portfolioValue) * 100;
