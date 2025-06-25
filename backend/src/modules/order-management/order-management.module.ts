@@ -6,14 +6,14 @@ import { Portfolio } from '../../entities/portfolio.entity';
 import { Position } from '../../entities/position.entity';
 import { Stock } from '../../entities/stock.entity';
 import { Trade } from '../../entities/trade.entity';
+import { MarketHoursService } from '../../utils/market-hours.service';
 import { PaperTradingModule } from '../paper-trading/paper-trading.module';
 import { WebsocketModule } from '../websocket/websocket.module';
-import { MarketHoursService } from '../../utils/market-hours.service';
 import { OrderManagementController } from './order-management.controller';
 import { OrderManagementService } from './order-management.service';
 import { OrderService } from './order.service';
-import { OrderExecutionEngine } from './services/order-execution-engine.service';
 import { ConditionalOrderService } from './services/conditional-order.service';
+import { OrderExecutionEngine } from './services/order-execution-engine.service';
 import { RiskManagementService } from './services/risk-management.service';
 
 @Module({
@@ -25,16 +25,16 @@ import { RiskManagementService } from './services/risk-management.service';
   ],
   controllers: [OrderManagementController],
   providers: [
-    OrderManagementService, 
-    OrderService, 
+    OrderManagementService,
+    OrderService,
     OrderExecutionEngine,
     ConditionalOrderService,
     RiskManagementService,
     MarketHoursService,
   ],
   exports: [
-    OrderManagementService, 
-    OrderService, 
+    OrderManagementService,
+    OrderService,
     OrderExecutionEngine,
     ConditionalOrderService,
     RiskManagementService,
