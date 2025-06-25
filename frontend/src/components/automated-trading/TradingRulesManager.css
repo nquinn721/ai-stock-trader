@@ -1,0 +1,478 @@
+.trading-rules-manager {
+  padding: 20px;
+  background: var(--background-secondary);
+  border-radius: 8px;
+  height: 100%;
+  overflow-y: auto;
+}
+
+.trading-rules-manager.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+}
+
+.loading-spinner {
+  font-size: 16px;
+  color: var(--text-secondary);
+}
+
+.rules-header {
+  margin-bottom: 24px;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 16px;
+}
+
+.header-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.header-actions h3 {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.action-buttons .btn-primary,
+.action-buttons .btn-secondary {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.action-buttons .btn-primary {
+  background: var(--primary-color);
+  color: white;
+}
+
+.action-buttons .btn-primary:hover {
+  background: var(--primary-hover);
+}
+
+.action-buttons .btn-secondary {
+  background: var(--background-tertiary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+}
+
+.action-buttons .btn-secondary:hover {
+  background: var(--hover-color);
+}
+
+.action-buttons .btn-secondary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.filters {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.filter-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.filter-group label {
+  font-size: 14px;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.filter-group select {
+  padding: 6px 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  background: var(--background-tertiary);
+  color: var(--text-primary);
+  font-size: 14px;
+}
+
+.error-message {
+  background: var(--error-background);
+  color: var(--error-color);
+  padding: 12px 16px;
+  border-radius: 6px;
+  margin-bottom: 16px;
+  border-left: 4px solid var(--error-color);
+}
+
+.rules-list {
+  display: grid;
+  gap: 16px;
+}
+
+.no-rules {
+  text-align: center;
+  padding: 60px 20px;
+  background: var(--background-tertiary);
+  border-radius: 8px;
+  border: 2px dashed var(--border-color);
+}
+
+.no-rules-content h4 {
+  margin: 0 0 8px 0;
+  color: var(--text-primary);
+  font-size: 18px;
+}
+
+.no-rules-content p {
+  margin: 0 0 20px 0;
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+.rule-card {
+  background: var(--background-tertiary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.rule-card:hover {
+  border-color: var(--primary-color);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.rule-card.active {
+  border-left: 4px solid var(--success-color);
+}
+
+.rule-card.inactive {
+  border-left: 4px solid var(--text-disabled);
+  opacity: 0.7;
+}
+
+.rule-card.recently-triggered {
+  border-left: 4px solid var(--warning-color);
+  background: linear-gradient(
+    90deg,
+    var(--background-tertiary) 0%,
+    rgba(255, 193, 7, 0.05) 100%
+  );
+}
+
+.rule-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.rule-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+}
+
+.rule-title h4 {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.status-badge {
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.status-badge.active {
+  background: var(--success-background);
+  color: var(--success-color);
+}
+
+.status-badge.inactive {
+  background: var(--background-secondary);
+  color: var(--text-disabled);
+}
+
+.rule-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.rule-actions button {
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.toggle-btn.active {
+  background: var(--warning-background);
+  color: var(--warning-color);
+}
+
+.toggle-btn.inactive {
+  background: var(--success-background);
+  color: var(--success-color);
+}
+
+.edit-btn {
+  background: var(--background-secondary);
+  color: var(--text-secondary);
+}
+
+.edit-btn:hover {
+  background: var(--primary-color);
+  color: white;
+}
+
+.duplicate-btn {
+  background: var(--background-secondary);
+  color: var(--text-secondary);
+}
+
+.duplicate-btn:hover {
+  background: var(--info-color);
+  color: white;
+}
+
+.delete-btn {
+  background: var(--background-secondary);
+  color: var(--text-secondary);
+}
+
+.delete-btn:hover {
+  background: var(--error-color);
+  color: white;
+}
+
+.rule-details {
+  display: grid;
+  gap: 12px;
+}
+
+.rule-description {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.rule-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 12px;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.stat label {
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.stat span {
+  color: var(--text-primary);
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.rule-performance {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: 12px;
+  padding: 12px;
+  background: var(--background-secondary);
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+}
+
+.perf-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  align-items: center;
+}
+
+.perf-stat label {
+  font-size: 11px;
+  color: var(--text-secondary);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.perf-stat span {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.perf-stat span.positive {
+  color: var(--success-color);
+}
+
+.perf-stat span.negative {
+  color: var(--error-color);
+}
+
+/* Modal Styles */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: var(--background-primary);
+  border-radius: 8px;
+  width: 90%;
+  max-width: 800px;
+  max-height: 90vh;
+  overflow: hidden;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--border-color);
+  background: var(--background-secondary);
+}
+
+.modal-header h3 {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.close-btn {
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 4px;
+  background: var(--background-tertiary);
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  transition: all 0.2s ease;
+}
+
+.close-btn:hover {
+  background: var(--error-color);
+  color: white;
+}
+
+.modal-body {
+  padding: 24px;
+  overflow-y: auto;
+  max-height: calc(90vh - 80px);
+}
+
+.rule-builder-placeholder {
+  text-align: center;
+  padding: 40px;
+  color: var(--text-secondary);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .trading-rules-manager {
+    padding: 16px;
+  }
+
+  .header-actions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+  }
+
+  .action-buttons {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .rule-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .rule-performance {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .modal-content {
+    width: 95%;
+    margin: 20px;
+  }
+
+  .modal-body {
+    padding: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .action-buttons {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .action-buttons .btn-primary,
+  .action-buttons .btn-secondary {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .rule-header {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .rule-actions {
+    align-self: flex-end;
+  }
+}

@@ -10,6 +10,7 @@ import {
   faDollarSign,
   faExchangeAlt,
   faEye,
+  faRobot,
   faSignal,
   faVolumeHigh,
 } from "@fortawesome/free-solid-svg-icons";
@@ -30,6 +31,7 @@ import PortfolioDetailsModal from "./PortfolioDetailsModal";
 import PortfolioSelector from "./PortfolioSelector";
 import QuickTrade from "./QuickTrade";
 import StockCard from "./StockCard";
+import AutoTradingDashboard from "./automated-trading/AutoTradingDashboard";
 
 // Add icons to library
 library.add(
@@ -44,7 +46,8 @@ library.add(
   faClock,
   faArrowUp,
   faArrowDown,
-  faCircle
+  faCircle,
+  faRobot
 );
 
 const Dashboard: React.FC = observer(() => {
@@ -57,6 +60,7 @@ const Dashboard: React.FC = observer(() => {
   const [portfolioForDetails, setPortfolioForDetails] =
     useState<Portfolio | null>(null);
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [showAutoTrading, setShowAutoTrading] = useState(false);
 
   // Initialize data on component mount
   useEffect(() => {
@@ -196,6 +200,25 @@ const Dashboard: React.FC = observer(() => {
     );
   }
 
+  if (showAutoTrading) {
+    return (
+      <div className="dashboard">
+        <header className="dashboard-header">
+          <div className="header-left">
+            <h1>Automated Trading</h1>
+            <button
+              className="back-button"
+              onClick={() => setShowAutoTrading(false)}
+            >
+              ← Back to Dashboard
+            </button>
+          </div>
+        </header>
+        <AutoTradingDashboard portfolios={portfolioStore.portfolios} />
+      </div>
+    );
+  }
+
   if (showPortfolioCreator) {
     return (
       <PortfolioCreator
@@ -218,6 +241,14 @@ const Dashboard: React.FC = observer(() => {
           </div>
         </div>
         <div className="header-info">
+          <button
+            className="auto-trading-btn"
+            onClick={() => setShowAutoTrading(true)}
+            title="Open Automated Trading"
+          >
+            <FontAwesomeIcon icon={faRobot} />
+            Auto Trading
+          </button>
           <div className="stats">
             <span>{stocksWithSignals.length} stocks</span>
           </div>

@@ -11,6 +11,10 @@ import { Position } from './entities/position.entity';
 import { Stock } from './entities/stock.entity';
 import { Trade } from './entities/trade.entity';
 import { TradingSignal } from './entities/trading-signal.entity';
+import { AutoTradingModule } from './modules/auto-trading/auto-trading.module';
+import { AutoTrade } from './modules/auto-trading/entities/auto-trade.entity';
+import { TradingRule } from './modules/auto-trading/entities/trading-rule.entity';
+import { TradingSession } from './modules/auto-trading/entities/trading-session.entity';
 import { BreakoutModule } from './modules/breakout/breakout.module';
 import {
   MLABTest,
@@ -67,6 +71,9 @@ import { SeedService } from './services/seed.service';
           NotificationEntity,
           NotificationPreferenceEntity,
           NotificationTemplateEntity,
+          TradingRule,
+          AutoTrade,
+          TradingSession,
         ],
         synchronize: true, // Don't use in production
         logging: false, // Disabled to clean up console output
@@ -83,6 +90,7 @@ import { SeedService } from './services/seed.service';
     BreakoutModule,
     MLModule,
     NotificationModule,
+    AutoTradingModule,
   ],
   controllers: [AppController],
   providers: [AppService, SeedService],

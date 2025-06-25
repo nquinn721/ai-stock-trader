@@ -1,4 +1,5 @@
 import { ApiStore } from "./ApiStore";
+import { AutoTradingStore } from "./AutoTradingStore";
 import { PortfolioStore } from "./PortfolioStore";
 import { RecommendationStore } from "./RecommendationStore";
 import { StockStore } from "./StockStore";
@@ -12,15 +13,17 @@ export class RootStore {
   stockStore: StockStore;
   portfolioStore: PortfolioStore;
   tradeStore: TradeStore;
+  autoTradingStore: AutoTradingStore;
   recommendationStore: RecommendationStore;
   userStore: UserStore;
-  
+
   constructor() {
     this.apiStore = new ApiStore();
     this.webSocketStore = new WebSocketStore();
     this.stockStore = new StockStore();
     this.portfolioStore = new PortfolioStore(this.apiStore);
     this.tradeStore = new TradeStore(this.apiStore);
+    this.autoTradingStore = new AutoTradingStore(this.apiStore);
     this.recommendationStore = new RecommendationStore();
     this.userStore = new UserStore();
 

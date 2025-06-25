@@ -23,6 +23,7 @@ export const useStore = () => {
 export const useStockStore = () => useStore().stockStore;
 export const usePortfolioStore = () => useStore().portfolioStore;
 export const useTradeStore = () => useStore().tradeStore;
+export const useAutoTradingStore = () => useStore().autoTradingStore;
 export const useWebSocketStore = () => useStore().webSocketStore;
 export const useApiStore = () => useStore().apiStore;
 export const useRecommendationStore = () => useStore().recommendationStore;
