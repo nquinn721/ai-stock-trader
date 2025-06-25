@@ -67,7 +67,7 @@ export class OrderManagementService {
     private paperTradingService: PaperTradingService,
     private marketHoursService: MarketHoursService,
     private riskManagementService: RiskManagementService,
-    private conditionalOrderService: ConditionalOrderService,
+  private executionEngine: OrderExecutionEngine,
   ) {
     // Initialize WebSocket gateway as null, will be set via setter to avoid circular dependency
     this.webSocketGateway = null;
@@ -914,5 +914,146 @@ export class OrderManagementService {
     } catch (error) {
       this.logger.error(`Error checking conditional orders: ${error.message}`);
     }
+  }
+
+  /**
+   * Get execution quality metrics for a portfolio
+   */
+  async getExecutionQuality(portfolioId: number, periodDays: number = 30) {
+    return this.executionEngine.getExecutionQuality(portfolioId, periodDays);
+  }
+
+  /**
+   * Get portfolio risk analysis
+   */
+  async getPortfolioRisk(portfolioId: number) {
+    return this.riskManagementService.getPortfolioRisk(portfolioId);
+  }
+
+  /**
+   * Get conditional orders for a portfolio
+   */
+  async getConditionalOrders(portfolioId: number): Promise<Order[]> {
+    return this.orderRepository.find({
+      where: { 
+        portfolioId,
+        conditionalTriggers: Not(null),
+        status: In([OrderStatus.PENDING, OrderStatus.TRIGGERED])
+      },
+      relations: ['stock'],
+      order: { createdAt: 'DESC' },
+    });
+  }
+
+  /**
+   * Get bracket orders for a portfolio
+   */
+  async getBracketOrders(portfolioId: number): Promise<Order[]> {
+    return this.orderRepository.find({
+      where: { 
+        portfolioId,
+        orderType: OrderType.BRACKET,
+        status: In([OrderStatus.PENDING, OrderStatus.TRIGGERED, OrderStatus.EXECUTED])
+      },
+      relations: ['stock'],
+      order: { createdAt: 'DESC' },
+    });
+  }
+
+  /**
+   * Get OCO order groups for a portfolio
+   */
+  async getOCOOrders(portfolioId: number): Promise<any[]> {
+    const ocoOrders = await this.orderRepository.find({
+      where: { 
+        portfolioId,
+        ocoGroupId: Not(null),
+        status: In([OrderStatus.PENDING, OrderStatus.TRIGGERED])
+      },
+      relations: ['stock'],
+      order: { createdAt: 'DESC' },
+    });
+
+    // Group by OCO group ID
+    const groupedOrders = new Map<string, Order[]>();
+    ocoOrders.forEach(order => {
+      if (order.ocoGroupId) {
+        if (!groupedOrders.has(order.ocoGroupId)) {
+          groupedOrders.set(order.ocoGroupId, []);
+        }
+        groupedOrders.get(order.ocoGroupId)!.push(order);
+      }
+    });
+
+    return Array.from(groupedOrders.entries()).map(([groupId, orders]) => ({
+      ocoGroupId: groupId,
+      orders,
+    }));
+  }
+
+  /**
+   * Modify an existing order
+   */
+  async modifyOrder(orderId: number, updates: Partial<CreateOrderDto>): Promise<Order> {
+    const order = await this.orderRepository.findOne({
+      where: { id: orderId },
+      relations: ['portfolio'],
+    });
+
+    if (!order) {
+      throw new Error(`Order ${orderId} not found`);
+    }
+
+    if (order.status !== OrderStatus.PENDING) {
+      throw new Error(`Cannot modify order ${orderId} - status: ${order.status}`);
+    }
+
+    // Cancel the existing order and create a new one with updates
+    order.status = OrderStatus.CANCELLED;
+    order.cancelledAt = new Date();
+    order.cancellationReason = 'Modified by user';
+    await this.orderRepository.save(order);
+
+    // Create new order with updates
+    const newOrderDto: CreateOrderDto = {
+      portfolioId: order.portfolioId,
+      symbol: order.symbol,
+      orderType: updates.orderType || order.orderType,
+      side: order.side,
+      quantity: updates.quantity || order.quantity,
+      limitPrice: updates.limitPrice || order.limitPrice,
+      stopPrice: updates.stopPrice || order.stopPrice,
+      triggerPrice: updates.triggerPrice || order.triggerPrice,
+      timeInForce: updates.timeInForce || order.timeInForce,
+      notes: updates.notes || order.notes,
+      ...updates,
+    };
+
+    return this.createOrder(newOrderDto);
+  }
+
+  /**
+   * Get order execution history
+   */
+  async getOrderExecutions(orderId: number) {
+    const order = await this.orderRepository.findOne({
+      where: { id: orderId },
+    });
+
+    if (!order) {
+      throw new Error(`Order ${orderId} not found`);
+    }
+
+    return {
+      orderId: order.id,
+      status: order.status,
+      executedPrice: order.executedPrice,
+      executedQuantity: order.executedQuantity,
+      executedAt: order.executedAt,
+      commission: order.commission,
+      executionReports: order.executionReports || [],
+      fillCount: order.fillCount || 0,
+      avgExecutionPrice: order.avgExecutionPrice,
+    };
   }
 }
