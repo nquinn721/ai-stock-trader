@@ -967,15 +967,16 @@ export class OrderManagementService {
    * Get OCO order groups for a portfolio
    */
   async getOCOOrders(portfolioId: number): Promise<any[]> {
-    const ocoOrders = await this.orderRepository.find({
-      where: { 
-        portfolioId,
-        ocoGroupId: Not(null),
-        status: In([OrderStatus.PENDING, OrderStatus.TRIGGERED])
-      },
-      relations: ['stock'],
-      order: { createdAt: 'DESC' },
-    });
+    const ocoOrders = await this.orderRepository
+      .createQueryBuilder('order')
+      .where('order.portfolioId = :portfolioId', { portfolioId })
+      .andWhere('order.ocoGroupId IS NOT NULL')
+      .andWhere('order.status IN (:...statuses)', { 
+        statuses: [OrderStatus.PENDING, OrderStatus.TRIGGERED] 
+      })
+      .leftJoinAndSelect('order.stock', 'stock')
+      .orderBy('order.createdAt', 'DESC')
+      .getMany();
 
     // Group by OCO group ID
     const groupedOrders = new Map<string, Order[]>();
