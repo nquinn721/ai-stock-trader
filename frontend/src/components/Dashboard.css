@@ -1227,7 +1227,8 @@
 
 /* Header navigation buttons */
 .auto-trading-btn,
-.analytics-btn {
+.analytics-btn,
+.ai-assistant-btn {
   background: linear-gradient(
     135deg,
     rgba(59, 130, 246, 0.1) 0%,
@@ -1249,7 +1250,8 @@
 }
 
 .auto-trading-btn:hover,
-.analytics-btn:hover {
+.analytics-btn:hover,
+.ai-assistant-btn:hover {
   background: linear-gradient(
     135deg,
     rgba(59, 130, 246, 0.2) 0%,
@@ -1261,9 +1263,30 @@
 }
 
 .auto-trading-btn:active,
-.analytics-btn:active {
+.analytics-btn:active,
+.ai-assistant-btn:active {
   transform: translateY(0);
   box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+/* Special styling for AI Assistant button */
+.ai-assistant-btn {
+  background: linear-gradient(
+    135deg,
+    rgba(34, 197, 94, 0.1) 0%,
+    rgba(59, 130, 246, 0.1) 100%
+  );
+  border: 1px solid rgba(34, 197, 94, 0.3);
+}
+
+.ai-assistant-btn:hover {
+  background: linear-gradient(
+    135deg,
+    rgba(34, 197, 94, 0.2) 0%,
+    rgba(59, 130, 246, 0.2) 100%
+  );
+  border-color: rgba(34, 197, 94, 0.5);
+  box-shadow: 0 8px 24px rgba(34, 197, 94, 0.2);
 }
 
 .back-button {

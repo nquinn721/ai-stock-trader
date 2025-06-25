@@ -16,6 +16,12 @@ import { AutoTrade } from './modules/auto-trading/entities/auto-trade.entity';
 import { TradingRule } from './modules/auto-trading/entities/trading-rule.entity';
 import { TradingSession } from './modules/auto-trading/entities/trading-session.entity';
 import { BreakoutModule } from './modules/breakout/breakout.module';
+import { MarketScannerModule } from './modules/market-scanner/market-scanner.module';
+import {
+  ScreenerTemplate,
+  MarketAlert,
+  ScanResult,
+} from './modules/market-scanner/entities/scanner.entity';
 import {
   MLABTest,
   MLFeatureImportance,
@@ -74,6 +80,9 @@ import { SeedService } from './services/seed.service';
           TradingRule,
           AutoTrade,
           TradingSession,
+          ScreenerTemplate,
+          MarketAlert,
+          ScanResult,
         ],
         synchronize: true, // Don't use in production
         logging: false, // Disabled to clean up console output
@@ -91,6 +100,7 @@ import { SeedService } from './services/seed.service';
     MLModule,
     NotificationModule,
     AutoTradingModule,
+    MarketScannerModule,
   ],
   controllers: [AppController],
   providers: [AppService, SeedService],

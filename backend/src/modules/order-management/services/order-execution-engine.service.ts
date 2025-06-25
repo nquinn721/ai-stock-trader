@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { GreaterThan, Repository } from 'typeorm';
+import { Repository, MoreThan } from 'typeorm';
 import {
   ExecutionReport,
   Order,
@@ -376,7 +376,7 @@ export class OrderExecutionEngine {
       where: {
         portfolioId,
         status: OrderStatus.EXECUTED,
-        executedAt: GreaterThan(sinceDate),
+        executedAt: MoreThan(sinceDate),
       },
     });
 

@@ -8,16 +8,23 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import {
   Order,
   OrderSide,
+  OrderStatus,
   OrderType,
   TimeInForce,
 } from '../../entities/order.entity';
+import { Stock } from '../../entities/stock.entity';
 import {
   CreateOrderDto,
   OrderManagementService,
 } from './order-management.service';
+import { OrderExecutionService } from './services/order-execution.service';
+import { OrderRiskManagementService } from './services/order-risk-management.service';
+import { ConditionalOrderService } from './services/conditional-order.service';
 
 export class CreateOrderRequestDto {
   portfolioId: number;
@@ -81,10 +88,50 @@ export class CreateConditionalOrderDto {
   }>;
 }
 
+export class CreateTrailingStopOrderDto {
+  portfolioId: number;
+  symbol: string;
+  quantity: number;
+  side: OrderSide;
+  trailAmount?: number;
+  trailPercent?: number;
+  triggerPrice?: number;
+}
+
+export class CreateOCOOrderPairDto {
+  portfolioId: number;
+  symbol: string;
+  quantity: number;
+  // First order (usually limit order)
+  limitPrice: number;
+  // Second order (usually stop order)
+  stopPrice: number;
+  side: OrderSide;
+}
+
+export class ModifyOrderDto {
+  quantity?: number;
+  limitPrice?: number;
+  stopPrice?: number;
+  triggerPrice?: number;
+}
+
+export class OrderRoutingOptionsDto {
+  routingStrategy?: 'best_execution' | 'speed' | 'dark_pool' | 'minimal_impact';
+  maxSlippage?: number;
+  timeLimit?: number;
+  allowPartialFills?: boolean;
+}
+
 @Controller('order-management')
 export class OrderManagementController {
   constructor(
     private readonly orderManagementService: OrderManagementService,
+    private readonly orderExecutionService: OrderExecutionService,
+    private readonly orderRiskManagementService: OrderRiskManagementService,
+    private readonly conditionalOrderService: ConditionalOrderService,
+    @InjectRepository(Stock)
+    private readonly stockRepository: Repository<Stock>,
   ) {}
 
   /**
@@ -254,134 +301,356 @@ export class OrderManagementController {
    */
   @Post('orders/trailing-stop')
   async createTrailingStopOrder(
-    @Body() trailingStopDto: CreateTrailingStopDto,
+    @Body() trailingStopDto: CreateTrailingStopOrderDto,
   ): Promise<Order> {
-    return this.orderManagementService.createTrailingStopOrder(
-      trailingStopDto.portfolioId,
-      trailingStopDto.symbol,
-      trailingStopDto.quantity,
-      trailingStopDto.trailAmount,
-      trailingStopDto.trailPercent,
-    );
+    const createOrderDto: CreateOrderDto = {
+      portfolioId: trailingStopDto.portfolioId,
+      symbol: trailingStopDto.symbol,
+      orderType: OrderType.TRAILING_STOP,
+      side: trailingStopDto.side,
+      quantity: trailingStopDto.quantity,
+      triggerPrice: trailingStopDto.triggerPrice,
+      trailAmount: trailingStopDto.trailAmount,
+      trailPercent: trailingStopDto.trailPercent,
+      timeInForce: TimeInForce.GTC, // Trailing stops are typically GTC
+    };
+
+    return this.orderManagementService.createOrder(createOrderDto);
   }
 
   /**
-   * Create an OCO (One-Cancels-Other) order pair
+   * Create OCO (One-Cancels-Other) order pair
    */
   @Post('orders/oco')
-  async createOCOOrder(
-    @Body() ocoOrderDto: CreateOCOOrderDto,
-  ): Promise<{ limitOrder: Order; stopOrder: Order }> {
-    return this.orderManagementService.createOCOOrder(
-      ocoOrderDto.portfolioId,
-      ocoOrderDto.symbol,
-      ocoOrderDto.quantity,
-      ocoOrderDto.limitPrice,
-      ocoOrderDto.stopPrice,
-    );
+  async createOCOOrderPair(
+    @Body() ocoDto: CreateOCOOrderPairDto,
+  ): Promise<{ order1: Order; order2: Order; ocoGroupId: string }> {
+    const ocoGroupId = `oco_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+    // Create limit order
+    const limitOrder = await this.orderManagementService.createOrder({
+      portfolioId: ocoDto.portfolioId,
+      symbol: ocoDto.symbol,
+      orderType: OrderType.LIMIT,
+      side: ocoDto.side,
+      quantity: ocoDto.quantity,
+      limitPrice: ocoDto.limitPrice,
+      ocoGroupId,
+      timeInForce: TimeInForce.GTC,
+    });
+
+    // Create stop order
+    const stopOrder = await this.orderManagementService.createOrder({
+      portfolioId: ocoDto.portfolioId,
+      symbol: ocoDto.symbol,
+      orderType: OrderType.STOP_LOSS,
+      side: ocoDto.side,
+      quantity: ocoDto.quantity,
+      stopPrice: ocoDto.stopPrice,
+      ocoGroupId,
+      timeInForce: TimeInForce.GTC,
+    });
+
+    return {
+      order1: limitOrder,
+      order2: stopOrder,
+      ocoGroupId,
+    };
   }
 
   /**
-   * Create a conditional order with triggers
+   * Create conditional order with complex triggers
    */
   @Post('orders/conditional')
   async createConditionalOrder(
-    @Body() conditionalOrderDto: CreateConditionalOrderDto,
+    @Body() conditionalDto: CreateConditionalOrderDto,
   ): Promise<Order> {
-    return this.orderManagementService.createConditionalOrder(
-      conditionalOrderDto,
-      conditionalOrderDto.conditionalTriggers,
-    );
+    // Use the regular order creation service with conditional triggers
+    const createOrderDto: CreateOrderDto = {
+      portfolioId: conditionalDto.portfolioId,
+      symbol: conditionalDto.symbol,
+      orderType: conditionalDto.orderType,
+      side: conditionalDto.side,
+      quantity: conditionalDto.quantity,
+      limitPrice: conditionalDto.limitPrice,
+      stopPrice: conditionalDto.stopPrice,
+      triggerPrice: conditionalDto.triggerPrice,
+      timeInForce: conditionalDto.timeInForce || TimeInForce.DAY,
+      notes: conditionalDto.notes,
+      conditionalTriggers: conditionalDto.conditionalTriggers,
+    };
+
+    return this.orderManagementService.createOrder(createOrderDto);
   }
 
   /**
-   * Cancel an OCO order group
-   */
-  @Delete('orders/oco/:ocoGroupId')
-  async cancelOCOGroup(
-    @Param('ocoGroupId') ocoGroupId: string,
-  ): Promise<Order[]> {
-    return this.orderManagementService.cancelOCOGroup(ocoGroupId);
-  }
-
-  /**
-   * Get the order book (all active orders)
-   */
-  @Get('orders/book')
-  async getOrderBook(): Promise<Order[]> {
-    return this.orderManagementService.getOrderBook();
-  }
-
-  /**
-   * Get execution quality metrics for a portfolio
-   */
-  @Get('portfolios/:portfolioId/execution-quality')
-  async getExecutionQuality(
-    @Param('portfolioId', ParseIntPipe) portfolioId: number,
-    @Query('period') period?: string,
-  ) {
-    const periodDays = period ? parseInt(period, 10) : 30;
-    return this.orderManagementService.getExecutionQuality(portfolioId, periodDays);
-  }
-
-  /**
-   * Get portfolio risk analysis
-   */
-  @Get('portfolios/:portfolioId/risk-analysis')
-  async getPortfolioRisk(
-    @Param('portfolioId', ParseIntPipe) portfolioId: number,
-  ) {
-    return this.orderManagementService.getPortfolioRisk(portfolioId);
-  }
-
-  /**
-   * Get conditional orders for a portfolio
-   */
-  @Get('portfolios/:portfolioId/conditional-orders')
-  async getConditionalOrders(
-    @Param('portfolioId', ParseIntPipe) portfolioId: number,
-  ): Promise<Order[]> {
-    return this.orderManagementService.getConditionalOrders(portfolioId);
-  }
-
-  /**
-   * Get bracket orders for a portfolio
-   */
-  @Get('portfolios/:portfolioId/bracket-orders')
-  async getBracketOrders(
-    @Param('portfolioId', ParseIntPipe) portfolioId: number,
-  ): Promise<Order[]> {
-    return this.orderManagementService.getBracketOrders(portfolioId);
-  }
-
-  /**
-   * Get OCO order groups for a portfolio
-   */
-  @Get('portfolios/:portfolioId/oco-orders')
-  async getOCOOrders(
-    @Param('portfolioId', ParseIntPipe) portfolioId: number,
-  ): Promise<any[]> {
-    return this.orderManagementService.getOCOOrders(portfolioId);
-  }
-
-  /**
-   * Modify an existing order
+   * Modify existing order (drag-and-drop interface support)
    */
   @Post('orders/:orderId/modify')
   async modifyOrder(
     @Param('orderId', ParseIntPipe) orderId: number,
-    @Body() updates: Partial<CreateOrderRequestDto>,
+    @Body() modifyDto: ModifyOrderDto,
   ): Promise<Order> {
-    return this.orderManagementService.modifyOrder(orderId, updates);
+    // Get existing order
+    const existingOrder = await this.getOrder(orderId);
+    
+    if (!existingOrder.isPending) {
+      throw new Error(`Cannot modify order ${orderId} - status: ${existingOrder.status}`);
+    }
+
+    // Cancel existing order
+    await this.cancelOrder(orderId, 'Modified by user');
+
+    // Create new order with updated parameters
+    const newOrder = await this.orderManagementService.createOrder({
+      portfolioId: existingOrder.portfolioId,
+      symbol: existingOrder.symbol,
+      orderType: existingOrder.orderType,
+      side: existingOrder.side,
+      quantity: modifyDto.quantity ?? existingOrder.quantity,
+      limitPrice: modifyDto.limitPrice ?? existingOrder.limitPrice,
+      stopPrice: modifyDto.stopPrice ?? existingOrder.stopPrice,
+      triggerPrice: modifyDto.triggerPrice ?? existingOrder.triggerPrice,
+      timeInForce: existingOrder.timeInForce,
+      notes: `Modified from order ${orderId}`,
+      parentOrderId: existingOrder.parentOrderId,
+      ocoGroupId: existingOrder.ocoGroupId,
+    });
+
+    return newOrder;
   }
 
   /**
-   * Get order execution history
+   * Execute order with specific routing options
    */
-  @Get('orders/:orderId/executions')
-  async getOrderExecutions(
+  @Post('orders/:orderId/execute')
+  async executeOrderWithRouting(
     @Param('orderId', ParseIntPipe) orderId: number,
+    @Body() routingOptions?: OrderRoutingOptionsDto,
+  ): Promise<any> {
+    const order = await this.getOrder(orderId);
+    
+    if (!order.isPending && order.status !== OrderStatus.TRIGGERED) {
+      throw new Error(`Cannot execute order ${orderId} - status: ${order.status}`);
+    }
+
+    const routingOpts = routingOptions ? {
+      routingStrategy: routingOptions.routingStrategy || 'best_execution',
+      maxSlippage: routingOptions.maxSlippage || 0.001,
+      timeLimit: routingOptions.timeLimit || 30,
+      allowPartialFills: routingOptions.allowPartialFills ?? true,
+    } : undefined;
+
+  switch (order.orderType) {
+    case OrderType.MARKET:
+      return this.orderExecutionService.executeMarketOrder(order, routingOpts);
+    
+    case OrderType.LIMIT:
+      const stock = await this.stockRepository.findOne({ where: { symbol: order.symbol } });
+      return this.orderExecutionService.executeLimitOrder(order, Number(stock?.currentPrice || 0), routingOpts);
+    
+    case OrderType.STOP_LOSS:
+      const stock2 = await this.stockRepository.findOne({ where: { symbol: order.symbol } });
+      return this.orderExecutionService.executeStopOrder(order, Number(stock2?.currentPrice || 0), routingOpts);
+    
+    case OrderType.STOP_LIMIT:
+      const stock3 = await this.stockRepository.findOne({ where: { symbol: order.symbol } });
+      return this.orderExecutionService.executeStopLimitOrder(order, Number(stock3?.currentPrice || 0), routingOpts);
+    
+    default:
+      throw new Error(`Unsupported order type for manual execution: ${order.orderType}`);
+  }
+  }
+
+  /**
+   * Get execution quality report for an order
+   */
+  @Get('orders/:orderId/execution-quality')
+  async getExecutionQuality(@Param('orderId', ParseIntPipe) orderId: number) {
+    return this.orderExecutionService.getExecutionQuality(orderId);
+  }
+
+  /**
+   * Get order risk validation
+   */
+  @Post('orders/validate-risk')
+  async validateOrderRisk(
+    @Body() orderRequest: CreateOrderRequestDto,
+  ): Promise<any> {
+    // Create temporary order for validation
+    const tempOrder = {
+      portfolioId: orderRequest.portfolioId,
+      symbol: orderRequest.symbol,
+      orderType: orderRequest.orderType,
+      side: orderRequest.side,
+      quantity: orderRequest.quantity,
+      limitPrice: orderRequest.limitPrice,
+      stopPrice: orderRequest.stopPrice,
+    } as Order;
+
+    return this.orderRiskManagementService.validateOrderRisk(tempOrder);
+  }
+
+  /**
+   * Get position risk metrics for a proposed order
+   */
+  @Get('portfolios/:portfolioId/risk-metrics/:symbol')
+  async getPositionRiskMetrics(
+    @Param('portfolioId', ParseIntPipe) portfolioId: number,
+    @Param('symbol') symbol: string,
+    @Query('quantity', ParseIntPipe) quantity: number,
+    @Query('side') side: OrderSide,
   ) {
-    return this.orderManagementService.getOrderExecutions(orderId);
+    return this.orderRiskManagementService.getPositionRiskMetrics(
+      portfolioId,
+      symbol,
+      quantity,
+      side,
+    );
+  }
+
+  /**
+   * Get conditional order analytics
+   */
+  @Get('portfolios/:portfolioId/conditional-analytics')
+  async getConditionalOrderAnalytics(
+    @Param('portfolioId', ParseIntPipe) portfolioId: number,
+  ) {
+    // Get all orders for the portfolio
+    const orders = await this.orderManagementService.getOrdersByPortfolio(portfolioId);
+    
+    const conditionalOrders = orders.filter(
+      order => order.conditionalTriggers && order.conditionalTriggers.length > 0
+    );
+
+    const pendingConditional = conditionalOrders.filter(
+      order => order.status === OrderStatus.PENDING
+    );
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const triggeredToday = conditionalOrders.filter(
+      order => order.status === OrderStatus.TRIGGERED && 
+               order.updatedAt >= today
+    );
+
+    return {
+      totalConditionalOrders: conditionalOrders.length,
+      pendingConditionalOrders: pendingConditional.length,
+      triggeredToday: triggeredToday.length,
+      averageTimeToTrigger: 0, // Simplified for now
+      mostUsedConditions: [], // Simplified for now
+    };
+  }
+
+  /**
+   * Bulk cancel orders
+   */
+  @Post('orders/bulk-cancel')
+  async bulkCancelOrders(
+    @Body() request: { orderIds: number[]; reason?: string },
+  ): Promise<{ cancelled: number[]; failed: { id: number; reason: string }[] }> {
+    const cancelled: number[] = [];
+    const failed: { id: number; reason: string }[] = [];
+
+    for (const orderId of request.orderIds) {
+      try {
+        await this.cancelOrder(orderId, request.reason || 'Bulk cancellation');
+        cancelled.push(orderId);
+      } catch (error) {
+        failed.push({ id: orderId, reason: error.message });
+      }
+    }
+
+    return { cancelled, failed };
+  }
+
+  /**
+   * Get order book for a symbol (level 2 data)
+   */
+  @Get('orderbook/:symbol')
+  async getOrderBook(@Param('symbol') symbol: string) {
+    // In a real system, this would come from market data feeds
+    // For now, return simulated order book
+    const orders = await this.orderManagementService.getActiveOrders();
+    const symbolOrders = orders.filter(order => order.symbol === symbol);
+
+    const buyOrders = symbolOrders
+      .filter(order => order.side === OrderSide.BUY && order.limitPrice)
+      .sort((a, b) => Number(b.limitPrice) - Number(a.limitPrice)) // Highest price first
+      .slice(0, 10);
+
+    const sellOrders = symbolOrders
+      .filter(order => order.side === OrderSide.SELL && order.limitPrice)
+      .sort((a, b) => Number(a.limitPrice) - Number(b.limitPrice)) // Lowest price first
+      .slice(0, 10);
+
+    return {
+      symbol,
+      timestamp: new Date(),
+      bids: buyOrders.map(order => ({
+        price: Number(order.limitPrice),
+        quantity: Number(order.quantity),
+        orderId: order.id,
+      })),
+      asks: sellOrders.map(order => ({
+        price: Number(order.limitPrice),
+        quantity: Number(order.quantity),
+        orderId: order.id,
+      })),
+    };
+  }
+
+  /**
+   * Get advanced order statistics with execution quality metrics
+   */
+  @Get('portfolios/:portfolioId/advanced-statistics')
+  async getAdvancedOrderStatistics(
+    @Param('portfolioId', ParseIntPipe) portfolioId: number,
+  ) {
+    const orders = await this.orderManagementService.getOrdersByPortfolio(portfolioId);
+    const executedOrders = orders.filter(o => o.isExecuted);
+
+    // Calculate advanced metrics
+    const executionTimes = executedOrders
+      .filter(order => order.executedAt && order.createdAt)
+      .map(order => (order.executedAt!.getTime() - order.createdAt.getTime()) / 1000);
+
+    const fillRates = executedOrders
+      .filter(order => order.executedQuantity && order.quantity)
+      .map(order => Number(order.executedQuantity) / Number(order.quantity));
+
+    const priceImprovements = executedOrders
+      .filter(order => order.limitPrice && order.executedPrice)
+      .map(order => {
+        const improvement = order.side === OrderSide.BUY
+          ? Number(order.limitPrice) - Number(order.executedPrice)
+          : Number(order.executedPrice) - Number(order.limitPrice);
+        return Math.max(0, improvement);
+      });
+
+    return {
+      ...await this.getOrderStatistics(portfolioId),
+      advancedMetrics: {
+        avgExecutionTimeSeconds: executionTimes.length > 0 
+          ? executionTimes.reduce((sum, time) => sum + time, 0) / executionTimes.length 
+          : 0,
+        avgFillRate: fillRates.length > 0 
+          ? fillRates.reduce((sum, rate) => sum + rate, 0) / fillRates.length 
+          : 0,
+        avgPriceImprovement: priceImprovements.length > 0 
+          ? priceImprovements.reduce((sum, imp) => sum + imp, 0) / priceImprovements.length 
+          : 0,
+        partialFills: executedOrders.filter(order => 
+          order.executedQuantity && Number(order.executedQuantity) < Number(order.quantity)
+        ).length,
+        trailingStopOrders: orders.filter(order => order.orderType === OrderType.TRAILING_STOP).length,
+        conditionalOrders: orders.filter(order => 
+          order.conditionalTriggers && order.conditionalTriggers.length > 0
+        ).length,
+        ocoGroups: new Set(orders.map(order => order.ocoGroupId).filter(Boolean)).size,
+      },
+    };
   }
 }

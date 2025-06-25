@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, Inject, forwardRef } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import {
@@ -41,6 +41,7 @@ export class ConditionalOrderService {
     private readonly orderRepository: Repository<Order>,
     @InjectRepository(Stock)
     private readonly stockRepository: Repository<Stock>,
+    @Inject(forwardRef(() => OrderManagementService))
     private readonly orderManagementService: OrderManagementService,
   ) {}
 

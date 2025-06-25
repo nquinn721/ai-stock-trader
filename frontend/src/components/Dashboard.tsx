@@ -7,6 +7,7 @@ import {
   faChartLine,
   faCircle,
   faClock,
+  faComments,
   faDollarSign,
   faExchangeAlt,
   faEye,
@@ -23,16 +24,18 @@ import {
   useWebSocketStore,
 } from "../stores/StoreContext";
 import { Portfolio } from "../types";
+import AutoTradingDashboard from "./automated-trading/AutoTradingDashboard";
 import "./Dashboard.css";
 import EmptyState from "./EmptyState";
+import EnhancedPortfolioAnalyticsDashboard from "./EnhancedPortfolioAnalyticsDashboard";
+import { MarketScannerDashboard } from "./MarketScanner/MarketScannerDashboard";
 import NotificationCenter from "./NotificationCenter";
 import PortfolioCreator from "./PortfolioCreator";
 import PortfolioDetailsModal from "./PortfolioDetailsModal";
 import PortfolioSelector from "./PortfolioSelector";
 import QuickTrade from "./QuickTrade";
 import StockCard from "./StockCard";
-import AutoTradingDashboard from "./automated-trading/AutoTradingDashboard";
-import EnhancedPortfolioAnalyticsDashboard from "./EnhancedPortfolioAnalyticsDashboard";
+import TradingAssistantChat from "./TradingAssistantChat";
 
 // Add icons to library
 library.add(
@@ -48,7 +51,8 @@ library.add(
   faArrowUp,
   faArrowDown,
   faCircle,
-  faRobot
+  faRobot,
+  faComments
 );
 
 const Dashboard: React.FC = observer(() => {
@@ -63,6 +67,8 @@ const Dashboard: React.FC = observer(() => {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [showAutoTrading, setShowAutoTrading] = useState(false);
   const [showPortfolioAnalytics, setShowPortfolioAnalytics] = useState(false);
+  const [showAIAssistant, setShowAIAssistant] = useState(false);
+  const [showMarketScanner, setShowMarketScanner] = useState(false);
 
   // Initialize data on component mount
   useEffect(() => {
@@ -183,6 +189,31 @@ const Dashboard: React.FC = observer(() => {
     setShowPortfolioDetails(false);
     setPortfolioForDetails(null);
   };
+
+  // AI Assistant handlers
+  const handleStockSelect = (symbol: string) => {
+    // TODO: Navigate to stock details or highlight in grid
+    console.log("Stock selected:", symbol);
+  };
+
+  const handleOrderAction = (action: "BUY" | "SELL", symbol?: string) => {
+    // TODO: Open quick trade modal with pre-filled action
+    console.log("Order action:", action, symbol);
+  };
+
+  const handleViewAnalysis = (type: string) => {
+    switch (type) {
+      case "portfolio":
+        setShowPortfolioAnalytics(true);
+        break;
+      case "dashboard":
+        setShowAIAssistant(false);
+        break;
+      default:
+        console.log("View analysis:", type);
+    }
+  };
+
   const isConnected = webSocketStore.isConnected;
   const stocksWithSignals = stockStore.stocksWithSignals;
   const loading = stockStore.isLoading;
@@ -198,6 +229,25 @@ const Dashboard: React.FC = observer(() => {
           description="Fetching real-time market data and trading signals..."
           size="large"
         />
+      </div>
+    );
+  }
+
+  if (showMarketScanner) {
+    return (
+      <div className="dashboard">
+        <header className="dashboard-header">
+          <div className="header-left">
+            <h1>Market Scanner</h1>
+            <button
+              className="back-button"
+              onClick={() => setShowMarketScanner(false)}
+            >
+              ← Back to Dashboard
+            </button>
+          </div>
+        </header>
+        <MarketScannerDashboard onStockSelect={handleStockSelect} />
       </div>
     );
   }
@@ -236,15 +286,42 @@ const Dashboard: React.FC = observer(() => {
           </div>
         </header>
         {portfolioStore.currentPortfolio ? (
-          <EnhancedPortfolioAnalyticsDashboard portfolioId={portfolioStore.currentPortfolio.id} />
+          <EnhancedPortfolioAnalyticsDashboard
+            portfolioId={portfolioStore.currentPortfolio.id}
+          />
         ) : (
-          <div style={{ padding: '20px', textAlign: 'center' }}>
+          <div style={{ padding: "20px", textAlign: "center" }}>
             <p>Please select a portfolio to view analytics.</p>
             <button onClick={() => setShowPortfolioAnalytics(false)}>
               Go Back to Select Portfolio
             </button>
           </div>
         )}
+      </div>
+    );
+  }
+
+  if (showAIAssistant) {
+    return (
+      <div className="dashboard">
+        <header className="dashboard-header">
+          <div className="header-left">
+            <h1>AI Trading Assistant</h1>
+            <button
+              className="back-button"
+              onClick={() => setShowAIAssistant(false)}
+            >
+              ← Back to Dashboard
+            </button>
+          </div>
+        </header>
+        <div style={{ padding: "20px", height: "calc(100vh - 120px)" }}>
+          <TradingAssistantChat
+            onStockSelect={handleStockSelect}
+            onOrderAction={handleOrderAction}
+            onViewAnalysis={handleViewAnalysis}
+          />
+        </div>
       </div>
     );
   }
@@ -286,6 +363,22 @@ const Dashboard: React.FC = observer(() => {
           >
             <FontAwesomeIcon icon={faChartLine} />
             Analytics
+          </button>
+          <button
+            className="scanner-btn"
+            onClick={() => setShowMarketScanner(true)}
+            title="Open Market Scanner"
+          >
+            <FontAwesomeIcon icon={faSignal} />
+            Scanner
+          </button>
+          <button
+            className="ai-assistant-btn"
+            onClick={() => setShowAIAssistant(true)}
+            title="Open AI Trading Assistant"
+          >
+            <FontAwesomeIcon icon={faComments} />
+            AI Assistant
           </button>
           <div className="stats">
             <span>{stocksWithSignals.length} stocks</span>

@@ -4,6 +4,7 @@ import { Portfolio } from '../../entities/portfolio.entity';
 import { Position } from '../../entities/position.entity';
 import { Stock } from '../../entities/stock.entity';
 import { Trade } from '../../entities/trade.entity';
+import { MarketHoursService } from '../../utils/market-hours.service';
 import { MLModule } from '../ml/ml.module';
 import { StockModule } from '../stock/stock.module';
 import { WebsocketModule } from '../websocket/websocket.module';
@@ -20,7 +21,7 @@ import { PortfolioAnalyticsService } from './portfolio-analytics.service';
     forwardRef(() => MLModule),
   ],
   controllers: [PaperTradingController, PortfolioAnalyticsController],
-  providers: [PaperTradingService, PortfolioAnalyticsService],
+  providers: [PaperTradingService, PortfolioAnalyticsService, MarketHoursService],
   exports: [PaperTradingService, PortfolioAnalyticsService],
 })
 export class PaperTradingModule {}

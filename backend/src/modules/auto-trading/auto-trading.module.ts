@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { MarketHoursService } from '../../utils/market-hours.service';
 import { PaperTradingModule } from '../paper-trading/paper-trading.module';
 import { StockModule } from '../stock/stock.module';
 import { WebsocketModule } from '../websocket/websocket.module';
@@ -29,6 +30,7 @@ import { TradeExecutionService } from './services/trade-execution.service';
     RiskManagementService,
     PositionSizingService,
     OrderManagementService,
+    MarketHoursService,
   ],
   exports: [AutoTradingService],
 })

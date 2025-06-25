@@ -83,17 +83,15 @@ export class OrderExecutionService {
       );
 
       // Execute the trade
-      const result = await this.paperTradingService.executeTrade({
-        portfolioId: order.portfolioId,
+      const trade = await this.paperTradingService.executeTrade({
+        userId: 'system', // TODO: Get actual userId from order/portfolio
         symbol: order.symbol,
-        action: order.side,
+        type: order.side === OrderSide.BUY ? 'buy' : 'sell',
         quantity: executedQuantity,
-        price: executionPrice,
-        orderType: 'market',
       });
 
-      if (!result.success) {
-        throw new Error(`Trade execution failed: ${result.message}`);
+      if (!trade) {
+        throw new Error('Trade execution failed');
       }
 
       // Update order with execution details
@@ -180,17 +178,15 @@ export class OrderExecutionService {
       );
 
       // Execute the trade
-      const result = await this.paperTradingService.executeTrade({
-        portfolioId: order.portfolioId,
+      const trade = await this.paperTradingService.executeTrade({
+        userId: 'system', // TODO: Get actual userId from order/portfolio
         symbol: order.symbol,
-        action: order.side,
+        type: order.side === OrderSide.BUY ? 'buy' : 'sell',
         quantity: executedQuantity,
-        price: executionPrice,
-        orderType: 'limit',
       });
 
-      if (!result.success) {
-        throw new Error(`Trade execution failed: ${result.message}`);
+      if (!trade) {
+        throw new Error('Trade execution failed');
       }
 
       // Update order execution details

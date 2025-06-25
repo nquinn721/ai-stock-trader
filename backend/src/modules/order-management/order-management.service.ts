@@ -18,7 +18,6 @@ import { PaperTradingService } from '../paper-trading/paper-trading.service';
 import { RiskManagementService } from './services/risk-management.service';
 import { ConditionalOrderService } from './services/conditional-order.service';
 import { OrderExecutionEngine } from './services/order-execution-engine.service';
-import { ConditionalOrderService } from './services/conditional-order.service';
 
 export interface CreateOrderDto {
   portfolioId: number;
@@ -69,6 +68,7 @@ export class OrderManagementService {
     private paperTradingService: PaperTradingService,
     private marketHoursService: MarketHoursService,
     private riskManagementService: RiskManagementService,
+    @Inject(forwardRef(() => ConditionalOrderService))
     private conditionalOrderService: ConditionalOrderService,
     private executionEngine: OrderExecutionEngine,
   ) {
@@ -871,7 +871,6 @@ export class OrderManagementService {
         stocks.map((s) => [s.symbol, {
           currentPrice: Number(s.currentPrice),
           volume: Number(s.volume || 0),
-          change: Number(s.change || 0),
           changePercent: Number(s.changePercent || 0),
         }]),
       );

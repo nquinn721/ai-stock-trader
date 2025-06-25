@@ -9,7 +9,9 @@ import {
   MLModelPerformance,
   MLPrediction,
 } from './entities/ml.entities';
+import { ChatMessage, ConversationContext, AIExplanation } from './entities/ai.entities';
 import { MLController } from './ml.controller';
+import { AIController } from './controllers/ai.controller';
 import { ABTestingService } from './services/ab-testing.service';
 import { BreakoutDetectionService } from './services/breakout-detection.service';
 import { DataIngestionService } from './services/data-ingestion.service';
@@ -35,6 +37,9 @@ import { RealTimeModelUpdateService } from './services/real-time-model-update.se
 import { SentimentAnalysisService } from './services/sentiment-analysis.service';
 import { SentimentMonitoringService } from './services/sentiment-monitoring.service';
 import { SignalGenerationService } from './services/signal-generation.service';
+import { LLMService } from './services/llm.service';
+import { ExplainableAIService } from './services/explainable-ai.service';
+import { TradingAssistantService } from './services/trading-assistant.service';
 
 @Module({
   imports: [
@@ -46,9 +51,13 @@ import { SignalGenerationService } from './services/signal-generation.service';
       MLABTest,
       MLFeatureImportance,
       MLModelPerformance,
+      // S38 AI Trading Assistant entities
+      ChatMessage,
+      ConversationContext,
+      AIExplanation,
     ]),
   ],
-  controllers: [MLController],
+  controllers: [MLController, AIController],
   providers: [
     MLService,
     FeatureEngineeringService,
@@ -80,6 +89,10 @@ import { SignalGenerationService } from './services/signal-generation.service';
     DynamicRiskManagementService,
     // S19 Intelligent Recommendation Engine
     IntelligentRecommendationService,
+    // S38 AI Trading Assistant & Explainable Recommendations
+    LLMService,
+    ExplainableAIService,
+    TradingAssistantService,
   ],
   exports: [
     MLService,
@@ -111,6 +124,10 @@ import { SignalGenerationService } from './services/signal-generation.service';
     DynamicRiskManagementService,
     // S19 Intelligent Recommendation Engine
     IntelligentRecommendationService,
+    // S38 AI Trading Assistant & Explainable Recommendations
+    LLMService,
+    ExplainableAIService,
+    TradingAssistantService,
   ],
 })
 export class MLModule {}

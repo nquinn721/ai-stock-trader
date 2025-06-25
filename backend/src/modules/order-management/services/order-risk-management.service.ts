@@ -263,8 +263,13 @@ export class OrderRiskManagementService {
       where: { portfolioId: portfolio.id, symbol: order.symbol },
     });
 
+    const stock = await this.stockRepository.findOne({
+      where: { symbol: order.symbol },
+    });
+
+    const currentPrice = stock ? Number(stock.currentPrice) : 0;
     const currentPositionValue = currentPosition
-      ? Number(currentPosition.quantity) * Number(currentPosition.currentPrice)
+      ? Number(currentPosition.quantity) * currentPrice
       : 0;
 
     const proposedPositionValue =
@@ -434,7 +439,7 @@ export class OrderRiskManagementService {
     }
 
     // Kelly Criterion suggestion (simplified)
-    const volatility = Number(stock.volatility) || 0.2; // Default 20% volatility
+    const volatility = 0.2; // Default 20% volatility (could be calculated from price history)
     const expectedReturn = 0.08; // Assume 8% expected return
     const kellyFraction = expectedReturn / (volatility * volatility);
     const kellyPositionValue = portfolioValue * Math.min(kellyFraction, 0.25); // Cap at 25%
