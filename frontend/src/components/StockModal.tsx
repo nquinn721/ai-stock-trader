@@ -75,77 +75,48 @@ const StockModal: React.FC<StockModalProps> = observer(
       try {
         const [stockData, historyData] = await Promise.all([
           stockStore.fetchStockDetails(stock.symbol),
-          stockStore.fetchStockHistory(stock.symbol, "1d", "5m"),
+          stockStore.fetchStockHistory(stock.symbol, "1d"), // Remove interval param as backend doesn't support it
         ]);
 
         const latestStock = stockData || stock;
         const historyArray = historyData || [];
 
-        // Create comprehensive chart data with full day coverage
+        // Create chart data with real historical prices
         let chartPoints: Array<{
           date: string;
           price: number;
           time: number;
-          volume: number;
-          high: number;
-          low: number;
         }> = [];
+
         if (historyArray.length > 0) {
-          chartPoints = historyArray.map((d: any, index: number) => ({
+          chartPoints = historyArray.map((d: any) => ({
             date: d.date,
             price: d.close || d.price || latestStock.currentPrice,
             time: new Date(d.date).getTime(),
-            volume: d.volume || 0,
-            high: d.high || d.price || latestStock.currentPrice,
-            low: d.low || d.price || latestStock.currentPrice,
           }));
 
-          // Ensure we have the latest price as the most recent data point
-          const lastDataTime = chartPoints[chartPoints.length - 1]?.time || 0;
+          // Always add the current live price as the latest data point
           const currentTime = Date.now();
-
-          // If last data point is more than 10 minutes old, add current price
-          if (currentTime - lastDataTime > 10 * 60 * 1000) {
-            chartPoints.push({
-              date: new Date().toISOString(),
-              price: latestStock.currentPrice,
-              time: currentTime,
-              volume: latestStock.volume || 0,
-              high: latestStock.currentPrice,
-              low: latestStock.currentPrice,
-            });
-          }
+          chartPoints.push({
+            date: new Date().toISOString(),
+            price: latestStock.currentPrice,
+            time: currentTime,
+          });
 
           setChartData(chartPoints);
         } else {
-          // Fallback: create minimal chart with current price
-          const now = new Date();
-          const startOfDay = new Date(
-            now.getFullYear(),
-            now.getMonth(),
-            now.getDate(),
-            9,
-            30
-          );
-          const fallbackData = [];
+          // If no historical data, show current price only
+          const currentTime = Date.now();
+          const singlePointData = [
+            {
+              date: new Date().toISOString(),
+              price: latestStock.currentPrice,
+              time: currentTime,
+            },
+          ];
 
-          for (let i = 0; i < 78; i++) {
-            // 6.5 hours * 12 (5-minute intervals)
-            const time = new Date(startOfDay.getTime() + i * 5 * 60 * 1000);
-            fallbackData.push({
-              date: time.toISOString(),
-              price:
-                latestStock.currentPrice * (1 + (Math.random() - 0.5) * 0.02), // Small random variation
-              time: time.getTime(),
-              volume: latestStock.volume || 1000000,
-              high: latestStock.currentPrice * 1.01,
-              low: latestStock.currentPrice * 0.99,
-            });
-          }
-
-          setChartData(fallbackData);
+          setChartData(singlePointData);
         }
-
         const prices =
           chartPoints.length > 0
             ? chartPoints.map((d: any) => d.price).filter(Boolean)
@@ -159,15 +130,9 @@ const StockModal: React.FC<StockModalProps> = observer(
           const sma50 = calculateSMA(prices, 50);
           const ema12 = calculateEMA(prices, 12);
           const ema26 = calculateEMA(prices, 26);
-          const atr = calculateATR(
-            chartPoints.length > 0 ? chartPoints : [latestStock]
-          );
-          const stochastic = calculateStochastic(
-            chartPoints.length > 0 ? chartPoints : [latestStock]
-          );
-          const williamsR = calculateWilliamsR(
-            chartPoints.length > 0 ? chartPoints : [latestStock]
-          );
+          const atr = calculateATR(prices);
+          const stochastic = calculateStochastic(prices);
+          const williamsR = calculateWilliamsR(prices);
           const support = findSupport(prices);
           const resistance = findResistance(prices);
 
@@ -183,9 +148,7 @@ const StockModal: React.FC<StockModalProps> = observer(
             stochastic,
             williamsR,
             volume: latestStock.volume || 0,
-            vwap: calculateVWAP(
-              chartPoints.length > 0 ? chartPoints : [latestStock]
-            ),
+            vwap: calculateVWAP(prices),
             support,
             resistance,
           });
@@ -208,6 +171,45 @@ const StockModal: React.FC<StockModalProps> = observer(
         }
       };
     }, [isOpen, stock, fetchLiveMetrics]);
+
+    // WebSocket listener for real-time price updates
+    useEffect(() => {
+      if (!isOpen || !stock) return;
+
+      const updateChartWithLivePrice = () => {
+        const currentStock = stockStore.stocks.find(
+          (s) => s.symbol === stock.symbol
+        );
+        if (currentStock && currentStock.currentPrice && chartData.length > 0) {
+          const now = new Date();
+          const newDataPoint = {
+            date: now.toISOString(),
+            price: currentStock.currentPrice,
+            time: now.getTime(),
+          };
+
+          setChartData((prevData) => {
+            // Keep last 100 data points for performance
+            const updatedData = [...prevData, newDataPoint].slice(-100);
+            return updatedData;
+          });
+        }
+      };
+
+      // Listen for stock updates from WebSocket
+      const checkInterval = setInterval(() => {
+        const stockUpdates = stockStore.stocks.find(
+          (s) => s.symbol === stock.symbol
+        );
+        if (stockUpdates && stockUpdates.currentPrice !== stock.currentPrice) {
+          updateChartWithLivePrice();
+        }
+      }, 2000); // Check every 2 seconds for WebSocket updates
+
+      return () => {
+        clearInterval(checkInterval);
+      };
+    }, [isOpen, stock, stockStore.stocks, chartData]);
 
     // Technical Indicator Calculations
     const calculateRSI = (prices: number[], period: number = 14): number => {
@@ -277,75 +279,61 @@ const StockModal: React.FC<StockModalProps> = observer(
       return ema;
     };
 
-    const calculateATR = (data: any[], period: number = 14): number => {
-      if (data.length < period) return 0;
-      const trueRanges = data.slice(-period).map((d) => {
-        const high = d.high || d.price;
-        const low = d.low || d.price;
-        const close = d.close || d.price;
-        return Math.max(
-          high - low,
-          Math.abs(high - close),
-          Math.abs(low - close)
+    const calculateATR = (prices: number[], period: number = 14): number => {
+      if (prices.length < period) return 0;
+      // Simplified ATR calculation using price differences
+      const trueRanges = [];
+      for (let i = 1; i < Math.min(prices.length, period + 1); i++) {
+        const high = prices[i];
+        const low = prices[i] * 0.995; // Approximate low as 0.5% below close
+        const prevClose = prices[i - 1];
+        trueRanges.push(
+          Math.max(
+            high - low,
+            Math.abs(high - prevClose),
+            Math.abs(low - prevClose)
+          )
         );
-      });
-      return trueRanges.reduce((sum, tr) => sum + tr, 0) / period;
+      }
+      return trueRanges.reduce((sum, tr) => sum + tr, 0) / trueRanges.length;
     };
 
     const calculateStochastic = (
-      data: any[],
+      prices: number[],
       period: number = 14
     ): { k: number; d: number } => {
-      if (data.length < period) return { k: 50, d: 50 };
-      const recentData = data.slice(-period);
-      const highs = recentData.map((d) => d.high || d.price);
-      const lows = recentData.map((d) => d.low || d.price);
-      const currentClose =
-        data[data.length - 1].close || data[data.length - 1].price;
-      const highestHigh = Math.max(...highs);
-      const lowestLow = Math.min(...lows);
-      const k = ((currentClose - lowestLow) / (highestHigh - lowestLow)) * 100;
-      const d = k * 0.9; // Simplified %D
-      return { k, d };
+      if (prices.length < period) return { k: 50, d: 50 };
+      const recentPrices = prices.slice(-period);
+      const currentPrice = prices[prices.length - 1];
+      const highest = Math.max(...recentPrices);
+      const lowest = Math.min(...recentPrices);
+      const k = ((currentPrice - lowest) / (highest - lowest)) * 100;
+      return { k, d: k * 0.9 }; // Simplified D calculation
     };
 
-    const calculateWilliamsR = (data: any[], period: number = 14): number => {
-      if (data.length < period) return -50;
-      const recentData = data.slice(-period);
-      const highs = recentData.map((d) => d.high || d.price);
-      const lows = recentData.map((d) => d.low || d.price);
-      const currentClose =
-        data[data.length - 1].close || data[data.length - 1].price;
-      const highestHigh = Math.max(...highs);
-      const lowestLow = Math.min(...lows);
-      return ((highestHigh - currentClose) / (highestHigh - lowestLow)) * -100;
+    const calculateWilliamsR = (
+      prices: number[],
+      period: number = 14
+    ): number => {
+      if (prices.length < period) return -50;
+      const recentPrices = prices.slice(-period);
+      const currentPrice = prices[prices.length - 1];
+      const highest = Math.max(...recentPrices);
+      const lowest = Math.min(...recentPrices);
+      return ((highest - currentPrice) / (highest - lowest)) * -100;
     };
 
-    const calculateVWAP = (data: any[]): number => {
-      if (data.length === 0) return 0;
-      let totalPriceVolume = 0;
-      let totalVolume = 0;
-
-      for (const d of data) {
-        const price = d.close || d.price || 0;
-        const volume = d.volume || 1000000;
-        totalPriceVolume += price * volume;
-        totalVolume += volume;
-      }
-
-      return totalVolume > 0 ? totalPriceVolume / totalVolume : 0;
+    const calculateVWAP = (prices: number[]): number => {
+      // Simplified VWAP calculation without volume data
+      return prices.reduce((sum, price) => sum + price, 0) / prices.length;
     };
 
     const findSupport = (prices: number[]): number => {
-      if (prices.length < 10) return Math.min(...prices);
-      const recentPrices = prices.slice(-20);
-      return Math.min(...recentPrices) * 0.995;
+      return Math.min(...prices) * 0.995; // Support slightly below lowest price
     };
 
     const findResistance = (prices: number[]): number => {
-      if (prices.length < 10) return Math.max(...prices);
-      const recentPrices = prices.slice(-20);
-      return Math.max(...recentPrices) * 1.005;
+      return Math.max(...prices) * 1.005; // Resistance slightly above highest price
     };
 
     // Helper functions
@@ -529,7 +517,7 @@ const StockModal: React.FC<StockModalProps> = observer(
               <div className="dashboard-section">
                 <div className="section-header">
                   <FontAwesomeIcon icon={faChartLine} />
-                  <h3>Price Chart with Day Trading Patterns</h3>
+                  <h3>Live Stock Price Chart</h3>
                 </div>
                 <div className="stock-modal-chart-container">
                   {chartData.length === 0 ? (
@@ -545,39 +533,8 @@ const StockModal: React.FC<StockModalProps> = observer(
                         series={[
                           {
                             data: chartData.map((d) => d.price),
-                            label: stock.symbol,
+                            label: `${stock.symbol} Price`,
                             color: "#00d4aa",
-                            curve: "linear",
-                          },
-                          // Support line
-                          {
-                            data: chartData.map(
-                              () =>
-                                liveMetrics?.support ||
-                                stock.currentPrice * 0.95
-                            ),
-                            label: "Support",
-                            color: "#ff4757",
-                            curve: "linear",
-                          },
-                          // Resistance line
-                          {
-                            data: chartData.map(
-                              () =>
-                                liveMetrics?.resistance ||
-                                stock.currentPrice * 1.05
-                            ),
-                            label: "Resistance",
-                            color: "#ffa502",
-                            curve: "linear",
-                          },
-                          // VWAP line (key day trading level)
-                          {
-                            data: chartData.map(
-                              () => liveMetrics?.vwap || stock.currentPrice
-                            ),
-                            label: "VWAP",
-                            color: "#a55eea",
                             curve: "linear",
                           },
                         ]}
@@ -638,20 +595,24 @@ const StockModal: React.FC<StockModalProps> = observer(
                       />
                     </div>
                   )}
-                  <div className="trading-patterns-info">
-                    <h5>Day Trading Patterns:</h5>
-                    <div className="patterns-grid">
-                      <div className="pattern-item">
-                        <strong>Price Action:</strong> Real-time stock price movement throughout the trading day
+                  <div className="live-chart-info">
+                    <h5>Live Price Chart Information:</h5>
+                    <div className="chart-info-grid">
+                      <div className="info-item">
+                        <strong>Real-Time Data:</strong> Live price updates from
+                        Yahoo Finance every 2 minutes via WebSocket
                       </div>
-                      <div className="pattern-item">
-                        <strong>Support Level:</strong> Key price floor where buyers typically step in
+                      <div className="info-item">
+                        <strong>Current Price:</strong> $
+                        {stock.currentPrice?.toFixed(2) || 'N/A'}
                       </div>
-                      <div className="pattern-item">
-                        <strong>Resistance Level:</strong> Key price ceiling where sellers typically emerge
+                      <div className="info-item">
+                        <strong>Last Updated:</strong>{" "}
+                        {new Date().toLocaleTimeString()}
                       </div>
-                      <div className="pattern-item">
-                        <strong>VWAP:</strong> Volume-weighted average price - institutional trading benchmark
+                      <div className="info-item">
+                        <strong>Data Points:</strong> {chartData.length} price
+                        points
                       </div>
                     </div>
                   </div>

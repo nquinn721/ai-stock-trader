@@ -396,19 +396,19 @@ const StockCard: React.FC<StockCardProps> = observer(({ stock, signal }) => {
             <span className="badge-label">Signal</span>
             <span
               className={`badge-value signal-${
-                stock.breakoutStrategy?.signal || "neutral"
+                stock.tradingSignal?.signal || "hold"
               }`}
               title={`AI Recommendation: ${
-                stock.breakoutStrategy?.signal === "bullish"
-                  ? "🟢 Positive outlook - Consider buying"
-                  : stock.breakoutStrategy?.signal === "bearish"
-                  ? "🔴 Negative outlook - Consider selling"
-                  : "🟡 Hold position - Wait for clearer signals"
+                stock.tradingSignal?.signal === "buy"
+                  ? "🟢 AI suggests buying - Strong positive signals detected"
+                  : stock.tradingSignal?.signal === "sell"
+                  ? "🔴 AI suggests selling - Strong negative signals detected"
+                  : "🟡 AI suggests holding - Wait for clearer signals"
               }`}
             >
-              {stock.breakoutStrategy?.signal === "bullish"
-                ? "�"
-                : stock.breakoutStrategy?.signal === "bearish"
+              {stock.tradingSignal?.signal === "buy"
+                ? "🟢"
+                : stock.tradingSignal?.signal === "sell"
                 ? "🔴"
                 : "🟡"}
             </span>

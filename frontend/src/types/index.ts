@@ -294,6 +294,7 @@ export interface Stock {
   sentiment?: SentimentData;
   recentNews?: NewsArticle[];
   breakoutStrategy?: BreakoutStrategy;
+  tradingSignal?: TradingSignal | null;
 }
 
 export interface StockPrice {

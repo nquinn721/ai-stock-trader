@@ -45,9 +45,23 @@ Sprint 5 Progress: ████████████████████ 
 
 ### 🟦 Planned for Next Sprint
 
-- 🟦 **Story 018**: Advanced charting and visualization
-- 🟦 **Story 019**: ML model training and deployment pipeline
-- 🟦 **Story 020**: Production deployment configuration
+- 🟦 **S31**: Portfolio Analytics Dashboard (8 story points)
+- 🟦 **S33**: Remove Latest Trade Signals (2 story points) - IN PROGRESS
+- 🟦 **S34**: Advanced Trading Tab (5 story points) - IN PROGRESS
+- 🟦 **S35**: Advanced Order Management System (13 story points)
+- 🟦 **S36**: Real-Time Market Scanner & Screener (10 story points)
+- 🟦 **S37**: Four Stock-Only Portfolios with Day Trading Rules (13 story points) - COMPLETED
+- 🟦 **S38**: AI Trading Assistant with Explainable Recommendations (13 story points)
+- 🟦 **S39**: Real-Time Predictive Analytics Dashboard (13 story points)
+- 🟦 **S40**: Autonomous Trading Agent Builder (21 story points)
+- 🟦 **S41**: Multi-Asset Intelligence & Alternative Data (21 story points)
+
+### 🔄 Recently Recovered Stories
+
+- ✅ **S31**: Portfolio Analytics Dashboard - Recreated missing story file
+- ✅ **S35**: Advanced Order Management System - Recreated missing story file
+- ✅ **S36**: Real-Time Market Scanner & Screener - Recreated missing story file
+- ⚠️ **S32**: Intentionally removed as documented in PROJECT_MANAGEMENT_README.md
 
 ## 📊 Overall Project Progress
 
@@ -97,7 +111,7 @@ Phase 5 (Production):       ░░░░░░░░░░░░░░░░░�
 
 ### 🎯 Key Metrics
 
-- **Total Stories**: 40 created, 25 completed (63%)
+- **Total Stories**: 43 created, 25 completed (58%)
 - **Epics**: 8 defined, 2 completed (Foundation, Testing)
 - **Test Coverage**:
   - Backend: 85% (target: 90%)

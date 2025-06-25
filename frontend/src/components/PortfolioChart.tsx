@@ -96,17 +96,12 @@ const PortfolioChart: React.FC<PortfolioChartProps> = observer(
           );
           setChartData(transformedData);
         } else {
-          console.log("📊 No performance history, using mock data");
-          // Fallback to mock data if no performance history
-          const mockData: ChartData = generateMockPerformanceData();
-          setChartData(mockData);
+          console.log("📊 No performance history available");
+          setChartData(null);
         }
       } catch (error) {
         console.error("⚠️ Portfolio Chart Error:", error);
-        console.log("📊 Error occurred, using mock data fallback");
-        // Fallback to mock data
-        const mockData: ChartData = generateMockPerformanceData();
-        setChartData(mockData);
+        setChartData(null);
       }
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [portfolioId, currentTimeframe, portfolioStore]);
@@ -114,70 +109,6 @@ const PortfolioChart: React.FC<PortfolioChartProps> = observer(
     useEffect(() => {
       fetchPortfolioPerformance();
     }, [fetchPortfolioPerformance]);
-
-    const generateMockPerformanceData = (): ChartData => {
-      const points: PerformancePoint[] = [];
-      const now = new Date();
-      const days =
-        currentTimeframe === "1D"
-          ? 1
-          : currentTimeframe === "1W"
-          ? 7
-          : currentTimeframe === "1M"
-          ? 30
-          : currentTimeframe === "3M"
-          ? 90
-          : 365;
-      let baseValue = 100000;
-      let currentValue = baseValue;
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      let cumulative = 0;
-
-      for (let i = days; i >= 0; i--) {
-        const date = new Date(now.getTime() - i * 24 * 60 * 60 * 1000);
-        const dailyChange = (Math.random() - 0.48) * 0.02; // Slight positive bias
-
-        currentValue *= 1 + dailyChange;
-        const investedValue = currentValue * 0.8; // 80% invested
-        const cash = currentValue * 0.2;
-        const profit = currentValue - baseValue;
-        const percentReturn = (profit / baseValue) * 100;
-
-        points.push({
-          date: date.toISOString().split("T")[0],
-          totalValue: currentValue,
-          cash,
-          investedValue,
-          profit,
-          percentReturn,
-        });
-      }
-
-      const returns = points.map((p) => p.percentReturn);
-      const drawdowns = [];
-      let peak = 0;
-
-      for (let i = 0; i < points.length; i++) {
-        if (points[i].totalValue > peak) {
-          peak = points[i].totalValue;
-        }
-        const drawdown = ((peak - points[i].totalValue) / peak) * 100;
-        drawdowns.push(drawdown);
-      }
-
-      return {
-        performanceHistory: points,
-        metrics: {
-          totalReturn: currentValue - baseValue,
-          totalReturnPercent: ((currentValue - baseValue) / baseValue) * 100,
-          maxDrawdown: Math.max(...drawdowns),
-          volatility: calculateVolatility(returns),
-          sharpeRatio: calculateSharpeRatio(returns),
-          bestDay: Math.max(...returns.slice(1).map((r, i) => r - returns[i])),
-          worstDay: Math.min(...returns.slice(1).map((r, i) => r - returns[i])),
-        },
-      };
-    };
 
     const calculateVolatility = (returns: number[]): number => {
       if (returns.length < 2) return 0;
@@ -188,19 +119,9 @@ const PortfolioChart: React.FC<PortfolioChartProps> = observer(
       return Math.sqrt(variance);
     };
 
-    const calculateSharpeRatio = (returns: number[]): number => {
-      if (returns.length < 2) return 0;
-      const mean = returns.reduce((a, b) => a + b, 0) / returns.length;
-      const std = calculateVolatility(returns);
-      return std === 0 ? 0 : mean / std;
-    };
-
     const renderChart = () => {
       if (!chartData) return null;
       const { performanceHistory } = chartData;
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const width = 100; // Percentage
-      const chartHeight = height - 60; // Leave space for axes
 
       const values = performanceHistory.map((p) => {
         switch (selectedMetric) {
@@ -369,8 +290,17 @@ const PortfolioChart: React.FC<PortfolioChartProps> = observer(
 
     if (!chartData) {
       return (
-        <div className="portfolio-chart-error">
-          <p>Failed to load portfolio performance data</p>
+        <div className="portfolio-chart-container" style={{ height }}>
+          <div className="portfolio-chart-error">
+            <div className="no-data-message">
+              <h4>No Performance Data Available</h4>
+              <p>
+                Portfolio performance data will appear here once you start
+                trading. Add some stocks to your portfolio to see performance
+                charts.
+              </p>
+            </div>
+          </div>
         </div>
       );
     }
@@ -382,7 +312,13 @@ const PortfolioChart: React.FC<PortfolioChartProps> = observer(
       return (
         <div className="portfolio-chart-container" style={{ height }}>
           <div className="portfolio-chart-error">
-            <p>No performance data available</p>
+            <div className="no-data-message">
+              <h4>No Performance History</h4>
+              <p>
+                Performance history will be generated as you make trades. Start
+                by adding positions to your portfolio.
+              </p>
+            </div>
           </div>
         </div>
       );
