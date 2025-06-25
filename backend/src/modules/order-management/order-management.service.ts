@@ -17,6 +17,8 @@ import { Stock } from '../../entities/stock.entity';
 import { PaperTradingService } from '../paper-trading/paper-trading.service';
 import { RiskManagementService } from './services/risk-management.service';
 import { ConditionalOrderService } from './services/conditional-order.service';
+import { OrderExecutionEngine } from './services/order-execution-engine.service';
+import { ConditionalOrderService } from './services/conditional-order.service';
 
 export interface CreateOrderDto {
   portfolioId: number;
@@ -67,7 +69,8 @@ export class OrderManagementService {
     private paperTradingService: PaperTradingService,
     private marketHoursService: MarketHoursService,
     private riskManagementService: RiskManagementService,
-  private executionEngine: OrderExecutionEngine,
+    private conditionalOrderService: ConditionalOrderService,
+    private executionEngine: OrderExecutionEngine,
   ) {
     // Initialize WebSocket gateway as null, will be set via setter to avoid circular dependency
     this.webSocketGateway = null;
