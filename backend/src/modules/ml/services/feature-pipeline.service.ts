@@ -53,6 +53,20 @@ export interface FeatureImportance {
 
 /**
  * S28D: Advanced Feature Engineering Pipeline
+ *
+ * ⚠️ **CRITICAL: NO MOCK DATA POLICY**
+ * This service NEVER uses mock/fake data. All features are extracted from:
+ * - Real market data from Yahoo Finance API
+ * - Actual price movements, volume, and technical indicators
+ * - Live market conditions and volatility
+ * - Historical real trading patterns
+ *
+ * When real data is unavailable:
+ * - Return empty feature sets with clear indicators
+ * - Handle API failures gracefully
+ * - Never generate fake technical indicators
+ * - Show proper "No data available" states
+ *
  * Transforms raw market data into comprehensive feature sets for ML models
  * Expected ROI: 30-40% improvement in ML model accuracy
  */

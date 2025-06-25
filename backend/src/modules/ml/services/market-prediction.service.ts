@@ -12,6 +12,20 @@ import { FeaturePipelineService, FeatureSet } from './feature-pipeline.service';
 
 /**
  * Advanced Market Prediction Service - S29A Implementation
+ *
+ * ⚠️ **CRITICAL: NO MOCK DATA POLICY**
+ * This service NEVER uses mock/fake data. All predictions are based on:
+ * - Real market data from Yahoo Finance API
+ * - Actual price movements and technical indicators
+ * - Live volume and sentiment data
+ * - Historical patterns from real market events
+ *
+ * When real data is unavailable:
+ * - Return low-confidence neutral predictions
+ * - Handle API failures gracefully
+ * - Never generate fake market scenarios
+ * - Show proper "No data available" states
+ *
  * Implements sophisticated market prediction models using ensemble methods,
  * LSTM/GRU networks, transformer models, and multi-horizon predictions.
  *
