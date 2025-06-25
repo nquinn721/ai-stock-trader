@@ -22,9 +22,9 @@ import {
   CreateOrderDto,
   OrderManagementService,
 } from './order-management.service';
+import { ConditionalOrderService } from './services/conditional-order.service';
 import { OrderExecutionService } from './services/order-execution.service';
 import { OrderRiskManagementService } from './services/order-risk-management.service';
-import { ConditionalOrderService } from './services/conditional-order.service';
 
 export class CreateOrderRequestDto {
   portfolioId: number;
@@ -393,9 +393,11 @@ export class OrderManagementController {
   ): Promise<Order> {
     // Get existing order
     const existingOrder = await this.getOrder(orderId);
-    
+
     if (!existingOrder.isPending) {
-      throw new Error(`Cannot modify order ${orderId} - status: ${existingOrder.status}`);
+      throw new Error(
+        `Cannot modify order ${orderId} - status: ${existingOrder.status}`,
+      );
     }
 
     // Cancel existing order
@@ -429,37 +431,64 @@ export class OrderManagementController {
     @Body() routingOptions?: OrderRoutingOptionsDto,
   ): Promise<any> {
     const order = await this.getOrder(orderId);
-    
+
     if (!order.isPending && order.status !== OrderStatus.TRIGGERED) {
-      throw new Error(`Cannot execute order ${orderId} - status: ${order.status}`);
+      throw new Error(
+        `Cannot execute order ${orderId} - status: ${order.status}`,
+      );
     }
 
-    const routingOpts = routingOptions ? {
-      routingStrategy: routingOptions.routingStrategy || 'best_execution',
-      maxSlippage: routingOptions.maxSlippage || 0.001,
-      timeLimit: routingOptions.timeLimit || 30,
-      allowPartialFills: routingOptions.allowPartialFills ?? true,
-    } : undefined;
+    const routingOpts = routingOptions
+      ? {
+          routingStrategy: routingOptions.routingStrategy || 'best_execution',
+          maxSlippage: routingOptions.maxSlippage || 0.001,
+          timeLimit: routingOptions.timeLimit || 30,
+          allowPartialFills: routingOptions.allowPartialFills ?? true,
+        }
+      : undefined;
 
-  switch (order.orderType) {
-    case OrderType.MARKET:
-      return this.orderExecutionService.executeMarketOrder(order, routingOpts);
-    
-    case OrderType.LIMIT:
-      const stock = await this.stockRepository.findOne({ where: { symbol: order.symbol } });
-      return this.orderExecutionService.executeLimitOrder(order, Number(stock?.currentPrice || 0), routingOpts);
-    
-    case OrderType.STOP_LOSS:
-      const stock2 = await this.stockRepository.findOne({ where: { symbol: order.symbol } });
-      return this.orderExecutionService.executeStopOrder(order, Number(stock2?.currentPrice || 0), routingOpts);
-    
-    case OrderType.STOP_LIMIT:
-      const stock3 = await this.stockRepository.findOne({ where: { symbol: order.symbol } });
-      return this.orderExecutionService.executeStopLimitOrder(order, Number(stock3?.currentPrice || 0), routingOpts);
-    
-    default:
-      throw new Error(`Unsupported order type for manual execution: ${order.orderType}`);
-  }
+    switch (order.orderType) {
+      case OrderType.MARKET:
+        return this.orderExecutionService.executeMarketOrder(
+          order,
+          routingOpts,
+        );
+
+      case OrderType.LIMIT:
+        const stock = await this.stockRepository.findOne({
+          where: { symbol: order.symbol },
+        });
+        return this.orderExecutionService.executeLimitOrder(
+          order,
+          Number(stock?.currentPrice || 0),
+          routingOpts,
+        );
+
+      case OrderType.STOP_LOSS:
+        const stock2 = await this.stockRepository.findOne({
+          where: { symbol: order.symbol },
+        });
+        return this.orderExecutionService.executeStopOrder(
+          order,
+          Number(stock2?.currentPrice || 0),
+          routingOpts,
+        );
+
+      case OrderType.STOP_LIMIT:
+        const stock3 = await this.stockRepository.findOne({
+          where: { symbol: order.symbol },
+        });
+        return this.orderExecutionService.executeStopLimitOrder(
+          order,
+          Number(stock3?.currentPrice || 0),
+          routingOpts,
+        );
+
+      default:
+        throw new Error(
+          `Unsupported order type for manual execution: ${order.orderType}`,
+        );
+    }
   }
 
   /**
@@ -517,22 +546,24 @@ export class OrderManagementController {
     @Param('portfolioId', ParseIntPipe) portfolioId: number,
   ) {
     // Get all orders for the portfolio
-    const orders = await this.orderManagementService.getOrdersByPortfolio(portfolioId);
-    
+    const orders =
+      await this.orderManagementService.getOrdersByPortfolio(portfolioId);
+
     const conditionalOrders = orders.filter(
-      order => order.conditionalTriggers && order.conditionalTriggers.length > 0
+      (order) =>
+        order.conditionalTriggers && order.conditionalTriggers.length > 0,
     );
 
     const pendingConditional = conditionalOrders.filter(
-      order => order.status === OrderStatus.PENDING
+      (order) => order.status === OrderStatus.PENDING,
     );
 
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
     const triggeredToday = conditionalOrders.filter(
-      order => order.status === OrderStatus.TRIGGERED && 
-               order.updatedAt >= today
+      (order) =>
+        order.status === OrderStatus.TRIGGERED && order.updatedAt >= today,
     );
 
     return {
@@ -550,7 +581,10 @@ export class OrderManagementController {
   @Post('orders/bulk-cancel')
   async bulkCancelOrders(
     @Body() request: { orderIds: number[]; reason?: string },
-  ): Promise<{ cancelled: number[]; failed: { id: number; reason: string }[] }> {
+  ): Promise<{
+    cancelled: number[];
+    failed: { id: number; reason: string }[];
+  }> {
     const cancelled: number[] = [];
     const failed: { id: number; reason: string }[] = [];
 
@@ -574,27 +608,27 @@ export class OrderManagementController {
     // In a real system, this would come from market data feeds
     // For now, return simulated order book
     const orders = await this.orderManagementService.getActiveOrders();
-    const symbolOrders = orders.filter(order => order.symbol === symbol);
+    const symbolOrders = orders.filter((order) => order.symbol === symbol);
 
     const buyOrders = symbolOrders
-      .filter(order => order.side === OrderSide.BUY && order.limitPrice)
+      .filter((order) => order.side === OrderSide.BUY && order.limitPrice)
       .sort((a, b) => Number(b.limitPrice) - Number(a.limitPrice)) // Highest price first
       .slice(0, 10);
 
     const sellOrders = symbolOrders
-      .filter(order => order.side === OrderSide.SELL && order.limitPrice)
+      .filter((order) => order.side === OrderSide.SELL && order.limitPrice)
       .sort((a, b) => Number(a.limitPrice) - Number(b.limitPrice)) // Lowest price first
       .slice(0, 10);
 
     return {
       symbol,
       timestamp: new Date(),
-      bids: buyOrders.map(order => ({
+      bids: buyOrders.map((order) => ({
         price: Number(order.limitPrice),
         quantity: Number(order.quantity),
         orderId: order.id,
       })),
-      asks: sellOrders.map(order => ({
+      asks: sellOrders.map((order) => ({
         price: Number(order.limitPrice),
         quantity: Number(order.quantity),
         orderId: order.id,
@@ -609,47 +643,64 @@ export class OrderManagementController {
   async getAdvancedOrderStatistics(
     @Param('portfolioId', ParseIntPipe) portfolioId: number,
   ) {
-    const orders = await this.orderManagementService.getOrdersByPortfolio(portfolioId);
-    const executedOrders = orders.filter(o => o.isExecuted);
+    const orders =
+      await this.orderManagementService.getOrdersByPortfolio(portfolioId);
+    const executedOrders = orders.filter((o) => o.isExecuted);
 
     // Calculate advanced metrics
     const executionTimes = executedOrders
-      .filter(order => order.executedAt && order.createdAt)
-      .map(order => (order.executedAt!.getTime() - order.createdAt.getTime()) / 1000);
+      .filter((order) => order.executedAt && order.createdAt)
+      .map(
+        (order) =>
+          (order.executedAt!.getTime() - order.createdAt.getTime()) / 1000,
+      );
 
     const fillRates = executedOrders
-      .filter(order => order.executedQuantity && order.quantity)
-      .map(order => Number(order.executedQuantity) / Number(order.quantity));
+      .filter((order) => order.executedQuantity && order.quantity)
+      .map((order) => Number(order.executedQuantity) / Number(order.quantity));
 
     const priceImprovements = executedOrders
-      .filter(order => order.limitPrice && order.executedPrice)
-      .map(order => {
-        const improvement = order.side === OrderSide.BUY
-          ? Number(order.limitPrice) - Number(order.executedPrice)
-          : Number(order.executedPrice) - Number(order.limitPrice);
+      .filter((order) => order.limitPrice && order.executedPrice)
+      .map((order) => {
+        const improvement =
+          order.side === OrderSide.BUY
+            ? Number(order.limitPrice) - Number(order.executedPrice)
+            : Number(order.executedPrice) - Number(order.limitPrice);
         return Math.max(0, improvement);
       });
 
     return {
-      ...await this.getOrderStatistics(portfolioId),
+      ...(await this.getOrderStatistics(portfolioId)),
       advancedMetrics: {
-        avgExecutionTimeSeconds: executionTimes.length > 0 
-          ? executionTimes.reduce((sum, time) => sum + time, 0) / executionTimes.length 
-          : 0,
-        avgFillRate: fillRates.length > 0 
-          ? fillRates.reduce((sum, rate) => sum + rate, 0) / fillRates.length 
-          : 0,
-        avgPriceImprovement: priceImprovements.length > 0 
-          ? priceImprovements.reduce((sum, imp) => sum + imp, 0) / priceImprovements.length 
-          : 0,
-        partialFills: executedOrders.filter(order => 
-          order.executedQuantity && Number(order.executedQuantity) < Number(order.quantity)
+        avgExecutionTimeSeconds:
+          executionTimes.length > 0
+            ? executionTimes.reduce((sum, time) => sum + time, 0) /
+              executionTimes.length
+            : 0,
+        avgFillRate:
+          fillRates.length > 0
+            ? fillRates.reduce((sum, rate) => sum + rate, 0) / fillRates.length
+            : 0,
+        avgPriceImprovement:
+          priceImprovements.length > 0
+            ? priceImprovements.reduce((sum, imp) => sum + imp, 0) /
+              priceImprovements.length
+            : 0,
+        partialFills: executedOrders.filter(
+          (order) =>
+            order.executedQuantity &&
+            Number(order.executedQuantity) < Number(order.quantity),
         ).length,
-        trailingStopOrders: orders.filter(order => order.orderType === OrderType.TRAILING_STOP).length,
-        conditionalOrders: orders.filter(order => 
-          order.conditionalTriggers && order.conditionalTriggers.length > 0
+        trailingStopOrders: orders.filter(
+          (order) => order.orderType === OrderType.TRAILING_STOP,
         ).length,
-        ocoGroups: new Set(orders.map(order => order.ocoGroupId).filter(Boolean)).size,
+        conditionalOrders: orders.filter(
+          (order) =>
+            order.conditionalTriggers && order.conditionalTriggers.length > 0,
+        ).length,
+        ocoGroups: new Set(
+          orders.map((order) => order.ocoGroupId).filter(Boolean),
+        ).size,
       },
     };
   }

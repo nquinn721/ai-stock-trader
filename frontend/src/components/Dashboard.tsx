@@ -35,7 +35,7 @@ import PortfolioDetailsModal from "./PortfolioDetailsModal";
 import PortfolioSelector from "./PortfolioSelector";
 import QuickTrade from "./QuickTrade";
 import StockCard from "./StockCard";
-import TradingAssistantChat from "./TradingAssistantChat";
+import TradingAssistantChat from "./ai/TradingAssistantChat";
 
 // Add icons to library
 library.add(
@@ -316,11 +316,7 @@ const Dashboard: React.FC = observer(() => {
           </div>
         </header>
         <div style={{ padding: "20px", height: "calc(100vh - 120px)" }}>
-          <TradingAssistantChat
-            onStockSelect={handleStockSelect}
-            onOrderAction={handleOrderAction}
-            onViewAnalysis={handleViewAnalysis}
-          />
+          <TradingAssistantChat />
         </div>
       </div>
     );

@@ -271,7 +271,7 @@ export class AIController {
   ) {
     const messages = await this.tradingAssistantService.getConversationHistory(
       userId, 
-      conversationId, 
+      conversationId || '', 
       limit
     );
     return { messages };

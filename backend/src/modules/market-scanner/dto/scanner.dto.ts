@@ -1,6 +1,19 @@
-import { IsArray, IsBoolean, IsEnum, IsNumber, IsOptional, IsString, ValidateNested } from 'class-validator';
-import { Type, Transform } from 'class-transformer';
-import { FilterType, FilterOperator, ScanCriteria, FilterCriteria } from '../entities/scanner.entity';
+import { Transform, Type } from 'class-transformer';
+import {
+  IsArray,
+  IsBoolean,
+  IsEnum,
+  IsNumber,
+  IsOptional,
+  IsString,
+  ValidateNested,
+} from 'class-validator';
+import {
+  FilterCriteria,
+  FilterOperator,
+  FilterType,
+  ScanCriteria,
+} from '../entities/scanner.entity';
 
 export class FilterCriteriaDto {
   @IsString()
@@ -26,7 +39,11 @@ export class FilterCriteriaDto {
 
   @IsOptional()
   @Transform(({ value }) => {
-    if (value !== undefined && typeof value === 'string' && !isNaN(Number(value))) {
+    if (
+      value !== undefined &&
+      typeof value === 'string' &&
+      !isNaN(Number(value))
+    ) {
       return Number(value);
     }
     return value;
@@ -80,7 +97,7 @@ export class ScanCriteriaDto {
   // Helper method to convert DTO to entity format
   toEntity(): ScanCriteria {
     return {
-      filters: this.filters.map(filter => filter.toEntity()),
+      filters: this.filters.map((filter) => filter.toEntity()),
       sortBy: this.sortBy,
       sortOrder: this.sortOrder,
       limit: this.limit,
