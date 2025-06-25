@@ -22,6 +22,8 @@ import "./AutoTradingDashboard.css";
 import TradingControlPanel from "./TradingControlPanel";
 import TradingRulesManager from "./TradingRulesManager";
 import TradingSessionMonitor from "./TradingSessionMonitor";
+import TradingPerformanceChart from "./TradingPerformanceChart";
+import AutoTradeHistory from "./AutoTradeHistory";
 
 interface AutoTradingDashboardProps {
   portfolios: Portfolio[];
@@ -268,6 +270,14 @@ const AutoTradingDashboard: React.FC<AutoTradingDashboardProps> = observer(
                 <TradingSessionMonitor />
               </div>
 
+              {/* Performance Chart */}
+              <div className="overview-section full-width">
+                <TradingPerformanceChart
+                  portfolioId={selectedPortfolioId || undefined}
+                  timeRange="1w"
+                />
+              </div>
+
               {/* Recent Activity */}
               <div className="overview-section full-width">
                 <div className="section-header">
@@ -318,67 +328,7 @@ const AutoTradingDashboard: React.FC<AutoTradingDashboardProps> = observer(
           {activeTab === "sessions" && <TradingSessionMonitor />}
 
           {activeTab === "history" && (
-            <div className="history-content">
-              <div className="section-header">
-                <h3>Trade History</h3>
-                <div className="history-filters">
-                  <select defaultValue="all">
-                    <option value="all">All Trades</option>
-                    <option value="executed">Executed</option>
-                    <option value="cancelled">Cancelled</option>
-                    <option value="failed">Failed</option>
-                  </select>
-                  <select defaultValue="7">
-                    <option value="1">Last 24 hours</option>
-                    <option value="7">Last 7 days</option>
-                    <option value="30">Last 30 days</option>
-                    <option value="all">All time</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="trade-history-table">
-                <div className="table-header">
-                  <div>Time</div>
-                  <div>Symbol</div>
-                  <div>Type</div>
-                  <div>Quantity</div>
-                  <div>Price</div>
-                  <div>P&L</div>
-                  <div>Status</div>
-                </div>
-                {autoTradingStore.tradeHistory.map((trade) => (
-                  <div key={trade.id} className="table-row">
-                    <div>{new Date(trade.createdAt).toLocaleString()}</div>
-                    <div>{trade.symbol}</div>
-                    <div className={`trade-type ${trade.type}`}>
-                      {trade.type.toUpperCase()}
-                    </div>
-                    <div>{trade.quantity}</div>
-                    <div>
-                      {trade.executedPrice
-                        ? formatCurrency(trade.executedPrice)
-                        : "--"}
-                    </div>
-                    <div
-                      className={`pnl ${
-                        (trade.pnl || 0) >= 0 ? "positive" : "negative"
-                      }`}
-                    >
-                      {trade.pnl ? formatCurrency(trade.pnl) : "--"}
-                    </div>
-                    <div className={`status ${trade.status}`}>
-                      {trade.status}
-                    </div>
-                  </div>
-                ))}
-                {autoTradingStore.tradeHistory.length === 0 && (
-                  <div className="no-data">
-                    <p>No trade history available</p>
-                  </div>
-                )}
-              </div>
-            </div>
+            <AutoTradeHistory portfolioId={selectedPortfolioId || undefined} />
           )}
         </div>
 

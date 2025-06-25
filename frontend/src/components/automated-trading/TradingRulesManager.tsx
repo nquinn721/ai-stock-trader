@@ -2,6 +2,7 @@ import { observer } from "mobx-react-lite";
 import React, { useEffect, useState } from "react";
 import { useAutoTradingStore } from "../../stores/StoreContext";
 import { TradingRule } from "../../types/autoTrading.types";
+import RuleBuilder from "./RuleBuilder";
 import "./TradingRulesManager.css";
 
 interface TradingRulesManagerProps {
@@ -323,11 +324,18 @@ const TradingRulesManager: React.FC<TradingRulesManagerProps> = observer(
                 </button>
               </div>
               <div className="modal-body">
-                {/* RuleBuilder component will be implemented next */}
-                <div className="rule-builder-placeholder">
-                  <p>Rule Builder Component will be implemented here</p>
-                  <p>Rule: {selectedRule?.name || "New Rule"}</p>
-                </div>
+                <RuleBuilder
+                  rule={selectedRule}
+                  portfolioId={portfolioId || "default"}
+                  onSave={(rule) => {
+                    setShowRuleBuilder(false);
+                    setSelectedRule(null);
+                  }}
+                  onCancel={() => {
+                    setShowRuleBuilder(false);
+                    setSelectedRule(null);
+                  }}
+                />
               </div>
             </div>
           </div>
