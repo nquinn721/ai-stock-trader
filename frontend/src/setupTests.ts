@@ -2,11 +2,11 @@
 // allows you to do things like:
 // expect(element).toHaveTextContent(/react/i)
 // learn more: https://github.com/testing-library/jest-dom
-import '@testing-library/jest-dom';
+import "@testing-library/jest-dom";
 
 // Mock axios to prevent real network requests
-import axios from 'axios';
-jest.mock('axios');
+import axios from "axios";
+jest.mock("axios");
 const mockedAxios = axios as jest.Mocked<typeof axios>;
 
 // Set up default axios mock responses
@@ -16,7 +16,7 @@ mockedAxios.put.mockResolvedValue({ data: {} });
 mockedAxios.delete.mockResolvedValue({ data: {} });
 
 // Mock Socket.IO
-jest.mock('socket.io-client', () => ({
+jest.mock("socket.io-client", () => ({
   connect: jest.fn(() => ({
     connect: jest.fn(),
     disconnect: jest.fn(),
@@ -27,9 +27,9 @@ jest.mock('socket.io-client', () => ({
 }));
 
 // Mock window.matchMedia for responsive queries
-Object.defineProperty(window, 'matchMedia', {
+Object.defineProperty(window, "matchMedia", {
   writable: true,
-  value: jest.fn().mockImplementation(query => ({
+  value: jest.fn().mockImplementation((query) => ({
     matches: false,
     media: query,
     onchange: null,

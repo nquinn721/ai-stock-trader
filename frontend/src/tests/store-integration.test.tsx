@@ -3,20 +3,7 @@ import { PortfolioStore } from "../stores/PortfolioStore";
 import { StockStore } from "../stores/StockStore";
 
 // Mock the API calls
-jest.mock("axios", () => ({
-  get: jest.fn(),
-  post: jest.fn(),
-  put: jest.fn(),
-  delete: jest.fn(),
-  interceptors: {
-    request: {
-      use: jest.fn(),
-    },
-    response: {
-      use: jest.fn(),
-    },
-  },
-}));
+jest.mock("axios");
 
 describe("Store Integration Tests", () => {
   let apiStore: ApiStore;
@@ -26,7 +13,7 @@ describe("Store Integration Tests", () => {
   beforeEach(() => {
     apiStore = new ApiStore();
     portfolioStore = new PortfolioStore(apiStore);
-    stockStore = new StockStore(); // StockStore uses singleton apiStore internally
+    stockStore = new StockStore(); // StockStore doesn't take parameters
     jest.clearAllMocks();
   });
 
@@ -44,19 +31,17 @@ describe("Store Integration Tests", () => {
             symbol: "AAPL",
             quantity: 10,
             averagePrice: 150.0,
-            totalCost: 1500.0,
-            currentValue: 1502.5,
-            unrealizedPnL: 25.0,
-            unrealizedReturn: 1.67,
+            currentPrice: 150.25,
+            marketValue: 1502.5,
+            unrealizedPnl: 25.0,
+            unrealizedPnlPercent: 1.67,
           },
         ],
         trades: [],
       };
 
-      // Mock the API response for portfolios list and specific portfolio
-      jest.spyOn(apiStore, "get")
-        .mockResolvedValueOnce([mockPortfolio]) // fetchPortfolios
-        .mockResolvedValueOnce(mockPortfolio); // fetchPortfolioById
+      // Mock the API response
+      jest.spyOn(apiStore, "get").mockResolvedValue(mockPortfolio);
 
       expect(portfolioStore.isLoading).toBe(false);
       expect(portfolioStore.portfolio).toBeNull();
@@ -65,7 +50,7 @@ describe("Store Integration Tests", () => {
 
       expect(portfolioStore.isLoading).toBe(false);
       expect(portfolioStore.currentPortfolio).toEqual(mockPortfolio);
-      expect(portfolioStore.positions).toEqual(expect.arrayContaining([expect.objectContaining({symbol: "AAPL"})]));
+      expect(portfolioStore.positions).toEqual(mockPortfolio.positions);
       expect(portfolioStore.error).toBeNull();
     });
 
@@ -124,33 +109,31 @@ describe("Store Integration Tests", () => {
             symbol: "AAPL",
             quantity: 10,
             averagePrice: 150.0,
-            totalCost: 1500.0,
-            currentValue: 1600.0,
-            unrealizedPnL: 100.0,
-            unrealizedReturn: 6.67,
+            currentPrice: 160.0,
+            marketValue: 1600.0,
+            unrealizedPnl: 100.0,
+            unrealizedPnlPercent: 6.67,
           },
           {
             id: 2,
             symbol: "GOOGL",
             quantity: 5,
             averagePrice: 2800.0,
-            totalCost: 14000.0,
-            currentValue: 14500.0,
-            unrealizedPnL: 500.0,
-            unrealizedReturn: 3.57,
+            currentPrice: 2900.0,
+            marketValue: 14500.0,
+            unrealizedPnl: 500.0,
+            unrealizedPnlPercent: 3.57,
           },
         ],
         trades: [],
       };
 
-      jest.spyOn(apiStore, "get")
-        .mockResolvedValueOnce([mockPortfolio]) // fetchPortfolios
-        .mockResolvedValueOnce(mockPortfolio); // fetchPortfolioById
+      jest.spyOn(apiStore, "get").mockResolvedValue(mockPortfolio);
       await portfolioStore.initializeDefaultPortfolio();
 
       expect(portfolioStore.totalCash).toBe(50000);
       expect(portfolioStore.totalEquity).toBe(16100); // 1600 + 14500
-      expect(portfolioStore.totalPortfolioValue).toBe(110000); // Use the mocked totalValue
+      expect(portfolioStore.totalPortfolioValue).toBe(66100); // 50000 + 16100
     });
   });
 
@@ -175,9 +158,7 @@ describe("Store Integration Tests", () => {
         },
       ];
 
-      // Mock the apiStore singleton used by StockStore
-      const mockApiStore = require("../stores/ApiStore").apiStore;
-      jest.spyOn(mockApiStore, "get").mockResolvedValue(mockStocks);
+      jest.spyOn(apiStore, "get").mockResolvedValue(mockStocks);
 
       expect(stockStore.isLoading).toBe(false);
       expect(stockStore.stocks).toHaveLength(0);
@@ -209,8 +190,7 @@ describe("Store Integration Tests", () => {
         },
       ];
 
-      const mockApiStore = require("../stores/ApiStore").apiStore;
-      jest.spyOn(mockApiStore, "get").mockResolvedValue(mockSignals);
+      jest.spyOn(apiStore, "get").mockResolvedValue(mockSignals);
 
       await stockStore.fetchTradingSignals();
 
@@ -219,8 +199,7 @@ describe("Store Integration Tests", () => {
 
     it("should handle stock fetch errors", async () => {
       const mockError = new Error("Failed to fetch stocks");
-      const mockApiStore = require("../stores/ApiStore").apiStore;
-      jest.spyOn(mockApiStore, "get").mockRejectedValue(mockError);
+      jest.spyOn(apiStore, "get").mockRejectedValue(mockError);
 
       await stockStore.fetchStocks();
 
@@ -242,8 +221,7 @@ describe("Store Integration Tests", () => {
         },
       ];
 
-      const mockApiStore = require("../stores/ApiStore").apiStore;
-      jest.spyOn(mockApiStore, "get").mockResolvedValue(initialStocks);
+      jest.spyOn(apiStore, "get").mockResolvedValue(initialStocks);
       await stockStore.fetchStocks(); // Now simulate WebSocket update
       const updatedStocks = [
         {
@@ -251,7 +229,8 @@ describe("Store Integration Tests", () => {
           symbol: "AAPL",
           name: "Apple Inc.",
           sector: "Technology",
-          description: "Apple Inc. is an American multinational technology company",
+          description:
+            "Apple Inc. is an American multinational technology company",
           currentPrice: 152.5,
           previousClose: 148.5,
           changePercent: 2.7,
@@ -274,8 +253,9 @@ describe("Store Integration Tests", () => {
     it("should handle successful GET requests", async () => {
       const mockData = { test: "data" };
 
-      // Mock successful axios response 
-      jest.spyOn(apiStore, "get").mockResolvedValue(mockData);
+      // Mock successful axios response
+      const mockAxios = require("axios");
+      mockAxios.get.mockResolvedValue({ data: mockData });
 
       const result = await apiStore.get("/test-endpoint");
 
@@ -286,7 +266,8 @@ describe("Store Integration Tests", () => {
       const mockData = { id: 1, created: true };
       const requestData = { name: "test" };
 
-      jest.spyOn(apiStore, "post").mockResolvedValue(mockData);
+      const mockAxios = require("axios");
+      mockAxios.post.mockResolvedValue({ data: mockData });
 
       const result = await apiStore.post("/test-endpoint", requestData);
 
@@ -294,13 +275,13 @@ describe("Store Integration Tests", () => {
     });
 
     it("should handle API errors gracefully", async () => {
-      const mockError = {
+      const mockAxios = require("axios");
+      mockAxios.get.mockRejectedValue({
         response: {
           status: 404,
           data: { message: "Not found" },
         },
-      };
-      jest.spyOn(apiStore, "get").mockRejectedValue(mockError);
+      });
 
       await expect(apiStore.get("/non-existent")).rejects.toMatchObject({
         response: { status: 404 },
@@ -308,7 +289,8 @@ describe("Store Integration Tests", () => {
     });
 
     it("should handle network errors", async () => {
-      jest.spyOn(apiStore, "get").mockRejectedValue(new Error("Network Error"));
+      const mockAxios = require("axios");
+      mockAxios.get.mockRejectedValue(new Error("Network Error"));
 
       await expect(apiStore.get("/test-endpoint")).rejects.toThrow(
         "Network Error"
@@ -331,18 +313,16 @@ describe("Store Integration Tests", () => {
             symbol: "AAPL",
             quantity: 10,
             averagePrice: 150.0,
-            totalCost: 1500.0,
-            currentValue: 1500.0,
-            unrealizedPnL: 0.0,
-            unrealizedReturn: 0.0,
+            currentPrice: 150.0,
+            marketValue: 1500.0,
+            unrealizedPnl: 0.0,
+            unrealizedPnlPercent: 0.0,
           },
         ],
         trades: [],
       };
 
-      jest.spyOn(apiStore, "get")
-        .mockResolvedValueOnce([mockPortfolio]) // fetchPortfolios
-        .mockResolvedValueOnce(mockPortfolio); // fetchPortfolioById
+      jest.spyOn(apiStore, "get").mockResolvedValue(mockPortfolio);
       await portfolioStore.initializeDefaultPortfolio();
 
       // Update stock price
@@ -354,24 +334,18 @@ describe("Store Integration Tests", () => {
     });
 
     it("should handle concurrent API calls without race conditions", async () => {
-      // Mock the portfolio store API calls
-      jest.spyOn(apiStore, "get")
+      const portfolioPromise = portfolioStore.initializeDefaultPortfolio();
+      const stocksPromise = stockStore.fetchStocks();
+
+      // Mock different response times
+      jest
+        .spyOn(apiStore, "get")
         .mockImplementationOnce(
           () =>
             new Promise((resolve) =>
-              setTimeout(() => resolve([{ id: 1, positions: [] }]), 100) // Return array for fetchPortfolios
+              setTimeout(() => resolve({ id: 1, positions: [] }), 100)
             )
         )
-        .mockImplementationOnce(
-          () =>
-            new Promise((resolve) =>
-              setTimeout(() => resolve({ id: 1, positions: [] }), 120) // Return object for fetchPortfolioById
-            )
-        );
-
-      // Mock the stock store API calls (uses singleton apiStore)
-      const mockApiStore = require("../stores/ApiStore").apiStore;
-      jest.spyOn(mockApiStore, "get")
         .mockImplementationOnce(
           () =>
             new Promise((resolve) =>
@@ -379,12 +353,9 @@ describe("Store Integration Tests", () => {
             )
         );
 
-      const portfolioPromise = portfolioStore.initializeDefaultPortfolio();
-      const stocksPromise = stockStore.fetchStocks();
-
       await Promise.all([portfolioPromise, stocksPromise]);
 
-      expect(portfolioStore.currentPortfolio).toBeTruthy();
+      expect(portfolioStore.portfolio).toBeTruthy();
       expect(stockStore.stocks).toHaveLength(1);
     });
   });
@@ -393,8 +364,7 @@ describe("Store Integration Tests", () => {
     it("should handle WebSocket reconnection scenarios", async () => {
       // Initial stock data
       const initialStocks = [{ id: 1, symbol: "AAPL", currentPrice: 150.0 }];
-      const mockApiStore = require("../stores/ApiStore").apiStore;
-      jest.spyOn(mockApiStore, "get").mockResolvedValue(initialStocks);
+      jest.spyOn(apiStore, "get").mockResolvedValue(initialStocks);
       await stockStore.fetchStocks();
 
       // Simulate WebSocket disconnection and reconnection
@@ -405,7 +375,8 @@ describe("Store Integration Tests", () => {
           symbol: "AAPL",
           name: "Apple Inc.",
           sector: "Technology",
-          description: "Apple Inc. is an American multinational technology company",
+          description:
+            "Apple Inc. is an American multinational technology company",
           currentPrice: 155.0,
           previousClose: 150.0,
           changePercent: 3.33,
@@ -429,16 +400,14 @@ describe("Store Integration Tests", () => {
             symbol: "AAPL",
             quantity: 10,
             averagePrice: 150.0,
-            totalCost: 1500.0,
-            currentValue: 1500.0,
-            unrealizedPnL: 0.0,
-            unrealizedReturn: 0.0,
+            currentPrice: 150.0,
+            marketValue: 1500.0,
+            unrealizedPnl: 0.0,
+            unrealizedPnlPercent: 0.0,
           },
         ],
       };
-      jest.spyOn(apiStore, "get")
-        .mockResolvedValueOnce([mockPortfolio]) // fetchPortfolios
-        .mockResolvedValueOnce(mockPortfolio); // fetchPortfolioById
+      jest.spyOn(apiStore, "get").mockResolvedValue(mockPortfolio);
       await portfolioStore.initializeDefaultPortfolio();
 
       const initialValue = portfolioStore.totalEquity;

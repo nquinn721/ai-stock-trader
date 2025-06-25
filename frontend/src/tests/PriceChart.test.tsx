@@ -29,7 +29,9 @@ describe("PriceChart Component", () => {
   });
 
   test("displays real-time indicator when market is open", async () => {
-    renderWithStoreProvider(<PriceChart {...defaultProps} showRealTime={true} />);
+    renderWithStoreProvider(
+      <PriceChart {...defaultProps} showRealTime={true} />
+    );
 
     await waitFor(
       () => {
@@ -40,7 +42,9 @@ describe("PriceChart Component", () => {
   });
 
   test("shows negative price change styling", async () => {
-    renderWithStoreProvider(<PriceChart {...defaultProps} changePercent={-1.5} />);
+    renderWithStoreProvider(
+      <PriceChart {...defaultProps} changePercent={-1.5} />
+    );
 
     await waitFor(
       () => {

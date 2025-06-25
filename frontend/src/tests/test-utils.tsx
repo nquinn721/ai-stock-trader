@@ -1,40 +1,27 @@
-import React, { ReactElement } from 'react';
-import { render, RenderOptions } from '@testing-library/react';
-import { StoreProvider } from '../stores/StoreContext';
-import { RootStore } from '../stores/RootStore';
-import { NotificationProvider } from '../context/NotificationContext';
-import { SocketProvider } from '../context/SocketContext';
+import { render, RenderOptions } from "@testing-library/react";
+import React, { ReactElement } from "react";
+import { NotificationProvider } from "../context/NotificationContext";
+import { SocketProvider } from "../context/SocketContext";
+import { RootStore } from "../stores/RootStore";
+import { StoreProvider } from "../stores/StoreContext";
 
 // Mock FontAwesome icons
-jest.mock('@fortawesome/react-fontawesome', () => ({
+jest.mock("@fortawesome/react-fontawesome", () => ({
   FontAwesomeIcon: ({ icon, ...props }: any) => {
-    const iconName = typeof icon === 'string' ? icon : 
-                    typeof icon === 'object' && icon.iconName ? icon.iconName :
-                    'mock-icon';
+    const iconName =
+      typeof icon === "string"
+        ? icon
+        : typeof icon === "object" && icon.iconName
+        ? icon.iconName
+        : "mock-icon";
     return <i data-testid={`fa-icon-${iconName}`} {...props} />;
   },
 }));
 
-// Mock FontAwesome icons library
-jest.mock('@fortawesome/free-solid-svg-icons', () => ({
-  faChevronUp: { prefix: 'fas', iconName: 'chevron-up' },
-  faChevronDown: { prefix: 'fas', iconName: 'chevron-down' },
-  faSearch: { prefix: 'fas', iconName: 'search' },
-  faArrowUp: { prefix: 'fas', iconName: 'arrow-up' },
-  faArrowDown: { prefix: 'fas', iconName: 'arrow-down' },
-  faBolt: { prefix: 'fas', iconName: 'bolt' },
-  faCalculator: { prefix: 'fas', iconName: 'calculator' },
-  faChartLine: { prefix: 'fas', iconName: 'chart-line' },
-  faCogs: { prefix: 'fas', iconName: 'cogs' },
-  faHashtag: { prefix: 'fas', iconName: 'hashtag' },
-  faSpinner: { prefix: 'fas', iconName: 'spinner' },
-  faWallet: { prefix: 'fas', iconName: 'wallet' },
-  faZap: { prefix: 'fas', iconName: 'zap' },
-}));
-
 // Mock the NotificationContext
-jest.mock('../context/NotificationContext', () => ({
-  NotificationProvider: ({ children }: { children: React.ReactNode }) => children,
+jest.mock("../context/NotificationContext", () => ({
+  NotificationProvider: ({ children }: { children: React.ReactNode }) =>
+    children,
   useNotification: () => ({
     notifications: [],
     unreadCount: 0,
@@ -64,7 +51,7 @@ jest.mock('../context/NotificationContext', () => ({
 }));
 
 // Mock the SocketContext
-jest.mock('../context/SocketContext', () => ({
+jest.mock("../context/SocketContext", () => ({
   SocketProvider: ({ children }: { children: React.ReactNode }) => children,
   useSocket: () => ({
     socket: null,
@@ -77,75 +64,138 @@ jest.mock('../context/SocketContext', () => ({
     subscribeToPortfolio: jest.fn(),
     unsubscribeFromPortfolio: jest.fn(),
     requestAllPortfolios: jest.fn(),
-    getPortfolioPerformance: jest.fn(),
+    getPortfolioPerformance: jest.fn().mockResolvedValue({
+      totalValue: 10150,
+      totalPnL: 150,
+      totalReturn: 1.5,
+      dayGain: 150,
+      dayGainPercent: 1.5,
+      performance: [
+        {
+          date: "2025-01-01",
+          timestamp: 1704067200000,
+          totalValue: 10000,
+          cash: 5000,
+          investedValue: 5000,
+          dayChange: 0,
+          dayChangePercent: 0,
+        },
+        {
+          date: "2025-01-02",
+          timestamp: 1704153600000,
+          totalValue: 10150,
+          cash: 5000,
+          investedValue: 5150,
+          dayChange: 150,
+          dayChangePercent: 1.5,
+        },
+      ],
+    }),
     getPositionDetails: jest.fn(),
     getPortfolioAnalytics: jest.fn(),
     getSectorAllocation: jest.fn(),
-    getPerformanceAttribution: jest.fn(),
     getRiskMetrics: jest.fn(),
     getBenchmarkComparison: jest.fn(),
-    getRebalancingSuggestions: jest.fn(),
-    createOrder: jest.fn(),
-    cancelOrder: jest.fn(),
-    getOrderBook: jest.fn(),
+    getPerformanceAttribution: jest.fn(),
+    placeOrder: jest.fn(),
+    executeOrder: jest.fn(),
+    addToWatchlist: jest.fn(),
+    removeFromWatchlist: jest.fn(),
   }),
 }));
 
 // Mock the recommendation service
-jest.mock('../services/recommendationService', () => ({
+jest.mock("../services/recommendationService", () => ({
   __esModule: true,
   default: {
     getQuickRecommendation: jest.fn().mockResolvedValue({
-      recommendation: 'HOLD',
+      recommendation: "HOLD",
       confidence: 0.75,
-      reasoning: 'Market conditions are neutral'
+      reasoning: "Market conditions are neutral",
     }),
   },
 }));
 
 // Mock axios specifically for API calls
-jest.mock('axios', () => ({
-  get: jest.fn().mockResolvedValue({ data: [] }),
-  post: jest.fn().mockResolvedValue({ data: {} }),
-  put: jest.fn().mockResolvedValue({ data: {} }),
-  delete: jest.fn().mockResolvedValue({ data: {} }),
-  create: jest.fn().mockReturnValue({
-    get: jest.fn().mockResolvedValue({ data: [] }),
+jest.mock("axios", () => {
+  const mockPerformanceData = [
+    {
+      date: "2025-01-01",
+      timestamp: 1704067200000,
+      totalValue: 10000,
+      cash: 5000,
+      investedValue: 5000,
+      dayChange: 0,
+      dayChangePercent: 0,
+    },
+    {
+      date: "2025-01-02",
+      timestamp: 1704153600000,
+      totalValue: 10150,
+      cash: 5000,
+      investedValue: 5150,
+      dayChange: 150,
+      dayChangePercent: 1.5,
+    },
+  ];
+
+  const mockPortfolioData = {
+    id: 1,
+    name: "Test Portfolio",
+    initialCash: 10000,
+    currentCash: 5000,
+    totalValue: 10150,
+    totalPnL: 150,
+    totalReturn: 1.5,
+    positions: [],
+    trades: [],
+    isActive: true,
+    createdAt: "2025-01-01T00:00:00.000Z",
+    updatedAt: "2025-01-02T00:00:00.000Z",
+  };
+
+  const mockAxiosInstance = {
+    get: jest.fn().mockImplementation((url: string) => {
+      if (url.includes("/performance")) {
+        return Promise.resolve({ data: mockPerformanceData });
+      } else if (url.includes("/portfolios/")) {
+        return Promise.resolve({ data: mockPortfolioData });
+      } else if (url.includes("/portfolios")) {
+        return Promise.resolve({ data: [mockPortfolioData] });
+      }
+      return Promise.resolve({ data: [] });
+    }),
     post: jest.fn().mockResolvedValue({ data: {} }),
     put: jest.fn().mockResolvedValue({ data: {} }),
     delete: jest.fn().mockResolvedValue({ data: {} }),
     interceptors: {
-      request: { use: jest.fn(), eject: jest.fn() },
-      response: { use: jest.fn(), eject: jest.fn() },
+      request: {
+        use: jest.fn().mockReturnValue(1),
+        eject: jest.fn(),
+      },
+      response: {
+        use: jest.fn().mockReturnValue(1),
+        eject: jest.fn(),
+      },
     },
-  }),
-  interceptors: {
-    request: { use: jest.fn(), eject: jest.fn() },
-    response: { use: jest.fn(), eject: jest.fn() },
-  },
-}));
+  };
+
+  return {
+    ...mockAxiosInstance,
+    create: jest.fn().mockReturnValue(mockAxiosInstance),
+    default: mockAxiosInstance,
+  };
+});
 
 // Create a mock RootStore for testing
 const createMockStore = (): RootStore => {
   const mockStore = new RootStore();
-  
+
   // Ensure all stores are properly initialized
   mockStore.stockStore.stocks = mockStore.stockStore.stocks || [];
-  mockStore.portfolioStore.portfolios = mockStore.portfolioStore.portfolios || [];
-  
-  // Mock the initializeDefaultPortfolio method if it doesn't exist
-  if (!mockStore.portfolioStore.initializeDefaultPortfolio) {
-    mockStore.portfolioStore.initializeDefaultPortfolio = jest.fn().mockResolvedValue(undefined);
-  }
-  
-  // Mock stocksWithSignals if it doesn't exist
-  if (!mockStore.stockStore.stocksWithSignals) {
-    Object.defineProperty(mockStore.stockStore, 'stocksWithSignals', {
-      get: () => mockStore.stockStore.stocks.map(stock => ({ ...stock, tradingSignal: null })),
-      configurable: true
-    });
-  }
-  
+  mockStore.portfolioStore.portfolios =
+    mockStore.portfolioStore.portfolios || [];
+
   return mockStore;
 };
 
@@ -154,16 +204,14 @@ interface AllTheProvidersProps {
   store?: RootStore;
 }
 
-const AllTheProviders: React.FC<AllTheProvidersProps> = ({ 
-  children, 
-  store = createMockStore() 
+const AllTheProviders: React.FC<AllTheProvidersProps> = ({
+  children,
+  store = createMockStore(),
 }) => {
   return (
     <StoreProvider store={store}>
       <NotificationProvider>
-        <SocketProvider>
-          {children}
-        </SocketProvider>
+        <SocketProvider>{children}</SocketProvider>
       </NotificationProvider>
     </StoreProvider>
   );
@@ -171,10 +219,10 @@ const AllTheProviders: React.FC<AllTheProvidersProps> = ({
 
 const customRender = (
   ui: ReactElement,
-  options?: Omit<RenderOptions, 'wrapper'> & { store?: RootStore }
+  options?: Omit<RenderOptions, "wrapper"> & { store?: RootStore }
 ) => {
   const { store, ...renderOptions } = options || {};
-  
+
   const Wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
     <AllTheProviders store={store}>{children}</AllTheProviders>
   );
@@ -183,11 +231,20 @@ const customRender = (
 };
 
 // Legacy function for backward compatibility
-export const renderWithStoreProvider = (ui: React.ReactElement, options = {}) => {
+export const renderWithStoreProvider = (
+  ui: React.ReactElement,
+  options = {}
+) => {
   return customRender(ui, options);
 };
 
+// Mock FontAwesome icons
+jest.mock("@fortawesome/react-fontawesome", () => ({
+  FontAwesomeIcon: ({ icon, ...props }: any) => (
+    <i data-testid={`fa-icon-${icon}`} {...props} />
+  ),
+}));
 
 // Re-export everything
-export * from '@testing-library/react';
-export { customRender as render, createMockStore };
+export * from "@testing-library/react";
+export { createMockStore, customRender as render };

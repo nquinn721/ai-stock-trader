@@ -1,6 +1,6 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import React, { useState } from "react";
+import { useState } from "react";
 import StockAutocomplete from "../components/StockAutocomplete";
 
 describe("StockAutocomplete", () => {
@@ -51,10 +51,10 @@ describe("StockAutocomplete", () => {
     const TestComponent = () => {
       const [value, setValue] = useState("");
       return (
-        <StockAutocomplete 
-          stocks={mockStocks} 
-          value={value} 
-          onChange={setValue} 
+        <StockAutocomplete
+          stocks={mockStocks}
+          value={value}
+          onChange={setValue}
         />
       );
     };
@@ -75,10 +75,10 @@ describe("StockAutocomplete", () => {
     const TestComponent = () => {
       const [value, setValue] = useState("");
       return (
-        <StockAutocomplete 
-          stocks={mockStocks} 
-          value={value} 
-          onChange={setValue} 
+        <StockAutocomplete
+          stocks={mockStocks}
+          value={value}
+          onChange={setValue}
         />
       );
     };
@@ -99,10 +99,10 @@ describe("StockAutocomplete", () => {
     const TestComponent = () => {
       const [value, setValue] = useState("");
       return (
-        <StockAutocomplete 
-          stocks={mockStocks} 
-          value={value} 
-          onChange={setValue} 
+        <StockAutocomplete
+          stocks={mockStocks}
+          value={value}
+          onChange={setValue}
         />
       );
     };

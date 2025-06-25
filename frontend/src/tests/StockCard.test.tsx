@@ -1,7 +1,7 @@
 import "@testing-library/jest-dom";
-import { render, screen } from "./test-utils";
 import StockCard from "../components/StockCard";
 import { Stock, TradingSignal } from "../types";
+import { render, screen } from "./test-utils";
 
 // Mock CSS imports
 jest.mock("../components/StockCard.css", () => ({}));
@@ -34,7 +34,9 @@ jest.mock("../components/DayTradingPatterns", () => {
 // Mock services
 jest.mock("../services/recommendationService", () => ({
   RecommendationService: class {
-    generateRecommendation = jest.fn().mockRejectedValue(new Error("Mocked error"));
+    generateRecommendation = jest
+      .fn()
+      .mockRejectedValue(new Error("Mocked error"));
   },
 }));
 
