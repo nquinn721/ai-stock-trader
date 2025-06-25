@@ -143,6 +143,30 @@ The AI trading system uses multiple indicators:
    - Position sizing recommendations
    - Stop-loss suggestions
 
+## ⚠️ NO MOCK DATA Policy
+
+**CRITICAL**: This application follows a strict **NO MOCK DATA** policy to ensure trading signal integrity:
+
+### What This Means
+
+- All trading recommendations are based on **real market data** from Yahoo Finance API
+- **No fake or simulated data** is used in any trading analysis
+- When real data is unavailable, the system returns **conservative HOLD recommendations** with low confidence
+- The UI shows proper "No data available" states instead of misleading signals
+
+### Impact on Trading Signals
+
+- **Before**: Biased toward BUY signals due to mock data optimism
+- **After**: Conservative HOLD approach when no real data is available
+- **Result**: More reliable and trustworthy trading recommendations
+
+### For Developers
+
+- Never use `createMockMarketData()` or similar functions
+- All ML services must handle real data gracefully
+- Default to conservative recommendations when data is unavailable
+- See [NO MOCK DATA Policy Documentation](docs/NO-MOCK-DATA-POLICY.md) for full details
+
 ## 🔧 Configuration
 
 ### Environment Variables
