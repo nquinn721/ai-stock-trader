@@ -1,4 +1,5 @@
 # S3- **Story ID**: S30B
+
 - **Epic**: Frontend Architecture Enhancement
 - **Sprint**: Sprint 5
 - **Story Points**: 13
@@ -67,10 +68,12 @@ Migrate all service calls and data logic from React components to centralized Mo
 ## Progress Notes
 
 **Components Migrated to MobX:**
+
 - ✅ Dashboard.tsx - Full migration completed
 - ✅ StockModal.tsx - Full migration completed
 
 **Components Still Using Direct API Calls:**
+
 - 🔄 StockCard.tsx - Uses fetch() for historical data
 - 🔄 QuickTrade.tsx - Uses axios for portfolio/trading operations
 - 🔄 PriceChart.tsx - Uses fetch() for chart data
@@ -79,6 +82,7 @@ Migrate all service calls and data logic from React components to centralized Mo
 - 🔄 PortfolioDetailsModal.tsx - Uses axios for performance data
 
 **Key Achievements:**
+
 - Successfully migrated Dashboard component from SocketContext to MobX stores
 - Added stocksWithSignals computed property to StockStore
 - Added fetchStockDetails and fetchStockHistory methods to StockStore
