@@ -311,4 +311,77 @@ export class OrderManagementController {
   async getOrderBook(): Promise<Order[]> {
     return this.orderManagementService.getOrderBook();
   }
+
+  /**
+   * Get execution quality metrics for a portfolio
+   */
+  @Get('portfolios/:portfolioId/execution-quality')
+  async getExecutionQuality(
+    @Param('portfolioId', ParseIntPipe) portfolioId: number,
+    @Query('period') period?: string,
+  ) {
+    const periodDays = period ? parseInt(period, 10) : 30;
+    return this.orderManagementService.getExecutionQuality(portfolioId, periodDays);
+  }
+
+  /**
+   * Get portfolio risk analysis
+   */
+  @Get('portfolios/:portfolioId/risk-analysis')
+  async getPortfolioRisk(
+    @Param('portfolioId', ParseIntPipe) portfolioId: number,
+  ) {
+    return this.orderManagementService.getPortfolioRisk(portfolioId);
+  }
+
+  /**
+   * Get conditional orders for a portfolio
+   */
+  @Get('portfolios/:portfolioId/conditional-orders')
+  async getConditionalOrders(
+    @Param('portfolioId', ParseIntPipe) portfolioId: number,
+  ): Promise<Order[]> {
+    return this.orderManagementService.getConditionalOrders(portfolioId);
+  }
+
+  /**
+   * Get bracket orders for a portfolio
+   */
+  @Get('portfolios/:portfolioId/bracket-orders')
+  async getBracketOrders(
+    @Param('portfolioId', ParseIntPipe) portfolioId: number,
+  ): Promise<Order[]> {
+    return this.orderManagementService.getBracketOrders(portfolioId);
+  }
+
+  /**
+   * Get OCO order groups for a portfolio
+   */
+  @Get('portfolios/:portfolioId/oco-orders')
+  async getOCOOrders(
+    @Param('portfolioId', ParseIntPipe) portfolioId: number,
+  ): Promise<any[]> {
+    return this.orderManagementService.getOCOOrders(portfolioId);
+  }
+
+  /**
+   * Modify an existing order
+   */
+  @Post('orders/:orderId/modify')
+  async modifyOrder(
+    @Param('orderId', ParseIntPipe) orderId: number,
+    @Body() updates: Partial<CreateOrderRequestDto>,
+  ): Promise<Order> {
+    return this.orderManagementService.modifyOrder(orderId, updates);
+  }
+
+  /**
+   * Get order execution history
+   */
+  @Get('orders/:orderId/executions')
+  async getOrderExecutions(
+    @Param('orderId', ParseIntPipe) orderId: number,
+  ) {
+    return this.orderManagementService.getOrderExecutions(orderId);
+  }
 }

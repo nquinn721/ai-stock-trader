@@ -15,6 +15,8 @@ import { Portfolio } from '../../entities/portfolio.entity';
 import { Position } from '../../entities/position.entity';
 import { Stock } from '../../entities/stock.entity';
 import { PaperTradingService } from '../paper-trading/paper-trading.service';
+import { RiskManagementService } from './services/risk-management.service';
+import { ConditionalOrderService } from './services/conditional-order.service';
 
 export interface CreateOrderDto {
   portfolioId: number;
@@ -64,6 +66,8 @@ export class OrderManagementService {
     @Inject(forwardRef(() => PaperTradingService))
     private paperTradingService: PaperTradingService,
     private marketHoursService: MarketHoursService,
+    private riskManagementService: RiskManagementService,
+    private conditionalOrderService: ConditionalOrderService,
   ) {
     // Initialize WebSocket gateway as null, will be set via setter to avoid circular dependency
     this.webSocketGateway = null;
@@ -313,6 +317,13 @@ export class OrderManagementService {
   }
 
   /**
+   * Execute a triggered order (public method for conditional orders)
+   */
+  async executeTriggeredOrder(order: Order): Promise<OrderExecutionResult> {
+    return this.executeOrder(order);
+  }
+
+  /**
    * Execute an order
    */
   private async executeOrder(
@@ -447,6 +458,20 @@ export class OrderManagementService {
     order: Order,
     portfolio: Portfolio,
   ): Promise<void> {
+    // Perform comprehensive risk management validation
+    const riskValidation = await this.riskManagementService.validateOrder(order, portfolio);
+    
+    if (!riskValidation.valid) {
+      const errorMessage = riskValidation.errors.join('; ');
+      throw new Error(`Order validation failed: ${errorMessage}`);
+    }
+
+    // Log warnings if any
+    if (riskValidation.warnings.length > 0) {
+      this.logger.warn(`Order warnings for ${order.symbol}: ${riskValidation.warnings.join('; ')}`);
+    }
+
+    // Basic order validation
     // Check portfolio cash for buy orders
     if (order.side === OrderSide.BUY) {
       const estimatedCost =
@@ -871,6 +896,23 @@ export class OrderManagementService {
       }
     } catch (error) {
       this.logger.error('Error monitoring advanced orders:', error);
+    }
+  }
+
+  /**
+   * Scheduled check for conditional orders (every 30 seconds during market hours)
+   */
+  @Cron('*/30 * * * * *') // Every 30 seconds
+  async checkConditionalOrders(): Promise<void> {
+    try {
+      // Only check during market hours
+      if (!this.marketHoursService.isMarketOpen()) {
+        return;
+      }
+
+      await this.conditionalOrderService.evaluateConditionalOrders();
+    } catch (error) {
+      this.logger.error(`Error checking conditional orders: ${error.message}`);
     }
   }
 }

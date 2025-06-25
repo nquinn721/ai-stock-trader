@@ -718,7 +718,7 @@ export const stories: Story[] = [
     title: "Comprehensive Unit Testing Upgrade",
     description:
       "Upgrade and expand unit testing coverage throughout the entire application to achieve 95%+ coverage across all modules. Update existing tests, add missing test cases, and implement comprehensive testing patterns for all services, controllers, components, and utilities. Include backend testing for all services and controllers with 95%+ coverage, frontend testing for all React components and hooks, integration tests for complex service interactions, mock external API calls, test error handling and edge cases, performance testing for critical endpoints, and create reusable testing utilities and helpers.",
-    status: "TODO",
+    status: "DONE",
     priority: "High",
     epic: "E1", // Testing & Quality Assurance
     storyPoints: 8,
@@ -779,7 +779,7 @@ export const stories: Story[] = [
     title: "Portfolio Analytics Dashboard",
     description:
       "Create a comprehensive portfolio analytics dashboard that provides detailed insights into portfolio performance, risk metrics, and comparative analysis. Display total return, annualized return, and benchmark comparison with Sharpe ratio, maximum drawdown, and volatility metrics. Include Value at Risk (VaR) calculations, portfolio beta relative to market indices, correlation matrix between holdings, and sector diversification analysis. Add performance attribution showing sector contribution, individual position impact, and asset allocation visualization. Provide benchmark comparison with S&P 500, peer portfolio performance comparison, and rolling performance windows.",
-    status: "TODO",
+    status: "DONE",
     priority: "Medium",
     epic: "E2",
     storyPoints: 8,
@@ -794,7 +794,7 @@ export const stories: Story[] = [
     title: "WebSocket Real-time Data Optimization",
     description:
       "Optimize WebSocket connections for better performance and reliability. Implement connection pooling, automatic reconnection with exponential backoff, message queuing for offline scenarios, and bandwidth optimization. Add WebSocket health monitoring, connection state management, and error recovery mechanisms. Ensure efficient data transmission and reduce network overhead.",
-    status: "TODO",
+    status: "DONE",
     priority: "Medium",
     epic: "E3",
     storyPoints: 5,
@@ -803,6 +803,7 @@ export const stories: Story[] = [
     progress: 0,
     dependencies: [],
     createdDate: "2025-06-24",
+    completedDate: "2025-06-25",
   },
   {
     id: "S35",

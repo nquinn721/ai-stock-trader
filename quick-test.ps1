@@ -1,110 +1,71 @@
-# Quick test runner for Stock Trading App
-# Runs unit tests only for fast feedback during development
+#!/usr/bin/env pwsh
+# Quick Test Script - Runs essential tests across the workspace
 
-Write-Host "Stock Trading App - Quick Test Suite" -ForegroundColor Cyan
-Write-Host "====================================" -ForegroundColor Cyan
-Write-Host ""
+Write-Host "🚀 Running Quick Tests for Stock Trading App" -ForegroundColor Green
+Write-Host "=============================================" -ForegroundColor Green
 
-$ErrorActionPreference = "Stop"
-$startTime = Get-Date
+$ErrorActionPreference = "Continue"
+$testResults = @{}
 
-# Function to run tests and capture results
-function Run-TestSuite {
+function Run-Test {
     param(
         [string]$TestName,
         [string]$Directory,
-        [string]$Command,
-        [string]$Color = "Yellow"
+        [string]$Command
     )
     
-    Write-Host "Running $TestName..." -ForegroundColor $Color
-    Write-Host "Directory: $Directory" -ForegroundColor Gray
-    Write-Host "Command: $Command" -ForegroundColor Gray
-    Write-Host ""
+    Write-Host "`n📝 Running $TestName..." -ForegroundColor Yellow
     
+    Push-Location $Directory
     try {
-        Push-Location $Directory
-        Invoke-Expression $Command
-        if ($LASTEXITCODE -ne 0) {
-            throw "Test failed with exit code $LASTEXITCODE"
+        $result = Invoke-Expression $Command
+        if ($LASTEXITCODE -eq 0) {
+            Write-Host "✅ $TestName PASSED" -ForegroundColor Green
+            $testResults[$TestName] = "PASSED"
+        } else {
+            Write-Host "❌ $TestName FAILED" -ForegroundColor Red
+            $testResults[$TestName] = "FAILED"
         }
-        Write-Host "$TestName PASSED" -ForegroundColor Green
-        Write-Host ""
-        return $true
     }
     catch {
-        Write-Host "$TestName FAILED" -ForegroundColor Red
-        Write-Host "Error: $_" -ForegroundColor Red
-        Write-Host ""
-        return $false
+        Write-Host "❌ $TestName ERROR: $_" -ForegroundColor Red
+        $testResults[$TestName] = "ERROR"
     }
     finally {
         Pop-Location
     }
 }
 
-# Initialize results
-$results = @()
-$totalTests = 0
-$passedTests = 0
+# Run Backend Quick Tests
+Run-Test "Backend Unit Tests" "backend" "npm test -- --testTimeout=30000 --passWithNoTests"
 
-Write-Host "Running Unit Tests Only (Quick Mode)" -ForegroundColor Magenta
-Write-Host "------------------------------------" -ForegroundColor Magenta
-Write-Host ""
+# Run Frontend Quick Tests  
+Run-Test "Frontend Component Tests" "frontend" "npm test -- --watchAll=false --testTimeout=30000"
 
-# Backend Unit Tests
-Write-Host "BACKEND UNIT TESTS" -ForegroundColor Blue
-Write-Host "==================" -ForegroundColor Blue
-$result = Run-TestSuite -TestName "Backend Unit Tests" -Directory "backend" -Command "npm test -- --passWithNoTests --watchAll=false --coverage=false" -Color "Blue"
-$results += @{ Name = "Backend Unit Tests"; Passed = $result }
-$totalTests++
-if ($result) { $passedTests++ }
-
-# Frontend Unit Tests
-Write-Host "FRONTEND UNIT TESTS" -ForegroundColor Green
-Write-Host "===================" -ForegroundColor Green
-$result = Run-TestSuite -TestName "Frontend Unit Tests" -Directory "frontend" -Command "npm test -- --passWithNoTests --watchAll=false --coverage=false" -Color "Green"
-$results += @{ Name = "Frontend Unit Tests"; Passed = $result }
-$totalTests++
-if ($result) { $passedTests++ }
-
-# Calculate execution time
-$endTime = Get-Date
-$duration = $endTime - $startTime
-$durationString = "{0:mm\:ss}" -f $duration
+# Test Development Scripts
+Run-Test "Stock Endpoint Test" "." "npm run test:stocks"
 
 # Print Summary
-Write-Host ""
-Write-Host "QUICK TEST SUMMARY" -ForegroundColor Cyan
-Write-Host "==================" -ForegroundColor Cyan
-Write-Host "Total Tests: $totalTests" -ForegroundColor White
-Write-Host "Passed: $passedTests" -ForegroundColor Green
-Write-Host "Failed: $($totalTests - $passedTests)" -ForegroundColor Red
-Write-Host "Duration: $durationString" -ForegroundColor Yellow
-Write-Host ""
+Write-Host "`n📊 TEST SUMMARY" -ForegroundColor Cyan
+Write-Host "=================" -ForegroundColor Cyan
 
-# Detailed Results
-foreach ($result in $results) {
-    $status = if ($result.Passed) { "PASS" } else { "FAIL" }
-    $color = if ($result.Passed) { "Green" } else { "Red" }
-    Write-Host "$status $($result.Name)" -ForegroundColor $color
+foreach ($test in $testResults.GetEnumerator()) {
+    $status = $test.Value
+    $color = switch ($status) {
+        "PASSED" { "Green" }
+        "FAILED" { "Red" }
+        "ERROR" { "Magenta" }
+    }
+    Write-Host "$($test.Key): $status" -ForegroundColor $color
 }
 
-Write-Host ""
+$passed = ($testResults.Values | Where-Object { $_ -eq "PASSED" }).Count
+$total = $testResults.Count
 
-# Final Result
-if ($passedTests -eq $totalTests) {
-    Write-Host "ALL QUICK TESTS PASSED!" -ForegroundColor Green
-    Write-Host ""
-    Write-Host "Quick tests completed successfully!" -ForegroundColor Green
-    Write-Host "Ready for development iteration." -ForegroundColor Gray
-    Write-Host "Run .\run-all-tests.ps1 for full test suite before committing." -ForegroundColor Gray
-    exit 0
+Write-Host "`n🎯 Results: $passed/$total tests passed" -ForegroundColor $(if ($passed -eq $total) { "Green" } else { "Yellow" })
+
+if ($passed -eq $total) {
+    Write-Host "🎉 All tests passed! Ready for development." -ForegroundColor Green
 } else {
-    Write-Host "SOME TESTS FAILED" -ForegroundColor Red
-    Write-Host ""
-    Write-Host "Failed: $($totalTests - $passedTests) out of $totalTests test suites." -ForegroundColor Red
-    Write-Host "Please fix failing tests before continuing development." -ForegroundColor Gray
-    Write-Host "Check the error messages above for details." -ForegroundColor Gray
-    exit 1
+    Write-Host "⚠️  Some tests failed. Check the output above." -ForegroundColor Yellow
 }

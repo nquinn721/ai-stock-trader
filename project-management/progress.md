@@ -61,7 +61,7 @@ Sprint 6 Progress: ████████████████████ 
 
 ### 🟦 Planned for Next Sprint
 
-- 🟦 **S31**: Portfolio Analytics Dashboard (8 story points)
+- ✅ **S31**: Portfolio Analytics Dashboard (8 story points) - COMPLETED
 - 🟦 **S33**: Remove Latest Trade Signals (2 story points) - IN PROGRESS
 - 🟦 **S34**: Advanced Trading Tab (5 story points) - IN PROGRESS
 - 🟦 **S35**: Advanced Order Management System (13 story points)
@@ -71,6 +71,16 @@ Sprint 6 Progress: ████████████████████ 
 - 🟦 **S39**: Real-Time Predictive Analytics Dashboard (13 story points)
 - 🟦 **S40**: Autonomous Trading Agent Builder (21 story points)
 - 🟦 **S41**: Multi-Asset Intelligence & Alternative Data (21 story points)
+
+### 🔄 Recently Completed
+
+- ✅ **S31**: Portfolio Analytics Dashboard - COMPLETED (2025-06-25)
+  - ✅ Enhanced Portfolio Analytics Dashboard with 8 comprehensive tabs
+  - ✅ Advanced visualizations using recharts (line, area, scatter, pie charts)
+  - ✅ Monte Carlo simulation, efficient frontier, correlation matrix
+  - ✅ Risk analysis with VaR, beta, Sharpe ratio calculations
+  - ✅ PDF export functionality and mobile-responsive design
+  - ✅ Professional-grade analytics replacing basic portfolio dashboard
 
 ### 🔄 Recently Recovered Stories
 
@@ -127,7 +137,7 @@ Phase 5 (Production):       ░░░░░░░░░░░░░░░░░�
 
 ### 🎯 Key Metrics
 
-- **Total Stories**: 43 created, 26 completed (60%)
+- **Total Stories**: 43 created, 27 completed (63%)
 - **Epics**: 8 defined, 2 completed (Foundation, Testing)
 - **Test Coverage**:
   - Backend: 85% (target: 90%)

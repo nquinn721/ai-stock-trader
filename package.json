@@ -1,5 +1,22 @@
 {
+  "name": "stock-trading-app-nest",
+  "version": "1.0.0",
+  "description": "Full-stack stock trading application with NestJS backend and React frontend",
+  "private": true,
+  "scripts": {
+    "test:stocks": "node test-scripts/test-stocks-endpoint.js",
+    "test:signals": "node test-scripts/test-signal-distribution-v2.js",
+    "test:recommendations": "node test-scripts/test-recommendation-integration.js",
+    "install:all": "npm install && cd frontend && npm install && cd ../backend && npm install && cd ../e2e-tests && npm install && cd ../project-management && npm install"
+  },
   "dependencies": {
     "axios": "^1.10.0"
-  }
+  },
+  "devDependencies": {},
+  "workspaces": [
+    "frontend",
+    "backend", 
+    "e2e-tests",
+    "project-management"
+  ]
 }

@@ -10,7 +10,7 @@ import { usePortfolioStore } from "../stores/StoreContext";
 import { CreateTradeRequest, Portfolio } from "../types";
 import OrderManagement from "./OrderManagement";
 import "./Portfolio.css";
-import { PortfolioAnalyticsDashboard } from "./PortfolioAnalyticsDashboard";
+import EnhancedPortfolioAnalyticsDashboard from "./EnhancedPortfolioAnalyticsDashboard";
 import PortfolioChart from "./PortfolioChart";
 import StockAutocomplete from "./StockAutocomplete";
 
@@ -359,7 +359,7 @@ const PortfolioComponent: React.FC<PortfolioProps> = observer(
           {/* Portfolio Analytics Dashboard */}
           <div className="analytics-section">
             <h2>Portfolio Analytics</h2>
-            <PortfolioAnalyticsDashboard portfolioId={portfolioId} />
+            <EnhancedPortfolioAnalyticsDashboard portfolioId={portfolioId} />
           </div>
           {/* Order Management Section */}
           <div className="order-management-section">

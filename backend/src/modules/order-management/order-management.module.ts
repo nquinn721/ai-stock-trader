@@ -8,10 +8,13 @@ import { Stock } from '../../entities/stock.entity';
 import { Trade } from '../../entities/trade.entity';
 import { PaperTradingModule } from '../paper-trading/paper-trading.module';
 import { WebsocketModule } from '../websocket/websocket.module';
+import { MarketHoursService } from '../../utils/market-hours.service';
 import { OrderManagementController } from './order-management.controller';
 import { OrderManagementService } from './order-management.service';
 import { OrderService } from './order.service';
 import { OrderExecutionEngine } from './services/order-execution-engine.service';
+import { ConditionalOrderService } from './services/conditional-order.service';
+import { RiskManagementService } from './services/risk-management.service';
 
 @Module({
   imports: [
@@ -21,7 +24,20 @@ import { OrderExecutionEngine } from './services/order-execution-engine.service'
     forwardRef(() => WebsocketModule), // For websocket communication
   ],
   controllers: [OrderManagementController],
-  providers: [OrderManagementService, OrderService, OrderExecutionEngine],
-  exports: [OrderManagementService, OrderService, OrderExecutionEngine],
+  providers: [
+    OrderManagementService, 
+    OrderService, 
+    OrderExecutionEngine,
+    ConditionalOrderService,
+    RiskManagementService,
+    MarketHoursService,
+  ],
+  exports: [
+    OrderManagementService, 
+    OrderService, 
+    OrderExecutionEngine,
+    ConditionalOrderService,
+    RiskManagementService,
+  ],
 })
 export class OrderManagementModule {}

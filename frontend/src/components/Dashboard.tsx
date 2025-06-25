@@ -32,7 +32,7 @@ import PortfolioSelector from "./PortfolioSelector";
 import QuickTrade from "./QuickTrade";
 import StockCard from "./StockCard";
 import AutoTradingDashboard from "./automated-trading/AutoTradingDashboard";
-import { PortfolioAnalyticsDashboard } from "./PortfolioAnalyticsDashboard";
+import EnhancedPortfolioAnalyticsDashboard from "./EnhancedPortfolioAnalyticsDashboard";
 
 // Add icons to library
 library.add(
@@ -236,7 +236,7 @@ const Dashboard: React.FC = observer(() => {
           </div>
         </header>
         {portfolioStore.currentPortfolio ? (
-          <PortfolioAnalyticsDashboard portfolioId={portfolioStore.currentPortfolio.id} />
+          <EnhancedPortfolioAnalyticsDashboard portfolioId={portfolioStore.currentPortfolio.id} />
         ) : (
           <div style={{ padding: '20px', textAlign: 'center' }}>
             <p>Please select a portfolio to view analytics.</p>

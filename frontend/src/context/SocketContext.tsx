@@ -41,6 +41,10 @@ interface SocketContextType {
   createOrder: (orderData: CreateOrderDto) => void;
   cancelOrder: (orderId: number) => void;
   getOrderBook: () => void;
+  // Connection health information
+  connectionAttempts: number;
+  messageQueueSize: number;
+  lastHeartbeat: number;
 }
 
 const SocketContext = createContext<SocketContextType>({
@@ -67,6 +71,10 @@ const SocketContext = createContext<SocketContextType>({
   createOrder: () => {},
   cancelOrder: () => {},
   getOrderBook: () => {},
+  // Connection health defaults
+  connectionAttempts: 0,
+  messageQueueSize: 0,
+  lastHeartbeat: 0,
 });
 
 export const useSocket = () => {
@@ -92,16 +100,56 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
   >(new Map());
   const [allPortfolios, setAllPortfolios] = useState<any[]>([]);
 
+  // Message queuing for offline scenarios
+  const [messageQueue, setMessageQueue] = useState<
+    Array<{ event: string; data: any }>
+  >([]);
+  const [connectionAttempts, setConnectionAttempts] = useState(0);
+  const [lastHeartbeat, setLastHeartbeat] = useState(Date.now());
+
+  // Connection health monitoring
+  const checkConnectionHealth = () => {
+    const now = Date.now();
+    const timeSinceLastHeartbeat = now - lastHeartbeat;
+
+    // If no heartbeat for 2 minutes, consider connection stale
+    if (timeSinceLastHeartbeat > 120000 && isConnected) {
+      console.warn("⚠️ Connection appears stale, attempting reconnection");
+      socket?.disconnect();
+      socket?.connect();
+    }
+  };
+
+  // Queue message when offline
+  const queueMessage = (event: string, data: any) => {
+    setMessageQueue((prev) => [...prev, { event, data }]);
+  };
+
+  // Process queued messages when connection is restored
+  const processQueuedMessages = () => {
+    if (socket && isConnected && messageQueue.length > 0) {
+      console.log(`📤 Processing ${messageQueue.length} queued messages`);
+      messageQueue.forEach(({ event, data }) => {
+        socket.emit(event, data);
+      });
+      setMessageQueue([]);
+    }
+  };
+
   const subscribeToPortfolio = (portfolioId: number) => {
     if (socket && isConnected) {
       console.log(`📈 Subscribing to portfolio ${portfolioId}`);
       socket.emit("subscribe_portfolio", { portfolioId });
+    } else {
+      queueMessage("subscribe_portfolio", { portfolioId });
     }
   };
   const unsubscribeFromPortfolio = (portfolioId: number) => {
     if (socket && isConnected) {
       console.log(`📉 Unsubscribing from portfolio ${portfolioId}`);
       socket.emit("unsubscribe_portfolio", { portfolioId });
+    } else {
+      queueMessage("unsubscribe_portfolio", { portfolioId });
     }
   };
 
@@ -109,6 +157,8 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
     if (socket && isConnected) {
       console.log("📊 Requesting all portfolios");
       socket.emit("subscribe_all_portfolios");
+    } else {
+      queueMessage("subscribe_all_portfolios", {});
     }
   };
 
@@ -116,6 +166,8 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
     if (socket && isConnected) {
       console.log("📊 Subscribing to selective stocks:", symbols);
       socket.emit("subscribe_selective_stocks", { symbols });
+    } else {
+      queueMessage("subscribe_selective_stocks", { symbols });
     }
   };
   const getPortfolioPerformance = async (portfolioId: number): Promise<any> => {
@@ -411,11 +463,23 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
       timeout: 20000,
       reconnection: true,
       reconnectionDelay: 1000,
-      reconnectionAttempts: 5,
+      reconnectionDelayMax: 5000,
+      randomizationFactor: 0.5,
+      reconnectionAttempts: 10,
+      // Enhanced connection optimization
+      forceNew: true,
+      upgrade: true,
+      rememberUpgrade: true,
     });
     newSocket.on("connect", () => {
       console.log("✅ Connected to WebSocket server");
       setIsConnected(true);
+      setConnectionAttempts(0);
+      setLastHeartbeat(Date.now());
+
+      // Process any queued messages
+      processQueuedMessages();
+
       newSocket.emit("subscribe_stocks");
       // Request all portfolios on connection
       newSocket.emit("subscribe_all_portfolios");
@@ -429,7 +493,35 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
     newSocket.on("connect_error", (error) => {
       console.error("❌ WebSocket connection error:", error);
       setIsConnected(false);
+      setConnectionAttempts((prev) => prev + 1);
     });
+
+    newSocket.on("reconnect", (attemptNumber) => {
+      console.log(`🔄 Reconnected after ${attemptNumber} attempts`);
+      setConnectionAttempts(0);
+      setLastHeartbeat(Date.now());
+    });
+
+    newSocket.on("reconnect_attempt", (attemptNumber) => {
+      console.log(`🔄 Reconnection attempt ${attemptNumber}`);
+      setConnectionAttempts(attemptNumber);
+    });
+
+    newSocket.on("reconnect_error", (error) => {
+      console.error("❌ Reconnection error:", error);
+    });
+
+    newSocket.on("reconnect_failed", () => {
+      console.error("❌ Reconnection failed after all attempts");
+    });
+
+    // Connection health monitoring
+    newSocket.on("pong", () => {
+      setLastHeartbeat(Date.now());
+    });
+
+    // Set up periodic connection health check
+    const healthCheckInterval = setInterval(checkConnectionHealth, 30000); // Check every 30 seconds
 
     newSocket.on("stock_updates", (data: Stock[]) => {
       console.log("📊 Received stock updates:", data.length, "stocks");
@@ -437,29 +529,44 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
     });
 
     // Handle batched stock updates
-    newSocket.on("stock_updates_batch", (data: { updates: Stock[][]; count: number; timestamp: string }) => {
-      console.log("📊 Received batched stock updates:", data.count, "batches");
-      // Flatten all batched updates
-      const allStocks = data.updates.flat();
-      // Remove duplicates by symbol (keep latest)
-      const stocksMap = new Map();
-      allStocks.forEach(stock => stocksMap.set(stock.symbol, stock));
-      setStocks(Array.from(stocksMap.values()));
-    });
+    newSocket.on(
+      "stock_updates_batch",
+      (data: { updates: Stock[][]; count: number; timestamp: string }) => {
+        console.log(
+          "📊 Received batched stock updates:",
+          data.count,
+          "batches"
+        );
+        // Flatten all batched updates
+        const allStocks = data.updates.flat();
+        // Remove duplicates by symbol (keep latest)
+        const stocksMap = new Map();
+        allStocks.forEach((stock) => stocksMap.set(stock.symbol, stock));
+        setStocks(Array.from(stocksMap.values()));
+      }
+    );
 
     // Handle selective stock updates
-    newSocket.on("selective_stock_updates", (data: { stocks: Stock[]; timestamp: string; initial?: boolean }) => {
-      console.log("📊 Received selective stock updates:", data.stocks.length, "stocks", data.initial ? "(initial)" : "");
-      if (data.initial) {
-        setStocks(data.stocks);
-      } else {
-        setStocks(prev => {
-          const stocksMap = new Map(prev.map(s => [s.symbol, s]));
-          data.stocks.forEach(stock => stocksMap.set(stock.symbol, stock));
-          return Array.from(stocksMap.values());
-        });
+    newSocket.on(
+      "selective_stock_updates",
+      (data: { stocks: Stock[]; timestamp: string; initial?: boolean }) => {
+        console.log(
+          "📊 Received selective stock updates:",
+          data.stocks.length,
+          "stocks",
+          data.initial ? "(initial)" : ""
+        );
+        if (data.initial) {
+          setStocks(data.stocks);
+        } else {
+          setStocks((prev) => {
+            const stocksMap = new Map(prev.map((s) => [s.symbol, s]));
+            data.stocks.forEach((stock) => stocksMap.set(stock.symbol, stock));
+            return Array.from(stocksMap.values());
+          });
+        }
       }
-    });
+    );
 
     newSocket.on(
       "stock_error",
@@ -481,19 +588,30 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
     );
 
     // Handle batched stock updates
-    newSocket.on("stock_update_batch", (data: { updates: Array<{ symbol: string; data: Stock }>; count: number; timestamp: string }) => {
-      console.log("📈 Received batched stock updates:", data.count, "updates");
-      setStocks(prev => {
-        const stocksMap = new Map(prev.map(s => [s.symbol, s]));
-        data.updates.forEach(({ symbol, data: stockData }) => {
-          const existing = stocksMap.get(symbol);
-          if (existing) {
-            stocksMap.set(symbol, { ...existing, ...stockData });
-          }
+    newSocket.on(
+      "stock_update_batch",
+      (data: {
+        updates: Array<{ symbol: string; data: Stock }>;
+        count: number;
+        timestamp: string;
+      }) => {
+        console.log(
+          "📈 Received batched stock updates:",
+          data.count,
+          "updates"
+        );
+        setStocks((prev) => {
+          const stocksMap = new Map(prev.map((s) => [s.symbol, s]));
+          data.updates.forEach(({ symbol, data: stockData }) => {
+            const existing = stocksMap.get(symbol);
+            if (existing) {
+              stocksMap.set(symbol, { ...existing, ...stockData });
+            }
+          });
+          return Array.from(stocksMap.values());
         });
-        return Array.from(stocksMap.values());
-      });
-    });
+      }
+    );
 
     newSocket.on("trading_signal", (signal: TradingSignal) => {
       console.log("🔔 New trading signal:", signal);
@@ -544,6 +662,7 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
     setSocket(newSocket);
     return () => {
       console.log("🔌 Cleaning up WebSocket connection");
+      clearInterval(healthCheckInterval);
       newSocket.removeAllListeners();
       newSocket.close();
     };
@@ -554,6 +673,8 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
     if (socket && isConnected) {
       console.log("📝 Creating order:", orderData);
       socket.emit("create_order", orderData);
+    } else {
+      queueMessage("create_order", orderData);
     }
   };
 
@@ -561,6 +682,8 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
     if (socket && isConnected) {
       console.log("❌ Canceling order:", orderId);
       socket.emit("cancel_order", { orderId });
+    } else {
+      queueMessage("cancel_order", { orderId });
     }
   };
 
@@ -568,6 +691,8 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
     if (socket && isConnected) {
       console.log("📊 Requesting order book");
       socket.emit("get_order_book");
+    } else {
+      queueMessage("get_order_book", {});
     }
   };
   const value = {
@@ -580,7 +705,8 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
     allPortfolios,
     subscribeToPortfolio,
     unsubscribeFromPortfolio,
-    requestAllPortfolios,\n    subscribeToSelectiveStocks,
+    requestAllPortfolios,
+    subscribeToSelectiveStocks,
     getPortfolioPerformance,
     getPositionDetails,
     getPortfolioAnalytics,
@@ -593,6 +719,10 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
     createOrder,
     cancelOrder,
     getOrderBook,
+    // Connection health information
+    connectionAttempts,
+    messageQueueSize: messageQueue.length,
+    lastHeartbeat,
   };
 
   return (

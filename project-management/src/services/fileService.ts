@@ -1,5 +1,5 @@
 import { saveAs } from "file-saver";
-import { Story } from "../../../src/data/types";
+import { Story } from "../data/types";
 
 export class FileService {
   /**
@@ -145,5 +145,53 @@ export const stories: Story[] = [`;
       console.error("Error creating comprehensive backup:", error);
       throw error;
     }
+  }
+
+  /**
+   * Load stories from a JSON file (for file input)
+   */
+  static loadStoriesFromFile(file: File): Promise<Story[]> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+
+      reader.onload = (event) => {
+        try {
+          const content = event.target?.result as string;
+          const stories = JSON.parse(content) as Story[];
+
+          // Validate the loaded data
+          if (!Array.isArray(stories)) {
+            throw new Error(
+              "Invalid file format: Expected an array of stories"
+            );
+          }
+
+          // Basic validation for each story
+          for (const story of stories) {
+            if (!story.id || !story.title || !story.status) {
+              throw new Error(
+                "Invalid story format: Missing required fields (id, title, status)"
+              );
+            }
+          }
+
+          resolve(stories);
+        } catch (error) {
+          reject(
+            new Error(
+              `Failed to parse stories file: ${
+                error instanceof Error ? error.message : "Unknown error"
+              }`
+            )
+          );
+        }
+      };
+
+      reader.onerror = () => {
+        reject(new Error("Failed to read file"));
+      };
+
+      reader.readAsText(file);
+    });
   }
 }

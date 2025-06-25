@@ -199,7 +199,7 @@ PORT=3000
 ### Code Structure
 
 ```
-├── backend/
+├── backend/                   # NestJS API server (port 8000)
 │   ├── src/
 │   │   ├── entities/          # Database entities
 │   │   ├── modules/           # Feature modules
@@ -210,14 +210,40 @@ PORT=3000
 │   │   ├── services/          # Business logic
 │   │   └── data/              # Static data files
 │   └── package.json
-├── frontend/
+├── frontend/                  # React client app (port 3000)
 │   ├── src/
 │   │   ├── components/        # React components
 │   │   ├── context/           # React context
 │   │   ├── types/             # TypeScript types
 │   │   └── App.tsx
 │   └── package.json
-└── README.md
+├── docs/                      # Project documentation
+│   ├── completion-summaries/  # Implementation summaries
+│   ├── adrs/                  # Architecture Decision Records
+│   └── implementation-guides/ # Development guides
+├── e2e-tests/                 # End-to-end tests (Playwright)
+├── project-management/        # Project tracking (port 5000)
+│   ├── dashboard/             # Project management dashboard
+│   ├── stories/               # User stories
+│   └── sprints/               # Sprint planning
+├── test-scripts/              # Development test scripts
+├── quick-test.ps1             # Quick test runner
+├── run-all-tests.ps1          # Full test suite
+└── package.json               # Root workspace configuration
+```
+
+### Workspace Scripts
+
+The root package.json provides workspace-level scripts:
+
+```bash
+# Install all dependencies across the workspace
+npm run install:all
+
+# Run development test scripts
+npm run test:stocks        # Test stock data endpoint
+npm run test:signals       # Test signal distribution
+npm run test:recommendations # Test recommendation system
 ```
 
 ### Adding New Features
