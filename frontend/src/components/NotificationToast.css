@@ -134,34 +134,80 @@
   transform: translateY(-1px);
 }
 
-/* Responsive design */
+/* Enhanced Responsive design */
 @media (max-width: 768px) {
   .notification-toast {
-    margin: 0 10px;
-    max-width: calc(100vw - 20px);
+    margin: 0 12px;
+    max-width: calc(100vw - 24px);
+    border-radius: 10px !important;
   }
 
   .toast-action-btn {
     font-size: 0.7rem;
-    padding: 4px 8px;
-    min-width: 60px;
+    padding: 6px 12px;
+    min-width: 70px;
   }
 }
 
-/* Dark theme support */
-@media (prefers-color-scheme: dark) {
-  .notification-toast {
-    background: #2e2e2e !important;
-    color: #ffffff !important;
-  }
+/* Enhanced Dark theme styling */
+.notification-toast .MuiAlert-message {
+  color: #f0f6fc !important;
+}
 
-  .toast-action-btn.secondary {
-    color: #ccc;
-    border-color: #555;
-  }
+.notification-toast .MuiAlert-icon {
+  color: #f0f6fc !important;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+}
 
-  .toast-action-btn.secondary:hover {
-    background: #444;
-    border-color: #666;
+.notification-toast .MuiAlertTitle-root {
+  color: #f0f6fc !important;
+  font-weight: 600 !important;
+}
+
+.notification-toast .MuiChip-root {
+  background: rgba(59, 130, 246, 0.2) !important;
+  color: #f0f6fc !important;
+  border: 1px solid rgba(59, 130, 246, 0.3) !important;
+}
+
+.notification-toast .MuiIconButton-root {
+  color: #94a3b8 !important;
+  transition: all 0.3s ease !important;
+}
+
+.notification-toast .MuiIconButton-root:hover {
+  color: #f0f6fc !important;
+  background: rgba(59, 130, 246, 0.1) !important;
+  transform: scale(1.1) !important;
+}
+
+/* Enhanced Loading States */
+.notification-toast.loading {
+  position: relative;
+  overflow: hidden;
+}
+
+.notification-toast.loading::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(59, 130, 246, 0.6),
+    transparent
+  );
+  animation: shimmer 2s infinite ease-in-out;
+}
+
+@keyframes shimmer {
+  0% {
+    left: -100%;
+  }
+  100% {
+    left: 100%;
   }
 }

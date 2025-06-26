@@ -494,26 +494,69 @@
     max-height: 100vh;
     border-radius: 0;
     background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
+    margin: 8px;
   }
 
   .notification-item {
     padding: 16px;
-    margin: 2px 4px;
+    margin: 4px 8px;
     border-radius: 16px;
   }
 
   .notification-item .MuiListItemText-primary {
-    font-size: 0.95rem;
+    font-size: 0.9rem !important;
     font-weight: 500;
   }
 
   .notification-item .MuiListItemText-secondary {
-    font-size: 0.85rem;
+    font-size: 0.8rem !important;
   }
 
   .notification-item .MuiListItemIcon-root {
-    min-width: 44px;
+    min-width: 40px;
   }
+
+  .notification-item .MuiIconButton-root {
+    padding: 6px;
+  }
+}
+
+@media (max-width: 480px) {
+  .notification-item.unread::before {
+    width: 6px;
+    height: 6px;
+    left: 12px;
+  }
+  
+  .notification-item {
+    margin: 3px 6px;
+    padding: 10px;
+  }
+  
+  .notification-bell {
+    padding: 6px;
+  }
+}
+
+/* Enhanced Focus States for Accessibility */
+.notification-item:focus-within {
+  outline: 2px solid rgba(59, 130, 246, 0.6);
+  outline-offset: 2px;
+}
+
+.notification-bell:focus {
+  outline: 2px solid rgba(59, 130, 246, 0.6);
+  outline-offset: 2px;
+}
+
+/* Enhanced Performance Optimizations */
+.notification-item {
+  will-change: transform, opacity;
+  contain: layout style paint;
+}
+
+.notification-item:hover {
+  will-change: transform, box-shadow;
 }
 
 /* Dark Theme Enhancement */

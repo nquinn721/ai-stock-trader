@@ -613,6 +613,13 @@ const AutonomousAgentDashboard: React.FC = () => {
         </DialogActions>
       </Dialog>
 
+      </>)}
+
+      {/* Strategy Builder Tab */}
+      {activeTab === 1 && (
+        <StrategyBuilder />
+      )}
+
       {/* Deploy Strategy Dialog */}
       <Dialog
         open={isDeployDialogOpen}
