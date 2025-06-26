@@ -26,7 +26,7 @@ import {
 import { Portfolio } from "../types";
 import TradingAssistantChat from "./ai/TradingAssistantChat";
 import AutoTradingDashboard from "./automated-trading/AutoTradingDashboard";
-import AutonomousAgentDashboard from "./autonomous-trading/AutonomousAgentDashboard";
+import AutonomousAgentDashboard from "./autonomous-trading/CleanAutonomousAgentDashboard";
 import "./Dashboard.css";
 import EmptyState from "./EmptyState";
 import EnhancedPortfolioAnalyticsDashboard from "./EnhancedPortfolioAnalyticsDashboard";

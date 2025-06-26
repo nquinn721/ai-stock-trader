@@ -111,14 +111,16 @@ export const StrategyBuilder: React.FC = () => {
       if (response.success) {
         // Transform the flat component list into categorized library
         const library: ComponentLibrary = {
-          indicators: response.data.filter(c => c.type === 'indicator'),
-          conditions: response.data.filter(c => c.type === 'condition'),
-          actions: response.data.filter(c => c.type === 'action'),
-          riskRules: response.data.filter(c => c.category === 'risk_management'),
+          indicators: response.data.filter((c) => c.type === "indicator"),
+          conditions: response.data.filter((c) => c.type === "condition"),
+          actions: response.data.filter((c) => c.type === "action"),
+          riskRules: response.data.filter(
+            (c) => c.category === "risk_management"
+          ),
         };
         setComponentLibrary(library);
       } else {
-        throw new Error(response.error || 'Failed to load components');
+        throw new Error(response.error || "Failed to load components");
       }
     } catch (error: any) {
       console.error("Failed to load component library:", error);
@@ -157,21 +159,21 @@ export const StrategyBuilder: React.FC = () => {
   const handleConnect = useCallback((fromId: string, toId: string) => {
     // Prevent self-connections
     if (fromId === toId) return;
-    
+
     setStrategy((prev) => {
-      const fromComponent = prev.components.find(c => c.id === fromId);
+      const fromComponent = prev.components.find((c) => c.id === fromId);
       if (!fromComponent) return prev;
-      
+
       // Check if connection already exists
       if (fromComponent.connections?.includes(toId)) return prev;
-      
+
       // Add connection to the from component
-      const updatedComponents = prev.components.map(comp => 
-        comp.id === fromId 
+      const updatedComponents = prev.components.map((comp) =>
+        comp.id === fromId
           ? { ...comp, connections: [...(comp.connections || []), toId] }
           : comp
       );
-      
+
       return {
         ...prev,
         components: updatedComponents,
@@ -263,7 +265,10 @@ export const StrategyBuilder: React.FC = () => {
       // If client-side validation passes and strategy is saved, run server-side validation
       if (errors.length === 0 && strategyToValidate.id) {
         try {
-          const serverValidation = await strategyBuilderService.validateStrategy(strategyToValidate.id);
+          const serverValidation =
+            await strategyBuilderService.validateStrategy(
+              strategyToValidate.id
+            );
           if (serverValidation.success) {
             const serverResult = serverValidation.data;
             errors.push(...serverResult.errors);
@@ -272,7 +277,9 @@ export const StrategyBuilder: React.FC = () => {
             }
           }
         } catch (serverError) {
-          console.warn("Server validation failed, using client-side validation only");
+          console.warn(
+            "Server validation failed, using client-side validation only"
+          );
         }
       }
 
@@ -296,7 +303,7 @@ export const StrategyBuilder: React.FC = () => {
     setIsLoading(true);
     try {
       const response = await strategyBuilderService.createStrategy(strategy);
-      
+
       if (!response.success) {
         throw new Error(response.error || "Failed to save strategy");
       }
@@ -324,8 +331,11 @@ export const StrategyBuilder: React.FC = () => {
 
     setIsLoading(true);
     try {
-      const response = await strategyBuilderService.runBacktest(strategy.id, backtestParams);
-      
+      const response = await strategyBuilderService.runBacktest(
+        strategy.id,
+        backtestParams
+      );
+
       if (!response.success) {
         throw new Error(response.error || "Backtest failed");
       }
@@ -356,9 +366,14 @@ export const StrategyBuilder: React.FC = () => {
     setIsLoading(true);
     try {
       // Import autonomousTradingService for deployment
-      const autonomousTradingApi = (await import("../../services/autonomousTradingApi")).default;
-      const response = await autonomousTradingApi.deployStrategy(strategy.id, deploymentConfig);
-      
+      const autonomousTradingApi = (
+        await import("../../services/autonomousTradingApi")
+      ).default;
+      const response = await autonomousTradingApi.deployStrategy(
+        strategy.id,
+        deploymentConfig
+      );
+
       if (!response.success) {
         throw new Error(response.error || "Deployment failed");
       }
@@ -388,11 +403,14 @@ export const StrategyBuilder: React.FC = () => {
 
     setIsLoading(true);
     try {
-      const response = await strategyBuilderService.publishStrategy(strategy.id, {
-        isPublic: true,
-        category: 'general',
-        tags: []
-      });
+      const response = await strategyBuilderService.publishStrategy(
+        strategy.id,
+        {
+          isPublic: true,
+          category: "general",
+          tags: [],
+        }
+      );
 
       if (!response.success) {
         throw new Error(response.error || "Publishing failed");
@@ -411,14 +429,15 @@ export const StrategyBuilder: React.FC = () => {
   const handleUseTemplate = async (template: any) => {
     try {
       setIsLoading(true);
-      
+
       // If template has an ID, create strategy from template via API
       if (template.id) {
-        const response = await strategyBuilderService.createStrategyFromTemplate(
-          template.id, 
-          `${template.name} - Copy`
-        );
-        
+        const response =
+          await strategyBuilderService.createStrategyFromTemplate(
+            template.id,
+            `${template.name} - Copy`
+          );
+
         if (response.success) {
           setStrategy({
             id: response.data.id,
@@ -444,7 +463,7 @@ export const StrategyBuilder: React.FC = () => {
           timeframe: template.defaultTimeframe || "1h",
         });
       }
-      
+
       setActiveTab(0); // Switch to builder tab
     } catch (error: any) {
       console.error("Error loading template:", error);
@@ -459,7 +478,7 @@ export const StrategyBuilder: React.FC = () => {
     try {
       setIsLoading(true);
       const response = await strategyBuilderService.getStrategy(strategyId);
-      
+
       if (response.success) {
         setStrategy({
           id: response.data.id,
@@ -471,7 +490,7 @@ export const StrategyBuilder: React.FC = () => {
           timeframe: response.data.timeframe,
         });
         setSuccessMessage("Strategy loaded successfully!");
-        
+
         // Trigger validation for loaded strategy
         await validateStrategy(response.data);
       } else {
@@ -491,7 +510,12 @@ export const StrategyBuilder: React.FC = () => {
 
   React.useEffect(() => {
     setHasUnsavedChanges(true);
-  }, [strategy.name, strategy.description, strategy.components, strategy.riskRules]);
+  }, [
+    strategy.name,
+    strategy.description,
+    strategy.components,
+    strategy.riskRules,
+  ]);
 
   React.useEffect(() => {
     if (!hasUnsavedChanges || !validation?.isValid) return;
@@ -499,7 +523,10 @@ export const StrategyBuilder: React.FC = () => {
     const autoSaveInterval = setInterval(async () => {
       try {
         if (strategy.id) {
-          const response = await strategyBuilderService.updateStrategy(strategy.id, strategy);
+          const response = await strategyBuilderService.updateStrategy(
+            strategy.id,
+            strategy
+          );
           if (response.success) {
             setLastSaved(new Date());
             setHasUnsavedChanges(false);
@@ -779,23 +806,26 @@ const getMockComponentLibrary = (): ComponentLibrary => {
         name: "Simple Moving Average",
         type: "indicator",
         category: "trend",
-        description: "Calculates the simple moving average of price over a specified period",
+        description:
+          "Calculates the simple moving average of price over a specified period",
         parameters: { period: 20 },
       },
       {
         id: "ema",
-        name: "Exponential Moving Average", 
+        name: "Exponential Moving Average",
         type: "indicator",
         category: "trend",
-        description: "Calculates the exponential moving average with more weight on recent values",
+        description:
+          "Calculates the exponential moving average with more weight on recent values",
         parameters: { period: 12 },
       },
       {
         id: "rsi",
         name: "Relative Strength Index",
-        type: "indicator", 
+        type: "indicator",
         category: "momentum",
-        description: "Momentum oscillator that measures speed and magnitude of price changes",
+        description:
+          "Momentum oscillator that measures speed and magnitude of price changes",
         parameters: { period: 14, overbought: 70, oversold: 30 },
       },
     ],
@@ -805,7 +835,8 @@ const getMockComponentLibrary = (): ComponentLibrary => {
         name: "Price Above",
         type: "condition",
         category: "price",
-        description: "Triggers when price is above a specified value or indicator",
+        description:
+          "Triggers when price is above a specified value or indicator",
         parameters: { threshold: 100 },
       },
       {
@@ -830,7 +861,7 @@ const getMockComponentLibrary = (): ComponentLibrary => {
         id: "sell_market",
         name: "Sell Market Order",
         type: "action",
-        category: "trade", 
+        category: "trade",
         description: "Places a market sell order",
         parameters: { quantity: 100 },
       },

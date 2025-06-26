@@ -2,9 +2,7 @@
 
 .notification-toast {
   animation: slideInRight 0.3s ease-out;
-  box-shadow: 
-    0 12px 40px rgba(0, 0, 0, 0.4),
-    0 4px 16px rgba(0, 0, 0, 0.2),
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4), 0 4px 16px rgba(0, 0, 0, 0.2),
     inset 0 1px 0 rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(20px);
   border-radius: 12px !important;
@@ -28,9 +26,7 @@
   ) !important;
   border-color: rgba(239, 68, 68, 0.5) !important;
   animation: slideInRight 0.3s ease-out, pulseAlert 2s infinite;
-  box-shadow: 
-    0 12px 40px rgba(239, 68, 68, 0.3),
-    0 4px 16px rgba(0, 0, 0, 0.3),
+  box-shadow: 0 12px 40px rgba(239, 68, 68, 0.3), 0 4px 16px rgba(0, 0, 0, 0.3),
     inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
@@ -81,16 +77,12 @@
 @keyframes pulseAlert {
   0%,
   100% {
-    box-shadow: 
-      0 12px 40px rgba(239, 68, 68, 0.3),
-      0 4px 16px rgba(0, 0, 0, 0.3),
-      inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    box-shadow: 0 12px 40px rgba(239, 68, 68, 0.3),
+      0 4px 16px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1);
   }
   50% {
-    box-shadow: 
-      0 16px 50px rgba(239, 68, 68, 0.5),
-      0 6px 20px rgba(239, 68, 68, 0.3),
-      inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    box-shadow: 0 16px 50px rgba(239, 68, 68, 0.5),
+      0 6px 20px rgba(239, 68, 68, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.15);
   }
 }
 
@@ -188,7 +180,7 @@
 }
 
 .notification-toast.loading::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: -100%;

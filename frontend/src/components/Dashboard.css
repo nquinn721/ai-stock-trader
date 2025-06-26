@@ -1381,17 +1381,17 @@
   .header-info {
     gap: 0.5rem;
   }
-  
+
   .header-info button {
     padding: 6px 10px;
     font-size: 0.7rem;
     min-width: 80px;
   }
-  
+
   .header-info button span {
     display: none;
   }
-  
+
   .header-info button svg {
     margin: 0;
   }
@@ -1420,7 +1420,7 @@
 }
 
 .header-info button.loading::after {
-  content: '';
+  content: "";
   position: absolute;
   top: 50%;
   left: 50%;

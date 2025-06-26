@@ -508,7 +508,199 @@
   margin-left: 10px;
 }
 
-/* Responsive Design */
+/* Emergency Stop Button */
+.emergency-stop-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 14px 28px;
+  border: none;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #ff4444 0%, #cc1717 50%, #990000 100%);
+  color: white;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 
+    0 8px 25px rgba(255, 68, 68, 0.4),
+    0 4px 12px rgba(255, 68, 68, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+  min-width: 180px;
+  backdrop-filter: blur(10px);
+}
+
+.emergency-stop-btn::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.3),
+    transparent
+  );
+  transition: left 0.8s ease-in-out;
+}
+
+.emergency-stop-btn::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 16px;
+  padding: 2px;
+  background: linear-gradient(135deg, #ff6666, #ff0000, #cc0000);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: xor;
+  -webkit-mask-composite: xor;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.emergency-stop-btn svg {
+  font-size: 18px;
+  animation: emergencyPulse 2s infinite ease-in-out;
+  filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.5));
+}
+
+@keyframes emergencyPulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.15);
+    opacity: 0.8;
+  }
+}
+
+@keyframes emergencyShake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-3px); }
+  20%, 40%, 60%, 80% { transform: translateX(3px); }
+}
+
+@keyframes emergencyGlow {
+  0%, 100% {
+    box-shadow: 
+      0 8px 25px rgba(255, 68, 68, 0.4),
+      0 4px 12px rgba(255, 68, 68, 0.3),
+      inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  }
+  50% {
+    box-shadow: 
+      0 8px 25px rgba(255, 68, 68, 0.8),
+      0 4px 12px rgba(255, 68, 68, 0.6),
+      0 0 30px rgba(255, 68, 68, 0.4),
+      inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  }
+}
+
+.emergency-stop-btn:hover {
+  background: linear-gradient(135deg, #ff0000 0%, #bb0000 50%, #880000 100%);
+  transform: scale(1.08) translateY(-3px);
+  animation: emergencyShake 0.6s ease-in-out, emergencyGlow 1.5s infinite;
+  box-shadow: 
+    0 12px 35px rgba(255, 0, 0, 0.6),
+    0 6px 18px rgba(255, 0, 0, 0.4),
+    0 0 40px rgba(255, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.emergency-stop-btn:hover::before {
+  left: 100%;
+}
+
+.emergency-stop-btn:hover::after {
+  opacity: 1;
+}
+
+.emergency-stop-btn:hover svg {
+  animation: emergencyPulse 0.3s infinite;
+  color: #ffff00;
+  filter: drop-shadow(0 0 10px rgba(255, 255, 0, 0.8));
+}
+
+.emergency-stop-btn:active {
+  transform: scale(1.02) translateY(-1px);
+  box-shadow: 
+    0 6px 20px rgba(255, 0, 0, 0.5),
+    0 3px 10px rgba(255, 0, 0, 0.3),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.emergency-stop-btn:focus {
+  outline: none;
+  box-shadow: 
+    0 8px 25px rgba(255, 68, 68, 0.4),
+    0 4px 12px rgba(255, 68, 68, 0.3),
+    0 0 0 4px rgba(255, 68, 68, 0.5),
+    0 0 0 8px rgba(255, 255, 255, 0.8);
+}
+
+.emergency-stop-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+  animation: none;
+  background: linear-gradient(135deg, #666 0%, #444 100%);
+  box-shadow: none;
+}
+
+.emergency-stop-btn:disabled svg {
+  animation: none;
+  filter: none;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .emergency-stop-btn {
+    border: 3px solid #000;
+    background: #ff0000;
+  }
+  
+  .emergency-stop-btn:hover {
+    background: #cc0000;
+    border-color: #fff;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .emergency-stop-btn,
+  .emergency-stop-btn:hover,
+  .emergency-stop-btn svg {
+    animation: none;
+    transition: color 0.2s ease, background-color 0.2s ease;
+  }
+  
+  .emergency-stop-btn:hover {
+    transform: none;
+  }
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .emergency-stop-btn {
+    padding: 12px 20px;
+    font-size: 14px;
+    min-width: 140px;
+  }
+  
+  .emergency-stop-btn svg {
+    font-size: 16px;
+  }
+}
+
 @media (max-width: 1200px) {
   .overview-grid {
     grid-template-columns: 1fr;

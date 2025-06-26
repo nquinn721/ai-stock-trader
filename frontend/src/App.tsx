@@ -1,9 +1,16 @@
+import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
 import "./App.css";
-import Dashboard from "./components/Dashboard";
 import ErrorBoundary from "./components/ErrorBoundary";
+import Header from "./components/Header";
 import NotificationToast from "./components/NotificationToast";
 import { NotificationProvider } from "./context/NotificationContext";
 import { SocketProvider } from "./context/SocketContext";
+import AIAssistantPage from "./pages/AIAssistantPage";
+import AnalyticsPage from "./pages/AnalyticsPage";
+import AutonomousTradingPage from "./pages/AutonomousTradingPage";
+import AutoTradingPage from "./pages/AutoTradingPage";
+import DashboardPage from "./pages/DashboardPage";
+import MarketScannerPage from "./pages/MarketScannerPage";
 import { rootStore } from "./stores/RootStore";
 import { StoreProvider } from "./stores/StoreContext";
 
@@ -13,10 +20,28 @@ function App() {
       <StoreProvider store={rootStore}>
         <SocketProvider>
           <NotificationProvider>
-            <div className="App">
-              <Dashboard />
-              <NotificationToast />
-            </div>
+            <Router>
+              <div className="App">
+                <Header />
+                <main className="app-main">
+                  <Routes>
+                    <Route path="/" element={<DashboardPage />} />
+                    <Route path="/auto-trading" element={<AutoTradingPage />} />
+                    <Route
+                      path="/autonomous-trading"
+                      element={<AutonomousTradingPage />}
+                    />
+                    <Route path="/analytics" element={<AnalyticsPage />} />
+                    <Route
+                      path="/market-scanner"
+                      element={<MarketScannerPage />}
+                    />
+                    <Route path="/ai-assistant" element={<AIAssistantPage />} />
+                  </Routes>
+                </main>
+                <NotificationToast />
+              </div>
+            </Router>
           </NotificationProvider>
         </SocketProvider>
       </StoreProvider>

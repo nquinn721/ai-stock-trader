@@ -1,5 +1,14 @@
-import { Delete, AddCircle, RemoveCircle, GridOn, GridOff, ZoomIn, ZoomOut, CenterFocusStrong } from "@mui/icons-material";
-import { Box, IconButton, Paper, Typography, Tooltip } from "@mui/material";
+import {
+  AddCircle,
+  CenterFocusStrong,
+  Delete,
+  GridOff,
+  GridOn,
+  RemoveCircle,
+  ZoomIn,
+  ZoomOut,
+} from "@mui/icons-material";
+import { Box, IconButton, Paper, Tooltip, Typography } from "@mui/material";
 import React, { useCallback, useRef, useState } from "react";
 import {
   ComponentDefinition,
@@ -32,7 +41,9 @@ export const StrategyCanvas: React.FC<StrategyCanvasProps> = ({
   const [draggedComponent, setDraggedComponent] = useState<string | null>(null);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const [connectionMode, setConnectionMode] = useState<string | null>(null);
-  const [hoveredConnection, setHoveredConnection] = useState<string | null>(null);
+  const [hoveredConnection, setHoveredConnection] = useState<string | null>(
+    null
+  );
   const [tempConnection, setTempConnection] = useState<{
     from: string;
     mouseX: number;
@@ -42,11 +53,13 @@ export const StrategyCanvas: React.FC<StrategyCanvasProps> = ({
   const [gridSize] = useState(20);
   const [hoveredComponent, setHoveredComponent] = useState<string | null>(null);
   const [zoom, setZoom] = useState(1);
-  const [selectedComponents, setSelectedComponents] = useState<Set<string>>(new Set());
+  const [selectedComponents, setSelectedComponents] = useState<Set<string>>(
+    new Set()
+  );
 
   const centerCanvas = useCallback(() => {
     if (strategy.components.length === 0) return;
-    
+
     // Calculate center of all components
     const bounds = strategy.components.reduce(
       (acc, comp) => {
@@ -60,18 +73,21 @@ export const StrategyCanvas: React.FC<StrategyCanvasProps> = ({
       },
       { minX: Infinity, minY: Infinity, maxX: -Infinity, maxY: -Infinity }
     );
-    
+
     // For now, just reset zoom - in a real implementation you'd scroll to center
     setZoom(1);
   }, [strategy.components]);
 
-  const snapToGridPosition = useCallback((x: number, y: number) => {
-    if (!snapToGrid) return { x, y };
-    return {
-      x: Math.round(x / gridSize) * gridSize,
-      y: Math.round(y / gridSize) * gridSize,
-    };
-  }, [snapToGrid, gridSize]);
+  const snapToGridPosition = useCallback(
+    (x: number, y: number) => {
+      if (!snapToGrid) return { x, y };
+      return {
+        x: Math.round(x / gridSize) * gridSize,
+        y: Math.round(y / gridSize) * gridSize,
+      };
+    },
+    [snapToGrid, gridSize]
+  );
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -92,7 +108,7 @@ export const StrategyCanvas: React.FC<StrategyCanvasProps> = ({
           x: e.clientX - rect.left - 110, // Center the component
           y: e.clientY - rect.top - 60,
         };
-        
+
         const position = snapToGridPosition(
           Math.max(0, rawPosition.x),
           Math.max(0, rawPosition.y)
@@ -128,7 +144,7 @@ export const StrategyCanvas: React.FC<StrategyCanvasProps> = ({
         const rect = canvasRef.current.getBoundingClientRect();
         const rawX = e.clientX - rect.left - dragOffset.x;
         const rawY = e.clientY - rect.top - dragOffset.y;
-        
+
         const snappedPosition = snapToGridPosition(
           Math.max(0, rawX),
           Math.max(0, rawY)
@@ -162,9 +178,9 @@ export const StrategyCanvas: React.FC<StrategyCanvasProps> = ({
     (componentId: string, e: React.MouseEvent) => {
       e.preventDefault();
       e.stopPropagation();
-      
+
       if (!canvasRef.current) return;
-      
+
       const rect = canvasRef.current.getBoundingClientRect();
       setConnectionMode(componentId);
       setTempConnection({
@@ -180,11 +196,11 @@ export const StrategyCanvas: React.FC<StrategyCanvasProps> = ({
     (targetId: string, e: React.MouseEvent) => {
       e.preventDefault();
       e.stopPropagation();
-      
+
       if (connectionMode && connectionMode !== targetId) {
         onConnect(connectionMode, targetId);
       }
-      
+
       setConnectionMode(null);
       setTempConnection(null);
     },
@@ -192,15 +208,21 @@ export const StrategyCanvas: React.FC<StrategyCanvasProps> = ({
   );
 
   // Add connection deletion functionality
-  const handleConnectionDoubleClick = useCallback((connection: { from: string; to: string }) => {
-    // Remove the connection from strategy
-    onConnect(connection.from, connection.to); // This should toggle the connection off
-  }, [onConnect]);
+  const handleConnectionDoubleClick = useCallback(
+    (connection: { from: string; to: string }) => {
+      // Remove the connection from strategy
+      onConnect(connection.from, connection.to); // This should toggle the connection off
+    },
+    [onConnect]
+  );
 
   // Handle connection disconnection
-  const handleDisconnect = useCallback((fromId: string, toId: string) => {
-    onConnect(fromId, toId); // Toggle the connection off
-  }, [onConnect]);
+  const handleDisconnect = useCallback(
+    (fromId: string, toId: string) => {
+      onConnect(fromId, toId); // Toggle the connection off
+    },
+    [onConnect]
+  );
 
   const getComponentIcon = (type: string) => {
     switch (type) {
@@ -228,25 +250,28 @@ export const StrategyCanvas: React.FC<StrategyCanvasProps> = ({
     }
   };
 
-  const handleComponentClick = useCallback((componentId: string, event: React.MouseEvent) => {
-    event.stopPropagation();
-    
-    if (event.ctrlKey || event.metaKey) {
-      // Multi-select with Ctrl/Cmd
-      setSelectedComponents(prev => {
-        const newSet = new Set(prev);
-        if (newSet.has(componentId)) {
-          newSet.delete(componentId);
-        } else {
-          newSet.add(componentId);
-        }
-        return newSet;
-      });
-    } else {
-      // Single select
-      setSelectedComponents(new Set([componentId]));
-    }
-  }, []);
+  const handleComponentClick = useCallback(
+    (componentId: string, event: React.MouseEvent) => {
+      event.stopPropagation();
+
+      if (event.ctrlKey || event.metaKey) {
+        // Multi-select with Ctrl/Cmd
+        setSelectedComponents((prev) => {
+          const newSet = new Set(prev);
+          if (newSet.has(componentId)) {
+            newSet.delete(componentId);
+          } else {
+            newSet.add(componentId);
+          }
+          return newSet;
+        });
+      } else {
+        // Single select
+        setSelectedComponents(new Set([componentId]));
+      }
+    },
+    []
+  );
 
   const handleCanvasClick = useCallback((event: React.MouseEvent) => {
     // Clear selection when clicking on canvas
@@ -258,25 +283,25 @@ export const StrategyCanvas: React.FC<StrategyCanvasProps> = ({
   // Keyboard shortcuts
   React.useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Delete' || event.key === 'Backspace') {
+      if (event.key === "Delete" || event.key === "Backspace") {
         // Delete selected components
-        selectedComponents.forEach(componentId => {
+        selectedComponents.forEach((componentId) => {
           onComponentDelete(componentId);
         });
         setSelectedComponents(new Set());
-      } else if (event.key === 'Escape') {
+      } else if (event.key === "Escape") {
         // Clear selection and exit connection mode
         setSelectedComponents(new Set());
         setConnectionMode(null);
         setTempConnection(null);
-      } else if (event.key === 'c' && event.ctrlKey) {
+      } else if (event.key === "c" && event.ctrlKey) {
         // Copy selected components (could implement later)
         event.preventDefault();
       }
     };
 
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
   }, [selectedComponents, onComponentDelete]);
 
   return (
@@ -292,7 +317,11 @@ export const StrategyCanvas: React.FC<StrategyCanvasProps> = ({
           linear-gradient(90deg, rgba(0,0,0,0.1) 1px, transparent 1px)
         `,
         backgroundSize: "20px 20px",
-        cursor: draggedComponent ? "grabbing" : connectionMode ? "crosshair" : "default",
+        cursor: draggedComponent
+          ? "grabbing"
+          : connectionMode
+          ? "crosshair"
+          : "default",
         overflow: "hidden",
       }}
       onDragOver={handleDragOver}
@@ -335,27 +364,27 @@ export const StrategyCanvas: React.FC<StrategyCanvasProps> = ({
             {snapToGrid ? <GridOn /> : <GridOff />}
           </IconButton>
         </Tooltip>
-        
+
         <Tooltip title="Zoom In">
           <IconButton
             size="small"
-            onClick={() => setZoom(prev => Math.min(prev + 0.1, 2))}
+            onClick={() => setZoom((prev) => Math.min(prev + 0.1, 2))}
             disabled={zoom >= 2}
           >
             <ZoomIn />
           </IconButton>
         </Tooltip>
-        
+
         <Tooltip title="Zoom Out">
           <IconButton
             size="small"
-            onClick={() => setZoom(prev => Math.max(prev - 0.1, 0.5))}
+            onClick={() => setZoom((prev) => Math.max(prev - 0.1, 0.5))}
             disabled={zoom <= 0.5}
           >
             <ZoomOut />
           </IconButton>
         </Tooltip>
-        
+
         <Tooltip title="Center View">
           <IconButton
             size="small"
@@ -410,7 +439,8 @@ export const StrategyCanvas: React.FC<StrategyCanvasProps> = ({
           }}
         >
           <Typography variant="body2">
-            🔗 Connection Mode: Click on another component to connect, or click empty space to cancel
+            🔗 Connection Mode: Click on another component to connect, or click
+            empty space to cancel
           </Typography>
         </Box>
       )}
@@ -423,7 +453,8 @@ export const StrategyCanvas: React.FC<StrategyCanvasProps> = ({
         const isConnectionSource = connectionMode === component.id;
         const canConnect = connectionMode && connectionMode !== component.id;
         const isHovered = hoveredComponent === component.id;
-        const hasConnections = component.connections && component.connections.length > 0;
+        const hasConnections =
+          component.connections && component.connections.length > 0;
         const isSelected = selectedComponents.has(component.id);
 
         return (
@@ -440,22 +471,22 @@ export const StrategyCanvas: React.FC<StrategyCanvasProps> = ({
               borderLeft: `4px solid ${getComponentColor(component.type)}`,
               border: isSelected
                 ? "2px solid #2196f3"
-                : isConnectionSource 
-                  ? "2px solid #2196f3" 
-                  : canConnect 
-                    ? "2px dashed #4caf50" 
-                    : isHovered 
-                      ? "1px solid #ddd" 
-                      : undefined,
+                : isConnectionSource
+                ? "2px solid #2196f3"
+                : canConnect
+                ? "2px dashed #4caf50"
+                : isHovered
+                ? "1px solid #ddd"
+                : undefined,
               boxShadow: isSelected
                 ? "0 0 12px rgba(33, 150, 243, 0.6)"
-                : isConnectionSource 
-                  ? "0 0 10px rgba(33, 150, 243, 0.5)" 
-                  : canConnect 
-                    ? "0 0 8px rgba(76, 175, 80, 0.4)"
-                    : isBeingDragged 
-                      ? "0 8px 24px rgba(0, 0, 0, 0.15)"
-                      : undefined,
+                : isConnectionSource
+                ? "0 0 10px rgba(33, 150, 243, 0.5)"
+                : canConnect
+                ? "0 0 8px rgba(76, 175, 80, 0.4)"
+                : isBeingDragged
+                ? "0 8px 24px rgba(0, 0, 0, 0.15)"
+                : undefined,
               transform: isBeingDragged ? "scale(1.02)" : "scale(1)",
               transition: "all 0.2s ease-in-out",
               "&:hover": {
@@ -480,7 +511,7 @@ export const StrategyCanvas: React.FC<StrategyCanvasProps> = ({
             onContextMenu={(e) => {
               e.preventDefault();
               e.stopPropagation();
-              
+
               // Show context menu (implement context menu logic here)
             }}
           >
@@ -556,10 +587,12 @@ export const StrategyCanvas: React.FC<StrategyCanvasProps> = ({
                       backgroundColor: canConnect ? "#4caf50" : "#9e9e9e",
                       border: "2px solid white",
                       cursor: canConnect ? "pointer" : "default",
-                      "&:hover": canConnect ? {
-                        backgroundColor: "#66bb6a",
-                        transform: "scale(1.2)",
-                      } : {},
+                      "&:hover": canConnect
+                        ? {
+                            backgroundColor: "#66bb6a",
+                            transform: "scale(1.2)",
+                          }
+                        : {},
                       transition: "all 0.2s",
                     }}
                     onClick={(e) => {
@@ -602,13 +635,33 @@ export const StrategyCanvas: React.FC<StrategyCanvasProps> = ({
 
               {/* Show existing connections */}
               {component.connections && component.connections.length > 0 && (
-                <Box sx={{ mt: 1, pt: 1, borderTop: "1px solid", borderColor: "divider" }}>
-                  <Typography variant="caption" color="text.secondary" display="block">
+                <Box
+                  sx={{
+                    mt: 1,
+                    pt: 1,
+                    borderTop: "1px solid",
+                    borderColor: "divider",
+                  }}
+                >
+                  <Typography
+                    variant="caption"
+                    color="text.secondary"
+                    display="block"
+                  >
                     Connected to: {component.connections.length} component(s)
                   </Typography>
-                  <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5, mt: 0.5 }}>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      flexWrap: "wrap",
+                      gap: 0.5,
+                      mt: 0.5,
+                    }}
+                  >
                     {component.connections.map((targetId) => {
-                      const targetComponent = strategy.components.find((c) => c.id === targetId);
+                      const targetComponent = strategy.components.find(
+                        (c) => c.id === targetId
+                      );
                       return (
                         <Box
                           key={targetId}
@@ -714,7 +767,9 @@ export const StrategyCanvas: React.FC<StrategyCanvasProps> = ({
                   fill="none"
                   markerEnd="url(#arrowhead)"
                   style={{
-                    filter: isHovered ? "drop-shadow(0 0 5px rgba(0,0,0,0.3))" : "none",
+                    filter: isHovered
+                      ? "drop-shadow(0 0 5px rgba(0,0,0,0.3))"
+                      : "none",
                     cursor: "pointer",
                     pointerEvents: "stroke",
                   }}

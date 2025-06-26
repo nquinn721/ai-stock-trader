@@ -1543,7 +1543,10 @@ export class StockWebSocketGateway
       await client.join(`predictions:${data.symbol}`);
 
       // Start streaming predictions if not already started
-      if (!this.predictionStreams.has(data.symbol) && this.predictiveAnalyticsService) {
+      if (
+        !this.predictionStreams.has(data.symbol) &&
+        this.predictiveAnalyticsService
+      ) {
         const stream = this.predictiveAnalyticsService
           .streamPredictions(data.symbol)
           .subscribe({

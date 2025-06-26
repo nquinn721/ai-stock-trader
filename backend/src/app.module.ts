@@ -13,8 +13,11 @@ import { Trade } from './entities/trade.entity';
 import { TradingSignal } from './entities/trading-signal.entity';
 import { AutoTradingModule } from './modules/auto-trading/auto-trading.module';
 import { AutoTrade } from './modules/auto-trading/entities/auto-trade.entity';
+import { BacktestResult } from './modules/auto-trading/entities/backtest-result.entity';
+import { StrategyTemplate } from './modules/auto-trading/entities/strategy-template.entity';
 import { TradingRule } from './modules/auto-trading/entities/trading-rule.entity';
 import { TradingSession } from './modules/auto-trading/entities/trading-session.entity';
+import { TradingStrategy } from './modules/auto-trading/entities/trading-strategy.entity';
 import { BreakoutModule } from './modules/breakout/breakout.module';
 import {
   MarketAlert,
@@ -31,6 +34,14 @@ import {
   MLPrediction,
 } from './modules/ml/entities/ml.entities';
 import { MLModule } from './modules/ml/ml.module';
+import { AlternativeData } from './modules/multi-asset/entities/alternative-data.entity';
+import { ArbitrageOpportunity } from './modules/multi-asset/entities/arbitrage-opportunity.entity';
+import { AssetData } from './modules/multi-asset/entities/asset-data.entity';
+import { CommodityData } from './modules/multi-asset/entities/commodity-data.entity';
+import { CrossAssetCorrelation } from './modules/multi-asset/entities/cross-asset-correlation.entity';
+import { CryptoData } from './modules/multi-asset/entities/crypto-data.entity';
+import { ForexData } from './modules/multi-asset/entities/forex-data.entity';
+import { MultiAssetModule } from './modules/multi-asset/multi-asset.module';
 import { NewsModule } from './modules/news/news.module';
 import {
   NotificationEntity,
@@ -80,9 +91,19 @@ import { SeedService } from './services/seed.service';
           TradingRule,
           AutoTrade,
           TradingSession,
+          TradingStrategy,
+          StrategyTemplate,
+          BacktestResult,
           ScreenerTemplate,
           MarketAlert,
           ScanResult,
+          AssetData,
+          CryptoData,
+          ForexData,
+          CommodityData,
+          AlternativeData,
+          CrossAssetCorrelation,
+          ArbitrageOpportunity,
         ],
         synchronize: true, // Don't use in production
         logging: false, // Disabled to clean up console output
@@ -101,6 +122,7 @@ import { SeedService } from './services/seed.service';
     NotificationModule,
     AutoTradingModule,
     MarketScannerModule,
+    MultiAssetModule,
   ],
   controllers: [AppController],
   providers: [AppService, SeedService],

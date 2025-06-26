@@ -170,24 +170,28 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
-  padding: 16px 24px;
-  border: 3px solid #ff1744;
-  border-radius: 12px;
-  background: linear-gradient(135deg, #ffebee 0%, #fce4ec 100%);
-  color: #b71c1c;
+  gap: 12px;
+  padding: 18px 32px;
+  border: none;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #ff4444 0%, #cc1717 50%, #990000 100%);
+  color: white;
   font-size: 16px;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: 1.2px;
   margin-left: auto;
   position: relative;
-  box-shadow: 0 4px 12px rgba(255, 23, 68, 0.3),
-    0 2px 6px rgba(255, 23, 68, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.3);
-  min-width: 180px;
   overflow: hidden;
+  box-shadow: 
+    0 8px 25px rgba(255, 68, 68, 0.4),
+    0 4px 12px rgba(255, 68, 68, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+  min-width: 200px;
+  backdrop-filter: blur(10px);
 }
 
 .emergency-btn::before {
@@ -200,74 +204,97 @@
   background: linear-gradient(
     90deg,
     transparent,
-    rgba(255, 255, 255, 0.4),
+    rgba(255, 255, 255, 0.3),
     transparent
   );
-  transition: left 0.6s ease;
+  transition: left 0.8s ease-in-out;
+}
+
+.emergency-btn::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 16px;
+  padding: 2px;
+  background: linear-gradient(135deg, #ff6666, #ff0000, #cc0000);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: xor;
+  -webkit-mask-composite: xor;
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
 
 .emergency-btn .icon {
-  font-size: 20px;
-  animation: pulse 2s infinite;
-  filter: drop-shadow(0 0 3px rgba(255, 23, 68, 0.5));
+  font-size: 22px;
+  animation: emergencyPulse 2s infinite ease-in-out;
+  filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.5));
 }
 
-@keyframes pulse {
-  0%,
-  100% {
+@keyframes emergencyPulse {
+  0%, 100% {
     transform: scale(1);
     opacity: 1;
   }
   50% {
-    transform: scale(1.1);
+    transform: scale(1.15);
     opacity: 0.8;
   }
 }
 
-@keyframes shake {
-  0%,
-  100% {
-    transform: translateX(0);
+@keyframes emergencyShake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-3px); }
+  20%, 40%, 60%, 80% { transform: translateX(3px); }
+}
+
+@keyframes emergencyGlow {
+  0%, 100% {
+    box-shadow: 
+      0 8px 25px rgba(255, 68, 68, 0.4),
+      0 4px 12px rgba(255, 68, 68, 0.3),
+      inset 0 1px 0 rgba(255, 255, 255, 0.2);
   }
-  10%,
-  30%,
-  50%,
-  70%,
-  90% {
-    transform: translateX(-2px);
-  }
-  20%,
-  40%,
-  60%,
-  80% {
-    transform: translateX(2px);
+  50% {
+    box-shadow: 
+      0 8px 25px rgba(255, 68, 68, 0.8),
+      0 4px 12px rgba(255, 68, 68, 0.6),
+      0 0 30px rgba(255, 68, 68, 0.4),
+      inset 0 1px 0 rgba(255, 255, 255, 0.3);
   }
 }
 
 .emergency-btn:hover:not(:disabled) {
-  background: linear-gradient(135deg, #ff1744 0%, #d50000 100%);
+  background: linear-gradient(135deg, #ff0000 0%, #bb0000 50%, #880000 100%);
   color: white;
-  transform: scale(1.08) translateY(-2px);
-  border-color: #d50000;
-  box-shadow: 0 8px 24px rgba(255, 23, 68, 0.5),
-    0 4px 12px rgba(255, 23, 68, 0.3), 0 0 0 4px rgba(255, 23, 68, 0.2);
-  animation: shake 0.5s ease-in-out;
+  transform: scale(1.08) translateY(-3px);
+  animation: emergencyShake 0.6s ease-in-out, emergencyGlow 1.5s infinite;
+  box-shadow: 
+    0 12px 35px rgba(255, 0, 0, 0.6),
+    0 6px 18px rgba(255, 0, 0, 0.4),
+    0 0 40px rgba(255, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
 
 .emergency-btn:hover:not(:disabled)::before {
   left: 100%;
 }
 
+.emergency-btn:hover:not(:disabled)::after {
+  opacity: 1;
+}
+
 .emergency-btn:hover:not(:disabled) .icon {
-  animation: pulse 0.5s infinite;
-  color: #ffeb3b;
-  text-shadow: 0 0 8px rgba(255, 235, 59, 0.8);
+  animation: emergencyPulse 0.3s infinite;
+  color: #ffff00;
+  filter: drop-shadow(0 0 10px rgba(255, 255, 0, 0.8));
 }
 
 .emergency-btn:active:not(:disabled) {
-  transform: scale(1.02) translateY(0);
-  box-shadow: 0 4px 12px rgba(255, 23, 68, 0.4),
-    0 2px 6px rgba(255, 23, 68, 0.3);
+  transform: scale(1.02) translateY(-1px);
+  box-shadow: 
+    0 6px 20px rgba(255, 0, 0, 0.5),
+    0 3px 10px rgba(255, 0, 0, 0.3),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .emergency-btn:disabled {
@@ -275,9 +302,8 @@
   cursor: not-allowed;
   transform: none;
   animation: none;
-  background: #f5f5f5;
-  color: #9e9e9e;
-  border-color: #e0e0e0;
+  background: linear-gradient(135deg, #666 0%, #444 100%);
+  color: #999;
   box-shadow: none;
 }
 
@@ -289,14 +315,15 @@
 /* Focus states for accessibility */
 .emergency-btn:focus:not(:disabled) {
   outline: none;
-  box-shadow: 0 4px 12px rgba(255, 23, 68, 0.3),
-    0 2px 6px rgba(255, 23, 68, 0.2), 0 0 0 4px rgba(255, 23, 68, 0.3),
+  box-shadow: 
+    0 8px 25px rgba(255, 68, 68, 0.4),
+    0 4px 12px rgba(255, 68, 68, 0.3),
+    0 0 0 4px rgba(255, 68, 68, 0.5),
     0 0 0 8px rgba(255, 255, 255, 0.8);
-  border-color: #d50000;
 }
 
 .emergency-btn:focus-visible:not(:disabled) {
-  background: linear-gradient(135deg, #ff1744 0%, #d50000 100%);
+  background: linear-gradient(135deg, #ff0000 0%, #bb0000 50%, #880000 100%);
   color: white;
   transform: scale(1.05);
 }
@@ -304,15 +331,14 @@
 /* High contrast mode support */
 @media (prefers-contrast: high) {
   .emergency-btn {
-    border-width: 4px;
-    border-color: #000;
+    border: 3px solid #000;
     background: #ff0000;
     color: #fff;
   }
 
   .emergency-btn:hover:not(:disabled) {
     background: #cc0000;
-    border-color: #000;
+    border-color: #fff;
   }
 }
 
@@ -322,11 +348,24 @@
   .emergency-btn:hover:not(:disabled),
   .emergency-btn .icon {
     animation: none;
-    transition: none;
+    transition: color 0.2s ease, background-color 0.2s ease;
   }
 
   .emergency-btn:hover:not(:disabled) {
     transform: none;
+  }
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .emergency-btn {
+    padding: 14px 24px;
+    font-size: 14px;
+    min-width: 160px;
+  }
+  
+  .emergency-btn .icon {
+    font-size: 18px;
   }
 }
 
