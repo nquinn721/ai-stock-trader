@@ -73,6 +73,15 @@ export interface RiskMetrics {
     upper: number;
     lower: number;
   };
+  maxDrawdown: number;
+  sharpeRatio: number;
+  varPercentile: {
+    p95: number;
+    p99: number;
+  };
+  correlationRisk: number;
+  liquidityRisk: number;
+  concentration: number;
   drawdownProbability: number;
   supportResistance: {
     support: number;
@@ -92,7 +101,11 @@ export interface PredictionUpdate {
 }
 
 export interface PredictionChange {
-  type: 'direction_change' | 'regime_change' | 'sentiment_change' | 'risk_change';
+  type:
+    | 'direction_change'
+    | 'regime_change'
+    | 'sentiment_change'
+    | 'risk_change';
   timeframe?: string;
   from: any;
   to: any;
@@ -103,7 +116,11 @@ export interface PredictionChange {
 
 // Chart overlay interfaces
 export interface PredictionOverlay {
-  type: 'prediction_line' | 'confidence_band' | 'sentiment_overlay' | 'regime_indicator';
+  type:
+    | 'prediction_line'
+    | 'confidence_band'
+    | 'sentiment_overlay'
+    | 'regime_indicator';
   timeframe: string;
   data: any[];
   color: string;
@@ -137,7 +154,11 @@ export interface PredictionSubscription {
 export interface PredictionAlert {
   id: string;
   symbol: string;
-  type: 'direction_change' | 'regime_shift' | 'sentiment_spike' | 'risk_threshold';
+  type:
+    | 'direction_change'
+    | 'regime_shift'
+    | 'sentiment_spike'
+    | 'risk_threshold';
   message: string;
   severity: 'info' | 'warning' | 'critical';
   timestamp: Date;

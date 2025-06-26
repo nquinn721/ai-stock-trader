@@ -16,8 +16,10 @@ import {
   RiskParameters,
   SentimentScore,
 } from './interfaces/ml.interfaces';
+import { PredictionData } from './interfaces/predictive-analytics.interfaces';
 import { IntelligentRecommendationService } from './services/intelligent-recommendation.service';
 import { MLService } from './services/ml.service';
+import { PredictiveAnalyticsService } from './services/predictive-analytics.service';
 
 @Controller('ml')
 export class MLController {
@@ -26,6 +28,7 @@ export class MLController {
   constructor(
     private readonly mlService: MLService,
     private readonly intelligentRecommendationService: IntelligentRecommendationService,
+    private readonly predictiveAnalyticsService: PredictiveAnalyticsService,
   ) {}
 
   /**
@@ -429,6 +432,165 @@ export class MLController {
       );
       throw new HttpException(
         'Failed to generate enhanced AI trading recommendation',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  // ========================================
+  // S39: Predictive Analytics Endpoints
+  // ========================================
+
+  /**
+   * Get comprehensive real-time predictions for a symbol
+   * S39: Real-Time Predictive Analytics Dashboard
+   */
+  @Get('predictions/:symbol')
+  async getRealTimePredictions(
+    @Param('symbol') symbol: string,
+  ): Promise<PredictionData> {
+    try {
+      this.logger.log(`S39: Getting real-time predictions for ${symbol}`);
+      return await this.predictiveAnalyticsService.getRealTimePredictions(
+        symbol.toUpperCase(),
+      );
+    } catch (error) {
+      this.logger.error(
+        `S39: Error getting real-time predictions for ${symbol}:`,
+        error,
+      );
+      throw new HttpException(
+        'Failed to get real-time predictions',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  /**
+   * Get multi-timeframe predictions for a symbol
+   * S39: Multi-timeframe prediction analysis
+   */
+  @Get('predictions/:symbol/timeframes')
+  async getMultiTimeframePredictions(
+    @Param('symbol') symbol: string,
+    @Query('timeframes') timeframes?: string,
+  ): Promise<any> {
+    try {
+      this.logger.log(`S39: Getting multi-timeframe predictions for ${symbol}`);
+      return await this.predictiveAnalyticsService.getMultiTimeframePredictions(
+        symbol.toUpperCase(),
+      );
+    } catch (error) {
+      this.logger.error(
+        `S39: Error getting multi-timeframe predictions for ${symbol}:`,
+        error,
+      );
+      throw new HttpException(
+        'Failed to get multi-timeframe predictions',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  /**
+   * Get current sentiment analysis for a symbol
+   * S39: Live sentiment integration
+   */
+  @Get('predictions/:symbol/sentiment')
+  async getLiveSentiment(@Param('symbol') symbol: string): Promise<any> {
+    try {
+      this.logger.log(`S39: Getting live sentiment for ${symbol}`);
+      return await this.predictiveAnalyticsService.getLiveSentiment(
+        symbol.toUpperCase(),
+      );
+    } catch (error) {
+      this.logger.error(
+        `S39: Error getting live sentiment for ${symbol}:`,
+        error,
+      );
+      throw new HttpException(
+        'Failed to get live sentiment',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  /**
+   * Get current market regime for a symbol
+   * S39: Market regime detection
+   */
+  @Get('predictions/:symbol/regime')
+  async getCurrentRegime(@Param('symbol') symbol: string): Promise<any> {
+    try {
+      this.logger.log(`S39: Getting current market regime for ${symbol}`);
+      return await this.predictiveAnalyticsService.getCurrentRegime(
+        symbol.toUpperCase(),
+      );
+    } catch (error) {
+      this.logger.error(
+        `S39: Error getting current market regime for ${symbol}:`,
+        error,
+      );
+      throw new HttpException(
+        'Failed to get current market regime',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  /**
+   * Get risk metrics and analytics for a symbol
+   * S39: Risk analytics integration
+   */
+  @Get('predictions/:symbol/risk')
+  async getRiskMetrics(@Param('symbol') symbol: string): Promise<any> {
+    try {
+      this.logger.log(`S39: Getting risk metrics for ${symbol}`);
+      return await this.predictiveAnalyticsService.calculateRiskMetrics(
+        symbol.toUpperCase(),
+      );
+    } catch (error) {
+      this.logger.error(
+        `S39: Error getting risk metrics for ${symbol}:`,
+        error,
+      );
+      throw new HttpException(
+        'Failed to get risk metrics',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  /**
+   * Get prediction confidence intervals
+   * S39: Confidence band analysis
+   */
+  @Get('predictions/:symbol/confidence')
+  async getConfidenceIntervals(
+    @Param('symbol') symbol: string,
+    @Query('timeframe') timeframe?: string,
+  ): Promise<any> {
+    try {
+      this.logger.log(`S39: Getting confidence intervals for ${symbol}`);
+      const prediction =
+        await this.predictiveAnalyticsService.getRealTimePredictions(
+          symbol.toUpperCase(),
+        );
+
+      return {
+        symbol,
+        timeframe: timeframe || '1D',
+        confidence: prediction.confidence,
+        confidenceBands: prediction.riskMetrics.confidenceBands,
+        timestamp: new Date(),
+      };
+    } catch (error) {
+      this.logger.error(
+        `S39: Error getting confidence intervals for ${symbol}:`,
+        error,
+      );
+      throw new HttpException(
+        'Failed to get confidence intervals',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }

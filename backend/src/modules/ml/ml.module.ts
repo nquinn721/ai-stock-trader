@@ -1,6 +1,12 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { NewsModule } from '../news/news.module';
+import { AIController } from './controllers/ai.controller';
+import {
+  AIExplanation,
+  ChatMessage,
+  ConversationContext,
+} from './entities/ai.entities';
 import {
   MLABTest,
   MLFeatureImportance,
@@ -9,9 +15,7 @@ import {
   MLModelPerformance,
   MLPrediction,
 } from './entities/ml.entities';
-import { ChatMessage, ConversationContext, AIExplanation } from './entities/ai.entities';
 import { MLController } from './ml.controller';
-import { AIController } from './controllers/ai.controller';
 import { ABTestingService } from './services/ab-testing.service';
 import { BreakoutDetectionService } from './services/breakout-detection.service';
 import { DataIngestionService } from './services/data-ingestion.service';
@@ -23,9 +27,11 @@ import { DataVersioningService } from './services/data-versioning.service';
 import { DynamicRiskManagementService } from './services/dynamic-risk-management.service';
 import { EnsembleSystemsService } from './services/ensemble-systems.service';
 import { ExperimentTrackingService } from './services/experiment-tracking.service';
+import { ExplainableAIService } from './services/explainable-ai.service';
 import { FeatureEngineeringService } from './services/feature-engineering.service';
 import { FeaturePipelineService } from './services/feature-pipeline.service';
 import { IntelligentRecommendationService } from './services/intelligent-recommendation.service';
+import { LLMService } from './services/llm.service';
 import { MarketPredictionService } from './services/market-prediction.service';
 import { MLInferenceService } from './services/ml-inference.service';
 import { MLService } from './services/ml.service';
@@ -33,12 +39,11 @@ import { ModelMonitoringService } from './services/model-monitoring.service';
 import { ModelTrainingService } from './services/model-training.service';
 import { PatternRecognitionService } from './services/pattern-recognition.service';
 import { PortfolioOptimizationService } from './services/portfolio-optimization.service';
+import { PredictiveAnalyticsService } from './services/predictive-analytics.service';
 import { RealTimeModelUpdateService } from './services/real-time-model-update.service';
 import { SentimentAnalysisService } from './services/sentiment-analysis.service';
 import { SentimentMonitoringService } from './services/sentiment-monitoring.service';
 import { SignalGenerationService } from './services/signal-generation.service';
-import { LLMService } from './services/llm.service';
-import { ExplainableAIService } from './services/explainable-ai.service';
 import { TradingAssistantService } from './services/trading-assistant.service';
 
 @Module({
@@ -93,6 +98,8 @@ import { TradingAssistantService } from './services/trading-assistant.service';
     LLMService,
     ExplainableAIService,
     TradingAssistantService,
+    // S39 Real-Time Predictive Analytics Dashboard
+    PredictiveAnalyticsService,
   ],
   exports: [
     MLService,
@@ -128,6 +135,8 @@ import { TradingAssistantService } from './services/trading-assistant.service';
     LLMService,
     ExplainableAIService,
     TradingAssistantService,
+    // S39 Real-Time Predictive Analytics Dashboard
+    PredictiveAnalyticsService,
   ],
 })
 export class MLModule {}

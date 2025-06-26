@@ -9,6 +9,11 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
+import {
+  PredictionSubscription,
+  PredictionUpdate,
+} from '../ml/interfaces/predictive-analytics.interfaces';
+import { PredictiveAnalyticsService } from '../ml/services/predictive-analytics.service';
 import { OrderManagementService } from '../order-management/order-management.service';
 import { PaperTradingService } from '../paper-trading/paper-trading.service';
 import { PortfolioAnalyticsService } from '../paper-trading/portfolio-analytics.service';
@@ -44,6 +49,11 @@ export class StockWebSocketGateway
   private clients: Map<string, Socket> = new Map();
   private portfolioSubscriptions: Map<string, Set<number>> = new Map(); // clientId -> portfolioIds
   private notificationSubscriptions: Map<string, string> = new Map(); // clientId -> userId
+
+  // S39: Predictive Analytics subscriptions
+  private predictionSubscriptions: Map<string, PredictionSubscription> =
+    new Map(); // clientId -> subscription
+  private predictionStreams: Map<string, any> = new Map(); // symbol -> RxJS subscription
 
   // Message batching optimization
   private messageBatch: Map<string, any[]> = new Map();
@@ -89,6 +99,8 @@ export class StockWebSocketGateway
     @Inject(forwardRef(() => OrderManagementService))
     private orderManagementService: OrderManagementService,
     private healthService: WebSocketHealthService,
+    @Inject(forwardRef(() => PredictiveAnalyticsService))
+    private predictiveAnalyticsService: PredictiveAnalyticsService,
   ) {
     // Set the WebSocket gateway reference in the order management service
     // to enable WebSocket event emission from the service
@@ -167,6 +179,9 @@ export class StockWebSocketGateway
     this.connectionPool.delete(client.id);
     this.connectionQuality.delete(client.id);
 
+    // S39: Clean up prediction subscriptions
+    this.cleanupPredictionSubscriptions(client.id);
+
     // Remove from health service
     this.healthService.removeConnection(client.id);
 
@@ -187,6 +202,9 @@ export class StockWebSocketGateway
       this.cleanupConnectionManagement();
       this.cleanupOptimizations();
     }
+
+    // Cleanup prediction subscriptions
+    this.cleanupPredictionSubscriptions(client.id);
   }
 
   @SubscribeMessage('subscribe_stocks')
@@ -1498,5 +1516,210 @@ export class StockWebSocketGateway
   private clientSupportsCompression(clientId: string): boolean {
     const client = this.clients.get(clientId);
     return client ? client.conn.transport.name === 'websocket' : false;
+  }
+
+  // ========================================
+  // S39: Predictive Analytics WebSocket Methods
+  // ========================================
+
+  /**
+   * Subscribe to real-time predictive analytics for symbols
+   */
+  @SubscribeMessage('subscribe-predictions')
+  async handlePredictionSubscription(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() data: PredictionSubscription,
+  ) {
+    console.log(
+      `🔮 Client ${client.id} subscribing to predictions for ${data.symbol}`,
+    );
+
+    try {
+      // Store client subscription
+      this.predictionSubscriptions.set(client.id, data);
+
+      // Join symbol-specific room
+      await client.join(`predictions:${data.symbol}`);
+
+      // Start streaming predictions if not already started
+      if (!this.predictionStreams.has(data.symbol)) {
+        const stream = this.predictiveAnalyticsService
+          .streamPredictions(data.symbol)
+          .subscribe({
+            next: (update: PredictionUpdate) => {
+              this.emitPredictionUpdate(data.symbol, update);
+            },
+            error: (error) => {
+              console.error(
+                `Error in prediction stream for ${data.symbol}:`,
+                error,
+              );
+              this.server
+                .to(`predictions:${data.symbol}`)
+                .emit('prediction-error', {
+                  symbol: data.symbol,
+                  error: 'Prediction stream error',
+                  timestamp: new Date(),
+                });
+            },
+          });
+
+        this.predictionStreams.set(data.symbol, stream);
+      }
+
+      // Send initial prediction data
+      const initialPrediction =
+        await this.predictiveAnalyticsService.getRealTimePredictions(
+          data.symbol,
+        );
+
+      client.emit('prediction-update', {
+        type: 'prediction-update',
+        symbol: data.symbol,
+        timestamp: new Date(),
+        data: initialPrediction,
+        changeDetected: [],
+      } as PredictionUpdate);
+
+      client.emit('subscription-confirmed', {
+        type: 'predictions',
+        symbol: data.symbol,
+        status: 'active',
+      });
+    } catch (error) {
+      console.error(
+        `Error subscribing to predictions for ${data.symbol}:`,
+        error,
+      );
+      client.emit('subscription-error', {
+        type: 'predictions',
+        symbol: data.symbol,
+        error: 'Failed to subscribe to predictions',
+      });
+    }
+  }
+
+  /**
+   * Unsubscribe from predictive analytics
+   */
+  @SubscribeMessage('unsubscribe-predictions')
+  async handlePredictionUnsubscription(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() data: { symbol: string },
+  ) {
+    console.log(
+      `🔮 Client ${client.id} unsubscribing from predictions for ${data.symbol}`,
+    );
+
+    try {
+      // Remove client subscription
+      this.predictionSubscriptions.delete(client.id);
+
+      // Leave symbol-specific room
+      await client.leave(`predictions:${data.symbol}`);
+
+      // Check if any clients are still subscribed to this symbol
+      const roomSize =
+        this.server.sockets.adapter.rooms.get(`predictions:${data.symbol}`)
+          ?.size || 0;
+
+      // If no clients are subscribed, stop the stream
+      if (roomSize === 0 && this.predictionStreams.has(data.symbol)) {
+        const stream = this.predictionStreams.get(data.symbol);
+        if (stream && stream.unsubscribe) {
+          stream.unsubscribe();
+        }
+        this.predictionStreams.delete(data.symbol);
+        console.log(
+          `🔮 Stopped prediction stream for ${data.symbol} - no active subscribers`,
+        );
+      }
+
+      client.emit('unsubscription-confirmed', {
+        type: 'predictions',
+        symbol: data.symbol,
+        status: 'inactive',
+      });
+    } catch (error) {
+      console.error(
+        `Error unsubscribing from predictions for ${data.symbol}:`,
+        error,
+      );
+      client.emit('unsubscription-error', {
+        type: 'predictions',
+        symbol: data.symbol,
+        error: 'Failed to unsubscribe from predictions',
+      });
+    }
+  }
+
+  /**
+   * Get current prediction data for a symbol
+   */
+  @SubscribeMessage('get-prediction')
+  async handleGetPrediction(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() data: { symbol: string },
+  ) {
+    try {
+      const prediction =
+        await this.predictiveAnalyticsService.getRealTimePredictions(
+          data.symbol,
+        );
+
+      client.emit('prediction-data', {
+        symbol: data.symbol,
+        data: prediction,
+        timestamp: new Date(),
+      });
+    } catch (error) {
+      console.error(`Error getting prediction for ${data.symbol}:`, error);
+      client.emit('prediction-error', {
+        symbol: data.symbol,
+        error: 'Failed to get prediction data',
+        timestamp: new Date(),
+      });
+    }
+  }
+
+  /**
+   * Emit prediction update to all subscribed clients
+   */
+  private emitPredictionUpdate(symbol: string, update: PredictionUpdate) {
+    try {
+      this.server.to(`predictions:${symbol}`).emit('prediction-update', update);
+      console.log(
+        `🔮 Emitted prediction update for ${symbol} to subscribed clients`,
+      );
+    } catch (error) {
+      console.error(`Error emitting prediction update for ${symbol}:`, error);
+    }
+  }
+
+  /**
+   * Clean up prediction subscriptions when client disconnects
+   */
+  private cleanupPredictionSubscriptions(clientId: string) {
+    const subscription = this.predictionSubscriptions.get(clientId);
+    if (subscription) {
+      this.predictionSubscriptions.delete(clientId);
+
+      // Check if we need to stop any streams
+      const symbol = subscription.symbol;
+      const roomSize =
+        this.server.sockets.adapter.rooms.get(`predictions:${symbol}`)?.size ||
+        0;
+
+      if (roomSize === 0 && this.predictionStreams.has(symbol)) {
+        const stream = this.predictionStreams.get(symbol);
+        if (stream && stream.unsubscribe) {
+          stream.unsubscribe();
+        }
+        this.predictionStreams.delete(symbol);
+        console.log(
+          `🔮 Cleaned up prediction stream for ${symbol} after client disconnect`,
+        );
+      }
+    }
   }
 }
