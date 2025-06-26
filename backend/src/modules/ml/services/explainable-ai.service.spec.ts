@@ -1,10 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { ExplainableAIService } from './explainable-ai.service';
-import { LLMService } from './llm.service';
 import { AIExplanation } from '../entities/ai.entities';
+import { ExplainableAIService } from './explainable-ai.service';
 import { TradingRecommendation } from './intelligent-recommendation.service';
+import { LLMService } from './llm.service';
 
 describe('ExplainableAIService', () => {
   let service: ExplainableAIService;
@@ -169,7 +169,7 @@ describe('ExplainableAIService', () => {
       mockRepository.findOne.mockResolvedValue(null);
       mockRepository.create.mockReturnValue({});
       mockRepository.save.mockResolvedValue({});
-      
+
       const llmExplanation = 'AI-generated explanation for AAPL buy signal';
       mockLLMService.generateExplanation.mockResolvedValue(llmExplanation);
 
@@ -223,14 +223,19 @@ describe('ExplainableAIService', () => {
       const result = await service.answerTradingQuestion(question, userContext);
 
       expect(result).toBe(expectedAnswer);
-      expect(mockLLMService.processQuery).toHaveBeenCalledWith(question, userContext);
+      expect(mockLLMService.processQuery).toHaveBeenCalledWith(
+        question,
+        userContext,
+      );
     });
 
     it('should return error message on service failure', async () => {
       const question = 'How do I analyze stocks?';
       const userContext = { userId: 'test-user' };
 
-      mockLLMService.processQuery.mockRejectedValue(new Error('LLM service error'));
+      mockLLMService.processQuery.mockRejectedValue(
+        new Error('LLM service error'),
+      );
 
       const result = await service.answerTradingQuestion(question, userContext);
 
@@ -313,7 +318,7 @@ describe('ExplainableAIService', () => {
       mockRepository.findOne.mockResolvedValue(null);
       mockRepository.create.mockReturnValue({});
       mockRepository.save.mockRejectedValue(new Error('Save failed'));
-      
+
       const llmExplanation = 'Generated explanation';
       mockLLMService.generateExplanation.mockResolvedValue(llmExplanation);
 
@@ -333,10 +338,19 @@ describe('ExplainableAIService', () => {
         timestamp: new Date(),
         reasoning: [],
         metrics: {
-          marketPrediction: { direction: 'HOLD', confidence: 0.5, timeHorizon: '1D' },
+          marketPrediction: {
+            direction: 'HOLD',
+            confidence: 0.5,
+            timeHorizon: '1D',
+          },
           technicalSignals: { strength: 0, signals: [] },
           sentimentAnalysis: { score: 0, sources: [], confidence: 0 },
-          riskAssessment: { level: 'LOW', factors: [], maxDrawdown: 0, volatility: 0 },
+          riskAssessment: {
+            level: 'LOW',
+            factors: [],
+            maxDrawdown: 0,
+            volatility: 0,
+          },
           patternRecognition: { patterns: [] },
           ensembleScore: 0.5,
           finalConfidence: 0.5,
@@ -345,7 +359,9 @@ describe('ExplainableAIService', () => {
 
       mockRepository.findOne.mockResolvedValue(null);
 
-      const result = await service.explainRecommendation(incompleteRecommendation as TradingRecommendation);
+      const result = await service.explainRecommendation(
+        incompleteRecommendation as TradingRecommendation,
+      );
 
       expect(result).toBeTruthy();
       expect(result).toContain('HOLD Recommendation for TEST');

@@ -1,31 +1,33 @@
 import {
-  Controller,
-  Get,
-  Post,
-  Put,
-  Delete,
   Body,
-  Param,
-  Query,
+  Controller,
+  Delete,
+  Get,
   HttpException,
   HttpStatus,
   Logger,
+  Param,
+  Post,
+  Put,
+  Query,
 } from '@nestjs/common';
-import { MarketScannerService, BacktestResult } from './services/market-scanner.service';
 import {
-  ScanCriteriaDto,
-  CreateScreenerTemplateDto,
-  UpdateScreenerTemplateDto,
-  CreateMarketAlertDto,
-  UpdateMarketAlertDto,
-  ScanRequestDto,
   BacktestRequestDto,
+  CreateMarketAlertDto,
+  CreateScreenerTemplateDto,
+  ScanRequestDto,
+  UpdateMarketAlertDto,
+  UpdateScreenerTemplateDto,
 } from './dto/scanner.dto';
 import {
-  ScreenerTemplate,
   MarketAlert,
   ScanMatch,
+  ScreenerTemplate,
 } from './entities/scanner.entity';
+import {
+  BacktestResult,
+  MarketScannerService,
+} from './services/market-scanner.service';
 
 @Controller('market-scanner')
 export class MarketScannerController {
@@ -45,7 +47,7 @@ export class MarketScannerController {
   }> {
     try {
       this.logger.log('Market scan request received');
-      
+
       // Convert DTO to entity format for service layer
       const scanCriteria = scanRequest.toEntity();
       const matches = await this.marketScannerService.scanMarket(scanCriteria);
@@ -89,7 +91,7 @@ export class MarketScannerController {
   }> {
     try {
       const templates = await this.marketScannerService.getTemplates();
-      const template = templates.find(t => t.id === templateId);
+      const template = templates.find((t) => t.id === templateId);
 
       if (!template) {
         throw new HttpException(
@@ -98,7 +100,9 @@ export class MarketScannerController {
         );
       }
 
-      const matches = await this.marketScannerService.scanMarket(template.criteria);
+      const matches = await this.marketScannerService.scanMarket(
+        template.criteria,
+      );
 
       // Update usage count
       template.usageCount += 1;
@@ -131,8 +135,10 @@ export class MarketScannerController {
     data: ScreenerTemplate[];
   }> {
     try {
-      const publicFilter = isPublic === 'true' ? true : isPublic === 'false' ? false : undefined;
-      const templates = await this.marketScannerService.getTemplates(publicFilter);
+      const publicFilter =
+        isPublic === 'true' ? true : isPublic === 'false' ? false : undefined;
+      const templates =
+        await this.marketScannerService.getTemplates(publicFilter);
 
       return {
         success: true,
@@ -181,13 +187,16 @@ export class MarketScannerController {
    * Create new screener template
    */
   @Post('templates')
-  async createTemplate(@Body() templateDto: CreateScreenerTemplateDto): Promise<{
+  async createTemplate(
+    @Body() templateDto: CreateScreenerTemplateDto,
+  ): Promise<{
     success: boolean;
     data: ScreenerTemplate;
     message: string;
   }> {
     try {
-      const template = await this.marketScannerService.createTemplate(templateDto);
+      const template =
+        await this.marketScannerService.createTemplate(templateDto);
 
       return {
         success: true,
@@ -219,7 +228,10 @@ export class MarketScannerController {
     message: string;
   }> {
     try {
-      const updatedTemplate = await this.marketScannerService.updateTemplate(id, updateDto);
+      const updatedTemplate = await this.marketScannerService.updateTemplate(
+        id,
+        updateDto,
+      );
 
       if (!updatedTemplate) {
         throw new HttpException(
@@ -348,7 +360,10 @@ export class MarketScannerController {
     message: string;
   }> {
     try {
-      const updatedAlert = await this.marketScannerService.updateAlert(id, updateDto);
+      const updatedAlert = await this.marketScannerService.updateAlert(
+        id,
+        updateDto,
+      );
 
       if (!updatedAlert) {
         throw new HttpException(
@@ -456,18 +471,28 @@ export class MarketScannerController {
       const matches = await this.marketScannerService.scanMarket(scanCriteria);
 
       // Generate CSV content
-      const headers = ['Symbol', 'Name', 'Price', 'Volume', 'Market Cap', 'Match Strength', 'Criteria Met'];
+      const headers = [
+        'Symbol',
+        'Name',
+        'Price',
+        'Volume',
+        'Market Cap',
+        'Match Strength',
+        'Criteria Met',
+      ];
       const csvContent = [
         headers.join(','),
-        ...matches.map(match => [
-          match.symbol,
-          `"${match.name}"`,
-          match.price,
-          match.volume,
-          match.marketCap || '',
-          match.matchStrength,
-          `"${match.criteriaMet.join('; ')}"`,
-        ].join(',')),
+        ...matches.map((match) =>
+          [
+            match.symbol,
+            `"${match.name}"`,
+            match.price,
+            match.volume,
+            match.marketCap || '',
+            match.matchStrength,
+            `"${match.criteriaMet.join('; ')}"`,
+          ].join(','),
+        ),
       ].join('\n');
 
       return {
@@ -502,7 +527,7 @@ export class MarketScannerController {
   }> {
     try {
       const templates = await this.marketScannerService.getTemplates();
-      
+
       return {
         success: true,
         data: {

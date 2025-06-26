@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { LLMService } from './llm.service';
 import { ExplanationContext } from '../interfaces/ai.interfaces';
+import { LLMService } from './llm.service';
 
 describe('LLMService', () => {
   let service: LLMService;
@@ -63,7 +63,8 @@ describe('LLMService', () => {
         riskFactors: ['High volatility', 'Sector decline'],
       };
 
-      const explanation = await service.generateExplanation(lowConfidenceContext);
+      const explanation =
+        await service.generateExplanation(lowConfidenceContext);
 
       expect(explanation).toContain('SELL');
       expect(explanation).toContain('Low Confidence');
@@ -100,7 +101,10 @@ describe('LLMService', () => {
         riskProfile: 'moderate' as const,
       };
 
-      const response = await service.processQuery('What stocks should I buy?', userContext);
+      const response = await service.processQuery(
+        'What stocks should I buy?',
+        userContext,
+      );
 
       expect(response.response).toBeTruthy();
       expect(response.confidence).toBeLessThan(0.5);
@@ -129,7 +133,10 @@ describe('LLMService', () => {
         },
       };
 
-      const response = await service.processQuery('How is my portfolio doing?', userContext);
+      const response = await service.processQuery(
+        'How is my portfolio doing?',
+        userContext,
+      );
 
       expect(response.response).toContain('portfolio');
       expect(response.context?.question).toBe('How is my portfolio doing?');
@@ -171,7 +178,9 @@ describe('LLMService', () => {
 
       expect(explanation).toBeTruthy();
       expect(explanation).toContain('BUY');
-      expect(explanation).toContain('AI explanation service is currently limited');
+      expect(explanation).toContain(
+        'AI explanation service is currently limited',
+      );
     });
   });
 });

@@ -1,11 +1,11 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { TradingAssistantService } from './trading-assistant.service';
-import { ExplainableAIService } from './explainable-ai.service';
-import { LLMService } from './llm.service';
 import { ChatMessage, ConversationContext } from '../entities/ai.entities';
 import { AssistantResponse } from '../interfaces/ai.interfaces';
+import { ExplainableAIService } from './explainable-ai.service';
+import { LLMService } from './llm.service';
+import { TradingAssistantService } from './trading-assistant.service';
 
 describe('TradingAssistantService', () => {
   let service: TradingAssistantService;
@@ -62,7 +62,8 @@ describe('TradingAssistantService', () => {
     }).compile();
 
     service = module.get<TradingAssistantService>(TradingAssistantService);
-    explainableAIService = module.get<ExplainableAIService>(ExplainableAIService);
+    explainableAIService =
+      module.get<ExplainableAIService>(ExplainableAIService);
     llmService = module.get<LLMService>(LLMService);
     chatMessageRepository = module.get<Repository<ChatMessage>>(
       getRepositoryToken(ChatMessage),
@@ -84,7 +85,7 @@ describe('TradingAssistantService', () => {
     it('should create new conversation if none exists', async () => {
       const userId = 'test-user';
       const message = 'What stocks should I buy?';
-      
+
       const newConversation = {
         conversationId: 'new-conversation-id',
         userId,
@@ -148,7 +149,9 @@ describe('TradingAssistantService', () => {
         },
       ];
 
-      mockConversationRepository.findOne.mockResolvedValue(existingConversation);
+      mockConversationRepository.findOne.mockResolvedValue(
+        existingConversation,
+      );
       mockConversationRepository.update.mockResolvedValue({});
       mockChatMessageRepository.create.mockReturnValue({});
       mockChatMessageRepository.save.mockResolvedValue({});
@@ -164,7 +167,11 @@ describe('TradingAssistantService', () => {
 
       mockLLMService.processQuery.mockResolvedValue(mockResponse);
 
-      const result = await service.processConversation(message, userId, conversationId);
+      const result = await service.processConversation(
+        message,
+        userId,
+        conversationId,
+      );
 
       expect(result).toEqual(mockResponse);
       expect(mockLLMService.processQuery).toHaveBeenCalledWith(
@@ -224,7 +231,9 @@ describe('TradingAssistantService', () => {
       const userId = 'test-user';
       const message = 'What should I do?';
 
-      mockConversationRepository.findOne.mockRejectedValue(new Error('Database error'));
+      mockConversationRepository.findOne.mockRejectedValue(
+        new Error('Database error'),
+      );
 
       const result = await service.processConversation(message, userId);
 
@@ -269,7 +278,11 @@ describe('TradingAssistantService', () => {
 
       mockChatMessageRepository.find.mockResolvedValue(mockHistory);
 
-      const result = await service.getConversationHistory(userId, conversationId, limit);
+      const result = await service.getConversationHistory(
+        userId,
+        conversationId,
+        limit,
+      );
 
       expect(result).toEqual(mockHistory);
       expect(mockChatMessageRepository.find).toHaveBeenCalledWith({
@@ -362,7 +375,9 @@ describe('TradingAssistantService', () => {
       const userId = 'test-user';
 
       mockConversationRepository.findOne.mockResolvedValue(null);
-      mockConversationRepository.create.mockReturnValue({ conversationId: 'new-id' });
+      mockConversationRepository.create.mockReturnValue({
+        conversationId: 'new-id',
+      });
       mockConversationRepository.save.mockResolvedValue({});
       mockConversationRepository.update.mockResolvedValue({});
       mockChatMessageRepository.create.mockReturnValue({});
@@ -395,7 +410,9 @@ describe('TradingAssistantService', () => {
       const userId = 'test-user';
 
       mockConversationRepository.findOne.mockResolvedValue(null);
-      mockConversationRepository.create.mockReturnValue({ conversationId: 'new-id' });
+      mockConversationRepository.create.mockReturnValue({
+        conversationId: 'new-id',
+      });
       mockConversationRepository.save.mockResolvedValue({});
       mockConversationRepository.update.mockResolvedValue({});
       mockChatMessageRepository.create.mockReturnValue({});

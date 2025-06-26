@@ -1,5 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { TechnicalIndicators, FundamentalMetrics } from '../entities/scanner.entity';
+import {
+  FundamentalMetrics,
+  TechnicalIndicators,
+} from '../entities/scanner.entity';
 
 export interface PriceData {
   date: Date;
@@ -24,15 +27,20 @@ export class TechnicalIndicatorService {
   /**
    * Calculate all technical indicators for a stock
    */
-  async calculateIndicators(symbol: string, priceData: PriceData[]): Promise<TechnicalIndicators> {
+  async calculateIndicators(
+    symbol: string,
+    priceData: PriceData[],
+  ): Promise<TechnicalIndicators> {
     try {
       if (!priceData || priceData.length < 20) {
-        this.logger.warn(`Insufficient data for ${symbol}: ${priceData?.length || 0} points`);
+        this.logger.warn(
+          `Insufficient data for ${symbol}: ${priceData?.length || 0} points`,
+        );
         return {};
       }
 
-      const closePrices = priceData.map(d => d.close);
-      const volumes = priceData.map(d => d.volume);
+      const closePrices = priceData.map((d) => d.close);
+      const volumes = priceData.map((d) => d.volume);
 
       return {
         rsi: this.calculateRSI(closePrices),
@@ -51,7 +59,10 @@ export class TechnicalIndicatorService {
   /**
    * Calculate RSI (Relative Strength Index)
    */
-  private calculateRSI(prices: number[], period: number = 14): number | undefined {
+  private calculateRSI(
+    prices: number[],
+    period: number = 14,
+  ): number | undefined {
     if (prices.length < period + 1) return undefined;
 
     const gains: number[] = [];
@@ -65,13 +76,15 @@ export class TechnicalIndicatorService {
     }
 
     // Calculate average gains and losses
-    const avgGain = gains.slice(-period).reduce((sum, gain) => sum + gain, 0) / period;
-    const avgLoss = losses.slice(-period).reduce((sum, loss) => sum + loss, 0) / period;
+    const avgGain =
+      gains.slice(-period).reduce((sum, gain) => sum + gain, 0) / period;
+    const avgLoss =
+      losses.slice(-period).reduce((sum, loss) => sum + loss, 0) / period;
 
     if (avgLoss === 0) return 100;
 
     const rs = avgGain / avgLoss;
-    const rsi = 100 - (100 / (1 + rs));
+    const rsi = 100 - 100 / (1 + rs);
 
     return Math.round(rsi * 100) / 100;
   }
@@ -79,16 +92,18 @@ export class TechnicalIndicatorService {
   /**
    * Calculate MACD (Moving Average Convergence Divergence)
    */
-  private calculateMACD(prices: number[]): { macd: number; signal: number; histogram: number } | undefined {
+  private calculateMACD(
+    prices: number[],
+  ): { macd: number; signal: number; histogram: number } | undefined {
     if (prices.length < 34) return undefined;
 
     const ema12 = this.calculateEMA(prices, 12);
     const ema26 = this.calculateEMA(prices, 26);
-    
+
     if (!ema12 || !ema26) return undefined;
 
     const macd = ema12 - ema26;
-    
+
     // Calculate MACD signal line (9-day EMA of MACD)
     const macdLine = prices.slice(-9).map((_, i) => {
       const idx = prices.length - 9 + i;
@@ -112,25 +127,33 @@ export class TechnicalIndicatorService {
   /**
    * Calculate Bollinger Bands
    */
-  private calculateBollingerBands(prices: number[], period: number = 20, stdDev: number = 2): {
-    upper: number;
-    middle: number;
-    lower: number;
-    position: number;
-  } | undefined {
+  private calculateBollingerBands(
+    prices: number[],
+    period: number = 20,
+    stdDev: number = 2,
+  ):
+    | {
+        upper: number;
+        middle: number;
+        lower: number;
+        position: number;
+      }
+    | undefined {
     if (prices.length < period) return undefined;
 
     const recentPrices = prices.slice(-period);
     const sma = recentPrices.reduce((sum, price) => sum + price, 0) / period;
-    
+
     // Calculate standard deviation
-    const variance = recentPrices.reduce((sum, price) => sum + Math.pow(price - sma, 2), 0) / period;
+    const variance =
+      recentPrices.reduce((sum, price) => sum + Math.pow(price - sma, 2), 0) /
+      period;
     const standardDeviation = Math.sqrt(variance);
 
-    const upper = sma + (stdDev * standardDeviation);
-    const lower = sma - (stdDev * standardDeviation);
+    const upper = sma + stdDev * standardDeviation;
+    const lower = sma - stdDev * standardDeviation;
     const currentPrice = prices[prices.length - 1];
-    
+
     // Calculate position within bands (0 = lower band, 1 = upper band)
     const position = (currentPrice - lower) / (upper - lower);
 
@@ -166,7 +189,7 @@ export class TechnicalIndicatorService {
    */
   private calculateSMA(prices: number[], period: number): number | undefined {
     if (prices.length < period) return undefined;
-    
+
     const recentPrices = prices.slice(-period);
     const sum = recentPrices.reduce((total, price) => total + price, 0);
     return Math.round((sum / period) * 100) / 100;
@@ -182,7 +205,7 @@ export class TechnicalIndicatorService {
     let ema = prices[0];
 
     for (let i = 1; i < prices.length; i++) {
-      ema = (prices[i] * multiplier) + (ema * (1 - multiplier));
+      ema = prices[i] * multiplier + ema * (1 - multiplier);
     }
 
     return Math.round(ema * 100) / 100;
@@ -191,7 +214,9 @@ export class TechnicalIndicatorService {
   /**
    * Calculate Volume Indicators
    */
-  private calculateVolumeIndicators(volumes: number[]): { average: number; ratio: number } | undefined {
+  private calculateVolumeIndicators(
+    volumes: number[],
+  ): { average: number; ratio: number } | undefined {
     if (volumes.length < 20) return undefined;
 
     const recent20 = volumes.slice(-20);
@@ -214,7 +239,7 @@ export class TechnicalIndicatorService {
     if (priceData.length < 20) return patterns;
 
     const recent = priceData.slice(-20);
-    const prices = recent.map(d => d.close);
+    const prices = recent.map((d) => d.close);
 
     // Simple pattern detection
     const currentPrice = prices[prices.length - 1];
@@ -254,7 +279,7 @@ export class TechnicalIndicatorService {
     }
 
     // Volume patterns
-    const volumes = recent.map(d => d.volume);
+    const volumes = recent.map((d) => d.volume);
     const volumeIndicators = this.calculateVolumeIndicators(volumes);
     if (volumeIndicators && volumeIndicators.ratio > 2) {
       patterns.push('High Volume');
@@ -295,7 +320,12 @@ export class TechnicalIndicatorService {
   /**
    * Evaluate if a stock matches specific technical criteria
    */
-  evaluateTechnicalCriteria(indicators: TechnicalIndicators, field: string, operator: string, value: number): boolean {
+  evaluateTechnicalCriteria(
+    indicators: TechnicalIndicators,
+    field: string,
+    operator: string,
+    value: number,
+  ): boolean {
     try {
       let actualValue: number | undefined;
 
@@ -358,7 +388,10 @@ export class TechnicalIndicatorService {
           return false;
       }
     } catch (error) {
-      this.logger.error(`Error evaluating technical criteria: ${field} ${operator} ${value}`, error);
+      this.logger.error(
+        `Error evaluating technical criteria: ${field} ${operator} ${value}`,
+        error,
+      );
       return false;
     }
   }

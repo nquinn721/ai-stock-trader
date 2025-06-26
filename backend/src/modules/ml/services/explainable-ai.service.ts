@@ -2,7 +2,11 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { AIExplanation } from '../entities/ai.entities';
-import { ExplanationContext, MarketConditions, NewsItem } from '../interfaces/ai.interfaces';
+import {
+  ExplanationContext,
+  MarketConditions,
+  NewsItem,
+} from '../interfaces/ai.interfaces';
 import { TradingRecommendation } from './intelligent-recommendation.service';
 import { LLMService } from './llm.service';
 
@@ -16,11 +20,13 @@ export class ExplainableAIService {
     private readonly llmService: LLMService,
   ) {}
 
-  async explainRecommendation(recommendation: TradingRecommendation): Promise<string> {
+  async explainRecommendation(
+    recommendation: TradingRecommendation,
+  ): Promise<string> {
     try {
       // Check if we already have an explanation for this recommendation
       const existingExplanation = await this.explanationRepository.findOne({
-        where: { 
+        where: {
           symbol: recommendation.symbol,
           signal: recommendation.action,
           confidence: recommendation.confidence,
@@ -29,14 +35,16 @@ export class ExplainableAIService {
       });
 
       // Return cached explanation if it's recent (within 1 hour)
-      if (existingExplanation && 
-          new Date().getTime() - existingExplanation.timestamp.getTime() < 3600000) {
+      if (
+        existingExplanation &&
+        new Date().getTime() - existingExplanation.timestamp.getTime() < 3600000
+      ) {
         return existingExplanation.explanation;
       }
 
       // Build context for LLM
       const context = await this.buildExplanationContext(recommendation);
-      
+
       // Generate explanation using LLM
       const explanation = await this.llmService.generateExplanation(context);
 
@@ -45,40 +53,62 @@ export class ExplainableAIService {
 
       return explanation;
     } catch (error) {
-      this.logger.error(`Failed to explain recommendation for ${recommendation.symbol}:`, error);
+      this.logger.error(
+        `Failed to explain recommendation for ${recommendation.symbol}:`,
+        error,
+      );
       return this.generateFallbackExplanation(recommendation);
     }
   }
 
-  async answerTradingQuestion(question: string, userContext: any): Promise<string> {
+  async answerTradingQuestion(
+    question: string,
+    userContext: any,
+  ): Promise<string> {
     try {
-      const response = await this.llmService.processQuery(question, userContext);
+      const response = await this.llmService.processQuery(
+        question,
+        userContext,
+      );
       return response.response;
     } catch (error) {
       this.logger.error('Failed to process trading question:', error);
-      return 'I apologize, but I\'m having trouble processing your question right now. Please try again later or contact support for assistance.';
+      return "I apologize, but I'm having trouble processing your question right now. Please try again later or contact support for assistance.";
     }
   }
 
-  async explainStockSituation(symbol: string, context?: Record<string, any>): Promise<string> {
+  async explainStockSituation(
+    symbol: string,
+    context?: Record<string, any>,
+  ): Promise<string> {
     try {
       // Build context for stock situation explanation
-      const explanationContext = await this.buildStockSituationContext(symbol, context);
-      
+      const explanationContext = await this.buildStockSituationContext(
+        symbol,
+        context,
+      );
+
       // Generate explanation using LLM
-      const explanation = await this.llmService.generateExplanation(explanationContext);
+      const explanation =
+        await this.llmService.generateExplanation(explanationContext);
 
       // Store the explanation for caching
       await this.saveStockExplanation(symbol, explanation, explanationContext);
 
       return explanation;
     } catch (error) {
-      this.logger.error(`Failed to explain stock situation for ${symbol}:`, error);
+      this.logger.error(
+        `Failed to explain stock situation for ${symbol}:`,
+        error,
+      );
       return this.generateFallbackStockExplanation(symbol, context);
     }
   }
 
-  async getExplanationHistory(symbol: string, limit: number = 10): Promise<any[]> {
+  async getExplanationHistory(
+    symbol: string,
+    limit: number = 10,
+  ): Promise<any[]> {
     try {
       const explanations = await this.explanationRepository.find({
         where: { symbol },
@@ -86,7 +116,7 @@ export class ExplainableAIService {
         take: limit,
       });
 
-      return explanations.map(exp => ({
+      return explanations.map((exp) => ({
         id: exp.id,
         symbol: exp.symbol,
         signal: exp.signal,
@@ -95,17 +125,22 @@ export class ExplainableAIService {
         timestamp: exp.timestamp,
       }));
     } catch (error) {
-      this.logger.error(`Failed to get explanation history for ${symbol}:`, error);
+      this.logger.error(
+        `Failed to get explanation history for ${symbol}:`,
+        error,
+      );
       return [];
     }
   }
 
-  private async buildExplanationContext(recommendation: TradingRecommendation): Promise<ExplanationContext> {
+  private async buildExplanationContext(
+    recommendation: TradingRecommendation,
+  ): Promise<ExplanationContext> {
     // Extract technical indicators from recommendation metrics
     const indicators: Record<string, number> = {};
-    
+
     if (recommendation.metrics.technicalSignals?.signals) {
-      recommendation.metrics.technicalSignals.signals.forEach(signal => {
+      recommendation.metrics.technicalSignals.signals.forEach((signal) => {
         indicators[signal.type] = signal.value;
       });
     }
@@ -135,10 +170,15 @@ export class ExplainableAIService {
     };
   }
 
-  private inferMarketTrend(recommendation: TradingRecommendation): 'BULLISH' | 'BEARISH' | 'SIDEWAYS' {
+  private inferMarketTrend(
+    recommendation: TradingRecommendation,
+  ): 'BULLISH' | 'BEARISH' | 'SIDEWAYS' {
     if (recommendation.action === 'BUY' && recommendation.confidence > 0.7) {
       return 'BULLISH';
-    } else if (recommendation.action === 'SELL' && recommendation.confidence > 0.7) {
+    } else if (
+      recommendation.action === 'SELL' &&
+      recommendation.confidence > 0.7
+    ) {
       return 'BEARISH';
     }
     return 'SIDEWAYS';
@@ -176,7 +216,10 @@ export class ExplainableAIService {
     }
   }
 
-  private async buildStockSituationContext(symbol: string, context?: Record<string, any>): Promise<any> {
+  private async buildStockSituationContext(
+    symbol: string,
+    context?: Record<string, any>,
+  ): Promise<any> {
     // TODO: Integrate with stock service to get real market data
     return {
       signal: 'HOLD' as const,
@@ -198,7 +241,11 @@ export class ExplainableAIService {
     };
   }
 
-  private async saveStockExplanation(symbol: string, explanation: string, context: any): Promise<void> {
+  private async saveStockExplanation(
+    symbol: string,
+    explanation: string,
+    context: any,
+  ): Promise<void> {
     try {
       const stockExplanation = this.explanationRepository.create({
         symbol,
@@ -215,11 +262,16 @@ export class ExplainableAIService {
 
       await this.explanationRepository.save(stockExplanation);
     } catch (error) {
-      this.logger.error(`Failed to save stock explanation for ${symbol}:`, error);
+      this.logger.error(
+        `Failed to save stock explanation for ${symbol}:`,
+        error,
+      );
     }
   }
 
-  private generateFallbackExplanation(recommendation: TradingRecommendation): string {
+  private generateFallbackExplanation(
+    recommendation: TradingRecommendation,
+  ): string {
     const action = recommendation.action.toLowerCase();
     const confidencePercent = (recommendation.confidence * 100).toFixed(1);
     const riskLevel = recommendation.riskLevel.toLowerCase();
@@ -247,12 +299,16 @@ export class ExplainableAIService {
     }
 
     explanation += `\n**Time Horizon:** ${recommendation.timeHorizon}\n\n`;
-    explanation += '*This is a simplified explanation. For detailed AI insights, please ensure the AI service is properly configured.*';
+    explanation +=
+      '*This is a simplified explanation. For detailed AI insights, please ensure the AI service is properly configured.*';
 
     return explanation;
   }
 
-  private generateFallbackStockExplanation(symbol: string, context?: Record<string, any>): string {
+  private generateFallbackStockExplanation(
+    symbol: string,
+    context?: Record<string, any>,
+  ): string {
     return `
 **${symbol} Current Situation**
 

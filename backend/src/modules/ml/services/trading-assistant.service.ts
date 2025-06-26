@@ -2,11 +2,11 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ChatMessage, ConversationContext } from '../entities/ai.entities';
-import { 
-  AssistantResponse, 
-  UserContext, 
+import {
+  AssistantResponse,
+  ConversationContext as IConversationContext,
   SuggestedAction,
-  ConversationContext as IConversationContext 
+  UserContext,
 } from '../interfaces/ai.interfaces';
 import { ExplainableAIService } from './explainable-ai.service';
 import { LLMService } from './llm.service';
@@ -26,28 +26,41 @@ export class TradingAssistantService {
   ) {}
 
   async processConversation(
-    message: string, 
-    userId: string, 
-    conversationId?: string
+    message: string,
+    userId: string,
+    conversationId?: string,
   ): Promise<AssistantResponse> {
     try {
       // Get or create conversation context
-      const conversation = await this.getOrCreateConversation(userId, conversationId);
-      
+      const conversation = await this.getOrCreateConversation(
+        userId,
+        conversationId,
+      );
+
       // Build user context for this conversation
       const userContext = await this.getUserTradingContext(userId);
-      
+
       // Add conversation history to context
       const contextWithHistory = {
         ...userContext,
-        conversationHistory: await this.getRecentMessages(conversation.conversationId, 5),
+        conversationHistory: await this.getRecentMessages(
+          conversation.conversationId,
+          5,
+        ),
       };
 
       // Process the message
-      const response = await this.llmService.processQuery(message, contextWithHistory);
+      const response = await this.llmService.processQuery(
+        message,
+        contextWithHistory,
+      );
 
       // Enhance response with suggested actions
-      const enhancedResponse = await this.enhanceWithActions(response, message, userContext);
+      const enhancedResponse = await this.enhanceWithActions(
+        response,
+        message,
+        userContext,
+      );
 
       // Save the conversation
       await this.saveChatMessage(
@@ -55,7 +68,7 @@ export class TradingAssistantService {
         userId,
         message,
         enhancedResponse.response,
-        enhancedResponse.context
+        enhancedResponse.context,
       );
 
       // Update conversation context
@@ -67,15 +80,18 @@ export class TradingAssistantService {
 
       return enhancedResponse;
     } catch (error) {
-      this.logger.error(`Failed to process conversation for user ${userId}:`, error);
+      this.logger.error(
+        `Failed to process conversation for user ${userId}:`,
+        error,
+      );
       return this.getFallbackResponse(message);
     }
   }
 
   async getConversationHistory(
-    userId: string, 
-    conversationId: string, 
-    limit: number = 20
+    userId: string,
+    conversationId: string,
+    limit: number = 20,
   ): Promise<ChatMessage[]> {
     return this.chatMessageRepository.find({
       where: { userId, conversationId },
@@ -84,7 +100,10 @@ export class TradingAssistantService {
     });
   }
 
-  async getUserConversations(userId: string, limit: number = 10): Promise<ConversationContext[]> {
+  async getUserConversations(
+    userId: string,
+    limit: number = 10,
+  ): Promise<ConversationContext[]> {
     return this.conversationRepository.find({
       where: { userId, isActive: true },
       order: { lastInteraction: 'DESC' },
@@ -93,14 +112,14 @@ export class TradingAssistantService {
   }
 
   async processTradingQuestion(
-    question: string, 
-    userId: string, 
-    context?: Record<string, any>
+    question: string,
+    userId: string,
+    context?: Record<string, any>,
   ): Promise<AssistantResponse> {
     try {
       const userContext = await this.getUserTradingContext(userId);
       const enhancedContext = { ...userContext, ...context };
-      
+
       return await this.llmService.processQuery(question, enhancedContext);
     } catch (error) {
       this.logger.error('Failed to process trading question:', error);
@@ -108,12 +127,15 @@ export class TradingAssistantService {
     }
   }
 
-  async generateMarketCommentary(symbols?: string[]): Promise<AssistantResponse> {
+  async generateMarketCommentary(
+    symbols?: string[],
+  ): Promise<AssistantResponse> {
     try {
       // Get market data for specified symbols or general market
-      const marketContext = symbols && symbols.length > 0 
-        ? await this.getMarketContextForSymbols(symbols)
-        : await this.getGeneralMarketContext();
+      const marketContext =
+        symbols && symbols.length > 0
+          ? await this.getMarketContextForSymbols(symbols)
+          : await this.getGeneralMarketContext();
 
       const prompt = this.buildMarketCommentaryPrompt(marketContext);
       const response = await this.llmService.processQuery(prompt, {
@@ -128,7 +150,8 @@ export class TradingAssistantService {
     } catch (error) {
       this.logger.error('Failed to generate market commentary:', error);
       return {
-        response: 'Market commentary is currently unavailable. Please check the dashboard for the latest market data and trends.',
+        response:
+          'Market commentary is currently unavailable. Please check the dashboard for the latest market data and trends.',
         confidence: 0.3,
         sources: ['Fallback'],
         context: { fallback: true, symbols },
@@ -136,13 +159,17 @@ export class TradingAssistantService {
     }
   }
 
-  async getPortfolioInsights(userId: string, portfolioId?: string): Promise<AssistantResponse> {
+  async getPortfolioInsights(
+    userId: string,
+    portfolioId?: string,
+  ): Promise<AssistantResponse> {
     try {
       const userContext = await this.getUserTradingContext(userId);
-      
+
       if (!userContext.portfolio) {
         return {
-          response: 'No portfolio data available. Please ensure you have an active portfolio to get insights.',
+          response:
+            'No portfolio data available. Please ensure you have an active portfolio to get insights.',
           confidence: 0.8,
           sources: ['Portfolio Analysis'],
           context: { userId, portfolioId },
@@ -154,7 +181,12 @@ export class TradingAssistantService {
 
       return {
         ...response,
-        context: { ...response.context, userId, portfolioId, type: 'portfolio-insights' },
+        context: {
+          ...response.context,
+          userId,
+          portfolioId,
+          type: 'portfolio-insights',
+        },
       };
     } catch (error) {
       this.logger.error('Failed to get portfolio insights:', error);
@@ -177,7 +209,11 @@ export class TradingAssistantService {
 
       return {
         ...response,
-        context: { ...response.context, userProfile, type: 'strategy-suggestions' },
+        context: {
+          ...response.context,
+          userProfile,
+          type: 'strategy-suggestions',
+        },
       };
     } catch (error) {
       this.logger.error('Failed to generate strategy suggestions:', error);
@@ -195,7 +231,8 @@ export class TradingAssistantService {
         lastInteraction: new Date(),
       });
 
-      const savedConversation = await this.conversationRepository.save(conversation);
+      const savedConversation =
+        await this.conversationRepository.save(conversation);
       return savedConversation.conversationId;
     } catch (error) {
       this.logger.error('Failed to create new conversation:', error);
@@ -207,10 +244,10 @@ export class TradingAssistantService {
     try {
       await this.conversationRepository.update(
         { conversationId },
-        { 
+        {
           isActive: false,
           endedAt: new Date(),
-        }
+        },
       );
     } catch (error) {
       this.logger.error('Failed to end conversation:', error);
@@ -219,8 +256,8 @@ export class TradingAssistantService {
   }
 
   private async getOrCreateConversation(
-    userId: string, 
-    conversationId?: string
+    userId: string,
+    conversationId?: string,
   ): Promise<ConversationContext> {
     if (conversationId) {
       const existing = await this.conversationRepository.findOne({
@@ -258,7 +295,10 @@ export class TradingAssistantService {
     };
   }
 
-  private async getRecentMessages(conversationId: string, limit: number): Promise<ChatMessage[]> {
+  private async getRecentMessages(
+    conversationId: string,
+    limit: number,
+  ): Promise<ChatMessage[]> {
     return this.chatMessageRepository.find({
       where: { conversationId },
       order: { timestamp: 'DESC' },
@@ -269,7 +309,7 @@ export class TradingAssistantService {
   private async enhanceWithActions(
     response: AssistantResponse,
     originalMessage: string,
-    userContext: UserContext
+    userContext: UserContext,
   ): Promise<AssistantResponse> {
     const actions: SuggestedAction[] = [];
 
@@ -278,7 +318,7 @@ export class TradingAssistantService {
     const mentionedSymbols = originalMessage.match(stockSymbolRegex);
 
     if (mentionedSymbols) {
-      mentionedSymbols.forEach(symbol => {
+      mentionedSymbols.forEach((symbol) => {
         if (symbol.length >= 2 && symbol.length <= 5) {
           actions.push({
             type: 'VIEW_STOCK',
@@ -290,7 +330,10 @@ export class TradingAssistantService {
     }
 
     // Detect trading-related intents
-    if (originalMessage.toLowerCase().includes('buy') || originalMessage.toLowerCase().includes('purchase')) {
+    if (
+      originalMessage.toLowerCase().includes('buy') ||
+      originalMessage.toLowerCase().includes('purchase')
+    ) {
       actions.push({
         type: 'PLACE_ORDER',
         description: 'Place a buy order',
@@ -325,7 +368,7 @@ export class TradingAssistantService {
     userId: string,
     message: string,
     response: string,
-    context?: Record<string, any>
+    context?: Record<string, any>,
   ): Promise<void> {
     try {
       const chatMessage = this.chatMessageRepository.create({
@@ -348,7 +391,7 @@ export class TradingAssistantService {
 
   private async updateConversationContext(
     conversationId: string,
-    updates: Record<string, any>
+    updates: Record<string, any>,
   ): Promise<void> {
     try {
       await this.conversationRepository.update(
@@ -357,7 +400,7 @@ export class TradingAssistantService {
           context: updates,
           lastInteraction: new Date(),
           messageCount: updates.messageCount,
-        }
+        },
       );
     } catch (error) {
       this.logger.error('Failed to update conversation context:', error);
@@ -408,9 +451,14 @@ Analyze this portfolio and provide actionable insights:
 - Holdings: ${portfolio.holdings?.length || 0} positions
 
 **Holdings Details**:
-${portfolio.holdings?.map((h: any) => 
-  `- ${h.symbol}: ${h.quantity} shares, ${h.gainLossPercent > 0 ? '+' : ''}${h.gainLossPercent?.toFixed(2)}% P&L`
-).join('\n') || 'No holdings data available'}
+${
+  portfolio.holdings
+    ?.map(
+      (h: any) =>
+        `- ${h.symbol}: ${h.quantity} shares, ${h.gainLossPercent > 0 ? '+' : ''}${h.gainLossPercent?.toFixed(2)}% P&L`,
+    )
+    .join('\n') || 'No holdings data available'
+}
 
 Please provide:
 1. Portfolio performance assessment

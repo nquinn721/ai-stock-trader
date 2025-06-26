@@ -96,11 +96,65 @@ describe('PredictiveAnalyticsService', () => {
 
       const mockMarketPrediction = {
         symbol,
-        predictions: {
-          '1h': { direction: 'bullish', targetPrice: 152, confidence: 0.8 },
+        timestamp: new Date(),
+        horizonPredictions: [
+          {
+            horizon: '1h',
+            predictions: [
+              {
+                modelId: 'test-model',
+                modelType: 'timeseries' as const,
+                prediction: {
+                  direction: 'bullish',
+                  targetPrice: 152,
+                  confidence: 0.8,
+                },
+                weight: 1.0,
+              },
+            ],
+            ensemble: {
+              returnPrediction: 0.02,
+              priceTarget: 152,
+              confidence: 0.8,
+            },
+            confidence: 0.8,
+            timestamp: new Date(),
+          },
+        ],
+        ensemblePrediction: {
+          returnPrediction: 0.02,
+          priceTarget: 152,
+          confidence: 0.8,
+        },
+        uncertaintyBounds: {
+          prediction: 152,
+          standardError: 2.5,
+          confidenceIntervals: {
+            '68%': [149.5, 154.5] as [number, number],
+            '95%': [147, 157] as [number, number],
+            '99%': [145, 159] as [number, number],
+          },
+          predictionInterval: [145, 159] as [number, number],
+        },
+        signals: {
+          signal: 'BUY' as const,
+          strength: 0.8,
+          reasoning: 'Strong technical indicators',
+          thresholds: {
+            buyThreshold: 0.7,
+            sellThreshold: 0.3,
+            confidenceThreshold: 0.6,
+            uncertaintyThreshold: 0.2,
+          },
+          riskMetrics: {
+            maxDrawdown: 0.1,
+            volatility: 0.25,
+            sharpeRatio: 1.2,
+          },
         },
         confidence: 0.8,
-        timestamp: new Date(),
+        modelVersions: {},
+        executionTime: 100,
       };
 
       const mockEnsemblePrediction = {
@@ -185,9 +239,66 @@ describe('PredictiveAnalyticsService', () => {
       };
 
       const mockPrediction = {
-        predictions: {
-          '1h': { direction: 'bullish', targetPrice: 152, confidence: 0.8 },
+        symbol,
+        timestamp: new Date(),
+        horizonPredictions: [
+          {
+            horizon: '1h',
+            predictions: [
+              {
+                modelId: 'test-model',
+                modelType: 'timeseries' as const,
+                prediction: {
+                  direction: 'bullish',
+                  targetPrice: 152,
+                  confidence: 0.8,
+                },
+                weight: 1.0,
+              },
+            ],
+            ensemble: {
+              returnPrediction: 0.02,
+              priceTarget: 152,
+              confidence: 0.8,
+            },
+            confidence: 0.8,
+            timestamp: new Date(),
+          },
+        ],
+        ensemblePrediction: {
+          returnPrediction: 0.02,
+          priceTarget: 152,
+          confidence: 0.8,
         },
+        uncertaintyBounds: {
+          prediction: 152,
+          standardError: 2.5,
+          confidenceIntervals: {
+            '68%': [149.5, 154.5] as [number, number],
+            '95%': [147, 157] as [number, number],
+            '99%': [145, 159] as [number, number],
+          },
+          predictionInterval: [145, 159] as [number, number],
+        },
+        signals: {
+          signal: 'BUY' as const,
+          strength: 0.8,
+          reasoning: 'Strong technical indicators',
+          thresholds: {
+            buyThreshold: 0.7,
+            sellThreshold: 0.3,
+            confidenceThreshold: 0.6,
+            uncertaintyThreshold: 0.2,
+          },
+          riskMetrics: {
+            maxDrawdown: 0.1,
+            volatility: 0.25,
+            sharpeRatio: 1.2,
+          },
+        },
+        confidence: 0.8,
+        modelVersions: {},
+        executionTime: 100,
       };
 
       featureEngineeringService.extractBreakoutFeatures.mockResolvedValue(

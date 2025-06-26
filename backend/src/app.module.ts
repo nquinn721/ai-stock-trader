@@ -16,12 +16,12 @@ import { AutoTrade } from './modules/auto-trading/entities/auto-trade.entity';
 import { TradingRule } from './modules/auto-trading/entities/trading-rule.entity';
 import { TradingSession } from './modules/auto-trading/entities/trading-session.entity';
 import { BreakoutModule } from './modules/breakout/breakout.module';
-import { MarketScannerModule } from './modules/market-scanner/market-scanner.module';
 import {
-  ScreenerTemplate,
   MarketAlert,
   ScanResult,
+  ScreenerTemplate,
 } from './modules/market-scanner/entities/scanner.entity';
+import { MarketScannerModule } from './modules/market-scanner/market-scanner.module';
 import {
   MLABTest,
   MLFeatureImportance,

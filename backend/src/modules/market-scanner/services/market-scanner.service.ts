@@ -1,22 +1,25 @@
-import { Injectable, Logger, forwardRef, Inject } from '@nestjs/common';
+import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
+import { Cron, CronExpression } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Cron, CronExpression } from '@nestjs/schedule';
+import yahooFinance from 'yahoo-finance2';
 import { Stock } from '../../../entities/stock.entity';
 import { StockService } from '../../stock/stock.service';
-import { TechnicalIndicatorService, PriceData } from './technical-indicator.service';
 import {
-  ScreenerTemplate,
-  MarketAlert,
-  ScanResult,
-  ScanMatch,
-  ScanCriteria,
   FilterCriteria,
   FilterType,
-  TechnicalIndicators,
   FundamentalMetrics,
+  MarketAlert,
+  ScanCriteria,
+  ScanMatch,
+  ScanResult,
+  ScreenerTemplate,
+  TechnicalIndicators,
 } from '../entities/scanner.entity';
-import yahooFinance from 'yahoo-finance2';
+import {
+  PriceData,
+  TechnicalIndicatorService,
+} from './technical-indicator.service';
 
 export interface BacktestResult {
   success: boolean;
@@ -61,8 +64,11 @@ export class MarketScannerService {
    */
   async scanMarket(criteria: ScanCriteria): Promise<ScanMatch[]> {
     try {
-      this.logger.log('Starting market scan with criteria:', JSON.stringify(criteria));
-      
+      this.logger.log(
+        'Starting market scan with criteria:',
+        JSON.stringify(criteria),
+      );
+
       // Get all available stocks
       const stocks = await this.stockService.getAllStocks();
       const matches: ScanMatch[] = [];
@@ -74,7 +80,10 @@ export class MarketScannerService {
             matches.push(match);
           }
         } catch (error) {
-          this.logger.warn(`Error evaluating stock ${stock.symbol}:`, error.message);
+          this.logger.warn(
+            `Error evaluating stock ${stock.symbol}:`,
+            error.message,
+          );
           continue;
         }
       }
@@ -86,9 +95,10 @@ export class MarketScannerService {
       const limit = criteria.limit || 50;
       const limitedMatches = matches.slice(0, limit);
 
-      this.logger.log(`Scan completed: ${limitedMatches.length} matches found out of ${stocks.length} stocks`);
+      this.logger.log(
+        `Scan completed: ${limitedMatches.length} matches found out of ${stocks.length} stocks`,
+      );
       return limitedMatches;
-
     } catch (error) {
       this.logger.error('Error during market scan:', error);
       throw new Error(`Market scan failed: ${error.message}`);
@@ -98,7 +108,10 @@ export class MarketScannerService {
   /**
    * Evaluate a single stock against scan criteria
    */
-  private async evaluateStock(stock: Stock, criteria: ScanCriteria): Promise<ScanMatch | null> {
+  private async evaluateStock(
+    stock: Stock,
+    criteria: ScanCriteria,
+  ): Promise<ScanMatch | null> {
     try {
       const matchedCriteria: string[] = [];
       let totalScore = 0;
@@ -106,24 +119,39 @@ export class MarketScannerService {
 
       // Get historical data for technical analysis
       const historicalData = await this.getHistoricalData(stock.symbol);
-      const technicalIndicators = historicalData.length > 0 
-        ? await this.technicalIndicatorService.calculateIndicators(stock.symbol, historicalData)
-        : {};
+      const technicalIndicators =
+        historicalData.length > 0
+          ? await this.technicalIndicatorService.calculateIndicators(
+              stock.symbol,
+              historicalData,
+            )
+          : {};
 
-      const fundamentalData = await this.technicalIndicatorService.calculateFundamentals(stock.symbol);
+      const fundamentalData =
+        await this.technicalIndicatorService.calculateFundamentals(
+          stock.symbol,
+        );
 
       // Evaluate each filter
       for (const filter of criteria.filters) {
-        const matches = await this.evaluateFilter(stock, filter, technicalIndicators, fundamentalData);
+        const matches = await this.evaluateFilter(
+          stock,
+          filter,
+          technicalIndicators,
+          fundamentalData,
+        );
         if (matches) {
-          matchedCriteria.push(`${filter.field} ${filter.operator} ${filter.value}`);
+          matchedCriteria.push(
+            `${filter.field} ${filter.operator} ${filter.value}`,
+          );
           totalScore += 1;
         }
         evaluatedCriteria += 1;
       }
 
       // Apply logical operators (simplified - assumes all are AND for now)
-      const matchStrength = evaluatedCriteria > 0 ? totalScore / evaluatedCriteria : 0;
+      const matchStrength =
+        evaluatedCriteria > 0 ? totalScore / evaluatedCriteria : 0;
 
       if (matchStrength > 0) {
         return {
@@ -142,7 +170,10 @@ export class MarketScannerService {
 
       return null;
     } catch (error) {
-      this.logger.warn(`Error evaluating stock ${stock.symbol}:`, error.message);
+      this.logger.warn(
+        `Error evaluating stock ${stock.symbol}:`,
+        error.message,
+      );
       return null;
     }
   }
@@ -190,9 +221,17 @@ export class MarketScannerService {
         return false;
       }
 
-      return this.applyOperator(actualValue, filter.operator, value, filter.value2 ? parseFloat(filter.value2.toString()) : undefined);
+      return this.applyOperator(
+        actualValue,
+        filter.operator,
+        value,
+        filter.value2 ? parseFloat(filter.value2.toString()) : undefined,
+      );
     } catch (error) {
-      this.logger.warn(`Error evaluating filter ${filter.field}:`, error.message);
+      this.logger.warn(
+        `Error evaluating filter ${filter.field}:`,
+        error.message,
+      );
       return false;
     }
   }
@@ -241,7 +280,10 @@ export class MarketScannerService {
   /**
    * Get fundamental values
    */
-  private getFundamentalValue(fundamentalData: FundamentalMetrics, field: string): number | undefined {
+  private getFundamentalValue(
+    fundamentalData: FundamentalMetrics,
+    field: string,
+  ): number | undefined {
     switch (field) {
       case 'pe_ratio':
         return fundamentalData.peRatio;
@@ -263,12 +305,15 @@ export class MarketScannerService {
   /**
    * Evaluate pattern filters
    */
-  private evaluatePatternFilter(technicalData: TechnicalIndicators, filter: FilterCriteria): boolean {
+  private evaluatePatternFilter(
+    technicalData: TechnicalIndicators,
+    filter: FilterCriteria,
+  ): boolean {
     const patterns = technicalData.patterns || [];
     const targetPattern = filter.value.toString().toLowerCase();
-    
-    return patterns.some(pattern => 
-      pattern.toLowerCase().includes(targetPattern)
+
+    return patterns.some((pattern) =>
+      pattern.toLowerCase().includes(targetPattern),
     );
   }
 
@@ -289,7 +334,9 @@ export class MarketScannerService {
       case 'eq':
         return Math.abs(actualValue - value) < 0.01;
       case 'between':
-        return value2 !== undefined && actualValue >= value && actualValue <= value2;
+        return (
+          value2 !== undefined && actualValue >= value && actualValue <= value2
+        );
       case 'above':
         return actualValue > value;
       case 'below':
@@ -314,7 +361,7 @@ export class MarketScannerService {
         interval: '1d',
       });
 
-      return historicalData.map(data => ({
+      return historicalData.map((data) => ({
         date: data.date,
         open: data.open,
         high: data.high,
@@ -323,7 +370,10 @@ export class MarketScannerService {
         volume: data.volume,
       }));
     } catch (error) {
-      this.logger.warn(`Failed to get historical data for ${symbol}:`, error.message);
+      this.logger.warn(
+        `Failed to get historical data for ${symbol}:`,
+        error.message,
+      );
       return [];
     }
   }
@@ -331,7 +381,9 @@ export class MarketScannerService {
   /**
    * Create a new screener template
    */
-  async createTemplate(templateData: Partial<ScreenerTemplate>): Promise<ScreenerTemplate> {
+  async createTemplate(
+    templateData: Partial<ScreenerTemplate>,
+  ): Promise<ScreenerTemplate> {
     try {
       const template = this.screenerTemplateRepository.create(templateData);
       return await this.screenerTemplateRepository.save(template);
@@ -346,7 +398,10 @@ export class MarketScannerService {
    */
   async getTemplates(isPublic?: boolean): Promise<ScreenerTemplate[]> {
     try {
-      const where = isPublic !== undefined ? { isPublic, isActive: true } : { isActive: true };
+      const where =
+        isPublic !== undefined
+          ? { isPublic, isActive: true }
+          : { isActive: true };
       return await this.screenerTemplateRepository.find({
         where,
         order: { usageCount: 'DESC', createdAt: 'DESC' },
@@ -416,7 +471,7 @@ export class MarketScannerService {
 
           const matches = await this.scanMarket(alert.criteria);
           const strongMatches = matches.filter(
-            match => match.matchStrength >= alert.minMatchStrength,
+            (match) => match.matchStrength >= alert.minMatchStrength,
           );
 
           if (strongMatches.length > 0) {
@@ -426,7 +481,6 @@ export class MarketScannerService {
           // Update last triggered time
           alert.lastTriggered = now;
           await this.marketAlertRepository.save(alert);
-
         } catch (error) {
           this.logger.error(`Error processing alert ${alert.id}:`, error);
         }
@@ -441,9 +495,14 @@ export class MarketScannerService {
   /**
    * Trigger an alert notification
    */
-  private async triggerAlert(alert: MarketAlert, matches: ScanMatch[]): Promise<void> {
+  private async triggerAlert(
+    alert: MarketAlert,
+    matches: ScanMatch[],
+  ): Promise<void> {
     try {
-      this.logger.log(`Alert triggered: ${alert.name} - ${matches.length} matches`);
+      this.logger.log(
+        `Alert triggered: ${alert.name} - ${matches.length} matches`,
+      );
 
       // Save scan results
       for (const match of matches) {
@@ -466,7 +525,6 @@ export class MarketScannerService {
 
       // TODO: Send notifications based on alert.notificationTypes
       // This would integrate with email/push notification services
-
     } catch (error) {
       this.logger.error(`Error triggering alert ${alert.id}:`, error);
     }
@@ -475,11 +533,15 @@ export class MarketScannerService {
   /**
    * Backtest a screener configuration
    */
-  async backtestScreener(criteria: ScanCriteria, startDate: string, endDate: string): Promise<BacktestResult> {
+  async backtestScreener(
+    criteria: ScanCriteria,
+    startDate: string,
+    endDate: string,
+  ): Promise<BacktestResult> {
     try {
       // This is a simplified backtest - in a real implementation,
       // you would analyze historical performance of the screener
-      
+
       this.logger.log(`Backtesting screener from ${startDate} to ${endDate}`);
 
       // For now, return mock backtest results
@@ -525,9 +587,27 @@ export class MarketScannerService {
         isPublic: true,
         criteria: {
           filters: [
-            { id: '1', type: FilterType.VOLUME, field: 'volume', operator: 'gt' as any, value: '1000000' },
-            { id: '2', type: FilterType.TECHNICAL, field: 'volume.ratio', operator: 'gt' as any, value: '2' },
-            { id: '3', type: FilterType.PRICE, field: 'change_percent', operator: 'gt' as any, value: '3' },
+            {
+              id: '1',
+              type: FilterType.VOLUME,
+              field: 'volume',
+              operator: 'gt' as any,
+              value: '1000000',
+            },
+            {
+              id: '2',
+              type: FilterType.TECHNICAL,
+              field: 'volume.ratio',
+              operator: 'gt' as any,
+              value: '2',
+            },
+            {
+              id: '3',
+              type: FilterType.PRICE,
+              field: 'change_percent',
+              operator: 'gt' as any,
+              value: '3',
+            },
           ],
         },
       },
@@ -538,8 +618,20 @@ export class MarketScannerService {
         isPublic: true,
         criteria: {
           filters: [
-            { id: '1', type: FilterType.TECHNICAL, field: 'rsi', operator: 'lt' as any, value: '30' },
-            { id: '2', type: FilterType.VOLUME, field: 'volume', operator: 'gt' as any, value: '500000' },
+            {
+              id: '1',
+              type: FilterType.TECHNICAL,
+              field: 'rsi',
+              operator: 'lt' as any,
+              value: '30',
+            },
+            {
+              id: '2',
+              type: FilterType.VOLUME,
+              field: 'volume',
+              operator: 'gt' as any,
+              value: '500000',
+            },
           ],
         },
       },
@@ -550,8 +642,20 @@ export class MarketScannerService {
         isPublic: true,
         criteria: {
           filters: [
-            { id: '1', type: FilterType.PATTERN, field: 'pattern', operator: 'eq' as any, value: 'Gap Up' },
-            { id: '2', type: FilterType.VOLUME, field: 'volume', operator: 'gt' as any, value: '300000' },
+            {
+              id: '1',
+              type: FilterType.PATTERN,
+              field: 'pattern',
+              operator: 'eq' as any,
+              value: 'Gap Up',
+            },
+            {
+              id: '2',
+              type: FilterType.VOLUME,
+              field: 'volume',
+              operator: 'gt' as any,
+              value: '300000',
+            },
           ],
         },
       },
@@ -564,10 +668,12 @@ export class MarketScannerService {
     const newTemplates: ScreenerTemplate[] = [];
 
     for (const preset of presetTemplates) {
-      const exists = existingTemplates.find(t => t.name === preset.name);
+      const exists = existingTemplates.find((t) => t.name === preset.name);
       if (!exists) {
         try {
-          const template = this.screenerTemplateRepository.create(preset as any);
+          const template = this.screenerTemplateRepository.create(
+            preset as any,
+          );
           const saved = await this.screenerTemplateRepository.save(template);
           if (Array.isArray(saved)) {
             newTemplates.push(...saved);
@@ -575,7 +681,10 @@ export class MarketScannerService {
             newTemplates.push(saved);
           }
         } catch (error) {
-          this.logger.error(`Failed to save preset template: ${preset.name}`, error);
+          this.logger.error(
+            `Failed to save preset template: ${preset.name}`,
+            error,
+          );
         }
       }
     }
@@ -599,10 +708,15 @@ export class MarketScannerService {
   /**
    * Update a screener template
    */
-  async updateTemplate(id: number, updateData: Partial<ScreenerTemplate>): Promise<ScreenerTemplate | null> {
+  async updateTemplate(
+    id: number,
+    updateData: Partial<ScreenerTemplate>,
+  ): Promise<ScreenerTemplate | null> {
     try {
-      const existingTemplate = await this.screenerTemplateRepository.findOne({ where: { id } });
-      
+      const existingTemplate = await this.screenerTemplateRepository.findOne({
+        where: { id },
+      });
+
       if (!existingTemplate) {
         return null;
       }
@@ -637,10 +751,15 @@ export class MarketScannerService {
   /**
    * Update a market alert
    */
-  async updateAlert(id: number, updateData: Partial<MarketAlert>): Promise<MarketAlert | null> {
+  async updateAlert(
+    id: number,
+    updateData: Partial<MarketAlert>,
+  ): Promise<MarketAlert | null> {
     try {
-      const existingAlert = await this.marketAlertRepository.findOne({ where: { id } });
-      
+      const existingAlert = await this.marketAlertRepository.findOne({
+        where: { id },
+      });
+
       if (!existingAlert) {
         return null;
       }
