@@ -185,10 +185,8 @@
   margin-left: auto;
   position: relative;
   overflow: hidden;
-  box-shadow: 
-    0 8px 25px rgba(255, 68, 68, 0.4),
-    0 4px 12px rgba(255, 68, 68, 0.3),
-    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+  box-shadow: 0 8px 25px rgba(255, 68, 68, 0.4),
+    0 4px 12px rgba(255, 68, 68, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2),
     inset 0 -1px 0 rgba(0, 0, 0, 0.1);
   min-width: 200px;
   backdrop-filter: blur(10px);
@@ -231,7 +229,8 @@
 }
 
 @keyframes emergencyPulse {
-  0%, 100% {
+  0%,
+  100% {
     transform: scale(1);
     opacity: 1;
   }
@@ -242,23 +241,34 @@
 }
 
 @keyframes emergencyShake {
-  0%, 100% { transform: translateX(0); }
-  10%, 30%, 50%, 70%, 90% { transform: translateX(-3px); }
-  20%, 40%, 60%, 80% { transform: translateX(3px); }
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  10%,
+  30%,
+  50%,
+  70%,
+  90% {
+    transform: translateX(-3px);
+  }
+  20%,
+  40%,
+  60%,
+  80% {
+    transform: translateX(3px);
+  }
 }
 
 @keyframes emergencyGlow {
-  0%, 100% {
-    box-shadow: 
-      0 8px 25px rgba(255, 68, 68, 0.4),
-      0 4px 12px rgba(255, 68, 68, 0.3),
-      inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  0%,
+  100% {
+    box-shadow: 0 8px 25px rgba(255, 68, 68, 0.4),
+      0 4px 12px rgba(255, 68, 68, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2);
   }
   50% {
-    box-shadow: 
-      0 8px 25px rgba(255, 68, 68, 0.8),
-      0 4px 12px rgba(255, 68, 68, 0.6),
-      0 0 30px rgba(255, 68, 68, 0.4),
+    box-shadow: 0 8px 25px rgba(255, 68, 68, 0.8),
+      0 4px 12px rgba(255, 68, 68, 0.6), 0 0 30px rgba(255, 68, 68, 0.4),
       inset 0 1px 0 rgba(255, 255, 255, 0.3);
   }
 }
@@ -268,11 +278,8 @@
   color: white;
   transform: scale(1.08) translateY(-3px);
   animation: emergencyShake 0.6s ease-in-out, emergencyGlow 1.5s infinite;
-  box-shadow: 
-    0 12px 35px rgba(255, 0, 0, 0.6),
-    0 6px 18px rgba(255, 0, 0, 0.4),
-    0 0 40px rgba(255, 0, 0, 0.3),
-    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  box-shadow: 0 12px 35px rgba(255, 0, 0, 0.6), 0 6px 18px rgba(255, 0, 0, 0.4),
+    0 0 40px rgba(255, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
 
 .emergency-btn:hover:not(:disabled)::before {
@@ -291,9 +298,7 @@
 
 .emergency-btn:active:not(:disabled) {
   transform: scale(1.02) translateY(-1px);
-  box-shadow: 
-    0 6px 20px rgba(255, 0, 0, 0.5),
-    0 3px 10px rgba(255, 0, 0, 0.3),
+  box-shadow: 0 6px 20px rgba(255, 0, 0, 0.5), 0 3px 10px rgba(255, 0, 0, 0.3),
     inset 0 -2px 4px rgba(0, 0, 0, 0.2);
 }
 
@@ -315,10 +320,8 @@
 /* Focus states for accessibility */
 .emergency-btn:focus:not(:disabled) {
   outline: none;
-  box-shadow: 
-    0 8px 25px rgba(255, 68, 68, 0.4),
-    0 4px 12px rgba(255, 68, 68, 0.3),
-    0 0 0 4px rgba(255, 68, 68, 0.5),
+  box-shadow: 0 8px 25px rgba(255, 68, 68, 0.4),
+    0 4px 12px rgba(255, 68, 68, 0.3), 0 0 0 4px rgba(255, 68, 68, 0.5),
     0 0 0 8px rgba(255, 255, 255, 0.8);
 }
 
@@ -363,7 +366,7 @@
     font-size: 14px;
     min-width: 160px;
   }
-  
+
   .emergency-btn .icon {
     font-size: 18px;
   }

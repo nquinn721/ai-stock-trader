@@ -1,22 +1,20 @@
-import { library } from "@fortawesome/fontawesome-svg-core";
 import {
-  faArrowDown,
-  faArrowTrendDown,
-  faArrowTrendUp,
-  faArrowUp,
-  faChartLine,
-  faCircle,
-  faClock,
-  faComments,
-  faDollarSign,
-  faExchangeAlt,
-  faEye,
-  faRobot,
-  faSignal,
-  faVolumeHigh,
-} from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { observer } from "mobx-react-lite";
+  AccessTime,
+  Analytics,
+  ArrowDownward,
+  ArrowUpward,
+  AttachMoney,
+  AutoMode,
+  Chat,
+  ShowChart,
+  SignalCellularAlt,
+  SwapHorizontalCircle,
+  TrendingDown,
+  TrendingUp,
+  Visibility,
+  VolumeUp,
+} from "@mui/icons-material";
+// import { observer } from "mobx-react-lite";
 import React, { useEffect, useState } from "react";
 import {
   usePortfolioStore,
@@ -25,12 +23,12 @@ import {
 } from "../stores/StoreContext";
 import { Portfolio } from "../types";
 import TradingAssistantChat from "./ai/TradingAssistantChat";
-import AutoTradingDashboard from "./automated-trading/AutoTradingDashboard";
-import AutonomousAgentDashboard from "./autonomous-trading/CleanAutonomousAgentDashboard";
+import AutonomousAgentDashboard from "./autonomous-trading/AutonomousAgentDashboard";
+import EnhancedPortfolioAnalyticsDashboard from "./CleanPortfolioAnalyticsDashboard";
 import "./Dashboard.css";
 import EmptyState from "./EmptyState";
-import EnhancedPortfolioAnalyticsDashboard from "./EnhancedPortfolioAnalyticsDashboard";
 import { MarketScannerDashboard } from "./MarketScanner/MarketScannerDashboard";
+import { MultiAssetDashboard } from "./multi-asset/MultiAssetDashboard";
 import NotificationCenter from "./NotificationCenter";
 import PortfolioCreator from "./PortfolioCreator";
 import PortfolioDetailsModal from "./PortfolioDetailsModal";
@@ -38,25 +36,25 @@ import PortfolioSelector from "./PortfolioSelector";
 import QuickTrade from "./QuickTrade";
 import StockCard from "./StockCard";
 
-// Add icons to library
-library.add(
-  faArrowTrendUp,
-  faArrowTrendDown,
-  faChartLine,
-  faDollarSign,
-  faExchangeAlt,
-  faVolumeHigh,
-  faEye,
-  faSignal,
-  faClock,
-  faArrowUp,
-  faArrowDown,
-  faCircle,
-  faRobot,
-  faComments
-);
+// Add icons to library - commented out for now
+// library.add(
+//   faArrowTrendUp,
+//   faArrowTrendDown,
+//   faChartLine,
+//   faDollarSign,
+//   faExchangeAlt,
+//   faVolumeHigh,
+//   faEye,
+//   faSignal,
+//   faClock,
+//   faArrowUp,
+//   faArrowDown,
+//   faCircle,
+//   faRobot,
+//   faComments
+// );
 
-const Dashboard: React.FC = observer(() => {
+const Dashboard: React.FC = () => {
   const stockStore = useStockStore();
   const portfolioStore = usePortfolioStore();
   const webSocketStore = useWebSocketStore();
@@ -66,11 +64,11 @@ const Dashboard: React.FC = observer(() => {
   const [portfolioForDetails, setPortfolioForDetails] =
     useState<Portfolio | null>(null);
   const [currentTime, setCurrentTime] = useState(new Date());
-  const [showAutoTrading, setShowAutoTrading] = useState(false);
   const [showAutonomousAgents, setShowAutonomousAgents] = useState(false);
   const [showPortfolioAnalytics, setShowPortfolioAnalytics] = useState(false);
   const [showAIAssistant, setShowAIAssistant] = useState(false);
   const [showMarketScanner, setShowMarketScanner] = useState(false);
+  const [showMultiAsset, setShowMultiAsset] = useState(false);
 
   // Initialize data on component mount
   useEffect(() => {
@@ -226,7 +224,7 @@ const Dashboard: React.FC = observer(() => {
         {" "}
         <EmptyState
           type="loading"
-          icon={<FontAwesomeIcon icon="clock" />}
+          icon={<AccessTime />}
           title="Loading Stock Data"
           description="Fetching real-time market data and trading signals..."
           size="large"
@@ -250,25 +248,6 @@ const Dashboard: React.FC = observer(() => {
           </div>
         </header>
         <MarketScannerDashboard onStockSelect={handleStockSelect} />
-      </div>
-    );
-  }
-
-  if (showAutoTrading) {
-    return (
-      <div className="dashboard">
-        <header className="dashboard-header">
-          <div className="header-left">
-            <h1>Automated Trading</h1>
-            <button
-              className="back-button"
-              onClick={() => setShowAutoTrading(false)}
-            >
-              ← Back to Dashboard
-            </button>
-          </div>
-        </header>
-        <AutoTradingDashboard portfolios={portfolioStore.portfolios} />
       </div>
     );
   }
@@ -351,34 +330,58 @@ const Dashboard: React.FC = observer(() => {
       />
     );
   }
+
+  if (showMultiAsset) {
+    return (
+      <div className="dashboard">
+        <header className="dashboard-header">
+          <div className="header-left">
+            <h1>Multi-Asset Intelligence</h1>
+            <button
+              className="back-button"
+              onClick={() => setShowMultiAsset(false)}
+            >
+              ← Back to Dashboard
+            </button>
+          </div>
+        </header>
+        <MultiAssetDashboard />
+      </div>
+    );
+  }
+
   return (
     <div className="dashboard">
       {" "}
       {/* Header */}
       <header className="dashboard-header">
         <div className="header-left">
-          <h1>Trading Dashboard</h1>
+          <div className="main-title-section">
+            <h1>Trading Dashboard</h1>
+            <div
+              className={`live-indicator-main ${
+                isConnected ? "connected" : "disconnected"
+              }`}
+            >
+              <span className="live-dot"></span>
+              <span className="live-text">
+                {isConnected ? "LIVE" : "OFFLINE"}
+              </span>
+            </div>
+          </div>
           <div className="market-time">
-            <FontAwesomeIcon icon={faClock} />
+            <AccessTime />
             <span>{currentTime.toLocaleTimeString()}</span>
             <span className="date">{currentTime.toLocaleDateString()}</span>
           </div>
         </div>
         <div className="header-info">
           <button
-            className="auto-trading-btn"
-            onClick={() => setShowAutoTrading(true)}
-            title="Open Automated Trading"
-          >
-            <FontAwesomeIcon icon={faRobot} />
-            Auto Trading
-          </button>
-          <button
             className="autonomous-agents-btn"
             onClick={() => setShowAutonomousAgents(true)}
             title="Autonomous Trading Agents"
           >
-            <FontAwesomeIcon icon={faRobot} />
+            <AutoMode />
             Agents
           </button>
           <button
@@ -386,7 +389,7 @@ const Dashboard: React.FC = observer(() => {
             onClick={() => setShowPortfolioAnalytics(true)}
             title="View Portfolio Analytics"
           >
-            <FontAwesomeIcon icon={faChartLine} />
+            <Analytics />
             Analytics
           </button>
           <button
@@ -394,27 +397,27 @@ const Dashboard: React.FC = observer(() => {
             onClick={() => setShowMarketScanner(true)}
             title="Open Market Scanner"
           >
-            <FontAwesomeIcon icon={faSignal} />
+            <SignalCellularAlt />
             Scanner
+          </button>
+          <button
+            className="multi-asset-btn"
+            onClick={() => setShowMultiAsset(true)}
+            title="Multi-Asset Intelligence Platform"
+          >
+            <SwapHorizontalCircle />
+            Multi-Asset
           </button>
           <button
             className="ai-assistant-btn"
             onClick={() => setShowAIAssistant(true)}
             title="Open AI Trading Assistant"
           >
-            <FontAwesomeIcon icon={faComments} />
+            <Chat />
             AI Assistant
           </button>
           <div className="stats">
             <span>{stocksWithSignals.length} stocks</span>
-          </div>
-          <div
-            className={`connection-status ${
-              isConnected ? "connected" : "disconnected"
-            }`}
-          >
-            <FontAwesomeIcon icon="circle" />
-            {isConnected ? "Live" : "Offline"}
           </div>
           <NotificationCenter />
         </div>
@@ -423,7 +426,7 @@ const Dashboard: React.FC = observer(() => {
       <div className="market-overview">
         <div className="metric-card">
           <div className="metric-icon">
-            <FontAwesomeIcon icon={faChartLine} />
+            <ShowChart />
           </div>
           <div className="metric-content">
             <div className="metric-value">{marketAnalytics.totalStocks}</div>
@@ -433,7 +436,7 @@ const Dashboard: React.FC = observer(() => {
 
         <div className="metric-card positive">
           <div className="metric-icon">
-            <FontAwesomeIcon icon={faArrowTrendUp} />
+            <TrendingUp />
           </div>
           <div className="metric-content">
             <div className="metric-value">{marketAnalytics.gainers}</div>
@@ -443,7 +446,7 @@ const Dashboard: React.FC = observer(() => {
 
         <div className="metric-card negative">
           <div className="metric-icon">
-            <FontAwesomeIcon icon={faArrowTrendDown} />
+            <TrendingDown />
           </div>
           <div className="metric-content">
             <div className="metric-value">{marketAnalytics.losers}</div>
@@ -457,9 +460,11 @@ const Dashboard: React.FC = observer(() => {
           }`}
         >
           <div className="metric-icon">
-            <FontAwesomeIcon
-              icon={marketAnalytics.avgChange >= 0 ? faArrowUp : faArrowDown}
-            />
+            {marketAnalytics.avgChange >= 0 ? (
+              <ArrowUpward />
+            ) : (
+              <ArrowDownward />
+            )}
           </div>
           <div className="metric-content">
             <div className="metric-value">
@@ -471,7 +476,7 @@ const Dashboard: React.FC = observer(() => {
 
         <div className="metric-card">
           <div className="metric-icon">
-            <FontAwesomeIcon icon={faVolumeHigh} />
+            <VolumeUp />
           </div>
           <div className="metric-content">
             <div className="metric-value">
@@ -483,7 +488,7 @@ const Dashboard: React.FC = observer(() => {
 
         <div className="metric-card">
           <div className="metric-icon">
-            <FontAwesomeIcon icon={faDollarSign} />
+            <AttachMoney />
           </div>
           <div className="metric-content">
             <div className="metric-value">
@@ -496,7 +501,7 @@ const Dashboard: React.FC = observer(() => {
       {/* Trading Signals Summary */}
       <div className="signals-overview">
         <h3>
-          <FontAwesomeIcon icon={faSignal} /> Trading Signals
+          <SignalCellularAlt /> Trading Signals
         </h3>
         <div className="signals-grid">
           <div className="signal-card buy">
@@ -517,13 +522,13 @@ const Dashboard: React.FC = observer(() => {
       {(marketAnalytics.topGainer || marketAnalytics.topLoser) && (
         <div className="top-movers">
           <h3>
-            <FontAwesomeIcon icon={faEye} /> Top Movers
+            <Visibility /> Top Movers
           </h3>
           <div className="movers-grid">
             {marketAnalytics.topGainer && (
               <div className="mover-card positive">
                 <div className="mover-header">
-                  <FontAwesomeIcon icon={faArrowTrendUp} />
+                  <TrendingUp />
                   <span>Top Gainer</span>
                 </div>
                 <div className="mover-symbol">
@@ -540,7 +545,7 @@ const Dashboard: React.FC = observer(() => {
             {marketAnalytics.topLoser && (
               <div className="mover-card negative">
                 <div className="mover-header">
-                  <FontAwesomeIcon icon={faArrowTrendDown} />
+                  <TrendingDown />
                   <span>Top Loser</span>
                 </div>
                 <div className="mover-symbol">
@@ -560,7 +565,7 @@ const Dashboard: React.FC = observer(() => {
       {/* Paper Trading Section */}
       <div className="paper-trading-section">
         <h3>
-          <FontAwesomeIcon icon={faExchangeAlt} /> Paper Trading
+          <SwapHorizontalCircle /> Paper Trading
         </h3>
         <div className="trading-row">
           {/* Portfolio Selector */}
@@ -580,7 +585,7 @@ const Dashboard: React.FC = observer(() => {
       {/* Stocks Grid */}
       <div className="stocks-section">
         <h3>
-          <FontAwesomeIcon icon={faChartLine} /> Live Stocks
+          <ShowChart /> Live Stocks
         </h3>
         <div className="stocks-grid">
           {stocksWithSignals.map((stockWithSignal) => (
@@ -596,7 +601,7 @@ const Dashboard: React.FC = observer(() => {
       {stocksWithSignals.length === 0 && !loading && (
         <EmptyState
           type="no-data"
-          icon={<FontAwesomeIcon icon="chart-line" />}
+          icon={<ShowChart />}
           title={isConnected ? "Waiting for Stock Data" : "No Connection"}
           description={
             isConnected
@@ -616,6 +621,6 @@ const Dashboard: React.FC = observer(() => {
       )}
     </div>
   );
-});
+};
 
 export default Dashboard;

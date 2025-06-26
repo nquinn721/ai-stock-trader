@@ -1,4 +1,4 @@
-import { Injectable, Logger, Inject, forwardRef } from '@nestjs/common';
+import { Inject, Injectable, Logger, forwardRef } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import {
@@ -77,9 +77,7 @@ export class ConditionalOrderService {
     }
 
     if (ordersToTrigger.length > 0) {
-      this.logger.log(
-        `Triggered ${ordersToTrigger.length} conditional orders`,
-      );
+      this.logger.log(`Triggered ${ordersToTrigger.length} conditional orders`);
     }
   }
 
@@ -93,21 +91,27 @@ export class ConditionalOrderService {
     }
 
     const triggers = order.conditionalTriggers as ConditionalTrigger[];
-    
+
     // Group triggers by logical operator
-    const andTriggers = triggers.filter(t => !t.logicalOperator || t.logicalOperator === 'AND');
-    const orTriggers = triggers.filter(t => t.logicalOperator === 'OR');
+    const andTriggers = triggers.filter(
+      (t) => !t.logicalOperator || t.logicalOperator === 'AND',
+    );
+    const orTriggers = triggers.filter((t) => t.logicalOperator === 'OR');
 
     // Evaluate AND triggers (all must be true)
     let andResult = true;
     if (andTriggers.length > 0) {
-      andResult = andTriggers.every(trigger => this.evaluateTrigger(trigger, marketData));
+      andResult = andTriggers.every((trigger) =>
+        this.evaluateTrigger(trigger, marketData),
+      );
     }
 
     // Evaluate OR triggers (at least one must be true)
     let orResult = false;
     if (orTriggers.length > 0) {
-      orResult = orTriggers.some(trigger => this.evaluateTrigger(trigger, marketData));
+      orResult = orTriggers.some((trigger) =>
+        this.evaluateTrigger(trigger, marketData),
+      );
     }
 
     // If we have both AND and OR triggers, both groups must pass
@@ -131,7 +135,10 @@ export class ConditionalOrderService {
   /**
    * Evaluate a single trigger condition
    */
-  private evaluateTrigger(trigger: ConditionalTrigger, marketData: MarketData): boolean {
+  private evaluateTrigger(
+    trigger: ConditionalTrigger,
+    marketData: MarketData,
+  ): boolean {
     let fieldValue: number;
 
     // Get the field value from market data
@@ -187,7 +194,7 @@ export class ConditionalOrderService {
     if (trigger.type === 'time') {
       const targetTime = new Date(trigger.value as string);
       const currentTime = new Date();
-      
+
       switch (trigger.condition) {
         case 'greater_than':
           return currentTime > targetTime;
@@ -195,7 +202,9 @@ export class ConditionalOrderService {
           return currentTime < targetTime;
         case 'equals':
           // For time equality, consider within 1 minute window
-          const timeDiff = Math.abs(currentTime.getTime() - targetTime.getTime());
+          const timeDiff = Math.abs(
+            currentTime.getTime() - targetTime.getTime(),
+          );
           return timeDiff <= 60000; // 1 minute in milliseconds
         default:
           return false;
@@ -217,7 +226,9 @@ export class ConditionalOrderService {
         return Math.abs(fieldValue - triggerValue) <= tolerance;
       case 'between':
         if (triggerValue2 === undefined) {
-          this.logger.warn(`'between' condition requires value2 for trigger ${trigger.id}`);
+          this.logger.warn(
+            `'between' condition requires value2 for trigger ${trigger.id}`,
+          );
           return false;
         }
         const min = Math.min(triggerValue, triggerValue2);
@@ -244,7 +255,6 @@ export class ConditionalOrderService {
 
       // Execute the order through the order management service
       await this.orderManagementService.executeTriggeredOrder(order);
-
     } catch (error) {
       this.logger.error(
         `Failed to trigger conditional order ${order.id}: ${error.message}`,
@@ -324,9 +334,17 @@ export class ConditionalOrderService {
   /**
    * Validate a conditional trigger
    */
-  validateTrigger(trigger: ConditionalTrigger): { valid: boolean; error?: string } {
+  validateTrigger(trigger: ConditionalTrigger): {
+    valid: boolean;
+    error?: string;
+  } {
     // Check required fields
-    if (!trigger.type || !trigger.condition || !trigger.field || trigger.value === undefined) {
+    if (
+      !trigger.type ||
+      !trigger.condition ||
+      !trigger.field ||
+      trigger.value === undefined
+    ) {
       return { valid: false, error: 'Missing required trigger fields' };
     }
 
@@ -346,7 +364,10 @@ export class ConditionalOrderService {
 
     // Validate numeric values for non-time triggers
     if (trigger.type !== 'time' && typeof trigger.value !== 'number') {
-      return { valid: false, error: 'Numeric value required for non-time triggers' };
+      return {
+        valid: false,
+        error: 'Numeric value required for non-time triggers',
+      };
     }
 
     return { valid: true };

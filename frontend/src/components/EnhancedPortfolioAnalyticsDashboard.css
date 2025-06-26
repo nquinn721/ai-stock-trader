@@ -1,0 +1,605 @@
+/* Enhanced Portfolio Analytics Dashboard Styles */
+.enhanced-analytics-dashboard {
+  background: linear-gradient(
+    135deg,
+    #667eea 0%,
+    #764ba2 25%,
+    #f093fb 50%,
+    #f5576c 75%,
+    #4facfe 100%
+  );
+  background-size: 400% 400%;
+  animation: gradientShift 15s ease infinite;
+  min-height: 100vh;
+  padding: 24px;
+  position: relative;
+}
+
+.enhanced-analytics-dashboard::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(
+      circle at 20% 80%,
+      rgba(120, 119, 198, 0.3) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 80% 20%,
+      rgba(255, 119, 198, 0.3) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 40% 40%,
+      rgba(120, 219, 255, 0.2) 0%,
+      transparent 50%
+    );
+  pointer-events: none;
+  z-index: -1;
+}
+
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Main Header Card */
+.analytics-header-card {
+  background: rgba(255, 255, 255, 0.15) !important;
+  backdrop-filter: blur(20px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  border-radius: 24px !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1) !important;
+  margin-bottom: 32px !important;
+}
+
+.analytics-header-content {
+  padding: 32px !important;
+}
+
+.analytics-title {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: 800 !important;
+  font-size: 2.5rem !important;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-bottom: 16px !important;
+}
+
+.export-button {
+  background: linear-gradient(135deg, #ff6b6b 0%, #feca57 100%) !important;
+  border: none !important;
+  border-radius: 16px !important;
+  padding: 12px 24px !important;
+  color: white !important;
+  font-weight: 600 !important;
+  box-shadow: 0 4px 16px rgba(255, 107, 107, 0.3) !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.export-button:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 24px rgba(255, 107, 107, 0.4) !important;
+}
+
+/* Enhanced Tabs */
+.analytics-tabs {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border-radius: 20px !important;
+  padding: 8px !important;
+  margin-bottom: 0 !important;
+  border: none !important;
+}
+
+.analytics-tab {
+  color: rgba(255, 255, 255, 0.7) !important;
+  font-weight: 600 !important;
+  border-radius: 16px !important;
+  margin: 0 4px !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  text-transform: none !important;
+}
+
+.analytics-tab.Mui-selected {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0.1) 100%) !important;
+  color: white !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1) !important;
+}
+
+.analytics-tab:hover {
+  background: rgba(255, 255, 255, 0.1) !important;
+  transform: translateY(-1px) !important;
+}
+
+/* Metric Cards Grid */
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+.metric-card {
+  background: rgba(255, 255, 255, 0.15) !important;
+  backdrop-filter: blur(20px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  border-radius: 20px !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1) !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  overflow: hidden !important;
+  position: relative !important;
+}
+
+.metric-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #ff6b6b, #feca57, #48dbfb, #ff9ff3, #54a0ff);
+  border-radius: 20px 20px 0 0;
+}
+
+.metric-card:hover {
+  transform: translateY(-8px) !important;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.2) !important;
+}
+
+.metric-card .MuiCardContent-root {
+  padding: 32px !important;
+}
+
+.metric-label {
+  color: rgba(255, 255, 255, 0.8) !important;
+  font-size: 0.875rem !important;
+  font-weight: 600 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 1px !important;
+  margin-bottom: 12px !important;
+}
+
+.metric-value {
+  color: white !important;
+  font-size: 2.5rem !important;
+  font-weight: 800 !important;
+  line-height: 1 !important;
+  margin-bottom: 8px !important;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.metric-value.negative {
+  color: #ff4757 !important;
+}
+
+.metric-subtext {
+  color: rgba(255, 255, 255, 0.6) !important;
+  font-size: 0.875rem !important;
+  font-weight: 500 !important;
+}
+
+.metric-change {
+  font-size: 0.875rem !important;
+  font-weight: 600 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+}
+
+.metric-change.positive {
+  color: #2ed573 !important;
+}
+
+.metric-change.negative {
+  color: #ff4757 !important;
+}
+
+.metric-change.neutral {
+  color: rgba(255, 255, 255, 0.7) !important;
+}
+
+/* Statistics Styling */
+.stat-label {
+  color: rgba(255, 255, 255, 0.8) !important;
+  font-weight: 600 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 1px !important;
+  font-size: 0.875rem !important;
+}
+
+.stat-value {
+  color: white !important;
+  font-weight: 700 !important;
+  font-size: 1.1rem !important;
+}
+
+/* Chart Cards */
+.chart-card {
+  background: rgba(255, 255, 255, 0.15) !important;
+  backdrop-filter: blur(20px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  border-radius: 24px !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1) !important;
+  margin-bottom: 32px !important;
+  overflow: hidden !important;
+}
+
+.chart-card-header {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%) !important;
+}
+
+.chart-card .MuiCardHeader-root {
+  padding: 24px 32px !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.chart-card .MuiCardHeader-title {
+  color: white !important;
+  font-size: 1.5rem !important;
+  font-weight: 700 !important;
+}
+
+.chart-card .MuiCardContent-root {
+  padding: 32px !important;
+}
+
+/* Performance Controls */
+.performance-controls {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border-radius: 16px !important;
+  padding: 16px !important;
+  margin-bottom: 24px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 16px !important;
+}
+
+.performance-select .MuiOutlinedInput-root {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border-radius: 12px !important;
+  color: white !important;
+}
+
+.performance-select .MuiOutlinedInput-notchedOutline {
+  border-color: rgba(255, 255, 255, 0.3) !important;
+}
+
+.performance-select .MuiInputLabel-root {
+  color: rgba(255, 255, 255, 0.8) !important;
+}
+
+.performance-select .MuiSelect-icon {
+  color: rgba(255, 255, 255, 0.8) !important;
+}
+
+/* Loading States */
+.loading-container {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 64px !important;
+  background: rgba(255, 255, 255, 0.1) !important;
+  border-radius: 24px !important;
+  backdrop-filter: blur(20px) !important;
+}
+
+.loading-spinner {
+  color: white !important;
+  margin-bottom: 16px !important;
+}
+
+.loading-text {
+  color: rgba(255, 255, 255, 0.8) !important;
+  font-size: 1.1rem !important;
+  font-weight: 600 !important;
+}
+
+/* Error States */
+.error-alert {
+  background: rgba(255, 71, 87, 0.15) !important;
+  border: 1px solid rgba(255, 71, 87, 0.3) !important;
+  border-radius: 16px !important;
+  backdrop-filter: blur(20px) !important;
+  color: white !important;
+}
+
+/* Tab Content */
+.tab-content {
+  padding: 0 !important;
+}
+
+/* Charts Grid Layout */
+.charts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+.large-chart {
+  grid-column: span 2;
+}
+
+@media (max-width: 1024px) {
+  .large-chart {
+    grid-column: span 1;
+  }
+}
+
+@media (max-width: 768px) {
+  .charts-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .enhanced-analytics-dashboard {
+    padding: 16px;
+  }
+  
+  .analytics-title {
+    font-size: 2rem !important;
+  }
+  
+  .metrics-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  
+  .metric-card .MuiCardContent-root {
+    padding: 24px !important;
+  }
+  
+  .chart-card .MuiCardHeader-root,
+  .chart-card .MuiCardContent-root {
+    padding: 20px !important;
+  }
+}
+
+/* Animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.metric-card,
+.chart-card {
+  animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.metric-card:nth-child(1) { animation-delay: 0.1s; }
+.metric-card:nth-child(2) { animation-delay: 0.2s; }
+.metric-card:nth-child(3) { animation-delay: 0.3s; }
+.metric-card:nth-child(4) { animation-delay: 0.4s; }
+
+/* Chart Customizations */
+.recharts-wrapper {
+  color: white !important;
+}
+
+.recharts-cartesian-axis-tick text {
+  fill: rgba(255, 255, 255, 0.8) !important;
+}
+
+.recharts-cartesian-grid line {
+  stroke: rgba(255, 255, 255, 0.1) !important;
+}
+
+.recharts-legend-wrapper {
+  color: white !important;
+}
+
+.recharts-tooltip-wrapper {
+  background: rgba(0, 0, 0, 0.8) !important;
+  border-radius: 12px !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+}
+
+.recharts-tooltip-content {
+  background: rgba(0, 0, 0, 0.9) !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  border-radius: 12px !important;
+  color: white !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
+}
+
+.chart-content {
+  background: rgba(0, 0, 0, 0.05) !important;
+}
+
+.chart-grid {
+  opacity: 0.3 !important;
+}
+
+/* Tab Panel Content */
+.MuiBox-root[role="tabpanel"] {
+  padding: 0 !important;
+}
+
+/* Correlation Table Styles */
+.correlation-table-container {
+  overflow-x: auto;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.correlation-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: transparent;
+}
+
+.correlation-header {
+  padding: 16px 12px;
+  text-align: left;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.1);
+  border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+.correlation-header.correlation-asset {
+  text-align: center;
+  font-size: 0.875rem;
+}
+
+.correlation-asset-name {
+  padding: 12px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.correlation-cell {
+  padding: 12px;
+  text-align: center;
+  font-weight: 600;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+}
+
+.correlation-cell:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  z-index: 10;
+  position: relative;
+}
+
+/* Diversification Analysis */
+.diversification-title {
+  color: rgba(255, 255, 255, 0.9) !important;
+  font-weight: 600 !important;
+  margin-bottom: 16px !important;
+}
+
+.diversification-score {
+  color: #2ed573 !important;
+  font-weight: 800 !important;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  margin-bottom: 16px !important;
+}
+
+.diversification-description {
+  color: rgba(255, 255, 255, 0.7) !important;
+  line-height: 1.6 !important;
+  margin-bottom: 24px !important;
+}
+
+.correlation-stat-label {
+  color: rgba(255, 255, 255, 0.8) !important;
+  font-weight: 600 !important;
+}
+
+/* Sector Analysis Styles */
+.sector-chart-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.sector-breakdown {
+  padding: 20px;
+}
+
+.sector-item {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+}
+
+.sector-item:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateY(-2px);
+}
+
+.sector-name {
+  color: rgba(255, 255, 255, 0.9) !important;
+  font-weight: 600 !important;
+  margin-bottom: 8px !important;
+}
+
+.sector-allocation {
+  color: #2ed573 !important;
+  font-weight: 700 !important;
+}
+
+/* Benchmark Comparison Styles */
+.benchmarks-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 24px;
+}
+
+.benchmark-card {
+  background: rgba(255, 255, 255, 0.08) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  border-radius: 16px !important;
+  transition: all 0.3s ease !important;
+}
+
+.benchmark-card:hover {
+  background: rgba(255, 255, 255, 0.12) !important;
+  transform: translateY(-4px) !important;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.2) !important;
+}
+
+.benchmark-name {
+  color: rgba(255, 255, 255, 0.9) !important;
+  font-weight: 700 !important;
+  text-align: center !important;
+  margin-bottom: 16px !important;
+}
+
+.benchmark-metric {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  padding: 8px 0 !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.benchmark-metric:last-child {
+  border-bottom: none !important;
+}
+
+.benchmark-label {
+  color: rgba(255, 255, 255, 0.7) !important;
+  font-weight: 500 !important;
+}
+
+.benchmark-value {
+  color: rgba(255, 255, 255, 0.95) !important;
+  font-weight: 700 !important;
+}
+
+.benchmark-value.positive {
+  color: #2ed573 !important;
+}
+
+.benchmark-value.negative {
+  color: #ff4757 !important;
+}
+
+/* Optimization Description */
+.optimization-description {
+  color: rgba(255, 255, 255, 0.8) !important;
+  line-height: 1.6 !important;
+  margin-bottom: 24px !important;
+}

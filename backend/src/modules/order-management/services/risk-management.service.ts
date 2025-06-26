@@ -71,7 +71,10 @@ export class RiskManagementService {
   /**
    * Validate an order against risk management rules
    */
-  async validateOrder(order: Order, portfolio: Portfolio): Promise<RiskValidationResult> {
+  async validateOrder(
+    order: Order,
+    portfolio: Portfolio,
+  ): Promise<RiskValidationResult> {
     const result: RiskValidationResult = {
       valid: true,
       errors: [],
@@ -93,7 +96,12 @@ export class RiskManagementService {
       await this.validateOrderValue(order, riskLimits, result);
 
       // Validate portfolio concentration
-      await this.validateConcentration(order, portfolioRisk, riskLimits, result);
+      await this.validateConcentration(
+        order,
+        portfolioRisk,
+        riskLimits,
+        result,
+      );
 
       // Validate buying power
       await this.validateBuyingPower(order, portfolioRisk, riskLimits, result);
@@ -102,11 +110,15 @@ export class RiskManagementService {
       await this.validateDailyLoss(order, portfolioRisk, riskLimits, result);
 
       // Validate pattern day trading rules
-      await this.validatePatternDayTrading(order, portfolio, riskLimits, result);
+      await this.validatePatternDayTrading(
+        order,
+        portfolio,
+        riskLimits,
+        result,
+      );
 
       // Set overall validity
       result.valid = result.errors.length === 0;
-
     } catch (error) {
       this.logger.error(`Risk validation error: ${error.message}`);
       result.valid = false;
@@ -140,9 +152,12 @@ export class RiskManagementService {
     let totalPositionValue = 0;
 
     for (const position of positions) {
-      const currentValue = Number(position.quantity) * Number(position.stock.currentPrice);
-      const unrealizedPnL = currentValue - (Number(position.quantity) * Number(position.averagePrice));
-      
+      const currentValue =
+        Number(position.quantity) * Number(position.stock.currentPrice);
+      const unrealizedPnL =
+        currentValue -
+        Number(position.quantity) * Number(position.averagePrice);
+
       const positionRisk: PositionRisk = {
         symbol: position.symbol,
         currentValue,
@@ -156,34 +171,49 @@ export class RiskManagementService {
 
       // Accumulate sector concentrations
       const sectorValue = sectorConcentrations.get(position.stock.sector) || 0;
-      sectorConcentrations.set(position.stock.sector, sectorValue + currentValue);
+      sectorConcentrations.set(
+        position.stock.sector,
+        sectorValue + currentValue,
+      );
     }
 
     const totalEquity = Number(portfolio.totalValue);
     const totalCash = Number(portfolio.currentCash);
 
     // Calculate position percentages
-    positionRisks.forEach(risk => {
-      risk.percentOfPortfolio = totalEquity > 0 ? (risk.currentValue / totalEquity) * 100 : 0;
+    positionRisks.forEach((risk) => {
+      risk.percentOfPortfolio =
+        totalEquity > 0 ? (risk.currentValue / totalEquity) * 100 : 0;
     });
 
     // Convert sector concentrations to percentages
     for (const [sector, value] of sectorConcentrations) {
-      sectorConcentrations.set(sector, totalEquity > 0 ? (value / totalEquity) * 100 : 0);
+      sectorConcentrations.set(
+        sector,
+        totalEquity > 0 ? (value / totalEquity) * 100 : 0,
+      );
     }
 
     // Calculate daily P&L (simplified - would need more sophisticated tracking)
-    const dailyPnL = positionRisks.reduce((sum, risk) => sum + risk.unrealizedPnL, 0);
+    const dailyPnL = positionRisks.reduce(
+      (sum, risk) => sum + risk.unrealizedPnL,
+      0,
+    );
 
     // Calculate risk score (0-100)
-    const riskScore = this.calculateRiskScore(positionRisks, sectorConcentrations, totalEquity);
+    const riskScore = this.calculateRiskScore(
+      positionRisks,
+      sectorConcentrations,
+      totalEquity,
+    );
 
     return {
       totalEquity,
       totalPositionValue,
       totalCash,
       buyingPower: totalCash * 2, // 2:1 margin for regular accounts
-      dayTradingBuyingPower: totalCash * this.defaultRiskLimits.dayTradingBuyingPowerMultiplier,
+      dayTradingBuyingPower:
+        totalCash * this.defaultRiskLimits.dayTradingBuyingPowerMultiplier,
       positionRisks,
       sectorConcentrations,
       dailyPnL,
@@ -202,11 +232,17 @@ export class RiskManagementService {
     let riskScore = 0;
 
     // Position concentration risk (0-40 points)
-    const maxPositionPercent = Math.max(...positionRisks.map(p => p.percentOfPortfolio), 0);
+    const maxPositionPercent = Math.max(
+      ...positionRisks.map((p) => p.percentOfPortfolio),
+      0,
+    );
     riskScore += Math.min(maxPositionPercent * 2, 40);
 
     // Sector concentration risk (0-30 points)
-    const maxSectorPercent = Math.max(...Array.from(sectorConcentrations.values()), 0);
+    const maxSectorPercent = Math.max(
+      ...Array.from(sectorConcentrations.values()),
+      0,
+    );
     riskScore += Math.min(maxSectorPercent * 0.75, 30);
 
     // Number of positions risk (0-20 points)
@@ -217,9 +253,12 @@ export class RiskManagementService {
     }
 
     // Unrealized loss risk (0-10 points)
-    const totalUnrealizedPnL = positionRisks.reduce((sum, p) => sum + p.unrealizedPnL, 0);
+    const totalUnrealizedPnL = positionRisks.reduce(
+      (sum, p) => sum + p.unrealizedPnL,
+      0,
+    );
     if (totalUnrealizedPnL < 0 && totalEquity > 0) {
-      const lossPercent = Math.abs(totalUnrealizedPnL) / totalEquity * 100;
+      const lossPercent = (Math.abs(totalUnrealizedPnL) / totalEquity) * 100;
       riskScore += Math.min(lossPercent, 10);
     }
 
@@ -236,14 +275,14 @@ export class RiskManagementService {
     result: RiskValidationResult,
   ): Promise<void> {
     const totalEquity = Number(portfolio.totalValue);
-    
+
     if (totalEquity < 2000) {
       result.errors.push('Account equity below minimum required ($2,000)');
     }
 
     if (totalEquity < riskLimits.patternDayTraderMinEquity) {
       result.warnings.push(
-        `Account equity below pattern day trader minimum ($${riskLimits.patternDayTraderMinEquity.toLocaleString()})`
+        `Account equity below pattern day trader minimum ($${riskLimits.patternDayTraderMinEquity.toLocaleString()})`,
       );
     }
   }
@@ -267,27 +306,30 @@ export class RiskManagementService {
     }
 
     const orderValue = Number(order.quantity) * Number(stock.currentPrice);
-    const orderPercentOfPortfolio = portfolioRisk.totalEquity > 0 
-      ? (orderValue / portfolioRisk.totalEquity) * 100 
-      : 0;
+    const orderPercentOfPortfolio =
+      portfolioRisk.totalEquity > 0
+        ? (orderValue / portfolioRisk.totalEquity) * 100
+        : 0;
 
     // Check if this order would exceed position size limits
-    const existingPosition = portfolioRisk.positionRisks.find(p => p.symbol === order.symbol);
-    const newPositionPercent = existingPosition 
+    const existingPosition = portfolioRisk.positionRisks.find(
+      (p) => p.symbol === order.symbol,
+    );
+    const newPositionPercent = existingPosition
       ? existingPosition.percentOfPortfolio + orderPercentOfPortfolio
       : orderPercentOfPortfolio;
 
     if (newPositionPercent > riskLimits.maxPositionSize) {
       result.errors.push(
         `Order would result in ${newPositionPercent.toFixed(2)}% position in ${order.symbol}, ` +
-        `exceeding limit of ${riskLimits.maxPositionSize}%`
+          `exceeding limit of ${riskLimits.maxPositionSize}%`,
       );
     }
 
     if (newPositionPercent > riskLimits.maxPortfolioConcentration) {
       result.errors.push(
         `Order would result in ${newPositionPercent.toFixed(2)}% concentration in ${order.symbol}, ` +
-        `exceeding limit of ${riskLimits.maxPortfolioConcentration}%`
+          `exceeding limit of ${riskLimits.maxPortfolioConcentration}%`,
       );
     }
   }
@@ -311,7 +353,7 @@ export class RiskManagementService {
     if (orderValue > riskLimits.maxOrderValue) {
       result.errors.push(
         `Order value $${orderValue.toLocaleString()} exceeds maximum allowed ` +
-        `$${riskLimits.maxOrderValue.toLocaleString()}`
+          `$${riskLimits.maxOrderValue.toLocaleString()}`,
       );
     }
   }
@@ -332,18 +374,20 @@ export class RiskManagementService {
     if (!stock) return;
 
     const orderValue = Number(order.quantity) * Number(stock.currentPrice);
-    const orderPercentOfPortfolio = portfolioRisk.totalEquity > 0 
-      ? (orderValue / portfolioRisk.totalEquity) * 100 
-      : 0;
+    const orderPercentOfPortfolio =
+      portfolioRisk.totalEquity > 0
+        ? (orderValue / portfolioRisk.totalEquity) * 100
+        : 0;
 
     // Check sector concentration
-    const currentSectorPercent = portfolioRisk.sectorConcentrations.get(stock.sector) || 0;
+    const currentSectorPercent =
+      portfolioRisk.sectorConcentrations.get(stock.sector) || 0;
     const newSectorPercent = currentSectorPercent + orderPercentOfPortfolio;
 
     if (newSectorPercent > riskLimits.maxSectorConcentration) {
       result.warnings.push(
         `Order would result in ${newSectorPercent.toFixed(2)}% concentration in ${stock.sector} sector, ` +
-        `approaching limit of ${riskLimits.maxSectorConcentration}%`
+          `approaching limit of ${riskLimits.maxSectorConcentration}%`,
       );
     }
   }
@@ -359,9 +403,13 @@ export class RiskManagementService {
   ): Promise<void> {
     if (order.side === OrderSide.SELL) {
       // For sell orders, check if we have enough shares
-      const position = portfolioRisk.positionRisks.find(p => p.symbol === order.symbol);
+      const position = portfolioRisk.positionRisks.find(
+        (p) => p.symbol === order.symbol,
+      );
       if (!position || position.currentValue < Number(order.quantity)) {
-        result.errors.push(`Insufficient shares to sell ${order.quantity} of ${order.symbol}`);
+        result.errors.push(
+          `Insufficient shares to sell ${order.quantity} of ${order.symbol}`,
+        );
       }
       return;
     }
@@ -374,12 +422,13 @@ export class RiskManagementService {
     if (!stock) return;
 
     const orderValue = Number(order.quantity) * Number(stock.currentPrice);
-    const requiredBuyingPower = order.orderType === OrderType.MARKET ? orderValue : orderValue * 0.5; // 50% margin for limit orders
+    const requiredBuyingPower =
+      order.orderType === OrderType.MARKET ? orderValue : orderValue * 0.5; // 50% margin for limit orders
 
     if (requiredBuyingPower > portfolioRisk.buyingPower) {
       result.errors.push(
         `Insufficient buying power. Required: $${requiredBuyingPower.toLocaleString()}, ` +
-        `Available: $${portfolioRisk.buyingPower.toLocaleString()}`
+          `Available: $${portfolioRisk.buyingPower.toLocaleString()}`,
       );
     }
   }
@@ -395,7 +444,7 @@ export class RiskManagementService {
   ): Promise<void> {
     if (portfolioRisk.dailyPnL < -riskLimits.maxDailyLoss) {
       result.warnings.push(
-        `Daily loss limit reached. Current P&L: $${portfolioRisk.dailyPnL.toLocaleString()}`
+        `Daily loss limit reached. Current P&L: $${portfolioRisk.dailyPnL.toLocaleString()}`,
       );
     }
   }
@@ -423,9 +472,12 @@ export class RiskManagementService {
     // Count same-day buy/sell pairs as day trades
     const dayTrades = this.countDayTrades(recentTrades);
 
-    if (dayTrades >= 3 && Number(portfolio.totalValue) < riskLimits.patternDayTraderMinEquity) {
+    if (
+      dayTrades >= 3 &&
+      Number(portfolio.totalValue) < riskLimits.patternDayTraderMinEquity
+    ) {
       result.warnings.push(
-        'Account flagged as Pattern Day Trader but below minimum equity requirement'
+        'Account flagged as Pattern Day Trader but below minimum equity requirement',
       );
     }
   }
@@ -435,13 +487,13 @@ export class RiskManagementService {
    */
   private countDayTrades(orders: Order[]): number {
     // Group orders by symbol and date
-    const dayTradeMap = new Map<string, { buys: Order[], sells: Order[] }>();
+    const dayTradeMap = new Map<string, { buys: Order[]; sells: Order[] }>();
 
-    orders.forEach(order => {
+    orders.forEach((order) => {
       if (!order.executedAt) return;
-      
+
       const dateKey = `${order.symbol}_${order.executedAt.toISOString().split('T')[0]}`;
-      
+
       if (!dayTradeMap.has(dateKey)) {
         dayTradeMap.set(dateKey, { buys: [], sells: [] });
       }
@@ -457,9 +509,15 @@ export class RiskManagementService {
     // Count day trades (same-day buy and sell)
     let dayTradeCount = 0;
     for (const [, dayData] of dayTradeMap) {
-      const buyQuantity = dayData.buys.reduce((sum, order) => sum + Number(order.quantity), 0);
-      const sellQuantity = dayData.sells.reduce((sum, order) => sum + Number(order.quantity), 0);
-      
+      const buyQuantity = dayData.buys.reduce(
+        (sum, order) => sum + Number(order.quantity),
+        0,
+      );
+      const sellQuantity = dayData.sells.reduce(
+        (sum, order) => sum + Number(order.quantity),
+        0,
+      );
+
       if (buyQuantity > 0 && sellQuantity > 0) {
         dayTradeCount++;
       }
@@ -480,9 +538,15 @@ export class RiskManagementService {
   /**
    * Update risk limits for a portfolio
    */
-  async updateRiskLimits(portfolioId: number, limits: Partial<RiskLimits>): Promise<void> {
+  async updateRiskLimits(
+    portfolioId: number,
+    limits: Partial<RiskLimits>,
+  ): Promise<void> {
     // This would update custom risk limits stored in the database
     // For now, we'll just log the request
-    this.logger.log(`Risk limits update requested for portfolio ${portfolioId}:`, limits);
+    this.logger.log(
+      `Risk limits update requested for portfolio ${portfolioId}:`,
+      limits,
+    );
   }
 }

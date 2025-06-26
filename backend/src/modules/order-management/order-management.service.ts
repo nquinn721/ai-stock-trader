@@ -10,14 +10,14 @@ import {
   OrderType,
   TimeInForce,
 } from '../../entities/order.entity';
-import { MarketHoursService } from '../../utils/market-hours.service';
 import { Portfolio } from '../../entities/portfolio.entity';
 import { Position } from '../../entities/position.entity';
 import { Stock } from '../../entities/stock.entity';
+import { MarketHoursService } from '../../utils/market-hours.service';
 import { PaperTradingService } from '../paper-trading/paper-trading.service';
-import { RiskManagementService } from './services/risk-management.service';
 import { ConditionalOrderService } from './services/conditional-order.service';
 import { OrderExecutionEngine } from './services/order-execution-engine.service';
+import { RiskManagementService } from './services/risk-management.service';
 
 export interface CreateOrderDto {
   portfolioId: number;
@@ -462,8 +462,11 @@ export class OrderManagementService {
     portfolio: Portfolio,
   ): Promise<void> {
     // Perform comprehensive risk management validation
-    const riskValidation = await this.riskManagementService.validateOrder(order, portfolio);
-    
+    const riskValidation = await this.riskManagementService.validateOrder(
+      order,
+      portfolio,
+    );
+
     if (!riskValidation.valid) {
       const errorMessage = riskValidation.errors.join('; ');
       throw new Error(`Order validation failed: ${errorMessage}`);
@@ -471,7 +474,9 @@ export class OrderManagementService {
 
     // Log warnings if any
     if (riskValidation.warnings.length > 0) {
-      this.logger.warn(`Order warnings for ${order.symbol}: ${riskValidation.warnings.join('; ')}`);
+      this.logger.warn(
+        `Order warnings for ${order.symbol}: ${riskValidation.warnings.join('; ')}`,
+      );
     }
 
     // Basic order validation
@@ -525,13 +530,17 @@ export class OrderManagementService {
 
       case OrderType.TRAILING_STOP:
         if (!order.trailAmount && !order.trailPercent) {
-          throw new Error('Either trail amount or trail percent required for trailing stop orders');
+          throw new Error(
+            'Either trail amount or trail percent required for trailing stop orders',
+          );
         }
         break;
 
       case OrderType.BRACKET:
         if (!order.profitTargetPrice || !order.stopLossPrice) {
-          throw new Error('Both profit target and stop loss prices required for bracket orders');
+          throw new Error(
+            'Both profit target and stop loss prices required for bracket orders',
+          );
         }
         break;
     }
@@ -647,13 +656,13 @@ export class OrderManagementService {
     const stock = await this.stockRepository.findOne({
       where: { symbol },
     });
-    
+
     if (!stock) {
       throw new Error(`Stock ${symbol} not found`);
     }
 
     const currentPrice = Number(stock.currentPrice);
-    
+
     return this.createOrder({
       portfolioId,
       symbol,
@@ -662,7 +671,9 @@ export class OrderManagementService {
       quantity,
       trailAmount,
       trailPercent,
-      stopPrice: currentPrice - (trailAmount || (currentPrice * (trailPercent || 0) / 100)),
+      stopPrice:
+        currentPrice -
+        (trailAmount || (currentPrice * (trailPercent || 0)) / 100),
       notes: `Trailing stop - ${trailAmount ? `$${trailAmount}` : `${trailPercent}%`} trail`,
     });
   }
@@ -721,7 +732,10 @@ export class OrderManagementService {
   /**
    * Update trailing stop high water mark
    */
-  private async updateTrailingStops(symbol: string, currentPrice: number): Promise<void> {
+  private async updateTrailingStops(
+    symbol: string,
+    currentPrice: number,
+  ): Promise<void> {
     const trailingStops = await this.orderRepository.find({
       where: {
         symbol,
@@ -732,11 +746,11 @@ export class OrderManagementService {
 
     for (const order of trailingStops) {
       const highWaterMark = Number(order.highWaterMark || currentPrice);
-      
+
       if (currentPrice > highWaterMark) {
         // Update high water mark and adjust stop price
         order.highWaterMark = currentPrice;
-        
+
         let newStopPrice: number;
         if (order.trailAmount) {
           newStopPrice = currentPrice - Number(order.trailAmount);
@@ -755,17 +769,20 @@ export class OrderManagementService {
   /**
    * Check conditional triggers for orders
    */
-  private async checkConditionalTriggers(order: Order, marketData: any): Promise<boolean> {
+  private async checkConditionalTriggers(
+    order: Order,
+    marketData: any,
+  ): Promise<boolean> {
     if (!order.conditionalTriggers || order.conditionalTriggers.length === 0) {
       return false;
     }
 
     const results: boolean[] = [];
-    
+
     for (const trigger of order.conditionalTriggers) {
       let triggerMet = false;
       const value = this.getFieldValue(marketData, trigger.field);
-      
+
       switch (trigger.condition) {
         case 'greater_than':
           triggerMet = value > Number(trigger.value);
@@ -777,10 +794,12 @@ export class OrderManagementService {
           triggerMet = value === Number(trigger.value);
           break;
         case 'between':
-          triggerMet = value >= Number(trigger.value) && value <= Number(trigger.value2 || 0);
+          triggerMet =
+            value >= Number(trigger.value) &&
+            value <= Number(trigger.value2 || 0);
           break;
       }
-      
+
       results.push(triggerMet);
     }
 
@@ -826,8 +845,14 @@ export class OrderManagementService {
 
     const cancelledOrders: Order[] = [];
     for (const order of orders) {
-      if (order.status === OrderStatus.PENDING || order.status === OrderStatus.TRIGGERED) {
-        const cancelled = await this.cancelOrder(order.id, 'OCO group cancelled');
+      if (
+        order.status === OrderStatus.PENDING ||
+        order.status === OrderStatus.TRIGGERED
+      ) {
+        const cancelled = await this.cancelOrder(
+          order.id,
+          'OCO group cancelled',
+        );
         cancelledOrders.push(cancelled);
       }
     }
@@ -868,11 +893,14 @@ export class OrderManagementService {
       const activeOrders = await this.getActiveOrders();
       const stocks = await this.stockRepository.find();
       const stockDataMap = new Map(
-        stocks.map((s) => [s.symbol, {
-          currentPrice: Number(s.currentPrice),
-          volume: Number(s.volume || 0),
-          changePercent: Number(s.changePercent || 0),
-        }]),
+        stocks.map((s) => [
+          s.symbol,
+          {
+            currentPrice: Number(s.currentPrice),
+            volume: Number(s.volume || 0),
+            changePercent: Number(s.changePercent || 0),
+          },
+        ]),
       );
 
       for (const order of activeOrders) {
@@ -886,9 +914,16 @@ export class OrderManagementService {
 
         // Check conditional triggers
         if (order.conditionalTriggers && order.conditionalTriggers.length > 0) {
-          const triggered = await this.checkConditionalTriggers(order, marketData);
+          const triggered = await this.checkConditionalTriggers(
+            order,
+            marketData,
+          );
           if (triggered) {
-            await this.executeOrder(order, marketData.currentPrice, 'Conditional trigger activated');
+            await this.executeOrder(
+              order,
+              marketData.currentPrice,
+              'Conditional trigger activated',
+            );
             continue;
           }
         }
@@ -937,10 +972,10 @@ export class OrderManagementService {
    */
   async getConditionalOrders(portfolioId: number): Promise<Order[]> {
     return this.orderRepository.find({
-      where: { 
+      where: {
         portfolioId,
         conditionalTriggers: Not(null),
-        status: In([OrderStatus.PENDING, OrderStatus.TRIGGERED])
+        status: In([OrderStatus.PENDING, OrderStatus.TRIGGERED]),
       },
       relations: ['stock'],
       order: { createdAt: 'DESC' },
@@ -952,10 +987,14 @@ export class OrderManagementService {
    */
   async getBracketOrders(portfolioId: number): Promise<Order[]> {
     return this.orderRepository.find({
-      where: { 
+      where: {
         portfolioId,
         orderType: OrderType.BRACKET,
-        status: In([OrderStatus.PENDING, OrderStatus.TRIGGERED, OrderStatus.EXECUTED])
+        status: In([
+          OrderStatus.PENDING,
+          OrderStatus.TRIGGERED,
+          OrderStatus.EXECUTED,
+        ]),
       },
       relations: ['stock'],
       order: { createdAt: 'DESC' },
@@ -970,8 +1009,8 @@ export class OrderManagementService {
       .createQueryBuilder('order')
       .where('order.portfolioId = :portfolioId', { portfolioId })
       .andWhere('order.ocoGroupId IS NOT NULL')
-      .andWhere('order.status IN (:...statuses)', { 
-        statuses: [OrderStatus.PENDING, OrderStatus.TRIGGERED] 
+      .andWhere('order.status IN (:...statuses)', {
+        statuses: [OrderStatus.PENDING, OrderStatus.TRIGGERED],
       })
       .leftJoinAndSelect('order.stock', 'stock')
       .orderBy('order.createdAt', 'DESC')
@@ -979,7 +1018,7 @@ export class OrderManagementService {
 
     // Group by OCO group ID
     const groupedOrders = new Map<string, Order[]>();
-    ocoOrders.forEach(order => {
+    ocoOrders.forEach((order) => {
       if (order.ocoGroupId) {
         if (!groupedOrders.has(order.ocoGroupId)) {
           groupedOrders.set(order.ocoGroupId, []);
@@ -997,7 +1036,10 @@ export class OrderManagementService {
   /**
    * Modify an existing order
    */
-  async modifyOrder(orderId: number, updates: Partial<CreateOrderDto>): Promise<Order> {
+  async modifyOrder(
+    orderId: number,
+    updates: Partial<CreateOrderDto>,
+  ): Promise<Order> {
     const order = await this.orderRepository.findOne({
       where: { id: orderId },
       relations: ['portfolio'],
@@ -1008,7 +1050,9 @@ export class OrderManagementService {
     }
 
     if (order.status !== OrderStatus.PENDING) {
-      throw new Error(`Cannot modify order ${orderId} - status: ${order.status}`);
+      throw new Error(
+        `Cannot modify order ${orderId} - status: ${order.status}`,
+      );
     }
 
     // Cancel the existing order and create a new one with updates

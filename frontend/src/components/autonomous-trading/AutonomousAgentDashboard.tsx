@@ -675,7 +675,7 @@ const AutonomousAgentDashboard: React.FC = () => {
                 value={deploymentConfig.mode}
                 label="Mode"
                 onChange={(e) =>
-                  setDeploymentConfig((prev) => ({
+                  setDeploymentConfig((prev: DeploymentConfig) => ({
                     ...prev,
                     mode: e.target.value as "paper" | "live",
                   }))
@@ -691,7 +691,7 @@ const AutonomousAgentDashboard: React.FC = () => {
               type="number"
               value={deploymentConfig.initialCapital}
               onChange={(e) =>
-                setDeploymentConfig((prev) => ({
+                setDeploymentConfig((prev: DeploymentConfig) => ({
                   ...prev,
                   initialCapital: Number(e.target.value),
                 }))
@@ -703,7 +703,7 @@ const AutonomousAgentDashboard: React.FC = () => {
               type="number"
               value={deploymentConfig.maxPositions}
               onChange={(e) =>
-                setDeploymentConfig((prev) => ({
+                setDeploymentConfig((prev: DeploymentConfig) => ({
                   ...prev,
                   maxPositions: Number(e.target.value),
                 }))
@@ -715,7 +715,7 @@ const AutonomousAgentDashboard: React.FC = () => {
                 value={deploymentConfig.executionFrequency}
                 label="Execution Frequency"
                 onChange={(e) =>
-                  setDeploymentConfig((prev) => ({
+                  setDeploymentConfig((prev: DeploymentConfig) => ({
                     ...prev,
                     executionFrequency: e.target.value as
                       | "minute"
@@ -735,7 +735,7 @@ const AutonomousAgentDashboard: React.FC = () => {
               type="number"
               value={deploymentConfig.riskLimits.maxDrawdown}
               onChange={(e) =>
-                setDeploymentConfig((prev) => ({
+                setDeploymentConfig((prev: DeploymentConfig) => ({
                   ...prev,
                   riskLimits: {
                     ...prev.riskLimits,
@@ -750,7 +750,7 @@ const AutonomousAgentDashboard: React.FC = () => {
               type="number"
               value={deploymentConfig.riskLimits.dailyLossLimit}
               onChange={(e) =>
-                setDeploymentConfig((prev) => ({
+                setDeploymentConfig((prev: DeploymentConfig) => ({
                   ...prev,
                   riskLimits: {
                     ...prev.riskLimits,

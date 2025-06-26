@@ -1,10 +1,10 @@
-import axios from 'axios';
+import axios from "axios";
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:8000";
 
 export interface StrategyComponent {
   id: string;
-  type: 'indicator' | 'condition' | 'action';
+  type: "indicator" | "condition" | "action";
   name: string;
   category: string;
   parameters: Record<string, any>;
@@ -14,7 +14,7 @@ export interface StrategyComponent {
 
 export interface RiskRule {
   id: string;
-  type: 'position_size' | 'stop_loss' | 'take_profit' | 'max_drawdown';
+  type: "position_size" | "stop_loss" | "take_profit" | "max_drawdown";
   parameters: Record<string, any>;
 }
 
@@ -39,12 +39,12 @@ export interface TradingStrategy {
   riskRules: RiskRule[];
   symbols: string[];
   timeframe: string;
-  status: 'draft' | 'validated' | 'deployed' | 'archived';
+  status: "draft" | "validated" | "deployed" | "archived";
   version: number;
   createdAt: Date;
   updatedAt: Date;
   backtestResults?: any[];
-  deploymentStatus?: 'idle' | 'running' | 'paused' | 'error';
+  deploymentStatus?: "idle" | "running" | "paused" | "error";
 }
 
 export interface ValidationResult {
@@ -78,7 +78,7 @@ export interface BacktestResult {
   equity: Array<{ date: string; value: number }>;
   trades: Array<{
     symbol: string;
-    action: 'buy' | 'sell';
+    action: "buy" | "sell";
     quantity: number;
     price: number;
     timestamp: Date;
@@ -93,7 +93,7 @@ export interface StrategyTemplate {
   name: string;
   description: string;
   category: string;
-  difficulty: 'beginner' | 'intermediate' | 'advanced';
+  difficulty: "beginner" | "intermediate" | "advanced";
   components: StrategyComponent[];
   riskRules: RiskRule[];
   defaultSymbols: string[];
@@ -108,7 +108,7 @@ export interface StrategyTemplate {
 export interface ComponentDefinition {
   id: string;
   name: string;
-  type: 'indicator' | 'condition' | 'action';
+  type: "indicator" | "condition" | "action";
   category: string;
   description: string;
   parameters: Record<string, any>;
@@ -130,7 +130,7 @@ class StrategyBuilderService {
   // Strategy Management
   async createStrategy(
     strategyConfig: StrategyConfig,
-    userId: string = 'demo-user'
+    userId: string = "demo-user"
   ): Promise<ApiResponse<TradingStrategy>> {
     try {
       const response = await axios.post(
@@ -139,19 +139,19 @@ class StrategyBuilderService {
       );
       return {
         success: true,
-        data: response.data
+        data: response.data,
       };
     } catch (error: any) {
       return {
         success: false,
         data: {} as TradingStrategy,
-        error: error.response?.data?.message || error.message
+        error: error.response?.data?.message || error.message,
       };
     }
   }
 
   async getUserStrategies(
-    userId: string = 'demo-user'
+    userId: string = "demo-user"
   ): Promise<ApiResponse<TradingStrategy[]>> {
     try {
       const response = await axios.get(
@@ -159,29 +159,31 @@ class StrategyBuilderService {
       );
       return {
         success: true,
-        data: response.data
+        data: response.data,
       };
     } catch (error: any) {
       return {
         success: false,
         data: [],
-        error: error.response?.data?.message || error.message
+        error: error.response?.data?.message || error.message,
       };
     }
   }
 
   async getStrategy(strategyId: string): Promise<ApiResponse<TradingStrategy>> {
     try {
-      const response = await axios.get(`${this.baseURL}/strategies/${strategyId}`);
+      const response = await axios.get(
+        `${this.baseURL}/strategies/${strategyId}`
+      );
       return {
         success: true,
-        data: response.data
+        data: response.data,
       };
     } catch (error: any) {
       return {
         success: false,
         data: {} as TradingStrategy,
-        error: error.response?.data?.message || error.message
+        error: error.response?.data?.message || error.message,
       };
     }
   }
@@ -197,36 +199,38 @@ class StrategyBuilderService {
       );
       return {
         success: true,
-        data: response.data
+        data: response.data,
       };
     } catch (error: any) {
       return {
         success: false,
         data: {} as TradingStrategy,
-        error: error.response?.data?.message || error.message
+        error: error.response?.data?.message || error.message,
       };
     }
   }
 
-  async deleteStrategy(strategyId: string): Promise<ApiResponse<{ message: string }>> {
+  async deleteStrategy(
+    strategyId: string
+  ): Promise<ApiResponse<{ message: string }>> {
     try {
       await axios.delete(`${this.baseURL}/strategies/${strategyId}`);
       return {
         success: true,
-        data: { message: 'Strategy deleted successfully' }
+        data: { message: "Strategy deleted successfully" },
       };
     } catch (error: any) {
       return {
         success: false,
-        data: { message: '' },
-        error: error.response?.data?.message || error.message
+        data: { message: "" },
+        error: error.response?.data?.message || error.message,
       };
     }
   }
 
   async duplicateStrategy(
     strategyId: string,
-    userId: string = 'demo-user',
+    userId: string = "demo-user",
     newName?: string
   ): Promise<ApiResponse<TradingStrategy>> {
     try {
@@ -236,29 +240,33 @@ class StrategyBuilderService {
       );
       return {
         success: true,
-        data: response.data
+        data: response.data,
       };
     } catch (error: any) {
       return {
         success: false,
         data: {} as TradingStrategy,
-        error: error.response?.data?.message || error.message
+        error: error.response?.data?.message || error.message,
       };
     }
   }
 
-  async validateStrategy(strategyId: string): Promise<ApiResponse<ValidationResult>> {
+  async validateStrategy(
+    strategyId: string
+  ): Promise<ApiResponse<ValidationResult>> {
     try {
-      const response = await axios.post(`${this.baseURL}/strategies/${strategyId}/validate`);
+      const response = await axios.post(
+        `${this.baseURL}/strategies/${strategyId}/validate`
+      );
       return {
         success: true,
-        data: response.data
+        data: response.data,
       };
     } catch (error: any) {
       return {
         success: false,
-        data: { isValid: false, errors: ['Validation failed'] },
-        error: error.response?.data?.message || error.message
+        data: { isValid: false, errors: ["Validation failed"] },
+        error: error.response?.data?.message || error.message,
       };
     }
   }
@@ -275,29 +283,33 @@ class StrategyBuilderService {
       );
       return {
         success: true,
-        data: response.data
+        data: response.data,
       };
     } catch (error: any) {
       return {
         success: false,
         data: {} as BacktestResult,
-        error: error.response?.data?.message || error.message
+        error: error.response?.data?.message || error.message,
       };
     }
   }
 
-  async getBacktestResults(strategyId: string): Promise<ApiResponse<BacktestResult[]>> {
+  async getBacktestResults(
+    strategyId: string
+  ): Promise<ApiResponse<BacktestResult[]>> {
     try {
-      const response = await axios.get(`${this.baseURL}/strategies/${strategyId}/backtests`);
+      const response = await axios.get(
+        `${this.baseURL}/strategies/${strategyId}/backtests`
+      );
       return {
         success: true,
-        data: response.data
+        data: response.data,
       };
     } catch (error: any) {
       return {
         success: false,
         data: [],
-        error: error.response?.data?.message || error.message
+        error: error.response?.data?.message || error.message,
       };
     }
   }
@@ -308,13 +320,13 @@ class StrategyBuilderService {
       const response = await axios.get(`${this.baseURL}/templates`);
       return {
         success: true,
-        data: response.data
+        data: response.data,
       };
     } catch (error: any) {
       return {
         success: false,
         data: [],
-        error: error.response?.data?.message || error.message
+        error: error.response?.data?.message || error.message,
       };
     }
   }
@@ -322,7 +334,7 @@ class StrategyBuilderService {
   async createStrategyFromTemplate(
     templateId: string,
     name: string,
-    userId: string = 'demo-user'
+    userId: string = "demo-user"
   ): Promise<ApiResponse<TradingStrategy>> {
     try {
       const response = await axios.post(
@@ -331,13 +343,13 @@ class StrategyBuilderService {
       );
       return {
         success: true,
-        data: response.data
+        data: response.data,
       };
     } catch (error: any) {
       return {
         success: false,
         data: {} as TradingStrategy,
-        error: error.response?.data?.message || error.message
+        error: error.response?.data?.message || error.message,
       };
     }
   }
@@ -348,13 +360,13 @@ class StrategyBuilderService {
       const response = await axios.get(`${this.baseURL}/components`);
       return {
         success: true,
-        data: response.data
+        data: response.data,
       };
     } catch (error: any) {
       return {
         success: false,
         data: [],
-        error: error.response?.data?.message || error.message
+        error: error.response?.data?.message || error.message,
       };
     }
   }
@@ -364,13 +376,13 @@ class StrategyBuilderService {
       const response = await axios.get(`${this.baseURL}/components/categories`);
       return {
         success: true,
-        data: response.data
+        data: response.data,
       };
     } catch (error: any) {
       return {
         success: false,
         data: [],
-        error: error.response?.data?.message || error.message
+        error: error.response?.data?.message || error.message,
       };
     }
   }
@@ -392,13 +404,13 @@ class StrategyBuilderService {
       );
       return {
         success: true,
-        data: response.data
+        data: response.data,
       };
     } catch (error: any) {
       return {
         success: false,
-        data: { message: '' },
-        error: error.response?.data?.message || error.message
+        data: { message: "" },
+        error: error.response?.data?.message || error.message,
       };
     }
   }
@@ -408,26 +420,29 @@ class StrategyBuilderService {
     category?: string;
     tags?: string[];
     minRating?: number;
-    sortBy?: 'rating' | 'usage' | 'recent';
+    sortBy?: "rating" | "usage" | "recent";
   }): Promise<ApiResponse<StrategyTemplate[]>> {
     try {
       const params = new URLSearchParams();
-      if (query.search) params.append('search', query.search);
-      if (query.category) params.append('category', query.category);
-      if (query.tags) query.tags.forEach(tag => params.append('tags', tag));
-      if (query.minRating) params.append('minRating', query.minRating.toString());
-      if (query.sortBy) params.append('sortBy', query.sortBy);
+      if (query.search) params.append("search", query.search);
+      if (query.category) params.append("category", query.category);
+      if (query.tags) query.tags.forEach((tag) => params.append("tags", tag));
+      if (query.minRating)
+        params.append("minRating", query.minRating.toString());
+      if (query.sortBy) params.append("sortBy", query.sortBy);
 
-      const response = await axios.get(`${this.baseURL}/marketplace/search?${params}`);
+      const response = await axios.get(
+        `${this.baseURL}/marketplace/search?${params}`
+      );
       return {
         success: true,
-        data: response.data
+        data: response.data,
       };
     } catch (error: any) {
       return {
         success: false,
         data: [],
-        error: error.response?.data?.message || error.message
+        error: error.response?.data?.message || error.message,
       };
     }
   }

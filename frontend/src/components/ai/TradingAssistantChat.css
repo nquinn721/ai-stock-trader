@@ -1,0 +1,388 @@
+/* Enhanced Trading Assistant Chat Styles */
+.trading-assistant-chat {
+  background: linear-gradient(
+    135deg,
+    #667eea 0%,
+    #764ba2 25%,
+    #f093fb 50%,
+    #f5576c 75%,
+    #4facfe 100%
+  );
+  background-size: 400% 400%;
+  animation: gradientShift 15s ease infinite;
+  min-height: 100vh;
+  padding: 24px;
+  position: relative;
+}
+
+.trading-assistant-chat::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(
+      circle at 20% 80%,
+      rgba(120, 119, 198, 0.3) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 80% 20%,
+      rgba(255, 119, 198, 0.3) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 40% 40%,
+      rgba(120, 219, 255, 0.2) 0%,
+      transparent 50%
+    );
+  pointer-events: none;
+  z-index: -1;
+}
+
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Main Chat Container */
+.chat-main-card {
+  background: rgba(255, 255, 255, 0.15) !important;
+  backdrop-filter: blur(20px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  border-radius: 24px !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1) !important;
+  overflow: hidden !important;
+  height: 600px !important;
+}
+
+.chat-container {
+  height: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+  background: transparent !important;
+  border-radius: 24px !important;
+  overflow: hidden !important;
+}
+
+/* Chat History Area */
+.chat-history {
+  flex: 1 !important;
+  overflow-y: auto !important;
+  padding: 24px !important;
+  background: rgba(0, 0, 0, 0.05) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 16px !important;
+}
+
+/* Message Bubbles */
+.message-bubble {
+  padding: 16px 20px !important;
+  margin: 8px 0 !important;
+  max-width: 80% !important;
+  border-radius: 20px !important;
+  backdrop-filter: blur(10px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  transition: all 0.3s ease !important;
+}
+
+.message-bubble:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15) !important;
+}
+
+.message-bubble-user {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  color: white !important;
+  align-self: flex-end !important;
+  border-radius: 20px 20px 6px 20px !important;
+}
+
+.message-bubble-ai {
+  background: rgba(255, 255, 255, 0.15) !important;
+  color: rgba(255, 255, 255, 0.95) !important;
+  align-self: flex-start !important;
+  border-radius: 20px 20px 20px 6px !important;
+}
+
+/* Message Headers */
+.message-header {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  margin-bottom: 8px !important;
+}
+
+.message-author {
+  font-weight: 700 !important;
+  font-size: 0.875rem !important;
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+
+.message-author-user {
+  color: rgba(255, 255, 255, 0.95) !important;
+}
+
+.message-content {
+  font-size: 1rem !important;
+  line-height: 1.6 !important;
+  white-space: pre-wrap !important;
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+
+.message-content-user {
+  color: white !important;
+}
+
+/* Confidence Chip */
+.confidence-chip {
+  background: rgba(255, 255, 255, 0.2) !important;
+  color: white !important;
+  font-weight: 600 !important;
+  font-size: 0.75rem !important;
+}
+
+.confidence-high {
+  background: rgba(46, 213, 115, 0.3) !important;
+  border: 1px solid rgba(46, 213, 115, 0.5) !important;
+}
+
+.confidence-medium {
+  background: rgba(255, 165, 0, 0.3) !important;
+  border: 1px solid rgba(255, 165, 0, 0.5) !important;
+}
+
+.confidence-low {
+  background: rgba(255, 71, 87, 0.3) !important;
+  border: 1px solid rgba(255, 71, 87, 0.5) !important;
+}
+
+/* Sources Section */
+.message-sources {
+  margin-top: 12px !important;
+  font-size: 0.75rem !important;
+  color: rgba(255, 255, 255, 0.6) !important;
+  font-style: italic !important;
+}
+
+/* Action Chips */
+.action-chips-container {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 8px !important;
+  margin-top: 16px !important;
+}
+
+.action-chip {
+  background: rgba(255, 255, 255, 0.15) !important;
+  color: rgba(255, 255, 255, 0.9) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  border-radius: 12px !important;
+  transition: all 0.3s ease !important;
+  font-weight: 500 !important;
+}
+
+.action-chip:hover {
+  background: rgba(255, 255, 255, 0.25) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Typing Indicator */
+.typing-indicator {
+  background: rgba(255, 255, 255, 0.1) !important;
+  color: rgba(255, 255, 255, 0.8) !important;
+  padding: 12px 16px !important;
+  border-radius: 20px 20px 20px 6px !important;
+  backdrop-filter: blur(10px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  align-self: flex-start !important;
+  max-width: 200px !important;
+}
+
+.typing-text {
+  color: rgba(255, 255, 255, 0.8) !important;
+  font-size: 0.875rem !important;
+}
+
+/* Chat Input Container */
+.chat-input-container {
+  padding: 24px !important;
+  background: rgba(255, 255, 255, 0.05) !important;
+  backdrop-filter: blur(10px) !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.chat-input-wrapper {
+  display: flex !important;
+  gap: 12px !important;
+  align-items: flex-end !important;
+}
+
+/* Input Field */
+.chat-input {
+  flex: 1 !important;
+}
+
+.chat-input .MuiOutlinedInput-root {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border-radius: 16px !important;
+  color: white !important;
+  backdrop-filter: blur(10px) !important;
+}
+
+.chat-input .MuiOutlinedInput-notchedOutline {
+  border-color: rgba(255, 255, 255, 0.3) !important;
+}
+
+.chat-input .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline {
+  border-color: rgba(255, 255, 255, 0.5) !important;
+}
+
+.chat-input .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+  border-color: rgba(102, 126, 234, 0.8) !important;
+  border-width: 2px !important;
+}
+
+.chat-input .MuiInputBase-input {
+  color: white !important;
+}
+
+.chat-input .MuiInputBase-input::placeholder {
+  color: rgba(255, 255, 255, 0.6) !important;
+  opacity: 1 !important;
+}
+
+/* Send Button */
+.send-button {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  border: none !important;
+  border-radius: 16px !important;
+  padding: 12px !important;
+  color: white !important;
+  box-shadow: 0 4px 16px rgba(102, 126, 234, 0.3) !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  min-width: 50px !important;
+  min-height: 50px !important;
+}
+
+.send-button:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4) !important;
+}
+
+.send-button:disabled {
+  background: rgba(255, 255, 255, 0.1) !important;
+  color: rgba(255, 255, 255, 0.3) !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+/* Divider */
+.chat-divider {
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  margin: 0 !important;
+}
+
+/* Icons */
+.ai-icon {
+  color: #f093fb !important;
+  font-size: 1.25rem !important;
+}
+
+.user-icon {
+  color: rgba(255, 255, 255, 0.9) !important;
+  font-size: 1.25rem !important;
+}
+
+.action-icon {
+  font-size: 1rem !important;
+  margin-right: 4px !important;
+}
+
+/* Loading Spinner */
+.typing-spinner {
+  color: rgba(255, 255, 255, 0.8) !important;
+}
+
+/* Scrollbar Styling */
+.chat-history::-webkit-scrollbar {
+  width: 8px;
+}
+
+.chat-history::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+
+.chat-history::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 4px;
+}
+
+.chat-history::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .trading-assistant-chat {
+    padding: 16px;
+  }
+  
+  .chat-main-card {
+    height: calc(100vh - 100px) !important;
+  }
+  
+  .chat-history {
+    padding: 16px !important;
+  }
+  
+  .chat-input-container {
+    padding: 16px !important;
+  }
+  
+  .message-bubble {
+    max-width: 90% !important;
+    padding: 12px 16px !important;
+  }
+}
+
+/* Animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.message-bubble {
+  animation: fadeInUp 0.4s ease-out;
+}
+
+.typing-indicator {
+  animation: fadeInUp 0.3s ease-out;
+}
+
+/* Focus Styles */
+.chat-input .MuiOutlinedInput-root.Mui-focused {
+  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2) !important;
+}
+
+/* Typography Overrides */
+.MuiTypography-root {
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+
+/* Card Content Override */
+.chat-main-card .MuiCardContent-root {
+  padding: 0 !important;
+  height: 100% !important;
+}

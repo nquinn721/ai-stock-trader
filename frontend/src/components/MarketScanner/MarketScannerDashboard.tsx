@@ -8,7 +8,6 @@ import {
 } from "@mui/icons-material";
 import {
   Alert,
-  Box,
   Button,
   Card,
   CardContent,
@@ -28,6 +27,7 @@ import {
   ScreenerTemplate,
 } from "../../types/marketScanner";
 import { AlertManager } from "./AlertManager";
+import "./MarketScannerDashboard.css";
 import { PresetTemplates } from "./PresetTemplates";
 import { ScanResults } from "./ScanResults";
 import { ScreenerBuilder } from "./ScreenerBuilder";
@@ -140,34 +140,27 @@ export const MarketScannerDashboard: React.FC<MarketScannerDashboardProps> = ({
   };
 
   return (
-    <Box sx={{ p: 3 }}>
+    <div className="market-scanner-dashboard">
       {/* Header */}
-      <Box
-        sx={{
-          mb: 3,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-        }}
-      >
-        <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-          <TrendingUpIcon sx={{ fontSize: 32, color: "primary.main" }} />
-          <Typography variant="h4" component="h1">
+      <div className="scanner-header">
+        <div className="scanner-status">
+          <TrendingUpIcon className="scanner-icon" />
+          <Typography className="scanner-title" variant="h4" component="h1">
             Market Scanner
           </Typography>
           {isScanning && (
             <Chip
               icon={<CircularProgress size={16} />}
               label="Scanning..."
-              color="primary"
+              className="scanning-chip"
               variant="outlined"
             />
           )}
-        </Box>
+        </div>
 
-        <Box sx={{ display: "flex", gap: 1 }}>
+        <div className="header-actions">
           <Tooltip title="Refresh Status">
-            <IconButton onClick={loadScanStatus}>
+            <IconButton onClick={loadScanStatus} className="refresh-button">
               <RefreshIcon />
             </IconButton>
           </Tooltip>
@@ -176,7 +169,7 @@ export const MarketScannerDashboard: React.FC<MarketScannerDashboardProps> = ({
             startIcon={isScanning ? <StopIcon /> : <ScanIcon />}
             onClick={handleScan}
             disabled={loading}
-            sx={{ minWidth: 120 }}
+            className="scan-button"
           >
             {isScanning ? "Stop" : "Scan Market"}
           </Button>
@@ -185,86 +178,96 @@ export const MarketScannerDashboard: React.FC<MarketScannerDashboardProps> = ({
             startIcon={<ExportIcon />}
             onClick={handleExport}
             disabled={scanResults.length === 0}
+            className="export-button"
           >
             Export
           </Button>
-        </Box>
-      </Box>
+        </div>
+      </div>
 
       {/* Status Cards */}
       {scanStatus && (
-        <Box
-          sx={{
-            display: "grid",
-            gridTemplateColumns: {
-              xs: "1fr",
-              sm: "1fr 1fr",
-              md: "1fr 1fr 1fr 1fr",
-            },
-            gap: 2,
-            mb: 3,
-          }}
-        >
-          <Card>
+        <div className="status-cards-grid">
+          <Card className="status-card">
             <CardContent>
-              <Typography color="textSecondary" gutterBottom>
+              <Typography className="status-label" gutterBottom>
                 Last Scan
               </Typography>
-              <Typography variant="h6">
+              <Typography className="status-value" variant="h6">
                 {scanStatus.lastScanTime
                   ? new Date(scanStatus.lastScanTime).toLocaleTimeString()
                   : "Never"}
               </Typography>
+              <Typography className="status-description">
+                Most recent scan execution
+              </Typography>
             </CardContent>
           </Card>
-          <Card>
+          <Card className="status-card">
             <CardContent>
-              <Typography color="textSecondary" gutterBottom>
+              <Typography className="status-label" gutterBottom>
                 Active Alerts
               </Typography>
-              <Typography variant="h6">{scanStatus.activeAlerts}</Typography>
+              <Typography className="status-value" variant="h6">
+                {scanStatus.activeAlerts}
+              </Typography>
+              <Typography className="status-description">
+                Real-time notifications enabled
+              </Typography>
             </CardContent>
           </Card>
-          <Card>
+          <Card className="status-card">
             <CardContent>
-              <Typography color="textSecondary" gutterBottom>
+              <Typography className="status-label" gutterBottom>
                 Templates
               </Typography>
-              <Typography variant="h6">
+              <Typography className="status-value" variant="h6">
                 {scanStatus.availableTemplates}
               </Typography>
+              <Typography className="status-description">
+                Pre-built screening strategies
+              </Typography>
             </CardContent>
           </Card>
-          <Card>
+          <Card className="status-card">
             <CardContent>
-              <Typography color="textSecondary" gutterBottom>
+              <Typography className="status-label" gutterBottom>
                 Results
               </Typography>
-              <Typography variant="h6">{scanResults.length}</Typography>
+              <Typography className="status-value" variant="h6">
+                {scanResults.length}
+              </Typography>
+              <Typography className="status-description">
+                Stocks matching criteria
+              </Typography>
             </CardContent>
           </Card>
-        </Box>
+        </div>
       )}
 
       {/* Error Alert */}
       {error && (
-        <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError(null)}>
+        <Alert
+          severity="error"
+          className="error-alert"
+          onClose={() => setError(null)}
+        >
           {error}
         </Alert>
       )}
 
       {/* Main Content Tabs */}
-      <Card>
-        <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
+      <Card className="main-content-card">
+        <div className="scanner-tabs">
           <Tabs value={activeTab} onChange={handleTabChange}>
-            <Tab label="Screener Builder" />
-            <Tab label="Preset Templates" />
-            <Tab label="Scan Results" />
-            <Tab label="Alerts" />
+            <Tab label="Screener Builder" className="scanner-tab" />
+            <Tab label="Preset Templates" className="scanner-tab" />
+            <Tab label="Scan Results" className="scanner-tab" />
+            <Tab label="Alerts" className="scanner-tab" />
           </Tabs>
-        </Box>
+        </div>
 
-        <CardContent sx={{ p: 0 }}>
+        <div className="tab-content">
           {activeTab === 0 && (
             <ScreenerBuilder
               onCriteriaChange={setCustomCriteria}
@@ -290,8 +293,8 @@ export const MarketScannerDashboard: React.FC<MarketScannerDashboardProps> = ({
           )}
 
           {activeTab === 3 && <AlertManager />}
-        </CardContent>
+        </div>
       </Card>
-    </Box>
+    </div>
   );
 };

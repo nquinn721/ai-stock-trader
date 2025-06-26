@@ -8,7 +8,6 @@ import { SocketProvider } from "./context/SocketContext";
 import AIAssistantPage from "./pages/AIAssistantPage";
 import AnalyticsPage from "./pages/AnalyticsPage";
 import AutonomousTradingPage from "./pages/AutonomousTradingPage";
-import AutoTradingPage from "./pages/AutoTradingPage";
 import DashboardPage from "./pages/DashboardPage";
 import MarketScannerPage from "./pages/MarketScannerPage";
 import { rootStore } from "./stores/RootStore";
@@ -26,7 +25,6 @@ function App() {
                 <main className="app-main">
                   <Routes>
                     <Route path="/" element={<DashboardPage />} />
-                    <Route path="/auto-trading" element={<AutoTradingPage />} />
                     <Route
                       path="/autonomous-trading"
                       element={<AutonomousTradingPage />}

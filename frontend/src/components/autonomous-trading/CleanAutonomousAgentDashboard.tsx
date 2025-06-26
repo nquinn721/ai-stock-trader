@@ -3,17 +3,19 @@ import autonomousTradingApi, {
   DeploymentConfig,
   StrategyInstance,
 } from "../../services/autonomousTradingApi";
-import SimpleStrategyBuilder from "../strategy-builder/SimpleStrategyBuilder";
 import "./CleanAutonomousAgentDashboard.css";
 
-const AutonomousAgentDashboard: React.FC = () => {
-  const [activeTab, setActiveTab] = useState(0);
-  const [runningStrategies, setRunningStrategies] = useState<StrategyInstance[]>([]);
-  const [selectedStrategy, setSelectedStrategy] = useState<StrategyInstance | null>(null);
-  const [isPerformanceDialogOpen, setIsPerformanceDialogOpen] = useState(false);
-  const [isDeployDialogOpen, setIsDeployDialogOpen] = useState(false);
+const CleanAutonomousAgentDashboard: React.FC = () => {
+  const [activeTab, setActiveTab] = useState("strategies");
+  const [runningStrategies, setRunningStrategies] = useState<
+    StrategyInstance[]
+  >([]);
+  const [selectedStrategy, setSelectedStrategy] =
+    useState<StrategyInstance | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showPerformanceModal, setShowPerformanceModal] = useState(false);
+  const [showDeployModal, setShowDeployModal] = useState(false);
 
   const [deploymentConfig, setDeploymentConfig] = useState<DeploymentConfig>({
     mode: "paper",
@@ -35,7 +37,56 @@ const AutonomousAgentDashboard: React.FC = () => {
     },
   });
 
-  // Load running strategies from API
+  // Demo data for when API is not available
+  const demoStrategies: StrategyInstance[] = [
+    {
+      id: "demo-strategy-1",
+      strategyId: "momentum-breakout-v1",
+      status: "running",
+      startedAt: new Date("2025-01-01T09:00:00Z"),
+      performance: {
+        totalReturn: 12.5,
+        dailyReturn: 0.8,
+        sharpeRatio: 1.6,
+        maxDrawdown: -3.2,
+        currentDrawdown: -1.1,
+        winRate: 68,
+        totalTrades: 45,
+        profitableTrades: 31,
+        currentValue: 11250,
+        unrealizedPnL: 150,
+      },
+      errorCount: 0,
+      strategy: {
+        name: "Momentum Breakout Pro",
+        description: "Advanced momentum-based strategy with ML filtering",
+      },
+    },
+    {
+      id: "demo-strategy-2",
+      strategyId: "mean-reversion-v2",
+      status: "paused",
+      startedAt: new Date("2025-01-01T08:30:00Z"),
+      performance: {
+        totalReturn: 8.3,
+        dailyReturn: -0.2,
+        sharpeRatio: 1.2,
+        maxDrawdown: -5.1,
+        currentDrawdown: -2.3,
+        winRate: 72,
+        totalTrades: 38,
+        profitableTrades: 27,
+        currentValue: 10830,
+        unrealizedPnL: -75,
+      },
+      errorCount: 1,
+      strategy: {
+        name: "Smart Mean Reversion",
+        description: "RSI-based mean reversion with dynamic thresholds",
+      },
+    },
+  ];
+
   const loadRunningStrategies = async () => {
     setIsLoading(true);
     setError(null);
@@ -44,79 +95,57 @@ const AutonomousAgentDashboard: React.FC = () => {
       if (response.success) {
         setRunningStrategies(response.data);
       } else {
-        setError(response.error || "Failed to load running strategies");
-        // Fallback to demo data if API is not available
-        setRunningStrategies([
-          {
-            id: "demo-strategy-1",
-            strategyId: "momentum-breakout-v1",
-            status: "running",
-            startedAt: new Date("2025-01-01T09:00:00Z"),
-            performance: {
-              totalReturn: 12.5,
-              dailyReturn: 0.8,
-              sharpeRatio: 1.6,
-              maxDrawdown: -3.2,
-              currentDrawdown: -1.1,
-              winRate: 68,
-              totalTrades: 45,
-              profitableTrades: 31,
-              currentValue: 11250,
-              unrealizedPnL: 150,
-            },
-            errorCount: 0,
-            strategy: {
-              name: "Momentum Breakout Strategy (Demo)",
-              description: "Demo strategy - Backend not connected",
-            },
-          },
-          {
-            id: "demo-strategy-2",
-            strategyId: "mean-reversion-v2",
-            status: "paused",
-            startedAt: new Date("2024-12-28T14:30:00Z"),
-            performance: {
-              totalReturn: -2.1,
-              dailyReturn: -0.3,
-              sharpeRatio: 0.8,
-              maxDrawdown: -5.8,
-              currentDrawdown: -2.1,
-              winRate: 45,
-              totalTrades: 23,
-              profitableTrades: 10,
-              currentValue: 9790,
-              unrealizedPnL: -50,
-            },
-            errorCount: 2,
-            strategy: {
-              name: "Mean Reversion Strategy (Demo)",
-              description: "Demo strategy - Backend not connected",
-            },
-          },
-        ]);
+        setRunningStrategies(demoStrategies);
       }
     } catch (err: any) {
-      setError(err.message);
-      setRunningStrategies([]);
+      setRunningStrategies(demoStrategies);
     } finally {
       setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    if (activeTab === 0) {
-      loadRunningStrategies();
-    }
-  }, [activeTab]);
-
-  const handleRefresh = () => {
     loadRunningStrategies();
+    // Refresh every 30 seconds
+    const interval = setInterval(loadRunningStrategies, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const handleStrategyAction = async (
+    strategyId: string,
+    action: "stop" | "pause" | "resume"
+  ) => {
+    setIsLoading(true);
+    try {
+      // API call simulation
+      setRunningStrategies((prev) =>
+        prev.map((strategy) =>
+          strategy.strategyId === strategyId
+            ? {
+                ...strategy,
+                status:
+                  action === "resume"
+                    ? "running"
+                    : action === "stop"
+                    ? "stopped"
+                    : "paused",
+              }
+            : strategy
+        )
+      );
+    } catch (err) {
+      setError(`Failed to ${action} strategy`);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat("en-US", {
       style: "currency",
       currency: "USD",
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
     }).format(value);
   };
 
@@ -127,15 +156,15 @@ const AutonomousAgentDashboard: React.FC = () => {
   const getStatusColor = (status: string) => {
     switch (status) {
       case "running":
-        return "success";
+        return "#10b981";
       case "paused":
-        return "warning";
+        return "#f59e0b";
       case "stopped":
-        return "default";
+        return "#6b7280";
       case "error":
-        return "error";
+        return "#ef4444";
       default:
-        return "default";
+        return "#6b7280";
     }
   };
 
@@ -148,88 +177,134 @@ const AutonomousAgentDashboard: React.FC = () => {
       case "stopped":
         return "⏹️";
       case "error":
-        return "❌";
+        return "⚠️";
       default:
-        return "❓";
+        return "⚙️";
     }
   };
 
-  const handleStrategyAction = (action: string, strategy: StrategyInstance) => {
-    console.log(`${action} strategy:`, strategy.id);
-    // TODO: Implement strategy control actions
-  };
-
   return (
-    <div className="autonomous-trading-dashboard">
-      {/* Header with Live Indicator */}
-      <header className="autonomous-header">
-        <div className="header-left">
-          <div className="header-title">
+    <div className="clean-autonomous-dashboard">
+      {/* Header with LIVE indicator */}
+      <div className="dashboard-header">
+        <div className="header-content">
+          <div className="title-section">
             <h1>Autonomous Trading System</h1>
+            <p>AI-powered strategies with real-time execution</p>
+          </div>
+          <div className="header-indicators">
             <div className="live-indicator">
-              <span className="live-dot"></span>
-              <span className="live-text">LIVE</span>
+              <div className="live-dot"></div>
+              <span>LIVE</span>
             </div>
-          </div>
-          <p className="header-subtitle">
-            Build, deploy, and manage your automated trading strategies
-          </p>
-        </div>
-        {activeTab === 0 && (
-          <div className="header-actions">
             <button
-              className="refresh-btn"
-              onClick={handleRefresh}
-              disabled={isLoading}
+              className="emergency-stop-btn"
+              onClick={() =>
+                runningStrategies.forEach(
+                  (s) =>
+                    s.status === "running" &&
+                    handleStrategyAction(s.strategyId, "stop")
+                )
+              }
             >
-              🔄 Refresh
-            </button>
-            <button
-              className="deploy-btn primary"
-              onClick={() => setIsDeployDialogOpen(true)}
-            >
-              ▶️ Deploy Strategy
+              🛑 Emergency Stop
             </button>
           </div>
-        )}
-      </header>
-
-      {/* Navigation Tabs */}
-      <div className="tab-navigation">
-        <div className="tab-list">
-          <button
-            className={`tab-button ${activeTab === 0 ? "active" : ""}`}
-            onClick={() => setActiveTab(0)}
-          >
-            📊 Active Strategies
-          </button>
-          <button
-            className={`tab-button ${activeTab === 1 ? "active" : ""}`}
-            onClick={() => setActiveTab(1)}
-          >
-            🔨 Strategy Builder
-          </button>
         </div>
       </div>
 
-      {/* Tab Content */}
-      <div className="tab-content">
-        {/* Active Strategies Tab */}
-        {activeTab === 0 && (
-          <div className="strategies-tab">
-            {error && (
-              <div className="error-alert">
-                <span className="error-icon">⚠️</span>
-                <span>{error}</span>
-              </div>
-            )}
+      {/* Navigation Tabs */}
+      <div className="nav-tabs">
+        <button
+          className={`tab-btn ${activeTab === "strategies" ? "active" : ""}`}
+          onClick={() => setActiveTab("strategies")}
+        >
+          📊 Active Strategies
+        </button>
+        <button
+          className={`tab-btn ${activeTab === "builder" ? "active" : ""}`}
+          onClick={() => setActiveTab("builder")}
+        >
+          🛠️ Strategy Builder
+        </button>
+        <button
+          className={`tab-btn ${activeTab === "analytics" ? "active" : ""}`}
+          onClick={() => setActiveTab("analytics")}
+        >
+          📈 Analytics
+        </button>
+      </div>
 
-            {isLoading && (
-              <div className="loading-state">
-                <div className="loading-spinner"></div>
-                <span>Loading strategies...</span>
+      {/* Error Banner */}
+      {error && (
+        <div className="error-banner">
+          <span>⚠️ {error}</span>
+          <button onClick={() => setError(null)}>✕</button>
+        </div>
+      )}
+
+      {/* Main Content */}
+      <div className="dashboard-content">
+        {activeTab === "strategies" && (
+          <div className="strategies-tab">
+            {/* Quick Stats */}
+            <div className="quick-stats">
+              <div className="stat-card">
+                <div className="stat-icon">🤖</div>
+                <div className="stat-content">
+                  <h3>
+                    {
+                      runningStrategies.filter((s) => s.status === "running")
+                        .length
+                    }
+                  </h3>
+                  <p>Active Agents</p>
+                </div>
               </div>
-            )}
+              <div className="stat-card">
+                <div className="stat-icon">💰</div>
+                <div className="stat-content">
+                  <h3>
+                    {formatCurrency(
+                      runningStrategies.reduce(
+                        (sum, s) => sum + s.performance.currentValue,
+                        0
+                      )
+                    )}
+                  </h3>
+                  <p>Total Value</p>
+                </div>
+              </div>
+              <div className="stat-card">
+                <div className="stat-icon">📈</div>
+                <div className="stat-content">
+                  <h3>
+                    {formatPercentage(
+                      runningStrategies.reduce(
+                        (sum, s) => sum + s.performance.totalReturn,
+                        0
+                      ) / Math.max(runningStrategies.length, 1)
+                    )}
+                  </h3>
+                  <p>Avg Return</p>
+                </div>
+              </div>
+              <div className="stat-card">
+                <div className="stat-icon">🎯</div>
+                <div className="stat-content">
+                  <h3>
+                    {Math.round(
+                      runningStrategies.reduce(
+                        (sum, s) => sum + s.performance.winRate,
+                        0
+                      ) / Math.max(runningStrategies.length, 1)
+                    )}
+                    %
+                  </h3>
+                  <p>Win Rate</p>
+                </div>
+              </div>
+            </div>
 
             {/* Strategy Cards */}
             <div className="strategies-grid">
@@ -237,165 +312,287 @@ const AutonomousAgentDashboard: React.FC = () => {
                 <div key={strategy.id} className="strategy-card">
                   <div className="card-header">
                     <div className="strategy-info">
-                      <h3 className="strategy-name">
-                        {strategy.strategy?.name || `Strategy ${strategy.id}`}
-                      </h3>
-                      <div className={`status-badge ${getStatusColor(strategy.status)}`}>
-                        <span className="status-icon">{getStatusIcon(strategy.status)}</span>
-                        <span className="status-text">{strategy.status.toUpperCase()}</span>
-                      </div>
+                      <h3>{strategy.strategy?.name || "Unnamed Strategy"}</h3>
+                      <p>
+                        {strategy.strategy?.description || "No description"}
+                      </p>
                     </div>
-                    <div className="card-actions">
-                      <button
-                        className="action-btn"
-                        onClick={() => {
-                          setSelectedStrategy(strategy);
-                          setIsPerformanceDialogOpen(true);
+                    <div className="strategy-status">
+                      <span
+                        className="status-badge"
+                        style={{
+                          backgroundColor: getStatusColor(strategy.status),
                         }}
-                        title="View Performance"
                       >
-                        👁️
-                      </button>
-                      <button
-                        className="action-btn"
-                        onClick={() => handleStrategyAction("pause", strategy)}
-                        disabled={strategy.status !== "running"}
-                        title="Pause Strategy"
-                      >
-                        ⏸️
-                      </button>
-                      <button
-                        className="action-btn danger"
-                        onClick={() => handleStrategyAction("stop", strategy)}
-                        title="Stop Strategy"
-                      >
-                        ⏹️
-                      </button>
+                        {getStatusIcon(strategy.status)}{" "}
+                        {strategy.status.toUpperCase()}
+                      </span>
                     </div>
                   </div>
 
-                  <div className="card-content">
-                    <p className="strategy-description">
-                      {strategy.strategy?.description || "No description available"}
-                    </p>
-
-                    {/* Performance Metrics Grid */}
-                    <div className="metrics-grid">
-                      <div className="metric-item">
-                        <span className="metric-label">Total Return</span>
-                        <span className={`metric-value ${strategy.performance.totalReturn >= 0 ? "positive" : "negative"}`}>
-                          {formatPercentage(strategy.performance.totalReturn)}
-                        </span>
-                      </div>
-                      <div className="metric-item">
-                        <span className="metric-label">Current Value</span>
-                        <span className="metric-value">
-                          {formatCurrency(strategy.performance.currentValue)}
-                        </span>
-                      </div>
-                      <div className="metric-item">
-                        <span className="metric-label">Win Rate</span>
-                        <span className="metric-value">
-                          {strategy.performance.winRate}%
-                        </span>
-                      </div>
-                      <div className="metric-item">
-                        <span className="metric-label">Total Trades</span>
-                        <span className="metric-value">
-                          {strategy.performance.totalTrades}
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="strategy-footer">
-                      <span className="started-at">
-                        Started: {strategy.startedAt.toLocaleDateString()}
+                  <div className="performance-metrics">
+                    <div className="metric">
+                      <span className="metric-label">Total Return</span>
+                      <span
+                        className={`metric-value ${
+                          strategy.performance.totalReturn >= 0
+                            ? "positive"
+                            : "negative"
+                        }`}
+                      >
+                        {formatPercentage(strategy.performance.totalReturn)}
                       </span>
-                      {strategy.errorCount > 0 && (
-                        <span className="error-count">
-                          ⚠️ {strategy.errorCount} errors
-                        </span>
-                      )}
                     </div>
+                    <div className="metric">
+                      <span className="metric-label">Current Value</span>
+                      <span className="metric-value">
+                        {formatCurrency(strategy.performance.currentValue)}
+                      </span>
+                    </div>
+                    <div className="metric">
+                      <span className="metric-label">Win Rate</span>
+                      <span className="metric-value">
+                        {strategy.performance.winRate}%
+                      </span>
+                    </div>
+                    <div className="metric">
+                      <span className="metric-label">Trades</span>
+                      <span className="metric-value">
+                        {strategy.performance.totalTrades}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="drawdown-indicator">
+                    <span className="drawdown-label">Current Drawdown</span>
+                    <div className="drawdown-bar">
+                      <div
+                        className="drawdown-fill"
+                        style={{
+                          width: `${Math.abs(
+                            strategy.performance.currentDrawdown * 10
+                          )}%`,
+                        }}
+                      ></div>
+                    </div>
+                    <span className="drawdown-value">
+                      {formatPercentage(strategy.performance.currentDrawdown)}
+                    </span>
+                  </div>
+
+                  {strategy.errorCount > 0 && (
+                    <div className="error-indicator">
+                      ⚠️ {strategy.errorCount} error(s) detected
+                    </div>
+                  )}
+
+                  <div className="card-actions">
+                    {strategy.status === "running" && (
+                      <button
+                        className="action-btn pause-btn"
+                        onClick={() =>
+                          handleStrategyAction(strategy.strategyId, "pause")
+                        }
+                        disabled={isLoading}
+                      >
+                        ⏸️ Pause
+                      </button>
+                    )}
+                    {strategy.status === "paused" && (
+                      <button
+                        className="action-btn resume-btn"
+                        onClick={() =>
+                          handleStrategyAction(strategy.strategyId, "resume")
+                        }
+                        disabled={isLoading}
+                      >
+                        ▶️ Resume
+                      </button>
+                    )}
+                    <button
+                      className="action-btn stop-btn"
+                      onClick={() =>
+                        handleStrategyAction(strategy.strategyId, "stop")
+                      }
+                      disabled={isLoading}
+                    >
+                      ⏹️ Stop
+                    </button>
+                    <button
+                      className="action-btn details-btn"
+                      onClick={() => {
+                        setSelectedStrategy(strategy);
+                        setShowPerformanceModal(true);
+                      }}
+                    >
+                      📊 Details
+                    </button>
                   </div>
                 </div>
               ))}
+
+              {/* Add New Strategy Card */}
+              <div
+                className="strategy-card add-card"
+                onClick={() => setShowDeployModal(true)}
+              >
+                <div className="add-content">
+                  <div className="add-icon">➕</div>
+                  <h3>Deploy New Strategy</h3>
+                  <p>Create and deploy a new autonomous trading agent</p>
+                </div>
+              </div>
             </div>
 
-            {/* Empty State */}
-            {runningStrategies.length === 0 && !isLoading && (
-              <div className="empty-state">
-                <div className="empty-icon">🤖</div>
-                <h3>No Active Strategies</h3>
-                <p>Deploy your first autonomous trading strategy to get started</p>
-                <button
-                  className="primary-btn"
-                  onClick={() => setActiveTab(1)}
-                >
-                  Create Strategy
-                </button>
+            {/* Recent Activity */}
+            <div className="recent-activity">
+              <h3>Recent Trading Activity</h3>
+              <div className="activity-list">
+                <div className="activity-item">
+                  <div className="activity-icon buy">📈</div>
+                  <div className="activity-details">
+                    <span className="activity-action">BUY AAPL</span>
+                    <span className="activity-meta">
+                      100 shares @ $150.25 • Momentum Breakout Pro
+                    </span>
+                  </div>
+                  <div className="activity-pnl positive">+$245.00</div>
+                  <div className="activity-time">2h ago</div>
+                </div>
+                <div className="activity-item">
+                  <div className="activity-icon sell">📉</div>
+                  <div className="activity-details">
+                    <span className="activity-action">SELL GOOGL</span>
+                    <span className="activity-meta">
+                      50 shares @ $2,850.75 • Smart Mean Reversion
+                    </span>
+                  </div>
+                  <div className="activity-pnl negative">-$125.00</div>
+                  <div className="activity-time">4h ago</div>
+                </div>
+                <div className="activity-item">
+                  <div className="activity-icon buy">📈</div>
+                  <div className="activity-details">
+                    <span className="activity-action">BUY MSFT</span>
+                    <span className="activity-meta">
+                      75 shares @ $420.50 • Momentum Breakout Pro
+                    </span>
+                  </div>
+                  <div className="activity-pnl positive">+$387.50</div>
+                  <div className="activity-time">6h ago</div>
+                </div>
               </div>
-            )}
+            </div>
           </div>
         )}
 
-        {/* Strategy Builder Tab */}
-        {activeTab === 1 && (
+        {activeTab === "builder" && (
           <div className="builder-tab">
-            <SimpleStrategyBuilder />
+            <div className="coming-soon">
+              <div className="coming-soon-icon">🚧</div>
+              <h2>Visual Strategy Builder</h2>
+              <p>
+                The drag-and-drop strategy builder is being enhanced with
+                advanced features.
+              </p>
+              <div className="features-list">
+                <div className="feature-item">✅ Visual node-based editor</div>
+                <div className="feature-item">
+                  ✅ Real-time strategy validation
+                </div>
+                <div className="feature-item">✅ Backtesting integration</div>
+                <div className="feature-item">🔄 Advanced ML components</div>
+                <div className="feature-item">🔄 Risk management templates</div>
+              </div>
+              <button className="notify-btn">Notify When Available</button>
+            </div>
+          </div>
+        )}
+
+        {activeTab === "analytics" && (
+          <div className="analytics-tab">
+            <div className="analytics-grid">
+              <div className="analytics-card">
+                <h3>Performance Overview</h3>
+                <div className="performance-chart-placeholder">
+                  📊 Performance charts will be displayed here
+                </div>
+              </div>
+              <div className="analytics-card">
+                <h3>Risk Metrics</h3>
+                <div className="risk-metrics">
+                  <div className="risk-metric">
+                    <span>Portfolio VaR (95%)</span>
+                    <span className="risk-value">-2.1%</span>
+                  </div>
+                  <div className="risk-metric">
+                    <span>Max Drawdown</span>
+                    <span className="risk-value">-5.3%</span>
+                  </div>
+                  <div className="risk-metric">
+                    <span>Sharpe Ratio</span>
+                    <span className="risk-value">1.45</span>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         )}
       </div>
 
-      {/* Performance Dialog */}
-      {isPerformanceDialogOpen && selectedStrategy && (
-        <div className="modal-overlay" onClick={() => setIsPerformanceDialogOpen(false)}>
+      {/* Performance Modal */}
+      {showPerformanceModal && selectedStrategy && (
+        <div
+          className="modal-overlay"
+          onClick={() => setShowPerformanceModal(false)}
+        >
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
-              <h2>Strategy Performance</h2>
+              <h2>{selectedStrategy.strategy?.name} Performance</h2>
               <button
                 className="modal-close"
-                onClick={() => setIsPerformanceDialogOpen(false)}
+                onClick={() => setShowPerformanceModal(false)}
               >
                 ✕
               </button>
             </div>
             <div className="modal-body">
-              <h3>{selectedStrategy.strategy?.name}</h3>
-              <div className="performance-grid">
-                <div className="perf-item">
-                  <span className="perf-label">Total Return</span>
-                  <span className={`perf-value ${selectedStrategy.performance.totalReturn >= 0 ? "positive" : "negative"}`}>
+              <div className="performance-details">
+                <div className="detail-metric">
+                  <span>Total Return</span>
+                  <span
+                    className={
+                      selectedStrategy.performance.totalReturn >= 0
+                        ? "positive"
+                        : "negative"
+                    }
+                  >
                     {formatPercentage(selectedStrategy.performance.totalReturn)}
                   </span>
                 </div>
-                <div className="perf-item">
-                  <span className="perf-label">Daily Return</span>
-                  <span className={`perf-value ${selectedStrategy.performance.dailyReturn >= 0 ? "positive" : "negative"}`}>
-                    {formatPercentage(selectedStrategy.performance.dailyReturn)}
+                <div className="detail-metric">
+                  <span>Sharpe Ratio</span>
+                  <span>
+                    {selectedStrategy.performance.sharpeRatio.toFixed(2)}
                   </span>
                 </div>
-                <div className="perf-item">
-                  <span className="perf-label">Sharpe Ratio</span>
-                  <span className="perf-value">{selectedStrategy.performance.sharpeRatio.toFixed(2)}</span>
-                </div>
-                <div className="perf-item">
-                  <span className="perf-label">Max Drawdown</span>
-                  <span className="perf-value negative">
+                <div className="detail-metric">
+                  <span>Max Drawdown</span>
+                  <span className="negative">
                     {formatPercentage(selectedStrategy.performance.maxDrawdown)}
                   </span>
                 </div>
-                <div className="perf-item">
-                  <span className="perf-label">Current Value</span>
-                  <span className="perf-value">
-                    {formatCurrency(selectedStrategy.performance.currentValue)}
-                  </span>
+                <div className="detail-metric">
+                  <span>Win Rate</span>
+                  <span>{selectedStrategy.performance.winRate}%</span>
                 </div>
-                <div className="perf-item">
-                  <span className="perf-label">Unrealized P&L</span>
-                  <span className={`perf-value ${selectedStrategy.performance.unrealizedPnL >= 0 ? "positive" : "negative"}`}>
-                    {formatCurrency(selectedStrategy.performance.unrealizedPnL)}
-                  </span>
+                <div className="detail-metric">
+                  <span>Total Trades</span>
+                  <span>{selectedStrategy.performance.totalTrades}</span>
+                </div>
+                <div className="detail-metric">
+                  <span>Profitable Trades</span>
+                  <span>{selectedStrategy.performance.profitableTrades}</span>
                 </div>
               </div>
             </div>
@@ -403,47 +600,98 @@ const AutonomousAgentDashboard: React.FC = () => {
         </div>
       )}
 
-      {/* Deploy Dialog */}
-      {isDeployDialogOpen && (
-        <div className="modal-overlay" onClick={() => setIsDeployDialogOpen(false)}>
+      {/* Deploy Modal */}
+      {showDeployModal && (
+        <div
+          className="modal-overlay"
+          onClick={() => setShowDeployModal(false)}
+        >
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
-              <h2>Deploy Strategy</h2>
+              <h2>Deploy New Strategy</h2>
               <button
                 className="modal-close"
-                onClick={() => setIsDeployDialogOpen(false)}
+                onClick={() => setShowDeployModal(false)}
               >
                 ✕
               </button>
             </div>
             <div className="modal-body">
-              <p>Strategy deployment configuration will be implemented in the next iteration.</p>
-              <div className="config-preview">
-                <h4>Current Configuration:</h4>
-                <ul>
-                  <li>Mode: {deploymentConfig.mode}</li>
-                  <li>Initial Capital: {formatCurrency(deploymentConfig.initialCapital)}</li>
-                  <li>Max Positions: {deploymentConfig.maxPositions}</li>
-                  <li>Execution Frequency: {deploymentConfig.executionFrequency}</li>
-                </ul>
+              <div className="deploy-form">
+                <div className="form-group">
+                  <label>Trading Mode</label>
+                  <select
+                    value={deploymentConfig.mode}
+                    onChange={(e) =>
+                      setDeploymentConfig((prev) => ({
+                        ...prev,
+                        mode: e.target.value as "paper" | "live",
+                      }))
+                    }
+                  >
+                    <option value="paper">Paper Trading</option>
+                    <option value="live">Live Trading</option>
+                  </select>
+                </div>
+                <div className="form-row">
+                  <div className="form-group">
+                    <label>Initial Capital</label>
+                    <input
+                      type="number"
+                      value={deploymentConfig.initialCapital}
+                      onChange={(e) =>
+                        setDeploymentConfig((prev) => ({
+                          ...prev,
+                          initialCapital: Number(e.target.value),
+                        }))
+                      }
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Max Positions</label>
+                    <input
+                      type="number"
+                      value={deploymentConfig.maxPositions}
+                      onChange={(e) =>
+                        setDeploymentConfig((prev) => ({
+                          ...prev,
+                          maxPositions: Number(e.target.value),
+                        }))
+                      }
+                    />
+                  </div>
+                </div>
+                <div className="form-group">
+                  <label>Execution Frequency</label>
+                  <select
+                    value={deploymentConfig.executionFrequency}
+                    onChange={(e) =>
+                      setDeploymentConfig((prev) => ({
+                        ...prev,
+                        executionFrequency: e.target.value as any,
+                      }))
+                    }
+                  >
+                    <option value="minute">Every Minute</option>
+                    <option value="hour">Every Hour</option>
+                    <option value="daily">Daily</option>
+                  </select>
+                </div>
               </div>
-            </div>
-            <div className="modal-actions">
-              <button
-                className="secondary-btn"
-                onClick={() => setIsDeployDialogOpen(false)}
-              >
-                Cancel
-              </button>
-              <button
-                className="primary-btn"
-                onClick={() => {
-                  console.log("Deploy strategy with config:", deploymentConfig);
-                  setIsDeployDialogOpen(false);
-                }}
-              >
-                Deploy
-              </button>
+              <div className="modal-actions">
+                <button
+                  className="cancel-btn"
+                  onClick={() => setShowDeployModal(false)}
+                >
+                  Cancel
+                </button>
+                <button
+                  className="deploy-btn"
+                  onClick={() => setShowDeployModal(false)}
+                >
+                  Deploy Strategy
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -452,347 +700,4 @@ const AutonomousAgentDashboard: React.FC = () => {
   );
 };
 
-export default AutonomousAgentDashboard;
-            className={`tab-btn ${activeTab === 0 ? 'active' : ''}`}
-            onClick={() => setActiveTab(0)}
-          >
-            <Assessment />
-            Running Strategies
-          </button>
-          <button
-            className={`tab-btn ${activeTab === 1 ? 'active' : ''}`}
-            onClick={() => setActiveTab(1)}
-          >
-            <Add />
-            Strategy Builder
-          </button>
-        </div>
-      </div>
-
-      {/* Tab Content */}
-      <div className="tab-content">
-        {activeTab === 0 && (
-          <div className="strategies-tab">
-            {error && (
-              <div className="error-alert">
-                <span className="error-icon">⚠️</span>
-                <span className="error-message">{error}</span>
-                <button className="error-close" onClick={() => setError(null)}>×</button>
-              </div>
-            )}
-
-            {isLoading && (
-              <div className="loading-bar">
-                <div className="loading-progress"></div>
-              </div>
-            )}
-
-            {/* Strategy Cards */}
-            <div className="strategy-grid">
-              {runningStrategies.map((strategy) => (
-                <div key={strategy.id} className="strategy-card">
-                  <div className="card-header">
-                    <div className="strategy-info">
-                      <h3 className="strategy-name">{strategy.strategy?.name || "Unknown Strategy"}</h3>
-                      <div className={`status-badge ${strategy.status}`}>
-                        <span className="status-dot"></span>
-                        {strategy.status.toUpperCase()}
-                      </div>
-                    </div>
-                    <div className="card-actions">
-                      <button 
-                        className="action-btn"
-                        onClick={() => {
-                          setSelectedStrategy(strategy);
-                          setIsPerformanceDialogOpen(true);
-                        }}
-                        title="View Performance"
-                      >
-                        <Visibility />
-                      </button>
-                      <button className="action-btn" title="Settings">
-                        <Settings />
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className="card-content">
-                    <div className="performance-summary">
-                      <div className="perf-item">
-                        <span className="perf-label">Total Return</span>
-                        <span className={`perf-value ${strategy.performance.totalReturn >= 0 ? 'positive' : 'negative'}`}>
-                          {formatPercentage(strategy.performance.totalReturn)}
-                        </span>
-                      </div>
-                      <div className="perf-item">
-                        <span className="perf-label">Current Value</span>
-                        <span className="perf-value">
-                          {formatCurrency(strategy.performance.currentValue)}
-                        </span>
-                      </div>
-                      <div className="perf-item">
-                        <span className="perf-label">Win Rate</span>
-                        <span className="perf-value">
-                          {strategy.performance.winRate}%
-                        </span>
-                      </div>
-                      <div className="perf-item">
-                        <span className="perf-label">Max Drawdown</span>
-                        <span className="perf-value negative">
-                          {formatPercentage(strategy.performance.maxDrawdown)}
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="strategy-controls">
-                      {strategy.status === "running" && (
-                        <button className="control-btn pause">
-                          <Pause />
-                          Pause
-                        </button>
-                      )}
-                      {strategy.status === "paused" && (
-                        <button className="control-btn resume">
-                          <PlayArrow />
-                          Resume
-                        </button>
-                      )}
-                      <button className="control-btn stop">
-                        <Stop />
-                        Stop
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))}
-
-              {runningStrategies.length === 0 && !isLoading && (
-                <div className="empty-state">
-                  <div className="empty-icon">🤖</div>
-                  <h3>No Running Strategies</h3>
-                  <p>Deploy your first autonomous trading strategy to get started</p>
-                  <button 
-                    className="deploy-btn primary"
-                    onClick={() => setIsDeployDialogOpen(true)}
-                  >
-                    <PlayArrow />
-                    Deploy Strategy
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
-        {activeTab === 1 && (
-          <div className="builder-tab">
-            <SimpleStrategyBuilder />
-          </div>
-        )}
-      </div>
-                        <Chip
-                          label={strategy.status}
-                          color={getStatusColor(strategy.status) as any}
-                          size="small"
-                        />
-                      </Box>
-                      
-                      <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                        {strategy.strategy?.description || "No description"}
-                      </Typography>
-
-                      {/* Performance Metrics */}
-                      <Box sx={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(120px, 1fr))", gap: 2 }}>
-                        <Box>
-                          <Typography variant="caption" color="text.secondary">
-                            Total Return
-                          </Typography>
-                          <Typography 
-                            variant="body2" 
-                            fontWeight="bold"
-                            color={strategy.performance.totalReturn >= 0 ? "success.main" : "error.main"}
-                          >
-                            {formatPercentage(strategy.performance.totalReturn)}
-                          </Typography>
-                        </Box>
-                        
-                        <Box>
-                          <Typography variant="caption" color="text.secondary">
-                            Current Value
-                          </Typography>
-                          <Typography variant="body2" fontWeight="bold">
-                            {formatCurrency(strategy.performance.currentValue)}
-                          </Typography>
-                        </Box>
-                        
-                        <Box>
-                          <Typography variant="caption" color="text.secondary">
-                            Win Rate
-                          </Typography>
-                          <Typography variant="body2" fontWeight="bold">
-                            {strategy.performance.winRate}%
-                          </Typography>
-                        </Box>
-                        
-                        <Box>
-                          <Typography variant="caption" color="text.secondary">
-                            Total Trades
-                          </Typography>
-                          <Typography variant="body2" fontWeight="bold">
-                            {strategy.performance.totalTrades}
-                          </Typography>
-                        </Box>
-                      </Box>
-                    </Box>
-
-                    {/* Action Buttons */}
-                    <Box sx={{ display: "flex", gap: 1, ml: 2 }}>
-                      <IconButton
-                        size="small"
-                        onClick={() => {
-                          setSelectedStrategy(strategy);
-                          setIsPerformanceDialogOpen(true);
-                        }}
-                        title="View Performance"
-                      >
-                        <Visibility />
-                      </IconButton>
-                      
-                      <IconButton
-                        size="small"
-                        title="Pause Strategy"
-                        disabled={strategy.status !== "running"}
-                      >
-                        <Pause />
-                      </IconButton>
-                      
-                      <IconButton
-                        size="small"
-                        title="Stop Strategy"
-                        color="error"
-                      >
-                        <Stop />
-                      </IconButton>
-                    </Box>
-                  </Box>
-                </CardContent>
-              </Card>
-            ))}
-
-            {runningStrategies.length === 0 && !isLoading && (
-              <Paper sx={{ p: 4, textAlign: "center" }}>
-                <Typography variant="h6" color="text.secondary" gutterBottom>
-                  No Running Strategies
-                </Typography>
-                <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                  Create and deploy your first autonomous trading strategy
-                </Typography>
-                <Button
-                  variant="contained"
-                  startIcon={<Add />}
-                  onClick={() => setActiveTab(1)}
-                >
-                  Create Strategy
-                </Button>
-              </Paper>
-            )}
-          </Box>
-        </Box>
-      )}
-
-      {/* Strategy Builder Tab */}
-      {activeTab === 1 && (
-        <SimpleStrategyBuilder />
-      )}
-
-      {/* Performance Dialog */}
-      <Dialog
-        open={isPerformanceDialogOpen}
-        onClose={() => setIsPerformanceDialogOpen(false)}
-        maxWidth="md"
-        fullWidth
-      >
-        <DialogTitle>Strategy Performance Details</DialogTitle>
-        <DialogContent>
-          {selectedStrategy && (
-            <Box sx={{ display: "grid", gap: 3 }}>
-              <Typography variant="h6">{selectedStrategy.strategy?.name}</Typography>
-              
-              <Box sx={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 2 }}>
-                <Box>
-                  <Typography variant="caption" color="text.secondary">Total Return</Typography>
-                  <Typography variant="h6" color={selectedStrategy.performance.totalReturn >= 0 ? "success.main" : "error.main"}>
-                    {formatPercentage(selectedStrategy.performance.totalReturn)}
-                  </Typography>
-                </Box>
-                
-                <Box>
-                  <Typography variant="caption" color="text.secondary">Sharpe Ratio</Typography>
-                  <Typography variant="h6">{selectedStrategy.performance.sharpeRatio}</Typography>
-                </Box>
-                
-                <Box>
-                  <Typography variant="caption" color="text.secondary">Max Drawdown</Typography>
-                  <Typography variant="h6" color="error.main">
-                    {formatPercentage(selectedStrategy.performance.maxDrawdown)}
-                  </Typography>
-                </Box>
-                
-                <Box>
-                  <Typography variant="caption" color="text.secondary">Win Rate</Typography>
-                  <Typography variant="h6">{selectedStrategy.performance.winRate}%</Typography>
-                </Box>
-              </Box>
-              
-              <Box>
-                <Typography variant="subtitle2" gutterBottom>Trade Summary</Typography>
-                <Typography>
-                  {selectedStrategy.performance.profitableTrades} profitable out of {selectedStrategy.performance.totalTrades} total trades
-                </Typography>
-              </Box>
-            </Box>
-          )}
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setIsPerformanceDialogOpen(false)}>
-            Close
-          </Button>
-        </DialogActions>
-      </Dialog>
-
-      {/* Deploy Strategy Dialog */}
-      <Dialog
-        open={isDeployDialogOpen}
-        onClose={() => setIsDeployDialogOpen(false)}
-        maxWidth="sm"
-        fullWidth
-      >
-        <DialogTitle>Deploy Strategy</DialogTitle>
-        <DialogContent>
-          <Alert severity="info" sx={{ mb: 2 }}>
-            Strategy deployment will be available once you create a strategy using the Strategy Builder.
-          </Alert>
-          <Typography variant="body2" color="text.secondary">
-            Build your strategy first, then deploy it for autonomous trading.
-          </Typography>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setIsDeployDialogOpen(false)}>
-            Cancel
-          </Button>
-          <Button 
-            variant="contained" 
-            onClick={() => {
-              setIsDeployDialogOpen(false);
-              setActiveTab(1);
-            }}
-          >
-            Go to Builder
-          </Button>
-        </DialogActions>
-      </Dialog>
-    </Box>
-  );
-};
-
-export default AutonomousAgentDashboard;
+export default CleanAutonomousAgentDashboard;

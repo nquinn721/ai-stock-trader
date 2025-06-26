@@ -1,0 +1,71 @@
+.multi-asset-dashboard {
+  padding: 24px;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  min-height: 100vh;
+}
+
+.overview-cards-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.overview-card {
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.overview-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+}
+
+.overview-card .MuiCardContent-root {
+  padding: 24px;
+}
+
+.loading-skeleton {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 50vh;
+  text-align: center;
+}
+
+/* Tab styling */
+.MuiTabs-root {
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 12px;
+}
+
+.MuiTab-root {
+  text-transform: none;
+  color: #2c3e50;
+  font-weight: 500;
+}
+
+.MuiTab-root.Mui-selected {
+  color: #3498db;
+  font-weight: bold;
+}
+
+/* Grid spacing adjustments */
+.asset-grid {
+  margin-bottom: 24px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .multi-asset-dashboard {
+    padding: 16px;
+  }
+  
+  .overview-card .MuiCardContent-root {
+    padding: 16px;
+  }
+}

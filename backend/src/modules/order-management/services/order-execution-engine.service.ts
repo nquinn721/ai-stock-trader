@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, MoreThan } from 'typeorm';
+import { MoreThan, Repository } from 'typeorm';
 import {
   ExecutionReport,
   Order,
@@ -44,15 +44,15 @@ export class OrderExecutionEngine {
   private readonly slippageConfig: SlippageConfig = {
     enabled: true,
     basisPoints: 5, // 0.05% slippage
-    maxSlippage: 0.50, // Maximum $0.50 slippage
+    maxSlippage: 0.5, // Maximum $0.50 slippage
   };
 
   private readonly commissionConfig: CommissionConfig = {
-    baseFee: 0.00, // No base fee for paper trading
+    baseFee: 0.0, // No base fee for paper trading
     perShareFee: 0.005, // $0.005 per share
     percentageFee: 0.001, // 0.1% of trade value
-    minimumFee: 1.00, // Minimum $1.00 commission
-    maximumFee: 65.00, // Maximum $65.00 commission
+    minimumFee: 1.0, // Minimum $1.00 commission
+    maximumFee: 65.0, // Maximum $65.00 commission
   };
 
   constructor(
@@ -78,21 +78,31 @@ export class OrderExecutionEngine {
 
       const marketPrice = Number(stock.currentPrice);
       if (marketPrice <= 0) {
-        throw new Error(`Invalid market price for ${order.symbol}: ${marketPrice}`);
+        throw new Error(
+          `Invalid market price for ${order.symbol}: ${marketPrice}`,
+        );
       }
 
       // Apply slippage for market orders
       const executionPrice = this.applySlippage(marketPrice, order.side);
-      
+
       // Calculate commission
-      const commission = this.calculateCommission(Number(order.quantity), executionPrice);
+      const commission = this.calculateCommission(
+        Number(order.quantity),
+        executionPrice,
+      );
 
       // Execute the trade
       const result = await this.executeTrade(order, executionPrice, commission);
 
       if (result.success) {
         // Update order with execution details
-        await this.updateOrderExecution(order, executionPrice, Number(order.quantity), commission);
+        await this.updateOrderExecution(
+          order,
+          executionPrice,
+          Number(order.quantity),
+          commission,
+        );
 
         return {
           success: true,
@@ -156,14 +166,22 @@ export class OrderExecutionEngine {
       }
 
       // Calculate commission
-      const commission = this.calculateCommission(Number(order.quantity), executionPrice);
+      const commission = this.calculateCommission(
+        Number(order.quantity),
+        executionPrice,
+      );
 
       // Execute the trade
       const result = await this.executeTrade(order, executionPrice, commission);
 
       if (result.success) {
         // Update order with execution details
-        await this.updateOrderExecution(order, executionPrice, Number(order.quantity), commission);
+        await this.updateOrderExecution(
+          order,
+          executionPrice,
+          Number(order.quantity),
+          commission,
+        );
 
         return {
           success: true,
@@ -196,7 +214,8 @@ export class OrderExecutionEngine {
     maxFillQuantity?: number,
   ): Promise<ExecutionResult> {
     const fillQuantity = maxFillQuantity || Number(order.quantity);
-    const remainingQuantity = Number(order.quantity) - Number(order.executedQuantity || 0);
+    const remainingQuantity =
+      Number(order.quantity) - Number(order.executedQuantity || 0);
     const actualFillQuantity = Math.min(fillQuantity, remainingQuantity);
 
     if (actualFillQuantity <= 0) {
@@ -220,12 +239,15 @@ export class OrderExecutionEngine {
           executionResult = await this.executeLimitOrder(order);
           break;
         default:
-          throw new Error(`Unsupported order type for execution: ${order.orderType}`);
+          throw new Error(
+            `Unsupported order type for execution: ${order.orderType}`,
+          );
       }
 
       if (executionResult.success && executionResult.executedQuantity) {
         // Handle partial fill
-        const newExecutedQuantity = Number(order.executedQuantity || 0) + actualFillQuantity;
+        const newExecutedQuantity =
+          Number(order.executedQuantity || 0) + actualFillQuantity;
         const newFillCount = (order.fillCount || 0) + 1;
 
         // Create execution report
@@ -241,11 +263,14 @@ export class OrderExecutionEngine {
         // Update order with partial fill information
         order.executedQuantity = newExecutedQuantity;
         order.fillCount = newFillCount;
-        order.executionReports = [...(order.executionReports || []), executionReport];
+        order.executionReports = [
+          ...(order.executionReports || []),
+          executionReport,
+        ];
 
         // Calculate average execution price
         const totalValue = (order.executionReports || []).reduce(
-          (sum, report) => sum + (report.quantity * report.price),
+          (sum, report) => sum + report.quantity * report.price,
           0,
         );
         const totalQuantity = (order.executionReports || []).reduce(
@@ -265,15 +290,19 @@ export class OrderExecutionEngine {
         return {
           ...executionResult,
           executedQuantity: actualFillQuantity,
-          message: newExecutedQuantity >= Number(order.quantity) 
-            ? 'Order fully executed' 
-            : `Partial fill: ${actualFillQuantity} of ${remainingQuantity} remaining`,
+          message:
+            newExecutedQuantity >= Number(order.quantity)
+              ? 'Order fully executed'
+              : `Partial fill: ${actualFillQuantity} of ${remainingQuantity} remaining`,
         };
       }
 
       return executionResult;
     } catch (error) {
-      this.logger.error(`Error executing order with partial fills ${order.id}:`, error);
+      this.logger.error(
+        `Error executing order with partial fills ${order.id}:`,
+        error,
+      );
       return {
         success: false,
         orderId: order.id,
@@ -297,8 +326,8 @@ export class OrderExecutionEngine {
     );
 
     // Buy orders get worse prices (higher), sell orders get worse prices (lower)
-    return side === OrderSide.BUY 
-      ? marketPrice + slippageAmount 
+    return side === OrderSide.BUY
+      ? marketPrice + slippageAmount
       : marketPrice - slippageAmount;
   }
 
@@ -307,7 +336,7 @@ export class OrderExecutionEngine {
    */
   private calculateCommission(quantity: number, price: number): number {
     const tradeValue = quantity * price;
-    
+
     let commission = this.commissionConfig.baseFee;
     commission += quantity * this.commissionConfig.perShareFee;
     commission += tradeValue * this.commissionConfig.percentageFee;
@@ -362,7 +391,10 @@ export class OrderExecutionEngine {
   /**
    * Get execution quality metrics for analysis
    */
-  async getExecutionQuality(portfolioId: number, period: number = 30): Promise<{
+  async getExecutionQuality(
+    portfolioId: number,
+    period: number = 30,
+  ): Promise<{
     averageSlippage: number;
     averageCommission: number;
     fillRate: number;
@@ -392,22 +424,32 @@ export class OrderExecutionEngine {
 
     // Calculate metrics
     const totalSlippage = orders
-      .filter(o => o.orderType === OrderType.MARKET)
+      .filter((o) => o.orderType === OrderType.MARKET)
       .reduce((sum, order) => {
         // Approximate slippage calculation (would need more sophisticated tracking in production)
-        const estimatedSlippage = Math.abs(Number(order.executedPrice) - Number(order.limitPrice || order.executedPrice)) / Number(order.executedPrice);
+        const estimatedSlippage =
+          Math.abs(
+            Number(order.executedPrice) -
+              Number(order.limitPrice || order.executedPrice),
+          ) / Number(order.executedPrice);
         return sum + estimatedSlippage;
       }, 0);
 
-    const totalCommission = orders.reduce((sum, order) => sum + Number(order.commission || 0), 0);
+    const totalCommission = orders.reduce(
+      (sum, order) => sum + Number(order.commission || 0),
+      0,
+    );
 
     const executionTimes = orders
-      .filter(order => order.executedAt && order.createdAt)
-      .map(order => order.executedAt!.getTime() - order.createdAt.getTime());
+      .filter((order) => order.executedAt && order.createdAt)
+      .map((order) => order.executedAt!.getTime() - order.createdAt.getTime());
 
-    const averageExecutionTime = executionTimes.length > 0
-      ? executionTimes.reduce((sum, time) => sum + time, 0) / executionTimes.length / 1000 // Convert to seconds
-      : 0;
+    const averageExecutionTime =
+      executionTimes.length > 0
+        ? executionTimes.reduce((sum, time) => sum + time, 0) /
+          executionTimes.length /
+          1000 // Convert to seconds
+        : 0;
 
     return {
       averageSlippage: totalSlippage / orders.length,

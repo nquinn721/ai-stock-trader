@@ -48,6 +48,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import "./EnhancedPortfolioAnalyticsDashboard.css";
 
 interface PortfolioAnalyticsData {
   totalValue: number;
@@ -326,96 +327,133 @@ const EnhancedPortfolioAnalyticsDashboard: React.FC<
 
   if (loading) {
     return (
-      <Box
-        display="flex"
-        justifyContent="center"
-        alignItems="center"
-        minHeight="400px"
-      >
-        <CircularProgress />
+      <Box className="enhanced-analytics-dashboard">
+        <div className="loading-container">
+          <CircularProgress size={64} className="loading-spinner" />
+          <Typography className="loading-text">
+            Loading portfolio analytics...
+          </Typography>
+        </div>
       </Box>
     );
   }
 
   if (error) {
     return (
-      <Alert severity="error" sx={{ m: 2 }}>
-        {error}
-      </Alert>
+      <Box className="enhanced-analytics-dashboard">
+        <Alert severity="error" className="error-alert">
+          {error}
+        </Alert>
+      </Box>
     );
   }
 
   if (!analyticsData) {
     return (
-      <Alert severity="warning" sx={{ m: 2 }}>
-        No analytics data available
-      </Alert>
+      <Box className="enhanced-analytics-dashboard">
+        <Alert severity="warning" className="error-alert">
+          No analytics data available
+        </Alert>
+      </Box>
     );
   }
 
   return (
-    <Box id="portfolio-analytics-dashboard" sx={{ width: "100%" }}>
-      <Paper sx={{ mb: 2 }}>
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            p: 2,
-          }}
-        >
-          <Typography variant="h4" component="h1">
-            Portfolio Analytics Dashboard
-          </Typography>
-          <Button
-            variant="outlined"
-            startIcon={<GetApp />}
-            onClick={handleExportPDF}
+    <Box className="enhanced-analytics-dashboard">
+      <Paper className="analytics-header-card">
+        <Box className="analytics-header-content">
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              flexWrap: "wrap",
+              gap: 2,
+            }}
           >
-            Export PDF
-          </Button>
-        </Box>
+            <Typography className="analytics-title">
+              Portfolio Analytics Dashboard
+            </Typography>
+            <Button
+              variant="contained"
+              startIcon={<GetApp />}
+              onClick={handleExportPDF}
+              className="export-button"
+            >
+              Export PDF
+            </Button>
+          </Box>
 
-        <Tabs
-          value={tabValue}
-          onChange={handleTabChange}
-          variant="scrollable"
-          scrollButtons="auto"
-          sx={{ borderBottom: 1, borderColor: "divider" }}
-        >
-          <Tab label="Overview" icon={<Assessment />} />
-          <Tab label="Performance" icon={<TrendingUp />} />
-          <Tab label="Risk Analysis" icon={<Warning />} />
-          <Tab label="Correlations" icon={<CompareArrows />} />
-          <Tab label="Monte Carlo" icon={<ShowChart />} />
-          <Tab label="Efficient Frontier" icon={<Timeline />} />
-          <Tab label="Sectors" icon={<PieChartIcon />} />
-          <Tab label="Benchmarks" icon={<ScatterPlot />} />
-        </Tabs>
+          <Tabs
+            value={tabValue}
+            onChange={handleTabChange}
+            variant="scrollable"
+            scrollButtons="auto"
+            className="analytics-tabs"
+          >
+            <Tab
+              label="Overview"
+              icon={<Assessment />}
+              className="analytics-tab"
+            />
+            <Tab
+              label="Performance"
+              icon={<TrendingUp />}
+              className="analytics-tab"
+            />
+            <Tab
+              label="Risk Analysis"
+              icon={<Warning />}
+              className="analytics-tab"
+            />
+            <Tab
+              label="Correlations"
+              icon={<CompareArrows />}
+              className="analytics-tab"
+            />
+            <Tab
+              label="Monte Carlo"
+              icon={<ShowChart />}
+              className="analytics-tab"
+            />
+            <Tab
+              label="Efficient Frontier"
+              icon={<Timeline />}
+              className="analytics-tab"
+            />
+            <Tab
+              label="Sectors"
+              icon={<PieChartIcon />}
+              className="analytics-tab"
+            />
+            <Tab
+              label="Benchmarks"
+              icon={<ScatterPlot />}
+              className="analytics-tab"
+            />
+          </Tabs>
+        </Box>
       </Paper>
 
       {/* Overview Tab */}
       <TabPanel value={tabValue} index={0}>
-        <Box
-          sx={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
-            gap: 3,
-            mb: 3,
-          }}
-        >
-          <Card sx={{ height: "100%" }}>
+        <div className="metrics-grid">
+          <Card className="metric-card">
             <CardContent>
-              <Typography color="textSecondary" gutterBottom>
+              <Typography
+                className="metric-label"
+                color="textSecondary"
+                gutterBottom
+              >
                 Total Value
               </Typography>
-              <Typography variant="h4">
+              <Typography className="metric-value" variant="h4">
                 {formatCurrency(analyticsData.totalValue)}
               </Typography>
               <Typography
-                color={
-                  analyticsData.dayChange >= 0 ? "success.main" : "error.main"
-                }
+                className={`metric-change ${
+                  analyticsData.dayChange >= 0 ? "positive" : "negative"
+                }`}
                 variant="body2"
               >
                 {formatPercent(analyticsData.dayChangePercent)} today
@@ -423,18 +461,22 @@ const EnhancedPortfolioAnalyticsDashboard: React.FC<
             </CardContent>
           </Card>
 
-          <Card sx={{ height: "100%" }}>
+          <Card className="metric-card">
             <CardContent>
-              <Typography color="textSecondary" gutterBottom>
+              <Typography
+                className="metric-label"
+                color="textSecondary"
+                gutterBottom
+              >
                 Total Return
               </Typography>
-              <Typography variant="h4">
+              <Typography className="metric-value" variant="h4">
                 {formatCurrency(analyticsData.totalReturn)}
               </Typography>
               <Typography
-                color={
-                  analyticsData.totalReturn >= 0 ? "success.main" : "error.main"
-                }
+                className={`metric-change ${
+                  analyticsData.totalReturn >= 0 ? "positive" : "negative"
+                }`}
                 variant="body2"
               >
                 {formatPercent(analyticsData.totalReturnPercent)}
@@ -442,41 +484,60 @@ const EnhancedPortfolioAnalyticsDashboard: React.FC<
             </CardContent>
           </Card>
 
-          <Card sx={{ height: "100%" }}>
+          <Card className="metric-card">
             <CardContent>
-              <Typography color="textSecondary" gutterBottom>
+              <Typography
+                className="metric-label"
+                color="textSecondary"
+                gutterBottom
+              >
                 Sharpe Ratio
               </Typography>
-              <Typography variant="h4">
+              <Typography className="metric-value" variant="h4">
                 {analyticsData.sharpeRatio.toFixed(2)}
               </Typography>
-              <Typography color="textSecondary" variant="body2">
+              <Typography
+                className="metric-subtext"
+                color="textSecondary"
+                variant="body2"
+              >
                 Risk-adjusted return
               </Typography>
             </CardContent>
           </Card>
 
-          <Card sx={{ height: "100%" }}>
+          <Card className="metric-card">
             <CardContent>
-              <Typography color="textSecondary" gutterBottom>
+              <Typography
+                className="metric-label"
+                color="textSecondary"
+                gutterBottom
+              >
                 Max Drawdown
               </Typography>
-              <Typography variant="h4" color="error.main">
+              <Typography className="metric-value negative" variant="h4">
                 {formatPercent(analyticsData.maxDrawdown)}
               </Typography>
-              <Typography color="textSecondary" variant="body2">
+              <Typography
+                className="metric-subtext"
+                color="textSecondary"
+                variant="body2"
+              >
                 Worst decline
               </Typography>
             </CardContent>
           </Card>
-        </Box>
+        </div>
 
-        <Card>
-          <CardHeader title="Portfolio Performance vs Benchmark" />
-          <CardContent>
+        <Card className="chart-card">
+          <CardHeader
+            title="Portfolio Performance vs Benchmark"
+            className="chart-card-header"
+          />
+          <CardContent className="chart-content">
             <ResponsiveContainer width="100%" height={400}>
               <LineChart data={analyticsData.performanceData.slice(-30)}>
-                <CartesianGrid strokeDasharray="3 3" />
+                <CartesianGrid strokeDasharray="3 3" className="chart-grid" />
                 <XAxis dataKey="date" />
                 <YAxis />
                 <Tooltip />
@@ -484,13 +545,15 @@ const EnhancedPortfolioAnalyticsDashboard: React.FC<
                 <Line
                   type="monotone"
                   dataKey="portfolioValue"
-                  stroke="#8884d8"
+                  stroke="#667eea"
+                  strokeWidth={3}
                   name="Portfolio"
                 />
                 <Line
                   type="monotone"
                   dataKey="benchmarkValue"
-                  stroke="#82ca9d"
+                  stroke="#f093fb"
+                  strokeWidth={2}
                   name="Benchmark"
                 />
               </LineChart>
@@ -501,8 +564,8 @@ const EnhancedPortfolioAnalyticsDashboard: React.FC<
 
       {/* Performance Tab */}
       <TabPanel value={tabValue} index={1}>
-        <Box sx={{ mb: 3 }}>
-          <FormControl size="small" sx={{ minWidth: 120 }}>
+        <div className="performance-controls">
+          <FormControl size="small" className="performance-select">
             <InputLabel>Time Period</InputLabel>
             <Select
               value={performanceWindow}
@@ -516,43 +579,39 @@ const EnhancedPortfolioAnalyticsDashboard: React.FC<
               <MenuItem value="3Y">3 Years</MenuItem>
             </Select>
           </FormControl>
-        </Box>
+        </div>
 
-        <Box
-          sx={{
-            display: "grid",
-            gridTemplateColumns: { xs: "1fr", md: "repeat(2, 1fr)" },
-            gap: 3,
-            mb: 3,
-          }}
-        >
-          <Card>
-            <CardHeader title="Rolling Returns" />
-            <CardContent>
+        <div className="charts-grid">
+          <Card className="chart-card">
+            <CardHeader title="Rolling Returns" className="chart-card-header" />
+            <CardContent className="chart-content">
               <ResponsiveContainer width="100%" height={300}>
                 <AreaChart data={analyticsData.performanceData.slice(-60)}>
-                  <CartesianGrid strokeDasharray="3 3" />
+                  <CartesianGrid strokeDasharray="3 3" className="chart-grid" />
                   <XAxis dataKey="date" />
                   <YAxis />
                   <Tooltip />
                   <Area
                     type="monotone"
                     dataKey="returns"
-                    stroke="#8884d8"
-                    fill="#8884d8"
-                    fillOpacity={0.6}
+                    stroke="#667eea"
+                    fill="#667eea"
+                    fillOpacity={0.3}
                   />
                 </AreaChart>
               </ResponsiveContainer>
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader title="Cumulative Performance" />
-            <CardContent>
+          <Card className="chart-card">
+            <CardHeader
+              title="Cumulative Performance"
+              className="chart-card-header"
+            />
+            <CardContent className="chart-content">
               <ResponsiveContainer width="100%" height={300}>
                 <ComposedChart data={analyticsData.performanceData.slice(-60)}>
-                  <CartesianGrid strokeDasharray="3 3" />
+                  <CartesianGrid strokeDasharray="3 3" className="chart-grid" />
                   <XAxis dataKey="date" />
                   <YAxis />
                   <Tooltip />
@@ -560,32 +619,27 @@ const EnhancedPortfolioAnalyticsDashboard: React.FC<
                   <Line
                     type="monotone"
                     dataKey="portfolioValue"
-                    stroke="#8884d8"
+                    stroke="#667eea"
+                    strokeWidth={3}
                     name="Portfolio"
                   />
                   <Line
                     type="monotone"
                     dataKey="benchmarkValue"
-                    stroke="#82ca9d"
+                    stroke="#f093fb"
+                    strokeWidth={2}
                     name="S&P 500"
                   />
                 </ComposedChart>
               </ResponsiveContainer>
             </CardContent>
           </Card>
-        </Box>
+        </div>
       </TabPanel>
 
       {/* Risk Analysis Tab */}
       <TabPanel value={tabValue} index={2}>
-        <Box
-          sx={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
-            gap: 2,
-            mb: 3,
-          }}
-        >
+        <div className="metrics-grid">
           {[
             { label: "Alpha", value: analyticsData.alpha, suffix: "%" },
             { label: "Beta", value: analyticsData.beta, suffix: "" },
@@ -611,12 +665,16 @@ const EnhancedPortfolioAnalyticsDashboard: React.FC<
               suffix: "%",
             },
           ].map((metric, index) => (
-            <Card key={index}>
+            <Card key={index} className="metric-card">
               <CardContent>
-                <Typography color="textSecondary" gutterBottom>
+                <Typography
+                  className="metric-label"
+                  color="textSecondary"
+                  gutterBottom
+                >
                   {metric.label}
                 </Typography>
-                <Typography variant="h5">
+                <Typography className="metric-value" variant="h5">
                   {metric.currency
                     ? formatCurrency(metric.value)
                     : `${metric.value.toFixed(2)}${metric.suffix}`}
@@ -624,21 +682,18 @@ const EnhancedPortfolioAnalyticsDashboard: React.FC<
               </CardContent>
             </Card>
           ))}
-        </Box>
+        </div>
 
-        <Box
-          sx={{
-            display: "grid",
-            gridTemplateColumns: { xs: "1fr", lg: "2fr 1fr" },
-            gap: 3,
-          }}
-        >
-          <Card>
-            <CardHeader title="Risk-Return Scatter Plot" />
-            <CardContent>
+        <div className="charts-grid">
+          <Card className="chart-card large-chart">
+            <CardHeader
+              title="Risk-Return Scatter Plot"
+              className="chart-card-header"
+            />
+            <CardContent className="chart-content">
               <ResponsiveContainer width="100%" height={400}>
                 <ScatterChart>
-                  <CartesianGrid />
+                  <CartesianGrid className="chart-grid" />
                   <XAxis
                     type="number"
                     dataKey="risk"
@@ -703,30 +758,27 @@ const EnhancedPortfolioAnalyticsDashboard: React.FC<
               </Stack>
             </CardContent>
           </Card>
-        </Box>
+        </div>
       </TabPanel>
 
       {/* Correlations Tab */}
       <TabPanel value={tabValue} index={3}>
-        <Box
-          sx={{
-            display: "grid",
-            gridTemplateColumns: { xs: "1fr", md: "repeat(2, 1fr)" },
-            gap: 3,
-          }}
-        >
-          <Card>
-            <CardHeader title="Asset Correlation Matrix" />
-            <CardContent>
-              <Box sx={{ overflowX: "auto" }}>
-                <table style={{ width: "100%", borderCollapse: "collapse" }}>
+        <div className="charts-grid">
+          <Card className="chart-card">
+            <CardHeader
+              title="Asset Correlation Matrix"
+              className="chart-card-header"
+            />
+            <CardContent className="chart-content">
+              <div className="correlation-table-container">
+                <table className="correlation-table">
                   <thead>
                     <tr>
-                      <th style={{ padding: 8, textAlign: "left" }}>Asset</th>
+                      <th className="correlation-header">Asset</th>
                       {analyticsData.correlationMatrix.map(({ asset }) => (
                         <th
                           key={asset}
-                          style={{ padding: 8, textAlign: "center" }}
+                          className="correlation-header correlation-asset"
                         >
                           {asset}
                         </th>
@@ -737,18 +789,18 @@ const EnhancedPortfolioAnalyticsDashboard: React.FC<
                     {analyticsData.correlationMatrix.map(
                       ({ asset, correlations }) => (
                         <tr key={asset}>
-                          <td style={{ padding: 8, fontWeight: "bold" }}>
-                            {asset}
-                          </td>
+                          <td className="correlation-asset-name">{asset}</td>
                           {Object.entries(correlations).map(
                             ([otherAsset, correlation]) => (
                               <td
                                 key={otherAsset}
+                                className="correlation-cell"
                                 style={{
-                                  padding: 8,
-                                  textAlign: "center",
-                                  backgroundColor: `rgba(136, 132, 216, ${correlation})`,
-                                  color: correlation > 0.5 ? "white" : "black",
+                                  backgroundColor: `rgba(102, 126, 234, ${correlation})`,
+                                  color:
+                                    correlation > 0.5
+                                      ? "white"
+                                      : "rgba(255, 255, 255, 0.9)",
                                 }}
                               >
                                 {correlation.toFixed(2)}
@@ -760,27 +812,45 @@ const EnhancedPortfolioAnalyticsDashboard: React.FC<
                     )}
                   </tbody>
                 </table>
-              </Box>
+              </div>
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader title="Diversification Analysis" />
-            <CardContent>
-              <Typography variant="h6" gutterBottom>
+          <Card className="chart-card">
+            <CardHeader
+              title="Diversification Analysis"
+              className="chart-card-header"
+            />
+            <CardContent className="chart-content">
+              <Typography
+                className="diversification-title"
+                variant="h6"
+                gutterBottom
+              >
                 Portfolio Diversification Score
               </Typography>
-              <Typography variant="h3" color="primary.main" gutterBottom>
+              <Typography
+                className="diversification-score"
+                variant="h3"
+                gutterBottom
+              >
                 7.8/10
               </Typography>
-              <Typography variant="body2" color="textSecondary" paragraph>
+              <Typography
+                className="diversification-description"
+                variant="body2"
+                paragraph
+              >
                 Your portfolio shows good diversification across different
                 assets and sectors.
               </Typography>
 
               <Stack spacing={2}>
                 <Box>
-                  <Typography variant="subtitle2">
+                  <Typography
+                    className="correlation-stat-label"
+                    variant="subtitle2"
+                  >
                     Average Correlation: 0.35
                   </Typography>
                   <Typography variant="body2" color="textSecondary">
@@ -798,24 +868,21 @@ const EnhancedPortfolioAnalyticsDashboard: React.FC<
               </Stack>
             </CardContent>
           </Card>
-        </Box>
+        </div>
       </TabPanel>
 
       {/* Monte Carlo Tab */}
       <TabPanel value={tabValue} index={4}>
-        <Box
-          sx={{
-            display: "grid",
-            gridTemplateColumns: { xs: "1fr", md: "repeat(2, 1fr)" },
-            gap: 3,
-          }}
-        >
-          <Card>
-            <CardHeader title="Monte Carlo Simulation Results" />
-            <CardContent>
+        <div className="charts-grid">
+          <Card className="chart-card">
+            <CardHeader
+              title="Monte Carlo Simulation Results"
+              className="chart-card-header"
+            />
+            <CardContent className="chart-content">
               <ResponsiveContainer width="100%" height={400}>
                 <AreaChart data={analyticsData.monteCarloResults.slice(0, 100)}>
-                  <CartesianGrid strokeDasharray="3 3" />
+                  <CartesianGrid strokeDasharray="3 3" className="chart-grid" />
                   <XAxis dataKey="scenario" />
                   <YAxis />
                   <Tooltip
@@ -824,24 +891,31 @@ const EnhancedPortfolioAnalyticsDashboard: React.FC<
                   <Area
                     type="monotone"
                     dataKey="finalValue"
-                    stroke="#8884d8"
-                    fill="#8884d8"
-                    fillOpacity={0.6}
+                    stroke="#667eea"
+                    fill="#667eea"
+                    fillOpacity={0.3}
                   />
                 </AreaChart>
               </ResponsiveContainer>
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader title="Simulation Statistics" />
-            <CardContent>
+          <Card className="chart-card">
+            <CardHeader
+              title="Simulation Statistics"
+              className="chart-card-header"
+            />
+            <CardContent className="chart-content">
               <Stack spacing={3}>
                 <Box>
-                  <Typography variant="subtitle2" gutterBottom>
+                  <Typography
+                    className="stat-label"
+                    variant="subtitle2"
+                    gutterBottom
+                  >
                     95% Confidence Interval
                   </Typography>
-                  <Typography variant="body1">
+                  <Typography className="stat-value" variant="body1">
                     {formatCurrency(
                       analyticsData.monteCarloResults[49]?.finalValue
                     )}{" "}
@@ -852,7 +926,11 @@ const EnhancedPortfolioAnalyticsDashboard: React.FC<
                   </Typography>
                 </Box>
                 <Box>
-                  <Typography variant="subtitle2" gutterBottom>
+                  <Typography
+                    className="stat-label"
+                    variant="subtitle2"
+                    gutterBottom
+                  >
                     Probability of Loss
                   </Typography>
                   <Typography variant="h6" color="error.main">
@@ -890,24 +968,21 @@ const EnhancedPortfolioAnalyticsDashboard: React.FC<
               </Stack>
             </CardContent>
           </Card>
-        </Box>
+        </div>
       </TabPanel>
 
       {/* Efficient Frontier Tab */}
       <TabPanel value={tabValue} index={5}>
-        <Box
-          sx={{
-            display: "grid",
-            gridTemplateColumns: { xs: "1fr", md: "repeat(2, 1fr)" },
-            gap: 3,
-          }}
-        >
-          <Card>
-            <CardHeader title="Efficient Frontier" />
-            <CardContent>
+        <div className="charts-grid">
+          <Card className="chart-card">
+            <CardHeader
+              title="Efficient Frontier"
+              className="chart-card-header"
+            />
+            <CardContent className="chart-content">
               <ResponsiveContainer width="100%" height={400}>
                 <ScatterChart>
-                  <CartesianGrid />
+                  <CartesianGrid className="chart-grid" />
                   <XAxis
                     type="number"
                     dataKey="risk"
@@ -926,31 +1001,39 @@ const EnhancedPortfolioAnalyticsDashboard: React.FC<
                   <Scatter
                     name="Efficient Portfolios"
                     data={analyticsData.efficientFrontier}
-                    fill="#8884d8"
+                    fill="#667eea"
                   />
                   <Scatter
                     name="Current Portfolio"
                     data={[{ risk: analyticsData.volatility, return: 12.5 }]}
-                    fill="#ff7300"
+                    fill="#f093fb"
                   />
                 </ScatterChart>
               </ResponsiveContainer>
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader title="Portfolio Optimization" />
-            <CardContent>
-              <Typography variant="body1" paragraph>
+          <Card className="chart-card">
+            <CardHeader
+              title="Portfolio Optimization"
+              className="chart-card-header"
+            />
+            <CardContent className="chart-content">
+              <Typography
+                className="optimization-description"
+                variant="body1"
+                paragraph
+              >
                 The efficient frontier shows the optimal risk-return
-                combinations. Your current portfolio is plotted as the orange
-                dot.
+                combinations. Your current portfolio is plotted as the pink dot.
               </Typography>
 
               <Stack spacing={2}>
                 <Box>
-                  <Typography variant="subtitle2">Current Position</Typography>
-                  <Typography variant="body2">
+                  <Typography className="stat-label" variant="subtitle2">
+                    Current Position
+                  </Typography>
+                  <Typography className="stat-value" variant="body2">
                     Risk: {analyticsData.volatility}% | Return: 12.5%
                   </Typography>
                 </Box>
@@ -981,7 +1064,7 @@ const EnhancedPortfolioAnalyticsDashboard: React.FC<
               </Stack>
             </CardContent>
           </Card>
-        </Box>
+        </div>
       </TabPanel>
 
       {/* Sectors Tab */}
@@ -1007,9 +1090,13 @@ const EnhancedPortfolioAnalyticsDashboard: React.FC<
                       outerRadius={120}
                       paddingAngle={5}
                       dataKey="value"
-                      label={({ sector, allocation }) =>
-                        `${sector}: ${allocation}%`
-                      }
+                      label={({
+                        sector,
+                        allocation,
+                      }: {
+                        sector: string;
+                        allocation: number;
+                      }) => `${sector}: ${allocation}%`}
                     >
                       {analyticsData.sectorAllocation.map((entry, index) => (
                         <Cell

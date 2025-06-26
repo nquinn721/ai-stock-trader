@@ -1,4 +1,4 @@
-import { Add, PlayArrow, Public, Save, Assessment } from "@mui/icons-material";
+import { Add, Assessment, PlayArrow, Save } from "@mui/icons-material";
 import {
   Alert,
   Box,
@@ -9,18 +9,16 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  FormControl,
+  InputLabel,
+  MenuItem,
   Paper,
+  Select,
   Snackbar,
   Tab,
   Tabs,
-  Typography,
   TextField,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  Chip,
-  Stack,
+  Typography,
 } from "@mui/material";
 import React, { useState } from "react";
 import { strategyBuilderService } from "../../services/strategy-builder.service";
@@ -79,20 +77,76 @@ export const SimpleStrategyBuilder: React.FC = () => {
   // Mock component library for demonstration
   const componentLibrary = {
     indicators: [
-      { id: "sma", name: "Simple Moving Average", type: "indicator", category: "trend", description: "Moving average indicator", parameters: { period: 20 } },
-      { id: "rsi", name: "RSI", type: "indicator", category: "momentum", description: "Relative Strength Index", parameters: { period: 14 } },
+      {
+        id: "sma",
+        name: "Simple Moving Average",
+        type: "indicator",
+        category: "trend",
+        description: "Moving average indicator",
+        parameters: { period: 20 },
+      },
+      {
+        id: "rsi",
+        name: "RSI",
+        type: "indicator",
+        category: "momentum",
+        description: "Relative Strength Index",
+        parameters: { period: 14 },
+      },
     ],
     conditions: [
-      { id: "price_above", name: "Price Above", type: "condition", category: "price", description: "Price above threshold", parameters: { threshold: 100 } },
-      { id: "crossover", name: "Crossover", type: "condition", category: "signal", description: "Line crossover", parameters: {} },
+      {
+        id: "price_above",
+        name: "Price Above",
+        type: "condition",
+        category: "price",
+        description: "Price above threshold",
+        parameters: { threshold: 100 },
+      },
+      {
+        id: "crossover",
+        name: "Crossover",
+        type: "condition",
+        category: "signal",
+        description: "Line crossover",
+        parameters: {},
+      },
     ],
     actions: [
-      { id: "buy_market", name: "Buy Market", type: "action", category: "trade", description: "Market buy order", parameters: { quantity: 100 } },
-      { id: "sell_market", name: "Sell Market", type: "action", category: "trade", description: "Market sell order", parameters: { quantity: 100 } },
+      {
+        id: "buy_market",
+        name: "Buy Market",
+        type: "action",
+        category: "trade",
+        description: "Market buy order",
+        parameters: { quantity: 100 },
+      },
+      {
+        id: "sell_market",
+        name: "Sell Market",
+        type: "action",
+        category: "trade",
+        description: "Market sell order",
+        parameters: { quantity: 100 },
+      },
     ],
     riskRules: [
-      { id: "stop_loss", name: "Stop Loss", type: "risk_rule", category: "risk", description: "Stop loss rule", parameters: { percentage: 5 } },
-      { id: "position_size", name: "Position Size", type: "risk_rule", category: "risk", description: "Position sizing", parameters: { percentage: 10 } },
+      {
+        id: "stop_loss",
+        name: "Stop Loss",
+        type: "risk_rule",
+        category: "risk",
+        description: "Stop loss rule",
+        parameters: { percentage: 5 },
+      },
+      {
+        id: "position_size",
+        name: "Position Size",
+        type: "risk_rule",
+        category: "risk",
+        description: "Position sizing",
+        parameters: { percentage: 10 },
+      },
     ],
   };
 
@@ -100,7 +154,7 @@ export const SimpleStrategyBuilder: React.FC = () => {
     setIsLoading(true);
     try {
       const response = await strategyBuilderService.createStrategy(strategy);
-      
+
       if (!response.success) {
         throw new Error(response.error || "Failed to save strategy");
       }
@@ -148,16 +202,16 @@ export const SimpleStrategyBuilder: React.FC = () => {
       connections: [],
     };
 
-    setStrategy(prev => ({
+    setStrategy((prev) => ({
       ...prev,
-      components: [...prev.components, newComponent]
+      components: [...prev.components, newComponent],
     }));
   };
 
   const removeComponent = (componentId: string) => {
-    setStrategy(prev => ({
+    setStrategy((prev) => ({
       ...prev,
-      components: prev.components.filter(c => c.id !== componentId)
+      components: prev.components.filter((c) => c.id !== componentId),
     }));
   };
 
@@ -165,12 +219,12 @@ export const SimpleStrategyBuilder: React.FC = () => {
     const newRule: RiskRule = {
       id: `${ruleDef.id}_${Date.now()}`,
       type: ruleDef.type,
-      parameters: { ...ruleDef.parameters }
+      parameters: { ...ruleDef.parameters },
     };
 
-    setStrategy(prev => ({
+    setStrategy((prev) => ({
       ...prev,
-      riskRules: [...prev.riskRules, newRule]
+      riskRules: [...prev.riskRules, newRule],
     }));
   };
 
@@ -193,19 +247,26 @@ export const SimpleStrategyBuilder: React.FC = () => {
             <Typography variant="h5" gutterBottom>
               Strategy Configuration
             </Typography>
-            
+
             <Box sx={{ display: "grid", gap: 3, mb: 4 }}>
               <TextField
                 label="Strategy Name"
                 value={strategy.name}
-                onChange={(e) => setStrategy(prev => ({ ...prev, name: e.target.value }))}
+                onChange={(e) =>
+                  setStrategy((prev) => ({ ...prev, name: e.target.value }))
+                }
                 fullWidth
               />
-              
+
               <TextField
                 label="Description"
                 value={strategy.description}
-                onChange={(e) => setStrategy(prev => ({ ...prev, description: e.target.value }))}
+                onChange={(e) =>
+                  setStrategy((prev) => ({
+                    ...prev,
+                    description: e.target.value,
+                  }))
+                }
                 multiline
                 rows={3}
                 fullWidth
@@ -216,7 +277,12 @@ export const SimpleStrategyBuilder: React.FC = () => {
                 <Select
                   value={strategy.timeframe}
                   label="Timeframe"
-                  onChange={(e) => setStrategy(prev => ({ ...prev, timeframe: e.target.value }))}
+                  onChange={(e) =>
+                    setStrategy((prev) => ({
+                      ...prev,
+                      timeframe: e.target.value,
+                    }))
+                  }
                 >
                   <MenuItem value="1m">1 Minute</MenuItem>
                   <MenuItem value="5m">5 Minutes</MenuItem>
@@ -230,12 +296,18 @@ export const SimpleStrategyBuilder: React.FC = () => {
             <Typography variant="h6" gutterBottom>
               Strategy Components ({strategy.components.length})
             </Typography>
-            
+
             <Box sx={{ display: "grid", gap: 2, mb: 4 }}>
               {strategy.components.map((component) => (
                 <Card key={component.id} variant="outlined">
                   <CardContent>
-                    <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <Box
+                      sx={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                      }}
+                    >
                       <Box>
                         <Typography variant="subtitle1" fontWeight="bold">
                           {component.name}
@@ -255,10 +327,14 @@ export const SimpleStrategyBuilder: React.FC = () => {
                   </CardContent>
                 </Card>
               ))}
-              
+
               {strategy.components.length === 0 && (
-                <Typography color="text.secondary" sx={{ textAlign: "center", py: 4 }}>
-                  No components added yet. Use the Components tab to add indicators, conditions, and actions.
+                <Typography
+                  color="text.secondary"
+                  sx={{ textAlign: "center", py: 4 }}
+                >
+                  No components added yet. Use the Components tab to add
+                  indicators, conditions, and actions.
                 </Typography>
               )}
             </Box>
@@ -266,13 +342,13 @@ export const SimpleStrategyBuilder: React.FC = () => {
             <Typography variant="h6" gutterBottom>
               Risk Management Rules ({strategy.riskRules.length})
             </Typography>
-            
+
             <Box sx={{ display: "grid", gap: 2 }}>
               {strategy.riskRules.map((rule) => (
                 <Card key={rule.id} variant="outlined">
                   <CardContent>
                     <Typography variant="subtitle1" fontWeight="bold">
-                      {rule.type.replace('_', ' ').toUpperCase()}
+                      {rule.type.replace("_", " ").toUpperCase()}
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
                       Parameters: {JSON.stringify(rule.parameters)}
@@ -280,10 +356,14 @@ export const SimpleStrategyBuilder: React.FC = () => {
                   </CardContent>
                 </Card>
               ))}
-              
+
               {strategy.riskRules.length === 0 && (
-                <Typography color="text.secondary" sx={{ textAlign: "center", py: 2 }}>
-                  No risk rules configured. Add risk management rules to protect your capital.
+                <Typography
+                  color="text.secondary"
+                  sx={{ textAlign: "center", py: 2 }}
+                >
+                  No risk rules configured. Add risk management rules to protect
+                  your capital.
                 </Typography>
               )}
             </Box>
@@ -296,17 +376,27 @@ export const SimpleStrategyBuilder: React.FC = () => {
             <Typography variant="h5" gutterBottom>
               Component Library
             </Typography>
-            
+
             {Object.entries(componentLibrary).map(([category, components]) => (
               <Box key={category} sx={{ mb: 4 }}>
-                <Typography variant="h6" gutterBottom sx={{ textTransform: "capitalize" }}>
+                <Typography
+                  variant="h6"
+                  gutterBottom
+                  sx={{ textTransform: "capitalize" }}
+                >
                   {category}
                 </Typography>
                 <Box sx={{ display: "grid", gap: 2 }}>
                   {components.map((comp: any) => (
                     <Card key={comp.id} variant="outlined">
                       <CardContent>
-                        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                        <Box
+                          sx={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            alignItems: "center",
+                          }}
+                        >
                           <Box>
                             <Typography variant="subtitle1" fontWeight="bold">
                               {comp.name}
@@ -318,7 +408,11 @@ export const SimpleStrategyBuilder: React.FC = () => {
                           <Button
                             variant="contained"
                             size="small"
-                            onClick={() => category === 'riskRules' ? addRiskRule(comp) : addComponent(comp)}
+                            onClick={() =>
+                              category === "riskRules"
+                                ? addRiskRule(comp)
+                                : addComponent(comp)
+                            }
                           >
                             Add
                           </Button>
@@ -338,7 +432,7 @@ export const SimpleStrategyBuilder: React.FC = () => {
             <Typography variant="h5" gutterBottom>
               Strategy Validation
             </Typography>
-            
+
             {validation && (
               <Box sx={{ mb: 3 }}>
                 {validation.isValid ? (
@@ -357,7 +451,7 @@ export const SimpleStrategyBuilder: React.FC = () => {
                     </ul>
                   </Alert>
                 )}
-                
+
                 {validation.warnings && validation.warnings.length > 0 && (
                   <Alert severity="warning" sx={{ mt: 2 }}>
                     <Typography variant="subtitle2" gutterBottom>
@@ -372,17 +466,27 @@ export const SimpleStrategyBuilder: React.FC = () => {
                 )}
               </Box>
             )}
-            
+
             <Typography variant="h6" gutterBottom>
               Strategy Summary
             </Typography>
             <Box sx={{ display: "grid", gap: 2 }}>
               <Paper sx={{ p: 2 }}>
-                <Typography><strong>Name:</strong> {strategy.name}</Typography>
-                <Typography><strong>Components:</strong> {strategy.components.length}</Typography>
-                <Typography><strong>Risk Rules:</strong> {strategy.riskRules.length}</Typography>
-                <Typography><strong>Timeframe:</strong> {strategy.timeframe}</Typography>
-                <Typography><strong>Symbols:</strong> {strategy.symbols?.join(", ")}</Typography>
+                <Typography>
+                  <strong>Name:</strong> {strategy.name}
+                </Typography>
+                <Typography>
+                  <strong>Components:</strong> {strategy.components.length}
+                </Typography>
+                <Typography>
+                  <strong>Risk Rules:</strong> {strategy.riskRules.length}
+                </Typography>
+                <Typography>
+                  <strong>Timeframe:</strong> {strategy.timeframe}
+                </Typography>
+                <Typography>
+                  <strong>Symbols:</strong> {strategy.symbols?.join(", ")}
+                </Typography>
               </Paper>
             </Box>
           </Box>
@@ -394,12 +498,13 @@ export const SimpleStrategyBuilder: React.FC = () => {
             <Typography variant="h5" gutterBottom>
               Backtesting
             </Typography>
-            
+
             <Alert severity="info" sx={{ mb: 3 }}>
-              Backtesting functionality will simulate your strategy against historical data.
-              Ensure your strategy is validated before running backtests.
+              Backtesting functionality will simulate your strategy against
+              historical data. Ensure your strategy is validated before running
+              backtests.
             </Alert>
-            
+
             <Button
               variant="contained"
               startIcon={<PlayArrow />}
@@ -408,7 +513,7 @@ export const SimpleStrategyBuilder: React.FC = () => {
             >
               Run Backtest
             </Button>
-            
+
             {!validation?.isValid && (
               <Typography color="text.secondary" sx={{ mt: 2 }}>
                 Fix validation errors before running backtests.
@@ -426,7 +531,13 @@ export const SimpleStrategyBuilder: React.FC = () => {
     <Box sx={{ height: "100vh", display: "flex", flexDirection: "column" }}>
       {/* Header */}
       <Box sx={{ borderBottom: 1, borderColor: "divider", p: 2 }}>
-        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
           <Box>
             <Typography variant="h4" gutterBottom>
               Strategy Builder
@@ -457,7 +568,10 @@ export const SimpleStrategyBuilder: React.FC = () => {
 
       {/* Tabs */}
       <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
-        <Tabs value={activeTab} onChange={(e, newValue) => setActiveTab(newValue)}>
+        <Tabs
+          value={activeTab}
+          onChange={(e, newValue) => setActiveTab(newValue)}
+        >
           {tabs.map((tab, index) => (
             <Tab
               key={index}
@@ -470,9 +584,7 @@ export const SimpleStrategyBuilder: React.FC = () => {
       </Box>
 
       {/* Content */}
-      <Box sx={{ flex: 1, overflow: "auto" }}>
-        {renderTabContent()}
-      </Box>
+      <Box sx={{ flex: 1, overflow: "auto" }}>{renderTabContent()}</Box>
 
       {/* Notifications */}
       <Snackbar
@@ -496,11 +608,17 @@ export const SimpleStrategyBuilder: React.FC = () => {
       </Snackbar>
 
       {/* Backtest Dialog */}
-      <Dialog open={showBacktestDialog} onClose={() => setShowBacktestDialog(false)} maxWidth="md" fullWidth>
+      <Dialog
+        open={showBacktestDialog}
+        onClose={() => setShowBacktestDialog(false)}
+        maxWidth="md"
+        fullWidth
+      >
         <DialogTitle>Run Backtest</DialogTitle>
         <DialogContent>
           <Typography gutterBottom>
-            This will test your strategy against historical data to evaluate performance.
+            This will test your strategy against historical data to evaluate
+            performance.
           </Typography>
           <Alert severity="info" sx={{ mt: 2 }}>
             Backtesting integration with real historical data coming soon!
@@ -508,7 +626,10 @@ export const SimpleStrategyBuilder: React.FC = () => {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setShowBacktestDialog(false)}>Cancel</Button>
-          <Button variant="contained" onClick={() => setShowBacktestDialog(false)}>
+          <Button
+            variant="contained"
+            onClick={() => setShowBacktestDialog(false)}
+          >
             Start Backtest
           </Button>
         </DialogActions>

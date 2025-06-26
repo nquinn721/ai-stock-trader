@@ -7,7 +7,6 @@ const Header: React.FC = () => {
 
   const navItems = [
     { path: "/", label: "Dashboard", icon: "📊" },
-    { path: "/auto-trading", label: "Auto Trading", icon: "🤖" },
     { path: "/autonomous-trading", label: "Autonomous Trading", icon: "🧠" },
     { path: "/analytics", label: "Analytics", icon: "📈" },
     { path: "/market-scanner", label: "Market Scanner", icon: "🔍" },

@@ -21,7 +21,11 @@ import { PortfolioAnalyticsService } from './portfolio-analytics.service';
     forwardRef(() => MLModule),
   ],
   controllers: [PaperTradingController, PortfolioAnalyticsController],
-  providers: [PaperTradingService, PortfolioAnalyticsService, MarketHoursService],
+  providers: [
+    PaperTradingService,
+    PortfolioAnalyticsService,
+    MarketHoursService,
+  ],
   exports: [PaperTradingService, PortfolioAnalyticsService],
 })
 export class PaperTradingModule {}

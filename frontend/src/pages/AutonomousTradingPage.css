@@ -1,22 +1,24 @@
+/* Autonomous Trading Page - Modern Design */
+
 .autonomous-trading-page {
   min-height: 100vh;
+  width: 100%;
+  margin: 0;
+  padding: 0;
   background: linear-gradient(
     135deg,
-    #0d1117 0%,
-    #161b22 25%,
-    #21262d 50%,
-    #30363d 75%,
-    #1c2128 100%
+    #0f172a 0%,
+    #1e293b 25%,
+    #334155 50%,
+    #475569 75%,
+    #1e293b 100%
   );
   background-attachment: fixed;
-  padding: 24px 16px;
-  font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI",
-    sans-serif;
-  color: #f0f6fc;
-  width: 100%;
-  box-sizing: border-box;
+  position: relative;
+  overflow-x: hidden;
 }
 
+/* Gradient Overlay */
 .autonomous-trading-page::before {
   content: "";
   position: fixed;
@@ -25,37 +27,90 @@
   width: 100%;
   height: 100%;
   background: radial-gradient(
-      circle at 25% 25%,
-      rgba(139, 92, 246, 0.1) 0%,
-      transparent 50%
+      circle at 20% 20%,
+      rgba(139, 92, 246, 0.15) 0%,
+      transparent 60%
     ),
     radial-gradient(
-      circle at 75% 75%,
-      rgba(236, 72, 153, 0.1) 0%,
-      transparent 50%
+      circle at 80% 80%,
+      rgba(236, 72, 153, 0.15) 0%,
+      transparent 60%
+    ),
+    radial-gradient(
+      circle at 50% 50%,
+      rgba(16, 185, 129, 0.08) 0%,
+      transparent 70%
     );
   pointer-events: none;
-  z-index: -1;
+  z-index: 0;
 }
 
-.page-header {
-  margin-bottom: 32px;
-  text-align: center;
+/* Animated background particles */
+.autonomous-trading-page::after {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: radial-gradient(
+      2px 2px at 40px 60px,
+      rgba(255, 255, 255, 0.1),
+      transparent
+    ),
+    radial-gradient(
+      2px 2px at 90px 40px,
+      rgba(255, 255, 255, 0.05),
+      transparent
+    ),
+    radial-gradient(
+      1px 1px at 130px 80px,
+      rgba(255, 255, 255, 0.08),
+      transparent
+    ),
+    radial-gradient(
+      1px 1px at 160px 30px,
+      rgba(255, 255, 255, 0.03),
+      transparent
+    );
+  background-repeat: repeat;
+  background-size: 200px 120px;
+  animation: moveStars 60s linear infinite;
+  pointer-events: none;
+  z-index: 0;
 }
 
-.page-header h1 {
-  font-size: 32px;
-  font-weight: 700;
-  color: #f0f6fc;
-  margin: 0 0 8px 0;
-  background: linear-gradient(135deg, #8b5cf6, #ec4899);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+@keyframes moveStars {
+  0% {
+    transform: translateY(0) translateX(0);
+  }
+  100% {
+    transform: translateY(-120px) translateX(-200px);
+  }
 }
 
-.page-header p {
-  font-size: 16px;
-  color: #8b949e;
-  margin: 0;
+/* Ensure content is above background */
+.autonomous-trading-page > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .autonomous-trading-page {
+    background-size: 400% 400%;
+    animation: gradientShift 15s ease infinite;
+  }
+}
+
+@keyframes gradientShift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
 }

@@ -1,50 +1,50 @@
-import React, { useState, useEffect } from 'react';
 import {
+  Assessment as AssessmentIcon,
+  ExpandMore as ExpandMoreIcon,
+  MonetizationOn as MonetizationOnIcon,
+  Psychology as PsychologyIcon,
+  Timeline as TimelineIcon,
+  TrendingDown as TrendingDownIcon,
+  TrendingFlat as TrendingFlatIcon,
+  TrendingUp as TrendingUpIcon,
+  Warning as WarningIcon,
+} from "@mui/icons-material";
+import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
+  Alert,
   Box,
+  Button,
   Card,
   CardContent,
-  Typography,
-  LinearProgress,
   Chip,
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
+  Divider,
+  LinearProgress,
   List,
   ListItem,
   ListItemIcon,
   ListItemText,
-  Divider,
-  Button,
-  Alert,
   Skeleton,
-} from '@mui/material';
-import {
-  ExpandMore as ExpandMoreIcon,
-  TrendingUp as TrendingUpIcon,
-  TrendingDown as TrendingDownIcon,
-  TrendingFlat as TrendingFlatIcon,
-  Assessment as AssessmentIcon,
-  Warning as WarningIcon,
-  Psychology as PsychologyIcon,
-  Timeline as TimelineIcon,
-  MonetizationOn as MonetizationOnIcon,
-} from '@mui/icons-material';
-import { styled } from '@mui/material/styles';
+  Typography,
+} from "@mui/material";
+import { styled } from "@mui/material/styles";
+import React, { useEffect, useState } from "react";
 
 interface TradingRecommendation {
   symbol: string;
-  action: 'BUY' | 'SELL' | 'HOLD';
+  action: "BUY" | "SELL" | "HOLD";
   confidence: number;
   reasoning: string[];
-  riskLevel: 'LOW' | 'MEDIUM' | 'HIGH';
+  riskLevel: "LOW" | "MEDIUM" | "HIGH";
   positionSize?: number;
   stopLoss?: number;
   takeProfit?: number;
-  timeHorizon: '1D' | '1W' | '1M';
+  timeHorizon: "1D" | "1W" | "1M";
   timestamp: Date;
   metrics?: {
     marketPrediction?: {
-      direction: 'BUY' | 'SELL' | 'HOLD';
+      direction: "BUY" | "SELL" | "HOLD";
       confidence: number;
       priceTarget?: number;
     };
@@ -62,7 +62,7 @@ interface TradingRecommendation {
       confidence: number;
     };
     riskAssessment?: {
-      level: 'LOW' | 'MEDIUM' | 'HIGH';
+      level: "LOW" | "MEDIUM" | "HIGH";
       factors: string[];
       maxDrawdown: number;
       volatility: number;
@@ -72,19 +72,19 @@ interface TradingRecommendation {
 
 interface RecommendationExplanationProps {
   recommendation: TradingRecommendation;
-  onActionClick?: (action: 'buy' | 'sell' | 'hold' | 'analyze') => void;
+  onActionClick?: (action: "buy" | "sell" | "hold" | "analyze") => void;
 }
 
 const ConfidenceMeter = styled(Box)(({ theme }) => ({
-  display: 'flex',
-  alignItems: 'center',
+  display: "flex",
+  alignItems: "center",
   gap: theme.spacing(1),
   marginBottom: theme.spacing(2),
 }));
 
 const ActionHeader = styled(Box)(({ theme }) => ({
-  display: 'flex',
-  alignItems: 'center',
+  display: "flex",
+  alignItems: "center",
   gap: theme.spacing(1),
   marginBottom: theme.spacing(2),
 }));
@@ -94,11 +94,10 @@ const MetricCard = styled(Card)(({ theme }) => ({
   border: `1px solid ${theme.palette.divider}`,
 }));
 
-export const RecommendationExplanation: React.FC<RecommendationExplanationProps> = ({
-  recommendation,
-  onActionClick,
-}) => {
-  const [explanation, setExplanation] = useState<string>('');
+export const RecommendationExplanation: React.FC<
+  RecommendationExplanationProps
+> = ({ recommendation, onActionClick }) => {
+  const [explanation, setExplanation] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -111,10 +110,10 @@ export const RecommendationExplanation: React.FC<RecommendationExplanationProps>
     setError(null);
 
     try {
-      const response = await fetch('/api/ai/explain-recommendation', {
-        method: 'POST',
+      const response = await fetch("/api/ai/explain-recommendation", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           symbol: recommendation.symbol,
@@ -129,14 +128,14 @@ export const RecommendationExplanation: React.FC<RecommendationExplanationProps>
       });
 
       if (!response.ok) {
-        throw new Error('Failed to load explanation');
+        throw new Error("Failed to load explanation");
       }
 
       const data = await response.json();
       setExplanation(data.explanation);
     } catch (err) {
-      console.error('Error loading explanation:', err);
-      setError('Unable to load AI explanation. Using fallback analysis.');
+      console.error("Error loading explanation:", err);
+      setError("Unable to load AI explanation. Using fallback analysis.");
       setExplanation(generateFallbackExplanation());
     } finally {
       setLoading(false);
@@ -144,15 +143,27 @@ export const RecommendationExplanation: React.FC<RecommendationExplanationProps>
   };
 
   const generateFallbackExplanation = (): string => {
-    const actionText = recommendation.action === 'BUY' ? 'buying' : 
-                     recommendation.action === 'SELL' ? 'selling' : 'holding';
-    const confidenceText = recommendation.confidence > 0.8 ? 'High' : 
-                          recommendation.confidence > 0.6 ? 'Medium' : 'Low';
+    const actionText =
+      recommendation.action === "BUY"
+        ? "buying"
+        : recommendation.action === "SELL"
+        ? "selling"
+        : "holding";
+    const confidenceText =
+      recommendation.confidence > 0.8
+        ? "High"
+        : recommendation.confidence > 0.6
+        ? "Medium"
+        : "Low";
 
-    return `Based on our technical analysis, we recommend ${actionText} ${recommendation.symbol} with ${confidenceText.toLowerCase()} confidence (${(recommendation.confidence * 100).toFixed(1)}%).
+    return `Based on our technical analysis, we recommend ${actionText} ${
+      recommendation.symbol
+    } with ${confidenceText.toLowerCase()} confidence (${(
+      recommendation.confidence * 100
+    ).toFixed(1)}%).
 
 Key factors supporting this recommendation:
-${recommendation.reasoning.map(reason => `• ${reason}`).join('\n')}
+${recommendation.reasoning.map((reason) => `• ${reason}`).join("\n")}
 
 Risk Level: ${recommendation.riskLevel}
 Time Horizon: ${recommendation.timeHorizon}
@@ -162,42 +173,42 @@ Please review the detailed metrics below for additional insights.`;
 
   const getActionIcon = () => {
     switch (recommendation.action) {
-      case 'BUY':
+      case "BUY":
         return <TrendingUpIcon color="success" />;
-      case 'SELL':
+      case "SELL":
         return <TrendingDownIcon color="error" />;
-      case 'HOLD':
+      case "HOLD":
         return <TrendingFlatIcon color="warning" />;
     }
   };
 
   const getActionColor = () => {
     switch (recommendation.action) {
-      case 'BUY':
-        return 'success';
-      case 'SELL':
-        return 'error';
-      case 'HOLD':
-        return 'warning';
+      case "BUY":
+        return "success";
+      case "SELL":
+        return "error";
+      case "HOLD":
+        return "warning";
     }
   };
 
   const getRiskColor = () => {
     switch (recommendation.riskLevel) {
-      case 'LOW':
-        return 'success';
-      case 'MEDIUM':
-        return 'warning';
-      case 'HIGH':
-        return 'error';
+      case "LOW":
+        return "success";
+      case "MEDIUM":
+        return "warning";
+      case "HIGH":
+        return "error";
     }
   };
 
   const formatCurrency = (value?: number) => {
-    if (value === undefined) return 'N/A';
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
+    if (value === undefined) return "N/A";
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
     }).format(value);
   };
 
@@ -235,8 +246,13 @@ Please review the detailed metrics below for additional insights.`;
             variant="determinate"
             value={recommendation.confidence * 100}
             sx={{ flex: 1, height: 8, borderRadius: 4 }}
-            color={recommendation.confidence > 0.8 ? 'success' : 
-                   recommendation.confidence > 0.6 ? 'warning' : 'error'}
+            color={
+              recommendation.confidence > 0.8
+                ? "success"
+                : recommendation.confidence > 0.6
+                ? "warning"
+                : "error"
+            }
           />
           <Typography variant="body2" fontWeight="bold">
             {formatPercentage(recommendation.confidence)}
@@ -245,7 +261,10 @@ Please review the detailed metrics below for additional insights.`;
 
         {/* AI Explanation */}
         <Box sx={{ mb: 3 }}>
-          <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+          <Typography
+            variant="h6"
+            sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}
+          >
             <PsychologyIcon color="primary" />
             AI Explanation
           </Typography>
@@ -260,7 +279,10 @@ Please review the detailed metrics below for additional insights.`;
               {error}
             </Alert>
           ) : null}
-          <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap', lineHeight: 1.6 }}>
+          <Typography
+            variant="body1"
+            sx={{ whiteSpace: "pre-wrap", lineHeight: 1.6 }}
+          >
             {explanation}
           </Typography>
         </Box>
@@ -277,11 +299,13 @@ Please review the detailed metrics below for additional insights.`;
           {recommendation.metrics?.marketPrediction && (
             <Accordion>
               <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                   <TimelineIcon color="primary" />
                   <Typography variant="subtitle1">Market Prediction</Typography>
                   <Chip
-                    label={formatPercentage(recommendation.metrics.marketPrediction.confidence)}
+                    label={formatPercentage(
+                      recommendation.metrics.marketPrediction.confidence
+                    )}
                     size="small"
                     color="primary"
                   />
@@ -292,20 +316,26 @@ Please review the detailed metrics below for additional insights.`;
                   <ListItem>
                     <ListItemText
                       primary="Direction"
-                      secondary={recommendation.metrics.marketPrediction.direction}
+                      secondary={
+                        recommendation.metrics.marketPrediction.direction
+                      }
                     />
                   </ListItem>
                   <ListItem>
                     <ListItemText
                       primary="Confidence"
-                      secondary={formatPercentage(recommendation.metrics.marketPrediction.confidence)}
+                      secondary={formatPercentage(
+                        recommendation.metrics.marketPrediction.confidence
+                      )}
                     />
                   </ListItem>
                   {recommendation.metrics.marketPrediction.priceTarget && (
                     <ListItem>
                       <ListItemText
                         primary="Price Target"
-                        secondary={formatCurrency(recommendation.metrics.marketPrediction.priceTarget)}
+                        secondary={formatCurrency(
+                          recommendation.metrics.marketPrediction.priceTarget
+                        )}
                       />
                     </ListItem>
                   )}
@@ -318,11 +348,13 @@ Please review the detailed metrics below for additional insights.`;
           {recommendation.metrics?.technicalSignals && (
             <Accordion>
               <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                   <AssessmentIcon color="primary" />
                   <Typography variant="subtitle1">Technical Signals</Typography>
                   <Chip
-                    label={`${recommendation.metrics.technicalSignals.strength.toFixed(1)}/10`}
+                    label={`${recommendation.metrics.technicalSignals.strength.toFixed(
+                      1
+                    )}/10`}
                     size="small"
                     color="primary"
                   />
@@ -330,14 +362,18 @@ Please review the detailed metrics below for additional insights.`;
               </AccordionSummary>
               <AccordionDetails>
                 <List dense>
-                  {recommendation.metrics.technicalSignals.signals.map((signal, index) => (
-                    <ListItem key={index}>
-                      <ListItemText
-                        primary={signal.type}
-                        secondary={`Value: ${signal.value.toFixed(2)} | Weight: ${signal.weight.toFixed(2)}`}
-                      />
-                    </ListItem>
-                  ))}
+                  {recommendation.metrics.technicalSignals.signals.map(
+                    (signal, index) => (
+                      <ListItem key={index}>
+                        <ListItemText
+                          primary={signal.type}
+                          secondary={`Value: ${signal.value.toFixed(
+                            2
+                          )} | Weight: ${signal.weight.toFixed(2)}`}
+                        />
+                      </ListItem>
+                    )
+                  )}
                 </List>
               </AccordionDetails>
             </Accordion>
@@ -347,15 +383,27 @@ Please review the detailed metrics below for additional insights.`;
           {recommendation.metrics?.sentimentAnalysis && (
             <Accordion>
               <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                   <PsychologyIcon color="primary" />
-                  <Typography variant="subtitle1">Sentiment Analysis</Typography>
+                  <Typography variant="subtitle1">
+                    Sentiment Analysis
+                  </Typography>
                   <Chip
-                    label={recommendation.metrics.sentimentAnalysis.score > 0 ? 'Positive' : 
-                           recommendation.metrics.sentimentAnalysis.score < 0 ? 'Negative' : 'Neutral'}
+                    label={
+                      recommendation.metrics.sentimentAnalysis.score > 0
+                        ? "Positive"
+                        : recommendation.metrics.sentimentAnalysis.score < 0
+                        ? "Negative"
+                        : "Neutral"
+                    }
                     size="small"
-                    color={recommendation.metrics.sentimentAnalysis.score > 0 ? 'success' : 
-                           recommendation.metrics.sentimentAnalysis.score < 0 ? 'error' : 'default'}
+                    color={
+                      recommendation.metrics.sentimentAnalysis.score > 0
+                        ? "success"
+                        : recommendation.metrics.sentimentAnalysis.score < 0
+                        ? "error"
+                        : "default"
+                    }
                   />
                 </Box>
               </AccordionSummary>
@@ -364,19 +412,25 @@ Please review the detailed metrics below for additional insights.`;
                   <ListItem>
                     <ListItemText
                       primary="Sentiment Score"
-                      secondary={recommendation.metrics.sentimentAnalysis.score.toFixed(2)}
+                      secondary={recommendation.metrics.sentimentAnalysis.score.toFixed(
+                        2
+                      )}
                     />
                   </ListItem>
                   <ListItem>
                     <ListItemText
                       primary="Confidence"
-                      secondary={formatPercentage(recommendation.metrics.sentimentAnalysis.confidence)}
+                      secondary={formatPercentage(
+                        recommendation.metrics.sentimentAnalysis.confidence
+                      )}
                     />
                   </ListItem>
                   <ListItem>
                     <ListItemText
                       primary="Sources"
-                      secondary={recommendation.metrics.sentimentAnalysis.sources.join(', ')}
+                      secondary={recommendation.metrics.sentimentAnalysis.sources.join(
+                        ", "
+                      )}
                     />
                   </ListItem>
                 </List>
@@ -388,7 +442,7 @@ Please review the detailed metrics below for additional insights.`;
           {recommendation.metrics?.riskAssessment && (
             <Accordion>
               <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                   <WarningIcon color="primary" />
                   <Typography variant="subtitle1">Risk Assessment</Typography>
                   <Chip
@@ -409,13 +463,17 @@ Please review the detailed metrics below for additional insights.`;
                   <ListItem>
                     <ListItemText
                       primary="Max Drawdown"
-                      secondary={formatPercentage(recommendation.metrics.riskAssessment.maxDrawdown)}
+                      secondary={formatPercentage(
+                        recommendation.metrics.riskAssessment.maxDrawdown
+                      )}
                     />
                   </ListItem>
                   <ListItem>
                     <ListItemText
                       primary="Volatility"
-                      secondary={formatPercentage(recommendation.metrics.riskAssessment.volatility)}
+                      secondary={formatPercentage(
+                        recommendation.metrics.riskAssessment.volatility
+                      )}
                     />
                   </ListItem>
                   <ListItem>
@@ -423,14 +481,19 @@ Please review the detailed metrics below for additional insights.`;
                       primary="Risk Factors"
                       secondary={
                         <List dense sx={{ mt: 1 }}>
-                          {recommendation.metrics.riskAssessment.factors.map((factor, index) => (
-                            <ListItem key={index} sx={{ pl: 0 }}>
-                              <ListItemIcon sx={{ minWidth: 32 }}>
-                                <WarningIcon fontSize="small" color="warning" />
-                              </ListItemIcon>
-                              <ListItemText primary={factor} />
-                            </ListItem>
-                          ))}
+                          {recommendation.metrics.riskAssessment.factors.map(
+                            (factor, index) => (
+                              <ListItem key={index} sx={{ pl: 0 }}>
+                                <ListItemIcon sx={{ minWidth: 32 }}>
+                                  <WarningIcon
+                                    fontSize="small"
+                                    color="warning"
+                                  />
+                                </ListItemIcon>
+                                <ListItemText primary={factor} />
+                              </ListItem>
+                            )
+                          )}
                         </List>
                       }
                     />
@@ -442,23 +505,23 @@ Please review the detailed metrics below for additional insights.`;
         </Box>
 
         {/* Action Buttons */}
-        <Box sx={{ mt: 3, display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-          {recommendation.action === 'BUY' && (
+        <Box sx={{ mt: 3, display: "flex", gap: 2, flexWrap: "wrap" }}>
+          {recommendation.action === "BUY" && (
             <Button
               variant="contained"
               color="success"
               startIcon={<MonetizationOnIcon />}
-              onClick={() => onActionClick?.('buy')}
+              onClick={() => onActionClick?.("buy")}
             >
               Place Buy Order
             </Button>
           )}
-          {recommendation.action === 'SELL' && (
+          {recommendation.action === "SELL" && (
             <Button
               variant="contained"
               color="error"
               startIcon={<MonetizationOnIcon />}
-              onClick={() => onActionClick?.('sell')}
+              onClick={() => onActionClick?.("sell")}
             >
               Place Sell Order
             </Button>
@@ -466,19 +529,21 @@ Please review the detailed metrics below for additional insights.`;
           <Button
             variant="outlined"
             startIcon={<AssessmentIcon />}
-            onClick={() => onActionClick?.('analyze')}
+            onClick={() => onActionClick?.("analyze")}
           >
             Detailed Analysis
           </Button>
         </Box>
 
         {/* Trading Parameters */}
-        {(recommendation.stopLoss || recommendation.takeProfit || recommendation.positionSize) && (
-          <Box sx={{ mt: 2, p: 2, bgcolor: 'grey.50', borderRadius: 1 }}>
+        {(recommendation.stopLoss ||
+          recommendation.takeProfit ||
+          recommendation.positionSize) && (
+          <Box sx={{ mt: 2, p: 2, bgcolor: "grey.50", borderRadius: 1 }}>
             <Typography variant="subtitle2" sx={{ mb: 1 }}>
               Suggested Trading Parameters:
             </Typography>
-            <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+            <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
               {recommendation.positionSize && (
                 <Typography variant="body2">
                   Position Size: {recommendation.positionSize} shares
