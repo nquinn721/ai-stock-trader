@@ -21,7 +21,7 @@ export interface AssistantResponse {
 }
 
 export interface SuggestedAction {
-  type: 'VIEW_STOCK' | 'PLACE_ORDER' | 'ADJUST_PORTFOLIO' | 'VIEW_ANALYSIS';
+  type: "VIEW_STOCK" | "PLACE_ORDER" | "ADJUST_PORTFOLIO" | "VIEW_ANALYSIS";
   symbol?: string;
   parameters?: Record<string, any>;
   description: string;
@@ -37,26 +37,29 @@ export interface ConversationSummary {
 
 export interface TradingRecommendation {
   symbol: string;
-  action: 'BUY' | 'SELL' | 'HOLD';
+  action: "BUY" | "SELL" | "HOLD";
   confidence: number;
   reasoning: string[];
-  riskLevel: 'LOW' | 'MEDIUM' | 'HIGH';
-  timeHorizon: '1D' | '1W' | '1M';
+  riskLevel: "LOW" | "MEDIUM" | "HIGH";
+  timeHorizon: "1D" | "1W" | "1M";
   stopLoss?: number;
   takeProfit?: number;
 }
 
 class TradingAssistantService {
   private readonly baseUrl = `${API_BASE_URL}/ai`;
-  private currentUserId = 'user_123'; // In real app, get from auth context
+  private currentUserId = "user_123"; // In real app, get from auth context
   private currentConversationId: string | null = null;
 
-  async sendMessage(message: string, conversationId?: string): Promise<AssistantResponse> {
+  async sendMessage(
+    message: string,
+    conversationId?: string
+  ): Promise<AssistantResponse> {
     try {
       const response = await fetch(`${this.baseUrl}/chat`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           message,
@@ -70,7 +73,7 @@ class TradingAssistantService {
       }
 
       const result = await response.json();
-      
+
       // Update current conversation ID if we get one back
       if (result.context?.conversationId) {
         this.currentConversationId = result.context.conversationId;
@@ -78,17 +81,19 @@ class TradingAssistantService {
 
       return result;
     } catch (error) {
-      console.error('Error sending message to AI assistant:', error);
+      console.error("Error sending message to AI assistant:", error);
       return this.getFallbackResponse(message);
     }
   }
 
-  async explainRecommendation(recommendation: TradingRecommendation): Promise<string> {
+  async explainRecommendation(
+    recommendation: TradingRecommendation
+  ): Promise<string> {
     try {
       const response = await fetch(`${this.baseUrl}/explain-recommendation`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(recommendation),
       });
@@ -100,17 +105,20 @@ class TradingAssistantService {
       const result = await response.json();
       return result.explanation;
     } catch (error) {
-      console.error('Error getting recommendation explanation:', error);
+      console.error("Error getting recommendation explanation:", error);
       return this.getFallbackExplanation(recommendation);
     }
   }
 
-  async askQuestion(question: string, context?: Record<string, any>): Promise<string> {
+  async askQuestion(
+    question: string,
+    context?: Record<string, any>
+  ): Promise<string> {
     try {
       const response = await fetch(`${this.baseUrl}/ask`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           question,
@@ -126,42 +134,49 @@ class TradingAssistantService {
       const result = await response.json();
       return result.answer;
     } catch (error) {
-      console.error('Error asking question:', error);
-      return 'I apologize, but I\'m having trouble processing your question right now. Please try again later.';
+      console.error("Error asking question:", error);
+      return "I apologize, but I'm having trouble processing your question right now. Please try again later.";
     }
   }
 
-  async getConversationHistory(conversationId: string, limit: number = 20): Promise<ChatMessage[]> {
+  async getConversationHistory(
+    conversationId: string,
+    limit: number = 20
+  ): Promise<ChatMessage[]> {
     try {
       const response = await fetch(
         `${this.baseUrl}/conversations/${this.currentUserId}/${conversationId}/history?limit=${limit}`,
         {
-          method: 'GET',
+          method: "GET",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
         }
       );
 
       if (!response.ok) {
-        throw new Error(`Failed to get conversation history: ${response.statusText}`);
+        throw new Error(
+          `Failed to get conversation history: ${response.statusText}`
+        );
       }
 
       return response.json();
     } catch (error) {
-      console.error('Error getting conversation history:', error);
+      console.error("Error getting conversation history:", error);
       return [];
     }
   }
 
-  async getUserConversations(limit: number = 10): Promise<ConversationSummary[]> {
+  async getUserConversations(
+    limit: number = 10
+  ): Promise<ConversationSummary[]> {
     try {
       const response = await fetch(
         `${this.baseUrl}/conversations/${this.currentUserId}?limit=${limit}`,
         {
-          method: 'GET',
+          method: "GET",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
         }
       );
@@ -172,29 +187,34 @@ class TradingAssistantService {
 
       return response.json();
     } catch (error) {
-      console.error('Error getting user conversations:', error);
+      console.error("Error getting user conversations:", error);
       return [];
     }
   }
 
   async createNewConversation(): Promise<string> {
     try {
-      const response = await fetch(`${this.baseUrl}/conversations/${this.currentUserId}/new`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
+      const response = await fetch(
+        `${this.baseUrl}/conversations/${this.currentUserId}/new`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
       if (!response.ok) {
-        throw new Error(`Failed to create conversation: ${response.statusText}`);
+        throw new Error(
+          `Failed to create conversation: ${response.statusText}`
+        );
       }
 
       const result = await response.json();
       this.currentConversationId = result.conversationId;
       return result.conversationId;
     } catch (error) {
-      console.error('Error creating new conversation:', error);
+      console.error("Error creating new conversation:", error);
       // Generate a fallback conversation ID
       const fallbackId = `fallback_${Date.now()}`;
       this.currentConversationId = fallbackId;
@@ -208,9 +228,9 @@ class TradingAssistantService {
 
     try {
       await fetch(`${this.baseUrl}/conversations/${id}/end`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
       });
 
@@ -218,7 +238,7 @@ class TradingAssistantService {
         this.currentConversationId = null;
       }
     } catch (error) {
-      console.error('Error ending conversation:', error);
+      console.error("Error ending conversation:", error);
     }
   }
 
@@ -242,33 +262,47 @@ Here are some things you can try:
 
 If you have specific questions about trading strategies or market analysis, feel free to ask again!`,
       confidence: 0.3,
-      sources: ['Fallback Response'],
+      sources: ["Fallback Response"],
       context: { fallback: true },
       actions: [
         {
-          type: 'VIEW_ANALYSIS',
-          description: 'View Dashboard',
-          parameters: { view: 'dashboard' },
+          type: "VIEW_ANALYSIS",
+          description: "View Dashboard",
+          parameters: { view: "dashboard" },
         },
       ],
     };
   }
 
-  private getFallbackExplanation(recommendation: TradingRecommendation): string {
+  private getFallbackExplanation(
+    recommendation: TradingRecommendation
+  ): string {
     const action = recommendation.action.toLowerCase();
     const confidencePercent = (recommendation.confidence * 100).toFixed(1);
     const riskLevel = recommendation.riskLevel.toLowerCase();
 
-    return `**${recommendation.action} Recommendation for ${recommendation.symbol}**
+    return `**${recommendation.action} Recommendation for ${
+      recommendation.symbol
+    }**
 
 Our AI analysis suggests a ${action} position with ${confidencePercent}% confidence. This is considered a ${riskLevel} risk trade.
 
 **Key Factors:**
-${recommendation.reasoning.map((reason, index) => `${index + 1}. ${reason}`).join('\n')}
+${recommendation.reasoning
+  .map((reason, index) => `${index + 1}. ${reason}`)
+  .join("\n")}
 
 **Risk Assessment:** ${recommendation.riskLevel} risk level.
-${recommendation.stopLoss ? `**Stop Loss:** $${recommendation.stopLoss.toFixed(2)}` : ''}
-${recommendation.takeProfit ? `**Target Price:** $${recommendation.takeProfit.toFixed(2)}` : ''}
+${
+  recommendation.stopLoss
+    ? `**Stop Loss:** $${recommendation.stopLoss.toFixed(2)}`
+    : ""
+}
+${
+  recommendation.takeProfit
+    ? `**Target Price:** $${recommendation.takeProfit.toFixed(2)}`
+    : ""
+}
 
 **Time Horizon:** ${recommendation.timeHorizon}
 

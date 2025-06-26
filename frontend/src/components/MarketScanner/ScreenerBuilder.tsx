@@ -219,12 +219,18 @@ export const ScreenerBuilder: React.FC<ScreenerBuilderProps> = ({
               </IconButton>
             </Box>
 
-            <Box sx={{ 
-              display: 'grid',
-              gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', md: 'repeat(5, 1fr)' },
-              gap: 2,
-              alignItems: 'center'
-            }}>
+            <Box
+              sx={{
+                display: "grid",
+                gridTemplateColumns: {
+                  xs: "1fr",
+                  sm: "1fr 1fr",
+                  md: "repeat(5, 1fr)",
+                },
+                gap: 2,
+                alignItems: "center",
+              }}
+            >
               <FormControl fullWidth size="small">
                 <InputLabel>Type</InputLabel>
                 <Select
@@ -342,11 +348,13 @@ export const ScreenerBuilder: React.FC<ScreenerBuilderProps> = ({
             <Typography variant="h6" gutterBottom>
               Output Settings
             </Typography>
-            <Box sx={{ 
-              display: 'grid',
-              gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr 1fr' },
-              gap: 2
-            }}>
+            <Box
+              sx={{
+                display: "grid",
+                gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr 1fr" },
+                gap: 2,
+              }}
+            >
               <FormControl fullWidth size="small">
                 <InputLabel>Sort By</InputLabel>
                 <Select

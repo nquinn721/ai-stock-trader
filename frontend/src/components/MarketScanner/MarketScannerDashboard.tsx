@@ -1,32 +1,36 @@
-import React, { useState, useEffect } from 'react';
+// Market Scanner Dashboard Component - Real-time stock screening and alerts
 import {
-  Box,
-  Card,
-  CardContent,
-  Typography,
-  Button,
-  Chip,
-  CircularProgress,
-  Alert,
-  Tab,
-  Tabs,
-  IconButton,
-  Tooltip,
-} from '@mui/material';
-import {
-  PlayArrow as ScanIcon,
-  Stop as StopIcon,
-  Settings as SettingsIcon,
   FileDownload as ExportIcon,
   Refresh as RefreshIcon,
+  PlayArrow as ScanIcon,
+  Stop as StopIcon,
   TrendingUp as TrendingUpIcon,
-} from '@mui/icons-material';
-import { ScreenerBuilder } from './ScreenerBuilder';
-import { ScanResults } from './ScanResults';
-import { PresetTemplates } from './PresetTemplates';
-import { AlertManager } from './AlertManager';
-import { marketScannerApi } from '../../services/marketScannerApi';
-import { ScanMatch, ScreenerTemplate, ScanCriteria } from '../../types/marketScanner';
+} from "@mui/icons-material";
+import {
+  Alert,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  CircularProgress,
+  IconButton,
+  Tab,
+  Tabs,
+  Tooltip,
+  Typography,
+} from "@mui/material";
+import React, { useEffect, useState } from "react";
+import { marketScannerApi } from "../../services/marketScannerApi";
+import {
+  ScanCriteria,
+  ScanMatch,
+  ScreenerTemplate,
+} from "../../types/marketScanner";
+import { AlertManager } from "./AlertManager";
+import { PresetTemplates } from "./PresetTemplates";
+import { ScanResults } from "./ScanResults";
+import { ScreenerBuilder } from "./ScreenerBuilder";
 
 interface MarketScannerDashboardProps {
   onStockSelect?: (symbol: string) => void;
@@ -38,8 +42,11 @@ export const MarketScannerDashboard: React.FC<MarketScannerDashboardProps> = ({
   const [activeTab, setActiveTab] = useState(0);
   const [isScanning, setIsScanning] = useState(false);
   const [scanResults, setScanResults] = useState<ScanMatch[]>([]);
-  const [selectedTemplate, setSelectedTemplate] = useState<ScreenerTemplate | null>(null);
-  const [customCriteria, setCustomCriteria] = useState<ScanCriteria | null>(null);
+  const [selectedTemplate, setSelectedTemplate] =
+    useState<ScreenerTemplate | null>(null);
+  const [customCriteria, setCustomCriteria] = useState<ScanCriteria | null>(
+    null
+  );
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [scanStatus, setScanStatus] = useState<{
@@ -58,13 +65,13 @@ export const MarketScannerDashboard: React.FC<MarketScannerDashboardProps> = ({
       const status = await marketScannerApi.getStatus();
       setScanStatus(status.data);
     } catch (err) {
-      console.error('Failed to load scan status:', err);
+      console.error("Failed to load scan status:", err);
     }
   };
 
   const handleScan = async () => {
     if (!selectedTemplate && !customCriteria) {
-      setError('Please select a template or create custom criteria');
+      setError("Please select a template or create custom criteria");
       return;
     }
 
@@ -77,7 +84,7 @@ export const MarketScannerDashboard: React.FC<MarketScannerDashboardProps> = ({
       const result = await marketScannerApi.scanMarket(criteria);
       setScanResults(result.data);
     } catch (err: any) {
-      setError(err.message || 'Scan failed');
+      setError(err.message || "Scan failed");
     } finally {
       setLoading(false);
       setIsScanning(false);
@@ -95,7 +102,7 @@ export const MarketScannerDashboard: React.FC<MarketScannerDashboardProps> = ({
       setScanResults(result.data);
       setSelectedTemplate(result.template);
     } catch (err: any) {
-      setError(err.message || 'Preset scan failed');
+      setError(err.message || "Preset scan failed");
     } finally {
       setLoading(false);
       setIsScanning(false);
@@ -105,26 +112,26 @@ export const MarketScannerDashboard: React.FC<MarketScannerDashboardProps> = ({
 
   const handleExport = async () => {
     if (scanResults.length === 0) {
-      setError('No results to export');
+      setError("No results to export");
       return;
     }
 
     try {
       const criteria = selectedTemplate?.criteria || customCriteria!;
       const result = await marketScannerApi.exportResults(criteria);
-      
+
       // Download CSV
-      const blob = new Blob([result.data], { type: 'text/csv' });
+      const blob = new Blob([result.data], { type: "text/csv" });
       const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
+      const a = document.createElement("a");
       a.href = url;
-      a.download = `market-scan-${new Date().toISOString().split('T')[0]}.csv`;
+      a.download = `market-scan-${new Date().toISOString().split("T")[0]}.csv`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
       window.URL.revokeObjectURL(url);
     } catch (err: any) {
-      setError(err.message || 'Export failed');
+      setError(err.message || "Export failed");
     }
   };
 
@@ -135,9 +142,16 @@ export const MarketScannerDashboard: React.FC<MarketScannerDashboardProps> = ({
   return (
     <Box sx={{ p: 3 }}>
       {/* Header */}
-      <Box sx={{ mb: 3, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-          <TrendingUpIcon sx={{ fontSize: 32, color: 'primary.main' }} />
+      <Box
+        sx={{
+          mb: 3,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+        }}
+      >
+        <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+          <TrendingUpIcon sx={{ fontSize: 32, color: "primary.main" }} />
           <Typography variant="h4" component="h1">
             Market Scanner
           </Typography>
@@ -150,8 +164,8 @@ export const MarketScannerDashboard: React.FC<MarketScannerDashboardProps> = ({
             />
           )}
         </Box>
-        
-        <Box sx={{ display: 'flex', gap: 1 }}>
+
+        <Box sx={{ display: "flex", gap: 1 }}>
           <Tooltip title="Refresh Status">
             <IconButton onClick={loadScanStatus}>
               <RefreshIcon />
@@ -164,7 +178,7 @@ export const MarketScannerDashboard: React.FC<MarketScannerDashboardProps> = ({
             disabled={loading}
             sx={{ minWidth: 120 }}
           >
-            {isScanning ? 'Stop' : 'Scan Market'}
+            {isScanning ? "Stop" : "Scan Market"}
           </Button>
           <Button
             variant="outlined"
@@ -179,22 +193,27 @@ export const MarketScannerDashboard: React.FC<MarketScannerDashboardProps> = ({
 
       {/* Status Cards */}
       {scanStatus && (
-        <Box sx={{ 
-          display: 'grid',
-          gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', md: '1fr 1fr 1fr 1fr' },
-          gap: 2,
-          mb: 3 
-        }}>
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: {
+              xs: "1fr",
+              sm: "1fr 1fr",
+              md: "1fr 1fr 1fr 1fr",
+            },
+            gap: 2,
+            mb: 3,
+          }}
+        >
           <Card>
             <CardContent>
               <Typography color="textSecondary" gutterBottom>
                 Last Scan
               </Typography>
               <Typography variant="h6">
-                {scanStatus.lastScanTime 
+                {scanStatus.lastScanTime
                   ? new Date(scanStatus.lastScanTime).toLocaleTimeString()
-                  : 'Never'
-                }
+                  : "Never"}
               </Typography>
             </CardContent>
           </Card>
@@ -203,9 +222,7 @@ export const MarketScannerDashboard: React.FC<MarketScannerDashboardProps> = ({
               <Typography color="textSecondary" gutterBottom>
                 Active Alerts
               </Typography>
-              <Typography variant="h6">
-                {scanStatus.activeAlerts}
-              </Typography>
+              <Typography variant="h6">{scanStatus.activeAlerts}</Typography>
             </CardContent>
           </Card>
           <Card>
@@ -223,9 +240,7 @@ export const MarketScannerDashboard: React.FC<MarketScannerDashboardProps> = ({
               <Typography color="textSecondary" gutterBottom>
                 Results
               </Typography>
-              <Typography variant="h6">
-                {scanResults.length}
-              </Typography>
+              <Typography variant="h6">{scanResults.length}</Typography>
             </CardContent>
           </Card>
         </Box>
@@ -240,7 +255,7 @@ export const MarketScannerDashboard: React.FC<MarketScannerDashboardProps> = ({
 
       {/* Main Content Tabs */}
       <Card>
-        <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+        <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
           <Tabs value={activeTab} onChange={handleTabChange}>
             <Tab label="Screener Builder" />
             <Tab label="Preset Templates" />
@@ -257,7 +272,7 @@ export const MarketScannerDashboard: React.FC<MarketScannerDashboardProps> = ({
               selectedTemplate={selectedTemplate}
             />
           )}
-          
+
           {activeTab === 1 && (
             <PresetTemplates
               onTemplateSelect={setSelectedTemplate}
@@ -265,7 +280,7 @@ export const MarketScannerDashboard: React.FC<MarketScannerDashboardProps> = ({
               selectedTemplate={selectedTemplate}
             />
           )}
-          
+
           {activeTab === 2 && (
             <ScanResults
               results={scanResults}
@@ -273,10 +288,8 @@ export const MarketScannerDashboard: React.FC<MarketScannerDashboardProps> = ({
               loading={loading}
             />
           )}
-          
-          {activeTab === 3 && (
-            <AlertManager />
-          )}
+
+          {activeTab === 3 && <AlertManager />}
         </CardContent>
       </Card>
     </Box>

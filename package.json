@@ -15,7 +15,7 @@
   "devDependencies": {},
   "workspaces": [
     "frontend",
-    "backend", 
+    "backend",
     "e2e-tests",
     "project-management"
   ]

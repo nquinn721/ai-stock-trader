@@ -184,22 +184,25 @@
   letter-spacing: 1px;
   margin-left: auto;
   position: relative;
-  box-shadow: 
-    0 4px 12px rgba(255, 23, 68, 0.3),
-    0 2px 6px rgba(255, 23, 68, 0.2),
-    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  box-shadow: 0 4px 12px rgba(255, 23, 68, 0.3),
+    0 2px 6px rgba(255, 23, 68, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.3);
   min-width: 180px;
   overflow: hidden;
 }
 
 .emergency-btn::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.4),
+    transparent
+  );
   transition: left 0.6s ease;
 }
 
@@ -210,7 +213,8 @@
 }
 
 @keyframes pulse {
-  0%, 100% {
+  0%,
+  100% {
     transform: scale(1);
     opacity: 1;
   }
@@ -221,9 +225,23 @@
 }
 
 @keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  10%, 30%, 50%, 70%, 90% { transform: translateX(-2px); }
-  20%, 40%, 60%, 80% { transform: translateX(2px); }
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  10%,
+  30%,
+  50%,
+  70%,
+  90% {
+    transform: translateX(-2px);
+  }
+  20%,
+  40%,
+  60%,
+  80% {
+    transform: translateX(2px);
+  }
 }
 
 .emergency-btn:hover:not(:disabled) {
@@ -231,10 +249,8 @@
   color: white;
   transform: scale(1.08) translateY(-2px);
   border-color: #d50000;
-  box-shadow: 
-    0 8px 24px rgba(255, 23, 68, 0.5),
-    0 4px 12px rgba(255, 23, 68, 0.3),
-    0 0 0 4px rgba(255, 23, 68, 0.2);
+  box-shadow: 0 8px 24px rgba(255, 23, 68, 0.5),
+    0 4px 12px rgba(255, 23, 68, 0.3), 0 0 0 4px rgba(255, 23, 68, 0.2);
   animation: shake 0.5s ease-in-out;
 }
 
@@ -250,8 +266,7 @@
 
 .emergency-btn:active:not(:disabled) {
   transform: scale(1.02) translateY(0);
-  box-shadow: 
-    0 4px 12px rgba(255, 23, 68, 0.4),
+  box-shadow: 0 4px 12px rgba(255, 23, 68, 0.4),
     0 2px 6px rgba(255, 23, 68, 0.3);
 }
 
@@ -274,10 +289,8 @@
 /* Focus states for accessibility */
 .emergency-btn:focus:not(:disabled) {
   outline: none;
-  box-shadow: 
-    0 4px 12px rgba(255, 23, 68, 0.3),
-    0 2px 6px rgba(255, 23, 68, 0.2),
-    0 0 0 4px rgba(255, 23, 68, 0.3),
+  box-shadow: 0 4px 12px rgba(255, 23, 68, 0.3),
+    0 2px 6px rgba(255, 23, 68, 0.2), 0 0 0 4px rgba(255, 23, 68, 0.3),
     0 0 0 8px rgba(255, 255, 255, 0.8);
   border-color: #d50000;
 }
@@ -296,7 +309,7 @@
     background: #ff0000;
     color: #fff;
   }
-  
+
   .emergency-btn:hover:not(:disabled) {
     background: #cc0000;
     border-color: #000;
@@ -311,7 +324,7 @@
     animation: none;
     transition: none;
   }
-  
+
   .emergency-btn:hover:not(:disabled) {
     transform: none;
   }
@@ -707,9 +720,7 @@
   border: 3px solid #ff1744;
   border-radius: 16px;
   background: linear-gradient(135deg, #fff 0%, #fff8f8 100%);
-  box-shadow: 
-    0 20px 60px rgba(255, 23, 68, 0.4),
-    0 10px 30px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 20px 60px rgba(255, 23, 68, 0.4), 0 10px 30px rgba(0, 0, 0, 0.3);
   animation: emergencyModalSlide 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
@@ -751,7 +762,8 @@
 }
 
 @keyframes warningPulse {
-  0%, 100% {
+  0%,
+  100% {
     transform: scale(1);
     filter: drop-shadow(0 0 5px #ffeb3b);
   }
@@ -904,16 +916,16 @@
     max-width: none;
     width: calc(100% - 40px);
   }
-  
+
   .emergency-modal-title h3 {
     font-size: 16px;
   }
-  
+
   .emergency-actions {
     flex-direction: column;
     gap: 8px;
   }
-  
+
   .emergency-cancel-btn,
   .emergency-confirm-btn {
     width: 100%;
@@ -926,12 +938,12 @@
     border-color: #000;
     background: #fff;
   }
-  
+
   .emergency-modal-header {
     background: #ff0000;
     color: #fff;
   }
-  
+
   .emergency-warning {
     background: #fff;
     border-color: #000;

@@ -8,9 +8,9 @@ import React, { useEffect, useState } from "react";
 import { useSocket } from "../context/SocketContext";
 import { usePortfolioStore } from "../stores/StoreContext";
 import { CreateTradeRequest, Portfolio } from "../types";
+import EnhancedPortfolioAnalyticsDashboard from "./EnhancedPortfolioAnalyticsDashboard";
 import OrderManagement from "./OrderManagement";
 import "./Portfolio.css";
-import EnhancedPortfolioAnalyticsDashboard from "./EnhancedPortfolioAnalyticsDashboard";
 import PortfolioChart from "./PortfolioChart";
 import StockAutocomplete from "./StockAutocomplete";
 

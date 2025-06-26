@@ -211,7 +211,9 @@ export const TradingControlPanel: React.FC<TradingControlPanelProps> = observer(
               title="Immediately stop all automated trading sessions"
               data-testid="emergency-stop-button"
             >
-              <span className="icon" role="img" aria-label="Emergency alert">🚨</span>
+              <span className="icon" role="img" aria-label="Emergency alert">
+                🚨
+              </span>
               <span>Emergency Stop</span>
             </button>
           </div>
@@ -468,27 +470,42 @@ export const TradingControlPanel: React.FC<TradingControlPanelProps> = observer(
             <div className="modal-content emergency-modal-content">
               <div className="modal-header emergency-modal-header">
                 <div className="emergency-modal-title">
-                  <span className="emergency-icon" role="img" aria-label="Warning">⚠️</span>
+                  <span
+                    className="emergency-icon"
+                    role="img"
+                    aria-label="Warning"
+                  >
+                    ⚠️
+                  </span>
                   <h3>EMERGENCY STOP CONFIRMATION</h3>
                 </div>
-                <button 
+                <button
                   onClick={cancelEmergencyStop}
                   className="modal-close-btn"
                   aria-label="Close emergency stop dialog"
-                >×</button>
+                >
+                  ×
+                </button>
               </div>
               <div className="modal-body emergency-modal-body">
                 <div className="emergency-warning">
-                  <p><strong>This action will immediately stop ALL automated trading activities.</strong></p>
+                  <p>
+                    <strong>
+                      This action will immediately stop ALL automated trading
+                      activities.
+                    </strong>
+                  </p>
                   <div className="emergency-details">
                     <ul>
                       <li>All pending orders will be cancelled</li>
                       <li>All active trading sessions will be terminated</li>
-                      <li>No new trades will be executed until manually restarted</li>
+                      <li>
+                        No new trades will be executed until manually restarted
+                      </li>
                     </ul>
                   </div>
                 </div>
-                
+
                 <div className="emergency-reason-section">
                   <label htmlFor="emergency-reason">
                     <strong>Reason for emergency stop (optional):</strong>
@@ -504,19 +521,23 @@ export const TradingControlPanel: React.FC<TradingControlPanelProps> = observer(
                 </div>
 
                 <div className="emergency-actions">
-                  <button 
+                  <button
                     onClick={cancelEmergencyStop}
                     className="btn-secondary emergency-cancel-btn"
                   >
                     Cancel
                   </button>
-                  <button 
+                  <button
                     onClick={confirmEmergencyStop}
                     className="btn-danger emergency-confirm-btn"
                     disabled={autoTradingStore.isLoading}
                   >
-                    <span className="confirm-icon" role="img" aria-label="Stop">🛑</span>
-                    {autoTradingStore.isLoading ? 'Stopping...' : 'CONFIRM EMERGENCY STOP'}
+                    <span className="confirm-icon" role="img" aria-label="Stop">
+                      🛑
+                    </span>
+                    {autoTradingStore.isLoading
+                      ? "Stopping..."
+                      : "CONFIRM EMERGENCY STOP"}
                   </button>
                 </div>
               </div>

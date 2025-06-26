@@ -24,6 +24,7 @@ import {
   useWebSocketStore,
 } from "../stores/StoreContext";
 import { Portfolio } from "../types";
+import TradingAssistantChat from "./ai/TradingAssistantChat";
 import AutoTradingDashboard from "./automated-trading/AutoTradingDashboard";
 import "./Dashboard.css";
 import EmptyState from "./EmptyState";
@@ -35,7 +36,6 @@ import PortfolioDetailsModal from "./PortfolioDetailsModal";
 import PortfolioSelector from "./PortfolioSelector";
 import QuickTrade from "./QuickTrade";
 import StockCard from "./StockCard";
-import TradingAssistantChat from "./ai/TradingAssistantChat";
 
 // Add icons to library
 library.add(

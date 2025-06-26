@@ -3,9 +3,7 @@
 .notification-center {
   background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
   border-radius: 16px;
-  box-shadow: 
-    0 20px 64px rgba(0, 0, 0, 0.12),
-    0 4px 16px rgba(0, 0, 0, 0.08),
+  box-shadow: 0 20px 64px rgba(0, 0, 0, 0.12), 0 4px 16px rgba(0, 0, 0, 0.08),
     inset 0 1px 0 rgba(255, 255, 255, 0.8);
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.2);
@@ -38,13 +36,14 @@
 }
 
 .notification-item.unread {
-  background: linear-gradient(135deg, 
-    rgba(25, 118, 210, 0.08) 0%, 
-    rgba(25, 118, 210, 0.04) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(25, 118, 210, 0.08) 0%,
+    rgba(25, 118, 210, 0.04) 100%
+  );
   border-left: 4px solid #1976d2;
   border: 1px solid rgba(25, 118, 210, 0.2);
-  box-shadow: 
-    0 4px 16px rgba(25, 118, 210, 0.1),
+  box-shadow: 0 4px 16px rgba(25, 118, 210, 0.1),
     inset 0 1px 0 rgba(255, 255, 255, 0.5);
 }
 
@@ -69,64 +68,69 @@
 }
 
 .notification-item:hover {
-  background: linear-gradient(135deg, 
-    rgba(25, 118, 210, 0.15) 0%, 
-    rgba(25, 118, 210, 0.08) 100%) !important;
+  background: linear-gradient(
+    135deg,
+    rgba(25, 118, 210, 0.15) 0%,
+    rgba(25, 118, 210, 0.08) 100%
+  ) !important;
   transform: translateY(-2px) scale(1.02);
-  box-shadow: 
-    0 8px 32px rgba(25, 118, 210, 0.15),
-    0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 8px 32px rgba(25, 118, 210, 0.15), 0 2px 8px rgba(0, 0, 0, 0.1);
   border-color: rgba(25, 118, 210, 0.3);
 }
 
 /* Enhanced Priority-based styling */
 .notification-item.priority-critical {
   border-left-color: #e53e3e !important;
-  background: linear-gradient(135deg, 
-    rgba(229, 62, 62, 0.1) 0%, 
-    rgba(229, 62, 62, 0.05) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(229, 62, 62, 0.1) 0%,
+    rgba(229, 62, 62, 0.05) 100%
+  );
 }
 
 .notification-item.priority-critical.unread::before {
   background: linear-gradient(45deg, #e53e3e, #fc8181);
-  box-shadow: 
-    0 0 0 3px rgba(229, 62, 62, 0.2),
-    0 0 12px rgba(229, 62, 62, 0.4);
+  box-shadow: 0 0 0 3px rgba(229, 62, 62, 0.2), 0 0 12px rgba(229, 62, 62, 0.4);
   animation: pulse-critical 1.5s infinite ease-in-out;
 }
 
 .notification-item.priority-high {
   border-left-color: #f59e0b !important;
-  background: linear-gradient(135deg, 
-    rgba(245, 158, 11, 0.1) 0%, 
-    rgba(245, 158, 11, 0.05) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(245, 158, 11, 0.1) 0%,
+    rgba(245, 158, 11, 0.05) 100%
+  );
 }
 
 .notification-item.priority-high.unread::before {
   background: linear-gradient(45deg, #f59e0b, #fbbf24);
-  box-shadow: 
-    0 0 0 3px rgba(245, 158, 11, 0.2),
-    0 0 8px rgba(245, 158, 11, 0.3);
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2), 0 0 8px rgba(245, 158, 11, 0.3);
   animation: pulse-high 2s infinite ease-in-out;
 }
 
 .notification-item.priority-medium {
   border-left-color: #3b82f6 !important;
-  background: linear-gradient(135deg, 
-    rgba(59, 130, 246, 0.08) 0%, 
-    rgba(59, 130, 246, 0.04) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(59, 130, 246, 0.08) 0%,
+    rgba(59, 130, 246, 0.04) 100%
+  );
 }
 
 .notification-item.priority-low {
   border-left-color: #6b7280 !important;
-  background: linear-gradient(135deg, 
-    rgba(107, 114, 128, 0.06) 0%, 
-    rgba(107, 114, 128, 0.03) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(107, 114, 128, 0.06) 0%,
+    rgba(107, 114, 128, 0.03) 100%
+  );
 }
 
 /* Enhanced Animations */
 @keyframes pulse-glow {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
     transform: translateY(-50%) scale(1);
     box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.2);
@@ -139,35 +143,33 @@
 }
 
 @keyframes pulse-critical {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
     transform: translateY(-50%) scale(1);
-    box-shadow: 
-      0 0 0 3px rgba(229, 62, 62, 0.2),
+    box-shadow: 0 0 0 3px rgba(229, 62, 62, 0.2),
       0 0 12px rgba(229, 62, 62, 0.4);
   }
   50% {
     opacity: 0.7;
     transform: translateY(-50%) scale(1.3);
-    box-shadow: 
-      0 0 0 8px rgba(229, 62, 62, 0.1),
+    box-shadow: 0 0 0 8px rgba(229, 62, 62, 0.1),
       0 0 20px rgba(229, 62, 62, 0.6);
   }
 }
 
 @keyframes pulse-high {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
     transform: translateY(-50%) scale(1);
-    box-shadow: 
-      0 0 0 3px rgba(245, 158, 11, 0.2),
+    box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2),
       0 0 8px rgba(245, 158, 11, 0.3);
   }
   50% {
     opacity: 0.8;
     transform: translateY(-50%) scale(1.2);
-    box-shadow: 
-      0 0 0 6px rgba(245, 158, 11, 0.1),
+    box-shadow: 0 0 0 6px rgba(245, 158, 11, 0.1),
       0 0 16px rgba(245, 158, 11, 0.4);
   }
 }
@@ -235,18 +237,22 @@
   background: linear-gradient(135deg, #e53e3e, #fc8181);
   color: white;
   font-weight: 600;
-  box-shadow: 
-    0 2px 8px rgba(229, 62, 62, 0.3),
+  box-shadow: 0 2px 8px rgba(229, 62, 62, 0.3),
     inset 0 1px 0 rgba(255, 255, 255, 0.2);
   animation: bounce-modern 2s infinite ease-in-out;
   border: 2px solid rgba(255, 255, 255, 0.9);
 }
 
 @keyframes bounce-modern {
-  0%, 20%, 53%, 80%, 100% {
+  0%,
+  20%,
+  53%,
+  80%,
+  100% {
     transform: translate(50%, -50%) scale(1);
   }
-  40%, 43% {
+  40%,
+  43% {
     transform: translate(50%, -50%) scale(1.15);
   }
   70% {
@@ -354,9 +360,11 @@
   }
 
   .notification-item.unread {
-    background: linear-gradient(135deg, 
-      rgba(59, 130, 246, 0.15) 0%, 
-      rgba(59, 130, 246, 0.08) 100%);
+    background: linear-gradient(
+      135deg,
+      rgba(59, 130, 246, 0.15) 0%,
+      rgba(59, 130, 246, 0.08) 100%
+    );
     border: 1px solid rgba(59, 130, 246, 0.3);
   }
 
@@ -366,22 +374,28 @@
   }
 
   .notification-item:hover {
-    background: linear-gradient(135deg, 
-      rgba(59, 130, 246, 0.2) 0%, 
-      rgba(59, 130, 246, 0.12) 100%) !important;
+    background: linear-gradient(
+      135deg,
+      rgba(59, 130, 246, 0.2) 0%,
+      rgba(59, 130, 246, 0.12) 100%
+    ) !important;
     border-color: rgba(59, 130, 246, 0.4);
   }
 
   .notification-item.priority-critical {
-    background: linear-gradient(135deg, 
-      rgba(229, 62, 62, 0.15) 0%, 
-      rgba(229, 62, 62, 0.08) 100%);
+    background: linear-gradient(
+      135deg,
+      rgba(229, 62, 62, 0.15) 0%,
+      rgba(229, 62, 62, 0.08) 100%
+    );
   }
 
   .notification-item.priority-high {
-    background: linear-gradient(135deg, 
-      rgba(245, 158, 11, 0.15) 0%, 
-      rgba(245, 158, 11, 0.08) 100%);
+    background: linear-gradient(
+      135deg,
+      rgba(245, 158, 11, 0.15) 0%,
+      rgba(245, 158, 11, 0.08) 100%
+    );
   }
 
   .notification-center .MuiBox-root::-webkit-scrollbar-track {
@@ -406,42 +420,48 @@
   max-width: 420px;
   border-radius: 16px;
   backdrop-filter: blur(16px);
-  box-shadow: 
-    0 20px 64px rgba(0, 0, 0, 0.15),
-    0 4px 16px rgba(0, 0, 0, 0.1),
+  box-shadow: 0 20px 64px rgba(0, 0, 0, 0.15), 0 4px 16px rgba(0, 0, 0, 0.1),
     inset 0 1px 0 rgba(255, 255, 255, 0.2);
   animation: slideInRight 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .notification-toast.critical {
-  background: linear-gradient(135deg, 
-    rgba(229, 62, 62, 0.95) 0%, 
-    rgba(220, 38, 38, 0.95) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(229, 62, 62, 0.95) 0%,
+    rgba(220, 38, 38, 0.95) 100%
+  );
   border-left: 6px solid #fecaca;
   color: white;
 }
 
 .notification-toast.high {
-  background: linear-gradient(135deg, 
-    rgba(245, 158, 11, 0.95) 0%, 
-    rgba(217, 119, 6, 0.95) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(245, 158, 11, 0.95) 0%,
+    rgba(217, 119, 6, 0.95) 100%
+  );
   border-left: 6px solid #fed7aa;
   color: white;
 }
 
 .notification-toast.medium {
-  background: linear-gradient(135deg, 
-    rgba(59, 130, 246, 0.95) 0%, 
-    rgba(37, 99, 235, 0.95) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(59, 130, 246, 0.95) 0%,
+    rgba(37, 99, 235, 0.95) 100%
+  );
   border-left: 6px solid #bfdbfe;
   color: white;
 }
 
 .notification-toast.low {
-  background: linear-gradient(135deg, 
-    rgba(107, 114, 128, 0.95) 0%, 
-    rgba(75, 85, 99, 0.95) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(107, 114, 128, 0.95) 0%,
+    rgba(75, 85, 99, 0.95) 100%
+  );
   border-left: 6px solid #d1d5db;
   color: white;
 }
@@ -517,10 +537,12 @@
 
 /* Loading States */
 .notification-loading {
-  background: linear-gradient(90deg, 
-    rgba(255, 255, 255, 0.1) 25%, 
-    rgba(255, 255, 255, 0.3) 50%, 
-    rgba(255, 255, 255, 0.1) 75%);
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.1) 25%,
+    rgba(255, 255, 255, 0.3) 50%,
+    rgba(255, 255, 255, 0.1) 75%
+  );
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
 }

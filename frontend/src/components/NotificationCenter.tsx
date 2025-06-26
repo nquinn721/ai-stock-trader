@@ -264,11 +264,11 @@ const NotificationCenter: React.FC<NotificationCenterProps> = ({
                 variant="body2"
                 fontWeight={isUnread ? 600 : 500}
                 noWrap
-                sx={{ 
+                sx={{
                   maxWidth: "65%",
-                  background: isUnread ? 
-                    "linear-gradient(135deg, #1976d2, #42a5f5)" : 
-                    "transparent",
+                  background: isUnread
+                    ? "linear-gradient(135deg, #1976d2, #42a5f5)"
+                    : "transparent",
                   backgroundClip: isUnread ? "text" : "initial",
                   WebkitBackgroundClip: isUnread ? "text" : "initial",
                   WebkitTextFillColor: isUnread ? "transparent" : "inherit",
@@ -282,8 +282,8 @@ const NotificationCenter: React.FC<NotificationCenterProps> = ({
                     label={notification.symbol}
                     size="small"
                     className="symbol-chip"
-                    sx={{ 
-                      fontSize: "0.7rem", 
+                    sx={{
+                      fontSize: "0.7rem",
                       height: "22px",
                       fontWeight: 600,
                     }}
@@ -293,8 +293,8 @@ const NotificationCenter: React.FC<NotificationCenterProps> = ({
                   label={notification.priority.toUpperCase()}
                   size="small"
                   className={`priority-chip ${notification.priority}`}
-                  sx={{ 
-                    fontSize: "0.65rem", 
+                  sx={{
+                    fontSize: "0.65rem",
                     height: "20px",
                     fontWeight: 600,
                   }}
@@ -307,7 +307,7 @@ const NotificationCenter: React.FC<NotificationCenterProps> = ({
               <Typography
                 variant="body2"
                 color="text.secondary"
-                sx={{ 
+                sx={{
                   mb: 0.5,
                   lineHeight: 1.4,
                   fontWeight: 400,
@@ -321,10 +321,10 @@ const NotificationCenter: React.FC<NotificationCenterProps> = ({
                 justifyContent="space-between"
                 sx={{ mt: 1 }}
               >
-                <Typography 
-                  variant="caption" 
+                <Typography
+                  variant="caption"
                   color="text.secondary"
-                  sx={{ 
+                  sx={{
                     fontWeight: 500,
                     opacity: 0.8,
                   }}
@@ -336,8 +336,8 @@ const NotificationCenter: React.FC<NotificationCenterProps> = ({
                     label={`${notification.confidenceScore}% confidence`}
                     size="small"
                     className="confidence-chip"
-                    sx={{ 
-                      fontSize: "0.6rem", 
+                    sx={{
+                      fontSize: "0.6rem",
                       height: "18px",
                       fontWeight: 600,
                     }}
@@ -355,9 +355,9 @@ const NotificationCenter: React.FC<NotificationCenterProps> = ({
               size="small"
               onClick={(e) => handleDismiss(notification, e)}
               className="notification-action-button"
-              sx={{ 
-                opacity: 0.6, 
-                "&:hover": { 
+              sx={{
+                opacity: 0.6,
+                "&:hover": {
                   opacity: 1,
                   backgroundColor: "rgba(229, 62, 62, 0.1)",
                   color: "#e53e3e",
@@ -410,12 +410,13 @@ const NotificationCenter: React.FC<NotificationCenterProps> = ({
       >
         <Box className="notification-center">
           {/* Header */}
-          <Box 
-            p={2.5} 
-            borderBottom={1} 
+          <Box
+            p={2.5}
+            borderBottom={1}
             borderColor="divider"
             sx={{
-              background: "linear-gradient(135deg, rgba(255, 255, 255, 0.8) 0%, rgba(248, 250, 252, 0.8) 100%)",
+              background:
+                "linear-gradient(135deg, rgba(255, 255, 255, 0.8) 0%, rgba(248, 250, 252, 0.8) 100%)",
               backdropFilter: "blur(10px)",
             }}
           >
@@ -424,8 +425,8 @@ const NotificationCenter: React.FC<NotificationCenterProps> = ({
               alignItems="center"
               justifyContent="space-between"
             >
-              <Typography 
-                variant="h6" 
+              <Typography
+                variant="h6"
                 fontWeight={700}
                 sx={{
                   background: "linear-gradient(135deg, #1976d2, #42a5f5)",
@@ -446,7 +447,7 @@ const NotificationCenter: React.FC<NotificationCenterProps> = ({
                     className="notification-action-button"
                     sx={{
                       opacity: unreadCount === 0 ? 0.4 : 0.8,
-                      "&:hover": { 
+                      "&:hover": {
                         opacity: 1,
                         backgroundColor: "rgba(25, 118, 210, 0.1)",
                         color: "#1976d2",
@@ -457,13 +458,13 @@ const NotificationCenter: React.FC<NotificationCenterProps> = ({
                   </IconButton>
                 </Tooltip>
                 <Tooltip title="Clear all" placement="bottom">
-                  <IconButton 
-                    size="small" 
+                  <IconButton
+                    size="small"
                     onClick={handleClearAll}
                     className="notification-action-button"
                     sx={{
                       opacity: 0.8,
-                      "&:hover": { 
+                      "&:hover": {
                         opacity: 1,
                         backgroundColor: "rgba(229, 62, 62, 0.1)",
                         color: "#e53e3e",
@@ -474,12 +475,12 @@ const NotificationCenter: React.FC<NotificationCenterProps> = ({
                   </IconButton>
                 </Tooltip>
                 <Tooltip title="Settings" placement="bottom">
-                  <IconButton 
+                  <IconButton
                     size="small"
                     className="notification-action-button"
                     sx={{
                       opacity: 0.8,
-                      "&:hover": { 
+                      "&:hover": {
                         opacity: 1,
                         backgroundColor: "rgba(107, 114, 128, 0.1)",
                         color: "#6b7280",
@@ -498,8 +499,8 @@ const NotificationCenter: React.FC<NotificationCenterProps> = ({
               onChange={handleTabChange}
               variant="scrollable"
               scrollButtons="auto"
-              sx={{ 
-                mt: 1.5, 
+              sx={{
+                mt: 1.5,
                 minHeight: 36,
                 "& .MuiTab-root": {
                   minHeight: 36,
@@ -555,27 +556,29 @@ const NotificationCenter: React.FC<NotificationCenterProps> = ({
           {/* Content */}
           <Box sx={{ maxHeight: 420, overflow: "auto" }}>
             {filteredNotifications.length === 0 ? (
-              <Box p={4} textAlign="center" className="notification-empty-state">
-                <CheckCircle 
-                  sx={{ 
-                    fontSize: 56, 
+              <Box
+                p={4}
+                textAlign="center"
+                className="notification-empty-state"
+              >
+                <CheckCircle
+                  sx={{
+                    fontSize: 56,
                     mb: 2,
                     color: "#3b82f6",
                     filter: "drop-shadow(0 4px 8px rgba(59, 130, 246, 0.2))",
-                  }} 
+                  }}
                 />
-                <Typography 
-                  variant="h6" 
-                  color="text.primary" 
+                <Typography
+                  variant="h6"
+                  color="text.primary"
                   fontWeight={600}
                   sx={{ mb: 1 }}
                 >
-                  {activeTab === 1
-                    ? "All caught up!"
-                    : "No notifications"}
+                  {activeTab === 1 ? "All caught up!" : "No notifications"}
                 </Typography>
-                <Typography 
-                  variant="body2" 
+                <Typography
+                  variant="body2"
                   color="text.secondary"
                   sx={{ maxWidth: "280px", mx: "auto", lineHeight: 1.5 }}
                 >
@@ -590,12 +593,13 @@ const NotificationCenter: React.FC<NotificationCenterProps> = ({
                   <React.Fragment key={notification.id}>
                     {renderNotificationItem(notification)}
                     {index < filteredNotifications.length - 1 && (
-                      <Divider 
-                        sx={{ 
-                          mx: 2, 
+                      <Divider
+                        sx={{
+                          mx: 2,
                           opacity: 0.6,
-                          background: "linear-gradient(90deg, transparent, rgba(0,0,0,0.1), transparent)",
-                        }} 
+                          background:
+                            "linear-gradient(90deg, transparent, rgba(0,0,0,0.1), transparent)",
+                        }}
                       />
                     )}
                   </React.Fragment>
@@ -606,12 +610,13 @@ const NotificationCenter: React.FC<NotificationCenterProps> = ({
 
           {/* Enhanced Footer */}
           {filteredNotifications.length > 0 && (
-            <Box 
-              p={2} 
-              borderTop={1} 
+            <Box
+              p={2}
+              borderTop={1}
               borderColor="divider"
               sx={{
-                background: "linear-gradient(135deg, rgba(255, 255, 255, 0.8) 0%, rgba(248, 250, 252, 0.8) 100%)",
+                background:
+                  "linear-gradient(135deg, rgba(255, 255, 255, 0.8) 0%, rgba(248, 250, 252, 0.8) 100%)",
                 backdropFilter: "blur(10px)",
               }}
             >
@@ -629,10 +634,12 @@ const NotificationCenter: React.FC<NotificationCenterProps> = ({
                   fontWeight: 600,
                   border: "2px solid",
                   borderColor: "rgba(25, 118, 210, 0.3)",
-                  background: "linear-gradient(135deg, rgba(25, 118, 210, 0.05) 0%, rgba(25, 118, 210, 0.02) 100%)",
+                  background:
+                    "linear-gradient(135deg, rgba(25, 118, 210, 0.05) 0%, rgba(25, 118, 210, 0.02) 100%)",
                   "&:hover": {
                     borderColor: "rgba(25, 118, 210, 0.6)",
-                    background: "linear-gradient(135deg, rgba(25, 118, 210, 0.1) 0%, rgba(25, 118, 210, 0.05) 100%)",
+                    background:
+                      "linear-gradient(135deg, rgba(25, 118, 210, 0.1) 0%, rgba(25, 118, 210, 0.05) 100%)",
                     transform: "translateY(-2px)",
                     boxShadow: "0 4px 16px rgba(25, 118, 210, 0.2)",
                   },
@@ -651,7 +658,7 @@ const NotificationCenter: React.FC<NotificationCenterProps> = ({
         open={snackbarOpen}
         autoHideDuration={3000}
         onClose={() => setSnackbarOpen(false)}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
         sx={{
           "& .MuiSnackbarContent-root": {
             background: "linear-gradient(135deg, #10b981, #34d399)",

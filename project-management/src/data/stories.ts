@@ -858,7 +858,7 @@ export const stories: Story[] = [
     title: "AI Trading Assistant with Explainable Recommendations",
     description:
       "Create an AI-powered trading assistant that provides explainable trading recommendations with detailed reasoning and confidence scores. Implement natural language explanations for why the AI suggests specific trades, include risk assessment and market context, provide alternative strategies and their trade-offs, and offer personalized coaching based on user trading patterns. Add interactive Q&A functionality where users can ask the AI about specific trades or market conditions. Include educational content delivery and adaptive learning based on user preferences.",
-    status: "TODO",
+    status: "DONE",
     priority: "High",
     epic: "E5",
     storyPoints: 13,
@@ -873,7 +873,7 @@ export const stories: Story[] = [
     title: "Real-time Predictive Analytics Dashboard",
     description:
       "Develop a comprehensive predictive analytics dashboard that uses machine learning to forecast market movements and trading opportunities. Implement real-time price prediction models, volatility forecasting, sector rotation predictions, and market regime detection. Create interactive visualizations showing prediction confidence intervals, model performance metrics, and historical accuracy. Include customizable prediction timeframes (1 hour, 1 day, 1 week) and integration with the recommendation engine for actionable insights.",
-    status: "TODO",
+    status: "DONE",
     priority: "Medium",
     epic: "E4",
     storyPoints: 13,

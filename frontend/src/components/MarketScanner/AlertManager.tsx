@@ -1,13 +1,11 @@
-import { 
-  Add, 
-  Delete, 
-  Edit, 
-  NotificationsActive, 
+import {
+  Add,
+  Delete,
+  Edit,
+  NotificationsActive,
   NotificationsOff,
   PlayArrow,
-  Stop,
   TrendingUp,
-  Warning,
 } from "@mui/icons-material";
 import {
   Alert,
@@ -26,7 +24,6 @@ import {
   InputLabel,
   List,
   ListItem,
-  ListItemText,
   MenuItem,
   Paper,
   Select,
@@ -44,7 +41,7 @@ interface MarketAlert {
   criteria: string;
   matchCount: number;
   lastTriggered?: Date;
-  priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  priority: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
 }
 
 // Mock data for demonstration
@@ -56,7 +53,7 @@ const mockAlerts: MarketAlert[] = [
     criteria: "Volume > 2x average AND Price > 20-day MA",
     matchCount: 7,
     lastTriggered: new Date(Date.now() - 2 * 60 * 60 * 1000),
-    priority: 'HIGH',
+    priority: "HIGH",
   },
   {
     id: 2,
@@ -65,7 +62,7 @@ const mockAlerts: MarketAlert[] = [
     criteria: "RSI < 30 AND Price near support",
     matchCount: 3,
     lastTriggered: new Date(Date.now() - 5 * 60 * 60 * 1000),
-    priority: 'MEDIUM',
+    priority: "MEDIUM",
   },
   {
     id: 3,
@@ -74,7 +71,7 @@ const mockAlerts: MarketAlert[] = [
     criteria: "Gap down > 3% AND Price recovery > 50%",
     matchCount: 2,
     lastTriggered: new Date(Date.now() - 1 * 60 * 60 * 1000),
-    priority: 'CRITICAL',
+    priority: "CRITICAL",
   },
 ];
 
@@ -84,19 +81,21 @@ export const AlertManager: React.FC = () => {
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [selectedAlert, setSelectedAlert] = useState<MarketAlert | null>(null);
   const [newAlert, setNewAlert] = useState({
-    name: '',
-    criteria: '',
-    priority: 'MEDIUM' as const,
+    name: "",
+    criteria: "",
+    priority: "MEDIUM" as const,
   });
 
   const handleToggleAlert = (id: number) => {
-    setAlerts(alerts.map(alert => 
-      alert.id === id ? { ...alert, isActive: !alert.isActive } : alert
-    ));
+    setAlerts(
+      alerts.map((alert) =>
+        alert.id === id ? { ...alert, isActive: !alert.isActive } : alert
+      )
+    );
   };
 
   const handleDeleteAlert = (id: number) => {
-    setAlerts(alerts.filter(alert => alert.id !== id));
+    setAlerts(alerts.filter((alert) => alert.id !== id));
   };
 
   const handleCreateAlert = () => {
@@ -110,16 +109,21 @@ export const AlertManager: React.FC = () => {
     };
     setAlerts([...alerts, alert]);
     setCreateDialogOpen(false);
-    setNewAlert({ name: '', criteria: '', priority: 'MEDIUM' });
+    setNewAlert({ name: "", criteria: "", priority: "MEDIUM" });
   };
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case 'CRITICAL': return '#e53e3e';
-      case 'HIGH': return '#f59e0b';
-      case 'MEDIUM': return '#3b82f6';
-      case 'LOW': return '#6b7280';
-      default: return '#3b82f6';
+      case "CRITICAL":
+        return "#e53e3e";
+      case "HIGH":
+        return "#f59e0b";
+      case "MEDIUM":
+        return "#3b82f6";
+      case "LOW":
+        return "#6b7280";
+      default:
+        return "#3b82f6";
     }
   };
 
@@ -127,30 +131,31 @@ export const AlertManager: React.FC = () => {
     const now = new Date();
     const diffMs = now.getTime() - date.getTime();
     const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
-    
-    if (diffHours < 1) return 'Just now';
+
+    if (diffHours < 1) return "Just now";
     if (diffHours < 24) return `${diffHours}h ago`;
     return `${Math.floor(diffHours / 24)}d ago`;
   };
 
   return (
-    <Box sx={{ p: 3, maxWidth: 1200, mx: 'auto' }}>
+    <Box sx={{ p: 3, maxWidth: 1200, mx: "auto" }}>
       {/* Header */}
-      <Box 
-        display="flex" 
-        justifyContent="space-between" 
-        alignItems="center" 
+      <Box
+        display="flex"
+        justifyContent="space-between"
+        alignItems="center"
         mb={3}
         sx={{
-          background: "linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(147, 197, 253, 0.1) 100%)",
+          background:
+            "linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(147, 197, 253, 0.1) 100%)",
           borderRadius: "16px",
           p: 3,
           border: "1px solid rgba(59, 130, 246, 0.2)",
         }}
       >
         <Box>
-          <Typography 
-            variant="h5" 
+          <Typography
+            variant="h5"
             fontWeight={700}
             sx={{
               background: "linear-gradient(135deg, #1976d2, #42a5f5)",
@@ -169,14 +174,17 @@ export const AlertManager: React.FC = () => {
         <Box display="flex" gap={1}>
           <Chip
             icon={<NotificationsActive />}
-            label={`${alerts.filter(a => a.isActive).length} Active`}
+            label={`${alerts.filter((a) => a.isActive).length} Active`}
             color="primary"
             variant="filled"
             sx={{ fontWeight: 600 }}
           />
           <Chip
             icon={<TrendingUp />}
-            label={`${alerts.reduce((sum, a) => sum + a.matchCount, 0)} Matches Today`}
+            label={`${alerts.reduce(
+              (sum, a) => sum + a.matchCount,
+              0
+            )} Matches Today`}
             color="success"
             variant="filled"
             sx={{ fontWeight: 600 }}
@@ -185,12 +193,39 @@ export const AlertManager: React.FC = () => {
       </Box>
 
       {/* Quick Stats */}
-      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', md: '1fr 1fr 1fr 1fr' }, gap: 2, mb: 3 }}>
+      <Box
+        sx={{
+          display: "grid",
+          gridTemplateColumns: {
+            xs: "1fr",
+            sm: "1fr 1fr",
+            md: "1fr 1fr 1fr 1fr",
+          },
+          gap: 2,
+          mb: 3,
+        }}
+      >
         {[
           { label: "Total Alerts", value: alerts.length, color: "#3b82f6" },
-          { label: "Active Alerts", value: alerts.filter(a => a.isActive).length, color: "#10b981" },
-          { label: "Triggered Today", value: alerts.filter(a => a.lastTriggered && a.lastTriggered > new Date(Date.now() - 24*60*60*1000)).length, color: "#f59e0b" },
-          { label: "Critical Alerts", value: alerts.filter(a => a.priority === 'CRITICAL').length, color: "#e53e3e" },
+          {
+            label: "Active Alerts",
+            value: alerts.filter((a) => a.isActive).length,
+            color: "#10b981",
+          },
+          {
+            label: "Triggered Today",
+            value: alerts.filter(
+              (a) =>
+                a.lastTriggered &&
+                a.lastTriggered > new Date(Date.now() - 24 * 60 * 60 * 1000)
+            ).length,
+            color: "#f59e0b",
+          },
+          {
+            label: "Critical Alerts",
+            value: alerts.filter((a) => a.priority === "CRITICAL").length,
+            color: "#e53e3e",
+          },
         ].map((stat, index) => (
           <Paper
             key={index}
@@ -218,7 +253,7 @@ export const AlertManager: React.FC = () => {
       </Box>
 
       {/* Alerts List */}
-      <Card 
+      <Card
         elevation={0}
         sx={{
           borderRadius: "16px",
@@ -230,12 +265,15 @@ export const AlertManager: React.FC = () => {
         <CardContent sx={{ p: 0 }}>
           {alerts.length === 0 ? (
             <Box p={6} textAlign="center">
-              <NotificationsOff sx={{ fontSize: 64, color: "#6b7280", mb: 2 }} />
+              <NotificationsOff
+                sx={{ fontSize: 64, color: "#6b7280", mb: 2 }}
+              />
               <Typography variant="h6" color="textSecondary" gutterBottom>
                 No alerts configured
               </Typography>
               <Typography variant="body2" color="textSecondary" mb={3}>
-                Create your first alert to get notified about market opportunities
+                Create your first alert to get notified about market
+                opportunities
               </Typography>
               <Button
                 variant="contained"
@@ -267,7 +305,12 @@ export const AlertManager: React.FC = () => {
                   >
                     <Box display="flex" alignItems="center" width="100%">
                       <Box flex={1}>
-                        <Box display="flex" alignItems="center" gap={1} mb={0.5}>
+                        <Box
+                          display="flex"
+                          alignItems="center"
+                          gap={1}
+                          mb={0.5}
+                        >
                           <Typography variant="h6" fontWeight={600}>
                             {alert.name}
                           </Typography>
@@ -291,9 +334,9 @@ export const AlertManager: React.FC = () => {
                             />
                           )}
                         </Box>
-                        <Typography 
-                          variant="body2" 
-                          color="textSecondary" 
+                        <Typography
+                          variant="body2"
+                          color="textSecondary"
                           sx={{ mb: 1, fontFamily: "monospace" }}
                         >
                           {alert.criteria}
@@ -304,14 +347,19 @@ export const AlertManager: React.FC = () => {
                           </Typography>
                           {alert.lastTriggered && (
                             <Typography variant="caption" color="textSecondary">
-                              Last triggered: {formatTimeAgo(alert.lastTriggered)}
+                              Last triggered:{" "}
+                              {formatTimeAgo(alert.lastTriggered)}
                             </Typography>
                           )}
                         </Box>
                       </Box>
-                      
+
                       <Box display="flex" alignItems="center" gap={1}>
-                        <Tooltip title={alert.isActive ? "Disable Alert" : "Enable Alert"}>
+                        <Tooltip
+                          title={
+                            alert.isActive ? "Disable Alert" : "Enable Alert"
+                          }
+                        >
                           <Switch
                             checked={alert.isActive}
                             onChange={() => handleToggleAlert(alert.id)}
@@ -353,12 +401,13 @@ export const AlertManager: React.FC = () => {
                     </Box>
                   </ListItem>
                   {index < alerts.length - 1 && (
-                    <Box 
-                      sx={{ 
-                        height: 1, 
-                        background: "linear-gradient(90deg, transparent, rgba(0,0,0,0.1), transparent)",
+                    <Box
+                      sx={{
+                        height: 1,
+                        background:
+                          "linear-gradient(90deg, transparent, rgba(0,0,0,0.1), transparent)",
                         mx: 3,
-                      }} 
+                      }}
                     />
                   )}
                 </React.Fragment>
@@ -388,8 +437,8 @@ export const AlertManager: React.FC = () => {
       </Fab>
 
       {/* Create Alert Dialog */}
-      <Dialog 
-        open={createDialogOpen} 
+      <Dialog
+        open={createDialogOpen}
         onClose={() => setCreateDialogOpen(false)}
         maxWidth="sm"
         fullWidth
@@ -409,7 +458,9 @@ export const AlertManager: React.FC = () => {
               fullWidth
               label="Alert Name"
               value={newAlert.name}
-              onChange={(e) => setNewAlert({ ...newAlert, name: e.target.value })}
+              onChange={(e) =>
+                setNewAlert({ ...newAlert, name: e.target.value })
+              }
               sx={{ mb: 2 }}
             />
             <TextField
@@ -418,7 +469,9 @@ export const AlertManager: React.FC = () => {
               multiline
               rows={3}
               value={newAlert.criteria}
-              onChange={(e) => setNewAlert({ ...newAlert, criteria: e.target.value })}
+              onChange={(e) =>
+                setNewAlert({ ...newAlert, criteria: e.target.value })
+              }
               sx={{ mb: 2 }}
               placeholder="e.g., Volume > 2x average AND RSI > 70"
             />
@@ -426,7 +479,9 @@ export const AlertManager: React.FC = () => {
               <InputLabel>Priority</InputLabel>
               <Select
                 value={newAlert.priority}
-                onChange={(e) => setNewAlert({ ...newAlert, priority: e.target.value as any })}
+                onChange={(e) =>
+                  setNewAlert({ ...newAlert, priority: e.target.value as any })
+                }
                 label="Priority"
               >
                 <MenuItem value="LOW">Low</MenuItem>
@@ -438,14 +493,14 @@ export const AlertManager: React.FC = () => {
           </Box>
         </DialogContent>
         <DialogActions sx={{ p: 3 }}>
-          <Button 
+          <Button
             onClick={() => setCreateDialogOpen(false)}
             sx={{ borderRadius: "8px" }}
           >
             Cancel
           </Button>
-          <Button 
-            onClick={handleCreateAlert} 
+          <Button
+            onClick={handleCreateAlert}
             variant="contained"
             disabled={!newAlert.name || !newAlert.criteria}
             sx={{
@@ -462,17 +517,19 @@ export const AlertManager: React.FC = () => {
       </Dialog>
 
       {/* Info Alert */}
-      <Alert 
-        severity="info" 
-        sx={{ 
-          mt: 3, 
+      <Alert
+        severity="info"
+        sx={{
+          mt: 3,
           borderRadius: "12px",
-          background: "linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(147, 197, 253, 0.1) 100%)",
+          background:
+            "linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(147, 197, 253, 0.1) 100%)",
           border: "1px solid rgba(59, 130, 246, 0.2)",
         }}
       >
         <Typography variant="body2">
-          <strong>Pro Tip:</strong> Use technical indicators like RSI, MACD, and volume ratios in your alert criteria for more accurate signals.
+          <strong>Pro Tip:</strong> Use technical indicators like RSI, MACD, and
+          volume ratios in your alert criteria for more accurate signals.
         </Typography>
       </Alert>
     </Box>

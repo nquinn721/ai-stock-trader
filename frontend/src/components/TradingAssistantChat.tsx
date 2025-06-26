@@ -1,38 +1,40 @@
-import React, { useState, useEffect, useRef } from 'react';
 import {
-  Box,
-  Paper,
-  TextField,
-  IconButton,
-  Typography,
-  Avatar,
-  List,
-  ListItem,
-  ListItemAvatar,
-  ListItemText,
-  Chip,
-  Button,
-  Divider,
-  CircularProgress,
-  Fade,
-  Tooltip,
-  useTheme,
-} from '@mui/material';
-import {
-  Send as SendIcon,
   SmartToy as AIIcon,
-  Person as PersonIcon,
-  TrendingUp as TrendingUpIcon,
   Analytics as AnalyticsIcon,
   ShoppingCart as OrderIcon,
+  Person as PersonIcon,
   Refresh as RefreshIcon,
-} from '@mui/icons-material';
-import { tradingAssistantService, AssistantResponse, SuggestedAction } from '../services/tradingAssistantService';
-import './TradingAssistantChat.css';
+  Send as SendIcon,
+  TrendingUp as TrendingUpIcon,
+} from "@mui/icons-material";
+import {
+  Avatar,
+  Box,
+  Button,
+  Chip,
+  CircularProgress,
+  Divider,
+  Fade,
+  IconButton,
+  List,
+  ListItem,
+  Paper,
+  TextField,
+  Tooltip,
+  Typography,
+  useTheme,
+} from "@mui/material";
+import React, { useEffect, useRef, useState } from "react";
+import {
+  AssistantResponse,
+  SuggestedAction,
+  tradingAssistantService,
+} from "../services/tradingAssistantService";
+import "./TradingAssistantChat.css";
 
 interface ChatMessage {
   id: string;
-  type: 'user' | 'assistant';
+  type: "user" | "assistant";
   content: string;
   timestamp: Date;
   confidence?: number;
@@ -41,7 +43,7 @@ interface ChatMessage {
 
 interface TradingAssistantChatProps {
   onStockSelect?: (symbol: string) => void;
-  onOrderAction?: (action: 'BUY' | 'SELL', symbol?: string) => void;
+  onOrderAction?: (action: "BUY" | "SELL", symbol?: string) => void;
   onViewAnalysis?: (type: string) => void;
 }
 
@@ -52,7 +54,7 @@ const TradingAssistantChat: React.FC<TradingAssistantChatProps> = ({
 }) => {
   const theme = useTheme();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [inputValue, setInputValue] = useState('');
+  const [inputValue, setInputValue] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [conversationId, setConversationId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -69,8 +71,8 @@ const TradingAssistantChat: React.FC<TradingAssistantChatProps> = ({
 
   const initializeChat = () => {
     const welcomeMessage: ChatMessage = {
-      id: 'welcome',
-      type: 'assistant',
+      id: "welcome",
+      type: "assistant",
       content: `👋 **Welcome to your AI Trading Assistant!**
 
 I'm here to help you with:
@@ -89,9 +91,9 @@ What would you like to know about the markets today?`,
       timestamp: new Date(),
       actions: [
         {
-          type: 'VIEW_ANALYSIS',
-          description: 'View Dashboard',
-          parameters: { view: 'dashboard' },
+          type: "VIEW_ANALYSIS",
+          description: "View Dashboard",
+          parameters: { view: "dashboard" },
         },
       ],
     };
@@ -100,7 +102,7 @@ What would you like to know about the markets today?`,
   };
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
   const handleSendMessage = async () => {
@@ -108,20 +110,21 @@ What would you like to know about the markets today?`,
 
     const userMessage: ChatMessage = {
       id: `user_${Date.now()}`,
-      type: 'user',
+      type: "user",
       content: inputValue,
       timestamp: new Date(),
     };
 
-    setMessages(prev => [...prev, userMessage]);
-    setInputValue('');
+    setMessages((prev) => [...prev, userMessage]);
+    setInputValue("");
     setIsLoading(true);
 
     try {
-      const response: AssistantResponse = await tradingAssistantService.sendMessage(
-        inputValue,
-        conversationId || undefined
-      );
+      const response: AssistantResponse =
+        await tradingAssistantService.sendMessage(
+          inputValue,
+          conversationId || undefined
+        );
 
       // Update conversation ID if we get one
       if (response.context?.conversationId && !conversationId) {
@@ -130,33 +133,34 @@ What would you like to know about the markets today?`,
 
       const assistantMessage: ChatMessage = {
         id: `assistant_${Date.now()}`,
-        type: 'assistant',
+        type: "assistant",
         content: response.response,
         timestamp: new Date(),
         confidence: response.confidence,
         actions: response.actions,
       };
 
-      setMessages(prev => [...prev, assistantMessage]);
+      setMessages((prev) => [...prev, assistantMessage]);
     } catch (error) {
-      console.error('Failed to send message:', error);
-      
+      console.error("Failed to send message:", error);
+
       const errorMessage: ChatMessage = {
         id: `error_${Date.now()}`,
-        type: 'assistant',
-        content: '⚠️ I apologize, but I\'m having trouble connecting to the AI service right now. Please try again in a moment, or check the dashboard for the latest market data.',
+        type: "assistant",
+        content:
+          "⚠️ I apologize, but I'm having trouble connecting to the AI service right now. Please try again in a moment, or check the dashboard for the latest market data.",
         timestamp: new Date(),
         confidence: 0,
       };
 
-      setMessages(prev => [...prev, errorMessage]);
+      setMessages((prev) => [...prev, errorMessage]);
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleKeyPress = (event: React.KeyboardEvent) => {
-    if (event.key === 'Enter' && !event.shiftKey) {
+    if (event.key === "Enter" && !event.shiftKey) {
       event.preventDefault();
       handleSendMessage();
     }
@@ -164,26 +168,26 @@ What would you like to know about the markets today?`,
 
   const handleActionClick = (action: SuggestedAction) => {
     switch (action.type) {
-      case 'VIEW_STOCK':
+      case "VIEW_STOCK":
         if (action.symbol && onStockSelect) {
           onStockSelect(action.symbol);
         }
         break;
-      case 'PLACE_ORDER':
+      case "PLACE_ORDER":
         if (onOrderAction) {
           onOrderAction(
-            action.parameters?.action as 'BUY' | 'SELL',
+            action.parameters?.action as "BUY" | "SELL",
             action.symbol
           );
         }
         break;
-      case 'VIEW_ANALYSIS':
+      case "VIEW_ANALYSIS":
         if (onViewAnalysis) {
-          onViewAnalysis(action.parameters?.view || 'dashboard');
+          onViewAnalysis(action.parameters?.view || "dashboard");
         }
         break;
       default:
-        console.log('Action not implemented:', action);
+        console.log("Action not implemented:", action);
     }
   };
 
@@ -194,17 +198,17 @@ What would you like to know about the markets today?`,
       setMessages([]);
       initializeChat();
     } catch (error) {
-      console.error('Failed to create new conversation:', error);
+      console.error("Failed to create new conversation:", error);
     }
   };
 
   const getActionIcon = (actionType: string) => {
     switch (actionType) {
-      case 'VIEW_STOCK':
+      case "VIEW_STOCK":
         return <TrendingUpIcon fontSize="small" />;
-      case 'PLACE_ORDER':
+      case "PLACE_ORDER":
         return <OrderIcon fontSize="small" />;
-      case 'VIEW_ANALYSIS':
+      case "VIEW_ANALYSIS":
         return <AnalyticsIcon fontSize="small" />;
       default:
         return <TrendingUpIcon fontSize="small" />;
@@ -212,88 +216,100 @@ What would you like to know about the markets today?`,
   };
 
   const renderMessage = (message: ChatMessage) => {
-    const isUser = message.type === 'user';
-    
+    const isUser = message.type === "user";
+
     return (
       <ListItem
         key={message.id}
         sx={{
-          flexDirection: 'column',
-          alignItems: isUser ? 'flex-end' : 'flex-start',
+          flexDirection: "column",
+          alignItems: isUser ? "flex-end" : "flex-start",
           mb: 2,
         }}
       >
         <Box
           sx={{
-            display: 'flex',
-            alignItems: 'flex-start',
+            display: "flex",
+            alignItems: "flex-start",
             gap: 1,
-            width: '100%',
-            flexDirection: isUser ? 'row-reverse' : 'row',
+            width: "100%",
+            flexDirection: isUser ? "row-reverse" : "row",
           }}
         >
           <Avatar
             sx={{
-              bgcolor: isUser ? theme.palette.primary.main : theme.palette.secondary.main,
+              bgcolor: isUser
+                ? theme.palette.primary.main
+                : theme.palette.secondary.main,
               width: 32,
               height: 32,
             }}
           >
-            {isUser ? <PersonIcon fontSize="small" /> : <AIIcon fontSize="small" />}
+            {isUser ? (
+              <PersonIcon fontSize="small" />
+            ) : (
+              <AIIcon fontSize="small" />
+            )}
           </Avatar>
-          
+
           <Paper
             elevation={1}
             sx={{
               p: 2,
-              maxWidth: '75%',
-              bgcolor: isUser 
-                ? theme.palette.primary.main 
+              maxWidth: "75%",
+              bgcolor: isUser
+                ? theme.palette.primary.main
                 : theme.palette.background.paper,
-              color: isUser 
-                ? theme.palette.primary.contrastText 
+              color: isUser
+                ? theme.palette.primary.contrastText
                 : theme.palette.text.primary,
               borderRadius: 2,
-              position: 'relative',
+              position: "relative",
             }}
           >
             <Typography
               variant="body1"
               sx={{
-                whiteSpace: 'pre-line',
-                '& strong': { fontWeight: 600 },
-                '& em': { fontStyle: 'italic' },
+                whiteSpace: "pre-line",
+                "& strong": { fontWeight: 600 },
+                "& em": { fontStyle: "italic" },
               }}
             >
               {message.content}
             </Typography>
-            
+
             {message.confidence !== undefined && (
               <Chip
                 label={`${(message.confidence * 100).toFixed(0)}% confidence`}
                 size="small"
-                color={message.confidence > 0.7 ? 'success' : message.confidence > 0.5 ? 'warning' : 'error'}
+                color={
+                  message.confidence > 0.7
+                    ? "success"
+                    : message.confidence > 0.5
+                    ? "warning"
+                    : "error"
+                }
                 sx={{ mt: 1 }}
               />
             )}
-            
+
             <Typography
               variant="caption"
               color="text.secondary"
-              sx={{ 
-                display: 'block', 
-                mt: 1, 
+              sx={{
+                display: "block",
+                mt: 1,
                 opacity: 0.7,
-                textAlign: isUser ? 'right' : 'left',
+                textAlign: isUser ? "right" : "left",
               }}
             >
               {message.timestamp.toLocaleTimeString()}
             </Typography>
           </Paper>
         </Box>
-        
+
         {message.actions && message.actions.length > 0 && (
-          <Box sx={{ mt: 1, display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+          <Box sx={{ mt: 1, display: "flex", gap: 1, flexWrap: "wrap" }}>
             {message.actions.map((action, index) => (
               <Button
                 key={index}
@@ -301,9 +317,9 @@ What would you like to know about the markets today?`,
                 size="small"
                 startIcon={getActionIcon(action.type)}
                 onClick={() => handleActionClick(action)}
-                sx={{ 
-                  fontSize: '0.75rem',
-                  textTransform: 'none',
+                sx={{
+                  fontSize: "0.75rem",
+                  textTransform: "none",
                 }}
               >
                 {action.description}
@@ -319,9 +335,9 @@ What would you like to know about the markets today?`,
     <Paper
       elevation={3}
       sx={{
-        height: '600px',
-        display: 'flex',
-        flexDirection: 'column',
+        height: "600px",
+        display: "flex",
+        flexDirection: "column",
         bgcolor: theme.palette.background.default,
       }}
     >
@@ -331,21 +347,21 @@ What would you like to know about the markets today?`,
           p: 2,
           bgcolor: theme.palette.primary.main,
           color: theme.palette.primary.contrastText,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
         }}
       >
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
           <AIIcon />
           <Typography variant="h6" fontWeight="bold">
             AI Trading Assistant
           </Typography>
         </Box>
-        
+
         <Tooltip title="Start New Conversation">
-          <IconButton 
-            color="inherit" 
+          <IconButton
+            color="inherit"
             onClick={handleNewConversation}
             size="small"
           >
@@ -360,17 +376,17 @@ What would you like to know about the markets today?`,
       <Box
         sx={{
           flex: 1,
-          overflowY: 'auto',
+          overflowY: "auto",
           p: 1,
         }}
       >
         <List sx={{ pb: 0 }}>
           {messages.map(renderMessage)}
-          
+
           {isLoading && (
-            <ListItem sx={{ justifyContent: 'center', py: 2 }}>
+            <ListItem sx={{ justifyContent: "center", py: 2 }}>
               <Fade in={isLoading}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                   <CircularProgress size={20} />
                   <Typography variant="body2" color="text.secondary">
                     AI is thinking...
@@ -387,7 +403,7 @@ What would you like to know about the markets today?`,
 
       {/* Input */}
       <Box sx={{ p: 2 }}>
-        <Box sx={{ display: 'flex', gap: 1 }}>
+        <Box sx={{ display: "flex", gap: 1 }}>
           <TextField
             fullWidth
             multiline
@@ -400,7 +416,7 @@ What would you like to know about the markets today?`,
             variant="outlined"
             size="small"
             sx={{
-              '& .MuiOutlinedInput-root': {
+              "& .MuiOutlinedInput-root": {
                 borderRadius: 2,
               },
             }}
@@ -412,10 +428,10 @@ What would you like to know about the markets today?`,
             sx={{
               bgcolor: theme.palette.primary.main,
               color: theme.palette.primary.contrastText,
-              '&:hover': {
+              "&:hover": {
                 bgcolor: theme.palette.primary.dark,
               },
-              '&:disabled': {
+              "&:disabled": {
                 bgcolor: theme.palette.grey[300],
               },
             }}
