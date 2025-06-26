@@ -13,7 +13,7 @@
 .portfolio-selector-header h3 {
   margin: 0;
   color: var(--text-primary, #ffffff);
-  font-size: 1.25rem;
+  font-size: 1rem;
   font-weight: 600;
 }
 
@@ -92,7 +92,7 @@
 
 .portfolio-name {
   margin: 0 0 0.25rem 0;
-  font-size: 1.125rem;
+  font-size: 1rem;
   font-weight: 600;
   color: var(--text-primary, #ffffff);
   white-space: nowrap;

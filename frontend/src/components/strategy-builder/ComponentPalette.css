@@ -32,10 +32,10 @@
 .category-title {
   font-size: 14px;
   font-weight: 600;
-  color: #495057;
+  color: #f1f5f9;
   margin: 0 0 12px 0;
   padding-bottom: 8px;
-  border-bottom: 1px solid #dee2e6;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.3);
 }
 
 .component-list {
@@ -49,8 +49,8 @@
   align-items: center;
   gap: 12px;
   padding: 12px;
-  background: white;
-  border: 1px solid #e9ecef;
+  background: rgba(30, 41, 59, 0.9);
+  border: 1px solid rgba(148, 163, 184, 0.3);
   border-radius: 8px;
   cursor: grab;
   transition: all 0.2s ease;
@@ -58,10 +58,10 @@
 }
 
 .component-item:hover {
-  background: #f8f9fa;
-  border-color: #6c757d;
+  background: rgba(51, 65, 85, 0.9);
+  border-color: #3b82f6;
   transform: translateY(-1px);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .component-item:active {
@@ -73,11 +73,13 @@
   font-size: 18px;
   min-width: 20px;
   text-align: center;
+  color: #94a3b8;
 }
 
 .component-name {
   font-size: 14px;
   font-weight: 500;
+  color: #f1f5f9;
   color: #343a40;
   flex: 1;
 }

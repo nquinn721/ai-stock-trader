@@ -57,18 +57,40 @@ const DashboardPage: React.FC = observer(() => {
     useState<Portfolio | null>(null);
   const [currentTime, setCurrentTime] = useState(new Date());
 
-  // Initialize data on component mount
+  // Initialize data only if stores are empty or need fresh data
   useEffect(() => {
-    stockStore.fetchStocksWithSignals();
-    portfolioStore.initializeDefaultPortfolio();
-  }, [stockStore, portfolioStore]);
-
-  // Update stocks when socket data changes
-  useEffect(() => {
-    if ((stockStore?.stocks?.length || 0) === 0 && !stockStore?.isLoading) {
-      stockStore?.fetchStocksWithSignals();
+    // Only fetch stocks if we don't have any recent data and WebSocket isn't providing updates
+    if ((!stockStore.isInitialized || stockStore.needsFreshData) && !stockStore.isLoading) {
+      console.log("Dashboard: Fetching initial stock data (not initialized or needs fresh data)");
+      stockStore.fetchStocksWithSignals();
+    } else if (stockStore.isInitialized) {
+      console.log("Dashboard: Using existing stock data, WebSocket will provide updates");
     }
-  }, [stockStore?.stocks?.length, stockStore?.isLoading, stockStore]);
+
+    // Only initialize portfolio if we don't have any portfolios
+    if (!portfolioStore.isInitialized && !portfolioStore.isLoading) {
+      console.log("Dashboard: Initializing default portfolio");
+      portfolioStore.initializeDefaultPortfolio();
+    } else if (portfolioStore.isInitialized) {
+      console.log("Dashboard: Using existing portfolio data");
+    }
+  }, []); // Remove dependencies to prevent re-runs
+
+  // Connect WebSocket if not already connected - only connect once
+  useEffect(() => {
+    if (!webSocketStore.isConnected && !webSocketStore.isConnecting) {
+      console.log("Dashboard: Connecting WebSocket for real-time updates");
+      webSocketStore.connect();
+    } else if (webSocketStore.isConnected) {
+      console.log("Dashboard: WebSocket already connected, real-time updates active");
+    }
+
+    // Cleanup function to prevent multiple connections
+    return () => {
+      // Don't disconnect WebSocket when dashboard unmounts - keep it alive for the app
+      console.log("Dashboard: Component unmounting, keeping WebSocket alive for other components");
+    };
+  }, []); // No dependencies - connect once and keep alive
 
   // Update clock every second
   useEffect(() => {

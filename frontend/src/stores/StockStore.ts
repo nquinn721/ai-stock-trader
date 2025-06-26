@@ -21,29 +21,33 @@ export class StockStore {
     this.setupWebSocketListeners();
   }
 
+  // Add cleanup method
+  cleanup() {
+    webSocketStore.removeListener("stock_updates", this.handleStockUpdates);
+    webSocketStore.removeListener("stock_update", this.handleSingleStockUpdate);
+    webSocketStore.removeListener("trading_signal", this.handleTradingSignal);
+  }
+
+  private handleStockUpdates = (data: Stock[]) => {
+    console.log("StockStore: Received stock updates via WebSocket");
+    this.updateStocksFromWebSocket(data);
+  };
+
+  private handleSingleStockUpdate = (data: Stock) => {
+    console.log("StockStore: Received single stock update via WebSocket");
+    this.updateStocksFromWebSocket([data]);
+  };
+
+  private handleTradingSignal = (data: TradingSignal) => {
+    console.log("StockStore: Received trading signal via WebSocket");
+    this.addTradingSignal(data);
+  };
+
   private setupWebSocketListeners() {
-    // React to WebSocket events
-    setInterval(() => {
-      const stockUpdates = webSocketStore.getEventsByType("stock_updates");
-      const latestUpdate = stockUpdates[0];
-
-      if (
-        latestUpdate &&
-        latestUpdate.timestamp > (this.lastUpdated?.getTime() || 0)
-      ) {
-        this.updateStocksFromWebSocket(latestUpdate.data);
-      }
-
-      const signalUpdates = webSocketStore.getEventsByType("trading_signal");
-      const latestSignal = signalUpdates[0];
-
-      if (
-        latestSignal &&
-        latestSignal.timestamp > (this.lastUpdated?.getTime() || 0)
-      ) {
-        this.addTradingSignal(latestSignal.data);
-      }
-    }, 1000); // Check every second
+    // Use proper WebSocket event listeners instead of polling
+    webSocketStore.addListener("stock_updates", this.handleStockUpdates);
+    webSocketStore.addListener("stock_update", this.handleSingleStockUpdate);
+    webSocketStore.addListener("trading_signal", this.handleTradingSignal);
   }
 
   async fetchStocks(): Promise<void> {
@@ -217,6 +221,18 @@ export class StockStore {
 
   getActiveSignals(): TradingSignal[] {
     return this.tradingSignals.filter((signal) => signal.isActive);
+  }
+
+  // Check if the store has been initialized with data
+  get isInitialized(): boolean {
+    return this.stocks.length > 0 || this.lastUpdated !== null;
+  }
+
+  // Check if we need fresh data (haven't loaded in the last 5 minutes)
+  get needsFreshData(): boolean {
+    if (!this.lastUpdated) return true;
+    const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
+    return this.lastUpdated < fiveMinutesAgo;
   }
 
   clearError(): void {

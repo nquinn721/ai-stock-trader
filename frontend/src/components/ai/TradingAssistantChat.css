@@ -1,50 +1,10 @@
 /* Enhanced Trading Assistant Chat Styles */
 .trading-assistant-chat {
-  background: linear-gradient(
-    135deg,
-    #667eea 0%,
-    #764ba2 25%,
-    #f093fb 50%,
-    #f5576c 75%,
-    #4facfe 100%
-  );
-  background-size: 400% 400%;
-  animation: gradientShift 15s ease infinite;
-  min-height: 100vh;
-  padding: 24px;
-  position: relative;
-}
-
-.trading-assistant-chat::before {
-  content: '';
-  position: fixed;
-  top: 0;
-  left: 0;
   width: 100%;
-  height: 100%;
-  background: radial-gradient(
-      circle at 20% 80%,
-      rgba(120, 119, 198, 0.3) 0%,
-      transparent 50%
-    ),
-    radial-gradient(
-      circle at 80% 20%,
-      rgba(255, 119, 198, 0.3) 0%,
-      transparent 50%
-    ),
-    radial-gradient(
-      circle at 40% 40%,
-      rgba(120, 219, 255, 0.2) 0%,
-      transparent 50%
-    );
-  pointer-events: none;
-  z-index: -1;
-}
-
-@keyframes gradientShift {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+  max-width: 900px;
+  margin: 0 auto;
+  position: relative;
+  background: transparent;
 }
 
 /* Main Chat Container */
@@ -55,7 +15,10 @@
   border-radius: 24px !important;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1) !important;
   overflow: hidden !important;
-  height: 600px !important;
+  height: 70vh !important;
+  max-height: 700px !important;
+  min-height: 500px !important;
+  width: 100% !important;
 }
 
 .chat-container {
@@ -330,24 +293,48 @@
 /* Responsive Design */
 @media (max-width: 768px) {
   .trading-assistant-chat {
-    padding: 16px;
+    max-width: 100%;
   }
   
   .chat-main-card {
-    height: calc(100vh - 100px) !important;
-  }
-  
-  .chat-history {
-    padding: 16px !important;
-  }
-  
-  .chat-input-container {
-    padding: 16px !important;
+    height: 65vh !important;
+    min-height: 400px !important;
   }
   
   .message-bubble {
     max-width: 90% !important;
     padding: 12px 16px !important;
+  }
+  
+  .chat-history {
+    padding: 16px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .chat-main-card {
+    height: 60vh !important;
+    min-height: 350px !important;
+    border-radius: 16px !important;
+  }
+  
+  .message-bubble {
+    max-width: 95% !important;
+    padding: 10px 14px !important;
+    border-radius: 16px !important;
+  }
+  
+  .message-bubble-user {
+    border-radius: 16px 16px 4px 16px !important;
+  }
+  
+  .message-bubble-ai {
+    border-radius: 16px 16px 16px 4px !important;
+  }
+  
+  .chat-history {
+    padding: 12px !important;
+    gap: 12px !important;
   }
 }
 

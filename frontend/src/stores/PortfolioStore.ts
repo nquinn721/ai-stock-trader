@@ -25,6 +25,11 @@ export class PortfolioStore {
     makeAutoObservable(this);
   }
 
+  // Check if portfolio data has been initialized
+  get isInitialized(): boolean {
+    return this.portfolios.length > 0;
+  }
+
   // Get the current portfolio (selected or first available)
   get currentPortfolio(): Portfolio | null {
     if (this.selectedPortfolioId && this.portfolios.length > 0) {
@@ -59,16 +64,24 @@ export class PortfolioStore {
 
   // Initialize with first available portfolio or create default
   async initializeDefaultPortfolio() {
+    // Skip if already initialized to prevent redundant API calls
+    if (this.isInitialized) {
+      console.log("PortfolioStore: Already initialized, skipping fetch");
+      return;
+    }
+
     try {
+      console.log("PortfolioStore: Initializing portfolios...");
       await this.fetchPortfolios();
       if (this.portfolios.length > 0) {
         // Select the first portfolio
         this.setSelectedPortfolio(this.portfolios[0].id);
         await this.fetchPortfolioById(this.portfolios[0].id);
+        console.log("PortfolioStore: Successfully initialized with existing portfolio");
       } else {
         // No portfolios exist, the backend will create a default one
         console.log(
-          "No portfolios found, backend will create default portfolio"
+          "PortfolioStore: No portfolios found, backend will create default portfolio"
         );
       }
     } catch (error) {

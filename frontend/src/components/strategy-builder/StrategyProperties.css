@@ -1,7 +1,7 @@
 .strategy-properties {
   width: 320px;
-  background: #f8f9fa;
-  border-left: 1px solid #e9ecef;
+  background: rgba(15, 23, 42, 0.9);
+  border-left: 1px solid rgba(148, 163, 184, 0.2);
   height: 100vh;
   overflow-y: auto;
   display: flex;
@@ -10,20 +10,20 @@
 
 .properties-header {
   padding: 16px;
-  border-bottom: 1px solid #e9ecef;
-  background: white;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+  background: rgba(30, 41, 59, 0.9);
 }
 
 .properties-header h3 {
   margin: 0 0 8px 0;
-  color: #343a40;
+  color: #f1f5f9;
   font-size: 18px;
   font-weight: 600;
 }
 
 .properties-header p {
   margin: 0;
-  color: #6c757d;
+  color: #94a3b8;
   font-size: 14px;
 }
 
@@ -33,18 +33,19 @@
   gap: 8px;
   margin-top: 12px;
   padding: 8px 12px;
-  background: #e7f3ff;
-  border: 1px solid #b3d7ff;
+  background: rgba(59, 130, 246, 0.2);
+  border: 1px solid rgba(59, 130, 246, 0.3);
   border-radius: 6px;
 }
 
 .selected-node-info .node-icon {
   font-size: 16px;
+  color: #94a3b8;
 }
 
 .selected-node-info .node-name {
   font-weight: 500;
-  color: #0056b3;
+  color: #3b82f6;
   font-size: 14px;
 }
 
@@ -54,7 +55,7 @@
 }
 
 .no-properties {
-  color: #6c757d;
+  color: #94a3b8;
   font-style: italic;
   text-align: center;
   margin: 40px 0;
@@ -78,7 +79,7 @@
   gap: 6px;
   font-size: 14px;
   font-weight: 500;
-  color: #343a40;
+  color: #f1f5f9;
   margin-bottom: 4px;
 }
 
@@ -86,25 +87,26 @@
   font-size: 12px;
   cursor: help;
   opacity: 0.7;
+  color: #94a3b8;
 }
 
 .property-input,
 .property-select {
   width: 100%;
   padding: 8px 12px;
-  border: 1px solid #ced4da;
+  border: 1px solid rgba(148, 163, 184, 0.3);
   border-radius: 4px;
   font-size: 14px;
-  background: white;
-  color: #495057;
+  background: rgba(30, 41, 59, 0.9);
+  color: #f1f5f9;
   transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
 }
 
 .property-input:focus,
 .property-select:focus {
   outline: none;
-  border-color: #007bff;
-  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25);
 }
 
 .property-checkbox {
@@ -113,7 +115,7 @@
   gap: 8px;
   cursor: pointer;
   font-size: 14px;
-  color: #495057;
+  color: #f1f5f9;
 }
 
 .property-checkbox input[type="checkbox"] {
@@ -123,16 +125,16 @@
 .checkmark {
   width: 18px;
   height: 18px;
-  border: 2px solid #ced4da;
+  border: 2px solid rgba(148, 163, 184, 0.3);
   border-radius: 3px;
   position: relative;
   transition: all 0.2s ease;
-  background: white;
+  background: rgba(30, 41, 59, 0.9);
 }
 
 .property-checkbox input[type="checkbox"]:checked + .checkmark {
-  background: #007bff;
-  border-color: #007bff;
+  background: #3b82f6;
+  border-color: #3b82f6;
 }
 
 .property-checkbox input[type="checkbox"]:checked + .checkmark::after {

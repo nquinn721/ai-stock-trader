@@ -1,7 +1,7 @@
 .strategy-canvas {
   flex: 1;
   position: relative;
-  background: #ffffff;
+  background: #0f172a;
   overflow: auto;
   height: 100vh;
   min-height: 800px;
@@ -14,8 +14,8 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-image: linear-gradient(rgba(0, 0, 0, 0.1) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0, 0, 0, 0.1) 1px, transparent 1px);
+  background-image: linear-gradient(rgba(148, 163, 184, 0.2) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(148, 163, 184, 0.2) 1px, transparent 1px);
   background-size: 20px 20px;
   pointer-events: none;
   z-index: 0;
@@ -35,21 +35,21 @@
   position: absolute;
   width: 200px;
   min-height: 100px;
-  background: white;
-  border: 2px solid #e9ecef;
+  background: rgba(30, 41, 59, 0.9);
+  border: 2px solid rgba(148, 163, 184, 0.3);
   border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
   z-index: 2;
   transition: all 0.2s ease;
 }
 
 .canvas-node:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
 }
 
 .canvas-node.selected {
-  border-color: #007bff;
-  box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+  border-color: #3b82f6;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
 }
 
 .node-header {
@@ -57,8 +57,8 @@
   align-items: center;
   gap: 8px;
   padding: 12px;
-  background: #f8f9fa;
-  border-bottom: 1px solid #e9ecef;
+  background: rgba(51, 65, 85, 0.9);
+  border-bottom: 1px solid rgba(148, 163, 184, 0.3);
   border-radius: 6px 6px 0 0;
   position: relative;
 }
@@ -66,13 +66,14 @@
 .node-icon {
   font-size: 18px;
   min-width: 20px;
+  color: #94a3b8;
 }
 
 .node-title {
   flex: 1;
   font-weight: 600;
   font-size: 14px;
-  color: #343a40;
+  color: #f1f5f9;
 }
 
 .node-delete {

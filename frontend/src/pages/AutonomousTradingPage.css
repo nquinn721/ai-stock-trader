@@ -1,24 +1,25 @@
-/* Autonomous Trading Page - Modern Design */
-
+/* Enhanced Autonomous Trading Page - Glassmorphism Design */
 .autonomous-trading-page {
-  min-height: 100vh;
-  width: 100%;
-  margin: 0;
-  padding: 0;
   background: linear-gradient(
     135deg,
-    #0f172a 0%,
-    #1e293b 25%,
-    #334155 50%,
-    #475569 75%,
-    #1e293b 100%
+    #667eea 0%,
+    #764ba2 25%,
+    #f093fb 50%,
+    #f5576c 75%,
+    #4facfe 100%
   );
-  background-attachment: fixed;
+  background-size: 400% 400%;
+  animation: gradientShift 15s ease infinite;
+  min-height: 100vh;
+  padding: 0;
   position: relative;
+  width: 100%;
   overflow-x: hidden;
+  color: white !important;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+  font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", "Roboto", sans-serif !important;
 }
 
-/* Gradient Overlay */
 .autonomous-trading-page::before {
   content: "";
   position: fixed;
@@ -26,81 +27,9 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background: radial-gradient(
-      circle at 20% 20%,
-      rgba(139, 92, 246, 0.15) 0%,
-      transparent 60%
-    ),
-    radial-gradient(
-      circle at 80% 80%,
-      rgba(236, 72, 153, 0.15) 0%,
-      transparent 60%
-    ),
-    radial-gradient(
-      circle at 50% 50%,
-      rgba(16, 185, 129, 0.08) 0%,
-      transparent 70%
-    );
+  background: rgba(0, 0, 0, 0.6);
   pointer-events: none;
-  z-index: 0;
-}
-
-/* Animated background particles */
-.autonomous-trading-page::after {
-  content: "";
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-image: radial-gradient(
-      2px 2px at 40px 60px,
-      rgba(255, 255, 255, 0.1),
-      transparent
-    ),
-    radial-gradient(
-      2px 2px at 90px 40px,
-      rgba(255, 255, 255, 0.05),
-      transparent
-    ),
-    radial-gradient(
-      1px 1px at 130px 80px,
-      rgba(255, 255, 255, 0.08),
-      transparent
-    ),
-    radial-gradient(
-      1px 1px at 160px 30px,
-      rgba(255, 255, 255, 0.03),
-      transparent
-    );
-  background-repeat: repeat;
-  background-size: 200px 120px;
-  animation: moveStars 60s linear infinite;
-  pointer-events: none;
-  z-index: 0;
-}
-
-@keyframes moveStars {
-  0% {
-    transform: translateY(0) translateX(0);
-  }
-  100% {
-    transform: translateY(-120px) translateX(-200px);
-  }
-}
-
-/* Ensure content is above background */
-.autonomous-trading-page > * {
-  position: relative;
-  z-index: 1;
-}
-
-/* Responsive adjustments */
-@media (max-width: 768px) {
-  .autonomous-trading-page {
-    background-size: 400% 400%;
-    animation: gradientShift 15s ease infinite;
-  }
+  z-index: -1;
 }
 
 @keyframes gradientShift {
@@ -113,4 +42,105 @@
   100% {
     background-position: 0% 50%;
   }
+}
+
+/* Ensure content is above background */
+.autonomous-trading-page > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Global Text Enhancement */
+.autonomous-trading-page * {
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Strong Text Shadows for Headers */
+.autonomous-trading-page h1,
+.autonomous-trading-page h2,
+.autonomous-trading-page h3,
+.autonomous-trading-page h4 {
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5) !important;
+  font-weight: 700 !important;
+  color: white !important;
+}
+
+/* Enhanced Readability for Body Text */
+.autonomous-trading-page p,
+.autonomous-trading-page span,
+.autonomous-trading-page div {
+  color: rgba(255, 255, 255, 0.95) !important;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.4) !important;
+  font-weight: 500 !important;
+}
+
+/* Button Text Enhancement */
+.autonomous-trading-page button {
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
+  font-weight: 600 !important;
+}
+
+/* Input and Form Text */
+.autonomous-trading-page input,
+.autonomous-trading-page select,
+.autonomous-trading-page textarea {
+  color: white !important;
+  text-shadow: none !important;
+}
+
+/* CRITICAL FIX: Force all text to be completely visible */
+.autonomous-trading-page,
+.autonomous-trading-page *,
+.autonomous-trading-page *:before,
+.autonomous-trading-page *:after {
+  color: white !important;
+  text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.9) !important;
+}
+
+/* Override any gradient text effects that make text invisible */
+.autonomous-trading-page h1,
+.autonomous-trading-page h2,
+.autonomous-trading-page h3 {
+  color: white !important;
+  -webkit-text-fill-color: white !important;
+  background-clip: unset !important;
+  -webkit-background-clip: unset !important;
+  text-shadow: 3px 3px 8px rgba(0, 0, 0, 1) !important;
+  font-weight: 900 !important;
+}
+
+/* Force visibility on all text elements */
+.autonomous-trading-page p,
+.autonomous-trading-page span,
+.autonomous-trading-page div,
+.autonomous-trading-page button,
+.autonomous-trading-page a,
+.autonomous-trading-page label {
+  color: white !important;
+  -webkit-text-fill-color: white !important;
+  text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.9) !important;
+  font-weight: 600 !important;
+}
+
+/* Override any Material-UI or styled component text hiding */
+.autonomous-trading-page [class*="MuiTypography"],
+.autonomous-trading-page [class*="title"],
+.autonomous-trading-page [class*="text"] {
+  color: white !important;
+  -webkit-text-fill-color: white !important;
+  background-clip: unset !important;
+  -webkit-background-clip: unset !important;
+}
+
+/* Add dark overlay to improve text contrast */
+.autonomous-trading-page::after {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.4);
+  pointer-events: none;
+  z-index: 0;
 }

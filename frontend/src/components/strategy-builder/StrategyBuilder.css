@@ -2,24 +2,24 @@
   height: 100vh;
   display: flex;
   flex-direction: column;
-  background-color: #f5f5f5;
+  background-color: #0f172a;
 }
 
 .strategy-builder__header {
-  background: white;
-  border-bottom: 1px solid #e0e0e0;
+  background: rgba(30, 41, 59, 0.9);
+  border-bottom: 1px solid rgba(148, 163, 184, 0.2);
   padding: 16px 24px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .strategy-builder__header h1 {
   margin: 0;
   font-size: 24px;
   font-weight: 500;
-  color: #1976d2;
+  color: #3b82f6;
 }
 
 .strategy-builder__actions {
@@ -32,8 +32,8 @@
 }
 
 .strategy-builder__tabs {
-  background: white;
-  border-bottom: 1px solid #e0e0e0;
+  background: rgba(30, 41, 59, 0.9);
+  border-bottom: 1px solid rgba(148, 163, 184, 0.2);
 }
 
 .strategy-builder__content {
@@ -44,8 +44,8 @@
 
 .strategy-builder__sidebar {
   width: 300px;
-  background: white;
-  border-right: 1px solid #e0e0e0;
+  background: rgba(30, 41, 59, 0.9);
+  border-right: 1px solid rgba(148, 163, 184, 0.2);
   overflow-y: auto;
 }
 
@@ -66,14 +66,14 @@
 
 .strategy-builder__properties {
   width: 350px;
-  background: white;
-  border-left: 1px solid #e0e0e0;
+  background: rgba(30, 41, 59, 0.9);
+  border-left: 1px solid rgba(148, 163, 184, 0.2);
   overflow-y: auto;
 }
 
 .strategy-builder__validation {
-  background: white;
-  border-top: 1px solid #e0e0e0;
+  background: rgba(30, 41, 59, 0.9);
+  border-top: 1px solid rgba(148, 163, 184, 0.2);
   padding: 16px;
   max-height: 200px;
   overflow-y: auto;
@@ -81,20 +81,20 @@
 
 /* Component Cards */
 .component-card {
-  background: white;
-  border: 2px solid #e0e0e0;
+  background: rgba(30, 41, 59, 0.9);
+  border: 2px solid rgba(148, 163, 184, 0.3);
   border-radius: 8px;
   padding: 12px;
   margin: 8px;
   cursor: move;
   user-select: none;
   transition: all 0.2s ease;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .component-card:hover {
-  border-color: #1976d2;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  border-color: #3b82f6;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
   transform: translateY(-1px);
 }
 
@@ -113,13 +113,13 @@
 .component-card__name {
   font-weight: 500;
   font-size: 14px;
-  color: #333;
+  color: #f1f5f9;
 }
 
 .component-card__category {
   font-size: 12px;
-  color: #666;
-  background: #f0f0f0;
+  color: #94a3b8;
+  background: rgba(148, 163, 184, 0.2);
   padding: 2px 6px;
   border-radius: 4px;
   margin-left: auto;
@@ -127,25 +127,26 @@
 
 .component-card__description {
   font-size: 12px;
-  color: #666;
+  color: #94a3b8;
   margin-bottom: 8px;
 }
 
 /* Canvas Components */
 .canvas-component {
   position: absolute;
-  background: white;
-  border: 2px solid #1976d2;
+  background: rgba(30, 41, 59, 0.9);
+  border: 2px solid #3b82f6;
   border-radius: 8px;
   padding: 12px;
   min-width: 150px;
   cursor: move;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+  color: #f1f5f9;
 }
 
 .canvas-component.selected {
-  border-color: #ff9800;
-  box-shadow: 0 0 0 2px rgba(255, 152, 0, 0.3);
+  border-color: #f59e0b;
+  box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.3);
 }
 
 .canvas-component__header {

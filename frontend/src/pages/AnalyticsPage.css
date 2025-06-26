@@ -44,7 +44,7 @@
 }
 
 .page-header h1 {
-  font-size: 32px;
+  font-size: 24px; /* Reduced from 32px */
   font-weight: 700;
   color: #f0f6fc;
   margin: 0 0 8px 0;
@@ -55,7 +55,7 @@
 }
 
 .page-header p {
-  font-size: 16px;
+  font-size: 14px; /* Reduced from 16px */
   color: #8b949e;
   margin: 0;
 }
@@ -75,7 +75,7 @@
 }
 
 .no-portfolio-message h3 {
-  font-size: 24px;
+  font-size: 18px; /* Reduced from 24px */
   color: #f0f6fc;
   margin: 0 0 12px 0;
 }

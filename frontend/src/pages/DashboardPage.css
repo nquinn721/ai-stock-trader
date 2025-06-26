@@ -96,7 +96,7 @@
   justify-content: center;
   background: rgba(59, 130, 246, 0.1);
   color: #3b82f6;
-  font-size: 20px;
+  font-size: 16px; /* Reduced from 20px */
 }
 
 .metric-card.positive .metric-icon {
@@ -114,14 +114,14 @@
 }
 
 .metric-value {
-  font-size: 24px;
+  font-size: 18px; /* Reduced from 24px */
   font-weight: 700;
   color: #f0f6fc;
   margin-bottom: 4px;
 }
 
 .metric-label {
-  font-size: 14px;
+  font-size: 12px; /* Reduced from 14px */
   color: #8b949e;
   font-weight: 500;
 }
