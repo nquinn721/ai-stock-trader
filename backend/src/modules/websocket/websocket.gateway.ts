@@ -1,4 +1,4 @@
-import { Inject, Injectable, forwardRef } from '@nestjs/common';
+import { Inject, Injectable, Optional, forwardRef } from '@nestjs/common';
 import {
   ConnectedSocket,
   MessageBody,
@@ -99,6 +99,7 @@ export class StockWebSocketGateway
     @Inject(forwardRef(() => OrderManagementService))
     private orderManagementService: OrderManagementService,
     private healthService: WebSocketHealthService,
+    @Optional()
     @Inject(forwardRef(() => PredictiveAnalyticsService))
     private predictiveAnalyticsService: PredictiveAnalyticsService,
   ) {
@@ -1542,7 +1543,7 @@ export class StockWebSocketGateway
       await client.join(`predictions:${data.symbol}`);
 
       // Start streaming predictions if not already started
-      if (!this.predictionStreams.has(data.symbol)) {
+      if (!this.predictionStreams.has(data.symbol) && this.predictiveAnalyticsService) {
         const stream = this.predictiveAnalyticsService
           .streamPredictions(data.symbol)
           .subscribe({
@@ -1568,18 +1569,20 @@ export class StockWebSocketGateway
       }
 
       // Send initial prediction data
-      const initialPrediction =
-        await this.predictiveAnalyticsService.getRealTimePredictions(
-          data.symbol,
-        );
+      if (this.predictiveAnalyticsService) {
+        const initialPrediction =
+          await this.predictiveAnalyticsService.getRealTimePredictions(
+            data.symbol,
+          );
 
-      client.emit('prediction-update', {
-        type: 'prediction-update',
-        symbol: data.symbol,
-        timestamp: new Date(),
-        data: initialPrediction,
-        changeDetected: [],
-      } as PredictionUpdate);
+        client.emit('prediction-update', {
+          type: 'prediction-update',
+          symbol: data.symbol,
+          timestamp: new Date(),
+          data: initialPrediction,
+          changeDetected: [],
+        } as PredictionUpdate);
+      }
 
       client.emit('subscription-confirmed', {
         type: 'predictions',
@@ -1662,16 +1665,23 @@ export class StockWebSocketGateway
     @MessageBody() data: { symbol: string },
   ) {
     try {
-      const prediction =
-        await this.predictiveAnalyticsService.getRealTimePredictions(
-          data.symbol,
-        );
+      if (this.predictiveAnalyticsService) {
+        const prediction =
+          await this.predictiveAnalyticsService.getRealTimePredictions(
+            data.symbol,
+          );
 
-      client.emit('prediction-data', {
-        symbol: data.symbol,
-        data: prediction,
-        timestamp: new Date(),
-      });
+        client.emit('prediction-data', {
+          symbol: data.symbol,
+          data: prediction,
+          timestamp: new Date(),
+        });
+      } else {
+        client.emit('prediction-error', {
+          symbol: data.symbol,
+          error: 'Predictive analytics service not available',
+        });
+      }
     } catch (error) {
       console.error(`Error getting prediction for ${data.symbol}:`, error);
       client.emit('prediction-error', {

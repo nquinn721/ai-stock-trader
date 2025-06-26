@@ -1,9 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { TradingStrategy } from './entities/trading-strategy.entity';
-import { StrategyTemplate } from './entities/strategy-template.entity';
-import { BacktestResult } from './entities/backtest-result.entity';
+import { BacktestResult } from '../entities/backtest-result.entity';
+import { StrategyTemplate } from '../entities/strategy-template.entity';
+import { TradingStrategy } from '../entities/trading-strategy.entity';
 
 export interface StrategyConfig {
   name: string;
@@ -50,7 +50,10 @@ export class StrategyBuilderService {
     private readonly backtestRepository: Repository<BacktestResult>,
   ) {}
 
-  async createStrategy(userId: string, strategyConfig: StrategyConfig): Promise<TradingStrategy> {
+  async createStrategy(
+    userId: string,
+    strategyConfig: StrategyConfig,
+  ): Promise<TradingStrategy> {
     try {
       const strategy = this.strategyRepository.create({
         userId,
@@ -63,18 +66,22 @@ export class StrategyBuilderService {
         status: 'draft',
         version: 1,
         createdAt: new Date(),
-        updatedAt: new Date()
+        updatedAt: new Date(),
       });
 
       // Validate strategy before saving
       const validation = await this.validateStrategy(strategy);
       if (!validation.isValid) {
-        throw new Error(`Strategy validation failed: ${validation.errors.join(', ')}`);
+        throw new Error(
+          `Strategy validation failed: ${validation.errors.join(', ')}`,
+        );
       }
 
       const savedStrategy = await this.strategyRepository.save(strategy);
-      this.logger.log(`Strategy created: ${savedStrategy.id} - ${savedStrategy.name}`);
-      
+      this.logger.log(
+        `Strategy created: ${savedStrategy.id} - ${savedStrategy.name}`,
+      );
+
       return savedStrategy;
     } catch (error) {
       this.logger.error(`Error creating strategy: ${error.message}`);
@@ -103,7 +110,9 @@ export class StrategyBuilderService {
 
     // Validate exit conditions
     if (!this.hasValidExitConditions(strategy)) {
-      warnings.push('Strategy should have exit conditions for better risk management');
+      warnings.push(
+        'Strategy should have exit conditions for better risk management',
+      );
     }
 
     // Validate risk management
@@ -112,39 +121,47 @@ export class StrategyBuilderService {
     }
 
     // Validate component connections
-    const connectionValidation = this.validateComponentConnections(strategy.components);
+    const connectionValidation = this.validateComponentConnections(
+      strategy.components,
+    );
     if (!connectionValidation.isValid) {
       errors.push(...connectionValidation.errors);
     }
 
     // Validate parameters
-    const parameterValidation = this.validateComponentParameters(strategy.components);
+    const parameterValidation = this.validateComponentParameters(
+      strategy.components,
+    );
     if (!parameterValidation.isValid) {
       errors.push(...parameterValidation.errors);
     }
 
-    return { 
-      isValid: errors.length === 0, 
+    return {
+      isValid: errors.length === 0,
       errors,
-      warnings: warnings.length > 0 ? warnings : undefined
+      warnings: warnings.length > 0 ? warnings : undefined,
     };
   }
 
   private hasValidEntryConditions(strategy: TradingStrategy): boolean {
     if (!strategy.components) return false;
-    
-    return strategy.components.some(component => 
-      component.type === 'condition' && 
-      (component.category === 'entry' || component.name.toLowerCase().includes('entry'))
+
+    return strategy.components.some(
+      (component) =>
+        component.type === 'condition' &&
+        (component.category === 'entry' ||
+          component.name.toLowerCase().includes('entry')),
     );
   }
 
   private hasValidExitConditions(strategy: TradingStrategy): boolean {
     if (!strategy.components) return false;
-    
-    return strategy.components.some(component => 
-      component.type === 'condition' && 
-      (component.category === 'exit' || component.name.toLowerCase().includes('exit'))
+
+    return strategy.components.some(
+      (component) =>
+        component.type === 'condition' &&
+        (component.category === 'exit' ||
+          component.name.toLowerCase().includes('exit')),
     );
   }
 
@@ -154,23 +171,33 @@ export class StrategyBuilderService {
     }
 
     // Check for essential risk rules
-    const hasPositionSizing = strategy.riskRules.some(rule => rule.type === 'position_size');
-    const hasStopLoss = strategy.riskRules.some(rule => rule.type === 'stop_loss');
-    
+    const hasPositionSizing = strategy.riskRules.some(
+      (rule) => rule.type === 'position_size',
+    );
+    const hasStopLoss = strategy.riskRules.some(
+      (rule) => rule.type === 'stop_loss',
+    );
+
     return hasPositionSizing || hasStopLoss;
   }
 
-  private validateComponentConnections(components: StrategyComponent[]): ValidationResult {
+  private validateComponentConnections(
+    components: StrategyComponent[],
+  ): ValidationResult {
     const errors: string[] = [];
-    
+
     if (!components) return { isValid: true, errors: [] };
 
     for (const component of components) {
       if (component.connections) {
         for (const connectionId of component.connections) {
-          const connectedComponent = components.find(c => c.id === connectionId);
+          const connectedComponent = components.find(
+            (c) => c.id === connectionId,
+          );
           if (!connectedComponent) {
-            errors.push(`Component ${component.id} references non-existent connection ${connectionId}`);
+            errors.push(
+              `Component ${component.id} references non-existent connection ${connectionId}`,
+            );
           }
         }
       }
@@ -179,9 +206,11 @@ export class StrategyBuilderService {
     return { isValid: errors.length === 0, errors };
   }
 
-  private validateComponentParameters(components: StrategyComponent[]): ValidationResult {
+  private validateComponentParameters(
+    components: StrategyComponent[],
+  ): ValidationResult {
     const errors: string[] = [];
-    
+
     if (!components) return { isValid: true, errors: [] };
 
     for (const component of components) {
@@ -210,37 +239,50 @@ export class StrategyBuilderService {
   private validateIndicatorParameters(component: StrategyComponent): boolean {
     switch (component.name.toLowerCase()) {
       case 'rsi':
-        return component.parameters.period && 
-               component.parameters.period > 0 && 
-               component.parameters.period <= 100;
+        return (
+          component.parameters.period &&
+          component.parameters.period > 0 &&
+          component.parameters.period <= 100
+        );
       case 'macd':
-        return component.parameters.fastPeriod && 
-               component.parameters.slowPeriod && 
-               component.parameters.signalPeriod;
+        return (
+          component.parameters.fastPeriod &&
+          component.parameters.slowPeriod &&
+          component.parameters.signalPeriod
+        );
       case 'bollinger bands':
-        return component.parameters.period && 
-               component.parameters.standardDeviations;
+        return (
+          component.parameters.period && component.parameters.standardDeviations
+        );
       default:
         return true; // Allow unknown indicators with any parameters
     }
   }
 
   private validateConditionParameters(component: StrategyComponent): boolean {
-    return component.parameters.operator && 
-           component.parameters.value !== undefined;
+    return (
+      component.parameters.operator && component.parameters.value !== undefined
+    );
   }
 
   private validateActionParameters(component: StrategyComponent): boolean {
-    if (component.name.toLowerCase().includes('buy') || 
-        component.name.toLowerCase().includes('sell')) {
+    if (
+      component.name.toLowerCase().includes('buy') ||
+      component.name.toLowerCase().includes('sell')
+    ) {
       return component.parameters.quantity || component.parameters.percentage;
     }
     return true;
   }
 
-  async updateStrategy(strategyId: string, updates: Partial<StrategyConfig>): Promise<TradingStrategy> {
+  async updateStrategy(
+    strategyId: string,
+    updates: Partial<StrategyConfig>,
+  ): Promise<TradingStrategy> {
     try {
-      const strategy = await this.strategyRepository.findOne({ where: { id: strategyId } });
+      const strategy = await this.strategyRepository.findOne({
+        where: { id: strategyId },
+      });
       if (!strategy) {
         throw new Error('Strategy not found');
       }
@@ -252,22 +294,28 @@ export class StrategyBuilderService {
       if (updates.riskRules) strategy.riskRules = updates.riskRules;
       if (updates.symbols) strategy.symbols = updates.symbols;
       if (updates.timeframe) strategy.timeframe = updates.timeframe;
-      
+
       strategy.version += 1;
       strategy.updatedAt = new Date();
 
       // Validate updated strategy
       const validation = await this.validateStrategy(strategy);
       if (!validation.isValid) {
-        throw new Error(`Strategy validation failed: ${validation.errors.join(', ')}`);
+        throw new Error(
+          `Strategy validation failed: ${validation.errors.join(', ')}`,
+        );
       }
 
       const updatedStrategy = await this.strategyRepository.save(strategy);
-      this.logger.log(`Strategy updated: ${strategyId} - version ${updatedStrategy.version}`);
-      
+      this.logger.log(
+        `Strategy updated: ${strategyId} - version ${updatedStrategy.version}`,
+      );
+
       return updatedStrategy;
     } catch (error) {
-      this.logger.error(`Error updating strategy ${strategyId}: ${error.message}`);
+      this.logger.error(
+        `Error updating strategy ${strategyId}: ${error.message}`,
+      );
       throw error;
     }
   }
@@ -280,13 +328,17 @@ export class StrategyBuilderService {
       }
       this.logger.log(`Strategy deleted: ${strategyId}`);
     } catch (error) {
-      this.logger.error(`Error deleting strategy ${strategyId}: ${error.message}`);
+      this.logger.error(
+        `Error deleting strategy ${strategyId}: ${error.message}`,
+      );
       throw error;
     }
   }
 
   async getStrategy(strategyId: string): Promise<TradingStrategy> {
-    const strategy = await this.strategyRepository.findOne({ where: { id: strategyId } });
+    const strategy = await this.strategyRepository.findOne({
+      where: { id: strategyId },
+    });
     if (!strategy) {
       throw new Error('Strategy not found');
     }
@@ -294,42 +346,54 @@ export class StrategyBuilderService {
   }
 
   async getUserStrategies(userId: string): Promise<TradingStrategy[]> {
-    return await this.strategyRepository.find({ 
+    return await this.strategyRepository.find({
       where: { userId },
-      order: { updatedAt: 'DESC' }
+      order: { updatedAt: 'DESC' },
     });
   }
 
-  async duplicateStrategy(strategyId: string, userId: string, newName?: string): Promise<TradingStrategy> {
+  async duplicateStrategy(
+    strategyId: string,
+    userId: string,
+    newName?: string,
+  ): Promise<TradingStrategy> {
     try {
       const originalStrategy = await this.getStrategy(strategyId);
-      
+
       const duplicatedStrategy = {
         name: newName || `${originalStrategy.name} (Copy)`,
         description: originalStrategy.description,
         components: JSON.parse(JSON.stringify(originalStrategy.components)), // Deep copy
         riskRules: JSON.parse(JSON.stringify(originalStrategy.riskRules)), // Deep copy
         symbols: originalStrategy.symbols,
-        timeframe: originalStrategy.timeframe
+        timeframe: originalStrategy.timeframe,
       };
 
       return await this.createStrategy(userId, duplicatedStrategy);
     } catch (error) {
-      this.logger.error(`Error duplicating strategy ${strategyId}: ${error.message}`);
+      this.logger.error(
+        `Error duplicating strategy ${strategyId}: ${error.message}`,
+      );
       throw error;
     }
   }
 
   async getStrategyTemplates(): Promise<StrategyTemplate[]> {
-    return await this.templateRepository.find({ 
+    return await this.templateRepository.find({
       where: { isActive: true },
-      order: { popularity: 'DESC' }
+      order: { popularity: 'DESC' },
     });
   }
 
-  async createStrategyFromTemplate(templateId: string, userId: string, customizations?: Partial<StrategyConfig>): Promise<TradingStrategy> {
+  async createStrategyFromTemplate(
+    templateId: string,
+    userId: string,
+    customizations?: Partial<StrategyConfig>,
+  ): Promise<TradingStrategy> {
     try {
-      const template = await this.templateRepository.findOne({ where: { id: templateId } });
+      const template = await this.templateRepository.findOne({
+        where: { id: templateId },
+      });
       if (!template) {
         throw new Error('Template not found');
       }
@@ -340,12 +404,14 @@ export class StrategyBuilderService {
         components: customizations?.components || template.components,
         riskRules: customizations?.riskRules || template.defaultRiskRules,
         symbols: customizations?.symbols || template.defaultSymbols,
-        timeframe: customizations?.timeframe || template.defaultTimeframe
+        timeframe: customizations?.timeframe || template.defaultTimeframe,
       };
 
       return await this.createStrategy(userId, strategyConfig);
     } catch (error) {
-      this.logger.error(`Error creating strategy from template ${templateId}: ${error.message}`);
+      this.logger.error(
+        `Error creating strategy from template ${templateId}: ${error.message}`,
+      );
       throw error;
     }
   }
@@ -353,31 +419,38 @@ export class StrategyBuilderService {
   async publishStrategy(strategyId: string): Promise<void> {
     try {
       const strategy = await this.getStrategy(strategyId);
-      
+
       // Validate strategy before publishing
       const validation = await this.validateStrategy(strategy);
       if (!validation.isValid) {
-        throw new Error(`Cannot publish invalid strategy: ${validation.errors.join(', ')}`);
+        throw new Error(
+          `Cannot publish invalid strategy: ${validation.errors.join(', ')}`,
+        );
       }
 
-      await this.strategyRepository.update(strategyId, { 
+      await this.strategyRepository.update(strategyId, {
         status: 'published',
-        publishedAt: new Date()
+        publishedAt: new Date(),
       });
 
       this.logger.log(`Strategy published: ${strategyId}`);
     } catch (error) {
-      this.logger.error(`Error publishing strategy ${strategyId}: ${error.message}`);
+      this.logger.error(
+        `Error publishing strategy ${strategyId}: ${error.message}`,
+      );
       throw error;
     }
   }
 
-  async getPublishedStrategies(limit: number = 20, offset: number = 0): Promise<TradingStrategy[]> {
+  async getPublishedStrategies(
+    limit: number = 20,
+    offset: number = 0,
+  ): Promise<TradingStrategy[]> {
     return await this.strategyRepository.find({
       where: { status: 'published' },
       order: { publishedAt: 'DESC' },
       take: limit,
-      skip: offset
+      skip: offset,
     });
   }
 }

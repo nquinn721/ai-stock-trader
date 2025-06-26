@@ -26,6 +26,7 @@ import {
 import { Portfolio } from "../types";
 import TradingAssistantChat from "./ai/TradingAssistantChat";
 import AutoTradingDashboard from "./automated-trading/AutoTradingDashboard";
+import AutonomousAgentDashboard from "./autonomous-trading/AutonomousAgentDashboard";
 import "./Dashboard.css";
 import EmptyState from "./EmptyState";
 import EnhancedPortfolioAnalyticsDashboard from "./EnhancedPortfolioAnalyticsDashboard";
@@ -66,6 +67,7 @@ const Dashboard: React.FC = observer(() => {
     useState<Portfolio | null>(null);
   const [currentTime, setCurrentTime] = useState(new Date());
   const [showAutoTrading, setShowAutoTrading] = useState(false);
+  const [showAutonomousAgents, setShowAutonomousAgents] = useState(false);
   const [showPortfolioAnalytics, setShowPortfolioAnalytics] = useState(false);
   const [showAIAssistant, setShowAIAssistant] = useState(false);
   const [showMarketScanner, setShowMarketScanner] = useState(false);
@@ -271,6 +273,25 @@ const Dashboard: React.FC = observer(() => {
     );
   }
 
+  if (showAutonomousAgents) {
+    return (
+      <div className="dashboard">
+        <header className="dashboard-header">
+          <div className="header-left">
+            <h1>Autonomous Trading Agents</h1>
+            <button
+              className="back-button"
+              onClick={() => setShowAutonomousAgents(false)}
+            >
+              ← Back to Dashboard
+            </button>
+          </div>
+        </header>
+        <AutonomousAgentDashboard />
+      </div>
+    );
+  }
+
   if (showPortfolioAnalytics) {
     return (
       <div className="dashboard">
@@ -351,6 +372,14 @@ const Dashboard: React.FC = observer(() => {
           >
             <FontAwesomeIcon icon={faRobot} />
             Auto Trading
+          </button>
+          <button
+            className="autonomous-agents-btn"
+            onClick={() => setShowAutonomousAgents(true)}
+            title="Autonomous Trading Agents"
+          >
+            <FontAwesomeIcon icon={faRobot} />
+            Agents
           </button>
           <button
             className="analytics-btn"

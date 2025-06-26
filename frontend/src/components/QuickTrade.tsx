@@ -499,7 +499,6 @@ const QuickTrade: React.FC = observer(() => {
           />
         </div>
       )}
-
       {/* Confirmation Dialog */}
       {showConfirmation && currentStock && (
         <div className="confirmation-overlay">

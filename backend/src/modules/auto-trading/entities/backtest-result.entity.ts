@@ -1,4 +1,10 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 
 export interface TradeDetail {
   symbol: string;
@@ -104,10 +110,10 @@ export class BacktestResult {
   @Column('decimal', { precision: 10, scale: 6, default: 0.0005 })
   slippage: number;
 
-  @Column({ 
+  @Column({
     type: 'enum',
     enum: ['completed', 'running', 'failed', 'cancelled'],
-    default: 'completed'
+    default: 'completed',
   })
   status: string;
 

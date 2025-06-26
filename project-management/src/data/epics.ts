@@ -56,4 +56,22 @@ export const epics: Epic[] = [
     owner: "AI Assistant",
     createdDate: "2025-06-23",
   },
+  {
+    id: "E7",
+    title: "Enterprise Intelligence & Advanced Trading Systems",
+    description:
+      "Transform the platform into an institutional-grade system with enterprise data infrastructure, behavioral finance AI, autonomous market making, and macroeconomic intelligence for professional trading operations.",
+    status: "TODO",
+    owner: "Enterprise Team",
+    createdDate: "2025-06-25",
+  },
+  {
+    id: "E8",
+    title: "Quantum Computing & Next-Generation Technologies",
+    description:
+      "Implement cutting-edge quantum computing capabilities for portfolio optimization and risk management, providing exponential improvements over classical computing methods for complex financial problems.",
+    status: "TODO",
+    owner: "Quantum Research Team",
+    createdDate: "2025-06-25",
+  },
 ];

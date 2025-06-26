@@ -1,4 +1,10 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 
 export interface StrategyComponent {
   id: string;
@@ -42,10 +48,10 @@ export class TradingStrategy {
   @Column({ default: '1h' })
   timeframe: string;
 
-  @Column({ 
-    type: 'enum', 
+  @Column({
+    type: 'enum',
     enum: ['draft', 'active', 'paused', 'published', 'archived'],
-    default: 'draft'
+    default: 'draft',
   })
   status: string;
 

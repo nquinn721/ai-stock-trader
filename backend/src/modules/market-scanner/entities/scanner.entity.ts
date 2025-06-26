@@ -98,7 +98,7 @@ export class MarketAlert {
   @Column({ type: 'boolean', default: true })
   isActive: boolean;
 
-  @Column({ type: 'simple-array', default: ['push'] })
+  @Column({ type: 'json' })
   notificationTypes: string[];
 
   @Column({ type: 'timestamp', nullable: true })

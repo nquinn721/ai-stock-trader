@@ -1,14 +1,14 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { StockService } from '../stock/stock.service';
+import { StockService } from '../../stock/stock.service';
 import {
   BacktestResult,
   PerformanceMetrics,
   RiskMetrics,
   TradeDetail,
-} from './entities/backtest-result.entity';
-import { TradingStrategy } from './entities/trading-strategy.entity';
+} from '../entities/backtest-result.entity';
+import { TradingStrategy } from '../entities/trading-strategy.entity';
 
 export interface BacktestParams {
   startDate: Date;

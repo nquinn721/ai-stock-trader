@@ -1,4 +1,5 @@
 import { Module, forwardRef } from '@nestjs/common';
+import { MLModule } from '../ml/ml.module';
 import { OrderManagementModule } from '../order-management/order-management.module';
 import { PaperTradingModule } from '../paper-trading/paper-trading.module';
 import { StockModule } from '../stock/stock.module';
@@ -11,6 +12,7 @@ import { StockWebSocketGateway } from './websocket.gateway';
     forwardRef(() => StockModule),
     forwardRef(() => PaperTradingModule),
     forwardRef(() => OrderManagementModule),
+    forwardRef(() => MLModule),
   ],
   controllers: [WebSocketController],
   providers: [StockWebSocketGateway, WebSocketHealthService],

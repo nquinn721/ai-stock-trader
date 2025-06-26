@@ -1,4 +1,10 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 
 export interface StrategyComponent {
   id: string;
@@ -33,7 +39,7 @@ export class StrategyTemplate {
   @Column({
     type: 'enum',
     enum: ['beginner', 'intermediate', 'advanced'],
-    default: 'beginner'
+    default: 'beginner',
   })
   complexity: string;
 
