@@ -241,6 +241,38 @@
         "Risk Management",
         "Paper Trading Integration"
       ]
+    },
+    "S41": {
+      "id": "S41",
+      "title": "Multi-Asset Intelligence & Alternative Data",
+      "status": "DONE",
+      "priority": "Medium",
+      "storyPoints": 21,
+      "assignee": "Full Stack Team",
+      "sprint": "Sprint 13",
+      "epic": "E28 - Automated Trading & AI Enhancement",
+      "completedDate": "2025-06-27",
+      "acceptanceCriteria": {
+        "total": 6,
+        "completed": 6,
+        "completionRate": 100
+      },
+      "components": [
+        "MultiAssetDashboard",
+        "CryptoDashboard",
+        "ForexDashboard",
+        "CommoditiesDashboard",
+        "CrossAssetAnalytics",
+        "AlternativeDataFeed",
+        "AssetClassManager",
+        "CryptoTradingService",
+        "ForexTradingService",
+        "CommoditiesTradingService",
+        "AlternativeDataService",
+        "Multi-Asset Controllers",
+        "Backend Infrastructure",
+        "Frontend Integration"
+      ]
     }
   },
   "phases": {

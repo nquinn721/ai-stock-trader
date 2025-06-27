@@ -63,6 +63,7 @@ Stock-Trading-App-Nest/
 ### Alternative Considered
 
 **Separate Package Management**: Managing each package independently was considered but rejected because:
+
 - Leads to dependency duplication
 - Complicates shared tooling configuration
 - Makes workspace-level scripts impossible
@@ -101,6 +102,7 @@ Stock-Trading-App-Nest/
 ### Guidelines for AI Assistants
 
 When performing "cleanup" operations:
+
 - **Preserve** the root `node_modules/` directory
 - **Organize** loose files into appropriate subdirectories
 - **Maintain** the workspace structure integrity

@@ -1,4 +1,4 @@
-@import '../shared-styles.css';
+@import "../shared-styles.css";
 
 .portfolio-container {
   min-height: 100vh;
@@ -24,7 +24,9 @@
   backdrop-filter: blur(20px);
   border: 2px solid;
   border-image: linear-gradient(135deg, #6366f1, #8b5cf6) 1;
-  box-shadow: 0 16px 60px rgba(0, 0, 0, 0.4), 0 8px 32px rgba(99, 102, 241, 0.2);
+  box-shadow:
+    0 16px 60px rgba(0, 0, 0, 0.4),
+    0 8px 32px rgba(99, 102, 241, 0.2);
 }
 
 .header-content {

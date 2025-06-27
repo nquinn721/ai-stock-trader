@@ -1,5 +1,5 @@
 /* Simple Dashboard Styling */
-@import '../shared-styles.css';
+@import "../shared-styles.css";
 
 .dashboard-page {
   min-height: 100vh;

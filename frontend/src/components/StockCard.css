@@ -1,5 +1,5 @@
 /* Modern Stock Card Component */
-@import '../shared-styles.css';
+@import "../shared-styles.css";
 
 .stock-card {
   background: var(--trading-bg-gradient-card);

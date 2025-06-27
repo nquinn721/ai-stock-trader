@@ -1,5 +1,5 @@
 /* Import shared trading app styles */
-@import '../shared-styles.css';
+@import "../shared-styles.css";
 
 /* Modern Autonomous Trading Page - Using Shared Theme */
 .autonomous-trading-page {
@@ -225,15 +225,24 @@
   color: rgba(255, 255, 255, 0.9) !important;
 }
 
-.autonomous-trading-page .MuiTextField-root .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline {
+.autonomous-trading-page
+  .MuiTextField-root
+  .MuiOutlinedInput-root
+  .MuiOutlinedInput-notchedOutline {
   border-color: rgba(75, 85, 99, 0.5) !important;
 }
 
-.autonomous-trading-page .MuiTextField-root .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline {
+.autonomous-trading-page
+  .MuiTextField-root
+  .MuiOutlinedInput-root:hover
+  .MuiOutlinedInput-notchedOutline {
   border-color: rgba(99, 102, 108, 0.8) !important;
 }
 
-.autonomous-trading-page .MuiTextField-root .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+.autonomous-trading-page
+  .MuiTextField-root
+  .MuiOutlinedInput-root.Mui-focused
+  .MuiOutlinedInput-notchedOutline {
   border-color: #3b82f6 !important;
   border-width: 2px !important;
 }

@@ -289,7 +289,9 @@ export class StockWebSocketGateway
 
   async broadcastTradingSignal(signal: any) {
     if (!this.server) {
-      console.warn('WebSocket server not available, skipping trading signal broadcast');
+      console.warn(
+        'WebSocket server not available, skipping trading signal broadcast',
+      );
       return;
     }
     this.server.emit('trading_signal', signal);
@@ -297,7 +299,9 @@ export class StockWebSocketGateway
 
   async broadcastNewsUpdate(news: any) {
     if (!this.server) {
-      console.warn('WebSocket server not available, skipping news update broadcast');
+      console.warn(
+        'WebSocket server not available, skipping news update broadcast',
+      );
       return;
     }
     this.server.emit('news_update', news);
@@ -405,7 +409,9 @@ export class StockWebSocketGateway
         `Error sending portfolio update for ${portfolioId}:`,
         error,
       );
-      const target = client || (this.server ? this.server.to(`portfolio_${portfolioId}`) : null);
+      const target =
+        client ||
+        (this.server ? this.server.to(`portfolio_${portfolioId}`) : null);
       if (target) {
         target.emit('portfolio_error', {
           portfolioId,
@@ -950,7 +956,9 @@ export class StockWebSocketGateway
   async sendBulkNotificationsToUser(userId: string, notifications: any[]) {
     try {
       if (!this.server) {
-        console.warn('WebSocket server not available, skipping bulk notifications');
+        console.warn(
+          'WebSocket server not available, skipping bulk notifications',
+        );
         return;
       }
       this.server.to(`notifications_${userId}`).emit('notifications_bulk', {
@@ -980,7 +988,9 @@ export class StockWebSocketGateway
   ) {
     try {
       if (!this.server) {
-        console.warn('WebSocket server not available, skipping notification status update');
+        console.warn(
+          'WebSocket server not available, skipping notification status update',
+        );
         return;
       }
       this.server.to(`notifications_${userId}`).emit('notification_status', {
@@ -1002,7 +1012,9 @@ export class StockWebSocketGateway
   async sendUnreadCountUpdate(userId: string, count: number) {
     try {
       if (!this.server) {
-        console.warn('WebSocket server not available, skipping unread count update');
+        console.warn(
+          'WebSocket server not available, skipping unread count update',
+        );
         return;
       }
       this.server.to(`notifications_${userId}`).emit('unread_count', {
@@ -1543,7 +1555,9 @@ export class StockWebSocketGateway
 
       // Ensure target has emit method
       if (!target || typeof target.emit !== 'function') {
-        console.warn('Target does not have emit method, falling back to server emit');
+        console.warn(
+          'Target does not have emit method, falling back to server emit',
+        );
         if (this.server && typeof this.server.emit === 'function') {
           this.server.emit(event, data);
         }
@@ -1696,7 +1710,9 @@ export class StockWebSocketGateway
       await client.leave(`predictions:${data.symbol}`);
 
       // Check if any clients are still subscribed to this symbol
-      const roomSize = this.server?.sockets?.adapter?.rooms?.get(`predictions:${data.symbol}`)?.size || 0;
+      const roomSize =
+        this.server?.sockets?.adapter?.rooms?.get(`predictions:${data.symbol}`)
+          ?.size || 0;
 
       // If no clients are subscribed, stop the stream
       if (roomSize === 0 && this.predictionStreams.has(data.symbol)) {
@@ -1770,7 +1786,9 @@ export class StockWebSocketGateway
   private emitPredictionUpdate(symbol: string, update: PredictionUpdate) {
     try {
       if (!this.server) {
-        console.warn('WebSocket server not available, skipping prediction update');
+        console.warn(
+          'WebSocket server not available, skipping prediction update',
+        );
         return;
       }
       this.server.to(`predictions:${symbol}`).emit('prediction-update', update);
@@ -1792,7 +1810,9 @@ export class StockWebSocketGateway
 
       // Check if we need to stop any streams
       const symbol = subscription.symbol;
-      const roomSize = this.server?.sockets?.adapter?.rooms?.get(`predictions:${symbol}`)?.size || 0;
+      const roomSize =
+        this.server?.sockets?.adapter?.rooms?.get(`predictions:${symbol}`)
+          ?.size || 0;
 
       if (roomSize === 0 && this.predictionStreams.has(symbol)) {
         const stream = this.predictionStreams.get(symbol);

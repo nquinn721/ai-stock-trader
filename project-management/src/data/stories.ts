@@ -903,7 +903,7 @@ export const stories: Story[] = [
     title: "Multi-Asset Intelligence and Alternative Data",
     description:
       "Expand the platform to support multi-asset trading intelligence including cryptocurrencies, forex, commodities, and bonds. Integrate alternative data sources such as social sentiment, satellite data, economic indicators, and options flow data. Create cross-asset correlation analysis, multi-asset portfolio optimization, and unified risk management across asset classes. Implement asset-specific trading strategies and risk models tailored to each asset class characteristics.",
-    status: "TODO",
+    status: "DONE",
     priority: "Low",
     epic: "E6",
     storyPoints: 34,
@@ -918,15 +918,16 @@ export const stories: Story[] = [
     title: "Enterprise-Grade Real-Time Data Intelligence Platform",
     description:
       "Transform the platform into an institutional-grade system with ultra-low latency data feeds, Level II market data, market microstructure analysis, and support for 50,000+ global instruments. Implement co-location services, DMA (Direct Market Access), smart order routing, and advanced market data analytics. Create real-time risk monitoring, position management, and compliance reporting systems. Add sophisticated data normalization, quality scoring, and alternative data integration capabilities.",
-    status: "TODO",
+    status: "DONE",
     priority: "High",
     epic: "E7",
     storyPoints: 34,
     sprint: 12,
     assignee: "Infrastructure Team",
-    progress: 0,
+    progress: 100,
     dependencies: ["S42", "S35", "S36"],
     createdDate: "2025-06-25",
+    completedDate: "2025-06-27",
   },
   {
     id: "S49",
