@@ -1,18 +1,12 @@
+@import '../shared-styles.css';
+
 .portfolio-container {
   min-height: 100vh;
-  background: linear-gradient(
-    135deg,
-    #0d1117 0%,
-    #161b22 25%,
-    #21262d 50%,
-    #30363d 75%,
-    #1c2128 100%
-  );
+  background: var(--trading-bg-gradient-dark);
   background-attachment: fixed;
-  padding: 24px;
-  font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI",
-    sans-serif;
-  color: #f0f6fc;
+  padding: var(--trading-spacing-page);
+  font-family: var(--trading-font-sans);
+  color: var(--trading-text-primary);
 }
 
 .portfolio-header {
@@ -40,11 +34,11 @@
 }
 
 .portfolio-header h1 {
-  color: #f0f6fc;
+  color: var(--trading-text-primary);
   margin: 0;
   font-size: 32px;
   font-weight: 900;
-  background: linear-gradient(135deg, #6366f1, #8b5cf6, #d946ef);
+  background: var(--trading-text-gradient-primary);
   background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;

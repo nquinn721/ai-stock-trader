@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import axios from 'axios';
 import { WordTokenizer } from 'natural';
 import * as Sentiment from 'sentiment';
+import { buildApiUrl, getHttpConfig } from '../../config';
 
 @Injectable()
 export class NewsService {
@@ -109,9 +110,18 @@ export class NewsService {
       return [];
     }
 
-    const alphaVantageUrl = `https://www.alphavantage.co/query?function=NEWS_SENTIMENT&tickers=${symbol}&limit=8&apikey=${apiKey}`;
+    const alphaVantageUrl = buildApiUrl('alphaVantage', 'newsSentiment', {
+      tickers: symbol,
+      limit: '8',
+      apikey: apiKey,
+    });
+
+    const httpConfig = getHttpConfig('alphaVantage');
+
     try {
-      const response = await axios.get(alphaVantageUrl, { timeout: 5000 });
+      const response = await axios.get(alphaVantageUrl, {
+        timeout: httpConfig.timeout,
+      });
 
       if (
         response.data &&
@@ -149,9 +159,19 @@ export class NewsService {
       return [];
     }
 
-    const finnhubUrl = `https://finnhub.io/api/v1/company-news?symbol=${symbol}&from=${this.getDateDaysAgo(7)}&to=${this.getDateDaysAgo(0)}&token=${apiKey}`;
+    const finnhubUrl = buildApiUrl('finnhub', 'companyNews', {
+      symbol: symbol,
+      from: this.getDateDaysAgo(7),
+      to: this.getDateDaysAgo(0),
+      token: apiKey,
+    });
+
+    const httpConfig = getHttpConfig('finnhub');
+
     try {
-      const response = await axios.get(finnhubUrl, { timeout: 5000 });
+      const response = await axios.get(finnhubUrl, {
+        timeout: httpConfig.timeout,
+      });
 
       if (
         response.data &&

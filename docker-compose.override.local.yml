@@ -1,0 +1,27 @@
+version: "3.8"
+
+# Override for local production testing
+# Use: docker-compose -f docker-compose.prod.yml -f docker-compose.override.local.yml up
+
+services:
+  backend-prod:
+    ports:
+      - "8100:8000" # Different port for local testing
+    environment:
+      - DATABASE_URL=mysql://trading_user:trading_pass@database-prod:3306/trading_app_local_prod
+
+  frontend-prod:
+    ports:
+      - "3100:80" # Different port for local testing
+    build:
+      args:
+        - REACT_APP_API_URL=http://localhost:8100
+
+  database-prod:
+    ports:
+      - "3307:3306" # Different port for local testing
+    environment:
+      - MYSQL_ROOT_PASSWORD=root_password
+      - MYSQL_DATABASE=trading_app_local_prod
+      - MYSQL_USER=trading_user
+      - MYSQL_PASSWORD=trading_pass

@@ -70,6 +70,57 @@ export interface DeploymentConfig {
   notificationsEnabled: boolean;
 }
 
+export interface FeatureImportance {
+  feature: string;
+  importance: number;
+  description: string;
+}
+
+export interface DecisionExplanation {
+  agentId: string;
+  symbol: string;
+  action: "buy" | "sell" | "hold";
+  confidence: number;
+  featureImportance: FeatureImportance[];
+  marketRegime: string;
+  riskFactors: Array<{
+    factor: string;
+    level: number;
+    impact: string;
+  }>;
+  reasoning: string;
+  alternativeActions: Array<{
+    action: string;
+    probability: number;
+    expectedReward: number;
+  }>;
+  timestamp: Date;
+}
+
+export interface ExplainableAIData {
+  agentId: string;
+  recentDecisions: DecisionExplanation[];
+  featureImportanceOverall: FeatureImportance[];
+  performanceBreakdown: {
+    byMarketRegime: Array<{
+      regime: string;
+      performance: number;
+      trades: number;
+    }>;
+    byAsset: Array<{
+      symbol: string;
+      performance: number;
+      trades: number;
+    }>;
+  };
+  modelMetrics: {
+    accuracy: number;
+    precision: number;
+    recall: number;
+    f1Score: number;
+  };
+}
+
 class RLTradingService {
   private readonly baseUrl = `${API_BASE_URL}/ml/reinforcement-learning`;
 
@@ -212,19 +263,35 @@ class RLTradingService {
     }
   }
 
-  // Performance Analytics
-  async getPerformanceAnalytics(
-    agentId: string,
-    timeframe: string = "24h"
-  ): Promise<{ success: boolean; data?: any; error?: string }> {
+  // Explainable AI
+  async getExplainableAIData(
+    agentId: string
+  ): Promise<{ success: boolean; data?: ExplainableAIData; error?: string }> {
     try {
-      const response = await axios.get(
-        `${this.baseUrl}/agents/${agentId}/performance?timeframe=${timeframe}`
+      const response = await axios.get<ExplainableAIData>(
+        `${this.baseUrl}/agents/${agentId}/explain`
       );
       return { success: true, data: response.data };
     } catch (error) {
-      console.error("Failed to fetch performance analytics:", error);
-      return { success: false, error: "Failed to fetch performance analytics" };
+      console.error("Failed to fetch explainable AI data:", error);
+      return { success: false, error: "Failed to fetch explainable AI data" };
+    }
+  }
+
+  async explainDecision(
+    agentId: string,
+    symbol: string,
+    marketData: any
+  ): Promise<{ success: boolean; data?: DecisionExplanation; error?: string }> {
+    try {
+      const response = await axios.post<DecisionExplanation>(
+        `${this.baseUrl}/agents/${agentId}/explain-decision`,
+        { symbol, marketData }
+      );
+      return { success: true, data: response.data };
+    } catch (error) {
+      console.error("Failed to explain decision:", error);
+      return { success: false, error: "Failed to explain decision" };
     }
   }
 

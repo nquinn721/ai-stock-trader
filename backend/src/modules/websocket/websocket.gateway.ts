@@ -288,28 +288,44 @@ export class StockWebSocketGateway
   }
 
   async broadcastTradingSignal(signal: any) {
+    if (!this.server) {
+      console.warn('WebSocket server not available, skipping trading signal broadcast');
+      return;
+    }
     this.server.emit('trading_signal', signal);
   }
 
   async broadcastNewsUpdate(news: any) {
+    if (!this.server) {
+      console.warn('WebSocket server not available, skipping news update broadcast');
+      return;
+    }
     this.server.emit('news_update', news);
   }
   /**
    * Broadcast all stock updates to connected clients with batching optimization
    * Called by StockService when prices are updated
+   * Only sends stocks that have valid price data (currentPrice > 0)
    */
   async broadcastAllStockUpdates() {
     try {
-      const stocks = await this.stockService.getAllStocks();
-      if (this.server && stocks.length > 0) {
+      const allStocks = await this.stockService.getAllStocks();
+      // Filter to only include stocks with valid price data
+      const readyStocks = allStocks.filter((stock) => stock.currentPrice > 0);
+
+      if (this.server && readyStocks.length > 0) {
         // Use batched message sending for better performance
-        this.addToBatch('stock_updates', stocks);
+        this.addToBatch('stock_updates', readyStocks);
         console.log(
-          `📊 Queued ${stocks.length} stock updates for batched broadcast`,
+          `📊 Queued ${readyStocks.length}/${allStocks.length} ready stock updates for batched broadcast`,
         );
 
         // Also queue portfolio updates since stock prices changed
         await this.broadcastPortfolioUpdates();
+      } else if (allStocks.length > 0) {
+        console.log(
+          `⏭️ No ready stocks to broadcast (${allStocks.length} total stocks, none with valid prices)`,
+        );
       }
     } catch (error) {
       console.error('Error broadcasting all stock updates:', error);
@@ -389,12 +405,14 @@ export class StockWebSocketGateway
         `Error sending portfolio update for ${portfolioId}:`,
         error,
       );
-      const target = client || this.server.to(`portfolio_${portfolioId}`);
-      target.emit('portfolio_error', {
-        portfolioId,
-        message: 'Failed to fetch portfolio data',
-        timestamp: new Date().toISOString(),
-      });
+      const target = client || (this.server ? this.server.to(`portfolio_${portfolioId}`) : null);
+      if (target) {
+        target.emit('portfolio_error', {
+          portfolioId,
+          message: 'Failed to fetch portfolio data',
+          timestamp: new Date().toISOString(),
+        });
+      }
     }
   }
   /**
@@ -808,7 +826,9 @@ export class StockWebSocketGateway
       client.emit('order_created', order);
 
       // Broadcast new order to all clients
-      this.server.emit('order_book_update', order);
+      if (this.server) {
+        this.server.emit('order_book_update', order);
+      }
 
       console.log(`Order created and broadcasted: ${order.id}`);
     } catch (error) {
@@ -836,10 +856,12 @@ export class StockWebSocketGateway
       client.emit('order_canceled', { orderId: data.orderId });
 
       // Broadcast order cancellation to all clients
-      this.server.emit('order_book_update', {
-        orderId: data.orderId,
-        status: 'canceled',
-      });
+      if (this.server) {
+        this.server.emit('order_book_update', {
+          orderId: data.orderId,
+          status: 'canceled',
+        });
+      }
 
       console.log(`Order canceled and broadcasted: ${data.orderId}`);
     } catch (error) {
@@ -905,6 +927,10 @@ export class StockWebSocketGateway
    */
   async sendNotificationToUser(userId: string, notification: any) {
     try {
+      if (!this.server) {
+        console.warn('WebSocket server not available, skipping notification');
+        return;
+      }
       this.server.to(`notifications_${userId}`).emit('notification', {
         type: 'new_notification',
         data: notification,
@@ -923,6 +949,10 @@ export class StockWebSocketGateway
    */
   async sendBulkNotificationsToUser(userId: string, notifications: any[]) {
     try {
+      if (!this.server) {
+        console.warn('WebSocket server not available, skipping bulk notifications');
+        return;
+      }
       this.server.to(`notifications_${userId}`).emit('notifications_bulk', {
         type: 'bulk_notifications',
         data: notifications,
@@ -949,6 +979,10 @@ export class StockWebSocketGateway
     status: string,
   ) {
     try {
+      if (!this.server) {
+        console.warn('WebSocket server not available, skipping notification status update');
+        return;
+      }
       this.server.to(`notifications_${userId}`).emit('notification_status', {
         type: 'status_update',
         data: {
@@ -967,6 +1001,10 @@ export class StockWebSocketGateway
    */
   async sendUnreadCountUpdate(userId: string, count: number) {
     try {
+      if (!this.server) {
+        console.warn('WebSocket server not available, skipping unread count update');
+        return;
+      }
       this.server.to(`notifications_${userId}`).emit('unread_count', {
         type: 'unread_count_update',
         data: { count },
@@ -982,6 +1020,10 @@ export class StockWebSocketGateway
    */
   async broadcastSystemAlert(alert: any) {
     try {
+      if (!this.server) {
+        console.warn('WebSocket server not available, skipping system alert');
+        return;
+      }
       this.server.emit('system_alert', {
         type: 'system_alert',
         data: alert,
@@ -1085,7 +1127,9 @@ export class StockWebSocketGateway
 
       if (portfolios && portfolios.length > 0) {
         // Send basic portfolio list to all clients
-        this.server.emit('portfolios_update', portfolios);
+        if (this.server) {
+          this.server.emit('portfolios_update', portfolios);
+        }
 
         // Send detailed performance data for each portfolio
         const portfolioPerformancePromises = portfolios.map(
@@ -1125,17 +1169,21 @@ export class StockWebSocketGateway
         );
       } else {
         // Send empty portfolios list
-        this.server.emit('portfolios_update', []);
+        if (this.server) {
+          this.server.emit('portfolios_update', []);
+        }
         console.log('📊 Broadcasted empty portfolios list to all clients');
       }
     } catch (error) {
       console.error('Error broadcasting all portfolios:', error);
 
       // Send error to all clients
-      this.server.emit('portfolios_error', {
-        message: 'Failed to fetch portfolios data',
-        timestamp: new Date().toISOString(),
-      });
+      if (this.server) {
+        this.server.emit('portfolios_error', {
+          message: 'Failed to fetch portfolios data',
+          timestamp: new Date().toISOString(),
+        });
+      }
     }
   }
 
@@ -1481,11 +1529,26 @@ export class StockWebSocketGateway
    */
   private emitOptimized(room: string | null, event: string, data: any) {
     try {
+      // Check if server is available
+      if (!this.server) {
+        console.warn('WebSocket server not available, skipping emit');
+        return;
+      }
+
       const serializedData = JSON.stringify(data);
       const dataSize = Buffer.byteLength(serializedData, 'utf8');
 
       // Determine target
       const target = room ? this.server.to(room) : this.server;
+
+      // Ensure target has emit method
+      if (!target || typeof target.emit !== 'function') {
+        console.warn('Target does not have emit method, falling back to server emit');
+        if (this.server && typeof this.server.emit === 'function') {
+          this.server.emit(event, data);
+        }
+        return;
+      }
 
       // Use binary message for large payloads if supported
       if (dataSize > this.COMPRESSION_THRESHOLD && this.compressionEnabled) {
@@ -1505,9 +1568,17 @@ export class StockWebSocketGateway
       }
     } catch (error) {
       console.error('Error in optimized emit:', error);
-      // Fallback to standard emit
-      const target = room ? this.server.to(room) : this.server;
-      target.emit(event, data);
+      // Fallback to standard emit if server is available
+      try {
+        if (this.server && typeof this.server.emit === 'function') {
+          const target = room ? this.server.to(room) : this.server;
+          if (target && typeof target.emit === 'function') {
+            target.emit(event, data);
+          }
+        }
+      } catch (fallbackError) {
+        console.error('Fallback emit also failed:', fallbackError);
+      }
     }
   }
 
@@ -1625,9 +1696,7 @@ export class StockWebSocketGateway
       await client.leave(`predictions:${data.symbol}`);
 
       // Check if any clients are still subscribed to this symbol
-      const roomSize =
-        this.server.sockets.adapter.rooms.get(`predictions:${data.symbol}`)
-          ?.size || 0;
+      const roomSize = this.server?.sockets?.adapter?.rooms?.get(`predictions:${data.symbol}`)?.size || 0;
 
       // If no clients are subscribed, stop the stream
       if (roomSize === 0 && this.predictionStreams.has(data.symbol)) {
@@ -1700,6 +1769,10 @@ export class StockWebSocketGateway
    */
   private emitPredictionUpdate(symbol: string, update: PredictionUpdate) {
     try {
+      if (!this.server) {
+        console.warn('WebSocket server not available, skipping prediction update');
+        return;
+      }
       this.server.to(`predictions:${symbol}`).emit('prediction-update', update);
       console.log(
         `🔮 Emitted prediction update for ${symbol} to subscribed clients`,
@@ -1719,9 +1792,7 @@ export class StockWebSocketGateway
 
       // Check if we need to stop any streams
       const symbol = subscription.symbol;
-      const roomSize =
-        this.server.sockets.adapter.rooms.get(`predictions:${symbol}`)?.size ||
-        0;
+      const roomSize = this.server?.sockets?.adapter?.rooms?.get(`predictions:${symbol}`)?.size || 0;
 
       if (roomSize === 0 && this.predictionStreams.has(symbol)) {
         const stream = this.predictionStreams.get(symbol);

@@ -27,11 +27,13 @@ import {
 } from "@mui/material";
 import { observer } from "mobx-react-lite";
 import React, { useEffect, useState } from "react";
+import StockCard from "../components/StockCard";
 import autonomousTradingApi, {
   DeploymentConfig,
   Portfolio,
   StrategyInstance,
 } from "../services/autonomousTradingApi";
+import { stockStore } from "../stores/StockStore";
 import "./AutonomousTradingPage.css";
 
 interface TabPanelProps {
@@ -116,6 +118,14 @@ const AutonomousTradingPage: React.FC = observer(() => {
   useEffect(() => {
     loadPortfolios();
     loadActiveStrategies();
+  }, []);
+
+  // Load stock data for live market data tab
+  useEffect(() => {
+    // Fetch initial stock data if not already loaded
+    if (!stockStore.isInitialized) {
+      stockStore.fetchStocksWithSignals();
+    }
   }, []);
 
   const loadPortfolios = async () => {
@@ -481,39 +491,136 @@ const AutonomousTradingPage: React.FC = observer(() => {
     </Box>
   );
 
+  const renderLiveMarketDataTab = () => {
+    const { stocksWithSignals, isLoading, readyStocks } = stockStore;
+
+    return (
+      <Box>
+        <Paper sx={{ p: 2, mb: 3 }}>
+          <Box
+            display="flex"
+            justifyContent="space-between"
+            alignItems="center"
+            mb={2}
+          >
+            <Typography variant="h6">Live Market Data</Typography>
+            <Box display="flex" alignItems="center" gap={2}>
+              <Chip
+                label={`${readyStocks.length} stocks ready`}
+                color={readyStocks.length > 0 ? "success" : "default"}
+                size="small"
+              />
+              <Button
+                variant="outlined"
+                size="small"
+                onClick={() => stockStore.fetchStocksWithSignals()}
+                disabled={isLoading}
+              >
+                {isLoading ? "Loading..." : "Refresh"}
+              </Button>
+            </Box>
+          </Box>
+
+          <Typography
+            variant="body2"
+            color="text.secondary"
+            sx={{ mb: 2 }}
+          ></Typography>
+
+          {isLoading && readyStocks.length === 0 ? (
+            <Box display="flex" justifyContent="center" py={4}>
+              <CircularProgress />
+              <Typography variant="body2" sx={{ ml: 2 }}>
+                Loading market data...
+              </Typography>
+            </Box>
+          ) : readyStocks.length === 0 ? (
+            <Box textAlign="center" py={4}>
+              <Typography variant="h6" color="text.secondary">
+                No Stock Data Ready
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                Waiting for stocks with valid price data. Live updates will
+                appear here automatically.
+              </Typography>
+            </Box>
+          ) : (
+            <Box
+              sx={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
+                gap: 2,
+                maxHeight: "600px",
+                overflow: "auto",
+              }}
+            >
+              {stocksWithSignals.slice(0, 20).map((stock) => (
+                <StockCard
+                  key={stock.symbol}
+                  stock={stock}
+                  signal={stock.tradingSignal || undefined}
+                />
+              ))}
+            </Box>
+          )}
+        </Paper>
+      </Box>
+    );
+  };
+
   return (
     <div className="autonomous-trading-page">
-      <Box sx={{ mb: 3 }}>
-        <Typography variant="h4" component="h1" sx={{ mb: 2, fontWeight: 600 }}>
-          Autonomous Trading
-        </Typography>
-
-        {error && (
-          <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError(null)}>
-            {error}
-          </Alert>
-        )}
-
-        <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
-          <Tabs
-            value={activeTab}
-            onChange={handleTabChange}
-            aria-label="autonomous trading tabs"
-            sx={{
-              "& .MuiTab-root": {
-                textTransform: "none",
-                fontWeight: 500,
-                fontSize: "1rem",
-                minWidth: 120,
-              },
-            }}
-          >
-            <Tab label="Overview" {...a11yProps(0)} />
-            <Tab label="Performance" {...a11yProps(1)} />
-            <Tab label="History" {...a11yProps(2)} />
-            <Tab label="Settings" {...a11yProps(3)} />
-          </Tabs>
+      {/* Header Section - Matching Market Scanner Style */}
+      <div className="autonomous-trading-header">
+        <Box display="flex" justifyContent="space-between" alignItems="center">
+          <Box display="flex" alignItems="center">
+            <Settings className="autonomous-icon" />
+            <Typography
+              variant="h4"
+              component="h1"
+              className="autonomous-title"
+            >
+              Autonomous Trading
+            </Typography>
+          </Box>
+          <Box display="flex" gap={2}>
+            <Chip
+              label={
+                globalTradingActive ? "Trading Active" : "Trading Inactive"
+              }
+              color={globalTradingActive ? "success" : "default"}
+              icon={globalTradingActive ? <PlayArrow /> : <Stop />}
+            />
+          </Box>
         </Box>
+      </div>
+
+      {error && (
+        <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError(null)}>
+          {error}
+        </Alert>
+      )}
+
+      <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
+        <Tabs
+          value={activeTab}
+          onChange={handleTabChange}
+          aria-label="autonomous trading tabs"
+          sx={{
+            "& .MuiTab-root": {
+              textTransform: "none",
+              fontWeight: 500,
+              fontSize: "1rem",
+              minWidth: 120,
+            },
+          }}
+        >
+          <Tab label="Overview" {...a11yProps(0)} />
+          <Tab label="Live Market Data" {...a11yProps(1)} />
+          <Tab label="Performance" {...a11yProps(2)} />
+          <Tab label="History" {...a11yProps(3)} />
+          <Tab label="Settings" {...a11yProps(4)} />
+        </Tabs>
       </Box>
 
       {loading && (
@@ -527,14 +634,18 @@ const AutonomousTradingPage: React.FC = observer(() => {
       </TabPanel>
 
       <TabPanel value={activeTab} index={1}>
-        {renderPerformanceTab()}
+        {renderLiveMarketDataTab()}
       </TabPanel>
 
       <TabPanel value={activeTab} index={2}>
-        {renderHistoryTab()}
+        {renderPerformanceTab()}
       </TabPanel>
 
       <TabPanel value={activeTab} index={3}>
+        {renderHistoryTab()}
+      </TabPanel>
+
+      <TabPanel value={activeTab} index={4}>
         {renderSettingsTab()}
       </TabPanel>
 

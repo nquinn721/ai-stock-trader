@@ -1,19 +1,13 @@
 /* Modern Analytics Page */
+@import '../shared-styles.css';
+
 .analytics-page {
   min-height: 100vh;
-  background: linear-gradient(
-    135deg,
-    #0f172a 0%,
-    #1e293b 25%,
-    #334155 50%,
-    #475569 75%,
-    #64748b 100%
-  );
+  background: var(--trading-bg-gradient-dark);
   background-attachment: fixed;
   padding: 2rem 1.5rem;
-  font-family:
-    -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", sans-serif;
-  color: #f0f6fc;
+  font-family: var(--trading-font-sans);
+  color: var(--trading-text-primary);
   width: 100%;
   box-sizing: border-box;
   position: relative;
@@ -66,9 +60,9 @@
 .page-header h1 {
   font-size: 3rem;
   font-weight: 800;
-  color: #f0f6fc;
+  color: var(--trading-text-primary);
   margin: 0 0 1rem 0;
-  background: linear-gradient(135deg, #8ba3f7, #a855f7, #ec4899);
+  background: var(--trading-text-gradient-primary);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -87,12 +81,7 @@
 .no-portfolio-message {
   text-align: center;
   padding: 4rem 2rem;
-  background: linear-gradient(
-    145deg,
-    rgba(15, 23, 42, 0.8) 0%,
-    rgba(30, 41, 59, 0.9) 50%,
-    rgba(51, 65, 85, 0.8) 100%
-  );
+  background: var(--trading-bg-gradient-analytics);
   border: 1px solid rgba(139, 163, 247, 0.3);
   border-radius: 20px;
   backdrop-filter: blur(25px);
@@ -104,9 +93,9 @@
 .no-portfolio-message h3 {
   font-size: 1.75rem;
   font-weight: 700;
-  color: #f0f6fc;
+  color: var(--trading-text-primary);
   margin: 0 0 1rem 0;
-  background: linear-gradient(135deg, #8ba3f7, #a855f7);
+  background: var(--trading-text-gradient-secondary);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -132,11 +121,7 @@
 }
 
 .overview-card {
-  background: linear-gradient(
-    145deg,
-    rgba(15, 23, 42, 0.8),
-    rgba(30, 41, 59, 0.9)
-  );
+  background: var(--trading-bg-gradient-card);
   border: 1px solid rgba(139, 163, 247, 0.25);
   border-radius: 16px;
   padding: 1.75rem;
@@ -252,9 +237,9 @@
 .analytics-section h2 {
   font-size: 1.75rem;
   font-weight: 700;
-  color: #f0f6fc;
+  color: var(--trading-text-primary);
   margin: 0 0 1.5rem 0;
-  background: linear-gradient(135deg, #8ba3f7, #a855f7);
+  background: var(--trading-text-gradient-secondary);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -269,11 +254,7 @@
 }
 
 .portfolio-card {
-  background: linear-gradient(
-    145deg,
-    rgba(15, 23, 42, 0.6),
-    rgba(30, 41, 59, 0.8)
-  );
+  background: var(--trading-bg-gradient-card);
   border: 1px solid rgba(139, 163, 247, 0.25);
   border-radius: 16px;
   padding: 1.5rem;
@@ -467,7 +448,7 @@
 
 .sector-fill {
   height: 100%;
-  background: linear-gradient(90deg, #8ba3f7, #a855f7);
+  background: var(--trading-text-gradient-secondary);
   border-radius: 4px;
   transition: width 0.8s ease;
 }
@@ -514,7 +495,7 @@
 .performer-rank {
   width: 40px;
   height: 40px;
-  background: linear-gradient(135deg, #8ba3f7, #a855f7);
+  background: var(--trading-text-gradient-secondary);
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -591,7 +572,7 @@
   left: 0;
   width: 100%;
   height: 2px;
-  background: linear-gradient(90deg, #8b5cf6, #06b6d4, #10b981);
+  background: var(--trading-bg-gradient-success);
   opacity: 0.8;
 }
 

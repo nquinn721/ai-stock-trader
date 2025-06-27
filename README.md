@@ -126,14 +126,12 @@ The application tracks these 10 stocks:
 The AI trading system uses multiple indicators:
 
 1. **Technical Analysis**
-
    - Simple Moving Averages (10, 20 day)
    - Relative Strength Index (RSI)
    - Volume analysis
    - Price breakout detection
 
 2. **Sentiment Analysis**
-
    - News headline analysis
    - Social media sentiment (future)
    - Market sentiment indicators

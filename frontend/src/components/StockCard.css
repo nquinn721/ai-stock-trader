@@ -1,15 +1,13 @@
 /* Modern Stock Card Component */
+@import '../shared-styles.css';
+
 .stock-card {
-  background: linear-gradient(
-    145deg,
-    rgba(17, 25, 40, 0.75),
-    rgba(17, 25, 40, 0.85)
-  );
+  background: var(--trading-bg-gradient-card);
   backdrop-filter: blur(20px);
   border: 1px solid rgba(139, 163, 247, 0.3);
   border-radius: 20px;
   padding: 1.75rem;
-  color: #f0f6fc;
+  color: var(--trading-text-primary);
   box-shadow:
     0 8px 32px rgba(0, 0, 0, 0.4),
     0 4px 16px rgba(139, 163, 247, 0.1),

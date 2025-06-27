@@ -1,4 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { buildApiUrl, getHttpConfig } from '../../../config';
 import {
   AssistantResponse,
   ExplanationContext,
@@ -76,12 +77,16 @@ export class LLMService {
   }
 
   private async callOpenAI(prompt: string): Promise<string> {
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    const openaiUrl = buildApiUrl('openai', 'chatCompletions');
+    const httpConfig = getHttpConfig('openai');
+
+    const response = await fetch(openaiUrl, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${this.config.apiKey}`,
         'Content-Type': 'application/json',
       },
+      signal: AbortSignal.timeout(httpConfig.timeout),
       body: JSON.stringify({
         model: this.config.model,
         messages: [
@@ -109,13 +114,17 @@ export class LLMService {
   }
 
   private async callAnthropic(prompt: string): Promise<string> {
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
+    const anthropicUrl = buildApiUrl('anthropic', 'messages');
+    const httpConfig = getHttpConfig('anthropic');
+
+    const response = await fetch(anthropicUrl, {
       method: 'POST',
       headers: {
         'x-api-key': this.config.apiKey,
         'Content-Type': 'application/json',
         'anthropic-version': '2023-06-01',
       },
+      signal: AbortSignal.timeout(httpConfig.timeout),
       body: JSON.stringify({
         model: this.config.model,
         max_tokens: this.config.maxTokens,

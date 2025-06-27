@@ -1,9 +1,11 @@
 /* Simple Dashboard Styling */
+@import '../shared-styles.css';
+
 .dashboard-page {
   min-height: 100vh;
-  background: var(--bg-primary);
-  color: var(--text-primary);
-  font-family: var(--font-sans);
+  background: var(--trading-bg-primary);
+  color: var(--trading-text-primary);
+  font-family: var(--trading-font-sans);
   padding: 0;
   margin: 0;
 }
@@ -35,7 +37,7 @@
   font-size: 1.875rem;
   font-weight: 600;
   margin: 0;
-  background: linear-gradient(135deg, var(--accent-400), var(--accent-600));
+  background: var(--trading-text-gradient-secondary);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -511,7 +513,7 @@
 }
 
 .title-accent {
-  background: linear-gradient(135deg, #0ea5e9, #3b82f6, #8b5cf6);
+  background: var(--trading-text-gradient-primary);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;

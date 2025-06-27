@@ -403,16 +403,22 @@ export class StockService {
           `✅ Updated ${symbol}: $${newPrice.toFixed(2)} (${changePercent >= 0 ? '+' : ''}${changePercent.toFixed(2)}%)`,
         );
 
-        // Broadcast the updated stock data via WebSocket
-        this.websocketGateway.broadcastStockUpdate(symbol, {
-          symbol: stock.symbol,
-          currentPrice: stock.currentPrice,
-          previousClose: stock.previousClose,
-          changePercent: stock.changePercent,
-          volume: stock.volume,
-          marketCap: stock.marketCap,
-          timestamp: new Date().toISOString(),
-        });
+        // Only broadcast the updated stock data via WebSocket if the stock has valid price data
+        if (stock.currentPrice > 0) {
+          this.websocketGateway.broadcastStockUpdate(symbol, {
+            symbol: stock.symbol,
+            currentPrice: stock.currentPrice,
+            previousClose: stock.previousClose,
+            changePercent: stock.changePercent,
+            volume: stock.volume,
+            marketCap: stock.marketCap,
+            timestamp: new Date().toISOString(),
+          });
+        } else {
+          console.log(
+            `⏭️ Skipping WebSocket broadcast for ${symbol} - no valid price data`,
+          );
+        }
       } else {
         console.log(`⚠️ No quote data received for ${symbol}`);
       }

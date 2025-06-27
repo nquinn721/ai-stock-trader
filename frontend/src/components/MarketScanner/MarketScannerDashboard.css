@@ -1,19 +1,16 @@
+/* Import shared trading app styles */
+@import "../../shared-styles.css";
+
 /* Modern Market Scanner Dashboard Styles */
 .market-scanner-dashboard {
-  background: linear-gradient(
-    145deg,
-    #0d1117 0%,
-    #161b22 25%,
-    #21262d 50%,
-    #30363d 75%,
-    #1c2128 100%
-  );
-  background-attachment: fixed;
+  /* Use shared background and layout */
   min-height: 100vh;
-  padding: 24px;
+  background: var(--trading-bg-gradient-dark);
+  background-attachment: fixed;
+  padding: var(--trading-spacing-page);
   position: relative;
-  font-family:
-    -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", sans-serif;
+  font-family: var(--trading-font-sans);
+  color: var(--trading-text-primary);
 }
 
 .market-scanner-dashboard::before {

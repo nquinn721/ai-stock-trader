@@ -1,5 +1,9 @@
 import axios, { AxiosResponse } from "axios";
 import { makeAutoObservable, runInAction } from "mobx";
+import {
+  FRONTEND_API_CONFIG,
+  getFrontendHttpConfig,
+} from "../config/api.config";
 
 export interface ApiConfig {
   baseURL: string;
@@ -8,8 +12,8 @@ export interface ApiConfig {
 
 export class ApiStore {
   private config: ApiConfig = {
-    baseURL: "http://localhost:8000",
-    timeout: 10000,
+    baseURL: FRONTEND_API_CONFIG.backend.baseUrl,
+    timeout: getFrontendHttpConfig().timeout,
   };
 
   isLoading = false;

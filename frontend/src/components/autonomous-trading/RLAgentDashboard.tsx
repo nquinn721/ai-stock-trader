@@ -50,6 +50,7 @@ import rlTradingService, {
   TrainingConfig,
 } from "../../services/rlTradingService";
 import { Grid } from "../common/GridWrapper";
+import ExplainableAI from "./ExplainableAI";
 import "./RLAgentDashboard.css";
 
 ChartJS.register(
@@ -562,12 +563,16 @@ const RLAgentDashboard: React.FC = () => {
 
       <TabPanel value={activeTab} index={2}>
         <Typography variant="h6" sx={{ mb: 2 }}>
-          Performance Analytics
+          Performance Analytics & AI Explanations
         </Typography>
-        <Alert severity="info">
-          Advanced performance analytics and backtesting results will be
-          displayed here.
-        </Alert>
+        {selectedAgent ? (
+          <ExplainableAI agentId={selectedAgent.id} />
+        ) : (
+          <Alert severity="info">
+            Select an agent from the "Agents Overview" tab to view detailed
+            performance analytics and AI decision explanations.
+          </Alert>
+        )}
       </TabPanel>
 
       <TabPanel value={activeTab} index={3}>

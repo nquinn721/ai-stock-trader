@@ -1,5 +1,6 @@
 import { makeAutoObservable, runInAction } from "mobx";
 import { io, Socket } from "socket.io-client";
+import { FRONTEND_API_CONFIG, getWebSocketConfig } from "../config/api.config";
 
 export interface WebSocketEvent {
   type: string;
@@ -14,14 +15,14 @@ export class WebSocketStore {
   error: string | null = null;
   events: WebSocketEvent[] = [];
   reconnectAttempts = 0;
-  maxReconnectAttempts = 5;
+  maxReconnectAttempts = getWebSocketConfig().maxReconnectAttempts;
   private eventListeners: Map<string, Array<(data: any) => void>> = new Map();
 
   constructor() {
     makeAutoObservable(this);
   }
 
-  connect(url: string = "http://localhost:8000") {
+  connect(url: string = FRONTEND_API_CONFIG.backend.wsUrl) {
     if (this.socket?.connected || this.isConnecting) {
       return;
     }
@@ -73,6 +74,19 @@ export class WebSocketStore {
       this.addEvent("stock_update", data);
     });
 
+    // Handle batched stock updates from backend
+    this.socket.on("stock_updates_batch", (data) => {
+      if (data && data.updates) {
+        // Process each update in the batch
+        data.updates.forEach((update: any) => {
+          this.addEvent("stock_updates", update);
+        });
+        console.log(
+          `📊 Processed batch of ${data.updates.length} stock updates`
+        );
+      }
+    });
+
     this.socket.on("trading_signal", (data) => {
       this.addEvent("trading_signal", data);
     });
@@ -96,11 +110,17 @@ export class WebSocketStore {
 
   private handleReconnect() {
     if (this.reconnectAttempts < this.maxReconnectAttempts) {
+      const wsConfig = getWebSocketConfig();
+      const backoffDelay = Math.min(
+        Math.pow(2, this.reconnectAttempts) * wsConfig.reconnectInterval,
+        30000 // Max 30 seconds
+      );
+
       setTimeout(() => {
         this.reconnectAttempts++;
         console.log(`Reconnecting... attempt ${this.reconnectAttempts}`);
         this.connect();
-      }, Math.pow(2, this.reconnectAttempts) * 1000); // Exponential backoff
+      }, backoffDelay);
     }
   }
 

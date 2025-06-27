@@ -44,8 +44,8 @@ describe('LLMService', () => {
       expect(explanation).toBeTruthy();
       expect(explanation).toContain('BUY');
       expect(explanation).toContain('High Confidence');
-      expect(explanation).toContain('Target Price: $150');
-      expect(explanation).toContain('Stop Loss: $120');
+      expect(explanation).toContain('**Target Price**: $150');
+      expect(explanation).toContain('**Stop Loss**: $120');
     });
 
     it('should include confidence level in fallback explanation', async () => {

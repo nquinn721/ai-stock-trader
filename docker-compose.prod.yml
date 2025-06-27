@@ -45,36 +45,26 @@ services:
       timeout: 10s
       retries: 3
 
-  # Production Database (if using PostgreSQL/MySQL)
+  # Production Database (MySQL)
   database-prod:
-    image: postgres:15-alpine
+    image: mysql:8.0
     ports:
-      - "5433:5432" # Different port
+      - "3307:3306" # Different port
     environment:
-      - POSTGRES_DB=trading_app_prod
-      - POSTGRES_USER=${PROD_DB_USER}
-      - POSTGRES_PASSWORD=${PROD_DB_PASSWORD}
+      - MYSQL_ROOT_PASSWORD=${PROD_DB_ROOT_PASSWORD}
+      - MYSQL_DATABASE=trading_app_prod
+      - MYSQL_USER=${PROD_DB_USER}
+      - MYSQL_PASSWORD=${PROD_DB_PASSWORD}
     volumes:
-      - prod_db_data:/var/lib/postgresql/data
+      - prod_db_data:/var/lib/mysql
     networks:
       - prod_network
     restart: unless-stopped
-
-  # Redis for production caching/sessions
-  redis-prod:
-    image: redis:7-alpine
-    ports:
-      - "6380:6379" # Different port
-    volumes:
-      - prod_redis_data:/data
-    networks:
-      - prod_network
-    restart: unless-stopped
+    command: --default-authentication-plugin=mysql_native_password
 
 volumes:
   prod_data:
   prod_db_data:
-  prod_redis_data:
 
 networks:
   prod_network:

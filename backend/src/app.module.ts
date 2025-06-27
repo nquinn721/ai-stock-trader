@@ -19,6 +19,7 @@ import { TradingRule } from './modules/auto-trading/entities/trading-rule.entity
 import { TradingSession } from './modules/auto-trading/entities/trading-session.entity';
 import { TradingStrategy } from './modules/auto-trading/entities/trading-strategy.entity';
 import { BreakoutModule } from './modules/breakout/breakout.module';
+import { DataIntelligenceModule } from './modules/data-intelligence/data-intelligence.module';
 import {
   MarketAlert,
   ScanResult,
@@ -123,6 +124,7 @@ import { SeedService } from './services/seed.service';
     AutoTradingModule,
     MarketScannerModule,
     MultiAssetModule,
+    DataIntelligenceModule,
   ],
   controllers: [AppController],
   providers: [AppService, SeedService],

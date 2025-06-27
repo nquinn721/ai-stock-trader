@@ -1,7 +1,13 @@
+@import "../shared-styles.css";
+
 .automated-trading-page {
   width: 100%;
   min-height: 100vh;
-  background-color: #f5f5f5;
+  background: var(--trading-bg-gradient-dark);
+  background-attachment: fixed;
+  padding: var(--trading-spacing-page);
+  font-family: var(--trading-font-sans);
+  color: var(--trading-text-primary);
 }
 
 .automated-trading-page .auto-trading-dashboard {

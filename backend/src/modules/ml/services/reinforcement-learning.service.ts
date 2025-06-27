@@ -820,37 +820,233 @@ class DQNAgent {
     return batch;
   }
 
+  /**
+   * Explainable AI: Generate feature importance for decision
+   * Uses gradient-based attribution to explain which input features
+   * most influenced the Q-value prediction
+   */
   async explainDecision(state: number[]): Promise<number[]> {
-    // Simple feature importance calculation using gradient
-    const stateTensor = tf.tensor2d([state]);
+    return tf.tidy(() => {
+      const stateTensor = tf.tensor2d([state]);
 
-    const gradients = tf.tidy(() => {
-      const f = () => this.model.predict(stateTensor) as tf.Tensor;
-      return tf.grad(f)(stateTensor) as tf.Tensor;
+      // Compute gradients of Q-values with respect to input features
+      const f = (x: tf.Tensor) => {
+        const qValues = this.model.apply(x) as tf.Tensor;
+        return qValues.max(-1); // Max Q-value
+      };
+
+      const grads = tf.grad(f)(stateTensor) as tf.Tensor;
+      const importance = grads.abs().dataSync();
+
+      // Normalize importance scores
+      const maxImportance = Math.max(...importance);
+      return Array.from(importance).map((i) => i / maxImportance);
     });
-
-    const importance = await gradients.data();
-
-    stateTensor.dispose();
-    gradients.dispose();
-
-    return Array.from(importance);
   }
 
+  /**
+   * Enhanced reward function optimizing for Sharpe ratio and drawdown
+   * Combines multiple objectives: returns, risk-adjusted performance, and risk management
+   */
+  private calculateEnhancedReward(
+    previousPortfolioValue: number,
+    currentPortfolioValue: number,
+    action: number,
+    volatility: number,
+    drawdown: number,
+    sharpeRatio: number,
+    riskFreeRate: number = 0.02,
+  ): number {
+    // Basic return component
+    const returnComponent =
+      (currentPortfolioValue - previousPortfolioValue) / previousPortfolioValue;
+
+    // Risk-adjusted return (Sharpe ratio component)
+    const riskAdjustedComponent = sharpeRatio * 0.1;
+
+    // Drawdown penalty (exponential penalty for large drawdowns)
+    const drawdownPenalty = Math.exp(-10 * Math.abs(drawdown)) - 1;
+
+    // Volatility penalty (prefer lower volatility for same returns)
+    const volatilityPenalty = -0.5 * volatility;
+
+    // Action consistency reward (slight bonus for not over-trading)
+    const actionConsistencyReward = action === 3 ? 0.001 : 0; // Small bonus for HOLD
+
+    // Combined reward with weighted components
+    const reward =
+      0.6 * returnComponent + // 60% weight on returns
+      0.2 * riskAdjustedComponent + // 20% weight on risk-adjusted performance
+      0.15 * drawdownPenalty + // 15% weight on drawdown management
+      0.04 * volatilityPenalty + // 4% weight on volatility control
+      0.01 * actionConsistencyReward; // 1% weight on trading frequency
+
+    return reward;
+  }
+
+  /**
+   * Prioritized Experience Replay
+   * Samples experiences based on their TD-error for more efficient learning
+   */
+  private samplePrioritizedBatch(batchSize: number): Experience[] {
+    if (this.memory.length < batchSize) {
+      return this.memory.slice();
+    }
+
+    // Calculate TD-errors for prioritization
+    const priorities = this.memory.map((experience, index) => {
+      const tdError = this.calculateTDError(experience);
+      return { index, priority: Math.abs(tdError) + 0.01 }; // Small epsilon to avoid zero priority
+    });
+
+    // Sample based on priorities
+    const totalPriority = priorities.reduce((sum, p) => sum + p.priority, 0);
+    const batch: Experience[] = [];
+
+    for (let i = 0; i < batchSize; i++) {
+      let randomValue = Math.random() * totalPriority;
+      let selectedIndex = 0;
+
+      for (let j = 0; j < priorities.length; j++) {
+        randomValue -= priorities[j].priority;
+        if (randomValue <= 0) {
+          selectedIndex = priorities[j].index;
+          break;
+        }
+      }
+
+      batch.push(this.memory[selectedIndex]);
+    }
+
+    return batch;
+  }
+
+  /**
+   * Calculate Temporal Difference Error for experience prioritization
+   */
+  private calculateTDError(experience: Experience): number {
+    const qValues = tf.tidy(() => {
+      const stateTensor = tf.tensor2d([experience.state]);
+      return this.model.predict(stateTensor) as tf.Tensor;
+    });
+
+    const nextQValues = tf.tidy(() => {
+      const nextStateTensor = tf.tensor2d([experience.nextState]);
+      return this.targetModel.predict(nextStateTensor) as tf.Tensor;
+    });
+
+    const currentQ = qValues.dataSync()[experience.action];
+    const maxNextQ = experience.done ? 0 : Math.max(...nextQValues.dataSync());
+    const targetQ = experience.reward + this.config.gamma * maxNextQ;
+
+    qValues.dispose();
+    nextQValues.dispose();
+
+    return targetQ - currentQ;
+  }
+
+  /**
+   * Market Regime Detection
+   * Identifies current market conditions for better state representation
+   */
+  private detectMarketRegime(prices: number[], volumes: number[]): number {
+    if (prices.length < 20) return 0; // Not enough data
+
+    const recentPrices = prices.slice(-20);
+    const recentVolumes = volumes.slice(-20);
+
+    // Calculate volatility
+    const returns = recentPrices
+      .slice(1)
+      .map((price, i) => Math.log(price / recentPrices[i]));
+    const volatility = Math.sqrt(
+      returns.reduce((sum, ret) => sum + ret * ret, 0) / returns.length,
+    );
+
+    // Calculate trend strength
+    const trendStrength =
+      (recentPrices[recentPrices.length - 1] - recentPrices[0]) /
+      recentPrices[0];
+
+    // Calculate volume trend
+    const avgVolume =
+      recentVolumes.reduce((sum, vol) => sum + vol, 0) / recentVolumes.length;
+    const recentAvgVolume =
+      recentVolumes.slice(-5).reduce((sum, vol) => sum + vol, 0) / 5;
+    const volumeRatio = recentAvgVolume / avgVolume;
+
+    // Classify market regime
+    if (volatility > 0.03 && volumeRatio > 1.2) {
+      return 1; // High volatility, high volume (Crisis/Panic)
+    } else if (trendStrength > 0.05 && volatility < 0.02) {
+      return 2; // Strong uptrend, low volatility (Bull market)
+    } else if (trendStrength < -0.05 && volatility > 0.025) {
+      return 3; // Strong downtrend, high volatility (Bear market)
+    } else if (Math.abs(trendStrength) < 0.02 && volatility < 0.015) {
+      return 4; // Low volatility, sideways (Consolidation)
+    } else {
+      return 0; // Normal/Mixed conditions
+    }
+  }
+
+  /**
+   * Get comprehensive performance metrics for the agent
+   */
   getPerformanceMetrics(): AgentPerformance {
+    // Calculate basic performance statistics
+    const recentRewards = this.memory.slice(-100).map((exp) => exp.reward);
+    const totalReward = recentRewards.reduce((sum, reward) => sum + reward, 0);
+    const averageReward =
+      recentRewards.length > 0 ? totalReward / recentRewards.length : 0;
+
+    // Calculate win rate (positive rewards)
+    const positiveRewards = recentRewards.filter((reward) => reward > 0);
+    const winRate =
+      recentRewards.length > 0
+        ? positiveRewards.length / recentRewards.length
+        : 0;
+
+    // Calculate Sharpe ratio approximation
+    const rewardMean = averageReward;
+    const rewardStd =
+      recentRewards.length > 1
+        ? Math.sqrt(
+            recentRewards.reduce(
+              (sum, r) => sum + Math.pow(r - rewardMean, 2),
+              0,
+            ) /
+              (recentRewards.length - 1),
+          )
+        : 0;
+    const sharpeRatio = rewardStd > 0 ? rewardMean / rewardStd : 0;
+
+    // Calculate maximum drawdown approximation
+    let maxDrawdown = 0;
+    let peak = 0;
+    let cumulativeReward = 0;
+
+    for (const reward of recentRewards) {
+      cumulativeReward += reward;
+      if (cumulativeReward > peak) {
+        peak = cumulativeReward;
+      }
+      const drawdown = (peak - cumulativeReward) / Math.max(peak, 1);
+      maxDrawdown = Math.max(maxDrawdown, drawdown);
+    }
+
     return {
       agentId: this.id,
-      totalReturns: 0, // Would be calculated from trading history
-      sharpeRatio: 0, // Would be calculated from trading history
-      maxDrawdown: 0, // Would be calculated from trading history
-      winRate: 0, // Would be calculated from trading history
-      averageReward: 0, // Would be calculated from memory
-      tradesExecuted: 0, // Would be tracked
+      totalReturns: totalReward,
+      sharpeRatio: sharpeRatio,
+      maxDrawdown: maxDrawdown,
+      winRate: winRate,
+      averageReward: averageReward,
+      tradesExecuted: this.memory.length,
       learningProgress: {
         episode: this.episodeCount,
         epsilon: this.epsilon,
         loss: this.lastLoss,
-        avgReward: 0,
+        avgReward: averageReward,
       },
     };
   }

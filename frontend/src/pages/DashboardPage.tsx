@@ -387,12 +387,19 @@ const DashboardPage: React.FC = observer(() => {
               </button>
             </div>
             <div className="section-content">
-              {stocksWithSignals.length === 0 ? (
+              {stockStore.isLoading ? (
+                <EmptyState
+                  type="loading"
+                  icon={<FontAwesomeIcon icon={faChartLine} />}
+                  title="Loading Market Data"
+                  description="Fetching latest stock prices and signals..."
+                />
+              ) : stocksWithSignals.length === 0 ? (
                 <EmptyState
                   type="no-data"
                   icon={<FontAwesomeIcon icon={faChartLine} />}
-                  title="No Stock Data"
-                  description="Unable to load market data. Check connection and try again."
+                  title="No Stock Data Ready"
+                  description="Waiting for stocks with valid price data. Live updates will appear here automatically."
                   action={{
                     label: "Refresh Data",
                     onClick: () => stockStore.fetchStocksWithSignals(),

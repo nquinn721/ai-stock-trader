@@ -31,6 +31,7 @@ This document provides quick reference guidelines for AI assistants working on t
 8. **PROTECT OUTGOING APIs** - Never break Yahoo Finance API, News API, or any external API integrations. These are critical for real-time data
 9. **PERSISTENT DEVELOPMENT SERVERS** - Keep client and server running in separate terminals. Hot reload handles updates automatically - no manual restarts needed
 10. **⚠️ CRITICAL: PRECISE STYLING SCOPE** - When asked to style something, **ONLY** style the specific component/element requested. Do not modify other UI elements, add unnecessary styling, or make changes beyond the exact scope of the request. Focus solely on the requested styling task.
+11. **⚠️ CRITICAL: MINIMAL FILE CHANGES** - When updating files, **ONLY** modify the specific portion that needs to change. Do not rewrite entire files unless the entire file structure needs to be changed. Use precise editing tools (replace_string_in_file, insert_edit_into_file) to make targeted updates while preserving existing code and formatting.
 
 ### Testing Workflow
 
@@ -81,6 +82,59 @@ Use the available VS Code tools and extensions for all development tasks:
 - Error checking tools (get_errors)
 - Testing tools (run_vs_code_task)
 - Git tools (get_changed_files)
+
+## File Editing Best Practices
+
+⚠️ **CRITICAL: SURGICAL EDITS ONLY**
+
+**When modifying existing files, make surgical changes rather than complete rewrites:**
+
+### **Use replace_string_in_file for:**
+
+- Updating specific functions or methods
+- Changing configuration values
+- Modifying specific sections of code
+- Include 3-5 lines of context before and after the change
+
+### **Use insert_edit_into_file for:**
+
+- Adding new functions to existing classes
+- Adding new imports or dependencies
+- Inserting new code sections
+- Use comments like `// ...existing code...` to represent unchanged regions
+
+### **Only rewrite entire files when:**
+
+- The entire file structure needs fundamental changes
+- Moving from one architecture pattern to another
+- Complete file reorganization is required
+- Converting file format (e.g., .js to .ts)
+
+### **Benefits of surgical edits:**
+
+- ✅ Preserves existing formatting and style
+- ✅ Reduces risk of introducing bugs
+- ✅ Maintains git history and blame information
+- ✅ Faster to review and understand changes
+- ✅ Less likely to break working code
+
+**Example of good surgical edit:**
+
+```typescript
+// Instead of rewriting entire StockStore.ts file:
+// GOOD: Update only the specific method
+private updateStocksFromWebSocket(stockUpdates: Stock[]): void {
+  runInAction(() => {
+    stockUpdates.forEach((updatedStock) => {
+      // Only update stocks that have valid price data
+      if (updatedStock.currentPrice > 0) {
+        // ...existing logic...
+      }
+    });
+    this.lastUpdated = new Date();
+  });
+}
+```
 
 ## Quick Development Tasks
 

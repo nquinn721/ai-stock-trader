@@ -1,4 +1,5 @@
 import { makeAutoObservable, runInAction } from "mobx";
+import { buildFrontendApiUrl, FRONTEND_API_CONFIG } from "../config/api.config";
 import { TradingSignal as BaseTradingSignal, Stock } from "../types";
 import { apiStore } from "./ApiStore";
 import { webSocketStore } from "./WebSocketStore";
@@ -57,7 +58,9 @@ export class StockStore {
         this.error = null;
       });
 
-      const stocks = await apiStore.get<Stock[]>("/stocks");
+      const stocks = await apiStore.get<Stock[]>(
+        FRONTEND_API_CONFIG.backend.endpoints.stocks
+      );
 
       runInAction(() => {
         this.stocks = stocks;
@@ -82,7 +85,7 @@ export class StockStore {
 
       const stocksWithSignals = await apiStore.get<
         (Stock & { tradingSignal?: TradingSignal })[]
-      >("/stocks/with-signals/all");
+      >(FRONTEND_API_CONFIG.backend.endpoints.stocksWithSignals);
 
       runInAction(() => {
         // Map the API response to our Stock interface
@@ -129,7 +132,9 @@ export class StockStore {
 
   async fetchTradingSignals(): Promise<void> {
     try {
-      const signals = await apiStore.get<TradingSignal[]>("/trading/signals");
+      const signals = await apiStore.get<TradingSignal[]>(
+        FRONTEND_API_CONFIG.backend.endpoints.tradingSignals
+      );
 
       runInAction(() => {
         this.tradingSignals = signals;
@@ -146,7 +151,9 @@ export class StockStore {
 
   async fetchStockDetails(symbol: string): Promise<Stock | null> {
     try {
-      const stockData = await apiStore.get<Stock>(`/stocks/${symbol}`);
+      const stockData = await apiStore.get<Stock>(
+        `${FRONTEND_API_CONFIG.backend.endpoints.stocks}/${symbol}`
+      );
       return stockData;
     } catch (error) {
       runInAction(() => {
@@ -166,7 +173,8 @@ export class StockStore {
   ): Promise<any[]> {
     try {
       const historyData = await apiStore.get<any[]>(
-        `/stocks/${symbol}/history?period=${period}&interval=${interval}`
+        buildFrontendApiUrl("stockHistory", { symbol }) +
+          `?period=${period}&interval=${interval}`
       );
       return historyData || [];
     } catch (error) {
@@ -183,11 +191,17 @@ export class StockStore {
   private updateStocksFromWebSocket(stockUpdates: Stock[]): void {
     runInAction(() => {
       stockUpdates.forEach((updatedStock) => {
-        const index = this.stocks.findIndex(
-          (stock) => stock.symbol === updatedStock.symbol
-        );
-        if (index !== -1) {
-          this.stocks[index] = { ...this.stocks[index], ...updatedStock };
+        // Only update stocks that have valid price data
+        if (updatedStock.currentPrice > 0) {
+          const index = this.stocks.findIndex(
+            (stock) => stock.symbol === updatedStock.symbol
+          );
+          if (index !== -1) {
+            this.stocks[index] = { ...this.stocks[index], ...updatedStock };
+          } else {
+            // Add new stock if it has valid data
+            this.stocks.push(updatedStock);
+          }
         }
       });
       this.lastUpdated = new Date();
@@ -239,25 +253,30 @@ export class StockStore {
     this.error = null;
   }
 
+  // Get stocks that have valid price data (ready for display)
+  get readyStocks(): Stock[] {
+    return this.stocks.filter((stock) => stock.currentPrice > 0);
+  }
+
   // Computed properties
   get topPerformers(): Stock[] {
-    return [...this.stocks]
+    return [...this.readyStocks]
       .sort((a, b) => b.changePercent - a.changePercent)
       .slice(0, 5);
   }
 
   get worstPerformers(): Stock[] {
-    return [...this.stocks]
+    return [...this.readyStocks]
       .sort((a, b) => a.changePercent - b.changePercent)
       .slice(0, 5);
   }
 
   get totalMarketCap(): number {
-    return this.stocks.reduce((sum, stock) => sum + stock.marketCap, 0);
+    return this.readyStocks.reduce((sum, stock) => sum + stock.marketCap, 0);
   }
 
   get stocksWithSignals(): (Stock & { tradingSignal: TradingSignal | null })[] {
-    return this.stocks.map((stock) => {
+    return this.readyStocks.map((stock) => {
       const signal = this.tradingSignals.find(
         (signal) => signal.symbol === stock.symbol && signal.isActive
       );

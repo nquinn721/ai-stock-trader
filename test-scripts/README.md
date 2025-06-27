@@ -24,14 +24,38 @@ This directory contains standalone test scripts used for development and debuggi
 
 - `test-chart-enhancements.js` - Tests for chart functionality improvements
 
+### WebSocket & Live Data Testing
+
+- `test-live-market-data.js` - Tests WebSocket live market data implementation
+- `test-autonomous-dashboard.js` - Tests autonomous trading dashboard functionality
+- `test-autonomous-trading-implementation.js` - Tests autonomous trading system implementation
+
+### Strategy & Trading Testing
+
+- `test-auto-trading-apis.js` - Tests auto-trading API endpoints
+- `test-strategy-builder-api.js` - Tests strategy builder API functionality
+
 ## Usage
 
 These scripts are typically run directly with Node.js for debugging and development purposes:
 
 ```bash
-# Example usage
+# Example usage - run from project root
 node test-scripts/test-stocks-endpoint.js
+
+# Or run from within test-scripts directory
+cd test-scripts
+node test-live-market-data.js
 ```
+
+**Important:** When running test scripts that require external dependencies (like `node-fetch` or `socket.io-client`), ensure these are installed in the project root:
+
+```bash
+# Install required dependencies for test scripts
+npm install node-fetch@2 socket.io-client --save-dev
+```
+
+**Note:** Always check the `test-scripts/` directory for available test files when debugging specific functionality.
 
 ## Note
 

@@ -7,10 +7,15 @@ const Header: React.FC = () => {
 
   const navItems = [
     { path: "/", label: "Dashboard", icon: "📊" },
-    { path: "/autonomous-trading", label: "Autonomous Trading", icon: "�" },
+    { path: "/autonomous-trading", label: "Autonomous Trading", icon: "🤖" },
     { path: "/analytics", label: "Analytics", icon: "📈" },
     { path: "/market-scanner", label: "Market Scanner", icon: "🔍" },
     { path: "/ai-assistant", label: "AI Assistant", icon: "🎯" },
+    {
+      path: "/enterprise-intelligence",
+      label: "Enterprise Intelligence",
+      icon: "⚡",
+    },
   ];
 
   return (

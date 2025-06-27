@@ -1,0 +1,103 @@
+version: "3.8"
+
+services:
+  # Local Production Backend
+  backend-local-prod:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.prod
+    ports:
+      - "8100:8000" # Local prod port to avoid dev conflicts
+    environment:
+      - NODE_ENV=production
+      - PORT=8000
+      - DATABASE_URL=postgresql://trading_user:trading_pass@database-local-prod:5432/trading_app_local_prod
+      - YAHOO_FINANCE_API_KEY=${YAHOO_FINANCE_API_KEY}
+      - NEWS_API_KEY=${NEWS_API_KEY}
+      - REDIS_URL=redis://redis-local-prod:6379
+    volumes:
+      - local_prod_data:/app/data
+    networks:
+      - local_prod_network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    depends_on:
+      - database-local-prod
+      - redis-local-prod
+
+  # Local Production Frontend
+  frontend-local-prod:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.prod
+      args:
+        - REACT_APP_API_URL=http://localhost:8100
+        - REACT_APP_WS_URL=ws://localhost:8100
+    ports:
+      - "3100:80" # Local prod port to avoid dev conflicts
+    depends_on:
+      - backend-local-prod
+    networks:
+      - local_prod_network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Local Production Database
+  database-local-prod:
+    image: postgres:15-alpine
+    ports:
+      - "5500:5432" # Local prod port
+    environment:
+      - POSTGRES_DB=trading_app_local_prod
+      - POSTGRES_USER=trading_user
+      - POSTGRES_PASSWORD=trading_pass
+    volumes:
+      - local_prod_db_data:/var/lib/postgresql/data
+      - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    networks:
+      - local_prod_network
+    restart: unless-stopped
+
+  # Local Production Redis
+  redis-local-prod:
+    image: redis:7-alpine
+    ports:
+      - "6400:6379" # Local prod port
+    volumes:
+      - local_prod_redis_data:/data
+    networks:
+      - local_prod_network
+    restart: unless-stopped
+
+  # Optional: Nginx reverse proxy for production-like setup
+  nginx-local-prod:
+    image: nginx:alpine
+    ports:
+      - "80:80" # Main production port
+      - "443:443" # HTTPS port (if you add SSL)
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - frontend-local-prod
+      - backend-local-prod
+    networks:
+      - local_prod_network
+    restart: unless-stopped
+
+volumes:
+  local_prod_data:
+  local_prod_db_data:
+  local_prod_redis_data:
+
+networks:
+  local_prod_network:
+    driver: bridge
