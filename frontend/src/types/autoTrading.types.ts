@@ -41,10 +41,12 @@ export interface RulePerformance {
 }
 
 export interface RuleCondition {
+  id?: string; // Optional ID for frontend use
   field: string;
   operator: "equals" | "greater_than" | "less_than" | "greater_equal" | "less_equal" | "not_equals";
   value: any;
   logical?: "AND" | "OR"; // Backend uses 'logical' not 'logicalOperator'
+  logicalOperator?: "AND" | "OR"; // Frontend alias for compatibility
 }
 
 export interface RuleAction {
