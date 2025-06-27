@@ -50,11 +50,19 @@ export interface RuleCondition {
 }
 
 export interface RuleAction {
+  id?: string; // Optional ID for frontend use
   type: "buy" | "sell";
-  sizing_method: "fixed" | "percentage" | "full_position" | "kelly"; // Backend structure
+  sizing_method?: "fixed" | "percentage" | "full_position" | "kelly"; // Backend structure
   size_value?: number;
   price_type?: "market" | "limit" | "stop";
   price_offset?: number;
+  parameters?: { // Frontend compatibility structure
+    sizingMethod?: "fixed" | "percentage" | "full_position" | "kelly";
+    sizeValue?: number;
+    maxPositionSize?: number;
+    priceType?: "market" | "limit" | "stop";
+    priceOffset?: number;
+  };
 }
 
 export interface TradingSession {
@@ -74,7 +82,7 @@ export interface TradingSessionDisplay {
   id: string;
   portfolioId: string;
   name: string;
-  status: "active" | "stopped";
+  status: "active" | "stopped" | "paused";
   startedAt: Date;
   stoppedAt?: Date;
   stopReason?: string;
@@ -193,10 +201,15 @@ export interface RuleTemplate {
     | "momentum"
     | "risk_management";
   difficulty: "beginner" | "intermediate" | "advanced";
-  ruleDefinition: Omit<
-    TradingRule,
-    "id" | "portfolioId" | "createdAt" | "updatedAt"
-  >;
+  ruleDefinition: {
+    name: string;
+    description?: string;
+    isActive: boolean;
+    priority: number;
+    ruleType: "entry" | "exit" | "risk";
+    conditions: RuleCondition[];
+    actions: RuleAction[];
+  };
 }
 
 export interface CreateTradingRuleDto {

@@ -643,8 +643,8 @@ export class AutoTradingStore {
       })),
       actions: template.ruleDefinition.actions.map((action) => ({
         type: action.type as "buy" | "sell",
-        sizing_method: (action.parameters.sizingMethod as any) || "percentage",
-        size_value: action.parameters.sizeValue || 5,
+        sizing_method: (action.parameters?.sizingMethod as any) || "percentage",
+        size_value: action.parameters?.sizeValue || 5,
         price_type: "market",
         price_offset: 0,
       })),
