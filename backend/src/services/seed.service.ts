@@ -1,3 +1,54 @@
+/**
+ * =============================================================================
+ * SEED SERVICE - Database Initialization and Setup Engine
+ * =============================================================================
+ *
+ * Database seeding and initialization service that sets up the application
+ * with initial data, configurations, and ensures proper database state
+ * for development and production environments.
+ *
+ * Key Features:
+ * - Database initialization and schema setup
+ * - Stock symbol seeding from curated watchlists
+ * - Initial portfolio creation and configuration
+ * - Trading signal history initialization
+ * - User preference and configuration setup
+ * - Development environment data population
+ * - Database cleanup and reset functionality
+ *
+ * Seeding Operations:
+ * - Stock symbols: Popular stocks, ETFs, and crypto assets
+ * - Market data: Initial price and volume data from Yahoo Finance
+ * - Trading signals: Historical signal data for backtesting
+ * - Portfolio types: Default portfolio configurations
+ * - User settings: Default notification and risk preferences
+ *
+ * Data Sources:
+ * - Yahoo Finance API: Real market data for initial seeding
+ * - Curated stock lists: S&P 500, NASDAQ 100, popular stocks
+ * - Default configurations: Risk limits, notification settings
+ * - Portfolio templates: Day trading, swing trading, long-term
+ *
+ * Environment Support:
+ * - Development: Full data seeding with sample portfolios
+ * - Testing: Clean database state for consistent testing
+ * - Production: Minimal seeding with essential configurations
+ * - Migration: Database version updates and schema changes
+ *
+ * Safety Features:
+ * - Environment detection to prevent production data loss
+ * - Backup creation before destructive operations
+ * - Incremental seeding to avoid data duplication
+ * - Rollback capabilities for failed operations
+ *
+ * Used By:
+ * - Application startup for database initialization
+ * - Development setup for consistent data state
+ * - Testing framework for clean test environments
+ * - Deployment scripts for production setup
+ * =============================================================================
+ */
+
 import { Injectable } from '@nestjs/common';
 
 @Injectable()

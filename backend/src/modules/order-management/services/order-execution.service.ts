@@ -1,3 +1,52 @@
+/**
+ * =============================================================================
+ * ORDER EXECUTION SERVICE - Trade Processing and Settlement Engine
+ * =============================================================================
+ *
+ * Core order execution engine that processes trading orders, manages fills,
+ * and handles the complete trade lifecycle from submission to settlement.
+ * Simulates realistic market execution with slippage and timing.
+ *
+ * Key Features:
+ * - Real-time order execution with market price simulation
+ * - Partial fill handling and order management
+ * - Slippage calculation and realistic execution timing
+ * - Commission calculation and fee management
+ * - Position updates and portfolio synchronization
+ * - Trade confirmation and settlement processing
+ * - Execution venue simulation and routing
+ * - Order status tracking and lifecycle management
+ *
+ * Execution Types:
+ * - Market orders: Immediate execution at current market price
+ * - Limit orders: Price-based execution when conditions are met
+ * - Stop orders: Triggered execution based on stop price
+ * - Stop-limit orders: Combined stop and limit functionality
+ *
+ * Order Processing:
+ * 1. Order validation and risk checking
+ * 2. Market data retrieval for execution price
+ * 3. Slippage calculation based on order size and volatility
+ * 4. Trade execution and fill generation
+ * 5. Position and portfolio updates
+ * 6. Commission calculation and settlement
+ * 7. Confirmation and notification delivery
+ *
+ * Execution Features:
+ * - Realistic slippage modeling based on market conditions
+ * - Partial fill simulation for large orders
+ * - Commission structure with volume-based discounts
+ * - Execution timestamp precision for audit trails
+ * - Multiple venue simulation (NASDAQ, NYSE, BATS)
+ *
+ * Integration Points:
+ * - Paper Trading Service: Portfolio and position updates
+ * - Risk Management: Pre-execution validation
+ * - Stock Service: Real-time pricing data
+ * - WebSocket: Real-time execution notifications
+ * =============================================================================
+ */
+
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';

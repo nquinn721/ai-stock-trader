@@ -1,3 +1,52 @@
+/**
+ * =============================================================================
+ * PORTFOLIO ANALYTICS SERVICE - Performance Intelligence Engine
+ * =============================================================================
+ * 
+ * Advanced portfolio analytics and performance measurement service that provides
+ * comprehensive insights into trading performance, risk metrics, and attribution
+ * analysis for paper trading portfolios.
+ * 
+ * Key Features:
+ * - Real-time portfolio performance calculation and tracking
+ * - Risk-adjusted return metrics (Sharpe ratio, Sortino ratio, Alpha/Beta)
+ * - Sector allocation analysis and diversification metrics
+ * - Performance attribution breakdown by position and sector
+ * - Drawdown analysis and volatility measurement
+ * - Trade analytics and success rate calculation
+ * - Benchmark comparison and relative performance
+ * - Historical performance charting and trend analysis
+ * 
+ * Analytics Capabilities:
+ * - Total return calculation (time-weighted and money-weighted)
+ * - Risk metrics: VaR, max drawdown, volatility, correlation
+ * - Performance attribution: security selection vs. allocation effects
+ * - Sector and position-level contribution analysis
+ * - Trade statistics: win rate, average gain/loss, holding periods
+ * - Benchmark relative performance and tracking error
+ * 
+ * Performance Metrics:
+ * - Absolute returns: daily, weekly, monthly, YTD, inception-to-date
+ * - Risk-adjusted metrics: Sharpe, Sortino, Calmar, Information ratios
+ * - Portfolio statistics: beta, alpha, R-squared vs benchmarks
+ * - Drawdown analysis: maximum, current, recovery time
+ * - Volatility measures: standard deviation, downside deviation
+ * 
+ * Reporting Features:
+ * - Comprehensive performance reports with charts and tables
+ * - Sector allocation breakdown with performance attribution
+ * - Top/bottom performers identification and analysis
+ * - Risk exposure analysis and concentration warnings
+ * - Trade-level analytics and pattern recognition
+ * 
+ * Used By:
+ * - Frontend performance dashboard for visualization
+ * - Portfolio optimization and rebalancing recommendations
+ * - Risk management for exposure monitoring
+ * - Paper trading education and strategy assessment
+ * =============================================================================
+ */
+
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -534,130 +583,4 @@ export class PortfolioAnalyticsService {
 
     // Check for sector overconcentration
     for (const sector of sectorAllocation) {
-      if (sector.percentage > 30) {
-        // Find the largest position in this overweight sector
-        const largestPosition = portfolio.positions
-          ?.filter((p) => {
-            // This is simplified - in production you'd check actual sector mapping
-            return true;
-          })
-          .sort(
-            (a, b) =>
-              Number(b.currentValue || b.totalCost) -
-              Number(a.currentValue || a.totalCost),
-          )[0];
-
-        if (largestPosition) {
-          const currentWeight =
-            totalValue > 0
-              ? (Number(
-                  largestPosition.currentValue || largestPosition.totalCost,
-                ) /
-                  totalValue) *
-                100
-              : 0;
-
-          suggestions.push({
-            action: 'reduce',
-            symbol: largestPosition.symbol,
-            currentWeight,
-            targetWeight: currentWeight * 0.8,
-            reasoning: `Reduce ${sector.sector} sector overweight (${sector.percentage.toFixed(1)}%)`,
-          });
-        }
-      }
-    }
-
-    // Suggest diversification if portfolio is too concentrated
-    if (riskMetrics.concentrationRisk > 0.3) {
-      suggestions.push({
-        action: 'add',
-        symbol: 'Diversification',
-        currentWeight: 0,
-        targetWeight: 10,
-        reasoning:
-          'Portfolio lacks diversification - consider adding more positions',
-      });
-    }
-
-    return suggestions.slice(0, 5); // Top 5 suggestions
-  }
-
-  // Helper methods
-  private async calculatePeriodReturn(
-    portfolio: Portfolio,
-    days: number,
-  ): Promise<number> {
-    // Simplified calculation - in production would use historical portfolio values
-    const dailyReturn =
-      Number(portfolio.totalReturn) /
-      Math.max(1, this.getDaysSinceInception(portfolio));
-    return dailyReturn * days;
-  }
-
-  private getDaysSinceInception(portfolio: Portfolio): number {
-    const now = new Date();
-    const inception = new Date(portfolio.createdAt);
-    return Math.max(
-      1,
-      Math.floor((now.getTime() - inception.getTime()) / (1000 * 60 * 60 * 24)),
-    );
-  }
-
-  private async calculatePortfolioVolatility(
-    portfolio: Portfolio,
-  ): Promise<number> {
-    // Simplified volatility calculation
-    // In production, this would calculate based on historical price movements
-    const positionCount = portfolio.positions?.length || 1;
-    const baseVolatility = 0.15; // 15% base volatility
-
-    // Diversification effect
-    const diversificationFactor = Math.sqrt(positionCount) / positionCount;
-    return baseVolatility * diversificationFactor;
-  }
-
-  private async calculateMaxDrawdown(portfolio: Portfolio): Promise<number> {
-    // Simplified max drawdown calculation
-    // In production, this would analyze historical portfolio values
-    const volatility = await this.calculatePortfolioVolatility(portfolio);
-    return volatility * 0.6; // Assume max drawdown is 60% of volatility
-  }
-
-  private async calculateCorrelationMatrix(
-    portfolio: Portfolio,
-  ): Promise<{ [symbol: string]: { [symbol2: string]: number } }> {
-    const matrix: { [symbol: string]: { [symbol2: string]: number } } = {};
-
-    // Simplified correlation matrix
-    for (const position1 of portfolio.positions || []) {
-      matrix[position1.symbol] = {};
-      for (const position2 of portfolio.positions || []) {
-        if (position1.symbol === position2.symbol) {
-          matrix[position1.symbol][position2.symbol] = 1.0;
-        } else {
-          // Simplified correlation (would calculate from historical prices in production)
-          matrix[position1.symbol][position2.symbol] =
-            Math.random() * 0.6 + 0.2; // 0.2 to 0.8
-        }
-      }
-    }
-
-    return matrix;
-  }
-
-  private calculateConcentrationRisk(portfolio: Portfolio): number {
-    const totalValue = Number(portfolio.totalValue);
-    if (totalValue === 0) return 0;
-
-    // Calculate Herfindahl Index
-    let herfindahlIndex = 0;
-    for (const position of portfolio.positions || []) {
-      const weight =
-        Number(position.currentValue || position.totalCost) / totalValue;
-      herfindahlIndex += weight * weight;
-    }
-
-    return herfindahlIndex;
-  }
-}
+      if

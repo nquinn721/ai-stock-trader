@@ -1,3 +1,54 @@
+/**
+ * =============================================================================
+ * MARKET HOURS SERVICE - Trading Schedule and Market Status Engine
+ * =============================================================================
+ *
+ * Intelligent market hours detection and trading schedule management service.
+ * Provides real-time market status, trading windows, and schedule awareness
+ * for optimized data fetching and trading operations.
+ *
+ * Key Features:
+ * - Real-time market status detection (open, closed, pre-market, after-hours)
+ * - US stock market trading hours management (NYSE, NASDAQ)
+ * - Market holiday calendar and special schedule handling
+ * - Timezone conversion and daylight saving time awareness
+ * - Trading window optimization for data fetching
+ * - Next market open/close time calculations
+ * - Extended hours trading support (pre-market and after-hours)
+ * - Market schedule validation and compliance checking
+ *
+ * Market Schedules:
+ * - Regular Hours: 9:30 AM - 4:00 PM ET (Mon-Fri)
+ * - Pre-Market: 4:00 AM - 9:30 AM ET (extended hours)
+ * - After-Hours: 4:00 PM - 8:00 PM ET (extended hours)
+ * - Holiday Schedule: Market closure detection and handling
+ *
+ * Status Types:
+ * - 'open': Regular market hours, full trading active
+ * - 'closed': Market closed, no trading activity
+ * - 'pre-market': Extended hours before regular session
+ * - 'after-hours': Extended hours after regular session
+ *
+ * Optimization Features:
+ * - Smart data fetching during active trading hours
+ * - API rate limiting during closed market periods
+ * - Reduced polling frequency outside trading windows
+ * - Next trading session countdown and scheduling
+ *
+ * Holiday Handling:
+ * - Federal holiday calendar integration
+ * - Market closure detection and early close handling
+ * - Special trading schedule notifications
+ * - International market coordination (future expansion)
+ *
+ * Used By:
+ * - Stock Service for optimized data fetching
+ * - Trading Service for order validation
+ * - WebSocket for intelligent update scheduling
+ * - Frontend for market status display
+ * =============================================================================
+ */
+
 import { Injectable, Logger } from '@nestjs/common';
 
 export interface MarketHours {

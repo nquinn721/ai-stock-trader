@@ -1,3 +1,53 @@
+/**
+ * =============================================================================
+ * WEBSOCKET HEALTH SERVICE - Real-Time Connection Monitoring
+ * =============================================================================
+ *
+ * Comprehensive WebSocket connection health monitoring and performance tracking
+ * service. Monitors connection quality, latency, and provides diagnostics for
+ * real-time data streaming infrastructure.
+ *
+ * Key Features:
+ * - Real-time connection monitoring and health assessment
+ * - Client connection metrics and performance tracking
+ * - Automatic connection quality scoring and categorization
+ * - Latency measurement and performance optimization
+ * - Error tracking and connection stability analysis
+ * - Automated health checks and system diagnostics
+ * - Performance metrics collection and reporting
+ * - Connection lifecycle management and cleanup
+ *
+ * Health Monitoring:
+ * - Individual client connection health scoring
+ * - Message throughput and delivery rate tracking
+ * - Connection latency and response time measurement
+ * - Error rate monitoring and anomaly detection
+ * - Connection stability and dropout analysis
+ * - System-wide performance metrics aggregation
+ *
+ * Metrics Tracked:
+ * - Connection count (current, peak, total lifetime)
+ * - Message statistics (sent, received, delivery rate)
+ * - Latency measurements (average, min, max, percentiles)
+ * - Error counts and failure rates by client
+ * - Connection quality scores (good, poor, bad)
+ * - System resource utilization and capacity
+ *
+ * Automated Features:
+ * - Scheduled health checks and system cleanup
+ * - Inactive connection detection and removal
+ * - Performance degradation alerts and warnings
+ * - Automatic metrics reset and archival
+ * - Connection quality optimization recommendations
+ *
+ * Used By:
+ * - WebSocket Gateway for connection management
+ * - Stock Service for delivery optimization
+ * - Frontend health dashboard for monitoring
+ * - System administrators for performance analysis
+ * =============================================================================
+ */
+
 import { Injectable } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 

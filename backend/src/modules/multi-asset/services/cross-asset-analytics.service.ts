@@ -1,3 +1,58 @@
+/**
+ * =============================================================================
+ * CROSS-ASSET ANALYTICS SERVICE - Multi-Asset Intelligence Engine
+ * =============================================================================
+ *
+ * Advanced cross-asset correlation analysis and multi-asset portfolio intelligence
+ * service. Provides sophisticated analytics across stocks, forex, crypto, and
+ * commodities to identify market relationships and opportunities.
+ *
+ * Key Features:
+ * - Cross-asset correlation analysis and tracking
+ * - Multi-asset portfolio optimization and allocation recommendations
+ * - Macro-economic indicator integration and impact analysis
+ * - Cross-asset signal generation and opportunity identification
+ * - Market regime detection and asset rotation strategies
+ * - Risk factor analysis across asset classes
+ * - Alternative data integration for enhanced insights
+ * - Real-time cross-asset monitoring and alerts
+ *
+ * Asset Classes Supported:
+ * - Equities: Individual stocks and sector ETFs
+ * - Foreign Exchange: Major and minor currency pairs
+ * - Cryptocurrencies: Bitcoin, Ethereum, major altcoins
+ * - Commodities: Precious metals, energy, agriculture
+ * - Fixed Income: Government and corporate bonds (future)
+ *
+ * Analytics Capabilities:
+ * - Correlation matrix calculation and visualization
+ * - Portfolio diversification analysis and optimization
+ * - Cross-asset momentum and mean reversion strategies
+ * - Macro factor exposure and sensitivity analysis
+ * - Alternative data sentiment correlation
+ * - Market stress testing and scenario analysis
+ *
+ * Signal Generation:
+ * - Cross-asset divergence signals
+ * - Risk-on/risk-off regime identification
+ * - Flight-to-quality opportunity detection
+ * - Currency carry trade optimization
+ * - Commodity cycle and seasonal patterns
+ *
+ * Macro Integration:
+ * - Economic indicator impact analysis
+ * - Central bank policy correlation
+ * - Inflation and interest rate sensitivity
+ * - Geopolitical event impact modeling
+ *
+ * Used By:
+ * - Portfolio management for asset allocation
+ * - Risk management for diversification analysis
+ * - Trading strategies for cross-asset opportunities
+ * - Research and analytics for market insights
+ * =============================================================================
+ */
+
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';

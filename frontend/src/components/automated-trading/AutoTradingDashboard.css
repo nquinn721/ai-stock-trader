@@ -1,258 +1,595 @@
 @import "../../shared-styles.css";
 
+/* ==========================================================================
+   AI TRADING DASHBOARD - Modern Design System Implementation
+   ========================================================================== */
+
 .page-container {
   background: var(--trading-bg-gradient-dark);
   min-height: 100vh;
   color: var(--trading-text-primary);
+  position: relative;
+  overflow: hidden;
 }
 
-.page-header {
+.page-container::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background:
+    radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.15) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.15) 0%, transparent 50%),
+    radial-gradient(circle at 40% 40%, rgba(120, 219, 255, 0.1) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.page-content {
+  position: relative;
+  z-index: 1;
+  padding: var(--theme-space-6) var(--theme-space-4);
+  max-width: 1600px;
+  margin: 0 auto;
+}
+
+/* ==========================================================================
+   STATUS OVERVIEW - Enhanced Cards with Glass Effect
+   ========================================================================== */
+
+.status-overview {
+  margin-bottom: var(--theme-space-8);
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: var(--theme-space-6);
+}
+
+.status-card {
+  background: var(--trading-bg-card);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--trading-radius-lg);
+  padding: var(--theme-space-6);
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.status-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--trading-bg-gradient-accent);
+}
+
+.status-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--trading-shadow-xl);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.status-card-header {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding: var(--theme-space-6) var(--theme-space-8);
-  background: var(--trading-bg-secondary-card);
-  border-bottom: 1px solid var(--trading-border-primary);
-  margin-bottom: var(--theme-space-6);
+  justify-content: space-between;
+  margin-bottom: var(--theme-space-4);
 }
 
-.header-left h1 {
-  background: var(--trading-text-gradient);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  font-size: 2rem;
-  font-weight: 700;
-  margin: 0;
-  margin-bottom: var(--theme-space-2);
-}
-
-.market-time {
+.status-card-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--trading-text-primary);
   display: flex;
   align-items: center;
   gap: var(--theme-space-2);
-  color: var(--trading-success-primary);
-  font-size: 0.875rem;
-  font-weight: 500;
 }
 
-.header-info {
+.status-card-icon {
+  width: 24px;
+  height: 24px;
+  color: var(--trading-primary-400);
+}
+
+.status-card-value {
+  font-size: 2rem;
+  font-weight: 700;
+  background: var(--trading-text-gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: var(--theme-space-2);
+}
+
+.status-card-subtitle {
+  color: var(--trading-text-secondary);
+  font-size: 0.9rem;
+}
+
+/* ==========================================================================
+   TRADING SESSIONS - Modern Card Design
+   ========================================================================== */
+
+.trading-session-card {
+  background: var(--trading-bg-card);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--trading-radius-lg);
+  margin-bottom: var(--theme-space-4);
+  padding: var(--theme-space-5);
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.trading-session-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  transition: all 0.3s ease;
+}
+
+.trading-session-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--trading-shadow-lg);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.session-status-active::before {
+  background: var(--trading-bg-gradient-success);
+}
+
+.session-status-paused::before {
+  background: var(--trading-bg-gradient-warning);
+}
+
+.session-status-stopped::before {
+  background: var(--trading-bg-gradient-error);
+}
+
+.session-header {
   display: flex;
-  align-items: center;
-  gap: var(--theme-space-4);
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: var(--theme-space-4);
 }
 
-.connection-status {
+.session-title {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--trading-text-primary);
+  margin-bottom: var(--theme-space-1);
+}
+
+.session-subtitle {
+  color: var(--trading-text-secondary);
+  font-size: 0.9rem;
+}
+
+.session-status-chip {
   padding: var(--theme-space-1) var(--theme-space-3);
-  border-radius: var(--theme-radius-2);
+  border-radius: var(--trading-radius-full);
   font-size: 0.75rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
-.connection-status.connected {
-  background: var(--trading-success-primary);
-  color: var(--trading-bg-primary);
+.session-status-active .session-status-chip {
+  background: rgba(34, 197, 94, 0.15);
+  color: var(--trading-success-400);
+  border: 1px solid rgba(34, 197, 94, 0.3);
 }
 
-.nav-btn {
-  background: var(--trading-primary-500);
-  color: var(--trading-text-primary);
-  border: none;
-  padding: var(--theme-space-2) var(--theme-space-4);
-  border-radius: var(--theme-radius-2);
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
+.session-status-paused .session-status-chip {
+  background: rgba(245, 158, 11, 0.15);
+  color: var(--trading-warning-400);
+  border: 1px solid rgba(245, 158, 11, 0.3);
 }
 
-.nav-btn:hover {
-  background: var(--trading-primary-600);
-  transform: translateY(-1px);
+.session-status-stopped .session-status-chip {
+  background: rgba(239, 68, 68, 0.15);
+  color: var(--trading-error-400);
+  border: 1px solid rgba(239, 68, 68, 0.3);
 }
 
-.page-content {
-  padding: 0 var(--theme-space-8) var(--theme-space-8);
+.session-metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: var(--theme-space-4);
+  margin-bottom: var(--theme-space-4);
 }
 
-.dashboard-header {
-  margin-bottom: 24px;
+.session-metric {
+  text-align: center;
+  padding: var(--theme-space-3);
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: var(--trading-radius-md);
+  border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-.dashboard-header .MuiCardHeader-root {
-  background: linear-gradient(135deg, #1976d2 0%, #42a5f5 100%);
-  color: white;
-}
-
-.dashboard-header .MuiCardHeader-title {
-  font-size: 1.5rem;
-  font-weight: 600;
-}
-
-.dashboard-header .MuiCardHeader-subheader {
-  color: rgba(255, 255, 255, 0.8);
-}
-
-.emergency-stop-btn {
-  background: var(--trading-error-primary) !important;
-  color: var(--trading-text-primary) !important;
-  font-weight: 600;
-  text-transform: none;
-  border-radius: var(--theme-radius-2);
-  box-shadow: 0 4px 12px rgba(220, 38, 127, 0.3);
-  transition: all 0.2s ease;
-}
-
-.emergency-stop-btn:hover {
-  background: var(--trading-error-dark) !important;
-  box-shadow: 0 6px 16px rgba(220, 38, 127, 0.4);
-  transform: translateY(-1px);
-}
-
-.status-overview {
-  margin-bottom: var(--theme-space-6);
-}
-
-.status-overview .MuiCard-root {
-  background: var(--trading-bg-secondary-card);
-  border: 1px solid var(--trading-border-primary);
-  transition: all 0.2s ease;
-}
-
-.status-overview .MuiCard-root:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-  border-color: var(--trading-primary-500);
-}
-
-.status-overview .MuiCardContent-root {
-  color: var(--trading-text-primary);
-}
-
-.status-overview .MuiTypography-h4 {
+.session-metric-value {
+  font-size: 1.4rem;
   font-weight: 700;
   color: var(--trading-text-primary);
+  margin-bottom: var(--theme-space-1);
 }
 
-.tabs-container {
-  background: var(--trading-bg-secondary-card);
-  border: 1px solid var(--trading-border-primary);
-  border-radius: var(--theme-radius-3);
-}
-
-.dashboard-tabs {
-  border-bottom: 1px solid var(--trading-border-primary);
-}
-
-.dashboard-tabs .MuiTab-root {
+.session-metric-label {
+  font-size: 0.8rem;
   color: var(--trading-text-secondary);
-  font-weight: 500;
-  text-transform: none;
-}
-
-.dashboard-tabs .MuiTab-root.Mui-selected {
-  color: var(--trading-primary-500);
-}
-
-/* Trading Session Styles */
-.trading-session-card {
-  margin-bottom: 16px;
-  transition: all 0.3s ease;
-}
-
-.trading-session-card:hover {
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
-}
-
-.session-status-active {
-  border-left: 4px solid #4caf50;
-}
-
-.session-status-paused {
-  border-left: 4px solid #ff9800;
-}
-
-.session-status-stopped {
-  border-left: 4px solid #f44336;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .session-controls {
   display: flex;
-  gap: 8px;
+  gap: var(--theme-space-2);
   align-items: center;
+  justify-content: flex-end;
 }
 
-/* Trading Rules Styles */
+.session-control-btn {
+  background: var(--trading-bg-glass);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--trading-radius-md);
+  padding: var(--theme-space-2);
+  color: var(--trading-text-secondary);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 40px;
+  height: 40px;
+}
+
+.session-control-btn:hover {
+  background: var(--trading-primary-500);
+  color: white;
+  border-color: var(--trading-primary-400);
+  transform: scale(1.05);
+}
+
+/* ==========================================================================
+   TRADING RULES - Enhanced Card Design with Performance Indicators
+   ========================================================================== */
+
+.trading-rules-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+  gap: var(--theme-space-5);
+}
+
 .rule-card {
-  margin-bottom: 16px;
-  border: 1px solid #e0e0e0;
+  background: var(--trading-bg-card);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--trading-radius-lg);
+  padding: var(--theme-space-5);
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.rule-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
   transition: all 0.3s ease;
 }
 
 .rule-card:hover {
-  border-color: #1976d2;
-  box-shadow: 0 2px 8px rgba(25, 118, 210, 0.15);
+  transform: translateY(-2px);
+  box-shadow: var(--trading-shadow-lg);
+  border-color: rgba(255, 255, 255, 0.2);
 }
 
-.rule-active {
-  border-left: 4px solid #4caf50;
+.rule-active::before {
+  background: var(--trading-bg-gradient-success);
 }
 
-.rule-inactive {
-  border-left: 4px solid #9e9e9e;
+.rule-inactive::before {
+  background: var(--trading-bg-gradient-secondary);
+}
+
+.rule-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: var(--theme-space-4);
+}
+
+.rule-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--trading-text-primary);
+  margin-bottom: var(--theme-space-1);
+}
+
+.rule-strategy {
+  color: var(--trading-text-secondary);
+  font-size: 0.85rem;
+  padding: var(--theme-space-1) var(--theme-space-2);
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: var(--trading-radius-sm);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.rule-toggle {
+  display: flex;
+  align-items: center;
+  gap: var(--theme-space-2);
 }
 
 .rule-performance {
-  background-color: #f8f9fa;
-  padding: 12px;
-  border-radius: 4px;
-  margin-top: 12px;
+  background: var(--trading-bg-glass);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: var(--trading-radius-md);
+  padding: var(--theme-space-4);
+  margin-top: var(--theme-space-4);
+}
+
+.rule-performance-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--trading-text-primary);
+  margin-bottom: var(--theme-space-3);
+  text-align: center;
+}
+
+.performance-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--theme-space-3);
 }
 
 .performance-metric {
   text-align: center;
+  padding: var(--theme-space-2);
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: var(--trading-radius-sm);
+}
+
+.performance-metric-value {
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin-bottom: var(--theme-space-1);
+}
+
+.performance-metric-label {
+  font-size: 0.75rem;
+  color: var(--trading-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .performance-positive {
-  color: #4caf50;
-  font-weight: 600;
+  color: var(--trading-success-400);
 }
 
 .performance-negative {
-  color: #f44336;
-  font-weight: 600;
+  color: var(--trading-error-400);
 }
 
-/* Control Panel Styles */
-.control-panel-section {
-  margin-bottom: 24px;
-  padding: 20px;
-  background: white;
-  border-radius: 8px;
-  border: 1px solid #e0e0e0;
+.performance-neutral {
+  color: var(--trading-text-secondary);
 }
+
+/* ==========================================================================
+   CONTROL PANEL - Modern Glass Design
+   ========================================================================== */
+
+.control-panel-section {
+  background: var(--trading-bg-card);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--trading-radius-lg);
+  padding: var(--theme-space-6);
+  margin-bottom: var(--theme-space-6);
+  position: relative;
+  overflow: hidden;
+}
+
+.control-panel-section::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--trading-bg-gradient-accent);
+}
+
+.control-panel-title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--trading-text-primary);
+  margin-bottom: var(--theme-space-4);
+  display: flex;
+  align-items: center;
+  gap: var(--theme-space-2);
+}
+
+.control-panel-title-icon {
+  width: 24px;
+  height: 24px;
+  color: var(--trading-primary-400);
+}
+
+.global-trading-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--theme-space-4);
+  background: var(--trading-bg-glass);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--trading-radius-md);
+  margin-bottom: var(--theme-space-4);
+}
+
+.global-trading-info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--theme-space-1);
+}
+
+.global-trading-label {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--trading-text-primary);
+}
+
+.global-trading-description {
+  font-size: 0.9rem;
+  color: var(--trading-text-secondary);
+}
+
+.global-trading-switch {
+  transform: scale(1.2);
+}
+
+.control-actions {
+  display: flex;
+  gap: var(--theme-space-3);
+  flex-wrap: wrap;
+}
+
+.control-action-btn {
+  background: var(--trading-bg-glass);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--trading-radius-md);
+  padding: var(--theme-space-3) var(--theme-space-4);
+  color: var(--trading-text-primary);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: var(--theme-space-2);
+  min-height: 44px;
+}
+
+.control-action-btn:hover {
+  background: var(--trading-primary-500);
+  color: white;
+  border-color: var(--trading-primary-400);
+  transform: translateY(-1px);
+  box-shadow: var(--trading-shadow-md);
+}
+
+.control-action-btn.primary {
+  background: var(--trading-bg-gradient-accent);
+  border-color: var(--trading-primary-400);
+  color: white;
+}
+
+.control-action-btn.primary:hover {
+  background: var(--trading-bg-gradient-primary);
+  transform: translateY(-2px);
+  box-shadow: var(--trading-shadow-lg);
+}
+
+/* ==========================================================================
+   ADDITIONAL CONTROL PANEL ELEMENTS
+   ========================================================================== */
 
 .control-panel-section h6 {
-  margin-bottom: 16px;
-  color: #333;
+  font-size: 1.1rem;
   font-weight: 600;
+  color: var(--trading-text-primary);
+  margin-bottom: var(--theme-space-4);
 }
 
 .global-controls {
-  background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
-  border: 1px solid #2196f3;
+  background: var(--trading-bg-card);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--trading-radius-lg);
+  padding: var(--theme-space-5);
 }
 
 .portfolio-controls {
   display: flex;
   flex-wrap: wrap;
-  gap: 12px;
+  gap: var(--theme-space-3);
+  margin-top: var(--theme-space-4);
 }
 
 .portfolio-control-item {
   flex: 1;
-  min-width: 200px;
+  min-width: 250px;
+  background: var(--trading-bg-glass);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--trading-radius-md);
+  padding: var(--theme-space-4);
+}
+
+.portfolio-control-label {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--trading-text-primary);
+  margin-bottom: var(--theme-space-2);
+}
+
+/* ==========================================================================
+   MODERN TAB STYLING
+   ========================================================================== */
+
+.ai-trading-tabs {
+  margin-bottom: var(--theme-space-6);
+  background: var(--trading-bg-card);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--trading-radius-lg);
+  padding: var(--theme-space-2);
+}
+
+.ai-trading-tabs .MuiTabs-root {
+  min-height: 48px;
+}
+
+.ai-trading-tabs .MuiTab-root {
+  color: var(--trading-text-secondary);
+  font-weight: 500;
+  text-transform: none;
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+  border-radius: var(--trading-radius-md);
+  margin: 0 var(--theme-space-1);
+  min-height: 44px;
+  padding: var(--theme-space-2) var(--theme-space-4);
+}
+
+.ai-trading-tabs .MuiTab-root:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+  color: var(--trading-text-primary);
+}
+
+.ai-trading-tabs .MuiTab-root.Mui-selected {
+  background: var(--trading-bg-gradient-accent);
+  color: white;
+  font-weight: 600;
+  box-shadow: var(--trading-shadow-md);
+}
+
+.ai-trading-tabs .MuiTabs-indicator {
+  display: none;
+}
+
+.tab-panel-content {
+  padding: var(--theme-space-4) 0;
 }
 
 /* History Table Styles */
@@ -377,55 +714,480 @@
   }
 }
 
-/* Status Indicators */
+/* ==========================================================================
+   Enhanced Status Indicators and Trading Elements
+   ========================================================================== */
+
 .status-indicator {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  padding: 4px 8px;
-  border-radius: 12px;
+  gap: var(--theme-space-1);
+  padding: var(--theme-space-1) var(--theme-space-3);
+  border-radius: var(--theme-radius-full);
   font-size: 0.75rem;
-  font-weight: 500;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  backdrop-filter: blur(10px);
 }
 
 .status-active {
-  background-color: #e8f5e8;
-  color: #2e7d32;
+  background: linear-gradient(135deg, 
+    rgba(76, 175, 80, 0.15) 0%, 
+    rgba(56, 142, 60, 0.15) 100%);
+  color: var(--trading-success-primary);
+  border: 1px solid rgba(76, 175, 80, 0.3);
 }
 
 .status-paused {
-  background-color: #fff3e0;
-  color: #f57c00;
+  background: linear-gradient(135deg, 
+    rgba(255, 152, 0, 0.15) 0%, 
+    rgba(245, 124, 0, 0.15) 100%);
+  color: var(--trading-warning-primary);
+  border: 1px solid rgba(255, 152, 0, 0.3);
 }
 
 .status-stopped {
-  background-color: #ffebee;
-  color: #c62828;
+  background: linear-gradient(135deg, 
+    rgba(244, 67, 54, 0.15) 0%, 
+    rgba(198, 40, 40, 0.15) 100%);
+  color: var(--trading-error-primary);
+  border: 1px solid rgba(244, 67, 54, 0.3);
 }
 
-/* Trade Cards */
-.trade-card {
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
-  margin-bottom: 12px;
-  transition: all 0.2s ease;
+/* Session Status Border Colors */
+.session-status-active {
+  border-left: 4px solid var(--trading-success-primary) !important;
 }
 
-.trade-card:hover {
-  border-color: #1976d2;
-  box-shadow: 0 2px 8px rgba(25, 118, 210, 0.15);
+.session-status-paused {
+  border-left: 4px solid var(--trading-warning-primary) !important;
 }
 
+.session-status-stopped {
+  border-left: 4px solid var(--trading-error-primary) !important;
+}
+
+/* Rule Status Styling */
+.rule-active {
+  border-left: 4px solid var(--trading-success-primary) !important;
+}
+
+.rule-inactive {
+  border-left: 4px solid var(--trading-text-disabled) !important;
+}
+
+/* Trade Result Styling */
 .trade-success {
-  border-left: 4px solid #4caf50;
+  border-left: 4px solid var(--trading-success-primary) !important;
 }
 
 .trade-failure {
-  border-left: 4px solid #f44336;
+  border-left: 4px solid var(--trading-error-primary) !important;
 }
 
-/* Tab panel styling */
-.MuiBox-root[role="tabpanel"] {
-  background: var(--trading-bg-secondary-card);
+/* Performance Metrics */
+.performance-positive {
+  color: var(--trading-success-primary) !important;
+  font-weight: 600;
+}
+
+.performance-negative {
+  color: var(--trading-error-primary) !important;
+  font-weight: 600;
+}
+
+.profit-cell {
+  color: var(--trading-success-primary) !important;
+  font-weight: 600;
+}
+
+.loss-cell {
+  color: var(--trading-error-primary) !important;
+  font-weight: 600;
+}
+
+.rule-performance {
+  background: var(--trading-bg-tertiary-card) !important;
+  border: 1px solid var(--trading-border-secondary) !important;
+  border-radius: var(--theme-radius-2) !important;
+  padding: var(--theme-space-3) !important;
+  margin-top: var(--theme-space-3) !important;
+}
+
+.performance-metric {
+  text-align: center;
   color: var(--trading-text-primary);
+}
+
+/* ==========================================================================
+   Enhanced Table Styling
+   ========================================================================== */
+
+.history-table {
+  background: var(--trading-bg-secondary-card) !important;
+  border: 1px solid var(--trading-border-primary) !important;
+  border-radius: var(--theme-radius-3) !important;
+  overflow: hidden;
+}
+
+.history-table .MuiTableHead-root {
+  background: var(--trading-bg-primary-card) !important;
+}
+
+.history-table .MuiTableHead-root th {
+  font-weight: 600;
+  color: var(--trading-text-primary) !important;
+  border-bottom: 1px solid var(--trading-border-primary) !important;
+  padding: var(--theme-space-4) !important;
+}
+
+.history-table .MuiTableBody-root .MuiTableRow-root {
+  border-bottom: 1px solid var(--trading-border-secondary) !important;
+}
+
+.history-table .MuiTableBody-root .MuiTableRow-root:hover {
+  background: rgba(25, 118, 210, 0.05) !important;
+}
+
+.history-table .MuiTableCell-root {
+  color: var(--trading-text-primary) !important;
+  border-bottom: 1px solid var(--trading-border-secondary) !important;
+  padding: var(--theme-space-3) var(--theme-space-4) !important;
+}
+
+/* ==========================================================================
+   Enhanced Responsive Design
+   ========================================================================== */
+
+@media (max-width: 768px) {
+  .page-content {
+    padding: var(--theme-space-4) var(--theme-space-3) !important;
+  }
+
+  .status-overview {
+    margin-bottom: var(--theme-space-4) !important;
+  }
+
+  .status-overview .MuiCard-root {
+    min-width: 100% !important;
+    margin-bottom: var(--theme-space-3) !important;
+  }
+
+  .dashboard-tabs {
+    padding: 0 var(--theme-space-2) !important;
+  }
+
+  .dashboard-tabs .MuiTab-root {
+    min-width: auto !important;
+    padding: var(--theme-space-2) var(--theme-space-3) !important;
+    font-size: 0.75rem !important;
+  }
+
+  .MuiBox-root[role="tabpanel"] {
+    padding: var(--theme-space-4) var(--theme-space-3) !important;
+  }
+
+  .portfolio-controls {
+    flex-direction: column;
+    gap: var(--theme-space-3) !important;
+  }
+
+  .portfolio-control-item {
+    min-width: unset;
+  }
+
+  .session-controls {
+    flex-wrap: wrap;
+    gap: var(--theme-space-2) !important;
+  }
+
+  .control-panel-section {
+    padding: var(--theme-space-4) !important;
+    margin-bottom: var(--theme-space-4) !important;
+  }
+
+  .performance-chart-container {
+    height: 300px !important;
+    padding: var(--theme-space-4) !important;
+  }
+
+  .chart-controls {
+    flex-direction: column;
+    gap: var(--theme-space-3);
+    align-items: stretch;
+  }
+
+  .chart-filters {
+    gap: var(--theme-space-2) !important;
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 480px) {
+  .status-overview .MuiTypography-h4 {
+    font-size: 1.5rem !important;
+  }
+
+  .dashboard-tabs .MuiTab-root .MuiSvgIcon-root {
+    display: none;
+  }
+
+  .page-header .emergency-btn {
+    padding: var(--theme-space-2) var(--theme-space-3) !important;
+    font-size: 0.75rem !important;
+  }
+}
+
+/* ==========================================================================
+   Enhanced Loading States and Animations
+   ========================================================================== */
+
+.loading-skeleton {
+  animation: trading-pulse 1.5s ease-in-out infinite;
+  background: linear-gradient(90deg, 
+    var(--trading-bg-secondary-card) 0%, 
+    rgba(25, 118, 210, 0.1) 50%, 
+    var(--trading-bg-secondary-card) 100%);
+  background-size: 200% 100%;
+}
+
+@keyframes trading-pulse {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* Add smooth transitions for all interactive elements */
+.trading-session-card,
+.rule-card,
+.trade-card,
+.control-panel-section,
+.status-overview .MuiCard-root,
+.tabs-container {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/* Enhance focus states for accessibility */
+.dashboard-tabs .MuiTab-root:focus,
+.page-header .emergency-btn:focus,
+.status-overview .MuiCard-root:focus-within {
+  outline: 2px solid var(--trading-primary-400);
+  outline-offset: 2px;
+}
+
+.status-overview .MuiCard-root {
+  background: var(--trading-bg-primary-card) !important;
+  border: 1px solid var(--trading-border-primary);
+  border-radius: var(--theme-radius-3);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+
+.status-overview .MuiCard-root:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(25, 118, 210, 0.15);
+  border-color: var(--trading-primary-400);
+}
+
+.status-overview .MuiCardContent-root {
+  color: var(--trading-text-primary) !important;
+  padding: var(--theme-space-5) !important;
+}
+
+.status-overview .MuiTypography-colorTextSecondary {
+  color: var(--trading-text-secondary) !important;
+  font-weight: 500;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: var(--theme-space-2) !important;
+}
+
+.status-overview .MuiTypography-h4 {
+  font-weight: 700;
+  color: var(--trading-text-primary) !important;
+  font-size: 2rem;
+  line-height: 1.2;
+  margin: var(--theme-space-2) 0 !important;
+}
+
+.status-overview .MuiTypography-body2 {
+  color: var(--trading-text-secondary) !important;
+  font-size: 0.875rem;
+  margin-top: var(--theme-space-2) !important;
+}
+
+.status-overview .MuiChip-root {
+  border-radius: var(--theme-radius-2);
+  font-weight: 600;
+  font-size: 0.75rem;
+  margin-top: var(--theme-space-1);
+}
+
+.status-overview .MuiChip-colorSuccess {
+  background: linear-gradient(135deg, 
+    rgba(76, 175, 80, 0.1) 0%, 
+    rgba(56, 142, 60, 0.1) 100%);
+  color: var(--trading-success-primary);
+  border: 1px solid rgba(76, 175, 80, 0.3);
+}
+
+.status-overview .MuiChip-colorWarning {
+  background: linear-gradient(135deg, 
+    rgba(255, 152, 0, 0.1) 0%, 
+    rgba(245, 124, 0, 0.1) 100%);
+  color: var(--trading-warning-primary);
+  border: 1px solid rgba(255, 152, 0, 0.3);
+}
+
+/* Enhanced Tab Container */
+.tabs-container {
+  background: var(--trading-bg-primary-card) !important;
+  border: 1px solid var(--trading-border-primary);
+  border-radius: var(--theme-radius-3);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10px);
+}
+
+.dashboard-tabs {
+  border-bottom: 1px solid var(--trading-border-primary);
+  padding: 0 var(--theme-space-4);
+}
+
+.dashboard-tabs .MuiTab-root {
+  color: var(--trading-text-secondary);
+  font-weight: 500;
+  text-transform: none;
+  font-size: 0.875rem;
+  min-height: 64px;
+  padding: var(--theme-space-3) var(--theme-space-4);
+  transition: all 0.2s ease;
+}
+
+.dashboard-tabs .MuiTab-root:hover {
+  color: var(--trading-primary-400);
+  background: rgba(25, 118, 210, 0.05);
+}
+
+.dashboard-tabs .MuiTab-root.Mui-selected {
+  color: var(--trading-primary-500);
+  font-weight: 600;
+}
+
+.dashboard-tabs .MuiTabs-indicator {
+  background: linear-gradient(90deg, 
+    var(--trading-primary-500) 0%, 
+    var(--trading-primary-400) 100%);
+  height: 3px;
+  border-radius: 2px;
+}
+
+/* Tab Panel Content */
+.MuiBox-root[role="tabpanel"] {
+  background: transparent !important;
+  color: var(--trading-text-primary);
+  padding: var(--theme-space-6) !important;
+}
+
+/* ==========================================================================
+   Enhanced Card Styling for Components
+   ========================================================================== */
+
+.trading-session-card,
+.rule-card,
+.trade-card {
+  background: var(--trading-bg-secondary-card) !important;
+  border: 1px solid var(--trading-border-primary) !important;
+  border-radius: var(--theme-radius-3) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+  transition: all 0.3s ease !important;
+  margin-bottom: var(--theme-space-4) !important;
+}
+
+.trading-session-card:hover,
+.rule-card:hover,
+.trade-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(25, 118, 210, 0.15) !important;
+  border-color: var(--trading-primary-400) !important;
+}
+
+/* Control Panel Sections */
+.control-panel-section {
+  background: var(--trading-bg-secondary-card) !important;
+  border: 1px solid var(--trading-border-primary) !important;
+  border-radius: var(--theme-radius-3) !important;
+  padding: var(--theme-space-5) !important;
+  margin-bottom: var(--theme-space-6) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.control-panel-section h6 {
+  color: var(--trading-text-primary) !important;
+  font-weight: 600;
+  margin-bottom: var(--theme-space-4) !important;
+}
+
+.global-controls {
+  background: linear-gradient(135deg, 
+    rgba(25, 118, 210, 0.1) 0%, 
+    rgba(66, 165, 245, 0.1) 100%) !important;
+  border: 1px solid rgba(25, 118, 210, 0.3) !important;
+}
+
+/* Performance Chart Container */
+.performance-chart-container {
+  background: var(--trading-bg-secondary-card) !important;
+  border: 1px solid var(--trading-border-primary) !important;
+  border-radius: var(--theme-radius-3) !important;
+  padding: var(--theme-space-5) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  height: 400px;
+}
+
+.chart-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--theme-space-5);
+  padding-bottom: var(--theme-space-3);
+  border-bottom: 1px solid var(--trading-border-primary);
+}
+
+/* Rule Builder Styling */
+.rule-builder {
+  background: var(--trading-bg-secondary-card) !important;
+  border: 1px solid var(--trading-border-primary) !important;
+  border-radius: var(--theme-radius-3) !important;
+  padding: var(--theme-space-6) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.rule-builder-section {
+  background: var(--trading-bg-primary-card) !important;
+  border: 1px solid var(--trading-border-secondary) !important;
+  border-radius: var(--theme-radius-2) !important;
+  padding: var(--theme-space-4) !important;
+  margin-bottom: var(--theme-space-6) !important;
+}
+
+.rule-builder-section h6 {
+  color: var(--trading-primary-500) !important;
+  font-weight: 600;
+  margin-bottom: var(--theme-space-3) !important;
+}
+
+.condition-item,
+.action-item {
+  background: var(--trading-bg-tertiary-card) !important;
+  border: 1px solid var(--trading-border-secondary) !important;
+  border-radius: var(--theme-radius-2) !important;
+  padding: var(--theme-space-3) !important;
+  margin-bottom: var(--theme-space-2) !important;
+  color: var(--trading-text-primary) !important;
 }

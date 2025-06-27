@@ -1,3 +1,60 @@
+/**
+ * =============================================================================
+ * ORDER MANAGEMENT SERVICE - Central Order Processing Hub
+ * =============================================================================
+ *
+ * Comprehensive order management system that orchestrates the complete order
+ * lifecycle from submission to settlement. Coordinates risk management,
+ * execution, and position updates for all trading activities.
+ *
+ * Key Features:
+ * - Complete order lifecycle management (submission to settlement)
+ * - Multi-order type support (market, limit, stop, stop-limit)
+ * - Conditional order processing and trigger monitoring
+ * - Real-time order status tracking and updates
+ * - Risk validation and compliance checking
+ * - Order execution coordination and settlement
+ * - Position management and portfolio synchronization
+ * - Order cancellation and modification handling
+ *
+ * Order Types Supported:
+ * - Market Orders: Immediate execution at current market price
+ * - Limit Orders: Execution at specified price or better
+ * - Stop Orders: Market order triggered at stop price
+ * - Stop-Limit Orders: Limit order triggered at stop price
+ * - Conditional Orders: Complex logic-based order triggers
+ *
+ * Order Processing Flow:
+ * 1. Order validation and risk assessment
+ * 2. Order routing and queue management
+ * 3. Market data monitoring for execution conditions
+ * 4. Execution engine coordination and fill processing
+ * 5. Position updates and portfolio reconciliation
+ * 6. Settlement processing and confirmation
+ * 7. Real-time status updates and notifications
+ *
+ * Risk Integration:
+ * - Pre-trade risk validation and limit checking
+ * - Real-time position monitoring and margin calculations
+ * - Portfolio concentration and diversification rules
+ * - Day trading rule compliance (PDT regulations)
+ * - Buying power verification and margin requirements
+ *
+ * Scheduled Operations:
+ * - Conditional order monitoring and trigger evaluation
+ * - Market hours compliance and order queue management
+ * - Expired order cleanup and status reconciliation
+ * - Position synchronization and portfolio updates
+ * - Performance metrics collection and reporting
+ *
+ * Used By:
+ * - Paper Trading Service for virtual trade execution
+ * - Frontend trading interface for order submission
+ * - Risk Management for compliance monitoring
+ * - WebSocket for real-time order status updates
+ * =============================================================================
+ */
+
 import { Inject, Injectable, Logger, forwardRef } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';

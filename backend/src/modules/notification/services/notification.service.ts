@@ -1,3 +1,60 @@
+/**
+ * =============================================================================
+ * NOTIFICATION SERVICE - Intelligent Alert and Communication Engine
+ * =============================================================================
+ *
+ * Comprehensive notification and alert system that delivers personalized,
+ * real-time notifications for trading activities, market events, and portfolio
+ * changes. Supports multiple delivery channels and intelligent filtering.
+ *
+ * Key Features:
+ * - Multi-channel notification delivery (email, SMS, push, in-app)
+ * - Intelligent alert detection and pattern recognition
+ * - Personalized notification preferences and filtering
+ * - Template-based notification formatting and customization
+ * - Real-time delivery tracking and status monitoring
+ * - Market event alerts and threshold-based notifications
+ * - Portfolio performance alerts and risk warnings
+ * - Trading signal notifications and opportunity alerts
+ *
+ * Notification Types:
+ * - TRADE_EXECUTION: Order fills and trade confirmations
+ * - PRICE_ALERT: Stock price threshold notifications
+ * - PORTFOLIO_UPDATE: Portfolio value and performance changes
+ * - RISK_WARNING: Risk limit breaches and margin calls
+ * - MARKET_NEWS: Important market events and news
+ * - SYSTEM_STATUS: Platform status and maintenance alerts
+ *
+ * Alert Detection:
+ * - Price movement alerts (percentage or absolute thresholds)
+ * - Volume spike detection and unusual activity alerts
+ * - Technical pattern recognition (breakouts, reversals)
+ * - Multi-timeframe analysis and confirmation signals
+ * - Correlation alerts and cross-asset opportunities
+ * - Sentiment analysis alerts from news and social media
+ *
+ * Delivery Channels:
+ * - Email: Rich HTML templates with charts and data
+ * - SMS: Concise text alerts for urgent notifications
+ * - Push Notifications: Mobile app and browser notifications
+ * - In-App: Real-time dashboard alerts and popups
+ * - WebSocket: Live notification streaming
+ *
+ * Personalization:
+ * - User-defined alert criteria and thresholds
+ * - Notification frequency control and quiet hours
+ * - Priority-based filtering and escalation rules
+ * - Channel preferences by notification type
+ * - Alert group management and batch processing
+ *
+ * Used By:
+ * - Stock Service for price and volume alerts
+ * - Paper Trading Service for trade notifications
+ * - Risk Management for compliance alerts
+ * - Frontend notification center for user alerts
+ * =============================================================================
+ */
+
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Between, Repository } from 'typeorm';

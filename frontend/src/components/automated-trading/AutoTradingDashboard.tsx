@@ -10,7 +10,6 @@ import {
 } from "@mui/icons-material";
 import {
   Box,
-  Button,
   Card,
   CardContent,
   Chip,
@@ -22,11 +21,11 @@ import {
   Typography,
 } from "@mui/material";
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
 import autonomousTradingApi, {
   DeploymentConfig,
   Portfolio,
 } from "../../services/autonomousTradingApi";
+import { PageHeader } from "../ui";
 import { BehavioralAnalyticsDashboard } from "../behavioral-analytics/BehavioralAnalyticsDashboard";
 import { AutoTradeHistory } from "./AutoTradeHistory";
 import "./AutoTradingDashboard.css";
@@ -361,15 +360,23 @@ export const AutoTradingDashboard: React.FC = () => {
   if (loading) {
     return (
       <div className="page-container">
-        <div className="page-header">
-          <div className="header-left">
-            <h1>Auto Trading Dashboard</h1>
-            <div className="market-time">
-              <TrendingUp sx={{ fontSize: 16 }} />
-              <span>Loading...</span>
-            </div>
-          </div>
-        </div>
+        <PageHeader
+          title="Auto Trading Dashboard"
+          currentTime={new Date()}
+          isConnected={false}
+          showLiveIndicator={true}
+          sticky={true}
+          statsValue="Loading..."
+          actionButtons={[
+            {
+              icon: <Home />,
+              onClick: () => window.location.href = "/",
+              tooltip: "Back to Dashboard",
+              className: "nav-btn",
+              label: "Dashboard",
+            },
+          ]}
+        />
         <div className="page-content">
           <LinearProgress />
           <Typography variant="h6" sx={{ mt: 2, textAlign: "center" }}>
@@ -383,76 +390,123 @@ export const AutoTradingDashboard: React.FC = () => {
   return (
     <div className="page-container">
       {/* Standardized Header */}
-      <div className="page-header">
-        <div className="header-left">
-          <h1>Auto Trading Dashboard</h1>
-          <div className="market-time">
-            <TrendingUp sx={{ fontSize: 16 }} />
-            <span>
-              {isGlobalTradingActive ? "Trading Active" : "Trading Paused"}
-            </span>
-          </div>
-        </div>
-        <div className="header-info">
-          <div
-            className={`connection-status ${isGlobalTradingActive ? "connected" : ""}`}
-          >
-            <span>{isGlobalTradingActive ? "Live" : "Paused"}</span>
-          </div>
-          <Link to="/" style={{ textDecoration: "none" }}>
-            <Button className="nav-btn" startIcon={<Home />}>
-              Dashboard
-            </Button>
-          </Link>
-          <FormControlLabel
-            control={
-              <Switch
-                checked={isGlobalTradingActive}
-                onChange={toggleGlobalTrading}
-                color="primary"
-              />
-            }
-            label="Global Trading"
-          />
-          <Button
-            variant="contained"
-            color="error"
-            startIcon={<Emergency />}
-            onClick={handleEmergencyStop}
-            className="emergency-stop-btn"
-          >
-            Emergency Stop
-          </Button>
-        </div>
-      </div>
+      <PageHeader
+        title="Auto Trading Dashboard"
+        currentTime={new Date()}
+        isConnected={isGlobalTradingActive}
+        showLiveIndicator={true}
+        sticky={true}
+        statsValue={`${tradingSessions.filter((s) => s.status === "active").length} active sessions • ${tradingSessions.reduce((acc, session) => acc + session.tradesExecuted, 0)} trades`}
+        actionButtons={[
+          {
+            icon: <Home />,
+            onClick: () => window.location.href = "/",
+            tooltip: "Back to Dashboard",
+            className: "nav-btn",
+            label: "Dashboard",
+          },
+          {
+            icon: <Emergency />,
+            onClick: handleEmergencyStop,
+            tooltip: "Emergency Stop All Trading",
+            className: "emergency-btn",
+            label: "Emergency Stop",
+          },
+        ]}
+      >
+        {/* Global Trading Control */}
+        <FormControlLabel
+          control={
+            <Switch
+              checked={isGlobalTradingActive}
+              onChange={toggleGlobalTrading}
+              color="primary"
+            />
+          }
+          label="Global Trading"
+          sx={{ ml: 2 }}
+        />
+      </PageHeader>
 
       <div className="page-content">
-        {/* Status Overview */}
-        <Box
-          sx={{ display: "flex", gap: 3, flexWrap: "wrap", mb: 3 }}
-          className="status-overview"
-        >
-          <Card sx={{ flex: 1, minWidth: 250 }}>
-            <CardContent>
-              <Typography color="textSecondary" gutterBottom>
+        {/* Status Overview Cards with Modern Design */}
+        <div className="status-overview">
+          <div className="status-card">
+            <div className="status-card-header">
+              <div className="status-card-title">
+                <Assessment className="status-card-icon" />
                 Active Sessions
-              </Typography>
-              <Typography variant="h4">
-                {tradingSessions.filter((s) => s.status === "active").length}
-              </Typography>
-              <Chip
-                size="small"
-                label={
-                  isGlobalTradingActive ? "Trading Active" : "Trading Paused"
-                }
-                color={isGlobalTradingActive ? "success" : "warning"}
-              />
-            </CardContent>
-          </Card>
+              </div>
+            </div>
+            <div className="status-card-value">
+              {tradingSessions.filter((s) => s.status === "active").length}
+            </div>
+            <div className="status-card-subtitle">
+              {isGlobalTradingActive ? "Trading Active" : "Trading Paused"}
+            </div>
+          </div>
 
-          <Card sx={{ flex: 1, minWidth: 250 }}>
-            <CardContent>
-              <Typography color="textSecondary" gutterBottom>
+          <div className="status-card">
+            <div className="status-card-header">
+              <div className="status-card-title">
+                <TrendingUp className="status-card-icon" />
+                Total P&L
+              </div>
+            </div>
+            <div className={`status-card-value ${calculateTotalPnL() >= 0 ? 'performance-positive' : 'performance-negative'}`}>
+              ${calculateTotalPnL().toFixed(2)}
+            </div>
+            <div className="status-card-subtitle">
+              Today's Performance
+            </div>
+          </div>
+
+          <div className="status-card">
+            <div className="status-card-header">
+              <div className="status-card-title">
+                <Psychology className="status-card-icon" />
+                Total Trades
+              </div>
+            </div>
+            <div className="status-card-value">
+              {calculateTotalTrades()}
+            </div>
+            <div className="status-card-subtitle">
+              All Sessions Combined
+            </div>
+          </div>
+
+          <div className="status-card">
+            <div className="status-card-header">
+              <div className="status-card-title">
+                <Assessment className="status-card-icon" />
+                Win Rate
+              </div>
+            </div>
+            <div className="status-card-value">
+              {calculateWinRate().toFixed(1)}%
+            </div>
+            <div className="status-card-subtitle">
+              Success Rate
+            </div>
+          </div>
+        </div>
+
+        {/* Tab Navigation with Modern Design */}
+        <div className="ai-trading-tabs">
+          <Tabs
+            value={activeTab}
+            onChange={handleTabChange}
+            variant="scrollable"
+            scrollButtons="auto"
+            className="main-tabs"
+          >
+            <Tab icon={<TrendingUp />} label="Live Sessions" />
+            <Tab icon={<Settings />} label="Trading Rules" />
+            <Tab icon={<History />} label="Trade History" />
+            <Tab icon={<Psychology />} label="Behavioral Analysis" />
+          </Tabs>
+        </div>
                 Total P&L Today
               </Typography>
               <Typography

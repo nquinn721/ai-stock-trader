@@ -30,6 +30,9 @@ import { SignalGenerationService } from '../ml/services/signal-generation.servic
 import { DynamicRiskManagementService } from '../ml/services/dynamic-risk-management.service';
 import { SentimentAnalysisService } from '../ml/services/sentiment-analysis.service';
 import { PatternRecognitionService } from '../ml/services/pattern-recognition.service';
+import { AutonomousTradingService, DeploymentConfig, StrategyInstance, InstancePerformance } from './services/autonomous-trading.service';
+import { StrategyBuilderService } from './strategy-builder.service';
+import { BacktestingService } from './backtesting.service';
 
 @Injectable()
 export class AutoTradingService {
@@ -49,7 +52,7 @@ export class AutoTradingService {
     private readonly positionSizingService: PositionSizingService,
     private readonly stockService: StockService,
     private readonly paperTradingService: PaperTradingService,
-    private readonly websocketGateway: StockWebSocketGateway,
+    private readonly stockWebSocketGateway: StockWebSocketGateway,
     private readonly marketHoursService: MarketHoursService,
     // ML Services
     private readonly intelligentRecommendationService: IntelligentRecommendationService,
@@ -57,6 +60,10 @@ export class AutoTradingService {
     private readonly dynamicRiskManagementService: DynamicRiskManagementService,
     private readonly sentimentAnalysisService: SentimentAnalysisService,
     private readonly patternRecognitionService: PatternRecognitionService,
+    // Autonomous Trading Services
+    private readonly autonomousTradingService: AutonomousTradingService,
+    private readonly strategyBuilderService: StrategyBuilderService,
+    private readonly backtestingService: BacktestingService,
   ) {}
 
   // Trading Rules Management
@@ -743,4 +750,114 @@ export class AutoTradingService {
         }, 0),
     };
   }
+
+  // ============================================================================
+  // AUTONOMOUS TRADING METHODS
+  // ============================================================================
+
+  /**
+   * Deploy an autonomous trading strategy
+   */
+  async deployStrategy(
+    userId: string,
+    strategyId: string,
+    config: DeploymentConfig,
+  ): Promise<StrategyInstance> {
+    return this.autonomousTradingService.deployStrategy(
+      userId,
+      strategyId,
+      config,
+    );
+  }
+
+  /**
+   * Stop an autonomous trading strategy
+   */
+  async stopStrategy(userId: string, strategyId: string): Promise<void> {
+    return this.autonomousTradingService.stopStrategy(userId, strategyId);
+  }
+
+  /**
+   * Pause an autonomous trading strategy
+   */
+  async pauseStrategy(userId: string, strategyId: string): Promise<void> {
+    return this.autonomousTradingService.pauseStrategy(userId, strategyId);
+  }
+
+  /**
+   * Resume a paused autonomous trading strategy
+   */
+  async resumeStrategy(userId: string, strategyId: string): Promise<void> {
+    return this.autonomousTradingService.resumeStrategy(userId, strategyId);
+  }
+
+  /**
+   * Get all active strategy instances
+   */
+  async getActiveStrategies(userId: string): Promise<StrategyInstance[]> {
+    return this.autonomousTradingService.getActiveStrategies(userId);
+  }
+
+  /**
+   * Get strategy performance metrics
+   */
+  async getStrategyPerformance(
+    userId: string,
+    strategyId: string,
+  ): Promise<InstancePerformance> {
+    return this.autonomousTradingService.getStrategyPerformance(
+      userId,
+      strategyId,
+    );
+  }
+
+  /**
+   * Run strategy backtest
+   */
+  async runBacktest(
+    strategyId: string,
+    startDate: Date,
+    endDate: Date,
+    initialCapital: number,
+  ): Promise<any> {
+    return this.backtestingService.runBacktest(
+      strategyId,
+      startDate,
+      endDate,
+      initialCapital,
+    );
+  }
+
+  /**
+   * Get available strategy templates
+   */
+  async getStrategyTemplates(): Promise<any[]> {
+    return this.strategyBuilderService.getStrategyTemplates();
+  }
+
+  /**
+   * Create a new strategy from template
+   */
+  async createStrategyFromTemplate(
+    userId: string,
+    templateId: string,
+    name: string,
+    parameters: any,
+  ): Promise<any> {
+    return this.strategyBuilderService.createStrategyFromTemplate(
+      userId,
+      templateId,
+      name,
+      parameters,
+    );
+  }
 }
+
+// Export autonomous trading interfaces for use in controller
+export {
+  DeploymentConfig,
+  RiskLimits,
+  NotificationConfig,
+  StrategyInstance,
+  InstancePerformance,
+} from './services/autonomous-trading.service';
