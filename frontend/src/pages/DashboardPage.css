@@ -598,6 +598,11 @@
     display: none;
   }
 }
+
+/* Portfolio Section */
+.portfolio-content {
+  background: var(--surface);
+  border: 1px solid var(--border-primary);
   border-radius: var(--radius-lg);
   padding: 2rem;
   margin-bottom: 2rem;
