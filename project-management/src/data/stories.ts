@@ -1016,15 +1016,16 @@ export const stories: Story[] = [
     title: "Autonomous Market Making & Liquidity Provision Engine",
     description:
       "Develop an advanced autonomous market making system that provides liquidity across multiple venues while optimizing for profit and risk management. Implement real-time bid-ask spread optimization, inventory management with dynamic hedging, cross-venue arbitrage detection, and multi-asset liquidity provision. Create statistical arbitrage strategies, mean reversion algorithms, volatility trading, and comprehensive risk management with VaR calculations, stress testing, and regulatory compliance monitoring.",
-    status: "IN_PROGRESS",
+    status: "DONE",
     priority: "Medium",
     epic: "E7",
     storyPoints: 34,
     sprint: 8,
     assignee: "Quantitative Team",
-    progress: 36,
+    progress: 100,
     dependencies: ["S48", "S35", "S42"],
     createdDate: "2025-06-25",
+    completedDate: "2025-06-27",
   },
   {
     id: "S51",

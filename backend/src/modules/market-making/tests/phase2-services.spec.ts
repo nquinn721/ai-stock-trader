@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { BinanceAdapter } from '../adapters/binance.adapter';
+// import { BinanceAdapter } from '../adapters/binance.adapter';
 import {
   ExchangeConfig,
   ExchangeOrderBook,

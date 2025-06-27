@@ -5,6 +5,7 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import Header from "./components/Header";
 import NotificationToast from "./components/NotificationToast";
 import EnterpriseDataIntelligence from "./components/enterprise/EnterpriseDataIntelligence";
+import MarketMakingDashboard from "./components/market-making/MarketMakingDashboard";
 import { NotificationProvider } from "./context/NotificationContext";
 import { SocketProvider } from "./context/SocketContext";
 import AIAssistantPage from "./pages/AIAssistantPage";
@@ -47,6 +48,10 @@ function App() {
                       <Route
                         path="/ai-assistant"
                         element={<AIAssistantPage />}
+                      />
+                      <Route
+                        path="/market-making"
+                        element={<MarketMakingDashboard />}
                       />
                       <Route
                         path="/behavioral-finance"

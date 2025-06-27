@@ -27,11 +27,11 @@ import {
 } from "@mui/material";
 import { observer } from "mobx-react-lite";
 import React, { useEffect, useState } from "react";
-import autonomousTradingApi, {
+import autoTradingService, {
   DeploymentConfig,
   Portfolio,
   StrategyInstance,
-} from "../services/autonomousTradingApi";
+} from "../services/autoTradingService";
 import { usePortfolioStore } from "../stores/StoreContext";
 import "./AutonomousTradingPage.css";
 
@@ -123,7 +123,7 @@ const AutonomousTradingPage: React.FC = observer(() => {
   const loadPortfolios = async () => {
     setLoading(true);
     try {
-      const response = await autonomousTradingApi.getAvailablePortfolios();
+      const response = await autoTradingService.getAvailablePortfolios();
       if (response.success && response.data) {
         setPortfolios(response.data);
 
@@ -149,7 +149,7 @@ const AutonomousTradingPage: React.FC = observer(() => {
 
   const loadActiveStrategies = async () => {
     try {
-      const response = await autonomousTradingApi.getActiveStrategies();
+      const response = await autoTradingService.getActiveStrategies();
       if (response.success) {
         // Group strategies by portfolio
         const updatedStatuses = { ...portfolioStatuses };
@@ -178,7 +178,7 @@ const AutonomousTradingPage: React.FC = observer(() => {
         portfolioId,
       } as DeploymentConfig;
 
-      const response = await autonomousTradingApi.deployStrategy(
+      const response = await autoTradingService.deployStrategy(
         "default-strategy",
         config
       );
@@ -211,7 +211,7 @@ const AutonomousTradingPage: React.FC = observer(() => {
 
       // Stop all active strategies for this portfolio
       for (const strategy of status.activeStrategies) {
-        await autonomousTradingApi.stopStrategy(strategy.strategyId);
+        await autoTradingService.stopStrategy(strategy.strategyId);
       }
 
       setPortfolioStatuses((prev) => ({
@@ -259,7 +259,7 @@ const AutonomousTradingPage: React.FC = observer(() => {
           portfolioId,
         } as DeploymentConfig;
 
-        await autonomousTradingApi.deployStrategy("custom-strategy", config);
+        await autoTradingService.deployStrategy("custom-strategy", config);
       }
       setDeployModalOpen(false);
       setSelectedPortfolios([]);

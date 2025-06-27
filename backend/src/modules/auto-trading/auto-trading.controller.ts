@@ -10,7 +10,7 @@ import {
   Put,
   Query,
 } from '@nestjs/common';
-import { AutoTradingService } from './auto-trading.service';
+import { AutoTradingService, DeploymentConfig } from './auto-trading.service';
 import { TradeFiltersDto } from './dto/auto-trade-config.dto';
 import {
   CreateTradingRuleDto,
@@ -434,6 +434,233 @@ export class AutoTradingController {
           error: error.message,
         },
         HttpStatus.SERVICE_UNAVAILABLE,
+      );
+    }
+  }
+
+  // ============================================================================
+  // AUTONOMOUS TRADING ENDPOINTS
+  // ============================================================================
+
+  @Post('autonomous/strategies/:strategyId/deploy')
+  async deployStrategy(
+    @Param('strategyId') strategyId: string,
+    @Body() config: DeploymentConfig,
+    @Query('userId') userId: string = 'default-user', // TODO: Get from auth context
+  ) {
+    try {
+      const instance = await this.autoTradingService.deployStrategy(
+        userId,
+        strategyId,
+        config,
+      );
+      return {
+        success: true,
+        data: instance,
+        message: 'Strategy deployed successfully',
+      };
+    } catch (error) {
+      throw new HttpException(
+        {
+          success: false,
+          message: error.message,
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
+  @Post('autonomous/strategies/:strategyId/stop')
+  async stopStrategy(
+    @Param('strategyId') strategyId: string,
+    @Query('userId') userId: string = 'default-user',
+  ) {
+    try {
+      await this.autoTradingService.stopStrategy(userId, strategyId);
+      return {
+        success: true,
+        message: 'Strategy stopped successfully',
+      };
+    } catch (error) {
+      throw new HttpException(
+        {
+          success: false,
+          message: error.message,
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
+  @Post('autonomous/strategies/:strategyId/pause')
+  async pauseStrategy(
+    @Param('strategyId') strategyId: string,
+    @Query('userId') userId: string = 'default-user',
+  ) {
+    try {
+      await this.autoTradingService.pauseStrategy(userId, strategyId);
+      return {
+        success: true,
+        message: 'Strategy paused successfully',
+      };
+    } catch (error) {
+      throw new HttpException(
+        {
+          success: false,
+          message: error.message,
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
+  @Post('autonomous/strategies/:strategyId/resume')
+  async resumeStrategy(
+    @Param('strategyId') strategyId: string,
+    @Query('userId') userId: string = 'default-user',
+  ) {
+    try {
+      await this.autoTradingService.resumeStrategy(userId, strategyId);
+      return {
+        success: true,
+        message: 'Strategy resumed successfully',
+      };
+    } catch (error) {
+      throw new HttpException(
+        {
+          success: false,
+          message: error.message,
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
+  @Get('autonomous/strategies/active')
+  async getActiveStrategies(@Query('userId') userId: string = 'default-user') {
+    try {
+      const strategies =
+        await this.autoTradingService.getActiveStrategies(userId);
+      return {
+        success: true,
+        data: strategies,
+      };
+    } catch (error) {
+      throw new HttpException(
+        {
+          success: false,
+          message: error.message,
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  @Get('autonomous/strategies/:strategyId/performance')
+  async getStrategyPerformance(
+    @Param('strategyId') strategyId: string,
+    @Query('userId') userId: string = 'default-user',
+  ) {
+    try {
+      const performance = await this.autoTradingService.getStrategyPerformance(
+        userId,
+        strategyId,
+      );
+      return {
+        success: true,
+        data: performance,
+      };
+    } catch (error) {
+      throw new HttpException(
+        {
+          success: false,
+          message: error.message,
+        },
+        HttpStatus.NOT_FOUND,
+      );
+    }
+  }
+
+  @Post('autonomous/strategies/:strategyId/backtest')
+  async runBacktest(
+    @Param('strategyId') strategyId: string,
+    @Body()
+    backtestConfig: {
+      startDate: string;
+      endDate: string;
+      initialCapital: number;
+    },
+  ) {
+    try {
+      const result = await this.autoTradingService.runBacktest(
+        strategyId,
+        new Date(backtestConfig.startDate),
+        new Date(backtestConfig.endDate),
+        backtestConfig.initialCapital,
+      );
+      return {
+        success: true,
+        data: result,
+      };
+    } catch (error) {
+      throw new HttpException(
+        {
+          success: false,
+          message: error.message,
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
+  @Get('autonomous/templates')
+  async getStrategyTemplates() {
+    try {
+      const templates = await this.autoTradingService.getStrategyTemplates();
+      return {
+        success: true,
+        data: templates,
+      };
+    } catch (error) {
+      throw new HttpException(
+        {
+          success: false,
+          message: error.message,
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  @Post('autonomous/templates/:templateId/create')
+  async createStrategyFromTemplate(
+    @Param('templateId') templateId: string,
+    @Body()
+    createConfig: {
+      name: string;
+      parameters: any;
+    },
+    @Query('userId') userId: string = 'default-user',
+  ) {
+    try {
+      const strategy = await this.autoTradingService.createStrategyFromTemplate(
+        userId,
+        templateId,
+        createConfig.name,
+        createConfig.parameters,
+      );
+      return {
+        success: true,
+        data: strategy,
+        message: 'Strategy created from template successfully',
+      };
+    } catch (error) {
+      throw new HttpException(
+        {
+          success: false,
+          message: error.message,
+        },
+        HttpStatus.BAD_REQUEST,
       );
     }
   }

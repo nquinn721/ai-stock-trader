@@ -2,10 +2,10 @@ import { Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { MarketHoursService } from '../../utils/market-hours.service';
 import { PaperTradingService } from '../paper-trading/paper-trading.service';
 import { StockService } from '../stock/stock.service';
 import { StockWebSocketGateway } from '../websocket/websocket.gateway';
-import { MarketHoursService } from '../../utils/market-hours.service';
 import {
   CreateTradingRuleDto,
   UpdateTradingRuleDto,
@@ -25,14 +25,19 @@ import {
   TradeRequest,
 } from './services/trade-execution.service';
 // ML Services Integration
-import { IntelligentRecommendationService } from '../ml/services/intelligent-recommendation.service';
-import { SignalGenerationService } from '../ml/services/signal-generation.service';
 import { DynamicRiskManagementService } from '../ml/services/dynamic-risk-management.service';
-import { SentimentAnalysisService } from '../ml/services/sentiment-analysis.service';
+import { IntelligentRecommendationService } from '../ml/services/intelligent-recommendation.service';
 import { PatternRecognitionService } from '../ml/services/pattern-recognition.service';
-import { AutonomousTradingService, DeploymentConfig, StrategyInstance, InstancePerformance } from './services/autonomous-trading.service';
-import { StrategyBuilderService } from './strategy-builder.service';
+import { SentimentAnalysisService } from '../ml/services/sentiment-analysis.service';
+import { SignalGenerationService } from '../ml/services/signal-generation.service';
 import { BacktestingService } from './backtesting.service';
+import {
+  AutonomousTradingService,
+  DeploymentConfig,
+  InstancePerformance,
+  StrategyInstance,
+} from './services/autonomous-trading.service';
+import { StrategyBuilderService } from './strategy-builder.service';
 
 @Injectable()
 export class AutoTradingService {
@@ -856,8 +861,8 @@ export class AutoTradingService {
 // Export autonomous trading interfaces for use in controller
 export {
   DeploymentConfig,
-  RiskLimits,
-  NotificationConfig,
-  StrategyInstance,
   InstancePerformance,
+  NotificationConfig,
+  RiskLimits,
+  StrategyInstance,
 } from './services/autonomous-trading.service';

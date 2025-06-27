@@ -3,7 +3,6 @@ import {
   Emergency,
   History,
   Home,
-  PlayArrow,
   Psychology,
   Settings,
   TrendingUp,
@@ -11,8 +10,6 @@ import {
 import {
   Box,
   Card,
-  CardContent,
-  Chip,
   FormControlLabel,
   LinearProgress,
   Switch,
@@ -21,17 +18,14 @@ import {
   Typography,
 } from "@mui/material";
 import React, { useEffect, useState } from "react";
-import autonomousTradingApi, {
+import autoTradingService, {
   DeploymentConfig,
   Portfolio,
-} from "../../services/autonomousTradingApi";
-import { PageHeader } from "../ui";
+} from "../../services/autoTradingService";
 import { BehavioralAnalyticsDashboard } from "../behavioral-analytics/BehavioralAnalyticsDashboard";
+import { PageHeader } from "../ui";
 import { AutoTradeHistory } from "./AutoTradeHistory";
 import "./AutoTradingDashboard.css";
-import { RuleBuilder } from "./RuleBuilder";
-import { TradingControlPanel } from "./TradingControlPanel";
-import { TradingPerformanceChart } from "./TradingPerformanceChart";
 import TradingRulesManager from "./TradingRulesManager";
 import { TradingSessionMonitor } from "./TradingSessionMonitor";
 
@@ -97,7 +91,7 @@ export const AutoTradingDashboard: React.FC = () => {
     try {
       // Load available portfolios
       const portfoliosResult =
-        await autonomousTradingApi.getAvailablePortfolios();
+        await autoTradingService.getAvailablePortfolios();
       if (portfoliosResult.success && portfoliosResult.data) {
         setPortfolios(portfoliosResult.data);
 
@@ -107,9 +101,7 @@ export const AutoTradingDashboard: React.FC = () => {
             try {
               // Try to get performance data for each portfolio
               const performanceResult =
-                await autonomousTradingApi.getPortfolioPerformance(
-                  portfolio.id
-                );
+                await autoTradingService.getPortfolioPerformance(portfolio.id);
               const performance = performanceResult.success
                 ? performanceResult.data
                 : null;
@@ -152,8 +144,7 @@ export const AutoTradingDashboard: React.FC = () => {
 
       // Load active trading strategies from backend
       try {
-        const strategiesResult =
-          await autonomousTradingApi.getActiveStrategies();
+        const strategiesResult = await autoTradingService.getActiveStrategies();
         if (strategiesResult.success && strategiesResult.data) {
           const rules = strategiesResult.data.map((instance) => ({
             id: instance.id,
@@ -226,7 +217,7 @@ export const AutoTradingDashboard: React.FC = () => {
       const activeStrategies = tradingRules.filter((rule) => rule.isActive);
       await Promise.all(
         activeStrategies.map((strategy) =>
-          autonomousTradingApi.stopStrategy(strategy.id)
+          autoTradingService.stopStrategy(strategy.id)
         )
       );
 
@@ -263,7 +254,7 @@ export const AutoTradingDashboard: React.FC = () => {
         portfolioId,
       };
 
-      const result = await autonomousTradingApi.deployStrategy(
+      const result = await autoTradingService.deployStrategy(
         strategyId,
         configWithPortfolio
       );
@@ -283,7 +274,7 @@ export const AutoTradingDashboard: React.FC = () => {
 
   const stopStrategy = async (strategyId: string) => {
     try {
-      const result = await autonomousTradingApi.stopStrategy(strategyId);
+      const result = await autoTradingService.stopStrategy(strategyId);
       if (result.success) {
         await loadData();
         return result;
@@ -298,7 +289,7 @@ export const AutoTradingDashboard: React.FC = () => {
 
   const pauseStrategy = async (strategyId: string) => {
     try {
-      const result = await autonomousTradingApi.pauseStrategy(strategyId);
+      const result = await autoTradingService.pauseStrategy(strategyId);
       if (result.success) {
         await loadData();
         return result;
@@ -313,7 +304,7 @@ export const AutoTradingDashboard: React.FC = () => {
 
   const resumeStrategy = async (strategyId: string) => {
     try {
-      const result = await autonomousTradingApi.resumeStrategy(strategyId);
+      const result = await autoTradingService.resumeStrategy(strategyId);
       if (result.success) {
         await loadData();
         return result;
@@ -370,7 +361,7 @@ export const AutoTradingDashboard: React.FC = () => {
           actionButtons={[
             {
               icon: <Home />,
-              onClick: () => window.location.href = "/",
+              onClick: () => (window.location.href = "/"),
               tooltip: "Back to Dashboard",
               className: "nav-btn",
               label: "Dashboard",
@@ -400,7 +391,7 @@ export const AutoTradingDashboard: React.FC = () => {
         actionButtons={[
           {
             icon: <Home />,
-            onClick: () => window.location.href = "/",
+            onClick: () => (window.location.href = "/"),
             tooltip: "Back to Dashboard",
             className: "nav-btn",
             label: "Dashboard",
@@ -453,12 +444,12 @@ export const AutoTradingDashboard: React.FC = () => {
                 Total P&L
               </div>
             </div>
-            <div className={`status-card-value ${calculateTotalPnL() >= 0 ? 'performance-positive' : 'performance-negative'}`}>
+            <div
+              className={`status-card-value ${calculateTotalPnL() >= 0 ? "performance-positive" : "performance-negative"}`}
+            >
               ${calculateTotalPnL().toFixed(2)}
             </div>
-            <div className="status-card-subtitle">
-              Today's Performance
-            </div>
+            <div className="status-card-subtitle">Today's Performance</div>
           </div>
 
           <div className="status-card">
@@ -468,12 +459,8 @@ export const AutoTradingDashboard: React.FC = () => {
                 Total Trades
               </div>
             </div>
-            <div className="status-card-value">
-              {calculateTotalTrades()}
-            </div>
-            <div className="status-card-subtitle">
-              All Sessions Combined
-            </div>
+            <div className="status-card-value">{calculateTotalTrades()}</div>
+            <div className="status-card-subtitle">All Sessions Combined</div>
           </div>
 
           <div className="status-card">
@@ -486,30 +473,26 @@ export const AutoTradingDashboard: React.FC = () => {
             <div className="status-card-value">
               {calculateWinRate().toFixed(1)}%
             </div>
-            <div className="status-card-subtitle">
-              Success Rate
-            </div>
+            <div className="status-card-subtitle">Success Rate</div>
           </div>
         </div>
 
         {/* Tab Navigation with Modern Design */}
-        <div className="ai-trading-tabs">
+        <Card className="tabs-container">
           <Tabs
             value={activeTab}
             onChange={handleTabChange}
             variant="scrollable"
             scrollButtons="auto"
-            className="main-tabs"
+            className="dashboard-tabs"
           >
             <Tab icon={<TrendingUp />} label="Live Sessions" />
             <Tab icon={<Settings />} label="Trading Rules" />
             <Tab icon={<History />} label="Trade History" />
             <Tab icon={<Psychology />} label="Behavioral Analysis" />
           </Tabs>
-        </div>
 
-        {/* Tab Panels with Modern Styling */}
-        <div className="tab-panel-content">
+          {/* Tab Panels with Modern Styling */}
           <TabPanel value={activeTab} index={0}>
             <TradingSessionMonitor
               sessions={tradingSessions}
@@ -528,7 +511,7 @@ export const AutoTradingDashboard: React.FC = () => {
           <TabPanel value={activeTab} index={3}>
             <BehavioralAnalyticsDashboard symbol="SPY" />
           </TabPanel>
-        </div>
+        </Card>
       </div>
     </div>
   );

@@ -20,9 +20,21 @@
   width: 100%;
   height: 100%;
   background:
-    radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.15) 0%, transparent 50%),
-    radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.15) 0%, transparent 50%),
-    radial-gradient(circle at 40% 40%, rgba(120, 219, 255, 0.1) 0%, transparent 50%);
+    radial-gradient(
+      circle at 20% 80%,
+      rgba(120, 119, 198, 0.15) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 80% 20%,
+      rgba(255, 119, 198, 0.15) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 40% 40%,
+      rgba(120, 219, 255, 0.1) 0%,
+      transparent 50%
+    );
   pointer-events: none;
   z-index: 0;
 }
@@ -732,25 +744,31 @@
 }
 
 .status-active {
-  background: linear-gradient(135deg, 
-    rgba(76, 175, 80, 0.15) 0%, 
-    rgba(56, 142, 60, 0.15) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(76, 175, 80, 0.15) 0%,
+    rgba(56, 142, 60, 0.15) 100%
+  );
   color: var(--trading-success-primary);
   border: 1px solid rgba(76, 175, 80, 0.3);
 }
 
 .status-paused {
-  background: linear-gradient(135deg, 
-    rgba(255, 152, 0, 0.15) 0%, 
-    rgba(245, 124, 0, 0.15) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 152, 0, 0.15) 0%,
+    rgba(245, 124, 0, 0.15) 100%
+  );
   color: var(--trading-warning-primary);
   border: 1px solid rgba(255, 152, 0, 0.3);
 }
 
 .status-stopped {
-  background: linear-gradient(135deg, 
-    rgba(244, 67, 54, 0.15) 0%, 
-    rgba(198, 40, 40, 0.15) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(244, 67, 54, 0.15) 0%,
+    rgba(198, 40, 40, 0.15) 100%
+  );
   color: var(--trading-error-primary);
   border: 1px solid rgba(244, 67, 54, 0.3);
 }
@@ -945,10 +963,12 @@
 
 .loading-skeleton {
   animation: trading-pulse 1.5s ease-in-out infinite;
-  background: linear-gradient(90deg, 
-    var(--trading-bg-secondary-card) 0%, 
-    rgba(25, 118, 210, 0.1) 50%, 
-    var(--trading-bg-secondary-card) 100%);
+  background: linear-gradient(
+    90deg,
+    var(--trading-bg-secondary-card) 0%,
+    rgba(25, 118, 210, 0.1) 50%,
+    var(--trading-bg-secondary-card) 100%
+  );
   background-size: 200% 100%;
 }
 
@@ -1023,66 +1043,68 @@
 }
 
 .status-overview .MuiChip-root {
-  border-radius: var(--theme-radius-2);
+  border-radius: var(--trading-radius-sm);
   font-weight: 600;
   font-size: 0.75rem;
   margin-top: var(--theme-space-1);
 }
 
 .status-overview .MuiChip-colorSuccess {
-  background: linear-gradient(135deg, 
-    rgba(76, 175, 80, 0.1) 0%, 
-    rgba(56, 142, 60, 0.1) 100%);
-  color: var(--trading-success-primary);
+  background: rgba(76, 175, 80, 0.2) !important;
+  color: var(--trading-success-primary) !important;
   border: 1px solid rgba(76, 175, 80, 0.3);
 }
 
 .status-overview .MuiChip-colorWarning {
-  background: linear-gradient(135deg, 
-    rgba(255, 152, 0, 0.1) 0%, 
-    rgba(245, 124, 0, 0.1) 100%);
-  color: var(--trading-warning-primary);
+  background: rgba(255, 152, 0, 0.2) !important;
+  color: var(--trading-warning-primary) !important;
   border: 1px solid rgba(255, 152, 0, 0.3);
 }
 
-/* Enhanced Tab Container */
-.tabs-container {
-  background: var(--trading-bg-primary-card) !important;
-  border: 1px solid var(--trading-border-primary);
-  border-radius: var(--theme-radius-3);
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
-  backdrop-filter: blur(10px);
+/* =========================================================================
+   TABS CONTAINER - Enhanced MUI Card Integration
+   ========================================================================== */
+
+.tabs-container.MuiCard-root {
+  background: var(--trading-bg-card) !important;
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: var(--trading-radius-lg) !important;
+  margin-bottom: var(--theme-space-6);
+  overflow: hidden;
+  box-shadow: var(--trading-shadow-lg) !important;
 }
 
 .dashboard-tabs {
-  border-bottom: 1px solid var(--trading-border-primary);
-  padding: 0 var(--theme-space-4);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  background: transparent;
 }
 
 .dashboard-tabs .MuiTab-root {
   color: var(--trading-text-secondary);
-  font-weight: 500;
+  font-weight: 600;
   text-transform: none;
   font-size: 0.875rem;
   min-height: 64px;
   padding: var(--theme-space-3) var(--theme-space-4);
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
+  border-radius: var(--trading-radius-sm);
+  margin: 0 var(--theme-space-1);
 }
 
 .dashboard-tabs .MuiTab-root:hover {
   color: var(--trading-primary-400);
-  background: rgba(25, 118, 210, 0.05);
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .dashboard-tabs .MuiTab-root.Mui-selected {
   color: var(--trading-primary-500);
-  font-weight: 600;
+  font-weight: 700;
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .dashboard-tabs .MuiTabs-indicator {
-  background: linear-gradient(90deg, 
-    var(--trading-primary-500) 0%, 
-    var(--trading-primary-400) 100%);
+  background: var(--trading-bg-gradient-accent);
   height: 3px;
   border-radius: 2px;
 }
@@ -1134,9 +1156,11 @@
 }
 
 .global-controls {
-  background: linear-gradient(135deg, 
-    rgba(25, 118, 210, 0.1) 0%, 
-    rgba(66, 165, 245, 0.1) 100%) !important;
+  background: linear-gradient(
+    135deg,
+    rgba(25, 118, 210, 0.1) 0%,
+    rgba(66, 165, 245, 0.1) 100%
+  ) !important;
   border: 1px solid rgba(25, 118, 210, 0.3) !important;
 }
 

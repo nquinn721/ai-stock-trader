@@ -137,14 +137,6 @@
   margin: 0 auto;
   font-size: 0.9rem;
 }
-  font-weight: 700;
-  color: #f0f6fc;
-  margin: 0 0 4px 0;
-  background: linear-gradient(135deg, #a855f7, #22c55e);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
 
 .page-header p {
   font-size: 12px; /* Reduced from 14px */

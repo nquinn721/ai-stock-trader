@@ -1,8 +1,7 @@
 import { makeAutoObservable, runInAction } from "mobx";
+import autoTradingService from "../services/autoTradingService";
 import {
-  AutoTrade,
   AutoTradeDisplay,
-  CreateTradingRuleDto,
   CreateTradingRuleDtoDisplay,
   EmergencyStopConfig,
   RuleTemplate,
@@ -11,20 +10,14 @@ import {
   TradingPerformance,
   TradingRule,
   TradingRuleDisplay,
-  TradingSession,
   TradingSessionDisplay,
-  TradingSessionDto,
   TradingSessionDtoDisplay,
-  transformTradingRuleToDisplay,
-  transformTradingSessionToDisplay,
   transformAutoTradeToDisplay,
   transformCreateRuleDtoToBackend,
   transformSessionDtoToBackend,
-  SessionStatusResponse,
-  TradingHistoryResponse,
-  SessionPerformanceResponse,
+  transformTradingRuleToDisplay,
+  transformTradingSessionToDisplay,
 } from "../types/autoTrading.types";
-import autoTradingService from "../services/autoTradingService";
 import { ApiStore } from "./ApiStore";
 
 export class AutoTradingStore {
@@ -135,14 +128,18 @@ export class AutoTradingStore {
     try {
       // All auto-trading endpoints require portfolioId or sessionId parameters
       // Data will be loaded when a specific portfolio/session is selected
-      console.log('AutoTradingStore initialized - data will be loaded when portfolio is selected');
+      console.log(
+        "AutoTradingStore initialized - data will be loaded when portfolio is selected"
+      );
     } catch (error) {
       console.error("Failed to load initial auto trading data:", error);
     }
   }
 
   // Trading Rules Management
-  async createTradingRule(ruleDto: CreateTradingRuleDtoDisplay): Promise<TradingRuleDisplay> {
+  async createTradingRule(
+    ruleDto: CreateTradingRuleDtoDisplay
+  ): Promise<TradingRuleDisplay> {
     runInAction(() => {
       this.isLoading = true;
       this.error = null;
@@ -172,13 +169,15 @@ export class AutoTradingStore {
   async fetchTradingRules(portfolioId?: string): Promise<void> {
     try {
       if (!portfolioId) {
-        console.warn('fetchTradingRules called without portfolioId, skipping API call');
+        console.warn(
+          "fetchTradingRules called without portfolioId, skipping API call"
+        );
         runInAction(() => {
           this.tradingRules = [];
         });
         return;
       }
-      
+
       const rules = await autoTradingService.getTradingRules(portfolioId);
       const displayRules = rules.map(transformTradingRuleToDisplay);
 
@@ -208,14 +207,18 @@ export class AutoTradingStore {
         conditions: updates.conditions,
         actions: updates.actions,
       };
-      
+
       // Remove undefined values
-      Object.keys(backendUpdates).forEach(key => 
-        backendUpdates[key as keyof typeof backendUpdates] === undefined && 
-        delete backendUpdates[key as keyof typeof backendUpdates]
+      Object.keys(backendUpdates).forEach(
+        (key) =>
+          backendUpdates[key as keyof typeof backendUpdates] === undefined &&
+          delete backendUpdates[key as keyof typeof backendUpdates]
       );
 
-      const updatedRule = await autoTradingService.updateTradingRule(ruleId, backendUpdates);
+      const updatedRule = await autoTradingService.updateTradingRule(
+        ruleId,
+        backendUpdates
+      );
       const displayRule = transformTradingRuleToDisplay(updatedRule);
 
       runInAction(() => {
@@ -283,7 +286,10 @@ export class AutoTradingStore {
 
     try {
       const backendDto = transformSessionDtoToBackend(sessionData);
-      const newSession = await autoTradingService.startTradingSession(portfolioId, backendDto);
+      const newSession = await autoTradingService.startTradingSession(
+        portfolioId,
+        backendDto
+      );
       const displaySession = transformTradingSessionToDisplay(newSession);
 
       runInAction(() => {
@@ -342,13 +348,15 @@ export class AutoTradingStore {
   async fetchTradingSessions(portfolioId?: string): Promise<void> {
     try {
       if (!portfolioId) {
-        console.warn('fetchTradingSessions called without portfolioId, skipping API call');
+        console.warn(
+          "fetchTradingSessions called without portfolioId, skipping API call"
+        );
         runInAction(() => {
           this.tradingSessions = [];
         });
         return;
       }
-      
+
       const sessions = await autoTradingService.getTradingSessions(portfolioId);
       const displaySessions = sessions.map(transformTradingSessionToDisplay);
 
@@ -374,7 +382,9 @@ export class AutoTradingStore {
         await autoTradingService.startGlobalTrading();
       } catch (error) {
         // Backend doesn't support global controls, simulate locally
-        console.warn('Global trading controls not available in backend, simulating locally');
+        console.warn(
+          "Global trading controls not available in backend, simulating locally"
+        );
       }
 
       runInAction(() => {
@@ -386,7 +396,7 @@ export class AutoTradingStore {
         });
         this.isLoading = false;
       });
-      
+
       this.addAlert({
         type: "session_stopped",
         severity: "info",
@@ -414,13 +424,21 @@ export class AutoTradingStore {
         await autoTradingService.stopGlobalTrading();
       } catch (error) {
         // Backend doesn't support global controls, stop sessions individually
-        console.warn('Global trading controls not available in backend, stopping sessions individually');
+        console.warn(
+          "Global trading controls not available in backend, stopping sessions individually"
+        );
         for (const session of this.tradingSessions) {
           if (session.status === "active") {
             try {
-              await autoTradingService.stopTradingSession(session.id, "Global stop");
+              await autoTradingService.stopTradingSession(
+                session.id,
+                "Global stop"
+              );
             } catch (sessionError) {
-              console.error(`Failed to stop session ${session.id}:`, sessionError);
+              console.error(
+                `Failed to stop session ${session.id}:`,
+                sessionError
+              );
             }
           }
         }
@@ -436,7 +454,7 @@ export class AutoTradingStore {
         });
         this.isLoading = false;
       });
-      
+
       this.addAlert({
         type: "session_stopped",
         severity: "warning",
@@ -458,10 +476,14 @@ export class AutoTradingStore {
       try {
         await autoTradingService.pauseGlobalTrading();
       } catch (error) {
-        console.warn('Global pause not available in backend, feature not implemented');
-        throw new Error('Pause functionality is not available - use stop instead');
+        console.warn(
+          "Global pause not available in backend, feature not implemented"
+        );
+        throw new Error(
+          "Pause functionality is not available - use stop instead"
+        );
       }
-      
+
       runInAction(() => {
         this.tradingSessions.forEach((session) => {
           if (session.status === "active") {
@@ -483,13 +505,21 @@ export class AutoTradingStore {
         await autoTradingService.triggerEmergencyStop();
       } catch (error) {
         // Backend doesn't support emergency stop, stop all sessions individually
-        console.warn('Emergency stop not available in backend, stopping all sessions');
+        console.warn(
+          "Emergency stop not available in backend, stopping all sessions"
+        );
         for (const session of this.tradingSessions) {
           if (session.status === "active") {
             try {
-              await autoTradingService.stopTradingSession(session.id, "Emergency stop");
+              await autoTradingService.stopTradingSession(
+                session.id,
+                "Emergency stop"
+              );
             } catch (sessionError) {
-              console.error(`Failed to stop session ${session.id}:`, sessionError);
+              console.error(
+                `Failed to stop session ${session.id}:`,
+                sessionError
+              );
             }
           }
         }
@@ -525,14 +555,18 @@ export class AutoTradingStore {
   async fetchActiveTrades(portfolioId?: string): Promise<void> {
     try {
       if (!portfolioId) {
-        console.warn('fetchActiveTrades called without portfolioId, skipping API call');
+        console.warn(
+          "fetchActiveTrades called without portfolioId, skipping API call"
+        );
         runInAction(() => {
           this.activeTrades = [];
         });
         return;
       }
-      
-      const trades = await autoTradingService.getAutoTrades(portfolioId, { status: 'pending' });
+
+      const trades = await autoTradingService.getAutoTrades(portfolioId, {
+        status: "pending",
+      });
       const displayTrades = trades.map(transformAutoTradeToDisplay);
 
       runInAction(() => {
@@ -551,15 +585,20 @@ export class AutoTradingStore {
   ): Promise<void> {
     try {
       if (!portfolioId) {
-        console.warn('fetchTradeHistory called without portfolioId, skipping API call');
+        console.warn(
+          "fetchTradeHistory called without portfolioId, skipping API call"
+        );
         runInAction(() => {
           this.tradeHistory = [];
         });
         return;
       }
-      
-      const historyResponse = await autoTradingService.getTradingHistory(portfolioId);
-      const displayTrades = historyResponse.trades.map(transformAutoTradeToDisplay);
+
+      const historyResponse =
+        await autoTradingService.getTradingHistory(portfolioId);
+      const displayTrades = historyResponse.trades.map(
+        transformAutoTradeToDisplay
+      );
 
       runInAction(() => {
         this.tradeHistory = displayTrades.slice(0, limit);
@@ -574,15 +613,18 @@ export class AutoTradingStore {
   async fetchTradingPerformance(sessionId?: string): Promise<void> {
     try {
       if (!sessionId) {
-        console.warn('fetchTradingPerformance called without sessionId, skipping API call');
+        console.warn(
+          "fetchTradingPerformance called without sessionId, skipping API call"
+        );
         runInAction(() => {
           this.tradingPerformance = null;
         });
         return;
       }
-      
-      const performanceResponse = await autoTradingService.getSessionPerformance(sessionId);
-      
+
+      const performanceResponse =
+        await autoTradingService.getSessionPerformance(sessionId);
+
       // Transform to legacy format for existing UI
       const legacyPerformance: TradingPerformance = {
         totalActiveSessions: 1,
@@ -591,13 +633,13 @@ export class AutoTradingStore {
         totalTrades: performanceResponse.totalTrades,
         winRate: performanceResponse.winRate,
         bestPerformingRule: {
-          id: 'unknown',
-          name: 'Unknown',
+          id: "unknown",
+          name: "Unknown",
           pnl: 0,
         },
         worstPerformingRule: {
-          id: 'unknown',
-          name: 'Unknown', 
+          id: "unknown",
+          name: "Unknown",
           pnl: 0,
         },
         riskMetrics: {
@@ -814,9 +856,12 @@ export class AutoTradingStore {
       const session = this.tradingSessions.find(
         (s) => s.portfolioId === portfolioId && s.status === "active"
       );
-      
+
       if (session) {
-        await autoTradingService.stopTradingSession(session.id, "Portfolio paused");
+        await autoTradingService.stopTradingSession(
+          session.id,
+          "Portfolio paused"
+        );
         runInAction(() => {
           session.status = "stopped";
           session.stoppedAt = new Date();
@@ -831,16 +876,22 @@ export class AutoTradingStore {
     }
   }
 
-  async resumePortfolioTrading(portfolioId: string, config?: TradingConfig): Promise<void> {
+  async resumePortfolioTrading(
+    portfolioId: string,
+    config?: TradingConfig
+  ): Promise<void> {
     try {
       // Backend doesn't support resume, need to start new session
       const sessionData: TradingSessionDtoDisplay = {
         sessionName: `Resumed Session - ${new Date().toISOString()}`,
         config: config || {},
       };
-      
-      const newSession = await this.startTradingSession(portfolioId, sessionData);
-      
+
+      const newSession = await this.startTradingSession(
+        portfolioId,
+        sessionData
+      );
+
       this.addAlert({
         type: "session_stopped",
         severity: "info",
@@ -898,16 +949,19 @@ export class AutoTradingStore {
       const activeSession = this.tradingSessions.find(
         (s) => s.portfolioId === portfolioId && s.status === "active"
       );
-      
+
       if (activeSession) {
-        await autoTradingService.stopTradingSession(activeSession.id, "Portfolio stopped");
+        await autoTradingService.stopTradingSession(
+          activeSession.id,
+          "Portfolio stopped"
+        );
         runInAction(() => {
           activeSession.status = "stopped";
           activeSession.stoppedAt = new Date();
           activeSession.stopReason = "Portfolio stopped";
         });
       }
-      
+
       runInAction(() => {
         this.isLoading = false;
       });
@@ -929,7 +983,7 @@ export class AutoTradingStore {
 
       // Backend doesn't support import, create rules individually
       const importedRules: TradingRuleDisplay[] = [];
-      
+
       for (const rule of rules) {
         try {
           const createdRule = await this.createTradingRule(rule);
@@ -942,7 +996,7 @@ export class AutoTradingStore {
       runInAction(() => {
         this.isLoading = false;
       });
-      
+
       this.addAlert({
         type: "rule_triggered",
         severity: "info",

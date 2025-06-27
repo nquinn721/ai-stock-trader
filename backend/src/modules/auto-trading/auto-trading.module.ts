@@ -1,13 +1,12 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { MarketHoursService } from '../../utils/market-hours.service';
+import { MLModule } from '../ml/ml.module';
 import { PaperTradingModule } from '../paper-trading/paper-trading.module';
 import { StockModule } from '../stock/stock.module';
 import { WebsocketModule } from '../websocket/websocket.module';
-import { MLModule } from '../ml/ml.module';
 import { AutoTradingController } from './auto-trading.controller';
 import { AutoTradingService } from './auto-trading.service';
-import { AutonomousTradingController } from './autonomous-trading.controller';
 import { AutoTrade } from './entities/auto-trade.entity';
 import { BacktestResult } from './entities/backtest-result.entity';
 import { StrategyTemplate } from './entities/strategy-template.entity';
@@ -39,11 +38,7 @@ import { StrategyBuilderService } from './strategy-builder.service';
     WebsocketModule,
     MLModule,
   ],
-  controllers: [
-    AutoTradingController,
-    StrategyBuilderController,
-    AutonomousTradingController,
-  ],
+  controllers: [AutoTradingController, StrategyBuilderController],
   providers: [
     AutoTradingService,
     StrategyBuilderService,

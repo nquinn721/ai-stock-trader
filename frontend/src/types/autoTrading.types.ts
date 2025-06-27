@@ -43,7 +43,13 @@ export interface RulePerformance {
 export interface RuleCondition {
   id?: string; // Optional ID for frontend use
   field: string;
-  operator: "equals" | "greater_than" | "less_than" | "greater_equal" | "less_equal" | "not_equals";
+  operator:
+    | "equals"
+    | "greater_than"
+    | "less_than"
+    | "greater_equal"
+    | "less_equal"
+    | "not_equals";
   value: any;
   logical?: "AND" | "OR"; // Backend uses 'logical' not 'logicalOperator'
   logicalOperator?: "AND" | "OR"; // Frontend alias for compatibility
@@ -56,7 +62,8 @@ export interface RuleAction {
   size_value?: number;
   price_type?: "market" | "limit" | "stop";
   price_offset?: number;
-  parameters?: { // Frontend compatibility structure
+  parameters?: {
+    // Frontend compatibility structure
     sizingMethod?: "fixed" | "percentage" | "full_position" | "kelly";
     sizeValue?: number;
     maxPositionSize?: number;
@@ -322,7 +329,9 @@ export interface EmergencyStopConfig {
 }
 
 // Utility functions for data transformation
-export const transformTradingRuleToDisplay = (rule: TradingRule): TradingRuleDisplay => ({
+export const transformTradingRuleToDisplay = (
+  rule: TradingRule
+): TradingRuleDisplay => ({
   id: rule.id,
   portfolioId: rule.portfolio_id,
   name: rule.name,
@@ -338,7 +347,9 @@ export const transformTradingRuleToDisplay = (rule: TradingRule): TradingRuleDis
   updatedAt: rule.updated_at,
 });
 
-export const transformTradingSessionToDisplay = (session: TradingSession): TradingSessionDisplay => ({
+export const transformTradingSessionToDisplay = (
+  session: TradingSession
+): TradingSessionDisplay => ({
   id: session.id,
   portfolioId: session.portfolio_id,
   name: session.session_name,
@@ -350,7 +361,9 @@ export const transformTradingSessionToDisplay = (session: TradingSession): Tradi
   createdAt: session.created_at,
 });
 
-export const transformAutoTradeToDisplay = (trade: AutoTrade): AutoTradeDisplay => ({
+export const transformAutoTradeToDisplay = (
+  trade: AutoTrade
+): AutoTradeDisplay => ({
   id: trade.id,
   portfolioId: trade.portfolio_id,
   ruleId: trade.rule_id,
@@ -367,7 +380,9 @@ export const transformAutoTradeToDisplay = (trade: AutoTrade): AutoTradeDisplay 
   pnl: undefined, // Will be calculated by frontend
 });
 
-export const transformCreateRuleDtoToBackend = (dto: CreateTradingRuleDtoDisplay): CreateTradingRuleDto => ({
+export const transformCreateRuleDtoToBackend = (
+  dto: CreateTradingRuleDtoDisplay
+): CreateTradingRuleDto => ({
   portfolio_id: dto.portfolioId,
   name: dto.name,
   description: dto.description,
@@ -378,7 +393,9 @@ export const transformCreateRuleDtoToBackend = (dto: CreateTradingRuleDtoDisplay
   is_active: dto.isActive ?? true,
 });
 
-export const transformSessionDtoToBackend = (dto: TradingSessionDtoDisplay): TradingSessionDto => ({
+export const transformSessionDtoToBackend = (
+  dto: TradingSessionDtoDisplay
+): TradingSessionDto => ({
   session_name: dto.sessionName,
   config: dto.config,
 });

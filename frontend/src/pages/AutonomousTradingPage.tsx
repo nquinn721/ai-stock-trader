@@ -30,11 +30,11 @@ import {
   StatusChip,
   TradingButton,
 } from "../components/ui";
-import autonomousTradingApi, {
+import autoTradingService, {
   DeploymentConfig,
   Portfolio,
   StrategyInstance,
-} from "../services/autonomousTradingApi";
+} from "../services/autoTradingService";
 import { stockStore } from "../stores/StockStore";
 import "./AutonomousTradingPage.css";
 
@@ -84,673 +84,682 @@ interface AutonomousTradingPageProps {
   isConnected?: boolean;
 }
 
-const AutonomousTradingPage: React.FC<AutonomousTradingPageProps> = observer(({ 
-  onNavigateBack, 
-  currentTime = new Date(),
-  isConnected = true 
-}) => {
-  const [activeTab, setActiveTab] = useState(0);
-  const [portfolios, setPortfolios] = useState<Portfolio[]>([]);
-  const [portfolioStatuses, setPortfolioStatuses] = useState<
-    Record<string, PortfolioTradingStatus>
-  >({});
-  const [globalTradingActive, setGlobalTradingActive] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+const AutonomousTradingPage: React.FC<AutonomousTradingPageProps> = observer(
+  ({ onNavigateBack, currentTime = new Date(), isConnected = true }) => {
+    const [activeTab, setActiveTab] = useState(0);
+    const [portfolios, setPortfolios] = useState<Portfolio[]>([]);
+    const [portfolioStatuses, setPortfolioStatuses] = useState<
+      Record<string, PortfolioTradingStatus>
+    >({});
+    const [globalTradingActive, setGlobalTradingActive] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
-  // Strategy deployment modal
-  const [deployModalOpen, setDeployModalOpen] = useState(false);
-  const [selectedPortfolios, setSelectedPortfolios] = useState<string[]>([]);
-  const [deploymentConfig, setDeploymentConfig] = useState<
-    Partial<DeploymentConfig>
-  >({
-    mode: "paper",
-    initialCapital: 10000,
-    maxPositions: 5,
-    executionFrequency: "hour",
-    riskLimits: {
-      maxDrawdown: 10,
-      maxPositionSize: 20,
-      dailyLossLimit: 5,
-      correlationLimit: 0.7,
-    },
-    notifications: {
-      enabled: true,
-      onTrade: true,
-      onError: true,
-      onRiskBreach: true,
-    },
-  });
+    // Strategy deployment modal
+    const [deployModalOpen, setDeployModalOpen] = useState(false);
+    const [selectedPortfolios, setSelectedPortfolios] = useState<string[]>([]);
+    const [deploymentConfig, setDeploymentConfig] = useState<
+      Partial<DeploymentConfig>
+    >({
+      mode: "paper",
+      initialCapital: 10000,
+      maxPositions: 5,
+      executionFrequency: "hour",
+      riskLimits: {
+        maxDrawdown: 10,
+        maxPositionSize: 20,
+        dailyLossLimit: 5,
+        correlationLimit: 0.7,
+      },
+      notifications: {
+        enabled: true,
+        onTrade: true,
+        onError: true,
+        onRiskBreach: true,
+      },
+    });
 
-  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
-    setActiveTab(newValue);
-  };
+    const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+      setActiveTab(newValue);
+    };
 
-  // Load portfolios and their trading status
-  useEffect(() => {
-    loadPortfolios();
-    loadActiveStrategies();
-  }, []);
+    // Load portfolios and their trading status
+    useEffect(() => {
+      loadPortfolios();
+      loadActiveStrategies();
+    }, []);
 
-  // Load stock data for live market data tab
-  useEffect(() => {
-    // Fetch initial stock data if not already loaded
-    if (!stockStore.isInitialized) {
-      stockStore.fetchStocksWithSignals();
-    }
-  }, []);
-
-  const loadPortfolios = async () => {
-    setLoading(true);
-    try {
-      const response = await autonomousTradingApi.getAvailablePortfolios();
-      if (response.success && response.data) {
-        setPortfolios(response.data);
-
-        // Initialize portfolio statuses
-        const statuses: Record<string, PortfolioTradingStatus> = {};
-        response.data.forEach((portfolio) => {
-          statuses[portfolio.id] = {
-            portfolioId: portfolio.id,
-            isActive: false,
-            activeStrategies: [],
-          };
-        });
-        setPortfolioStatuses(statuses);
-      } else {
-        setError(response.error || "Failed to load portfolios");
+    // Load stock data for live market data tab
+    useEffect(() => {
+      // Fetch initial stock data if not already loaded
+      if (!stockStore.isInitialized) {
+        stockStore.fetchStocksWithSignals();
       }
-    } catch (err) {
-      setError("Failed to load portfolios");
-    } finally {
-      setLoading(false);
-    }
-  };
+    }, []);
 
-  const loadActiveStrategies = async () => {
-    try {
-      const response = await autonomousTradingApi.getActiveStrategies();
-      if (response.success) {
-        // Group strategies by portfolio
-        const updatedStatuses = { ...portfolioStatuses };
-        response.data.forEach((strategy) => {
-          // Assuming strategy has portfolioId - may need to adjust based on actual API
-          const portfolioId = strategy.id.split("-")[0]; // Placeholder logic
-          if (updatedStatuses[portfolioId]) {
-            updatedStatuses[portfolioId].activeStrategies.push(strategy);
-            updatedStatuses[portfolioId].isActive =
-              strategy.status === "running";
-          }
-        });
-        setPortfolioStatuses(updatedStatuses);
-      }
-    } catch (err) {
-      console.error("Failed to load active strategies:", err);
-    }
-  };
-
-  const handleStartTrading = async (portfolioId: string) => {
-    try {
+    const loadPortfolios = async () => {
       setLoading(true);
-      // Deploy a default strategy to the portfolio
-      const config: DeploymentConfig = {
-        ...deploymentConfig,
-        portfolioId,
-      } as DeploymentConfig;
+      try {
+        const response = await autoTradingService.getAvailablePortfolios();
+        if (response.success && response.data) {
+          setPortfolios(response.data);
 
-      const response = await autonomousTradingApi.deployStrategy(
-        "default-strategy",
-        config
-      );
-      if (response.success) {
-        setPortfolioStatuses((prev) => ({
-          ...prev,
-          [portfolioId]: {
-            ...prev[portfolioId],
-            isActive: true,
-            activeStrategies: [
-              ...prev[portfolioId].activeStrategies,
-              response.data,
-            ],
-          },
-        }));
-      } else {
-        setError(response.error || "Failed to start trading");
-      }
-    } catch (err) {
-      setError("Failed to start trading");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleStopTrading = async (portfolioId: string) => {
-    try {
-      setLoading(true);
-      const status = portfolioStatuses[portfolioId];
-
-      // Stop all active strategies for this portfolio
-      for (const strategy of status.activeStrategies) {
-        await autonomousTradingApi.stopStrategy(strategy.strategyId);
-      }
-
-      setPortfolioStatuses((prev) => ({
-        ...prev,
-        [portfolioId]: {
-          ...prev[portfolioId],
-          isActive: false,
-          activeStrategies: [],
-        },
-      }));
-    } catch (err) {
-      setError("Failed to stop trading");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleGlobalTradingToggle = async () => {
-    const newState = !globalTradingActive;
-    setGlobalTradingActive(newState);
-
-    if (newState) {
-      // Start trading on all portfolios
-      for (const portfolio of portfolios) {
-        if (!portfolioStatuses[portfolio.id]?.isActive) {
-          await handleStartTrading(portfolio.id);
+          // Initialize portfolio statuses
+          const statuses: Record<string, PortfolioTradingStatus> = {};
+          response.data.forEach((portfolio) => {
+            statuses[portfolio.id] = {
+              portfolioId: portfolio.id,
+              isActive: false,
+              activeStrategies: [],
+            };
+          });
+          setPortfolioStatuses(statuses);
+        } else {
+          setError(response.error || "Failed to load portfolios");
         }
+      } catch (err) {
+        setError("Failed to load portfolios");
+      } finally {
+        setLoading(false);
       }
-    } else {
-      // Stop trading on all portfolios
-      for (const portfolio of portfolios) {
-        if (portfolioStatuses[portfolio.id]?.isActive) {
-          await handleStopTrading(portfolio.id);
+    };
+
+    const loadActiveStrategies = async () => {
+      try {
+        const response = await autoTradingService.getActiveStrategies();
+        if (response.success) {
+          // Group strategies by portfolio
+          const updatedStatuses = { ...portfolioStatuses };
+          response.data.forEach((strategy) => {
+            // Assuming strategy has portfolioId - may need to adjust based on actual API
+            const portfolioId = strategy.id.split("-")[0]; // Placeholder logic
+            if (updatedStatuses[portfolioId]) {
+              updatedStatuses[portfolioId].activeStrategies.push(strategy);
+              updatedStatuses[portfolioId].isActive =
+                strategy.status === "running";
+            }
+          });
+          setPortfolioStatuses(updatedStatuses);
         }
+      } catch (err) {
+        console.error("Failed to load active strategies:", err);
       }
-    }
-  };
+    };
 
-  const handleAssignRandomStrategy = async (portfolioId: string) => {
-    try {
-      setLoading(true);
-      const response =
-        await autonomousTradingApi.assignRandomStrategy(portfolioId);
-
-      if (response.success) {
-        // Reload portfolios to show the updated assigned strategy
-        await loadPortfolios();
-
-        // Show success message could be added here
-        console.log(
-          `Random strategy assigned: ${response.data.assignedStrategyName}`
-        );
-      } else {
-        setError(response.error || "Failed to assign random strategy");
-      }
-    } catch (err) {
-      setError("Failed to assign random strategy");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleDeployStrategy = async () => {
-    try {
-      setLoading(true);
-      for (const portfolioId of selectedPortfolios) {
+    const handleStartTrading = async (portfolioId: string) => {
+      try {
+        setLoading(true);
+        // Deploy a default strategy to the portfolio
         const config: DeploymentConfig = {
           ...deploymentConfig,
           portfolioId,
         } as DeploymentConfig;
 
-        await autonomousTradingApi.deployStrategy("custom-strategy", config);
+        const response = await autoTradingService.deployStrategy(
+          "default-strategy",
+          config
+        );
+        if (response.success) {
+          setPortfolioStatuses((prev) => ({
+            ...prev,
+            [portfolioId]: {
+              ...prev[portfolioId],
+              isActive: true,
+              activeStrategies: [
+                ...prev[portfolioId].activeStrategies,
+                response.data,
+              ],
+            },
+          }));
+        } else {
+          setError(response.error || "Failed to start trading");
+        }
+      } catch (err) {
+        setError("Failed to start trading");
+      } finally {
+        setLoading(false);
       }
-      setDeployModalOpen(false);
-      setSelectedPortfolios([]);
-      await loadActiveStrategies();
-    } catch (err) {
-      setError("Failed to deploy strategy");
-    } finally {
-      setLoading(false);
-    }
-  };
+    };
 
-  const renderOverviewTab = () => (
-    <div className="overview-tab">
-      {/* Global Controls */}
-      <ContentCard
-        title="Global Trading Control"
-        variant="gradient"
-        padding="lg"
-        className="global-controls"
-      >
-        <div className="control-content">
-          <div className="control-left">
-            <div className="status-switch">
-              <Typography variant="body2">
-                {globalTradingActive ? "Trading Active" : "Trading Stopped"}
-              </Typography>
-              <Switch
-                checked={globalTradingActive}
-                onChange={handleGlobalTradingToggle}
-                color="primary"
-              />
-            </div>
-          </div>
-          <div className="control-right">
-            <TradingButton
-              variant="primary"
-              onClick={() => setDeployModalOpen(true)}
-              startIcon={<Settings />}
-              size="md"
-            >
-              Deploy Strategy
-            </TradingButton>
-          </div>
-        </div>
-      </ContentCard>
+    const handleStopTrading = async (portfolioId: string) => {
+      try {
+        setLoading(true);
+        const status = portfolioStatuses[portfolioId];
 
-      {/* Portfolio Cards */}
-      <div className="content-grid">
-        {portfolios.map((portfolio) => {
-          const status = portfolioStatuses[portfolio.id];
-          return (
-            <ContentCard
-              key={portfolio.id}
-              title={portfolio.name}
-              subtitle={`Total Value: $${portfolio.totalValue.toLocaleString()}`}
-              variant="default"
-              padding="lg"
-              className="portfolio-card"
-              headerActions={
-                <StatusChip
-                  status={status?.isActive ? "success" : "inactive"}
-                  label={status?.isActive ? "Active" : "Inactive"}
-                  animated={status?.isActive}
-                />
-              }
-            >
-              <div className="card-content">
-                <div className="info-row">
-                  <Typography variant="body2">Cash Available</Typography>
-                  <Typography variant="body2">
-                    ${portfolio.currentCash.toLocaleString()}
-                  </Typography>
-                </div>
+        // Stop all active strategies for this portfolio
+        for (const strategy of status.activeStrategies) {
+          await autoTradingService.stopStrategy(strategy.strategyId);
+        }
 
-                <div className="info-row">
-                  <Typography variant="body2">Active Strategies</Typography>
-                  <Typography variant="body2">
-                    {status?.activeStrategies.length || 0}
-                  </Typography>
-                </div>
+        setPortfolioStatuses((prev) => ({
+          ...prev,
+          [portfolioId]: {
+            ...prev[portfolioId],
+            isActive: false,
+            activeStrategies: [],
+          },
+        }));
+      } catch (err) {
+        setError("Failed to stop trading");
+      } finally {
+        setLoading(false);
+      }
+    };
 
-                <div className="strategy-row">
-                  <Typography variant="body2">Assigned Strategy</Typography>
-                  <TradingButton
-                    variant="secondary"
-                    size="sm"
-                    onClick={() => handleAssignRandomStrategy(portfolio.id)}
-                    disabled={loading}
-                    startIcon={<Shuffle />}
-                  >
-                    Random
-                  </TradingButton>
-                </div>
+    const handleGlobalTradingToggle = async () => {
+      const newState = !globalTradingActive;
+      setGlobalTradingActive(newState);
 
-                {portfolio.assignedStrategyName ? (
-                  <div className="assigned-strategy">
-                    <Typography variant="body2" fontWeight="medium">
-                      {portfolio.assignedStrategyName}
-                    </Typography>
-                    <Typography variant="caption" color="text.secondary">
-                      Assigned{" "}
-                      {portfolio.strategyAssignedAt
-                        ? new Date(
-                            portfolio.strategyAssignedAt
-                          ).toLocaleDateString()
-                        : "recently"}
-                    </Typography>
-                  </div>
-                ) : (
-                  <Typography
-                    variant="body2"
-                    color="text.secondary"
-                    fontStyle="italic"
-                  >
-                    No strategy assigned
-                  </Typography>
-                )}
+      if (newState) {
+        // Start trading on all portfolios
+        for (const portfolio of portfolios) {
+          if (!portfolioStatuses[portfolio.id]?.isActive) {
+            await handleStartTrading(portfolio.id);
+          }
+        }
+      } else {
+        // Stop trading on all portfolios
+        for (const portfolio of portfolios) {
+          if (portfolioStatuses[portfolio.id]?.isActive) {
+            await handleStopTrading(portfolio.id);
+          }
+        }
+      }
+    };
 
-                <Divider />
+    const handleAssignRandomStrategy = async (portfolioId: string) => {
+      try {
+        setLoading(true);
+        const response =
+          await autoTradingService.assignRandomStrategy(portfolioId);
 
-                <div className="card-actions">
-                  {status?.isActive ? (
-                    <TradingButton
-                      variant="danger"
-                      onClick={() => handleStopTrading(portfolio.id)}
-                      disabled={loading}
-                      startIcon={<Stop />}
-                      fullWidth
-                    >
-                      Stop Trading
-                    </TradingButton>
-                  ) : (
-                    <TradingButton
-                      variant="success"
-                      onClick={() => handleStartTrading(portfolio.id)}
-                      disabled={loading}
-                      startIcon={<PlayArrow />}
-                      fullWidth
-                    >
-                      Start Trading
-                    </TradingButton>
-                  )}
-                </div>
-              </div>
-            </ContentCard>
+        if (response.success) {
+          // Reload portfolios to show the updated assigned strategy
+          await loadPortfolios();
+
+          // Show success message could be added here
+          console.log(
+            `Random strategy assigned: ${response.data.assignedStrategyName}`
           );
-        })}
-      </div>
-    </div>
-  );
+        } else {
+          setError(response.error || "Failed to assign random strategy");
+        }
+      } catch (err) {
+        setError("Failed to assign random strategy");
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const renderPerformanceTab = () => (
-    <ContentCard title="Performance Overview" variant="gradient" padding="lg">
-      <Alert severity="info">
-        Performance metrics will be displayed here once trading sessions are
-        active.
-      </Alert>
-    </ContentCard>
-  );
+    const handleDeployStrategy = async () => {
+      try {
+        setLoading(true);
+        for (const portfolioId of selectedPortfolios) {
+          const config: DeploymentConfig = {
+            ...deploymentConfig,
+            portfolioId,
+          } as DeploymentConfig;
 
-  const renderHistoryTab = () => (
-    <ContentCard title="Trading History" variant="gradient" padding="lg">
-      <Alert severity="info">
-        Trading history and logs will be displayed here.
-      </Alert>
-    </ContentCard>
-  );
+          await autoTradingService.deployStrategy("custom-strategy", config);
+        }
+        setDeployModalOpen(false);
+        setSelectedPortfolios([]);
+        await loadActiveStrategies();
+      } catch (err) {
+        setError("Failed to deploy strategy");
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const renderSettingsTab = () => (
-    <ContentCard title="Trading Settings" variant="gradient" padding="lg">
-      <Alert severity="info">
-        Global trading settings and risk management parameters will be
-        configured here.
-      </Alert>
-    </ContentCard>
-  );
-
-  const renderLiveMarketDataTab = () => {
-    const { stocksWithSignals, isLoading, readyStocks } = stockStore;
-
-    return (
-      <div className="live-market-tab">
+    const renderOverviewTab = () => (
+      <div className="overview-tab">
+        {/* Global Controls */}
         <ContentCard
-          title="Live Market Data"
-          subtitle="Real-time stock prices and trading signals"
+          title="Global Trading Control"
           variant="gradient"
           padding="lg"
-          className="live-market-header"
-          headerActions={
-            <div className="header-actions">
-              <StatusChip
-                status={readyStocks.length > 0 ? "success" : "inactive"}
-                label={`${readyStocks.length} stocks ready`}
-                animated={readyStocks.length > 0}
-              />
+          className="global-controls"
+        >
+          <div className="control-content">
+            <div className="control-left">
+              <div className="status-switch">
+                <Typography variant="body2">
+                  {globalTradingActive ? "Trading Active" : "Trading Stopped"}
+                </Typography>
+                <Switch
+                  checked={globalTradingActive}
+                  onChange={handleGlobalTradingToggle}
+                  color="primary"
+                />
+              </div>
+            </div>
+            <div className="control-right">
               <TradingButton
-                variant="secondary"
-                size="sm"
-                onClick={() => stockStore.fetchStocksWithSignals()}
-                disabled={isLoading}
-                loading={isLoading}
+                variant="primary"
+                onClick={() => setDeployModalOpen(true)}
+                startIcon={<Settings />}
+                size="md"
               >
-                Refresh
+                Deploy Strategy
               </TradingButton>
             </div>
-          }
-        >
-          {isLoading && readyStocks.length === 0 ? (
-            <LoadingState
-              variant="spinner"
-              message="Loading market data..."
-              size="lg"
-            />
-          ) : readyStocks.length === 0 ? (
-            <LoadingState
-              variant="skeleton"
-              message="Waiting for stocks with valid price data. Live updates will appear here automatically."
-              size="lg"
-            />
-          ) : (
-            <div className="content-grid stock-grid">
-              {stocksWithSignals.slice(0, 20).map((stock) => (
-                <StockCard
-                  key={stock.symbol}
-                  stock={stock}
-                  signal={stock.tradingSignal || undefined}
-                />
-              ))}
-            </div>
-          )}
+          </div>
         </ContentCard>
+
+        {/* Portfolio Cards */}
+        <div className="content-grid">
+          {portfolios.map((portfolio) => {
+            const status = portfolioStatuses[portfolio.id];
+            return (
+              <ContentCard
+                key={portfolio.id}
+                title={portfolio.name}
+                subtitle={`Total Value: $${portfolio.totalValue.toLocaleString()}`}
+                variant="default"
+                padding="lg"
+                className="portfolio-card"
+                headerActions={
+                  <StatusChip
+                    status={status?.isActive ? "success" : "inactive"}
+                    label={status?.isActive ? "Active" : "Inactive"}
+                    animated={status?.isActive}
+                  />
+                }
+              >
+                <div className="card-content">
+                  <div className="info-row">
+                    <Typography variant="body2">Cash Available</Typography>
+                    <Typography variant="body2">
+                      ${portfolio.currentCash.toLocaleString()}
+                    </Typography>
+                  </div>
+
+                  <div className="info-row">
+                    <Typography variant="body2">Active Strategies</Typography>
+                    <Typography variant="body2">
+                      {status?.activeStrategies.length || 0}
+                    </Typography>
+                  </div>
+
+                  <div className="strategy-row">
+                    <Typography variant="body2">Assigned Strategy</Typography>
+                    <TradingButton
+                      variant="secondary"
+                      size="sm"
+                      onClick={() => handleAssignRandomStrategy(portfolio.id)}
+                      disabled={loading}
+                      startIcon={<Shuffle />}
+                    >
+                      Random
+                    </TradingButton>
+                  </div>
+
+                  {portfolio.assignedStrategyName ? (
+                    <div className="assigned-strategy">
+                      <Typography variant="body2" fontWeight="medium">
+                        {portfolio.assignedStrategyName}
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        Assigned{" "}
+                        {portfolio.strategyAssignedAt
+                          ? new Date(
+                              portfolio.strategyAssignedAt
+                            ).toLocaleDateString()
+                          : "recently"}
+                      </Typography>
+                    </div>
+                  ) : (
+                    <Typography
+                      variant="body2"
+                      color="text.secondary"
+                      fontStyle="italic"
+                    >
+                      No strategy assigned
+                    </Typography>
+                  )}
+
+                  <Divider />
+
+                  <div className="card-actions">
+                    {status?.isActive ? (
+                      <TradingButton
+                        variant="danger"
+                        onClick={() => handleStopTrading(portfolio.id)}
+                        disabled={loading}
+                        startIcon={<Stop />}
+                        fullWidth
+                      >
+                        Stop Trading
+                      </TradingButton>
+                    ) : (
+                      <TradingButton
+                        variant="success"
+                        onClick={() => handleStartTrading(portfolio.id)}
+                        disabled={loading}
+                        startIcon={<PlayArrow />}
+                        fullWidth
+                      >
+                        Start Trading
+                      </TradingButton>
+                    )}
+                  </div>
+                </div>
+              </ContentCard>
+            );
+          })}
+        </div>
       </div>
     );
-  };
 
-  return (
-    <div className="page-container autonomous-trading-page">
-      {/* Standardized Page Header */}
-      <PageHeader
-        title="Autonomous Trading Agents"
-        currentTime={currentTime}
-        isConnected={isConnected}
-        showLiveIndicator={true}
-        sticky={true}
-        statsValue={`${Object.values(portfolioStatuses).filter((s) => s.isActive).length}/${portfolios.length} portfolios • ${Object.values(portfolioStatuses).reduce((acc, status) => acc + status.activeStrategies.length, 0)} strategies`}
-        actionButtons={[
-          {
-            icon: <span>←</span>,
-            onClick: () => onNavigateBack ? onNavigateBack() : (window.location.href = "/"),
-            tooltip: "Back to Dashboard",
-            className: "back-button",
-            label: "Back to Dashboard",
-          },
-          {
-            icon: <Settings />,
-            onClick: () => setDeployModalOpen(true),
-            tooltip: "Deploy Strategy",
-            className: "action-btn",
-            label: "Deploy",
-          },
-        ]}
-      />
+    const renderPerformanceTab = () => (
+      <ContentCard title="Performance Overview" variant="gradient" padding="lg">
+        <Alert severity="info">
+          Performance metrics will be displayed here once trading sessions are
+          active.
+        </Alert>
+      </ContentCard>
+    );
 
-      <div className="page-content">
-        {error && (
-          <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError(null)}>
-            {error}
-          </Alert>
-        )}
+    const renderHistoryTab = () => (
+      <ContentCard title="Trading History" variant="gradient" padding="lg">
+        <Alert severity="info">
+          Trading history and logs will be displayed here.
+        </Alert>
+      </ContentCard>
+    );
 
-        <ContentCard variant="glass" padding="sm" className="tabs-container">
-          <Tabs
-            value={activeTab}
-            onChange={handleTabChange}
-            aria-label="autonomous trading tabs"
-            className="main-tabs"
+    const renderSettingsTab = () => (
+      <ContentCard title="Trading Settings" variant="gradient" padding="lg">
+        <Alert severity="info">
+          Global trading settings and risk management parameters will be
+          configured here.
+        </Alert>
+      </ContentCard>
+    );
+
+    const renderLiveMarketDataTab = () => {
+      const { stocksWithSignals, isLoading, readyStocks } = stockStore;
+
+      return (
+        <div className="live-market-tab">
+          <ContentCard
+            title="Live Market Data"
+            subtitle="Real-time stock prices and trading signals"
+            variant="gradient"
+            padding="lg"
+            className="live-market-header"
+            headerActions={
+              <div className="header-actions">
+                <StatusChip
+                  status={readyStocks.length > 0 ? "success" : "inactive"}
+                  label={`${readyStocks.length} stocks ready`}
+                  animated={readyStocks.length > 0}
+                />
+                <TradingButton
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => stockStore.fetchStocksWithSignals()}
+                  disabled={isLoading}
+                  loading={isLoading}
+                >
+                  Refresh
+                </TradingButton>
+              </div>
+            }
           >
-            <Tab label="Overview" {...a11yProps(0)} />
-            <Tab label="Live Market Data" {...a11yProps(1)} />
-            <Tab label="Performance" {...a11yProps(2)} />
-            <Tab label="History" {...a11yProps(3)} />
-            <Tab label="Settings" {...a11yProps(4)} />
-          </Tabs>
-        </ContentCard>
-
-        {loading && (
-          <LoadingState
-            variant="spinner"
-            message="Loading autonomous trading data..."
-            size="lg"
-            fullHeight={false}
-          />
-        )}
-
-        <TabPanel value={activeTab} index={0}>
-          {renderOverviewTab()}
-        </TabPanel>
-
-        <TabPanel value={activeTab} index={1}>
-          {renderLiveMarketDataTab()}
-        </TabPanel>
-
-        <TabPanel value={activeTab} index={2}>
-          {renderPerformanceTab()}
-        </TabPanel>
-
-        <TabPanel value={activeTab} index={3}>
-          {renderHistoryTab()}
-        </TabPanel>
-
-        <TabPanel value={activeTab} index={4}>
-          {renderSettingsTab()}
-        </TabPanel>
-      </div>
-
-      {/* Strategy Deployment Modal */}
-      <Dialog
-        open={deployModalOpen}
-        onClose={() => setDeployModalOpen(false)}
-        maxWidth="md"
-        fullWidth
-      >
-        <DialogTitle>
-          <Box
-            display="flex"
-            justifyContent="space-between"
-            alignItems="center"
-          >
-            Deploy Trading Strategy
-            <IconButton onClick={() => setDeployModalOpen(false)}>
-              <Close />
-            </IconButton>
-          </Box>
-        </DialogTitle>
-        <DialogContent>
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 3, mt: 1 }}>
-            <FormControl fullWidth>
-              <InputLabel>Select Portfolios</InputLabel>
-              <Select
-                multiple
-                value={selectedPortfolios}
-                onChange={(e) =>
-                  setSelectedPortfolios(e.target.value as string[])
-                }
-                renderValue={(selected) => (
-                  <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
-                    {selected.map((value) => {
-                      const portfolio = portfolios.find((p) => p.id === value);
-                      return (
-                        <Chip
-                          key={value}
-                          label={portfolio?.name || value}
-                          size="small"
-                        />
-                      );
-                    })}
-                  </Box>
-                )}
-              >
-                {portfolios.map((portfolio) => (
-                  <MenuItem key={portfolio.id} value={portfolio.id}>
-                    {portfolio.name}
-                  </MenuItem>
+            {isLoading && readyStocks.length === 0 ? (
+              <LoadingState
+                variant="spinner"
+                message="Loading market data..."
+                size="lg"
+              />
+            ) : readyStocks.length === 0 ? (
+              <LoadingState
+                variant="skeleton"
+                message="Waiting for stocks with valid price data. Live updates will appear here automatically."
+                size="lg"
+              />
+            ) : (
+              <div className="content-grid stock-grid">
+                {stocksWithSignals.slice(0, 20).map((stock) => (
+                  <StockCard
+                    key={stock.symbol}
+                    stock={stock}
+                    signal={stock.tradingSignal || undefined}
+                  />
                 ))}
-              </Select>
-            </FormControl>
+              </div>
+            )}
+          </ContentCard>
+        </div>
+      );
+    };
 
-            <Box sx={{ display: "flex", gap: 2 }}>
+    return (
+      <div className="page-container autonomous-trading-page">
+        {/* Standardized Page Header */}
+        <PageHeader
+          title="Autonomous Trading Agents"
+          currentTime={currentTime}
+          isConnected={isConnected}
+          showLiveIndicator={true}
+          sticky={true}
+          statsValue={`${Object.values(portfolioStatuses).filter((s) => s.isActive).length}/${portfolios.length} portfolios • ${Object.values(portfolioStatuses).reduce((acc, status) => acc + status.activeStrategies.length, 0)} strategies`}
+          actionButtons={[
+            {
+              icon: <span>←</span>,
+              onClick: () =>
+                onNavigateBack
+                  ? onNavigateBack()
+                  : (window.location.href = "/"),
+              tooltip: "Back to Dashboard",
+              className: "back-button",
+              label: "Back to Dashboard",
+            },
+            {
+              icon: <Settings />,
+              onClick: () => setDeployModalOpen(true),
+              tooltip: "Deploy Strategy",
+              className: "action-btn",
+              label: "Deploy",
+            },
+          ]}
+        />
+
+        <div className="page-content">
+          {error && (
+            <Alert
+              severity="error"
+              sx={{ mb: 2 }}
+              onClose={() => setError(null)}
+            >
+              {error}
+            </Alert>
+          )}
+
+          <ContentCard variant="glass" padding="sm" className="tabs-container">
+            <Tabs
+              value={activeTab}
+              onChange={handleTabChange}
+              aria-label="autonomous trading tabs"
+              className="main-tabs"
+            >
+              <Tab label="Overview" {...a11yProps(0)} />
+              <Tab label="Live Market Data" {...a11yProps(1)} />
+              <Tab label="Performance" {...a11yProps(2)} />
+              <Tab label="History" {...a11yProps(3)} />
+              <Tab label="Settings" {...a11yProps(4)} />
+            </Tabs>
+          </ContentCard>
+
+          {loading && (
+            <LoadingState
+              variant="spinner"
+              message="Loading autonomous trading data..."
+              size="lg"
+              fullHeight={false}
+            />
+          )}
+
+          <TabPanel value={activeTab} index={0}>
+            {renderOverviewTab()}
+          </TabPanel>
+
+          <TabPanel value={activeTab} index={1}>
+            {renderLiveMarketDataTab()}
+          </TabPanel>
+
+          <TabPanel value={activeTab} index={2}>
+            {renderPerformanceTab()}
+          </TabPanel>
+
+          <TabPanel value={activeTab} index={3}>
+            {renderHistoryTab()}
+          </TabPanel>
+
+          <TabPanel value={activeTab} index={4}>
+            {renderSettingsTab()}
+          </TabPanel>
+        </div>
+
+        {/* Strategy Deployment Modal */}
+        <Dialog
+          open={deployModalOpen}
+          onClose={() => setDeployModalOpen(false)}
+          maxWidth="md"
+          fullWidth
+        >
+          <DialogTitle>
+            <Box
+              display="flex"
+              justifyContent="space-between"
+              alignItems="center"
+            >
+              Deploy Trading Strategy
+              <IconButton onClick={() => setDeployModalOpen(false)}>
+                <Close />
+              </IconButton>
+            </Box>
+          </DialogTitle>
+          <DialogContent>
+            <Box
+              sx={{ display: "flex", flexDirection: "column", gap: 3, mt: 1 }}
+            >
               <FormControl fullWidth>
-                <InputLabel>Trading Mode</InputLabel>
+                <InputLabel>Select Portfolios</InputLabel>
                 <Select
-                  value={deploymentConfig.mode}
+                  multiple
+                  value={selectedPortfolios}
                   onChange={(e) =>
-                    setDeploymentConfig((prev) => ({
-                      ...prev,
-                      mode: e.target.value as "paper" | "live",
-                    }))
+                    setSelectedPortfolios(e.target.value as string[])
                   }
+                  renderValue={(selected) => (
+                    <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
+                      {selected.map((value) => {
+                        const portfolio = portfolios.find(
+                          (p) => p.id === value
+                        );
+                        return (
+                          <Chip
+                            key={value}
+                            label={portfolio?.name || value}
+                            size="small"
+                          />
+                        );
+                      })}
+                    </Box>
+                  )}
                 >
-                  <MenuItem value="paper">Paper Trading</MenuItem>
-                  <MenuItem value="live">Live Trading</MenuItem>
+                  {portfolios.map((portfolio) => (
+                    <MenuItem key={portfolio.id} value={portfolio.id}>
+                      {portfolio.name}
+                    </MenuItem>
+                  ))}
                 </Select>
               </FormControl>
 
-              <TextField
-                fullWidth
-                label="Initial Capital"
-                type="number"
-                value={deploymentConfig.initialCapital}
-                onChange={(e) =>
-                  setDeploymentConfig((prev) => ({
-                    ...prev,
-                    initialCapital: Number(e.target.value),
-                  }))
-                }
-              />
-            </Box>
+              <Box sx={{ display: "flex", gap: 2 }}>
+                <FormControl fullWidth>
+                  <InputLabel>Trading Mode</InputLabel>
+                  <Select
+                    value={deploymentConfig.mode}
+                    onChange={(e) =>
+                      setDeploymentConfig((prev) => ({
+                        ...prev,
+                        mode: e.target.value as "paper" | "live",
+                      }))
+                    }
+                  >
+                    <MenuItem value="paper">Paper Trading</MenuItem>
+                    <MenuItem value="live">Live Trading</MenuItem>
+                  </Select>
+                </FormControl>
 
-            <Box sx={{ display: "flex", gap: 2 }}>
-              <TextField
-                fullWidth
-                label="Max Positions"
-                type="number"
-                value={deploymentConfig.maxPositions}
-                onChange={(e) =>
-                  setDeploymentConfig((prev) => ({
-                    ...prev,
-                    maxPositions: Number(e.target.value),
-                  }))
-                }
-              />
-
-              <FormControl fullWidth>
-                <InputLabel>Execution Frequency</InputLabel>
-                <Select
-                  value={deploymentConfig.executionFrequency}
+                <TextField
+                  fullWidth
+                  label="Initial Capital"
+                  type="number"
+                  value={deploymentConfig.initialCapital}
                   onChange={(e) =>
                     setDeploymentConfig((prev) => ({
                       ...prev,
-                      executionFrequency: e.target.value as
-                        | "minute"
-                        | "hour"
-                        | "daily",
+                      initialCapital: Number(e.target.value),
                     }))
                   }
-                >
-                  <MenuItem value="minute">Every Minute</MenuItem>
-                  <MenuItem value="hour">Hourly</MenuItem>
-                  <MenuItem value="daily">Daily</MenuItem>
-                </Select>
-              </FormControl>
+                />
+              </Box>
+
+              <Box sx={{ display: "flex", gap: 2 }}>
+                <TextField
+                  fullWidth
+                  label="Max Positions"
+                  type="number"
+                  value={deploymentConfig.maxPositions}
+                  onChange={(e) =>
+                    setDeploymentConfig((prev) => ({
+                      ...prev,
+                      maxPositions: Number(e.target.value),
+                    }))
+                  }
+                />
+
+                <FormControl fullWidth>
+                  <InputLabel>Execution Frequency</InputLabel>
+                  <Select
+                    value={deploymentConfig.executionFrequency}
+                    onChange={(e) =>
+                      setDeploymentConfig((prev) => ({
+                        ...prev,
+                        executionFrequency: e.target.value as
+                          | "minute"
+                          | "hour"
+                          | "daily",
+                      }))
+                    }
+                  >
+                    <MenuItem value="minute">Every Minute</MenuItem>
+                    <MenuItem value="hour">Hourly</MenuItem>
+                    <MenuItem value="daily">Daily</MenuItem>
+                  </Select>
+                </FormControl>
+              </Box>
             </Box>
-          </Box>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setDeployModalOpen(false)}>Cancel</Button>
-          <Button
-            onClick={handleDeployStrategy}
-            variant="contained"
-            disabled={selectedPortfolios.length === 0 || loading}
-          >
-            Deploy Strategy
-          </Button>
-        </DialogActions>
-      </Dialog>
-    </div>
-  );
-});
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setDeployModalOpen(false)}>Cancel</Button>
+            <Button
+              onClick={handleDeployStrategy}
+              variant="contained"
+              disabled={selectedPortfolios.length === 0 || loading}
+            >
+              Deploy Strategy
+            </Button>
+          </DialogActions>
+        </Dialog>
+      </div>
+    );
+  }
+);
 
 export default AutonomousTradingPage;
