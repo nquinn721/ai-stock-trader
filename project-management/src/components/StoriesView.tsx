@@ -53,7 +53,10 @@ const getStatusMeta = (status: string) => {
     case "REVIEW":
       return { icon: <TodoIcon sx={{ color: "#9c27b0" }} />, label: "Review" };
     case "ARCHIVED":
-      return { icon: <ArchiveIcon sx={{ color: "#795548" }} />, label: "Archived" };
+      return {
+        icon: <ArchiveIcon sx={{ color: "#795548" }} />,
+        label: "Archived",
+      };
     default:
       return { icon: <TodoIcon sx={{ color: "#757575" }} />, label: status };
   }
@@ -76,7 +79,6 @@ const StoriesView: React.FC = () => {
   const [localStories, setLocalStories] = useState<Story[]>(stories);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [storyToDelete, setStoryToDelete] = useState<string | null>(null);
-  const [showArchived, setShowArchived] = useState(false);
 
   const handleMarkComplete = (storyId: string) => {
     setLocalStories((prev) =>
@@ -141,40 +143,36 @@ const StoriesView: React.FC = () => {
     setDeleteDialogOpen(false);
   };
 
-  const filteredStories = localStories.filter((story) => 
-    showArchived ? story.status === "ARCHIVED" : story.status !== "ARCHIVED"
+  // Filter to show only non-archived stories (active stories)
+  const activeStories = localStories.filter(
+    (story) => story.status !== "ARCHIVED"
   );
 
-  if (!filteredStories.length) {
+  if (!activeStories.length) {
     return (
       <Box sx={{ mt: 6, textAlign: "center" }}>
         <Typography variant="h5" color="textSecondary">
-          {showArchived ? "No archived stories found." : "No active stories found."}
+          No active stories found.
         </Typography>
-        <Button
-          variant="outlined"
-          onClick={() => setShowArchived(!showArchived)}
-          sx={{ mt: 2 }}
-        >
-          {showArchived ? "Show Active Stories" : "Show Archived Stories"}
-        </Button>
+        <Typography variant="body2" color="textSecondary" sx={{ mt: 1 }}>
+          All stories have been completed and archived. Check the Archive tab to
+          view completed stories.
+        </Typography>
       </Box>
     );
   }
 
   return (
     <Box>
-      <Stack direction="row" justifyContent="space-between" alignItems="center" mb={3}>
+      <Stack
+        direction="row"
+        justifyContent="space-between"
+        alignItems="center"
+        mb={3}
+      >
         <Typography variant="h4">
-          {showArchived ? "Archived Stories" : "Storyboard"}
+          Active Stories ({activeStories.length})
         </Typography>
-        <Button
-          variant="outlined"
-          onClick={() => setShowArchived(!showArchived)}
-          startIcon={showArchived ? <UnarchiveIcon /> : <ArchiveIcon />}
-        >
-          {showArchived ? "Show Active Stories" : "Show Archived Stories"}
-        </Button>
       </Stack>
       <Box
         sx={{
@@ -183,8 +181,7 @@ const StoriesView: React.FC = () => {
           gap: 3,
         }}
       >
-        {" "}
-        {filteredStories.map((story) => {
+        {activeStories.map((story) => {
           const statusMeta = getStatusMeta(story.status);
           return (
             <Card

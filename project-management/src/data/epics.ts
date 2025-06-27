@@ -83,4 +83,15 @@ export const epics: Epic[] = [
     owner: "Cross-Asset Team",
     createdDate: "2025-06-26",
   },
+  {
+    id: "E10",
+    title: "AI Trading Server Cohesion & Multi-Asset Intelligence",
+    description:
+      "Create a unified AI trading orchestrator that intelligently manages all trading decisions across stocks, forex, and crypto markets. Build a cohesive system that leverages shared AI models and services while maintaining strict asset class separation, live data integration, and cross-asset intelligence for superior trading performance.",
+    status: "TODO",
+    owner: "AI Architecture Team",
+    createdDate: "2025-06-27",
+  },
 ];
+
+export default epics;

@@ -2,7 +2,9 @@ import {
   Assessment,
   Emergency,
   History,
+  Home,
   PlayArrow,
+  Psychology,
   Settings,
   TrendingUp,
 } from "@mui/icons-material";
@@ -11,7 +13,6 @@ import {
   Button,
   Card,
   CardContent,
-  CardHeader,
   Chip,
   FormControlLabel,
   LinearProgress,
@@ -21,16 +22,18 @@ import {
   Typography,
 } from "@mui/material";
 import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import autonomousTradingApi, {
   DeploymentConfig,
   Portfolio,
 } from "../../services/autonomousTradingApi";
+import { BehavioralAnalyticsDashboard } from "../behavioral-analytics/BehavioralAnalyticsDashboard";
 import { AutoTradeHistory } from "./AutoTradeHistory";
 import "./AutoTradingDashboard.css";
 import { RuleBuilder } from "./RuleBuilder";
 import { TradingControlPanel } from "./TradingControlPanel";
 import { TradingPerformanceChart } from "./TradingPerformanceChart";
-import { TradingRulesManager } from "./TradingRulesManager";
+import TradingRulesManager from "./TradingRulesManager";
 import { TradingSessionMonitor } from "./TradingSessionMonitor";
 
 interface TradingSession {
@@ -58,7 +61,6 @@ interface TradingRule {
   };
 }
 
-<<<<<<< HEAD
 interface TabPanelProps {
   children?: React.ReactNode;
   index: number;
@@ -147,21 +149,6 @@ export const AutoTradingDashboard: React.FC = () => {
           })
         );
         setTradingSessions(sessions);
-=======
-    useEffect(() => {
-      // Load initial data when component mounts
-      if (selectedPortfolioId) {
-        autoTradingStore.fetchTradingRules(selectedPortfolioId);
-        autoTradingStore.fetchTradingSessions(selectedPortfolioId);
-        autoTradingStore.fetchActiveTrades(selectedPortfolioId);
-        autoTradingStore.fetchTradeHistory(selectedPortfolioId);
-        
-        // Get first active session for performance data
-        const activeSessions = autoTradingStore.tradingSessions.filter(s => s.status === 'active');
-        if (activeSessions.length > 0) {
-          autoTradingStore.fetchTradingPerformance(activeSessions[0].id);
-        }
->>>>>>> 6ddc0fc (udpate)
       }
 
       // Load active trading strategies from backend
@@ -373,176 +360,205 @@ export const AutoTradingDashboard: React.FC = () => {
 
   if (loading) {
     return (
-      <Box className="auto-trading-dashboard">
-        <LinearProgress />
-        <Typography variant="h6" sx={{ mt: 2, textAlign: "center" }}>
-          Loading Automated Trading Dashboard...
-        </Typography>
-      </Box>
+      <div className="page-container">
+        <div className="page-header">
+          <div className="header-left">
+            <h1>Auto Trading Dashboard</h1>
+            <div className="market-time">
+              <TrendingUp sx={{ fontSize: 16 }} />
+              <span>Loading...</span>
+            </div>
+          </div>
+        </div>
+        <div className="page-content">
+          <LinearProgress />
+          <Typography variant="h6" sx={{ mt: 2, textAlign: "center" }}>
+            Loading Automated Trading Dashboard...
+          </Typography>
+        </div>
+      </div>
     );
   }
 
   return (
-    <Box className="auto-trading-dashboard">
-      {/* Header Section */}
-      <Card className="dashboard-header">
-        <CardHeader
-          title="Automated Trading Dashboard"
-          subheader="Manage your automated trading strategies and monitor performance"
-          action={
-            <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
-              <Button
-                variant="contained"
-                color="error"
-                startIcon={<Emergency />}
-                onClick={handleEmergencyStop}
-                className="emergency-stop-btn"
-              >
-                Emergency Stop
-              </Button>
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={isGlobalTradingActive}
-                    onChange={toggleGlobalTrading}
-                    color="primary"
-                  />
-                }
-                label="Global Trading"
+    <div className="page-container">
+      {/* Standardized Header */}
+      <div className="page-header">
+        <div className="header-left">
+          <h1>Auto Trading Dashboard</h1>
+          <div className="market-time">
+            <TrendingUp sx={{ fontSize: 16 }} />
+            <span>
+              {isGlobalTradingActive ? "Trading Active" : "Trading Paused"}
+            </span>
+          </div>
+        </div>
+        <div className="header-info">
+          <div
+            className={`connection-status ${isGlobalTradingActive ? "connected" : ""}`}
+          >
+            <span>{isGlobalTradingActive ? "Live" : "Paused"}</span>
+          </div>
+          <Link to="/" style={{ textDecoration: "none" }}>
+            <Button className="nav-btn" startIcon={<Home />}>
+              Dashboard
+            </Button>
+          </Link>
+          <FormControlLabel
+            control={
+              <Switch
+                checked={isGlobalTradingActive}
+                onChange={toggleGlobalTrading}
+                color="primary"
               />
-            </Box>
-          }
-        />
-      </Card>
+            }
+            label="Global Trading"
+          />
+          <Button
+            variant="contained"
+            color="error"
+            startIcon={<Emergency />}
+            onClick={handleEmergencyStop}
+            className="emergency-stop-btn"
+          >
+            Emergency Stop
+          </Button>
+        </div>
+      </div>
 
-      {/* Status Overview */}
-      <Box
-        sx={{ display: "flex", gap: 3, flexWrap: "wrap", mb: 3 }}
-        className="status-overview"
-      >
-        <Card sx={{ flex: 1, minWidth: 250 }}>
-          <CardContent>
-            <Typography color="textSecondary" gutterBottom>
-              Active Sessions
-            </Typography>
-            <Typography variant="h4">
-              {tradingSessions.filter((s) => s.status === "active").length}
-            </Typography>
-            <Chip
-              size="small"
-              label={
-                isGlobalTradingActive ? "Trading Active" : "Trading Paused"
-              }
-              color={isGlobalTradingActive ? "success" : "warning"}
-            />
-          </CardContent>
-        </Card>
-
-        <Card sx={{ flex: 1, minWidth: 250 }}>
-          <CardContent>
-            <Typography color="textSecondary" gutterBottom>
-              Total P&L Today
-            </Typography>
-            <Typography
-              variant="h4"
-              color={calculateTotalPnL() >= 0 ? "success.main" : "error.main"}
-            >
-              {calculateTotalPnL() >= 0 ? "+" : ""}$
-              {calculateTotalPnL().toFixed(2)}
-            </Typography>
-            <Typography variant="body2" color="textSecondary">
-              {calculateTotalTrades()} trades executed
-            </Typography>
-          </CardContent>
-        </Card>
-
-        <Card sx={{ flex: 1, minWidth: 250 }}>
-          <CardContent>
-            <Typography color="textSecondary" gutterBottom>
-              Active Rules
-            </Typography>
-            <Typography variant="h4">
-              {tradingRules.filter((r) => r.isActive).length}
-            </Typography>
-            <Typography variant="body2" color="textSecondary">
-              {tradingRules.length} total rules
-            </Typography>
-          </CardContent>
-        </Card>
-
-        <Card sx={{ flex: 1, minWidth: 250 }}>
-          <CardContent>
-            <Typography color="textSecondary" gutterBottom>
-              Win Rate
-            </Typography>
-            <Typography variant="h4">
-              {calculateWinRate().toFixed(1)}%
-            </Typography>
-            <Typography variant="body2" color="textSecondary">
-              From active strategies
-            </Typography>
-          </CardContent>
-        </Card>
-      </Box>
-
-      {/* Tab Navigation */}
-      <Card className="tabs-container">
-        <Tabs
-          value={activeTab}
-          onChange={handleTabChange}
-          variant="scrollable"
-          scrollButtons="auto"
-          className="dashboard-tabs"
+      <div className="page-content">
+        {/* Status Overview */}
+        <Box
+          sx={{ display: "flex", gap: 3, flexWrap: "wrap", mb: 3 }}
+          className="status-overview"
         >
-          <Tab label="Overview" icon={<Assessment />} />
-          <Tab label="Trading Rules" icon={<Settings />} />
-          <Tab label="Session Control" icon={<PlayArrow />} />
-          <Tab label="Performance" icon={<TrendingUp />} />
-          <Tab label="Trade History" icon={<History />} />
-          <Tab label="Rule Builder" icon={<Settings />} />
-        </Tabs>
+          <Card sx={{ flex: 1, minWidth: 250 }}>
+            <CardContent>
+              <Typography color="textSecondary" gutterBottom>
+                Active Sessions
+              </Typography>
+              <Typography variant="h4">
+                {tradingSessions.filter((s) => s.status === "active").length}
+              </Typography>
+              <Chip
+                size="small"
+                label={
+                  isGlobalTradingActive ? "Trading Active" : "Trading Paused"
+                }
+                color={isGlobalTradingActive ? "success" : "warning"}
+              />
+            </CardContent>
+          </Card>
 
-        {/* Tab Panels */}
-        <TabPanel value={activeTab} index={0}>
-          <TradingSessionMonitor
-            sessions={tradingSessions}
-            isGlobalActive={isGlobalTradingActive}
-          />
-        </TabPanel>
+          <Card sx={{ flex: 1, minWidth: 250 }}>
+            <CardContent>
+              <Typography color="textSecondary" gutterBottom>
+                Total P&L Today
+              </Typography>
+              <Typography
+                variant="h4"
+                color={calculateTotalPnL() >= 0 ? "success.main" : "error.main"}
+              >
+                {calculateTotalPnL() >= 0 ? "+" : ""}$
+                {calculateTotalPnL().toFixed(2)}
+              </Typography>
+              <Typography variant="body2" color="textSecondary">
+                {calculateTotalTrades()} trades executed
+              </Typography>
+            </CardContent>
+          </Card>
 
-        <TabPanel value={activeTab} index={1}>
-          <TradingRulesManager
-            rules={tradingRules}
-            onRuleUpdate={setTradingRules}
-          />
-        </TabPanel>
+          <Card sx={{ flex: 1, minWidth: 250 }}>
+            <CardContent>
+              <Typography color="textSecondary" gutterBottom>
+                Active Rules
+              </Typography>
+              <Typography variant="h4">
+                {tradingRules.filter((r) => r.isActive).length}
+              </Typography>
+              <Typography variant="body2" color="textSecondary">
+                {tradingRules.length} total rules
+              </Typography>
+            </CardContent>
+          </Card>
 
-        <TabPanel value={activeTab} index={2}>
-          <TradingControlPanel
-            sessions={tradingSessions}
-            onSessionUpdate={setTradingSessions}
-            isGlobalActive={isGlobalTradingActive}
-            onGlobalToggle={toggleGlobalTrading}
-          />
-        </TabPanel>
+          <Card sx={{ flex: 1, minWidth: 250 }}>
+            <CardContent>
+              <Typography color="textSecondary" gutterBottom>
+                Win Rate
+              </Typography>
+              <Typography variant="h4">
+                {calculateWinRate().toFixed(1)}%
+              </Typography>
+              <Typography variant="body2" color="textSecondary">
+                From active strategies
+              </Typography>
+            </CardContent>
+          </Card>
+        </Box>
 
-        <TabPanel value={activeTab} index={3}>
-          <TradingPerformanceChart />
-        </TabPanel>
+        {/* Tab Navigation */}
+        <Card className="tabs-container">
+          <Tabs
+            value={activeTab}
+            onChange={handleTabChange}
+            variant="scrollable"
+            scrollButtons="auto"
+            className="dashboard-tabs"
+          >
+            <Tab label="Overview" icon={<Assessment />} />
+            <Tab label="Trading Rules" icon={<Settings />} />
+            <Tab label="Session Control" icon={<PlayArrow />} />
+            <Tab label="Performance" icon={<TrendingUp />} />
+            <Tab label="Trade History" icon={<History />} />
+            <Tab label="Rule Builder" icon={<Settings />} />
+            <Tab label="Behavioral Analytics" icon={<Psychology />} />{" "}
+            {/* New tab */}
+          </Tabs>
 
-        <TabPanel value={activeTab} index={4}>
-          <AutoTradeHistory />
-        </TabPanel>
+          {/* Tab Panels */}
+          <TabPanel value={activeTab} index={0}>
+            <TradingSessionMonitor
+              sessions={tradingSessions}
+              isGlobalActive={isGlobalTradingActive}
+            />
+          </TabPanel>
 
-        <TabPanel value={activeTab} index={5}>
-          <RuleBuilder
-            onRuleCreate={(rule: TradingRule) => {
-              setTradingRules((prev) => [...prev, rule]);
-            }}
-          />
-        </TabPanel>
-      </Card>
-    </Box>
+          <TabPanel value={activeTab} index={1}>
+            <TradingRulesManager portfolioId={portfolios[0]?.id} />
+          </TabPanel>
+
+          <TabPanel value={activeTab} index={2}>
+            <TradingControlPanel
+              sessions={tradingSessions}
+              onSessionUpdate={setTradingSessions}
+              isGlobalActive={isGlobalTradingActive}
+              onGlobalToggle={toggleGlobalTrading}
+            />
+          </TabPanel>
+
+          <TabPanel value={activeTab} index={3}>
+            <TradingPerformanceChart />
+          </TabPanel>
+
+          <TabPanel value={activeTab} index={4}>
+            <AutoTradeHistory />
+          </TabPanel>
+
+          <TabPanel value={activeTab} index={5}>
+            <RuleBuilder
+              onRuleCreate={(rule: TradingRule) => {
+                setTradingRules((prev) => [...prev, rule]);
+              }}
+            />
+          </TabPanel>
+
+          <TabPanel value={activeTab} index={6}>
+            <BehavioralAnalyticsDashboard symbol="SPY" />
+          </TabPanel>
+        </Card>
+      </div>
+    </div>
   );
 };
 

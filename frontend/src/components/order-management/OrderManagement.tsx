@@ -12,7 +12,7 @@ export interface ConditionalTrigger {
 
 export interface ConditionalTrigger {
   id: string;
-  logicalOperator?: string;
+  logicalOperator?: "AND" | "OR";
   condition: string;
   value: number;
 }
@@ -68,7 +68,6 @@ export const OrderManagement: React.FC<OrderManagementProps> = observer(
     const [statusFilter, setStatusFilter] = useState<string>("");
     const [orderTypeFilter, setOrderTypeFilter] = useState<string>("");
 
-<<<<<<< HEAD
     useEffect(() => {
       loadOrders();
     }, [activeTab, selectedPortfolio]);
@@ -122,43 +121,6 @@ export const OrderManagement: React.FC<OrderManagementProps> = observer(
         setError(err.message || "Failed to load orders");
       } finally {
         setIsLoading(false);
-=======
-  const loadOrders = async () => {
-    if (!selectedPortfolio && !showPortfolioFilter) return;
-    
-    setIsLoading(true);
-    setError(null);
-    
-    try {
-      let fetchedOrders: Order[] = [];
-      
-      switch (activeTab) {
-        case 'active':
-          if (selectedPortfolio) {
-            fetchedOrders = await orderManagementStore.getPendingOrders(selectedPortfolio);
-          } else {
-            fetchedOrders = await orderManagementStore.getActiveOrders();
-          }
-          break;
-        case 'history':
-          if (selectedPortfolio) {
-            fetchedOrders = await orderManagementStore.getOrderHistory(selectedPortfolio);
-          }
-          break;
-        case 'conditional':
-          if (selectedPortfolio) {
-            const allOrders = await orderManagementStore.getOrdersByPortfolio(selectedPortfolio);
-            fetchedOrders = allOrders.filter((order: Order) => 
-              order.conditionalTriggers && order.conditionalTriggers.length > 0
-            );
-          }
-          break;
-        case 'execution':
-          if (selectedPortfolio) {
-            fetchedOrders = await orderManagementStore.getOrderHistory(selectedPortfolio, 50);
-          }
-          break;
->>>>>>> 6ddc0fc (udpate)
       }
     };
 
@@ -334,7 +296,6 @@ export const OrderManagement: React.FC<OrderManagementProps> = observer(
               onChange={(e) => setStatusFilter(e.target.value)}
               className="filter-select"
             >
-<<<<<<< HEAD
               <option value="">All Statuses</option>
               <option value="pending">Pending</option>
               <option value="triggered">Triggered</option>
@@ -356,14 +317,6 @@ export const OrderManagement: React.FC<OrderManagementProps> = observer(
               <option value="trailing_stop">Trailing Stop</option>
               <option value="bracket">Bracket</option>
               <option value="oco">OCO</option>
-=======
-              <option value="">Select Portfolio</option>
-              {portfolioStore.portfolios.map((portfolio: any) => (
-                <option key={portfolio.id} value={portfolio.id}>
-                  {portfolio.name}
-                </option>
-              ))}
->>>>>>> 6ddc0fc (udpate)
             </select>
           </div>
 
@@ -754,7 +707,6 @@ export const OrderManagement: React.FC<OrderManagementProps> = observer(
                     </div>
                   </div>
 
-<<<<<<< HEAD
                   <div className="execution-table">
                     <h4>Recent Executions</h4>
                     <table>
@@ -794,40 +746,6 @@ export const OrderManagement: React.FC<OrderManagementProps> = observer(
                                     )}`}
                                   >
                                     {order.side.toUpperCase()}
-=======
-                <div className="orders-table">
-                  <table>
-                    <thead>
-                      <tr>
-                        <th>Symbol</th>
-                        <th>Type</th>
-                        <th>Side</th>
-                        <th>Quantity</th>
-                        <th>Triggers</th>
-                        <th>Status</th>
-                        <th>Created</th>
-                        <th>Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {filteredOrders.map(order => (
-                        <tr key={order.id}>
-                          <td className="symbol-cell">{order.symbol}</td>
-                          <td>{order.orderType.replace('_', ' ').toUpperCase()}</td>
-                          <td>
-                            <span className={`side-badge ${getSideBadgeClass(order.side)}`}>
-                              {order.side.toUpperCase()}
-                            </span>
-                          </td>
-                          <td>{order.quantity}</td>
-                          <td>
-                            <div className="triggers">
-                              {order.conditionalTriggers?.map((trigger: ConditionalTrigger, index: number) => (
-                                <div key={trigger.id} className="trigger">
-                                  {index > 0 && <span className="logical-op">{trigger.logicalOperator}</span>}
-                                  <span className="trigger-condition">
-                                    {trigger.condition} {trigger.value}
->>>>>>> 6ddc0fc (udpate)
                                   </span>
                                 </td>
                                 <td>

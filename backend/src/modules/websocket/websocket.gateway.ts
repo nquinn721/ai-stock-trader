@@ -1604,7 +1604,6 @@ export class StockWebSocketGateway
     return client ? client.conn.transport.name === 'websocket' : false;
   }
 
-<<<<<<< HEAD
   // ========================================
   // S39: Predictive Analytics WebSocket Methods
   // ========================================
@@ -1826,43 +1825,64 @@ export class StockWebSocketGateway
         );
       }
     }
-=======
-  // === Auto-Trading WebSocket Methods ===
+  }
+
+  // ========================================
+  // Auto-Trading WebSocket Methods
+  // ========================================
 
   /**
    * Notify about trading session started
    */
   async notifyTradingSessionStarted(portfolioId: string, session: any) {
     try {
-      this.server.to(`portfolio_${portfolioId}`).emit('trading_session_started', {
-        type: 'trading_session_started',
-        data: session,
-        portfolioId,
-        timestamp: new Date().toISOString(),
-      });
-      console.log(`🎯 Trading session started notification sent for portfolio ${portfolioId}`);
+      this.server
+        .to(`portfolio_${portfolioId}`)
+        .emit('trading_session_started', {
+          type: 'trading_session_started',
+          data: session,
+          portfolioId,
+          timestamp: new Date().toISOString(),
+        });
+      console.log(
+        `🎯 Trading session started notification sent for portfolio ${portfolioId}`,
+      );
     } catch (error) {
-      console.error(`Error sending trading session started notification:`, error);
+      console.error(
+        `Error sending trading session started notification:`,
+        error,
+      );
     }
   }
 
   /**
    * Notify about trading session stopped
    */
-  async notifyTradingSessionStopped(portfolioId: string, sessionId: string, reason?: string) {
+  async notifyTradingSessionStopped(
+    portfolioId: string,
+    sessionId: string,
+    reason?: string,
+  ) {
     try {
-      this.server.to(`portfolio_${portfolioId}`).emit('trading_session_stopped', {
-        type: 'trading_session_stopped',
-        data: {
-          sessionId,
-          reason: reason || 'Manual stop',
-        },
-        portfolioId,
-        timestamp: new Date().toISOString(),
-      });
-      console.log(`🛑 Trading session stopped notification sent for portfolio ${portfolioId}`);
+      this.server
+        .to(`portfolio_${portfolioId}`)
+        .emit('trading_session_stopped', {
+          type: 'trading_session_stopped',
+          data: {
+            sessionId,
+            reason: reason || 'Manual stop',
+          },
+          portfolioId,
+          timestamp: new Date().toISOString(),
+        });
+      console.log(
+        `🛑 Trading session stopped notification sent for portfolio ${portfolioId}`,
+      );
     } catch (error) {
-      console.error(`Error sending trading session stopped notification:`, error);
+      console.error(
+        `Error sending trading session stopped notification:`,
+        error,
+      );
     }
   }
 
@@ -1893,7 +1913,9 @@ export class StockWebSocketGateway
         timestamp: new Date().toISOString(),
       });
 
-      console.log(`💹 Trade executed notification sent: ${tradeData.type} ${tradeData.quantity} ${tradeData.symbol}`);
+      console.log(
+        `💹 Trade executed notification sent: ${tradeData.type} ${tradeData.quantity} ${tradeData.symbol}`,
+      );
     } catch (error) {
       console.error(`Error sending trade executed notification:`, error);
     }
@@ -1904,15 +1926,22 @@ export class StockWebSocketGateway
    */
   async notifyTradingRuleTriggered(portfolioId: string, ruleData: any) {
     try {
-      this.server.to(`portfolio_${portfolioId}`).emit('trading_rule_triggered', {
-        type: 'trading_rule_triggered',
-        data: ruleData,
-        portfolioId,
-        timestamp: new Date().toISOString(),
-      });
-      console.log(`⚡ Trading rule triggered notification sent for portfolio ${portfolioId}`);
+      this.server
+        .to(`portfolio_${portfolioId}`)
+        .emit('trading_rule_triggered', {
+          type: 'trading_rule_triggered',
+          data: ruleData,
+          portfolioId,
+          timestamp: new Date().toISOString(),
+        });
+      console.log(
+        `⚡ Trading rule triggered notification sent for portfolio ${portfolioId}`,
+      );
     } catch (error) {
-      console.error(`Error sending trading rule triggered notification:`, error);
+      console.error(
+        `Error sending trading rule triggered notification:`,
+        error,
+      );
     }
   }
 
@@ -1921,14 +1950,16 @@ export class StockWebSocketGateway
    */
   async notifyEmergencyStopTriggered(portfolioId: string, reason: string) {
     try {
-      this.server.to(`portfolio_${portfolioId}`).emit('emergency_stop_triggered', {
-        type: 'emergency_stop_triggered',
-        data: {
-          reason,
-          portfolioId,
-        },
-        timestamp: new Date().toISOString(),
-      });
+      this.server
+        .to(`portfolio_${portfolioId}`)
+        .emit('emergency_stop_triggered', {
+          type: 'emergency_stop_triggered',
+          data: {
+            reason,
+            portfolioId,
+          },
+          timestamp: new Date().toISOString(),
+        });
 
       // Also broadcast as system alert for high visibility
       await this.broadcastSystemAlert({
@@ -1938,7 +1969,9 @@ export class StockWebSocketGateway
         portfolioId,
       });
 
-      console.log(`🚨 Emergency stop notification sent for portfolio ${portfolioId}`);
+      console.log(
+        `🚨 Emergency stop notification sent for portfolio ${portfolioId}`,
+      );
     } catch (error) {
       console.error(`Error sending emergency stop notification:`, error);
     }
@@ -1952,7 +1985,9 @@ export class StockWebSocketGateway
     @MessageBody() data: { portfolioId: string },
     @ConnectedSocket() client: Socket,
   ) {
-    console.log(`Client ${client.id} subscribed to auto-trading for portfolio ${data.portfolioId}`);
+    console.log(
+      `Client ${client.id} subscribed to auto-trading for portfolio ${data.portfolioId}`,
+    );
     client.join(`auto_trading_${data.portfolioId}`);
   }
 
@@ -1964,8 +1999,9 @@ export class StockWebSocketGateway
     @MessageBody() data: { portfolioId: string },
     @ConnectedSocket() client: Socket,
   ) {
-    console.log(`Client ${client.id} unsubscribed from auto-trading for portfolio ${data.portfolioId}`);
+    console.log(
+      `Client ${client.id} unsubscribed from auto-trading for portfolio ${data.portfolioId}`,
+    );
     client.leave(`auto_trading_${data.portfolioId}`);
->>>>>>> 6ddc0fc (udpate)
   }
 }

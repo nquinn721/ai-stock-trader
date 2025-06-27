@@ -1,7 +1,7 @@
 import {
   Archive as ArchiveIcon,
-  Unarchive as UnarchiveIcon,
   Delete as DeleteIcon,
+  Unarchive as UnarchiveIcon,
 } from "@mui/icons-material";
 import {
   Avatar,
@@ -29,7 +29,9 @@ const ArchiveView: React.FC = () => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [storyToDelete, setStoryToDelete] = useState<string | null>(null);
 
-  const archivedStories = localStories.filter((story) => story.status === "ARCHIVED");
+  const archivedStories = localStories.filter(
+    (story) => story.status === "ARCHIVED"
+  );
 
   const handleUnarchiveStory = (storyId: string) => {
     setLocalStories((prev) =>
@@ -52,7 +54,9 @@ const ArchiveView: React.FC = () => {
 
   const confirmDelete = () => {
     if (storyToDelete) {
-      setLocalStories((prev) => prev.filter((story) => story.id !== storyToDelete));
+      setLocalStories((prev) =>
+        prev.filter((story) => story.id !== storyToDelete)
+      );
       setStoryToDelete(null);
     }
     setDeleteDialogOpen(false);
@@ -86,7 +90,8 @@ const ArchiveView: React.FC = () => {
           No Archived Stories
         </Typography>
         <Typography variant="body1" color="textSecondary">
-          Stories that are archived will appear here for reference and potential restoration.
+          Stories that are archived will appear here for reference and potential
+          restoration.
         </Typography>
       </Box>
     );
@@ -94,12 +99,17 @@ const ArchiveView: React.FC = () => {
 
   return (
     <Box>
-      <Stack direction="row" justifyContent="space-between" alignItems="center" mb={3}>
+      <Stack
+        direction="row"
+        justifyContent="space-between"
+        alignItems="center"
+        mb={3}
+      >
         <Typography variant="h4">
           Archived Stories ({archivedStories.length})
         </Typography>
         <Typography variant="body2" color="textSecondary">
-          Stories archived on or after their completion dates
+          Completed stories archived on or after their completion dates
         </Typography>
       </Stack>
 
@@ -113,12 +123,12 @@ const ArchiveView: React.FC = () => {
         {archivedStories.map((story) => (
           <Card
             key={story.id}
-            sx={{ 
-              borderRadius: 3, 
-              boxShadow: 3, 
+            sx={{
+              borderRadius: 3,
+              boxShadow: 3,
               height: "100%",
               opacity: 0.8,
-              border: "1px solid #e0e0e0"
+              border: "1px solid #e0e0e0",
             }}
           >
             <CardContent>
@@ -143,10 +153,22 @@ const ArchiveView: React.FC = () => {
               </Typography>
 
               <Stack direction="row" spacing={1} mb={2} flexWrap="wrap">
-                <Chip label={`Epic: ${story.epic}`} size="small" variant="outlined" />
-                <Chip label={`Points: ${story.storyPoints}`} size="small" variant="outlined" />
+                <Chip
+                  label={`Epic: ${story.epic}`}
+                  size="small"
+                  variant="outlined"
+                />
+                <Chip
+                  label={`Points: ${story.storyPoints}`}
+                  size="small"
+                  variant="outlined"
+                />
                 {story.sprint && (
-                  <Chip label={`Sprint: ${story.sprint}`} size="small" variant="outlined" />
+                  <Chip
+                    label={`Sprint: ${story.sprint}`}
+                    size="small"
+                    variant="outlined"
+                  />
                 )}
               </Stack>
 
@@ -156,27 +178,40 @@ const ArchiveView: React.FC = () => {
                 </Avatar>
                 <Typography variant="body2">{story.assignee}</Typography>
                 {story.archivedDate && (
-                  <Typography variant="caption" color="textSecondary" ml="auto!">
+                  <Typography
+                    variant="caption"
+                    color="textSecondary"
+                    ml="auto!"
+                  >
                     Archived: {story.archivedDate}
                   </Typography>
                 )}
               </Stack>
 
               {story.completedDate && (
-                <Typography variant="caption" color="textSecondary" mb={1} display="block">
+                <Typography
+                  variant="caption"
+                  color="textSecondary"
+                  mb={1}
+                  display="block"
+                >
                   Completed: {story.completedDate}
                 </Typography>
               )}
 
               {story.progress !== undefined && (
                 <Box mb={2}>
-                  <Stack direction="row" justifyContent="space-between" mb={0.5}>
+                  <Stack
+                    direction="row"
+                    justifyContent="space-between"
+                    mb={0.5}
+                  >
                     <Typography variant="caption">Progress</Typography>
                     <Typography variant="caption">{story.progress}%</Typography>
                   </Stack>
-                  <LinearProgress 
-                    variant="determinate" 
-                    value={story.progress} 
+                  <LinearProgress
+                    variant="determinate"
+                    value={story.progress}
                     sx={{ opacity: 0.6 }}
                   />
                 </Box>
@@ -211,7 +246,8 @@ const ArchiveView: React.FC = () => {
         <DialogTitle>Delete Story Permanently</DialogTitle>
         <DialogContent>
           <Typography>
-            Are you sure you want to permanently delete this story? This action cannot be undone.
+            Are you sure you want to permanently delete this story? This action
+            cannot be undone.
           </Typography>
         </DialogContent>
         <DialogActions>

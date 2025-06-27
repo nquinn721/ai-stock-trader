@@ -893,23 +893,15 @@ export class OrderManagementService {
       const activeOrders = await this.getActiveOrders();
       const stocks = await this.stockRepository.find();
       const stockDataMap = new Map(
-<<<<<<< HEAD
         stocks.map((s) => [
           s.symbol,
           {
             currentPrice: Number(s.currentPrice),
             volume: Number(s.volume || 0),
+            change: Number((s as any).change || 0),
             changePercent: Number(s.changePercent || 0),
           },
         ]),
-=======
-        stocks.map((s) => [s.symbol, {
-          currentPrice: Number(s.currentPrice),
-          volume: Number(s.volume || 0),
-          change: Number((s as any).change || 0),
-          changePercent: Number(s.changePercent || 0),
-        }]),
->>>>>>> 6ddc0fc (udpate)
       );
 
       for (const order of activeOrders) {
