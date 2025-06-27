@@ -1,362 +1,311 @@
 /* Import shared trading app styles */
 @import "../shared-styles.css";
 
-/* Modern Autonomous Trading Page - Using Shared Theme */
-.autonomous-trading-page {
-  /* Use shared background and layout from trading-page-base */
-  min-height: 100vh;
-  background: var(--trading-bg-gradient-dark);
-  background-attachment: fixed;
-  padding: var(--trading-spacing-page);
-  position: relative;
-  width: 100%;
-  overflow-x: hidden;
-  font-family: var(--trading-font-sans);
+/* ==========================================================================
+   Autonomous Trading Page - Standardized Layout
+   ========================================================================== */
+
+/* Page Container - Inherits from UI standards */
+.page-container {
+  /* Uses styles from UI-THEME-LAYOUT-STANDARDS.md */
+}
+
+/* Page Header - Inherits from UI standards */
+.page-header {
+  /* Uses styles from UI-THEME-LAYOUT-STANDARDS.md */
+}
+
+/* Page Content */
+.page-content {
+  padding-top: 24px;
+}
+
+/* ==========================================================================
+   Tabs Styling
+   ========================================================================== */
+
+.tabs-container {
+  background: rgba(15, 23, 42, 0.8);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--trading-border-secondary);
+  border-radius: var(--trading-radius-lg);
+  margin-bottom: 24px;
+  padding: 8px;
+}
+
+.main-tabs {
+  border-bottom: none;
+}
+
+.main-tabs .MuiTab-root {
+  color: var(--trading-text-secondary);
+  font-weight: 600;
+  text-transform: none;
+  transition: all 0.3s ease;
+  border-radius: var(--trading-radius-md);
+}
+
+.main-tabs .MuiTab-root:hover {
+  background-color: rgba(255, 255, 255, 0.05);
   color: var(--trading-text-primary);
 }
 
-.autonomous-trading-page::before {
-  content: "";
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
+.main-tabs .MuiTab-root.Mui-selected {
+  background: var(--trading-btn-gradient-secondary);
+  color: white !important;
+  font-weight: 700;
+  box-shadow: var(--trading-shadow-md);
+}
+
+.main-tabs .MuiTabs-indicator {
+  display: none;
+}
+
+.tab-content {
+  padding-top: 1rem;
+}
+
+/* ==========================================================================
+   Card and Section Styling
+   ========================================================================== */
+
+.content-card {
+  background: linear-gradient(
+    135deg,
+    rgba(15, 23, 42, 0.9) 0%,
+    rgba(30, 41, 59, 0.9) 100%
+  );
+  border: 1px solid var(--trading-border-secondary);
+  border-radius: var(--trading-radius-xl);
+  padding: 1.5rem;
+  backdrop-filter: blur(12px);
+  margin-bottom: 1.5rem;
+  transition: all 0.3s ease;
+}
+
+.content-card:hover {
+  border-color: var(--trading-border-accent);
+  transform: translateY(-2px);
+  box-shadow: var(--trading-shadow-glow);
+}
+
+.section-header {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--trading-text-primary);
+  margin-bottom: 0.5rem;
+}
+
+/* ==========================================================================
+   Overview Tab
+   ========================================================================== */
+
+.global-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.status-switch {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.portfolio-card {
+  display: flex;
+  flex-direction: column;
   height: 100%;
-  background:
-    radial-gradient(
-      circle at 25% 25%,
-      rgba(34, 197, 94, 0.08) 0%,
-      transparent 60%
-    ),
-    radial-gradient(
-      circle at 75% 75%,
-      rgba(59, 130, 246, 0.06) 0%,
-      transparent 60%
-    ),
-    radial-gradient(
-      circle at 50% 50%,
-      rgba(168, 85, 247, 0.04) 0%,
-      transparent 70%
-    );
-  pointer-events: none;
-  z-index: -1;
 }
 
-@keyframes subtleFloat {
-  0%,
-  100% {
-    transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(-3px);
-  }
+.portfolio-card .card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
 }
 
-/* Floating particles animation */
-@keyframes float {
-  0%,
-  100% {
-    transform: translateY(0px) translateX(0px);
-  }
-  25% {
-    transform: translateY(-10px) translateX(5px);
-  }
-  50% {
-    transform: translateY(-5px) translateX(-5px);
-  }
-  75% {
-    transform: translateY(-15px) translateX(10px);
-  }
+.portfolio-card .header-left h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--trading-text-primary);
 }
 
-/* Content Layer */
-.autonomous-trading-page > * {
-  position: relative;
-  z-index: 10;
+.portfolio-card .header-left span {
+  font-size: 0.875rem;
+  color: var(--trading-text-secondary);
 }
 
-/* Header Section - Matching Market Scanner */
-.autonomous-trading-header {
-  background: rgba(33, 38, 45, 0.95) !important;
-  backdrop-filter: blur(20px) !important;
-  border: 1px solid rgba(56, 62, 70, 0.8) !important;
-  border-radius: 16px !important;
-  box-shadow:
-    0 8px 32px rgba(0, 0, 0, 0.2),
-    0 1px 0 rgba(255, 255, 255, 0.05) inset !important;
-  margin-bottom: 32px !important;
-  padding: 32px !important;
+.portfolio-card .card-content {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
 }
 
-.autonomous-title {
-  background: linear-gradient(135deg, #a855f7 0%, #3b82f6 100%);
-  background-clip: text;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+.info-row,
+.strategy-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.assigned-strategy {
+  background: rgba(0, 0, 0, 0.2);
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--trading-radius-md);
+  margin-top: 0.5rem;
+}
+
+.card-actions {
+  padding: 1rem 0 0 0 !important;
+}
+
+.action-btn.start-btn {
+  background: var(--trading-btn-gradient-success);
+}
+
+.action-btn.stop-btn {
+  background: var(--trading-btn-gradient-secondary);
+  opacity: 0.8;
+}
+
+/* ==========================================================================
+   Live Market Data Tab
+   ========================================================================== */
+
+.live-market-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.stock-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+  max-height: 65vh;
+  overflow-y: auto;
+  padding-right: 1rem;
+}
+
+/* Custom scrollbar for stock grid */
+.stock-grid::-webkit-scrollbar {
+  width: 8px;
+}
+
+.stock-grid::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+}
+
+.stock-grid::-webkit-scrollbar-thumb {
+  background: var(--trading-gray-700);
+  border-radius: 4px;
+}
+
+.stock-grid::-webkit-scrollbar-thumb:hover {
+  background: var(--trading-gray-600);
+}
+
+/* ==========================================================================
+   Chips and Buttons
+   ========================================================================== */
+
+.status-chip {
   font-weight: 700 !important;
-  font-size: 2.2rem !important;
-  margin-bottom: 0 !important;
-  letter-spacing: -0.025em;
+  border-radius: 20px !important;
+  padding: 4px 8px !important;
 }
 
-/* Cards and Containers */
-.autonomous-trading-page .MuiCard-root {
-  background: rgba(33, 38, 45, 0.95) !important;
-  backdrop-filter: blur(20px) !important;
-  border: 1px solid rgba(56, 62, 70, 0.8) !important;
-  border-radius: 16px !important;
-  box-shadow:
-    0 8px 32px rgba(0, 0, 0, 0.2),
-    0 1px 0 rgba(255, 255, 255, 0.05) inset !important;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-  color: rgba(255, 255, 255, 0.9) !important;
-}
-
-.autonomous-trading-page .MuiCard-root:hover {
-  transform: translateY(-2px) !important;
-  box-shadow:
-    0 12px 48px rgba(0, 0, 0, 0.25),
-    0 1px 0 rgba(255, 255, 255, 0.1) inset !important;
-  border-color: rgba(75, 85, 99, 0.6) !important;
-}
-
-.autonomous-trading-page .MuiCardHeader-root {
-  color: rgba(255, 255, 255, 0.95) !important;
-}
-
-.autonomous-trading-page .MuiCardContent-root {
-  color: rgba(255, 255, 255, 0.85) !important;
-}
-
-/* Buttons - Matching Market Scanner Style */
-.autonomous-trading-page .MuiButton-containedPrimary {
-  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%) !important;
-  border: none !important;
-  border-radius: 12px !important;
-  padding: 12px 24px !important;
-  color: white !important;
-  font-weight: 600 !important;
-  box-shadow:
-    0 4px 16px rgba(34, 197, 94, 0.25),
-    0 1px 0 rgba(255, 255, 255, 0.1) inset !important;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-  text-transform: none !important;
-}
-
-.autonomous-trading-page .MuiButton-containedPrimary:hover {
-  transform: translateY(-1px) !important;
-  box-shadow:
-    0 6px 20px rgba(34, 197, 94, 0.35),
-    0 1px 0 rgba(255, 255, 255, 0.1) inset !important;
-  background: linear-gradient(135deg, #16a34a 0%, #15803d 100%) !important;
-}
-
-.autonomous-trading-page .MuiButton-containedSecondary {
-  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%) !important;
-  border: none !important;
-  border-radius: 12px !important;
-  padding: 12px 24px !important;
-  color: white !important;
-  font-weight: 600 !important;
-  box-shadow:
-    0 4px 16px rgba(59, 130, 246, 0.25),
-    0 1px 0 rgba(255, 255, 255, 0.1) inset !important;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-  text-transform: none !important;
-}
-
-.autonomous-trading-page .MuiButton-containedSecondary:hover {
-  transform: translateY(-1px) !important;
-  box-shadow:
-    0 6px 20px rgba(59, 130, 246, 0.35),
-    0 1px 0 rgba(255, 255, 255, 0.1) inset !important;
-  background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%) !important;
-}
-
-.autonomous-trading-page .MuiButton-outlined {
-  background: rgba(56, 62, 70, 0.8) !important;
-  backdrop-filter: blur(10px) !important;
-  border: 1px solid rgba(75, 85, 99, 0.5) !important;
-  border-radius: 12px !important;
-  color: rgba(255, 255, 255, 0.9) !important;
-  font-weight: 500 !important;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-  text-transform: none !important;
-}
-
-.autonomous-trading-page .MuiButton-outlined:hover {
-  background: rgba(75, 85, 99, 0.6) !important;
-  border-color: rgba(99, 102, 108, 0.8) !important;
-  transform: translateY(-1px) !important;
-}
-
-/* Tabs */
-.autonomous-trading-page .MuiTabs-root {
-  background: rgba(33, 38, 45, 0.8) !important;
-  backdrop-filter: blur(20px) !important;
-  border-radius: 12px !important;
-  margin-bottom: 24px !important;
-  border: 1px solid rgba(56, 62, 70, 0.6) !important;
-}
-
-.autonomous-trading-page .MuiTab-root {
-  color: rgba(255, 255, 255, 0.7) !important;
-  font-weight: 500 !important;
-  text-transform: none !important;
-  transition: all 0.3s ease !important;
-}
-
-.autonomous-trading-page .MuiTab-root.Mui-selected {
-  color: #3b82f6 !important;
-  font-weight: 600 !important;
-}
-
-.autonomous-trading-page .MuiTabs-indicator {
-  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%) !important;
-  height: 3px !important;
-  border-radius: 3px !important;
-}
-
-/* Form Elements */
-.autonomous-trading-page .MuiTextField-root .MuiOutlinedInput-root {
-  background: rgba(33, 38, 45, 0.8) !important;
-  backdrop-filter: blur(10px) !important;
-  border-radius: 12px !important;
-  color: rgba(255, 255, 255, 0.9) !important;
-}
-
-.autonomous-trading-page
-  .MuiTextField-root
-  .MuiOutlinedInput-root
-  .MuiOutlinedInput-notchedOutline {
-  border-color: rgba(75, 85, 99, 0.5) !important;
-}
-
-.autonomous-trading-page
-  .MuiTextField-root
-  .MuiOutlinedInput-root:hover
-  .MuiOutlinedInput-notchedOutline {
-  border-color: rgba(99, 102, 108, 0.8) !important;
-}
-
-.autonomous-trading-page
-  .MuiTextField-root
-  .MuiOutlinedInput-root.Mui-focused
-  .MuiOutlinedInput-notchedOutline {
-  border-color: #3b82f6 !important;
-  border-width: 2px !important;
-}
-
-.autonomous-trading-page .MuiInputLabel-root {
-  color: rgba(255, 255, 255, 0.7) !important;
-}
-
-.autonomous-trading-page .MuiInputLabel-root.Mui-focused {
-  color: #3b82f6 !important;
-}
-
-/* Chips */
-.autonomous-trading-page .MuiChip-root {
+.status-chip.active {
   background: rgba(34, 197, 94, 0.15) !important;
   color: #22c55e !important;
-  backdrop-filter: blur(10px) !important;
   border: 1px solid rgba(34, 197, 94, 0.3) !important;
-  border-radius: 20px !important;
-  font-weight: 500 !important;
 }
 
-.autonomous-trading-page .MuiChip-root.MuiChip-colorSecondary {
+.status-chip.inactive {
+  background: rgba(100, 116, 139, 0.15) !important;
+  color: #94a3b8 !important;
+  border: 1px solid rgba(100, 116, 139, 0.3) !important;
+}
+
+.status-chip.ready {
   background: rgba(59, 130, 246, 0.15) !important;
   color: #3b82f6 !important;
-  border-color: rgba(59, 130, 246, 0.3) !important;
+  border: 1px solid rgba(59, 130, 246, 0.3) !important;
 }
 
-.autonomous-trading-page .MuiChip-root.MuiChip-colorError {
-  background: rgba(239, 68, 68, 0.15) !important;
-  color: #ef4444 !important;
-  border-color: rgba(239, 68, 68, 0.3) !important;
+.random-btn {
+  border-color: var(--trading-border-secondary) !important;
+  color: var(--trading-text-secondary) !important;
+}
+.random-btn:hover {
+  border-color: var(--trading-border-accent) !important;
+  background-color: rgba(59, 130, 246, 0.1) !important;
 }
 
-/* Alert Components */
-.autonomous-trading-page .MuiAlert-root {
-  background: rgba(33, 38, 45, 0.9) !important;
-  backdrop-filter: blur(20px) !important;
-  border-radius: 12px !important;
-  border: 1px solid rgba(56, 62, 70, 0.8) !important;
-  color: rgba(255, 255, 255, 0.9) !important;
+/* ==========================================================================
+   Loading and Empty States
+   ========================================================================== */
+
+.loading-indicator,
+.loading-state,
+.empty-state {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  padding: 4rem 2rem;
+  background: rgba(15, 23, 42, 0.5);
+  border-radius: var(--trading-radius-xl);
+  text-align: center;
+  gap: 1rem;
 }
 
-/* Typography */
-.autonomous-trading-page .MuiTypography-root {
-  color: rgba(255, 255, 255, 0.9) !important;
+.loading-indicator .MuiCircularProgress-root {
+  color: var(--trading-primary-500);
 }
 
-.autonomous-trading-page .MuiTypography-h1,
-.autonomous-trading-page .MuiTypography-h2,
-.autonomous-trading-page .MuiTypography-h3,
-.autonomous-trading-page .MuiTypography-h4,
-.autonomous-trading-page .MuiTypography-h5,
-.autonomous-trading-page .MuiTypography-h6 {
-  color: rgba(255, 255, 255, 0.95) !important;
-  font-weight: 600 !important;
+.empty-state h6 {
+  color: var(--trading-text-primary);
 }
 
-/* Dialog Overrides */
-.autonomous-trading-page .MuiDialog-paper {
-  background: rgba(33, 38, 45, 0.95) !important;
-  backdrop-filter: blur(20px) !important;
-  border: 1px solid rgba(56, 62, 70, 0.8) !important;
-  border-radius: 16px !important;
-  color: rgba(255, 255, 255, 0.9) !important;
+.empty-state p {
+  color: var(--trading-text-secondary);
 }
 
-.autonomous-trading-page .MuiDialogTitle-root {
-  color: rgba(255, 255, 255, 0.95) !important;
-  font-weight: 600 !important;
+/* ==========================================================================
+   Dialog / Modal Styling
+   ========================================================================== */
+
+.MuiDialog-paper {
+  background: var(--trading-modal-gradient-dark) !important;
+  border: 1px solid var(--trading-border-secondary) !important;
+  border-radius: var(--trading-radius-xl) !importan;
+  backdrop-filter: blur(20px);
 }
 
-.autonomous-trading-page .MuiDialogContent-root {
-  color: rgba(255, 255, 255, 0.85) !important;
+.MuiDialogTitle-root {
+  font-weight: 700 !important;
+  color: var(--trading-text-primary) !important;
 }
 
-/* Progress Components */
-.autonomous-trading-page .MuiCircularProgress-root {
-  color: #3b82f6 !important;
+.MuiDialogContent-root {
+  color: var(--trading-text-secondary) !important;
 }
 
-/* Autonomous Trading Icon */
-.autonomous-icon {
-  color: #a855f7 !important;
-  font-size: 2.2rem !important;
-  margin-right: 16px !important;
-  filter: drop-shadow(0 2px 4px rgba(168, 85, 247, 0.3));
+.MuiTextField-root .MuiOutlinedInput-root {
+  background: rgba(15, 23, 42, 0.8) !important;
+  color: var(--trading-text-primary) !important;
 }
 
-/* Responsive Design */
-@media (max-width: 768px) {
-  .autonomous-trading-page {
-    padding: 16px !important;
-  }
-
-  .autonomous-trading-header {
-    padding: 24px !important;
-  }
-
-  .autonomous-title {
-    font-size: 1.8rem !important;
-  }
+.MuiTextField-root .MuiOutlinedInput-notchedOutline {
+  border-color: var(--trading-border-secondary) !important;
 }
 
-@media (max-width: 480px) {
-  .autonomous-trading-page {
-    padding: 12px !important;
-  }
-
-  .autonomous-trading-header {
-    padding: 20px !important;
-  }
-
-  .autonomous-title {
-    font-size: 1.5rem !important;
-  }
+.MuiInputLabel-root {
+  color: var(--trading-text-secondary) !important;
 }
