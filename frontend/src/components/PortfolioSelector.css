@@ -3,41 +3,6 @@
   margin-bottom: 2rem;
 }
 
-.portfolio-selector-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1.5rem;
-}
-
-.portfolio-selector-header h3 {
-  margin: 0;
-  color: var(--text-primary, #ffffff);
-  font-size: 1rem;
-  font-weight: 600;
-}
-
-.create-portfolio-btn-small {
-  background: linear-gradient(135deg, #6366f1, #8b5cf6);
-  color: white;
-  border: none;
-  border-radius: 8px;
-  padding: 0.5rem 1rem;
-  font-size: 0.875rem;
-  font-weight: 500;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  transition: all 0.2s ease;
-}
-
-.create-portfolio-btn-small:hover {
-  background: linear-gradient(135deg, #5b5fcf, #805ad5);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
-}
-
 .portfolios-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -260,9 +225,7 @@
     border-color: #334155;
   }
 
-  .portfolio-card:hover {
-    border-color: #6366f1;
-  }
+  /* Portfolio card hover effects removed for cleaner dashboard experience */
 
   .portfolio-card.selected {
     border-color: #10b981;

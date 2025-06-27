@@ -14,6 +14,8 @@
   padding: 0;
   margin: 0;
   position: relative;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 /* Enhanced background with subtle patterns */
@@ -50,19 +52,21 @@
     var(--theme-border-color);
   padding: var(--theme-space-6) 0;
   position: sticky;
-  top: 0;
+  top: 80px; /* Account for fixed app header height */
   z-index: var(--theme-z-sticky);
   box-shadow: var(--theme-shadow-sm);
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .header-content {
-  max-width: 1400px;
-  margin: 0 auto;
+  width: 100%;
   padding: 0 var(--theme-space-6);
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: var(--theme-space-8);
+  box-sizing: border-box;
 }
 
 .header-left {
@@ -167,12 +171,12 @@
 /* ===== MAIN CONTENT AREA ===== */
 
 .dashboard-content {
-  max-width: 1400px;
-  margin: 0 auto;
+  width: 100%;
   padding: var(--theme-space-8) var(--theme-space-6);
   display: flex;
   flex-direction: column;
   gap: var(--theme-space-8);
+  box-sizing: border-box;
 }
 
 /* ===== DASHBOARD GRID SYSTEM ===== */

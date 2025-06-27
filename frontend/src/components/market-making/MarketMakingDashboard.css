@@ -1,0 +1,312 @@
+/* Market Making Dashboard Styles */
+.market-making-dashboard {
+  padding: 24px;
+  background-color: var(--color-background);
+  min-height: 100vh;
+}
+
+.market-making-dashboard.loading,
+.market-making-dashboard.error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+}
+
+.dashboard-title {
+  color: var(--color-text-primary);
+  font-weight: 600;
+  margin-bottom: 24px;
+  text-align: center;
+}
+
+/* Status Overview Styles */
+.status-overview {
+  margin-bottom: 32px;
+}
+
+.status-card {
+  background: var(--color-card-background);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.status-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.status-card.profit {
+  background: linear-gradient(135deg, rgba(76, 175, 80, 0.1), rgba(76, 175, 80, 0.05));
+  border-color: var(--color-success);
+}
+
+.status-metric {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 8px;
+}
+
+.status-icon {
+  font-size: 2rem;
+  color: var(--color-primary);
+  margin-bottom: 8px;
+}
+
+.status-card.profit .status-icon {
+  color: var(--color-success);
+}
+
+/* Dashboard Content Styles */
+.dashboard-content {
+  background: var(--color-card-background);
+  border-radius: 16px;
+  border: 1px solid var(--color-border);
+  overflow: hidden;
+}
+
+.dashboard-tabs {
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-card-background);
+}
+
+.dashboard-tabs .MuiTab-root {
+  color: var(--color-text-secondary);
+  font-weight: 500;
+  text-transform: none;
+  font-size: 0.95rem;
+  padding: 16px 24px;
+}
+
+.dashboard-tabs .MuiTab-root.Mui-selected {
+  color: var(--color-primary);
+}
+
+.dashboard-tabs .MuiTabs-indicator {
+  background-color: var(--color-primary);
+  height: 3px;
+}
+
+.tab-content {
+  padding: 24px;
+}
+
+/* Table Styles */
+.strategies-table,
+.arbitrage-table {
+  margin-top: 16px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+}
+
+.strategies-table .MuiTableHead-root,
+.arbitrage-table .MuiTableHead-root {
+  background-color: var(--color-surface);
+}
+
+.strategies-table .MuiTableCell-root,
+.arbitrage-table .MuiTableCell-root {
+  border-bottom: 1px solid var(--color-border);
+  color: var(--color-text-primary);
+}
+
+.strategies-table .MuiTableCell-head,
+.arbitrage-table .MuiTableCell-head {
+  font-weight: 600;
+  color: var(--color-text-primary);
+  background-color: var(--color-surface);
+}
+
+/* P&L Colors */
+.profit {
+  color: var(--color-success) !important;
+  font-weight: 600;
+}
+
+.loss {
+  color: var(--color-error) !important;
+  font-weight: 600;
+}
+
+/* Risk Management Styles */
+.risk-card {
+  background: var(--color-card-background);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  margin-bottom: 16px;
+}
+
+.risk-progress {
+  margin: 12px 0;
+  height: 8px;
+  border-radius: 4px;
+}
+
+.risk-progress .MuiLinearProgress-bar {
+  border-radius: 4px;
+}
+
+/* Chip Styles */
+.MuiChip-root {
+  font-weight: 500;
+  font-size: 0.75rem;
+}
+
+.MuiChip-colorSuccess {
+  background-color: rgba(76, 175, 80, 0.1);
+  color: var(--color-success);
+  border-color: var(--color-success);
+}
+
+.MuiChip-colorError {
+  background-color: rgba(244, 67, 54, 0.1);
+  color: var(--color-error);
+  border-color: var(--color-error);
+}
+
+.MuiChip-colorWarning {
+  background-color: rgba(255, 152, 0, 0.1);
+  color: var(--color-warning);
+  border-color: var(--color-warning);
+}
+
+.MuiChip-colorInfo {
+  background-color: rgba(33, 150, 243, 0.1);
+  color: var(--color-info);
+  border-color: var(--color-info);
+}
+
+/* Button Styles */
+.MuiButton-containedPrimary {
+  background-color: var(--color-primary);
+  color: white;
+  font-weight: 500;
+  text-transform: none;
+  border-radius: 8px;
+  padding: 6px 16px;
+}
+
+.MuiButton-containedPrimary:hover {
+  background-color: var(--color-primary-dark);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Alert Styles */
+.MuiAlert-root {
+  border-radius: 8px;
+  margin: 16px 0;
+}
+
+.MuiAlert-standardInfo {
+  background-color: rgba(33, 150, 243, 0.1);
+  border: 1px solid rgba(33, 150, 243, 0.2);
+}
+
+.MuiAlert-standardError {
+  background-color: rgba(244, 67, 54, 0.1);
+  border: 1px solid rgba(244, 67, 54, 0.2);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .market-making-dashboard {
+    padding: 16px;
+  }
+  
+  .dashboard-title {
+    font-size: 1.75rem;
+  }
+  
+  .status-overview {
+    flex-direction: column;
+  }
+  
+  .status-card {
+    margin-bottom: 12px;
+  }
+  
+  .tab-content {
+    padding: 16px;
+  }
+  
+  .strategies-table,
+  .arbitrage-table {
+    font-size: 0.875rem;
+  }
+  
+  .MuiTableCell-root {
+    padding: 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .dashboard-tabs .MuiTab-root {
+    padding: 12px 16px;
+    font-size: 0.875rem;
+  }
+  
+  .status-metric .MuiTypography-h6 {
+    font-size: 1.1rem;
+  }
+  
+  .status-icon {
+    font-size: 1.5rem;
+  }
+}
+
+/* Loading Animation */
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.7; }
+  100% { opacity: 1; }
+}
+
+.loading .MuiLinearProgress-root {
+  animation: pulse 2s infinite;
+}
+
+/* Dark Theme Adjustments */
+@media (prefers-color-scheme: dark) {
+  .status-card {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  }
+  
+  .status-card:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  }
+}
+
+/* Utility Classes */
+.text-center {
+  text-align: center;
+}
+
+.text-right {
+  text-align: right;
+}
+
+.mt-2 {
+  margin-top: 16px;
+}
+
+.mb-3 {
+  margin-bottom: 24px;
+}
+
+.flex-wrap {
+  flex-wrap: wrap;
+}
+
+.gap-2 {
+  gap: 16px;
+}
+
+.gap-3 {
+  gap: 24px;
+}

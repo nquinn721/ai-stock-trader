@@ -268,7 +268,7 @@ const QuickTrade: React.FC = observer(() => {
   };
   if (portfolioLoading) {
     return (
-      <div className="quick-trade-container">
+      <div className="quick-trade-card">
         <EmptyState
           title="Loading Portfolio"
           description="Setting up your trading portfolio..."
@@ -279,7 +279,7 @@ const QuickTrade: React.FC = observer(() => {
     );
   }
   return (
-    <div className="quick-trade-container">
+    <div className="dashboard-card quick-trade-card">
       {/* Notifications */}
       {notifications.length > 0 && (
         <div className="notifications-container">

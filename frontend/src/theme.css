@@ -4,14 +4,14 @@
 
 :root {
   /* ===== DESIGN TOKENS ===== */
-  
+
   /* Color Palette - Professional Trading Theme */
   --theme-primary-50: #f0f9ff;
   --theme-primary-100: #e0f2fe;
   --theme-primary-200: #bae6fd;
   --theme-primary-300: #7dd3fc;
   --theme-primary-400: #38bdf8;
-  --theme-primary-500: #0ea5e9;    /* Main brand blue */
+  --theme-primary-500: #0ea5e9; /* Main brand blue */
   --theme-primary-600: #0284c7;
   --theme-primary-700: #0369a1;
   --theme-primary-800: #075985;
@@ -25,10 +25,10 @@
   --theme-accent-emerald: #10b981;
 
   /* Trading-Specific Colors */
-  --theme-trading-bull: #22c55e;     /* Green for gains */
-  --theme-trading-bear: #ef4444;     /* Red for losses */
-  --theme-trading-neutral: #64748b;  /* Gray for holds */
-  --theme-trading-warning: #f59e0b;  /* Yellow for warnings */
+  --theme-trading-bull: #22c55e; /* Green for gains */
+  --theme-trading-bear: #ef4444; /* Red for losses */
+  --theme-trading-neutral: #64748b; /* Gray for holds */
+  --theme-trading-warning: #f59e0b; /* Yellow for warnings */
 
   /* Success States */
   --theme-success-50: #f0fdf4;
@@ -63,12 +63,12 @@
   --theme-gray-900: #0f172a;
 
   /* ===== DARK THEME BACKGROUNDS ===== */
-  
+
   /* Base Backgrounds */
-  --theme-bg-primary: #0a0e1a;       /* Deepest background */
-  --theme-bg-secondary: #111827;     /* Secondary background */
-  --theme-bg-tertiary: #1f2937;      /* Tertiary background */
-  --theme-bg-quaternary: #374151;    /* Light background */
+  --theme-bg-primary: #0a0e1a; /* Deepest background */
+  --theme-bg-secondary: #111827; /* Secondary background */
+  --theme-bg-tertiary: #1f2937; /* Tertiary background */
+  --theme-bg-quaternary: #374151; /* Light background */
 
   /* Card & Component Backgrounds */
   --theme-bg-card: rgba(31, 41, 55, 0.9);
@@ -78,48 +78,79 @@
   --theme-bg-overlay: rgba(0, 0, 0, 0.8);
 
   /* ===== GRADIENTS ===== */
-  
+
   /* Primary Gradients */
-  --theme-gradient-primary: linear-gradient(135deg, #0a0e1a 0%, #111827 50%, #1f2937 100%);
+  --theme-gradient-primary: linear-gradient(
+    135deg,
+    #0a0e1a 0%,
+    #111827 50%,
+    #1f2937 100%
+  );
   --theme-gradient-secondary: linear-gradient(135deg, #1e293b 0%, #334155 100%);
   --theme-gradient-accent: linear-gradient(135deg, #0ea5e9 0%, #3b82f6 100%);
-  
+
   /* Card Gradients */
-  --theme-gradient-card: linear-gradient(145deg, rgba(31, 41, 55, 0.8), rgba(55, 65, 81, 0.9));
-  --theme-gradient-card-hover: linear-gradient(145deg, rgba(55, 65, 81, 0.9), rgba(75, 85, 99, 0.9));
-  
+  --theme-gradient-card: linear-gradient(
+    145deg,
+    rgba(31, 41, 55, 0.8),
+    rgba(55, 65, 81, 0.9)
+  );
+  --theme-gradient-card-hover: linear-gradient(
+    145deg,
+    rgba(55, 65, 81, 0.9),
+    rgba(75, 85, 99, 0.9)
+  );
+
   /* Trading Gradients */
   --theme-gradient-bull: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
   --theme-gradient-bear: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
   --theme-gradient-neutral: linear-gradient(135deg, #64748b 0%, #475569 100%);
-  
+
   /* Button Gradients */
-  --theme-gradient-btn-primary: linear-gradient(135deg, #0ea5e9 0%, #0369a1 100%);
-  --theme-gradient-btn-success: linear-gradient(135deg, #22c55e 0%, #15803d 100%);
-  --theme-gradient-btn-danger: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);
-  
+  --theme-gradient-btn-primary: linear-gradient(
+    135deg,
+    #0ea5e9 0%,
+    #0369a1 100%
+  );
+  --theme-gradient-btn-success: linear-gradient(
+    135deg,
+    #22c55e 0%,
+    #15803d 100%
+  );
+  --theme-gradient-btn-danger: linear-gradient(
+    135deg,
+    #ef4444 0%,
+    #b91c1c 100%
+  );
+
   /* Text Gradients */
-  --theme-gradient-text-primary: linear-gradient(135deg, #8ba3f7, #a855f7, #ec4899);
+  --theme-gradient-text-primary: linear-gradient(
+    135deg,
+    #8ba3f7,
+    #a855f7,
+    #ec4899
+  );
   --theme-gradient-text-secondary: linear-gradient(135deg, #38bdf8, #8b5cf6);
   --theme-gradient-text-accent: linear-gradient(135deg, #06b6d4, #3b82f6);
 
   /* ===== TYPOGRAPHY ===== */
-  
+
   /* Font Families */
-  --theme-font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
-  --theme-font-mono: 'JetBrains Mono', 'Fira Code', 'Monaco', monospace;
-  --theme-font-display: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --theme-font-sans:
+    "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", sans-serif;
+  --theme-font-mono: "JetBrains Mono", "Fira Code", "Monaco", monospace;
+  --theme-font-display: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
 
   /* Font Sizes */
-  --theme-text-xs: 0.75rem;      /* 12px */
-  --theme-text-sm: 0.875rem;     /* 14px */
-  --theme-text-base: 1rem;       /* 16px */
-  --theme-text-lg: 1.125rem;     /* 18px */
-  --theme-text-xl: 1.25rem;      /* 20px */
-  --theme-text-2xl: 1.5rem;      /* 24px */
-  --theme-text-3xl: 1.875rem;    /* 30px */
-  --theme-text-4xl: 2.25rem;     /* 36px */
-  --theme-text-5xl: 3rem;        /* 48px */
+  --theme-text-xs: 0.75rem; /* 12px */
+  --theme-text-sm: 0.875rem; /* 14px */
+  --theme-text-base: 1rem; /* 16px */
+  --theme-text-lg: 1.125rem; /* 18px */
+  --theme-text-xl: 1.25rem; /* 20px */
+  --theme-text-2xl: 1.5rem; /* 24px */
+  --theme-text-3xl: 1.875rem; /* 30px */
+  --theme-text-4xl: 2.25rem; /* 36px */
+  --theme-text-5xl: 3rem; /* 48px */
 
   /* Font Weights */
   --theme-font-light: 300;
@@ -135,7 +166,7 @@
   --theme-leading-relaxed: 1.75;
 
   /* ===== TEXT COLORS ===== */
-  
+
   --theme-text-primary: #f8fafc;
   --theme-text-secondary: #cbd5e1;
   --theme-text-tertiary: #94a3b8;
@@ -144,34 +175,34 @@
   --theme-text-inverse: #0f172a;
 
   /* ===== SPACING SYSTEM ===== */
-  
+
   --theme-space-0: 0;
-  --theme-space-1: 0.25rem;      /* 4px */
-  --theme-space-2: 0.5rem;       /* 8px */
-  --theme-space-3: 0.75rem;      /* 12px */
-  --theme-space-4: 1rem;         /* 16px */
-  --theme-space-5: 1.25rem;      /* 20px */
-  --theme-space-6: 1.5rem;       /* 24px */
-  --theme-space-8: 2rem;         /* 32px */
-  --theme-space-10: 2.5rem;      /* 40px */
-  --theme-space-12: 3rem;        /* 48px */
-  --theme-space-16: 4rem;        /* 64px */
-  --theme-space-20: 5rem;        /* 80px */
-  --theme-space-24: 6rem;        /* 96px */
+  --theme-space-1: 0.25rem; /* 4px */
+  --theme-space-2: 0.5rem; /* 8px */
+  --theme-space-3: 0.75rem; /* 12px */
+  --theme-space-4: 1rem; /* 16px */
+  --theme-space-5: 1.25rem; /* 20px */
+  --theme-space-6: 1.5rem; /* 24px */
+  --theme-space-8: 2rem; /* 32px */
+  --theme-space-10: 2.5rem; /* 40px */
+  --theme-space-12: 3rem; /* 48px */
+  --theme-space-16: 4rem; /* 64px */
+  --theme-space-20: 5rem; /* 80px */
+  --theme-space-24: 6rem; /* 96px */
 
   /* ===== BORDER RADIUS ===== */
-  
+
   --theme-radius-none: 0;
-  --theme-radius-sm: 0.25rem;    /* 4px */
+  --theme-radius-sm: 0.25rem; /* 4px */
   --theme-radius-base: 0.375rem; /* 6px */
-  --theme-radius-md: 0.5rem;     /* 8px */
-  --theme-radius-lg: 0.75rem;    /* 12px */
-  --theme-radius-xl: 1rem;       /* 16px */
-  --theme-radius-2xl: 1.5rem;    /* 24px */
+  --theme-radius-md: 0.5rem; /* 8px */
+  --theme-radius-lg: 0.75rem; /* 12px */
+  --theme-radius-xl: 1rem; /* 16px */
+  --theme-radius-2xl: 1.5rem; /* 24px */
   --theme-radius-full: 9999px;
 
   /* ===== BORDERS ===== */
-  
+
   --theme-border-width: 1px;
   --theme-border-width-2: 2px;
   --theme-border-style: solid;
@@ -180,15 +211,18 @@
   --theme-border-color-focus: rgba(99, 102, 241, 0.8);
 
   /* ===== SHADOWS ===== */
-  
+
   --theme-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.15);
-  --theme-shadow-base: 0 4px 6px -1px rgba(0, 0, 0, 0.2), 0 2px 4px -1px rgba(0, 0, 0, 0.1);
-  --theme-shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.1);
-  --theme-shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.4), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
+  --theme-shadow-base:
+    0 4px 6px -1px rgba(0, 0, 0, 0.2), 0 2px 4px -1px rgba(0, 0, 0, 0.1);
+  --theme-shadow-md:
+    0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.1);
+  --theme-shadow-lg:
+    0 20px 25px -5px rgba(0, 0, 0, 0.4), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
   --theme-shadow-xl: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
 
   /* ===== Z-INDEX SYSTEM ===== */
-  
+
   --theme-z-base: 0;
   --theme-z-dropdown: 10;
   --theme-z-sticky: 20;
@@ -199,14 +233,14 @@
   --theme-z-max: 999;
 
   /* ===== TRANSITIONS ===== */
-  
+
   --theme-transition-fast: all 0.15s ease-in-out;
   --theme-transition-base: all 0.2s ease-in-out;
   --theme-transition-slow: all 0.3s ease-in-out;
   --theme-transition-slower: all 0.5s ease-in-out;
 
   /* ===== BREAKPOINTS (for use in media queries) ===== */
-  
+
   --theme-breakpoint-sm: 640px;
   --theme-breakpoint-md: 768px;
   --theme-breakpoint-lg: 1024px;
@@ -249,13 +283,15 @@
 
 .bg-card {
   background: var(--theme-bg-card);
-  border: var(--theme-border-width) var(--theme-border-style) var(--theme-border-color);
+  border: var(--theme-border-width) var(--theme-border-style)
+    var(--theme-border-color);
   border-radius: var(--theme-radius-lg);
 }
 
 .bg-gradient-card {
   background: var(--theme-gradient-card);
-  border: var(--theme-border-width) var(--theme-border-style) var(--theme-border-color);
+  border: var(--theme-border-width) var(--theme-border-style)
+    var(--theme-border-color);
   border-radius: var(--theme-radius-lg);
 }
 
@@ -325,7 +361,8 @@
 /* Card Components */
 .card {
   background: var(--theme-bg-card);
-  border: var(--theme-border-width) var(--theme-border-style) var(--theme-border-color);
+  border: var(--theme-border-width) var(--theme-border-style)
+    var(--theme-border-color);
   border-radius: var(--theme-radius-lg);
   padding: var(--theme-space-6);
   box-shadow: var(--theme-shadow-base);
@@ -341,7 +378,8 @@
 .card-header {
   padding-bottom: var(--theme-space-4);
   margin-bottom: var(--theme-space-4);
-  border-bottom: var(--theme-border-width) var(--theme-border-style) var(--theme-border-color);
+  border-bottom: var(--theme-border-width) var(--theme-border-style)
+    var(--theme-border-color);
 }
 
 .card-title {
@@ -661,4 +699,3 @@
 .mt-6 {
   margin-top: var(--theme-space-6);
 }
-```

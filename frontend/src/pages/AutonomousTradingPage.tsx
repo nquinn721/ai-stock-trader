@@ -1,9 +1,19 @@
-import { Close, PlayArrow, Settings, Shuffle, Stop } from "@mui/icons-material";
+import {
+  AccessTime,
+  ChevronRight,
+  Close,
+  PlayArrow,
+  Settings,
+  Shuffle,
+  Stop,
+  TrendingUp,
+} from "@mui/icons-material";
 import {
   Alert,
   Box,
   Button,
   Card,
+  CardActions,
   CardContent,
   CardHeader,
   Chip,
@@ -17,7 +27,6 @@ import {
   IconButton,
   InputLabel,
   MenuItem,
-  Paper,
   Select,
   Switch,
   Tab,
@@ -53,7 +62,7 @@ function TabPanel(props: TabPanelProps) {
       aria-labelledby={`autonomous-trading-tab-${index}`}
       {...other}
     >
-      {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
+      {value === index && <div className="tab-content">{children}</div>}
     </div>
   );
 }
@@ -304,12 +313,12 @@ const AutonomousTradingPage: React.FC = observer(() => {
   };
 
   const renderOverviewTab = () => (
-    <Box>
+    <div className="overview-tab">
       {/* Global Controls */}
-      <Paper sx={{ p: 2, mb: 3 }}>
-        <Box display="flex" justifyContent="space-between" alignItems="center">
-          <Typography variant="h6">Global Trading Control</Typography>
-          <Box display="flex" alignItems="center" gap={2}>
+      <div className="content-card global-controls">
+        <div className="control-left">
+          <h2 className="section-header">Global Trading Control</h2>
+          <div className="status-switch">
             <Typography variant="body2">
               {globalTradingActive ? "Trading Active" : "Trading Stopped"}
             </Typography>
@@ -318,146 +327,131 @@ const AutonomousTradingPage: React.FC = observer(() => {
               onChange={handleGlobalTradingToggle}
               color="primary"
             />
-            <Button
-              variant="contained"
-              onClick={() => setDeployModalOpen(true)}
-              startIcon={<Settings />}
-            >
-              Deploy Strategy
-            </Button>
-          </Box>
-        </Box>
-      </Paper>
+          </div>
+        </div>
+        <div className="control-right">
+          <Button
+            variant="contained"
+            onClick={() => setDeployModalOpen(true)}
+            startIcon={<Settings />}
+            className="nav-btn"
+          >
+            Deploy Strategy
+          </Button>
+        </div>
+      </div>
 
       {/* Portfolio Cards */}
-      <Box
-        sx={{
-          display: "grid",
-          gridTemplateColumns: {
-            xs: "1fr",
-            sm: "repeat(2, 1fr)",
-            md: "repeat(3, 1fr)",
-          },
-          gap: 3,
-        }}
-      >
+      <div className="content-grid">
         {portfolios.map((portfolio) => {
           const status = portfolioStatuses[portfolio.id];
           return (
-            <Card key={portfolio.id} sx={{ height: "100%" }}>
-              <CardHeader
-                title={portfolio.name}
-                subheader={`Total Value: $${portfolio.totalValue.toLocaleString()}`}
-                action={
-                  <Chip
-                    label={status?.isActive ? "Active" : "Inactive"}
-                    color={status?.isActive ? "success" : "default"}
+            <div key={portfolio.id} className="content-card portfolio-card">
+              <div className="card-header">
+                <div className="header-left">
+                  <h3>{portfolio.name}</h3>
+                  <span>{`Total Value: $${portfolio.totalValue.toLocaleString()}`}</span>
+                </div>
+                <Chip
+                  label={status?.isActive ? "Active" : "Inactive"}
+                  color={status?.isActive ? "success" : "default"}
+                  size="small"
+                  className={`status-chip ${
+                    status?.isActive ? "active" : "inactive"
+                  }`}
+                />
+              </div>
+              <div className="card-content">
+                <div className="info-row">
+                  <Typography variant="body2">Cash Available</Typography>
+                  <Typography variant="body2">
+                    ${portfolio.currentCash.toLocaleString()}
+                  </Typography>
+                </div>
+
+                <div className="info-row">
+                  <Typography variant="body2">Active Strategies</Typography>
+                  <Typography variant="body2">
+                    {status?.activeStrategies.length || 0}
+                  </Typography>
+                </div>
+
+                <div className="strategy-row">
+                  <Typography variant="body2">Assigned Strategy</Typography>
+                  <Button
                     size="small"
-                  />
-                }
-              />
-              <CardContent>
-                <Box display="flex" flexDirection="column" gap={2}>
-                  <Box display="flex" justifyContent="space-between">
-                    <Typography variant="body2" color="text.secondary">
-                      Cash Available
+                    variant="outlined"
+                    startIcon={<Shuffle />}
+                    onClick={() => handleAssignRandomStrategy(portfolio.id)}
+                    disabled={loading}
+                    className="random-btn"
+                  >
+                    Random
+                  </Button>
+                </div>
+                {portfolio.assignedStrategyName ? (
+                  <div className="assigned-strategy">
+                    <Typography variant="body2" fontWeight="medium">
+                      {portfolio.assignedStrategyName}
                     </Typography>
-                    <Typography variant="body2">
-                      ${portfolio.currentCash.toLocaleString()}
+                    <Typography variant="caption" color="text.secondary">
+                      Assigned{" "}
+                      {portfolio.strategyAssignedAt
+                        ? new Date(
+                            portfolio.strategyAssignedAt
+                          ).toLocaleDateString()
+                        : "recently"}
                     </Typography>
-                  </Box>
+                  </div>
+                ) : (
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    fontStyle="italic"
+                  >
+                    No strategy assigned
+                  </Typography>
+                )}
+              </div>
 
-                  <Box display="flex" justifyContent="space-between">
-                    <Typography variant="body2" color="text.secondary">
-                      Active Strategies
-                    </Typography>
-                    <Typography variant="body2">
-                      {status?.activeStrategies.length || 0}
-                    </Typography>
-                  </Box>
+              <Divider />
 
-                  <Box display="flex" flexDirection="column" gap={1}>
-                    <Box
-                      display="flex"
-                      justifyContent="space-between"
-                      alignItems="center"
-                    >
-                      <Typography variant="body2" color="text.secondary">
-                        Assigned Strategy
-                      </Typography>
-                      <Button
-                        size="small"
-                        variant="outlined"
-                        startIcon={<Shuffle />}
-                        onClick={() => handleAssignRandomStrategy(portfolio.id)}
-                        disabled={loading}
-                      >
-                        Random
-                      </Button>
-                    </Box>
-                    {portfolio.assignedStrategyName ? (
-                      <Box>
-                        <Typography variant="body2" fontWeight="medium">
-                          {portfolio.assignedStrategyName}
-                        </Typography>
-                        <Typography variant="caption" color="text.secondary">
-                          Assigned{" "}
-                          {portfolio.strategyAssignedAt
-                            ? new Date(
-                                portfolio.strategyAssignedAt
-                              ).toLocaleDateString()
-                            : "recently"}
-                        </Typography>
-                      </Box>
-                    ) : (
-                      <Typography
-                        variant="body2"
-                        color="text.secondary"
-                        fontStyle="italic"
-                      >
-                        No strategy assigned
-                      </Typography>
-                    )}
-                  </Box>
-
-                  <Divider />
-
-                  <Box display="flex" gap={1}>
-                    {status?.isActive ? (
-                      <Button
-                        variant="outlined"
-                        color="error"
-                        startIcon={<Stop />}
-                        onClick={() => handleStopTrading(portfolio.id)}
-                        fullWidth
-                        disabled={loading}
-                      >
-                        Stop Trading
-                      </Button>
-                    ) : (
-                      <Button
-                        variant="contained"
-                        color="primary"
-                        startIcon={<PlayArrow />}
-                        onClick={() => handleStartTrading(portfolio.id)}
-                        fullWidth
-                        disabled={loading}
-                      >
-                        Start Trading
-                      </Button>
-                    )}
-                  </Box>
-                </Box>
-              </CardContent>
-            </Card>
+              <CardActions className="card-actions">
+                {status?.isActive ? (
+                  <Button
+                    variant="outlined"
+                    color="error"
+                    startIcon={<Stop />}
+                    onClick={() => handleStopTrading(portfolio.id)}
+                    fullWidth
+                    disabled={loading}
+                    className="action-btn stop-btn"
+                  >
+                    Stop Trading
+                  </Button>
+                ) : (
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    startIcon={<PlayArrow />}
+                    onClick={() => handleStartTrading(portfolio.id)}
+                    fullWidth
+                    disabled={loading}
+                    className="action-btn start-btn"
+                  >
+                    Start Trading
+                  </Button>
+                )}
+              </CardActions>
+            </div>
           );
         })}
-      </Box>
-    </Box>
+      </div>
+    </div>
   );
 
   const renderPerformanceTab = () => (
-    <Box>
+    <div>
       <Typography variant="h6" gutterBottom>
         Performance Overview
       </Typography>
@@ -465,22 +459,22 @@ const AutonomousTradingPage: React.FC = observer(() => {
         Performance metrics will be displayed here once trading sessions are
         active.
       </Alert>
-    </Box>
+    </div>
   );
 
   const renderHistoryTab = () => (
-    <Box>
+    <div>
       <Typography variant="h6" gutterBottom>
         Trading History
       </Typography>
       <Alert severity="info">
         Trading history and logs will be displayed here.
       </Alert>
-    </Box>
+    </div>
   );
 
   const renderSettingsTab = () => (
-    <Box>
+    <div>
       <Typography variant="h6" gutterBottom>
         Trading Settings
       </Typography>
@@ -488,166 +482,151 @@ const AutonomousTradingPage: React.FC = observer(() => {
         Global trading settings and risk management parameters will be
         configured here.
       </Alert>
-    </Box>
+    </div>
   );
 
   const renderLiveMarketDataTab = () => {
     const { stocksWithSignals, isLoading, readyStocks } = stockStore;
 
     return (
-      <Box>
-        <Paper sx={{ p: 2, mb: 3 }}>
-          <Box
-            display="flex"
-            justifyContent="space-between"
-            alignItems="center"
-            mb={2}
-          >
-            <Typography variant="h6">Live Market Data</Typography>
-            <Box display="flex" alignItems="center" gap={2}>
-              <Chip
-                label={`${readyStocks.length} stocks ready`}
-                color={readyStocks.length > 0 ? "success" : "default"}
-                size="small"
-              />
-              <Button
-                variant="outlined"
-                size="small"
-                onClick={() => stockStore.fetchStocksWithSignals()}
-                disabled={isLoading}
-              >
-                {isLoading ? "Loading..." : "Refresh"}
-              </Button>
-            </Box>
-          </Box>
-
-          <Typography
-            variant="body2"
-            color="text.secondary"
-            sx={{ mb: 2 }}
-          ></Typography>
-
-          {isLoading && readyStocks.length === 0 ? (
-            <Box display="flex" justifyContent="center" py={4}>
-              <CircularProgress />
-              <Typography variant="body2" sx={{ ml: 2 }}>
-                Loading market data...
-              </Typography>
-            </Box>
-          ) : readyStocks.length === 0 ? (
-            <Box textAlign="center" py={4}>
-              <Typography variant="h6" color="text.secondary">
-                No Stock Data Ready
-              </Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                Waiting for stocks with valid price data. Live updates will
-                appear here automatically.
-              </Typography>
-            </Box>
-          ) : (
-            <Box
-              sx={{
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
-                gap: 2,
-                maxHeight: "600px",
-                overflow: "auto",
-              }}
+      <div className="live-market-tab">
+        <div className="content-card live-market-header">
+          <div className="header-left">
+            <h2 className="section-header">Live Market Data</h2>
+            <Typography variant="body2" color="text.secondary">
+              Real-time stock prices and trading signals
+            </Typography>
+          </div>
+          <div className="header-right">
+            <Chip
+              label={`${readyStocks.length} stocks ready`}
+              color={readyStocks.length > 0 ? "success" : "default"}
+              size="small"
+              className="status-chip ready"
+            />
+            <Button
+              variant="outlined"
+              size="small"
+              onClick={() => stockStore.fetchStocksWithSignals()}
+              disabled={isLoading}
+              className="nav-btn"
             >
-              {stocksWithSignals.slice(0, 20).map((stock) => (
-                <StockCard
-                  key={stock.symbol}
-                  stock={stock}
-                  signal={stock.tradingSignal || undefined}
-                />
-              ))}
-            </Box>
-          )}
-        </Paper>
-      </Box>
+              {isLoading ? "Loading..." : "Refresh"}
+            </Button>
+          </div>
+        </div>
+
+        {isLoading && readyStocks.length === 0 ? (
+          <div className="loading-state">
+            <CircularProgress />
+            <Typography variant="body2">Loading market data...</Typography>
+          </div>
+        ) : readyStocks.length === 0 ? (
+          <div className="empty-state">
+            <Typography variant="h6">No Stock Data Ready</Typography>
+            <Typography variant="body2">
+              Waiting for stocks with valid price data. Live updates will appear
+              here automatically.
+            </Typography>
+          </div>
+        ) : (
+          <div className="content-grid stock-grid">
+            {stocksWithSignals.slice(0, 20).map((stock) => (
+              <StockCard
+                key={stock.symbol}
+                stock={stock}
+                signal={stock.tradingSignal || undefined}
+              />
+            ))}
+          </div>
+        )}
+      </div>
     );
   };
 
   return (
-    <div className="autonomous-trading-page">
-      {/* Header Section - Matching Market Scanner Style */}
-      <div className="autonomous-trading-header">
-        <Box display="flex" justifyContent="space-between" alignItems="center">
-          <Box display="flex" alignItems="center">
-            <Settings className="autonomous-icon" />
-            <Typography
-              variant="h4"
-              component="h1"
-              className="autonomous-title"
-            >
-              Autonomous Trading
-            </Typography>
-          </Box>
-          <Box display="flex" gap={2}>
-            <Chip
-              label={
-                globalTradingActive ? "Trading Active" : "Trading Inactive"
-              }
-              color={globalTradingActive ? "success" : "default"}
-              icon={globalTradingActive ? <PlayArrow /> : <Stop />}
-            />
-          </Box>
-        </Box>
+    <div className="page-container">
+      {/* Standardized Page Header */}
+      <div className="page-header">
+        <div className="header-left">
+          <h1 className="page-title">Autonomous Trading</h1>
+          <div className="market-time">
+            <TrendingUp fontSize="small" />
+            <span>
+              {globalTradingActive ? "Trading Active" : "Trading Inactive"}
+            </span>
+          </div>
+        </div>
+        <div className="header-info">
+          <div
+            className={`connection-status ${
+              globalTradingActive ? "connected" : ""
+            }`}
+          >
+            <div className="status-dot"></div>
+            <span>Live</span>
+          </div>
+          <Button className="nav-btn">
+            Dashboard <ChevronRight />
+          </Button>
+          <Button className="nav-btn">
+            Analytics <ChevronRight />
+          </Button>
+        </div>
       </div>
 
-      {error && (
-        <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError(null)}>
-          {error}
-        </Alert>
-      )}
+      <div className="page-content">
+        {error && (
+          <Alert
+            severity="error"
+            sx={{ mb: 2 }}
+            onClose={() => setError(null)}
+          >
+            {error}
+          </Alert>
+        )}
 
-      <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
-        <Tabs
-          value={activeTab}
-          onChange={handleTabChange}
-          aria-label="autonomous trading tabs"
-          sx={{
-            "& .MuiTab-root": {
-              textTransform: "none",
-              fontWeight: 500,
-              fontSize: "1rem",
-              minWidth: 120,
-            },
-          }}
-        >
-          <Tab label="Overview" {...a11yProps(0)} />
-          <Tab label="Live Market Data" {...a11yProps(1)} />
-          <Tab label="Performance" {...a11yProps(2)} />
-          <Tab label="History" {...a11yProps(3)} />
-          <Tab label="Settings" {...a11yProps(4)} />
-        </Tabs>
-      </Box>
+        <div className="tabs-container">
+          <Tabs
+            value={activeTab}
+            onChange={handleTabChange}
+            aria-label="autonomous trading tabs"
+            className="main-tabs"
+          >
+            <Tab label="Overview" {...a11yProps(0)} />
+            <Tab label="Live Market Data" {...a11yProps(1)} />
+            <Tab label="Performance" {...a11yProps(2)} />
+            <Tab label="History" {...a11yProps(3)} />
+            <Tab label="Settings" {...a11yProps(4)} />
+          </Tabs>
+        </div>
 
-      {loading && (
-        <Box display="flex" justifyContent="center" py={2}>
-          <CircularProgress />
-        </Box>
-      )}
+        {loading && (
+          <div className="loading-indicator">
+            <CircularProgress />
+          </div>
+        )}
 
-      <TabPanel value={activeTab} index={0}>
-        {renderOverviewTab()}
-      </TabPanel>
+        <TabPanel value={activeTab} index={0}>
+          {renderOverviewTab()}
+        </TabPanel>
 
-      <TabPanel value={activeTab} index={1}>
-        {renderLiveMarketDataTab()}
-      </TabPanel>
+        <TabPanel value={activeTab} index={1}>
+          {renderLiveMarketDataTab()}
+        </TabPanel>
 
-      <TabPanel value={activeTab} index={2}>
-        {renderPerformanceTab()}
-      </TabPanel>
+        <TabPanel value={activeTab} index={2}>
+          {renderPerformanceTab()}
+        </TabPanel>
 
-      <TabPanel value={activeTab} index={3}>
-        {renderHistoryTab()}
-      </TabPanel>
+        <TabPanel value={activeTab} index={3}>
+          {renderHistoryTab()}
+        </TabPanel>
 
-      <TabPanel value={activeTab} index={4}>
-        {renderSettingsTab()}
-      </TabPanel>
+        <TabPanel value={activeTab} index={4}>
+          {renderSettingsTab()}
+        </TabPanel>
+      </div>
 
       {/* Strategy Deployment Modal */}
       <Dialog

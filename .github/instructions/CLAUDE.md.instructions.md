@@ -32,6 +32,8 @@ This document provides quick reference guidelines for AI assistants working on t
 9. **PERSISTENT DEVELOPMENT SERVERS** - Keep client and server running in separate terminals. Hot reload handles updates automatically - no manual restarts needed
 10. **⚠️ CRITICAL: PRECISE STYLING SCOPE** - When asked to style something, **ONLY** style the specific component/element requested. Do not modify other UI elements, add unnecessary styling, or make changes beyond the exact scope of the request. Focus solely on the requested styling task.
 11. **⚠️ CRITICAL: MINIMAL FILE CHANGES** - When updating files, **ONLY** modify the specific portion that needs to change. Do not rewrite entire files unless the entire file structure needs to be changed. Use precise editing tools (replace_string_in_file, insert_edit_into_file) to make targeted updates while preserving existing code and formatting.
+12. **⚠️ NEVER USE MUI GRID** - Do NOT use Material-UI Grid components (`<Grid>`, `@mui/material/Grid`) due to recurring compatibility issues, version conflicts, and build problems. Use CSS Grid, Flexbox, or our custom CSS grid utilities in `theme.css` instead.
+13. **⚠️ MANDATORY: UI THEME CONSISTENCY** - ALL pages must follow the dashboard layout and styling standards. Every page must include a standardized header, use shared CSS variables, and follow the established design patterns. See [UI Theme and Layout Standards](../../docs/UI-THEME-LAYOUT-STANDARDS.md) for complete requirements.
 
 ### Testing Workflow
 
@@ -314,6 +316,7 @@ Use Git tools to stage and commit changes with descriptive message format.
 4. **Verify story points** and other fields are accurate
 
 Example update:
+
 ```typescript
 {
   id: "S41",
@@ -501,3 +504,149 @@ Test API endpoints using available tools and verify WebSocket data flow by check
 ---
 
 **Note**: This is a condensed reference. Always consult the [full documentation](../../docs/) for detailed guidelines and decision rationale.
+
+## UI Component Guidelines
+
+### ⚠️ MANDATORY: UI Theme Consistency Standards
+
+**ALL pages must follow the dashboard layout and styling standards**:
+
+#### Required Elements for Every Page:
+
+1. **Standardized Header**: Every page must include a header following the dashboard pattern
+   - Left section: Page title with gradient text + market time/status
+   - Right section: Navigation buttons + connection status + stats
+   - Must use `.page-header` class with proper styling
+
+2. **Base Layout Structure**:
+   ```jsx
+   <div className="page-container">
+     <div className="page-header">{/* Standard header */}</div>
+     <div className="page-content">{/* Page content */}</div>
+   </div>
+   ```
+
+3. **Required CSS Import**: Every page stylesheet must import:
+   ```css
+   @import "../shared-styles.css";
+   ```
+
+4. **Color System**: Must use CSS variables from shared-styles.css:
+   - `--trading-bg-gradient-dark` for page backgrounds
+   - `--trading-text-primary` for primary text
+   - `--trading-primary-500` for accent colors
+   - All other approved color variables
+
+5. **Layout Patterns**:
+   - Use CSS Grid or Flexbox (NOT MUI Grid)
+   - Follow responsive breakpoints (768px, 1024px, 1200px)
+   - Use `.content-card` class for card components
+   - Implement standard animations (`slideInUp`, `pulse-glow`)
+
+#### Examples of Standard Headers:
+
+```jsx
+// Trading page header
+<div className="page-header">
+  <div className="header-left">
+    <h1>Auto Trading Dashboard</h1>
+    <div className="market-time">
+      <TrendingUp size={16} />
+      <span>Trading Active</span>
+    </div>
+  </div>
+  <div className="header-info">
+    <div className="connection-status connected">
+      <span>Live</span>
+    </div>
+    <button className="nav-btn">Dashboard</button>
+  </div>
+</div>
+```
+
+#### Compliance Checklist:
+
+- [ ] Imports `shared-styles.css`
+- [ ] Uses `.page-container` wrapper
+- [ ] Implements standardized `.page-header`
+- [ ] Uses approved CSS variables
+- [ ] Follows responsive design patterns
+- [ ] Uses CSS Grid/Flexbox (not MUI Grid)
+- [ ] Includes navigation buttons
+- [ ] Shows connection status
+
+**📚 Full Documentation**: [UI Theme and Layout Standards](../../docs/UI-THEME-LAYOUT-STANDARDS.md)
+
+### ⚠️ CRITICAL: MUI Grid Prohibition
+
+**NEVER use Material-UI Grid components** due to persistent issues in this project:
+
+#### Prohibited Components:
+
+- `import { Grid } from '@mui/material'`
+- `import Grid from '@mui/material/Grid'`
+- `<Grid container>`, `<Grid item>`, etc.
+
+#### Issues with MUI Grid:
+
+- **Version conflicts** between MUI v4 and v5/v6
+- **Build failures** and compilation errors
+- **Runtime errors** and prop conflicts
+- **TypeScript compatibility** problems
+- **Bundle size** and performance issues
+
+#### ✅ Approved Alternatives:
+
+##### 1. CSS Grid (Preferred)
+
+```css
+.my-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--theme-space-4);
+}
+```
+
+##### 2. Theme CSS Grid Utilities
+
+```jsx
+<div className="grid grid-auto-fit gap-4">
+  <div>Item 1</div>
+  <div>Item 2</div>
+</div>
+```
+
+##### 3. Flexbox
+
+```css
+.my-flex {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--theme-space-4);
+}
+```
+
+##### 4. Custom Grid Component
+
+```jsx
+// Use our custom GridWrapper component instead
+import { Grid } from "../common/GridWrapper";
+```
+
+#### Benefits of Alternatives:
+
+- ✅ No version conflicts or dependency issues
+- ✅ Better performance and smaller bundle size
+- ✅ More control over responsive behavior
+- ✅ Consistent with our design system
+- ✅ No TypeScript compilation errors
+
+### Other MUI Components
+
+Other Material-UI components are acceptable:
+
+- `Box`, `Typography`, `Button`, `Card`, `Paper`
+- `Dialog`, `Modal`, `Drawer`, `AppBar`
+- `TextField`, `Select`, `Checkbox`, etc.
+
+**Just avoid the Grid system specifically.**

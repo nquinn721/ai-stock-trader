@@ -1,9 +1,22 @@
 /* Import comprehensive theme system */
 @import "./theme.css";
 
+/* Global width and box-sizing reset */
+html {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: inherit;
+}
+
 /* Additional global styles specific to the application */
 body {
   margin: 0;
+  padding: 0;
   font-family: var(--theme-font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -11,6 +24,8 @@ body {
   background-attachment: fixed;
   min-height: 100vh;
   color: var(--theme-text-primary);
+  width: 100%;
+  box-sizing: border-box;
 }
 
 code {

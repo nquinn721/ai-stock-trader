@@ -7,6 +7,7 @@
 ### The Problem
 
 When tickets are completed but `stories.ts` is not updated:
+
 - ❌ Project management dashboard shows incorrect progress
 - ❌ Sprint velocity calculations are wrong
 - ❌ Epic completion percentages are inaccurate
@@ -20,6 +21,7 @@ When tickets are completed but `stories.ts` is not updated:
 ### Required Steps for EVERY Ticket Completion:
 
 #### 1. Update stories.ts File
+
 ```typescript
 // File: project-management/src/data/stories.ts
 {
@@ -32,16 +34,18 @@ When tickets are completed but `stories.ts` is not updated:
 ```
 
 #### 2. Update Story Markdown File
+
 ```markdown
 # S## - Story Title
 
-**Status**: DONE  ← Update this
-**Completed**: 2025-06-27  ← Add this line
+**Status**: DONE ← Update this
+**Completed**: 2025-06-27 ← Add this line
 
 ## Rest of story content...
 ```
 
 #### 3. Verify in Project Dashboard
+
 - Open project management dashboard (port 5000)
 - Check that story shows as "DONE"
 - Verify progress metrics are updated
@@ -66,6 +70,7 @@ When tickets are completed but `stories.ts` is not updated:
 ### Impact:
 
 This workflow ensures:
+
 - ✅ Accurate project tracking
 - ✅ Correct sprint velocity calculations
 - ✅ Proper epic completion percentages

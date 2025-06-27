@@ -6,7 +6,6 @@ import {
   faClock,
   faExclamationTriangle,
   faPauseCircle,
-  faPlus,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { observer } from "mobx-react-lite";
@@ -133,18 +132,6 @@ const PortfolioSelector: React.FC<PortfolioSelectorProps> = observer(
 
     return (
       <div className="portfolio-selector">
-        <div className="portfolio-selector-header">
-          <h3>Your Portfolios</h3>
-          <button
-            className="create-portfolio-btn-small"
-            onClick={onCreatePortfolio}
-            title="Create a new portfolio"
-          >
-            <FontAwesomeIcon icon={faPlus} />
-            New
-          </button>
-        </div>
-
         <div className="portfolios-grid">
           {" "}
           {portfolioStore.portfolios.map((portfolio: Portfolio) => (

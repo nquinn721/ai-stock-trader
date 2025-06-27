@@ -18,8 +18,10 @@ import { StrategyTemplate } from './modules/auto-trading/entities/strategy-templ
 import { TradingRule } from './modules/auto-trading/entities/trading-rule.entity';
 import { TradingSession } from './modules/auto-trading/entities/trading-session.entity';
 import { TradingStrategy } from './modules/auto-trading/entities/trading-strategy.entity';
+import { BehavioralFinanceModule } from './modules/behavioral-finance/behavioral-finance.module';
 import { BreakoutModule } from './modules/breakout/breakout.module';
 import { DataIntelligenceModule } from './modules/data-intelligence/data-intelligence.module';
+import { MarketMakingModule } from './modules/market-making/market-making.module';
 import {
   MarketAlert,
   ScanResult,
@@ -43,6 +45,13 @@ import { CrossAssetCorrelation } from './modules/multi-asset/entities/cross-asse
 import { CryptoData } from './modules/multi-asset/entities/crypto-data.entity';
 import { ForexData } from './modules/multi-asset/entities/forex-data.entity';
 import { MultiAssetModule } from './modules/multi-asset/multi-asset.module';
+import {
+  MarketMakingStrategyEntity,
+  MarketMakingQuoteEntity,
+  ArbitrageOpportunityEntity,
+  RiskExposureEntity,
+  LiquidityPositionEntity
+} from './modules/market-making/entities/market-making.entities';
 import { NewsModule } from './modules/news/news.module';
 import {
   NotificationEntity,
@@ -105,6 +114,11 @@ import { SeedService } from './services/seed.service';
           AlternativeData,
           CrossAssetCorrelation,
           ArbitrageOpportunity,
+          MarketMakingStrategyEntity,
+          MarketMakingQuoteEntity,
+          ArbitrageOpportunityEntity,
+          RiskExposureEntity,
+          LiquidityPositionEntity,
         ],
         synchronize: true, // Don't use in production
         logging: false, // Disabled to clean up console output
@@ -122,9 +136,11 @@ import { SeedService } from './services/seed.service';
     MLModule,
     NotificationModule,
     AutoTradingModule,
+    BehavioralFinanceModule,
     MarketScannerModule,
     MultiAssetModule,
     DataIntelligenceModule,
+    MarketMakingModule,
   ],
   controllers: [AppController],
   providers: [AppService, SeedService],

@@ -11,6 +11,7 @@ import AIAssistantPage from "./pages/AIAssistantPage";
 import AnalyticsPage from "./pages/AnalyticsPage";
 import AutomatedTradingPage from "./pages/AutomatedTradingPage";
 import AutonomousTradingPage from "./pages/AutonomousTradingPage";
+import BehavioralFinancePage from "./pages/BehavioralFinancePage";
 import DashboardPage from "./pages/DashboardPage";
 import MarketScannerPage from "./pages/MarketScannerPage";
 import { rootStore } from "./stores/RootStore";
@@ -46,6 +47,10 @@ function App() {
                       <Route
                         path="/ai-assistant"
                         element={<AIAssistantPage />}
+                      />
+                      <Route
+                        path="/behavioral-finance"
+                        element={<BehavioralFinancePage />}
                       />
                       <Route
                         path="/enterprise-intelligence"

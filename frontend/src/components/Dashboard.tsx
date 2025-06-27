@@ -578,9 +578,7 @@ const Dashboard: React.FC = () => {
           </div>
 
           {/* Quick Trade */}
-          <div className="quick-trade-container">
-            <QuickTrade />
-          </div>
+          <QuickTrade />
         </div>
       </div>
       {/* Stocks Grid */}

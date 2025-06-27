@@ -11,6 +11,7 @@ const Header: React.FC = () => {
     { path: "/analytics", label: "Analytics", icon: "📈" },
     { path: "/market-scanner", label: "Market Scanner", icon: "🔍" },
     { path: "/ai-assistant", label: "AI Assistant", icon: "🎯" },
+    { path: "/behavioral-finance", label: "Behavioral Finance", icon: "🧠" },
     {
       path: "/enterprise-intelligence",
       label: "Enterprise Intelligence",

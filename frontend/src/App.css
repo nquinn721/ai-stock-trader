@@ -9,6 +9,8 @@
   color: var(--theme-text-primary);
   position: relative;
   font-family: var(--theme-font-sans);
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .App::before {
@@ -47,10 +49,21 @@ code {
 }
 
 /* Main content area styles */
+.app-main {
+  min-height: calc(100vh - 80px);
+  margin-top: 80px; /* Account for fixed header */
+  padding: 0;
+  background: transparent;
+  width: 100%;
+  box-sizing: border-box;
+}
+
 .app-main-content {
   min-height: calc(100vh - 80px);
   padding: 0;
   background: transparent;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 /* Global utility classes */

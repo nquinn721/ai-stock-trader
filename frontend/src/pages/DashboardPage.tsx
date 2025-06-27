@@ -31,7 +31,7 @@ import {
   useWebSocketStore,
 } from "../stores/StoreContext";
 import { Portfolio } from "../types";
-import "./DashboardPage-New.css";
+import "./DashboardPage.css";
 
 // Add icons to library
 library.add(

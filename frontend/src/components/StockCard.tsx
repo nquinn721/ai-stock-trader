@@ -1,3 +1,5 @@
+import { faChartLine } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { observer } from "mobx-react-lite";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
@@ -427,7 +429,8 @@ const StockCard: React.FC<StockCardProps> = observer(({ stock, signal }) => {
             onClick={() => setIsModalOpen(true)}
             title="Open detailed dashboard with advanced charts and metrics"
           >
-            � Detailed Dashboard
+            <FontAwesomeIcon icon={faChartLine} />
+            Detailed Dashboard
           </button>
         </div>
       </div>{" "}
