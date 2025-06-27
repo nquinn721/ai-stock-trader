@@ -800,7 +800,7 @@ export class AutoTradingService {
    * Get all active strategy instances
    */
   async getActiveStrategies(userId: string): Promise<StrategyInstance[]> {
-    return this.autonomousTradingService.getActiveStrategies(userId);
+    return this.autonomousTradingService.getRunningStrategies(userId);
   }
 
   /**
@@ -825,12 +825,14 @@ export class AutoTradingService {
     endDate: Date,
     initialCapital: number,
   ): Promise<any> {
-    return this.backtestingService.runBacktest(
-      strategyId,
+    // Create a mock strategy and params for backtesting
+    const strategy = { id: strategyId, name: `Strategy ${strategyId}` };
+    const params = {
       startDate,
       endDate,
       initialCapital,
-    );
+    };
+    return this.backtestingService.runBacktest(strategy as any, params as any);
   }
 
   /**
@@ -850,9 +852,8 @@ export class AutoTradingService {
     parameters: any,
   ): Promise<any> {
     return this.strategyBuilderService.createStrategyFromTemplate(
-      userId,
       templateId,
-      name,
+      userId,
       parameters,
     );
   }

@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
-import autonomousTradingApi, {
+import autoTradingService, {
   DeploymentConfig,
   StrategyInstance,
-} from "../../services/autonomousTradingApi";
+} from "../../services/autoTradingService";
 import "./CleanAutonomousAgentDashboard.css";
 
 const CleanAutonomousAgentDashboard: React.FC = () => {
@@ -95,7 +95,7 @@ const CleanAutonomousAgentDashboard: React.FC = () => {
   const loadStrategies = async () => {
     setIsLoading(true);
     try {
-      const response = await autonomousTradingApi.getRunningStrategies();
+      const response = await autoTradingService.getRunningStrategies();
       if (response.success && response.data.length > 0) {
         setRunningStrategies(response.data);
       } else {
@@ -144,13 +144,13 @@ const CleanAutonomousAgentDashboard: React.FC = () => {
     try {
       switch (action) {
         case "start":
-          await autonomousTradingApi.resumeStrategy(strategyId);
+          await autoTradingService.resumeStrategy(strategyId);
           break;
         case "pause":
-          await autonomousTradingApi.pauseStrategy(strategyId);
+          await autoTradingService.pauseStrategy(strategyId);
           break;
         case "stop":
-          await autonomousTradingApi.stopStrategy(strategyId);
+          await autoTradingService.stopStrategy(strategyId);
           break;
       }
       await loadStrategies();
@@ -165,7 +165,7 @@ const CleanAutonomousAgentDashboard: React.FC = () => {
   const handleDeployStrategy = async () => {
     setIsLoading(true);
     try {
-      await autonomousTradingApi.deployStrategy(
+      await autoTradingService.deployStrategy(
         "default-strategy",
         deploymentConfig
       );

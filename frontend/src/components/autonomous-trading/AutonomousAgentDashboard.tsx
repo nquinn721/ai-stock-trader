@@ -41,10 +41,10 @@ import {
   Typography,
 } from "@mui/material";
 import React, { useEffect, useState } from "react";
-import autonomousTradingApi, {
+import autoTradingService, {
   DeploymentConfig,
   StrategyInstance,
-} from "../../services/autonomousTradingApi";
+} from "../../services/autoTradingService";
 // import { StrategyBuilder } from "../strategy-builder/StrategyBuilder";
 
 // Remove the duplicate interfaces since they're now imported from the API service
@@ -87,7 +87,7 @@ const AutonomousAgentDashboard: React.FC = () => {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await autonomousTradingApi.getRunningStrategies();
+      const response = await autoTradingService.getRunningStrategies();
       if (response.success) {
         setRunningStrategies(response.data);
       } else {
@@ -143,13 +143,13 @@ const AutonomousAgentDashboard: React.FC = () => {
       let response;
       switch (action) {
         case "stop":
-          response = await autonomousTradingApi.stopStrategy(strategyId);
+          response = await autoTradingService.stopStrategy(strategyId);
           break;
         case "pause":
-          response = await autonomousTradingApi.pauseStrategy(strategyId);
+          response = await autoTradingService.pauseStrategy(strategyId);
           break;
         case "resume":
-          response = await autonomousTradingApi.resumeStrategy(strategyId);
+          response = await autoTradingService.resumeStrategy(strategyId);
           break;
       }
 
@@ -205,7 +205,7 @@ const AutonomousAgentDashboard: React.FC = () => {
     try {
       // Use a demo strategy ID since we don't have a strategy selection UI yet
       const demoStrategyId = "demo-strategy-" + Date.now();
-      const response = await autonomousTradingApi.deployStrategy(
+      const response = await autoTradingService.deployStrategy(
         demoStrategyId,
         deploymentConfig
       );

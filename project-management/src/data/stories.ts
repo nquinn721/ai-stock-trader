@@ -978,6 +978,22 @@ export const stories: Story[] = [
     completedDate: "2025-06-27",
   },
   {
+    id: "S42",
+    title: "Deep Reinforcement Learning Trading Agent",
+    description:
+      "Implement a sophisticated Deep Q-Network (DQN) based autonomous trading agent that continuously learns from market outcomes and adapts its strategies in real-time. This agent uses reinforcement learning to make optimal trading decisions based on market state, portfolio status, and risk parameters. Features include DQN with experience replay, multi-action space (BUY/SELL/HOLD + position sizing), 50+ market features state representation, continuous online learning, risk management integration, and explainable AI for decision transparency.",
+    status: "DONE",
+    priority: "High",
+    epic: "E5",
+    storyPoints: 21,
+    sprint: 7,
+    assignee: "ML Team",
+    progress: 100,
+    dependencies: ["S29A", "S30C"],
+    createdDate: "2025-06-24",
+    completedDate: "2025-06-27",
+  },
+  {
     id: "S48",
     title: "Enterprise-Grade Real-Time Data Intelligence Platform",
     description:

@@ -11,9 +11,9 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { observer } from "mobx-react-lite";
 import React, { useEffect, useState } from "react";
 import EmptyState from "../components/EmptyState";
-import autonomousTradingApi, {
+import autoTradingService, {
   StrategyInstance,
-} from "../services/autonomousTradingApi";
+} from "../services/autoTradingService";
 import { usePortfolioStore } from "../stores/StoreContext";
 import "./AnalyticsPage.css";
 
@@ -208,7 +208,7 @@ const AnalyticsPage: React.FC = observer(() => {
   const fetchStrategyAnalytics = async () => {
     setStrategyLoading(true);
     try {
-      const response = await autonomousTradingApi.getRunningStrategies();
+      const response = await autoTradingService.getRunningStrategies();
 
       if (response.success && response.data) {
         const strategies = response.data;

@@ -1,13 +1,9 @@
 import "@testing-library/jest-dom";
-import autonomousTradingApi, {
-  Portfolio,
-} from "../services/autonomousTradingApi";
+import autoTradingService, { Portfolio } from "../services/autoTradingService";
 
-// Mock the autonomousTradingApi
-jest.mock("../../services/autonomousTradingApi");
-const mockedApi = autonomousTradingApi as jest.Mocked<
-  typeof autonomousTradingApi
->;
+// Mock the autoTradingService
+jest.mock("../services/autoTradingService");
+const mockedApi = autoTradingService as jest.Mocked<typeof autoTradingService>;
 
 // Mock portfolio data
 const mockPortfolios: Portfolio[] = [
@@ -77,7 +73,7 @@ describe("Random Strategy Assignment Feature", () => {
     });
 
     // Call the API function directly (simulating button click)
-    const result = await autonomousTradingApi.assignRandomStrategy("1");
+    const result = await autoTradingService.assignRandomStrategy("1");
 
     // Verify the API was called with correct parameters
     expect(mockedApi.assignRandomStrategy).toHaveBeenCalledWith("1");
@@ -94,7 +90,7 @@ describe("Random Strategy Assignment Feature", () => {
     });
 
     // Call the API function
-    const result = await autonomousTradingApi.assignRandomStrategy("999");
+    const result = await autoTradingService.assignRandomStrategy("999");
 
     // Verify error handling
     expect(result.success).toBe(false);
@@ -119,7 +115,7 @@ describe("Random Strategy Assignment Feature", () => {
 
     mockedApi.assignRandomStrategy.mockResolvedValue(mockResponse);
 
-    const result = await autonomousTradingApi.assignRandomStrategy("1");
+    const result = await autoTradingService.assignRandomStrategy("1");
 
     // Verify all required fields are present
     expect(result.data).toHaveProperty("portfolioId");

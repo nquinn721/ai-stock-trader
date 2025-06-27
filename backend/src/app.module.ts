@@ -52,6 +52,22 @@ import { CrossAssetCorrelation } from './modules/multi-asset/entities/cross-asse
 import { CryptoData } from './modules/multi-asset/entities/crypto-data.entity';
 import { ForexData } from './modules/multi-asset/entities/forex-data.entity';
 import { MultiAssetModule } from './modules/multi-asset/multi-asset.module';
+import {
+  EconomicForecast,
+  BusinessCycle,
+  RecessionProbability,
+} from './modules/macro-intelligence/entities/economic.entities';
+import {
+  MonetaryPolicyPrediction,
+  PolicyStanceAnalysis,
+  QEProbabilityAssessment,
+} from './modules/macro-intelligence/entities/monetary-policy.entities';
+import {
+  PoliticalStabilityScore,
+  ElectionPrediction,
+  ConflictRiskAssessment,
+} from './modules/macro-intelligence/entities/geopolitical.entities';
+import { MacroIntelligenceModule } from './modules/macro-intelligence/macro-intelligence.module';
 import { NewsModule } from './modules/news/news.module';
 import {
   NotificationEntity,
@@ -119,6 +135,16 @@ import { SeedService } from './services/seed.service';
           ArbitrageOpportunityEntity,
           RiskExposureEntity,
           LiquidityPositionEntity,
+          // Macro Intelligence entities
+          EconomicForecast,
+          BusinessCycle,
+          RecessionProbability,
+          MonetaryPolicyPrediction,
+          PolicyStanceAnalysis,
+          QEProbabilityAssessment,
+          PoliticalStabilityScore,
+          ElectionPrediction,
+          ConflictRiskAssessment,
         ],
         synchronize: true, // Don't use in production
         logging: false, // Disabled to clean up console output
@@ -141,6 +167,7 @@ import { SeedService } from './services/seed.service';
     MultiAssetModule,
     DataIntelligenceModule,
     MarketMakingModule,
+    MacroIntelligenceModule,
   ],
   controllers: [AppController],
   providers: [AppService, SeedService],

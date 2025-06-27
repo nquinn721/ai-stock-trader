@@ -365,11 +365,11 @@ export const StrategyBuilder: React.FC = () => {
 
     setIsLoading(true);
     try {
-      // Import autonomousTradingService for deployment
-      const autonomousTradingApi = (
-        await import("../../services/autonomousTradingApi")
+      // Import autoTradingService for deployment
+      const autoTradingService = (
+        await import("../../services/autoTradingService")
       ).default;
-      const response = await autonomousTradingApi.deployStrategy(
+      const response = await autoTradingService.deployStrategy(
         strategy.id,
         deploymentConfig
       );
