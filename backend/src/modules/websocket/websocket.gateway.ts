@@ -1466,7 +1466,7 @@ export class StockWebSocketGateway
   private throttleUpdate(key: string, data: any, emitFn: () => void) {
     // Cancel previous timeout for this key
     if (this.throttledUpdates.has(key)) {
-      clearTimeout(this.throttledUpdates.get(key)!);
+      clearTimeout(this.throttledUpdates.get(key));
     }
 
     // Store pending update

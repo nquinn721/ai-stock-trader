@@ -139,7 +139,7 @@ export class ForexController {
     const majorPairs = ['EUR/USD', 'GBP/USD', 'USD/JPY', 'AUD/USD'];
     const pairData = await Promise.all(
       majorPairs.map(async (pair) => {
-        const tick = await this.forexService.getForexTick(pair as ForexPair);
+        const tick = await this.forexService.getForexTick(pair);
         return {
           pair,
           price: tick.bid,

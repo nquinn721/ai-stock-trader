@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { BinanceAdapter } from './adapters/binance.adapter';
-import { CoinbaseAdapter } from './adapters/coinbase.adapter';
+// import { BinanceAdapter } from './adapters/binance.adapter';
+// import { CoinbaseAdapter } from './adapters/coinbase.adapter';
 import { MarketMakingController } from './controllers/market-making.controller';
 import {
   ArbitrageOpportunityEntity,
@@ -51,9 +51,9 @@ import { WebSocketManagerService } from './services/websocket-manager.service';
     ExchangeConnectorService,
     WebSocketManagerService,
     DataPersistenceService,
-    // Exchange adapters
-    BinanceAdapter,
-    CoinbaseAdapter,
+    // Exchange adapters - temporarily disabled
+    // BinanceAdapter,
+    // CoinbaseAdapter,
   ],
   exports: [
     MarketMakingServiceImpl,

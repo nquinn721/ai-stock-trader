@@ -91,12 +91,12 @@ export class MarketHoursService {
   getMarketStatus(date?: Date, schedule?: TradingSchedule): MarketStatus {
     const now = date || new Date();
     const tradingSchedule = schedule || this.DEFAULT_SCHEDULE;
-    
+
     // Convert to Eastern Time
     const easternTime = new Date(
-      now.toLocaleString('en-US', { timeZone: tradingSchedule.timezone })
+      now.toLocaleString('en-US', { timeZone: tradingSchedule.timezone }),
     );
-    
+
     const dateStr = easternTime.toISOString().split('T')[0];
     const timeStr = easternTime.toTimeString().slice(0, 5); // HH:mm
     const dayOfWeek = easternTime.getDay(); // 0 = Sunday, 6 = Saturday
@@ -113,18 +113,24 @@ export class MarketHoursService {
 
     // Check for early close
     const isEarlyClose = this.EARLY_CLOSE_DAYS.includes(dateStr);
-    const closeTime = isEarlyClose ? '13:00' : tradingSchedule.regularHours.close;
+    const closeTime = isEarlyClose
+      ? '13:00'
+      : tradingSchedule.regularHours.close;
 
     // Determine market status
     const openTime = tradingSchedule.regularHours.open;
-    
+
     if (timeStr >= openTime && timeStr < closeTime) {
       // Regular market hours
       return {
         isOpen: true,
         status: 'open',
         nextOpen: this.getNextMarketOpen(easternTime, tradingSchedule),
-        nextClose: this.getNextMarketClose(easternTime, tradingSchedule, isEarlyClose),
+        nextClose: this.getNextMarketClose(
+          easternTime,
+          tradingSchedule,
+          isEarlyClose,
+        ),
         timeUntilNextClose: this.getTimeUntil(easternTime, closeTime),
       };
     } else if (
@@ -138,7 +144,11 @@ export class MarketHoursService {
         isOpen: true,
         status: 'pre-market',
         nextOpen: this.getNextMarketOpen(easternTime, tradingSchedule),
-        nextClose: this.getNextMarketClose(easternTime, tradingSchedule, isEarlyClose),
+        nextClose: this.getNextMarketClose(
+          easternTime,
+          tradingSchedule,
+          isEarlyClose,
+        ),
         timeUntilNextOpen: this.getTimeUntil(easternTime, openTime),
       };
     } else if (
@@ -152,8 +162,15 @@ export class MarketHoursService {
         isOpen: true,
         status: 'after-hours',
         nextOpen: this.getNextMarketOpen(easternTime, tradingSchedule),
-        nextClose: this.getNextMarketClose(easternTime, tradingSchedule, isEarlyClose),
-        timeUntilNextClose: this.getTimeUntil(easternTime, tradingSchedule.afterHours.close),
+        nextClose: this.getNextMarketClose(
+          easternTime,
+          tradingSchedule,
+          isEarlyClose,
+        ),
+        timeUntilNextClose: this.getTimeUntil(
+          easternTime,
+          tradingSchedule.afterHours.close,
+        ),
       };
     } else {
       // Market is closed
@@ -167,20 +184,20 @@ export class MarketHoursService {
   validateTradingHours(
     throwError: boolean = true,
     date?: Date,
-    schedule?: TradingSchedule
+    schedule?: TradingSchedule,
   ): boolean {
     const status = this.getMarketStatus(date, schedule);
-    
+
     if (!status.isOpen) {
       const message = this.getMarketClosedMessage(status);
       this.logger.warn(`Trading blocked: ${message}`);
-      
+
       if (throwError) {
         throw new Error(message);
       }
       return false;
     }
-    
+
     return true;
   }
 
@@ -189,13 +206,13 @@ export class MarketHoursService {
    */
   getTimeUntilMarketEvent(date?: Date): string {
     const status = this.getMarketStatus(date);
-    
+
     if (status.isOpen && status.timeUntilNextClose) {
       return this.formatDuration(status.timeUntilNextClose);
     } else if (!status.isOpen && status.timeUntilNextOpen) {
       return this.formatDuration(status.timeUntilNextOpen);
     }
-    
+
     return 'Unknown';
   }
 
@@ -205,7 +222,7 @@ export class MarketHoursService {
   isTradingDay(date: Date): boolean {
     const dateStr = date.toISOString().split('T')[0];
     const dayOfWeek = date.getDay();
-    
+
     return (
       dayOfWeek !== 0 && // Not Sunday
       dayOfWeek !== 6 && // Not Saturday
@@ -218,13 +235,13 @@ export class MarketHoursService {
    */
   getNextTradingDay(date?: Date): Date {
     const current = date ? new Date(date) : new Date();
-    let nextDay = new Date(current);
+    const nextDay = new Date(current);
     nextDay.setDate(nextDay.getDate() + 1);
-    
+
     while (!this.isTradingDay(nextDay)) {
       nextDay.setDate(nextDay.getDate() + 1);
     }
-    
+
     return nextDay;
   }
 
@@ -233,7 +250,7 @@ export class MarketHoursService {
    */
   updateTradingSchedule(
     allowPreMarket: boolean,
-    allowAfterHours: boolean
+    allowAfterHours: boolean,
   ): TradingSchedule {
     return {
       ...this.DEFAULT_SCHEDULE,
@@ -243,7 +260,10 @@ export class MarketHoursService {
   }
 
   // Private helper methods
-  private getClosedStatus(easternTime: Date, schedule: TradingSchedule): MarketStatus {
+  private getClosedStatus(
+    easternTime: Date,
+    schedule: TradingSchedule,
+  ): MarketStatus {
     return {
       isOpen: false,
       status: 'closed',
@@ -251,7 +271,7 @@ export class MarketHoursService {
       nextClose: this.getNextMarketClose(easternTime, schedule),
       timeUntilNextOpen: this.getTimeUntil(
         easternTime,
-        this.getNextMarketOpen(easternTime, schedule)
+        this.getNextMarketOpen(easternTime, schedule),
       ),
     };
   }
@@ -259,31 +279,31 @@ export class MarketHoursService {
   private getNextMarketOpen(date: Date, schedule: TradingSchedule): Date {
     const nextTradingDay = this.getNextTradingDay(date);
     const [hours, minutes] = schedule.regularHours.open.split(':').map(Number);
-    
+
     const nextOpen = new Date(nextTradingDay);
     nextOpen.setHours(hours, minutes, 0, 0);
-    
+
     return nextOpen;
   }
 
   private getNextMarketClose(
     date: Date,
     schedule: TradingSchedule,
-    isEarlyClose: boolean = false
+    isEarlyClose: boolean = false,
   ): Date {
     const closeTime = isEarlyClose ? '13:00' : schedule.regularHours.close;
     const [hours, minutes] = closeTime.split(':').map(Number);
-    
+
     const nextClose = new Date(date);
     nextClose.setHours(hours, minutes, 0, 0);
-    
+
     // If close time has passed today, get next trading day's close
     if (nextClose <= date) {
       const nextTradingDay = this.getNextTradingDay(date);
       nextClose.setTime(nextTradingDay.getTime());
       nextClose.setHours(hours, minutes, 0, 0);
     }
-    
+
     return nextClose;
   }
 
@@ -292,21 +312,21 @@ export class MarketHoursService {
       const [hours, minutes] = to.split(':').map(Number);
       const targetTime = new Date(from);
       targetTime.setHours(hours, minutes, 0, 0);
-      
+
       if (targetTime <= from) {
         targetTime.setDate(targetTime.getDate() + 1);
       }
-      
+
       return targetTime.getTime() - from.getTime();
     }
-    
+
     return to.getTime() - from.getTime();
   }
 
   private formatDuration(milliseconds: number): string {
     const hours = Math.floor(milliseconds / (1000 * 60 * 60));
     const minutes = Math.floor((milliseconds % (1000 * 60 * 60)) / (1000 * 60));
-    
+
     if (hours > 0) {
       return `${hours}h ${minutes}m`;
     }
@@ -317,15 +337,18 @@ export class MarketHoursService {
     const timeUntilOpen = status.timeUntilNextOpen
       ? this.formatDuration(status.timeUntilNextOpen)
       : 'unknown';
-    
-    return `Market is currently closed. Next opening in ${timeUntilOpen} at ${status.nextOpen.toLocaleString('en-US', {
-      timeZone: 'America/New_York',
-      weekday: 'short',
-      month: 'short',
-      day: 'numeric',
-      hour: 'numeric',
-      minute: '2-digit',
-      timeZoneName: 'short',
-    })}`;
+
+    return `Market is currently closed. Next opening in ${timeUntilOpen} at ${status.nextOpen.toLocaleString(
+      'en-US',
+      {
+        timeZone: 'America/New_York',
+        weekday: 'short',
+        month: 'short',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: '2-digit',
+        timeZoneName: 'short',
+      },
+    )}`;
   }
 }

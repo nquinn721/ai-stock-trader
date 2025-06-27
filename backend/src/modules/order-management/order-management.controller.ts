@@ -276,7 +276,7 @@ export class OrderManagementController {
     const executionTimes = executedOrders
       .filter((order) => order.executedAt && order.createdAt)
       .map((order) => {
-        const diff = order.executedAt!.getTime() - order.createdAt.getTime();
+        const diff = order.executedAt.getTime() - order.createdAt.getTime();
         return diff / (1000 * 60); // Convert to minutes
       });
 
@@ -652,7 +652,7 @@ export class OrderManagementController {
       .filter((order) => order.executedAt && order.createdAt)
       .map(
         (order) =>
-          (order.executedAt!.getTime() - order.createdAt.getTime()) / 1000,
+          (order.executedAt.getTime() - order.createdAt.getTime()) / 1000,
       );
 
     const fillRates = executedOrders

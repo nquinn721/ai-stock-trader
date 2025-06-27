@@ -52,7 +52,7 @@ export class CoinbaseAdapter implements ExchangeConnector {
   }
 
   async getTickers(symbols: string[]): Promise<ExchangeTicker[]> {
-    return Promise.all(symbols.map(symbol => this.getTicker(symbol)));
+    return Promise.all(symbols.map((symbol) => this.getTicker(symbol)));
   }
 
   async getOrderBook(symbol: string, limit = 100): Promise<ExchangeOrderBook> {
@@ -60,7 +60,7 @@ export class CoinbaseAdapter implements ExchangeConnector {
     const bids: [number, number][] = [];
     const asks: [number, number][] = [];
     const basePrice = 45500;
-    
+
     for (let i = 0; i < limit; i++) {
       bids.push([basePrice - (i + 1) * 0.1, Math.random() * 10]);
       asks.push([basePrice + (i + 1) * 0.1, Math.random() * 10]);
@@ -97,7 +97,11 @@ export class CoinbaseAdapter implements ExchangeConnector {
     return trades;
   }
 
-  async getCandles(symbol: string, timeframe: string, since?: Date, limit = 100): Promise<ExchangeCandle[]> {
+  async getCandles(
+    symbol: string,
+    interval: string,
+    limit = 100,
+  ): Promise<ExchangeCandle[]> {
     // Mock implementation
     const candles: ExchangeCandle[] = [];
     const basePrice = 45500;
@@ -119,7 +123,7 @@ export class CoinbaseAdapter implements ExchangeConnector {
         volume: Math.random() * 1000,
         symbol,
         exchange: 'coinbase',
-        timeframe,
+        interval,
       });
     }
 
@@ -130,8 +134,9 @@ export class CoinbaseAdapter implements ExchangeConnector {
     throw new Error('Order creation not implemented in mock Coinbase adapter');
   }
 
-  async cancelOrder(orderId: string, symbol: string): Promise<void> {
-    throw new Error('Order cancellation not implemented in mock Coinbase adapter');
+  async cancelOrder(orderId: string, symbol: string): Promise<boolean> {
+    this.logger.log(`Cancelling order ${orderId} for ${symbol}`);
+    return true;
   }
 
   async getOrder(orderId: string, symbol: string): Promise<ExchangeOrder> {
@@ -168,15 +173,24 @@ export class CoinbaseAdapter implements ExchangeConnector {
     };
   }
 
-  async subscribeTicker(symbol: string, callback: (ticker: ExchangeTicker) => void): Promise<void> {
+  async subscribeTicker(
+    symbol: string,
+    callback: (ticker: ExchangeTicker) => void,
+  ): Promise<void> {
     this.logger.log(`Mock subscription to ticker updates for ${symbol}`);
   }
 
-  async subscribeOrderBook(symbol: string, callback: (orderBook: ExchangeOrderBook) => void): Promise<void> {
+  async subscribeOrderBook(
+    symbol: string,
+    callback: (orderBook: ExchangeOrderBook) => void,
+  ): Promise<void> {
     this.logger.log(`Mock subscription to order book updates for ${symbol}`);
   }
 
-  async subscribeTrades(symbol: string, callback: (trade: ExchangeTrade) => void): Promise<void> {
+  async subscribeTrades(
+    symbol: string,
+    callback: (trade: ExchangeTrade) => void,
+  ): Promise<void> {
     this.logger.log(`Mock subscription to trade updates for ${symbol}`);
   }
 

@@ -7,7 +7,7 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
-  
+
   // Serve static files (React build) in production
   const isProduction = process.env.NODE_ENV === 'production';
   if (isProduction) {
@@ -17,9 +17,11 @@ async function bootstrap() {
 
   // Enable CORS for development
   app.enableCors({
-    origin: isProduction ? true : [
-      'http://localhost:3000', // Frontend development
-    ],
+    origin: isProduction
+      ? true
+      : [
+          'http://localhost:3000', // Frontend development
+        ],
     credentials: true,
   });
 
@@ -49,7 +51,7 @@ async function bootstrap() {
 
   // Catch-all handler: send back React's index.html file for SPA routing
   if (isProduction) {
-    app.getHttpAdapter().get('*', (req, res) => {
+    app.getHttpAdapter().get('*', (req: any, res: any) => {
       if (!req.url.startsWith('/api') && !req.url.startsWith('/socket.io')) {
         res.sendFile(join(__dirname, '..', 'public', 'index.html'));
       }

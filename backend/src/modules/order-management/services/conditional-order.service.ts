@@ -90,7 +90,7 @@ export class ConditionalOrderService {
       return false;
     }
 
-    const triggers = order.conditionalTriggers as ConditionalTrigger[];
+    const triggers = order.conditionalTriggers;
 
     // Group triggers by logical operator
     const andTriggers = triggers.filter(

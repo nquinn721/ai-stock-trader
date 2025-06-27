@@ -1,5 +1,18 @@
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+import { Injectable, Logger, OnModuleInit } from '@n      };
+
+      // const binanceAdapter = new BinanceAdapter(binanceConfig);
+
+      // Only connect if API keys are provided
+      // if (binanceConfig.apiKey && binanceConfig.secretKey) {
+      //   await binanceAdapter.connect();
+      //   this.logger.log('Binance adapter connected with API authentication');
+      // } else {
+      //   this.logger.warn(
+      //     'Binance API keys not configured - running in read-only mode',
+      //   );
+      // }
+
+      // this.exchanges.set('binance', binanceAdapter);import { ConfigService } from '@nestjs/config';
 import {
   CreateOrderRequest,
   ExchangeConnector,
@@ -7,7 +20,7 @@ import {
   ExchangeOrderBook,
   ExchangeConfig,
 } from '../interfaces/exchange-connector.interface';
-import { BinanceAdapter } from '../adapters/binance.adapter';
+// import { BinanceAdapter } from '../adapters/binance.adapter';
 
 @Injectable()
 export class ExchangeConnectorService implements OnModuleInit {
@@ -24,10 +37,12 @@ export class ExchangeConnectorService implements OnModuleInit {
     try {
       // Initialize Binance adapter
       await this.initializeBinanceAdapter();
-      
+
       this.logger.log(`Initialized ${this.exchanges.size} exchange connectors`);
     } catch (error) {
-      this.logger.error(`Failed to initialize exchange connectors: ${error.message}`);
+      this.logger.error(
+        `Failed to initialize exchange connectors: ${error.message}`,
+      );
     }
   }
 
@@ -57,12 +72,16 @@ export class ExchangeConnectorService implements OnModuleInit {
         await binanceAdapter.connect();
         this.logger.log('Binance adapter connected with API authentication');
       } else {
-        this.logger.warn('Binance API keys not configured - running in read-only mode');
+        this.logger.warn(
+          'Binance API keys not configured - running in read-only mode',
+        );
       }
 
       this.registerExchange('binance', binanceAdapter);
     } catch (error) {
-      this.logger.error(`Failed to initialize Binance adapter: ${error.message}`);
+      this.logger.error(
+        `Failed to initialize Binance adapter: ${error.message}`,
+      );
     }
   }
 

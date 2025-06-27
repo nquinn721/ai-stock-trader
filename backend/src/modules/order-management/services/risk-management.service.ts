@@ -1,3 +1,58 @@
+/**
+ * =============================================================================
+ * RISK MANAGEMENT SERVICE - Portfolio Protection and Compliance Engine
+ * =============================================================================
+ * 
+ * Comprehensive risk management system that enforces trading limits, validates
+ * orders, and protects portfolios from excessive risk exposure. Implements
+ * regulatory compliance and sophisticated risk controls.
+ * 
+ * Key Features:
+ * - Real-time risk validation for all trading orders
+ * - Position sizing and concentration limits enforcement
+ * - Pattern Day Trader (PDT) rule compliance
+ * - Sector and stock concentration monitoring
+ * - Daily loss limits and drawdown protection
+ * - Buying power calculations and margin requirements
+ * - Risk metrics calculation and portfolio analysis
+ * - Automated risk alerts and warnings
+ * 
+ * Risk Controls:
+ * - Maximum position size limits (% of portfolio)
+ * - Single order value restrictions
+ * - Daily loss thresholds and circuit breakers
+ * - Portfolio concentration limits (stock and sector)
+ * - PDT compliance ($25k minimum equity requirement)
+ * - Day trading buying power multiplier rules
+ * 
+ * Validation Types:
+ * - Pre-trade order validation
+ * - Real-time position monitoring
+ * - Portfolio-level risk assessment
+ * - Regulatory compliance checking
+ * - Margin requirement calculations
+ * 
+ * Risk Metrics:
+ * - Value at Risk (VaR) calculations
+ * - Portfolio beta and correlation analysis
+ * - Sector exposure breakdown
+ * - Unrealized P&L monitoring
+ * - Risk-adjusted return metrics
+ * 
+ * Compliance Features:
+ * - FINRA Pattern Day Trader rules
+ * - SEC regulatory requirements
+ * - Risk disclosure and warnings
+ * - Audit trail for all risk decisions
+ * 
+ * Used By:
+ * - Order execution services for pre-trade validation
+ * - Portfolio management for risk monitoring
+ * - Paper trading service for realistic risk simulation
+ * - Frontend risk dashboard for user awareness
+ * =============================================================================
+ */
+
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';

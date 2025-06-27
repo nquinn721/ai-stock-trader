@@ -442,7 +442,7 @@ export class OrderExecutionEngine {
 
     const executionTimes = orders
       .filter((order) => order.executedAt && order.createdAt)
-      .map((order) => order.executedAt!.getTime() - order.createdAt.getTime());
+      .map((order) => order.executedAt.getTime() - order.createdAt.getTime());
 
     const averageExecutionTime =
       executionTimes.length > 0

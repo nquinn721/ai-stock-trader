@@ -1,3 +1,38 @@
+/**
+ * =============================================================================
+ * NEWS SERVICE
+ * =============================================================================
+ *
+ * Financial news aggregation and sentiment analysis service for stock trading.
+ * Provides real-time news data with AI-powered sentiment scoring to support
+ * trading decisions and market intelligence.
+ *
+ * Key Features:
+ * - News API integration for financial headlines and articles
+ * - Advanced sentiment analysis using Natural Language Processing
+ * - Financial-specific sentiment lexicon (bullish, bearish, volatility terms)
+ * - Intelligent caching system (5-minute cache duration)
+ * - Stock symbol filtering and relevance scoring
+ * - Market impact analysis and categorization
+ *
+ * External Dependencies:
+ * - News API: Real-time financial news aggregation
+ * - Natural.js: Text tokenization and processing
+ * - Sentiment.js: Sentiment analysis engine
+ *
+ * Cache Strategy:
+ * - 5-minute cache for news data to reduce API calls
+ * - Symbol-specific caching for targeted news retrieval
+ * - Automatic cache invalidation for fresh market data
+ *
+ * Used By:
+ * - Stock analysis for news-driven price movements
+ * - Portfolio risk assessment based on sentiment
+ * - Trading signal generation from market sentiment
+ * - Real-time market intelligence dashboard
+ * =============================================================================
+ */
+
 import { Injectable } from '@nestjs/common';
 import axios from 'axios';
 import { WordTokenizer } from 'natural';

@@ -1,3 +1,44 @@
+/**
+ * =============================================================================
+ * STOCK SERVICE - Core Market Data Engine
+ * =============================================================================
+ * 
+ * Primary service for real-time stock data aggregation, analysis, and distribution.
+ * Serves as the central hub for all stock-related operations including live price
+ * updates, technical analysis, and trading signal generation.
+ * 
+ * Key Features:
+ * - Yahoo Finance API integration for real-time stock prices
+ * - Automated market data updates via scheduled cron jobs (every 2 minutes)
+ * - Advanced technical analysis (RSI, MACD, Bollinger Bands, SMA/EMA)
+ * - Trading signal generation and distribution via WebSocket
+ * - Historical data processing and trend analysis
+ * - Market hours awareness and intelligent data fetching
+ * - Breakout detection and momentum analysis
+ * - Integration with ML analysis for predictive insights
+ * 
+ * External Dependencies:
+ * - Yahoo Finance API: Real-time stock prices and historical data
+ * - WebSocket Gateway: Live data distribution to connected clients
+ * - News Service: Sentiment analysis integration
+ * - ML Analysis Service: Machine learning insights
+ * - Breakout Service: Technical pattern detection
+ * 
+ * Data Flow:
+ * 1. Scheduled cron jobs fetch latest market data
+ * 2. Technical indicators calculated for each stock
+ * 3. Trading signals generated based on analysis
+ * 4. Data broadcast to WebSocket clients in real-time
+ * 5. Historical data stored for trend analysis
+ * 
+ * Performance Optimizations:
+ * - Intelligent caching to reduce API calls
+ * - Batch processing for multiple stock updates
+ * - Market hours detection to avoid unnecessary calls
+ * - Client-aware updates (only when clients connected)
+ * =============================================================================
+ */
+
 import { Inject, Injectable, forwardRef } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
 import yahooFinance from 'yahoo-finance2';

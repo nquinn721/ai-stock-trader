@@ -78,7 +78,7 @@ describe('StockService', () => {
 
       // First update prices so stocks have currentPrice > 0
       await service.updateAllStockPrices();
-      
+
       const stocks = await service.getAllStocks();
       expect(stocks).toBeDefined();
       expect(Array.isArray(stocks)).toBe(true);
@@ -154,9 +154,9 @@ describe('StockService', () => {
         fiftyTwoWeekHigh: 180.0,
         fiftyTwoWeekLow: 120.0,
       } as any);
-      
+
       await service.updateAllStockPrices();
-      
+
       mockTradingService.getSignalsForStock.mockResolvedValue([
         {
           id: 1,

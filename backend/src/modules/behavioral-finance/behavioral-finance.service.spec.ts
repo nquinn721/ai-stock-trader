@@ -22,7 +22,13 @@ describe('BehavioralFinanceService', () => {
         symbol: 'AAPL',
         prices: [150, 155, 160, 158, 162],
         volume: [1000000, 1100000, 950000, 1200000, 1050000],
-        timestamps: ['2025-06-27T09:00:00Z', '2025-06-27T10:00:00Z', '2025-06-27T11:00:00Z', '2025-06-27T12:00:00Z', '2025-06-27T13:00:00Z'],
+        timestamps: [
+          '2025-06-27T09:00:00Z',
+          '2025-06-27T10:00:00Z',
+          '2025-06-27T11:00:00Z',
+          '2025-06-27T12:00:00Z',
+          '2025-06-27T13:00:00Z',
+        ],
       };
 
       const result = await service.detectCognitiveBias(mockMarketData);
@@ -36,7 +42,9 @@ describe('BehavioralFinanceService', () => {
       expect(result.biases).toHaveProperty('overconfidence');
       expect(result.overallBiasScore).toBeGreaterThanOrEqual(0);
       expect(result.overallBiasScore).toBeLessThanOrEqual(1);
-      expect(['exploit', 'neutral', 'avoid']).toContain(result.recommendedAction);
+      expect(['exploit', 'neutral', 'avoid']).toContain(
+        result.recommendedAction,
+      );
     });
 
     it('should handle anchoring bias analysis', async () => {
@@ -67,7 +75,9 @@ describe('BehavioralFinanceService', () => {
 
       expect(result.biases.confirmation.score).toBeGreaterThanOrEqual(0);
       expect(result.biases.confirmation.confidence).toBeGreaterThanOrEqual(0);
-      expect(result.biases.confirmation.confirmatorySignals).toBeGreaterThanOrEqual(0);
+      expect(
+        result.biases.confirmation.confirmatorySignals,
+      ).toBeGreaterThanOrEqual(0);
     });
   });
 
@@ -76,13 +86,30 @@ describe('BehavioralFinanceService', () => {
       const result = await service.analyzeMarketSentimentCycle();
 
       expect(result).toBeDefined();
-      expect(['despair', 'depression', 'hope', 'optimism', 'belief', 'thrill', 'euphoria', 'complacency', 'anxiety', 'denial', 'fear', 'capitulation']).toContain(result.phase);
+      expect([
+        'despair',
+        'depression',
+        'hope',
+        'optimism',
+        'belief',
+        'thrill',
+        'euphoria',
+        'complacency',
+        'anxiety',
+        'denial',
+        'fear',
+        'capitulation',
+      ]).toContain(result.phase);
       expect(result.confidence).toBeGreaterThanOrEqual(0);
       expect(result.confidence).toBeLessThanOrEqual(1);
       expect(result.duration).toBeGreaterThan(0);
       expect(result.marketImplications).toBeDefined();
-      expect(result.marketImplications.expectedVolatility).toBeGreaterThanOrEqual(0);
-      expect(['up', 'down', 'sideways']).toContain(result.marketImplications.expectedDirection);
+      expect(
+        result.marketImplications.expectedVolatility,
+      ).toBeGreaterThanOrEqual(0);
+      expect(['up', 'down', 'sideways']).toContain(
+        result.marketImplications.expectedDirection,
+      );
     });
 
     it('should provide valid transition probability', async () => {
@@ -118,7 +145,13 @@ describe('BehavioralFinanceService', () => {
     it('should have appropriate interpretation for index ranges', async () => {
       const result = await service.calculateFearGreedIndex();
 
-      expect(['extreme-fear', 'fear', 'neutral', 'greed', 'extreme-greed']).toContain(result.interpretation);
+      expect([
+        'extreme-fear',
+        'fear',
+        'neutral',
+        'greed',
+        'extreme-greed',
+      ]).toContain(result.interpretation);
       expect(result.tradingSignal).toBeDefined();
       expect(result.tradingSignal.confidence).toBeGreaterThanOrEqual(0);
       expect(result.tradingSignal.confidence).toBeLessThanOrEqual(1);
@@ -149,7 +182,9 @@ describe('BehavioralFinanceService', () => {
       expect(result.contrarian.expectedReversion).toBeDefined();
       expect(result.contrarian.timeframe).toBeGreaterThan(0);
       expect(result.crowdPsychology).toBeDefined();
-      expect(['accumulation', 'markup', 'distribution', 'decline']).toContain(result.crowdPsychology.phase);
+      expect(['accumulation', 'markup', 'distribution', 'decline']).toContain(
+        result.crowdPsychology.phase,
+      );
     });
   });
 
@@ -181,7 +216,9 @@ describe('BehavioralFinanceService', () => {
     it('should calculate value function correctly', async () => {
       const mockPortfolio = {
         id: 'test-portfolio-2',
-        positions: [{ symbol: 'MSFT', quantity: 10, avgPrice: 300, currentPrice: 310 }],
+        positions: [
+          { symbol: 'MSFT', quantity: 10, avgPrice: 300, currentPrice: 310 },
+        ],
         totalValue: 3100,
         totalReturn: 100,
       };
@@ -198,10 +235,38 @@ describe('BehavioralFinanceService', () => {
   describe('assessLossAversion', () => {
     it('should assess loss aversion from trading history', async () => {
       const mockTradingHistory = [
-        { type: 'buy', symbol: 'AAPL', quantity: 10, price: 150, pnl: 0, date: '2025-06-01' },
-        { type: 'sell', symbol: 'AAPL', quantity: 10, price: 155, pnl: 50, date: '2025-06-02' },
-        { type: 'buy', symbol: 'TSLA', quantity: 5, price: 200, pnl: 0, date: '2025-06-03' },
-        { type: 'sell', symbol: 'TSLA', quantity: 5, price: 190, pnl: -50, date: '2025-06-04' },
+        {
+          type: 'buy',
+          symbol: 'AAPL',
+          quantity: 10,
+          price: 150,
+          pnl: 0,
+          date: '2025-06-01',
+        },
+        {
+          type: 'sell',
+          symbol: 'AAPL',
+          quantity: 10,
+          price: 155,
+          pnl: 50,
+          date: '2025-06-02',
+        },
+        {
+          type: 'buy',
+          symbol: 'TSLA',
+          quantity: 5,
+          price: 200,
+          pnl: 0,
+          date: '2025-06-03',
+        },
+        {
+          type: 'sell',
+          symbol: 'TSLA',
+          quantity: 5,
+          price: 190,
+          pnl: -50,
+          date: '2025-06-04',
+        },
       ];
 
       const result = await service.assessLossAversion(mockTradingHistory);
@@ -210,8 +275,12 @@ describe('BehavioralFinanceService', () => {
       expect(result.traderId).toBeDefined();
       expect(result.lossAversionCoefficient).toBeGreaterThan(0);
       expect(result.realizationEffect).toBeDefined();
-      expect(result.realizationEffect.prematureGainRealization).toBeGreaterThanOrEqual(0);
-      expect(result.realizationEffect.lossHoldingTendency).toBeGreaterThanOrEqual(0);
+      expect(
+        result.realizationEffect.prematureGainRealization,
+      ).toBeGreaterThanOrEqual(0);
+      expect(
+        result.realizationEffect.lossHoldingTendency,
+      ).toBeGreaterThanOrEqual(0);
       expect(result.dispositionEffect).toBeDefined();
       expect(result.recommendations).toBeDefined();
     });
@@ -228,7 +297,12 @@ describe('BehavioralFinanceService', () => {
 
   describe('Error handling', () => {
     it('should handle invalid market data gracefully', async () => {
-      const invalidData = { symbol: '', prices: [], volume: [], timestamps: [] };
+      const invalidData = {
+        symbol: '',
+        prices: [],
+        volume: [],
+        timestamps: [],
+      };
 
       const result = await service.detectCognitiveBias(invalidData);
 

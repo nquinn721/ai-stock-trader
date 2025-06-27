@@ -1,3 +1,49 @@
+/**
+ * =============================================================================
+ * TRADING SERVICE - Signal Detection and Analysis Engine
+ * =============================================================================
+ * 
+ * Core trading logic service that analyzes market conditions and generates
+ * actionable trading signals. Integrates technical analysis, news sentiment,
+ * and market patterns to identify trading opportunities.
+ * 
+ * Key Features:
+ * - Breakout pattern detection and analysis
+ * - Trading signal generation (BUY, SELL, HOLD)
+ * - Confidence scoring for signal reliability
+ * - Multi-factor analysis combining technical and fundamental data
+ * - News sentiment integration for market context
+ * - Signal validation and risk assessment
+ * 
+ * Signal Generation Logic:
+ * - Symbol-specific analysis using hash-based deterministic patterns
+ * - Time-based cycling to simulate realistic market behavior
+ * - Confidence scoring based on multiple technical factors
+ * - Integration with news sentiment for signal reinforcement
+ * - Balanced signal distribution to avoid bias
+ * 
+ * Analysis Components:
+ * - Technical pattern recognition (breakouts, reversals)
+ * - Volume analysis and momentum indicators
+ * - Price action and support/resistance levels
+ * - News sentiment impact on signal strength
+ * - Market timing and trend confirmation
+ * 
+ * Signal Types:
+ * - STRONG_BUY: High confidence bullish signals
+ * - BUY: Moderate bullish signals
+ * - HOLD: Neutral market conditions
+ * - SELL: Moderate bearish signals
+ * - STRONG_SELL: High confidence bearish signals
+ * 
+ * Used By:
+ * - Stock service for automated signal generation
+ * - Paper trading service for trade recommendations
+ * - Frontend dashboard for signal visualization
+ * - WebSocket broadcasts for real-time signal updates
+ * =============================================================================
+ */
+
 import { Injectable } from '@nestjs/common';
 import { SignalType } from '../../entities/trading-signal.entity';
 import { NewsService } from '../news/news.service';

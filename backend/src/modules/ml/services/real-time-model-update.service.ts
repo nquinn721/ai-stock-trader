@@ -567,7 +567,7 @@ export class RealTimeModelUpdateService implements OnModuleInit {
 
       // Calculate performance metrics
       let correctPredictions = 0;
-      let totalPredictions = recentPredictions.length;
+      const totalPredictions = recentPredictions.length;
       let totalError = 0;
       for (const prediction of recentPredictions) {
         // Simulate actual vs predicted comparison

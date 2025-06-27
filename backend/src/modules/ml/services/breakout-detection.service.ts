@@ -280,7 +280,7 @@ export class BreakoutDetectionService {
     );
 
     const trades: BacktestResult['trades'] = [];
-    let capital = config.initialCapital;
+    const capital = config.initialCapital;
     let totalReturn = 0;
 
     try {

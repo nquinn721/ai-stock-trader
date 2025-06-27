@@ -326,9 +326,7 @@ export class DataPreprocessingService {
   /**
    * Get pipeline status and metrics
    */
-  async getPipelineStatus(
-    pipelineId: string,
-  ): Promise<{
+  async getPipelineStatus(pipelineId: string): Promise<{
     pipeline: PreprocessingPipeline;
     recentJobs: PreprocessingJob[];
   }> {

@@ -1,66 +1,131 @@
 version: "3.8"
 
+# =============================================================================
+# DOCKER COMPOSE PRODUCTION CONFIGURATION
+# =============================================================================
+#
+# This file defines the production Docker setup for the Stock Trading App
+# with all services configured for production deployment.
+#
+# Services Overview:
+#   - backend-prod:  NestJS API server with Yahoo Finance & News API integration
+#   - frontend-prod: React trading dashboard with real-time stock data
+#   - database-prod: MySQL 8.0 database for persistent data storage
+#
+# Port Mappings (Production):
+#   - Backend:  localhost:8080 → container:8000 (NestJS API server)
+#   - Frontend: localhost:3080 → container:80   (React app via nginx)
+#   - Database: localhost:3307 → container:3306 (MySQL database)
+#
+# API URL Configuration:
+#   - REACT_APP_API_URL=http://localhost:8080
+#     ↳ Frontend connects to backend for:
+#       • Stock data endpoints (/stocks, /stocks/with-signals/all)
+#       • Portfolio management (/paper-trading/portfolios)
+#       • WebSocket real-time updates (ws://localhost:8080/stocks)
+#       • News sentiment analysis (/news)
+#       • Health checks (/health)
+#
+# Environment Variables Required:
+#   - PROD_DATABASE_URL: MySQL connection string
+#   - YAHOO_FINANCE_API_KEY: For real-time stock data
+#   - NEWS_API_KEY: For financial news sentiment
+#   - PROD_DB_ROOT_PASSWORD, PROD_DB_USER, PROD_DB_PASSWORD: Database auth
+# =============================================================================
+
+# COMMENTED OUT - Uncomment when ready for production deployment
 services:
-  # Production Backend
-  backend-prod:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile.prod
-    ports:
-      - "8080:8000" # Different port to avoid dev conflicts
-    environment:
-      - NODE_ENV=production
-      - PORT=8000
-      - DATABASE_URL=${PROD_DATABASE_URL}
-      - YAHOO_FINANCE_API_KEY=${YAHOO_FINANCE_API_KEY}
-      - NEWS_API_KEY=${NEWS_API_KEY}
-    volumes:
-      - prod_data:/app/data
-    networks:
-      - prod_network
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
+  # =============================================================================
+  # BACKEND SERVICE - NestJS API Server
+  # =============================================================================
+  # Provides REST API endpoints and WebSocket connections for:
+  # - Real-time stock data from Yahoo Finance API
+  # - Portfolio management and paper trading
+  # - News sentiment analysis integration
+  # - WebSocket live updates every 2 minutes
+  # - Health monitoring and performance tracking
+  # backend-prod:
+  #   build:
+  #     context: ./backend
+  #     dockerfile: Dockerfile.prod
+  #   ports:
+  #     - "8080:8000" # External:Internal - Avoids dev port 8000 conflicts
+  #   environment:
+  #     - NODE_ENV=production
+  #     - PORT=8000
+  #     - DATABASE_URL=${PROD_DATABASE_URL}
+  #     - YAHOO_FINANCE_API_KEY=${YAHOO_FINANCE_API_KEY}  # Real stock prices
+  #     - NEWS_API_KEY=${NEWS_API_KEY}                    # Financial news data
+  #   volumes:
+  #     - prod_data:/app/data
+  #   networks:
+  #     - prod_network
+  #   restart: unless-stopped
+  #   healthcheck:
+  #     test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+  #     interval: 30s
+  #     timeout: 10s
+  #     retries: 3
 
-  # Production Frontend
-  frontend-prod:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile.prod
-      args:
-        - REACT_APP_API_URL=http://localhost:8080
-    ports:
-      - "3080:80" # Different port to avoid dev conflicts
-    depends_on:
-      - backend-prod
-    networks:
-      - prod_network
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:80"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
+  # =============================================================================
+  # FRONTEND SERVICE - React Trading Dashboard
+  # =============================================================================
+  # Serves the React application with:
+  # - Real-time stock trading interface
+  # - Portfolio performance visualization
+  # - Live market data displays
+  # - WebSocket connection management
+  # - Production-optimized nginx serving
+  # frontend-prod:
+  #   build:
+  #     context: ./frontend
+  #     dockerfile: Dockerfile.prod
+  #     args:
+  #       # API_URL tells React where to find the backend API:
+  #       # - Stock data: GET ${API_URL}/stocks/with-signals/all
+  #       # - Portfolio: GET ${API_URL}/paper-trading/portfolios/{id}
+  #       # - Performance: GET ${API_URL}/paper-trading/portfolios/{id}/performance
+  #       # - WebSocket: ws://${API_URL}/stocks (real-time updates)
+  #       # - News data: GET ${API_URL}/news (sentiment analysis)
+  #       # - Health: GET ${API_URL}/health (system status)
+  #       - REACT_APP_API_URL=http://localhost:8080
+  #   ports:
+  #     - "3080:80" # External:Internal - Avoids dev port 3000 conflicts
+  #   depends_on:
+  #     - backend-prod
+  #   networks:
+  #     - prod_network
+  #   restart: unless-stopped
+  #   healthcheck:
+  #     test: ["CMD", "curl", "-f", "http://localhost:80"]
+  #     interval: 30s
+  #     timeout: 10s
+  #     retries: 3
 
-  # Production Database (MySQL)
-  database-prod:
-    image: mysql:8.0
-    ports:
-      - "3307:3306" # Different port
-    environment:
-      - MYSQL_ROOT_PASSWORD=${PROD_DB_ROOT_PASSWORD}
-      - MYSQL_DATABASE=trading_app_prod
-      - MYSQL_USER=${PROD_DB_USER}
-      - MYSQL_PASSWORD=${PROD_DB_PASSWORD}
-    volumes:
-      - prod_db_data:/var/lib/mysql
-    networks:
-      - prod_network
-    restart: unless-stopped
-    command: --default-authentication-plugin=mysql_native_password
+  # =============================================================================
+  # DATABASE SERVICE - MySQL 8.0 Production Database
+  # =============================================================================
+  # Persistent storage for:
+  # - User portfolio data and trade history
+  # - Stock performance metrics and signals
+  # - Paper trading transactions and P&L
+  # - System configuration and settings
+  # - Cached market data for performance
+  # database-prod:
+  #   image: mysql:8.0
+  #   ports:
+  #     - "3307:3306" # External:Internal - Avoids dev port 3306 conflicts
+  #   environment:
+  #     - MYSQL_ROOT_PASSWORD=${PROD_DB_ROOT_PASSWORD}
+  #     - MYSQL_DATABASE=trading_app_prod                # Main application database
+  #     - MYSQL_USER=${PROD_DB_USER}
+  #     - MYSQL_PASSWORD=${PROD_DB_PASSWORD}
+  #   volumes:
+  #     - prod_db_data:/var/lib/mysql                    # Persistent data storage
+  #   networks:
+  #     - prod_network
+  #   restart: unless-stopped
+  #   command: --default-authentication-plugin=mysql_native_password
 
 volumes:
   prod_data:

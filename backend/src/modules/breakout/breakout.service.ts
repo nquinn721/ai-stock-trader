@@ -1315,7 +1315,7 @@ export class BreakoutService {
 
       levels.push({
         price: avgPrice,
-        strength: strength as 'strong' | 'moderate' | 'weak',
+        strength: strength,
         type: 'support',
         touches,
         confidence,
@@ -1365,7 +1365,7 @@ export class BreakoutService {
 
       levels.push({
         price: avgPrice,
-        strength: strength as 'strong' | 'moderate' | 'weak',
+        strength: strength,
         type: 'resistance',
         touches,
         confidence,
@@ -1585,7 +1585,7 @@ export class BreakoutService {
   } {
     let bullishScore = 0;
     let bearishScore = 0;
-    let signals: string[] = [];
+    const signals: string[] = [];
 
     // Technical indicators scoring
     if (technical.rsi < 30) {
@@ -1658,7 +1658,7 @@ export class BreakoutService {
     const totalScore = bullishScore + bearishScore;
     let direction: 'bullish' | 'bearish' | 'neutral' = 'neutral';
     let probability = 0.5;
-    let confidence = Math.min(totalScore * 10, 100);
+    const confidence = Math.min(totalScore * 10, 100);
 
     if (bullishScore > bearishScore && bullishScore >= 3) {
       direction = 'bullish';

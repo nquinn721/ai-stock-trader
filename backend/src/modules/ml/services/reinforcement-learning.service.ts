@@ -835,7 +835,7 @@ class DQNAgent {
         return qValues.max(-1); // Max Q-value
       };
 
-      const grads = tf.grad(f)(stateTensor) as tf.Tensor;
+      const grads = tf.grad(f)(stateTensor);
       const importance = grads.abs().dataSync();
 
       // Normalize importance scores

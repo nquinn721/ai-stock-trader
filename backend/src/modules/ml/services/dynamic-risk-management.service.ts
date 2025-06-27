@@ -712,9 +712,7 @@ export class DynamicRiskManagementService {
     const volMultiplier = marketConditions.volatilityIndex > 25 ? 2.5 : 2.0;
     return currentPrice * (1 - volatility * volMultiplier);
   }
-  private async selectOptimalStopLoss(
-    stopLosses: any,
-  ): Promise<{
+  private async selectOptimalStopLoss(stopLosses: any): Promise<{
     bestStopLoss: number;
     stopLossType: 'fixed' | 'trailing' | 'volatility' | 'atr' | 'momentum';
   }> {

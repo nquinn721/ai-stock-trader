@@ -187,7 +187,9 @@ export class AutoTradingService {
 
       // Notify via WebSocket - TODO: Fix WebSocket method compilation issues
       // await this.websocketGateway.notifyTradingSessionStarted(portfolioId, savedSession);
-      this.logger.log(`Trading session started notification (WebSocket temporarily disabled): ${portfolioId}`);
+      this.logger.log(
+        `Trading session started notification (WebSocket temporarily disabled): ${portfolioId}`,
+      );
 
       return savedSession;
     } catch (error) {
@@ -227,7 +229,9 @@ export class AutoTradingService {
 
       // Notify via WebSocket - TODO: Fix WebSocket method compilation issues
       // await this.websocketGateway.notifyTradingSessionStopped(session.portfolio_id, sessionId, reason);
-      this.logger.log(`Trading session stopped notification (WebSocket temporarily disabled): ${sessionId}`);
+      this.logger.log(
+        `Trading session stopped notification (WebSocket temporarily disabled): ${sessionId}`,
+      );
     } catch (error) {
       this.logger.error(`Error stopping trading session ${sessionId}:`, error);
       throw error;
@@ -349,7 +353,11 @@ export class AutoTradingService {
   /**
    * Check for ML-generated trading signals
    */
-  private async checkMLSignals(portfolioId: string, portfolio: any, stocks: any[]): Promise<void> {
+  private async checkMLSignals(
+    portfolioId: string,
+    portfolio: any,
+    stocks: any[],
+  ): Promise<void> {
     try {
       // Get ML-generated signals for high-confidence trades
       // Signal generation will be implemented when the service method is available
@@ -359,13 +367,12 @@ export class AutoTradingService {
       //   timeframe: '1h',
       //   minConfidence: 0.8, // Only high-confidence signals
       // });
-
       // for (const signal of signals) {
       //   if (signal.confidence > 0.85 && signal.signal !== 'HOLD') {
       //     this.logger.log(
       //       `High-confidence ML signal detected: ${signal.signal} ${signal.symbol} (confidence: ${signal.confidence})`,
       //     );
-      //     
+      //
       //     // Notify about ML signal
       //     await this.websocketGateway.notifyTradingRuleTriggered(portfolioId, {
       //       type: 'ML_SIGNAL',
@@ -396,16 +403,19 @@ export class AutoTradingService {
 
     try {
       // Get intelligent recommendation from ML service
-      const mlRecommendation = await this.intelligentRecommendationService.generateRecommendation({
-        symbol,
-        currentPrice: stock?.currentPrice || 0,
-        timeHorizon: '1D',
-      });
+      const mlRecommendation =
+        await this.intelligentRecommendationService.generateRecommendation({
+          symbol,
+          currentPrice: stock?.currentPrice || 0,
+          timeHorizon: '1D',
+        });
       if (mlRecommendation) {
         recommendation = {
           type: mlRecommendation.action,
           confidence: mlRecommendation.confidence,
-          reasoning: Array.isArray(mlRecommendation.reasoning) ? mlRecommendation.reasoning.join(', ') : (mlRecommendation.reasoning || 'ML-generated recommendation'),
+          reasoning: Array.isArray(mlRecommendation.reasoning)
+            ? mlRecommendation.reasoning.join(', ')
+            : mlRecommendation.reasoning || 'ML-generated recommendation',
         };
       }
     } catch (error) {
@@ -413,7 +423,7 @@ export class AutoTradingService {
     }
 
     // Get technical indicators and patterns
-    let technicalIndicators = {
+    const technicalIndicators = {
       rsi: undefined,
       macd: undefined,
       volume: stock?.volume || 0,
@@ -432,11 +442,14 @@ export class AutoTradingService {
       //   };
       // }
     } catch (error) {
-      this.logger.warn(`Failed to get pattern recognition for ${symbol}:`, error);
+      this.logger.warn(
+        `Failed to get pattern recognition for ${symbol}:`,
+        error,
+      );
     }
 
     // Get sentiment analysis
-    let sentimentScore = 0;
+    const sentimentScore = 0;
     try {
       // Sentiment analysis will be implemented when the service method is available
       // const sentiment = await this.sentimentAnalysisService.analyzeSymbol(symbol);
@@ -448,7 +461,10 @@ export class AutoTradingService {
       //   };
       // }
     } catch (error) {
-      this.logger.warn(`Failed to get sentiment analysis for ${symbol}:`, error);
+      this.logger.warn(
+        `Failed to get sentiment analysis for ${symbol}:`,
+        error,
+      );
     }
 
     return {
@@ -480,7 +496,9 @@ export class AutoTradingService {
         // Apply ML-powered risk management before execution
         const riskAssessment = await this.assessMLRisk(rule, context);
         if (!riskAssessment.approved) {
-          this.logger.warn(`Trade blocked by ML risk management: ${riskAssessment.reason}`);
+          this.logger.warn(
+            `Trade blocked by ML risk management: ${riskAssessment.reason}`,
+          );
           continue;
         }
 
@@ -530,7 +548,9 @@ export class AutoTradingService {
             //   price: result.executedPrice,
             //   rule: rule.name,
             // });
-            this.logger.log(`Trade executed notification (WebSocket temporarily disabled): ${action.symbol}`);
+            this.logger.log(
+              `Trade executed notification (WebSocket temporarily disabled): ${action.symbol}`,
+            );
           } else {
             this.logger.warn(`Auto trade failed: ${result.error}`);
           }
@@ -544,7 +564,10 @@ export class AutoTradingService {
   /**
    * Assess ML-powered risk for a trade
    */
-  private async assessMLRisk(rule: TradingRule, context: TradingContext): Promise<{ approved: boolean; reason?: string }> {
+  private async assessMLRisk(
+    rule: TradingRule,
+    context: TradingContext,
+  ): Promise<{ approved: boolean; reason?: string }> {
     try {
       // Use dynamic risk management service
       // Risk assessment will be implemented when the service method is available
@@ -562,11 +585,14 @@ export class AutoTradingService {
       //   approved: riskAssessment.approved,
       //   reason: riskAssessment.reason,
       // };
-      
+
       // For now, default to approved until ML service is properly integrated
       return { approved: true };
     } catch (error) {
-      this.logger.warn('ML risk assessment failed, defaulting to approved:', error);
+      this.logger.warn(
+        'ML risk assessment failed, defaulting to approved:',
+        error,
+      );
       return { approved: true };
     }
   }
@@ -593,11 +619,14 @@ export class AutoTradingService {
       // });
 
       // return optimization.optimizedQuantity || originalQuantity;
-      
+
       // For now, return original quantity until ML service is properly integrated
       return originalQuantity;
     } catch (error) {
-      this.logger.warn('ML position sizing failed, using original quantity:', error);
+      this.logger.warn(
+        'ML position sizing failed, using original quantity:',
+        error,
+      );
       return originalQuantity;
     }
   }
@@ -616,7 +645,9 @@ export class AutoTradingService {
 
     // Notify about emergency stop via WebSocket - TODO: Fix WebSocket method compilation issues
     // await this.websocketGateway.notifyEmergencyStopTriggered(portfolioId, reason);
-    this.logger.warn(`Emergency stop notification (WebSocket temporarily disabled): ${portfolioId} - ${reason}`);
+    this.logger.warn(
+      `Emergency stop notification (WebSocket temporarily disabled): ${portfolioId} - ${reason}`,
+    );
   }
 
   // Trade Monitoring
@@ -667,8 +698,8 @@ export class AutoTradingService {
       .reduce((sum, trade) => {
         const pnl =
           trade.trade_type === 'buy'
-            ? -(trade.executed_price! * trade.quantity)
-            : trade.executed_price! * trade.quantity;
+            ? -(trade.executed_price * trade.quantity)
+            : trade.executed_price * trade.quantity;
         return sum + pnl;
       }, 0);
 
@@ -706,8 +737,8 @@ export class AutoTradingService {
         .reduce((sum, trade) => {
           const pnl =
             trade.trade_type === 'buy'
-              ? -(trade.executed_price! * trade.quantity)
-              : trade.executed_price! * trade.quantity;
+              ? -(trade.executed_price * trade.quantity)
+              : trade.executed_price * trade.quantity;
           return sum + pnl;
         }, 0),
     };

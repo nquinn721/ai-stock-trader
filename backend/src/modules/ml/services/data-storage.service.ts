@@ -87,9 +87,7 @@ export class DataStorageService {
     },
   };
 
-  constructor() // Note: In a real implementation, this would use proper TypeORM entities
-  // For now, we'll simulate database operations
-  {}
+  constructor() {} // For now, we'll simulate database operations // Note: In a real implementation, this would use proper TypeORM entities
 
   /**
    * Initialize time-series optimized storage

@@ -827,7 +827,7 @@ export class SignalGenerationService {
     primarySignal: any,
     inputs: any,
   ): Promise<any> {
-    let filteredSignal = { ...primarySignal };
+    const filteredSignal = { ...primarySignal };
     const filters: string[] = [];
 
     // Volatility filter

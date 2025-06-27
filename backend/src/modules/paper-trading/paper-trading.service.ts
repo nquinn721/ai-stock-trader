@@ -1,3 +1,51 @@
+/**
+ * =============================================================================
+ * PAPER TRADING SERVICE - Virtual Portfolio Management Engine
+ * =============================================================================
+ *
+ * Comprehensive paper trading system that simulates real trading with virtual
+ * money. Provides full portfolio management, trade execution, and performance
+ * tracking without financial risk.
+ *
+ * Key Features:
+ * - Multiple portfolio types (Day Trading Pro/Standard, Small Account, Swing Trading)
+ * - Virtual trade execution with real market prices
+ * - Position management and portfolio balancing
+ * - P&L tracking and performance analytics
+ * - Risk management and margin calculations
+ * - Trade history and reporting
+ * - Real-time portfolio updates via WebSocket
+ * - Market hours compliance and validation
+ * - ML-powered trade recommendations and insights
+ *
+ * Portfolio Types:
+ * - Day Trading Pro: $50k starting capital, PDT enabled
+ * - Day Trading Standard: $30k starting capital, PDT enabled
+ * - Small Account Basic: $1k starting capital, swing trading focused
+ * - Custom configurations with flexible parameters
+ *
+ * Trading Features:
+ * - Market/Limit/Stop orders simulation
+ * - Real-time price execution using Yahoo Finance data
+ * - Position sizing and risk management
+ * - Automatic stop-loss and take-profit execution
+ * - Trade validation and error handling
+ *
+ * Performance Tracking:
+ * - Real-time P&L calculations
+ * - Portfolio value tracking over time
+ * - Trade success rate analytics
+ * - Risk-adjusted returns measurement
+ * - Detailed performance reports and charts
+ *
+ * Used By:
+ * - Frontend portfolio dashboard
+ * - Trading strategy backtesting
+ * - Risk assessment and education
+ * - Performance analytics and reporting
+ * =============================================================================
+ */
+
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -423,7 +471,7 @@ export class PaperTradingService {
   ): Promise<any[]> {
     const history: any[] = [];
     let currentCash = portfolio.initialCash;
-    let currentPositions: {
+    const currentPositions: {
       [symbol: string]: { quantity: number; avgPrice: number };
     } = {};
 

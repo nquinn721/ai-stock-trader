@@ -548,7 +548,7 @@ export class MarketPredictionService {
     // Signal generation logic
     let signal = 'HOLD';
     let strength = 0;
-    let reasoning: string[] = [];
+    const reasoning: string[] = [];
 
     // Strong buy signal
     if (prediction > 0.03 && confidence > 0.8 && uncertainty < 0.02) {

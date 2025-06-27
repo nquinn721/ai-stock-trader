@@ -175,7 +175,7 @@ describe('ExchangeConnectorService', () => {
       service.registerExchange('coinbase', {
         ...binanceAdapter,
         getOrderBook: jest.fn().mockResolvedValue(mockOrderBook2),
-      } as any);
+      });
 
       (binanceAdapter.getOrderBook as jest.Mock).mockResolvedValue(
         mockOrderBook1,
@@ -254,7 +254,7 @@ describe('ExchangeConnectorService', () => {
         createOrder: jest.fn().mockResolvedValue(mockSellOrder),
       };
 
-      service.registerExchange('coinbase', sellAdapter as any);
+      service.registerExchange('coinbase', sellAdapter);
       (binanceAdapter.createOrder as jest.Mock).mockResolvedValue(mockBuyOrder);
 
       const result = await service.executeArbitrage(
@@ -277,7 +277,7 @@ describe('ExchangeConnectorService', () => {
         createOrder: jest.fn().mockRejectedValue(new Error('Order failed')),
       };
 
-      service.registerExchange('coinbase', sellAdapter as any);
+      service.registerExchange('coinbase', sellAdapter);
       (binanceAdapter.createOrder as jest.Mock).mockRejectedValue(
         new Error('Order failed'),
       );

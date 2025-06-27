@@ -19,12 +19,18 @@ export class NewsController {
 
   @Get(':symbol/sentiment')
   @ApiOperation({ summary: 'Get average sentiment for a stock' })
-  @ApiResponse({ status: 200, description: 'Sentiment data retrieved successfully' })
+  @ApiResponse({
+    status: 200,
+    description: 'Sentiment data retrieved successfully',
+  })
   async getStockSentiment(
     @Param('symbol') symbol: string,
     @Query('days') days: string = '7',
   ) {
-    const avgSentiment = await this.newsService.getAverageSentiment(symbol, parseInt(days));
+    const avgSentiment = await this.newsService.getAverageSentiment(
+      symbol,
+      parseInt(days),
+    );
     return {
       symbol,
       averageSentiment: avgSentiment,
@@ -33,12 +39,16 @@ export class NewsController {
   }
   @Get(':symbol/fetch')
   @ApiOperation({ summary: 'Fetch and analyze new news for a stock' })
-  @ApiResponse({ status: 200, description: 'News fetched and analyzed successfully' })
+  @ApiResponse({
+    status: 200,
+    description: 'News fetched and analyzed successfully',
+  })
   async fetchAndAnalyzeNews(@Param('symbol') symbol: string) {
     const newsData = await this.newsService.fetchNewsForStock(symbol);
     const savedNews: any[] = [];
 
-    for (const item of newsData.slice(0, 5)) { // Process first 5 items
+    for (const item of newsData.slice(0, 5)) {
+      // Process first 5 items
       try {
         const news = await this.newsService.saveNewsWithSentiment(symbol, item);
         savedNews.push(news);

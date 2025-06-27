@@ -35,9 +35,7 @@ export class BehavioralFinanceController {
   }
 
   @Post('prospect-theory')
-  async analyzeProspectTheory(
-    @Body() data: { portfolio: any }
-  ) {
+  async analyzeProspectTheory(@Body() data: { portfolio: any }) {
     return this.behavioralFinanceService.analyzeProspectTheory(data.portfolio);
   }
 
@@ -50,7 +48,9 @@ export class BehavioralFinanceController {
   // Cognitive AI Endpoints
   @Get('emotional-state')
   async getEmotionalState(@Query('textData') textData?: string) {
-    const textArray = textData ? JSON.parse(textData) : ['Market analysis data'];
+    const textArray = textData
+      ? JSON.parse(textData)
+      : ['Market analysis data'];
     return this.cognitiveAIService.analyzeMarketEmotion(textArray);
   }
 
@@ -67,14 +67,14 @@ export class BehavioralFinanceController {
   }
 
   @Post('behavioral-prediction')
-  async getBehavioralPrediction(
-    @Body() data: { triggers: any[] }
-  ) {
+  async getBehavioralPrediction(@Body() data: { triggers: any[] }) {
     return this.cognitiveAIService.predictBehavioralShifts(data.triggers);
   }
 
   @Get('cognitive-load')
-  async getCognitiveLoad(@Query('complexityMetrics') complexityMetrics?: string) {
+  async getCognitiveLoad(
+    @Query('complexityMetrics') complexityMetrics?: string,
+  ) {
     const metrics = complexityMetrics ? JSON.parse(complexityMetrics) : {};
     return this.cognitiveAIService.assessCognitiveLoad(metrics);
   }
@@ -124,7 +124,7 @@ export class BehavioralFinanceController {
   async getBehavioralDashboard(@Param('symbol') symbol: string) {
     const mockMarketData = { symbol, prices: [], volume: [], timestamps: [] };
     const mockTextData = ['Market analysis data'];
-    
+
     const [cognitiveBiases, emotionalState, bubbleRisk] = await Promise.all([
       this.behavioralFinanceService.detectCognitiveBias(mockMarketData),
       this.cognitiveAIService.analyzeMarketEmotion(mockTextData),
@@ -143,7 +143,7 @@ export class BehavioralFinanceController {
   @Get('psychology-insights')
   async getPsychologyInsights(@Query('symbols') symbols?: string) {
     const symbolArray = symbols ? symbols.split(',') : ['SPY', 'QQQ', 'AAPL'];
-    
+
     const insights = await Promise.all(
       symbolArray.map(async (symbol) => {
         const [fearGreed, herding, stress] = await Promise.all([
@@ -158,7 +158,7 @@ export class BehavioralFinanceController {
           herding,
           stress,
         };
-      })
+      }),
     );
 
     return {
@@ -169,12 +169,13 @@ export class BehavioralFinanceController {
 
   @Post('behavioral-trading-signal')
   async getBehavioralTradingSignal(
-    @Body() data: { 
-      symbol: string; 
-      riskTolerance: number; 
+    @Body()
+    data: {
+      symbol: string;
+      riskTolerance: number;
       timeframe: string;
       includeEmotional?: boolean;
-    }
+    },
   ) {
     const { symbol, riskTolerance, timeframe, includeEmotional = true } = data;
     const mockMarketData = { symbol, prices: [], volume: [], timestamps: [] };
@@ -190,7 +191,9 @@ export class BehavioralFinanceController {
       this.behavioralFinanceService.detectCognitiveBias(mockMarketData),
       this.behavioralFinanceService.analyzeMarketSentimentCycle(),
       this.behavioralFinanceService.calculateFearGreedIndex(),
-      includeEmotional ? this.cognitiveAIService.analyzeMarketEmotion(mockTextData) : null,
+      includeEmotional
+        ? this.cognitiveAIService.analyzeMarketEmotion(mockTextData)
+        : null,
       this.marketPsychologyService.analyzeBubbleFormation(symbol),
     ]);
 
@@ -225,7 +228,9 @@ export class BehavioralFinanceController {
     // Analyze cognitive biases
     if (data.cognitiveBiases.overconfidence > 0.7) {
       bearishFactors += 2;
-      reasoning.push('High overconfidence detected - potential reversal signal');
+      reasoning.push(
+        'High overconfidence detected - potential reversal signal',
+      );
     }
     if (data.cognitiveBiases.anchoring < 0.3) {
       bullishFactors += 1;
@@ -259,13 +264,13 @@ export class BehavioralFinanceController {
     // Calculate net signal
     const netSignal = bullishFactors - bearishFactors;
     let action: 'BUY' | 'SELL' | 'HOLD';
-    
+
     if (netSignal >= 3) {
       action = 'BUY';
-      confidence = Math.min(0.9, (netSignal / 10) + 0.5);
+      confidence = Math.min(0.9, netSignal / 10 + 0.5);
     } else if (netSignal <= -3) {
       action = 'SELL';
-      confidence = Math.min(0.9, (Math.abs(netSignal) / 10) + 0.5);
+      confidence = Math.min(0.9, Math.abs(netSignal) / 10 + 0.5);
     } else {
       action = 'HOLD';
       confidence = 0.3 + Math.abs(netSignal) * 0.1;
@@ -275,7 +280,12 @@ export class BehavioralFinanceController {
       action,
       confidence,
       reasoning,
-      risk: data.riskTolerance > 0.7 ? 'HIGH' : data.riskTolerance > 0.4 ? 'MEDIUM' : 'LOW',
+      risk:
+        data.riskTolerance > 0.7
+          ? 'HIGH'
+          : data.riskTolerance > 0.4
+            ? 'MEDIUM'
+            : 'LOW',
       factors: {
         bullish: bullishFactors,
         bearish: bearishFactors,
