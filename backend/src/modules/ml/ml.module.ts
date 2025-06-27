@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { NewsModule } from '../news/news.module';
 import { AIController } from './controllers/ai.controller';
+import { ReinforcementLearningController } from './controllers/reinforcement-learning.controller';
 import {
   AIExplanation,
   ChatMessage,
@@ -41,6 +42,7 @@ import { PatternRecognitionService } from './services/pattern-recognition.servic
 import { PortfolioOptimizationService } from './services/portfolio-optimization.service';
 import { PredictiveAnalyticsService } from './services/predictive-analytics.service';
 import { RealTimeModelUpdateService } from './services/real-time-model-update.service';
+import { ReinforcementLearningService } from './services/reinforcement-learning.service';
 import { SentimentAnalysisService } from './services/sentiment-analysis.service';
 import { SentimentMonitoringService } from './services/sentiment-monitoring.service';
 import { SignalGenerationService } from './services/signal-generation.service';
@@ -62,7 +64,7 @@ import { TradingAssistantService } from './services/trading-assistant.service';
       AIExplanation,
     ]),
   ],
-  controllers: [MLController, AIController],
+  controllers: [MLController, AIController, ReinforcementLearningController],
   providers: [
     MLService,
     FeatureEngineeringService,
@@ -100,6 +102,7 @@ import { TradingAssistantService } from './services/trading-assistant.service';
     TradingAssistantService,
     // S39 Real-Time Predictive Analytics Dashboard
     PredictiveAnalyticsService,
+    ReinforcementLearningService,
   ],
   exports: [
     MLService,
@@ -137,6 +140,7 @@ import { TradingAssistantService } from './services/trading-assistant.service';
     TradingAssistantService,
     // S39 Real-Time Predictive Analytics Dashboard
     PredictiveAnalyticsService,
+    ReinforcementLearningService,
   ],
 })
 export class MLModule {}

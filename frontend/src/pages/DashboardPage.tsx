@@ -60,11 +60,18 @@ const DashboardPage: React.FC = observer(() => {
   // Initialize data only if stores are empty or need fresh data
   useEffect(() => {
     // Only fetch stocks if we don't have any recent data and WebSocket isn't providing updates
-    if ((!stockStore.isInitialized || stockStore.needsFreshData) && !stockStore.isLoading) {
-      console.log("Dashboard: Fetching initial stock data (not initialized or needs fresh data)");
+    if (
+      (!stockStore.isInitialized || stockStore.needsFreshData) &&
+      !stockStore.isLoading
+    ) {
+      console.log(
+        "Dashboard: Fetching initial stock data (not initialized or needs fresh data)"
+      );
       stockStore.fetchStocksWithSignals();
     } else if (stockStore.isInitialized) {
-      console.log("Dashboard: Using existing stock data, WebSocket will provide updates");
+      console.log(
+        "Dashboard: Using existing stock data, WebSocket will provide updates"
+      );
     }
 
     // Only initialize portfolio if we don't have any portfolios
@@ -82,13 +89,17 @@ const DashboardPage: React.FC = observer(() => {
       console.log("Dashboard: Connecting WebSocket for real-time updates");
       webSocketStore.connect();
     } else if (webSocketStore.isConnected) {
-      console.log("Dashboard: WebSocket already connected, real-time updates active");
+      console.log(
+        "Dashboard: WebSocket already connected, real-time updates active"
+      );
     }
 
     // Cleanup function to prevent multiple connections
     return () => {
       // Don't disconnect WebSocket when dashboard unmounts - keep it alive for the app
-      console.log("Dashboard: Component unmounting, keeping WebSocket alive for other components");
+      console.log(
+        "Dashboard: Component unmounting, keeping WebSocket alive for other components"
+      );
     };
   }, []); // No dependencies - connect once and keep alive
 
@@ -212,6 +223,34 @@ const DashboardPage: React.FC = observer(() => {
 
   return (
     <div className="dashboard-page">
+      {/* Dashboard Header with LIVE indicator */}
+      <div className="dashboard-header">
+        <div className="header-left">
+          <h1 className="dashboard-title">Trading Dashboard</h1>
+          <p className="dashboard-subtitle">
+            Real-time market overview and portfolio management
+          </p>
+        </div>
+        <div className="header-right">
+          <div
+            className={`live-indicator ${isConnected ? "active" : "inactive"}`}
+          >
+            <div className="live-dot"></div>
+            <span className="live-text">
+              {isConnected ? "LIVE" : "OFFLINE"}
+            </span>
+          </div>
+          <div className="current-time">
+            {currentTime.toLocaleTimeString("en-US", {
+              hour: "2-digit",
+              minute: "2-digit",
+              second: "2-digit",
+              hour12: true,
+            })}
+          </div>
+        </div>
+      </div>
+
       {/* Market Overview Cards */}
       <div className="market-overview">
         <div className="metric-card">
@@ -311,14 +350,6 @@ const DashboardPage: React.FC = observer(() => {
           <h2>Market Overview</h2>
           <div className="stock-stats">
             <span>{stocksWithSignals.length} stocks tracked</span>
-            <div
-              className={`connection-status ${
-                isConnected ? "connected" : "disconnected"
-              }`}
-            >
-              <FontAwesomeIcon icon="circle" />
-              {isConnected ? "Live" : "Offline"}
-            </div>
           </div>
         </div>
 
