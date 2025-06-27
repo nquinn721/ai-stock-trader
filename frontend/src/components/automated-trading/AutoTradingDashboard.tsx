@@ -507,70 +507,9 @@ export const AutoTradingDashboard: React.FC = () => {
             <Tab icon={<Psychology />} label="Behavioral Analysis" />
           </Tabs>
         </div>
-                Total P&L Today
-              </Typography>
-              <Typography
-                variant="h4"
-                color={calculateTotalPnL() >= 0 ? "success.main" : "error.main"}
-              >
-                {calculateTotalPnL() >= 0 ? "+" : ""}$
-                {calculateTotalPnL().toFixed(2)}
-              </Typography>
-              <Typography variant="body2" color="textSecondary">
-                {calculateTotalTrades()} trades executed
-              </Typography>
-            </CardContent>
-          </Card>
 
-          <Card sx={{ flex: 1, minWidth: 250 }}>
-            <CardContent>
-              <Typography color="textSecondary" gutterBottom>
-                Active Rules
-              </Typography>
-              <Typography variant="h4">
-                {tradingRules.filter((r) => r.isActive).length}
-              </Typography>
-              <Typography variant="body2" color="textSecondary">
-                {tradingRules.length} total rules
-              </Typography>
-            </CardContent>
-          </Card>
-
-          <Card sx={{ flex: 1, minWidth: 250 }}>
-            <CardContent>
-              <Typography color="textSecondary" gutterBottom>
-                Win Rate
-              </Typography>
-              <Typography variant="h4">
-                {calculateWinRate().toFixed(1)}%
-              </Typography>
-              <Typography variant="body2" color="textSecondary">
-                From active strategies
-              </Typography>
-            </CardContent>
-          </Card>
-        </Box>
-
-        {/* Tab Navigation */}
-        <Card className="tabs-container">
-          <Tabs
-            value={activeTab}
-            onChange={handleTabChange}
-            variant="scrollable"
-            scrollButtons="auto"
-            className="dashboard-tabs"
-          >
-            <Tab label="Overview" icon={<Assessment />} />
-            <Tab label="Trading Rules" icon={<Settings />} />
-            <Tab label="Session Control" icon={<PlayArrow />} />
-            <Tab label="Performance" icon={<TrendingUp />} />
-            <Tab label="Trade History" icon={<History />} />
-            <Tab label="Rule Builder" icon={<Settings />} />
-            <Tab label="Behavioral Analytics" icon={<Psychology />} />{" "}
-            {/* New tab */}
-          </Tabs>
-
-          {/* Tab Panels */}
+        {/* Tab Panels with Modern Styling */}
+        <div className="tab-panel-content">
           <TabPanel value={activeTab} index={0}>
             <TradingSessionMonitor
               sessions={tradingSessions}
@@ -583,34 +522,13 @@ export const AutoTradingDashboard: React.FC = () => {
           </TabPanel>
 
           <TabPanel value={activeTab} index={2}>
-            <TradingControlPanel
-              sessions={tradingSessions}
-              onSessionUpdate={setTradingSessions}
-              isGlobalActive={isGlobalTradingActive}
-              onGlobalToggle={toggleGlobalTrading}
-            />
-          </TabPanel>
-
-          <TabPanel value={activeTab} index={3}>
-            <TradingPerformanceChart />
-          </TabPanel>
-
-          <TabPanel value={activeTab} index={4}>
             <AutoTradeHistory />
           </TabPanel>
 
-          <TabPanel value={activeTab} index={5}>
-            <RuleBuilder
-              onRuleCreate={(rule: TradingRule) => {
-                setTradingRules((prev) => [...prev, rule]);
-              }}
-            />
-          </TabPanel>
-
-          <TabPanel value={activeTab} index={6}>
+          <TabPanel value={activeTab} index={3}>
             <BehavioralAnalyticsDashboard symbol="SPY" />
           </TabPanel>
-        </Card>
+        </div>
       </div>
     </div>
   );
