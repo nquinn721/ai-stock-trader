@@ -298,9 +298,31 @@ Use Git tools to stage and commit changes with descriptive message format.
 
 ### **Step 6: Update Project Management**
 
-- Mark story/ticket as DONE in project management dashboard
-- Update completion date
-- Move to next priority ticket
+⚠️ **CRITICAL**: See [Story Completion Workflow](../../docs/STORY-COMPLETION-WORKFLOW.md) for detailed instructions.
+
+- **Update stories.ts file**: Mark story status as "DONE" in `project-management/src/data/stories.ts`
+- **Set completion date**: Add/update `completedDate` field with current date
+- **Mark story/ticket as DONE in project management dashboard**
+- **Update completion date in markdown file**: Update the story markdown file with completion date
+- **Move to next priority ticket**
+
+#### **stories.ts Update Process:**
+
+1. **Locate the story** in `project-management/src/data/stories.ts`
+2. **Update status** from current status to `"DONE"`
+3. **Add completion date** using format `"YYYY-MM-DD"`
+4. **Verify story points** and other fields are accurate
+
+Example update:
+```typescript
+{
+  id: "S41",
+  title: "Multi-Asset Intelligence & Alternative Data",
+  status: "DONE",  // ← Update this
+  completedDate: "2025-06-27",  // ← Add this
+  // ...rest of story data
+}
+```
 
 ### **Testing Standards by Component:**
 

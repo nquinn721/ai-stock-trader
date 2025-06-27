@@ -112,3 +112,59 @@ S26 (ML Model Integration) has been successfully completed with:
 4. **Actions Tab**: Perform bulk operations and reporting
 
 The dashboard provides full CRUD operations for all project management entities with real-time updates and comprehensive progress tracking.
+
+## Ticket Completion Workflow
+
+### ⚠️ CRITICAL: Update stories.ts When Finishing Tickets
+
+**When completing any ticket/story, you MUST update the `stories.ts` file:**
+
+#### Required Steps:
+
+1. **Update `project-management/src/data/stories.ts`**:
+   - Change `status` to `"DONE"`
+   - Add/update `completedDate` with current date (`"YYYY-MM-DD"`)
+   - Ensure all other fields are accurate
+
+2. **Update the story markdown file** (e.g., `stories/S41-story-name.md`):
+   - Update **Status** field to `DONE`
+   - Add **Completed** date
+
+3. **Verify in dashboard**:
+   - Check that the story appears as completed in the project management dashboard
+   - Ensure progress metrics are updated correctly
+
+#### Example Update in stories.ts:
+
+```typescript
+{
+  id: "S41",
+  title: "Multi-Asset Intelligence & Alternative Data",
+  description: "Expand AI trading capabilities across multiple asset classes...",
+  status: "DONE",  // ← Update this from previous status
+  priority: "Medium",
+  epic: "E28",
+  storyPoints: 21,
+  sprint: 13,
+  assignee: "Full Stack Team",
+  progress: 0,
+  dependencies: [],
+  createdDate: "2025-06-15",
+  completedDate: "2025-06-27",  // ← Add this with current date
+},
+```
+
+#### Why This Is Important:
+
+- **Dashboard Accuracy**: Project management dashboard relies on stories.ts data
+- **Progress Tracking**: Sprint and epic progress calculations depend on accurate status
+- **Metrics**: Velocity calculations and team performance metrics need current data
+- **Reporting**: Automated reports and progress summaries require up-to-date information
+
+#### Quality Gates:
+
+- ✅ stories.ts file updated with DONE status
+- ✅ Completion date added in YYYY-MM-DD format
+- ✅ Story markdown file updated with completion info
+- ✅ Dashboard shows story as completed
+- ✅ Sprint/Epic progress reflects the completion
