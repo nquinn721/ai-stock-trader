@@ -77,7 +77,9 @@ export class PortfolioStore {
         // Select the first portfolio
         this.setSelectedPortfolio(this.portfolios[0].id);
         await this.fetchPortfolioById(this.portfolios[0].id);
-        console.log("PortfolioStore: Successfully initialized with existing portfolio");
+        console.log(
+          "PortfolioStore: Successfully initialized with existing portfolio"
+        );
       } else {
         // No portfolios exist, the backend will create a default one
         console.log(
