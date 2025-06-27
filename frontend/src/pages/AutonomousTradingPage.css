@@ -1,25 +1,49 @@
-/* Enhanced Autonomous Trading Page - Glassmorphism Design */
+/* Modern Autonomous Trading Page - Professional Glassmorphism Design */
 .autonomous-trading-page {
   background: linear-gradient(
     135deg,
-    #667eea 0%,
-    #764ba2 25%,
-    #f093fb 50%,
-    #f5576c 75%,
-    #4facfe 100%
+    #1e3a8a 0%,
+    #3730a3 25%,
+    #7c3aed 50%,
+    #db2777 75%,
+    #dc2626 100%
   );
-  background-size: 400% 400%;
-  animation: gradientShift 15s ease infinite;
+  background-size: 300% 300%;
+  animation: gradientShift 25s ease infinite;
   min-height: 100vh;
   padding: 0;
   position: relative;
   width: 100%;
   overflow-x: hidden;
-  color: white !important;
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
-  font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", "Roboto", sans-serif !important;
+  font-family:
+    "Inter",
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    "Roboto",
+    sans-serif;
 }
 
+/* Sophisticated animated gradient background */
+@keyframes gradientShift {
+  0% {
+    background-position: 0% 50%;
+  }
+  25% {
+    background-position: 100% 50%;
+  }
+  50% {
+    background-position: 100% 100%;
+  }
+  75% {
+    background-position: 0% 100%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* Professional overlay effects */
 .autonomous-trading-page::before {
   content: "";
   position: fixed;
@@ -27,112 +51,26 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.6);
+  background:
+    radial-gradient(
+      circle at 15% 85%,
+      rgba(59, 130, 246, 0.4) 0%,
+      transparent 60%
+    ),
+    radial-gradient(
+      circle at 85% 15%,
+      rgba(168, 85, 247, 0.4) 0%,
+      transparent 60%
+    ),
+    radial-gradient(
+      circle at 50% 50%,
+      rgba(34, 197, 94, 0.2) 0%,
+      transparent 70%
+    );
   pointer-events: none;
-  z-index: -1;
-}
-
-@keyframes gradientShift {
-  0% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0% 50%;
-  }
-}
-
-/* Ensure content is above background */
-.autonomous-trading-page > * {
-  position: relative;
   z-index: 1;
 }
 
-/* Global Text Enhancement */
-.autonomous-trading-page * {
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
-}
-
-/* Strong Text Shadows for Headers */
-.autonomous-trading-page h1,
-.autonomous-trading-page h2,
-.autonomous-trading-page h3,
-.autonomous-trading-page h4 {
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5) !important;
-  font-weight: 700 !important;
-  color: white !important;
-}
-
-/* Enhanced Readability for Body Text */
-.autonomous-trading-page p,
-.autonomous-trading-page span,
-.autonomous-trading-page div {
-  color: rgba(255, 255, 255, 0.95) !important;
-  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.4) !important;
-  font-weight: 500 !important;
-}
-
-/* Button Text Enhancement */
-.autonomous-trading-page button {
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
-  font-weight: 600 !important;
-}
-
-/* Input and Form Text */
-.autonomous-trading-page input,
-.autonomous-trading-page select,
-.autonomous-trading-page textarea {
-  color: white !important;
-  text-shadow: none !important;
-}
-
-/* CRITICAL FIX: Force all text to be completely visible */
-.autonomous-trading-page,
-.autonomous-trading-page *,
-.autonomous-trading-page *:before,
-.autonomous-trading-page *:after {
-  color: white !important;
-  text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.9) !important;
-}
-
-/* Override any gradient text effects that make text invisible */
-.autonomous-trading-page h1,
-.autonomous-trading-page h2,
-.autonomous-trading-page h3 {
-  color: white !important;
-  -webkit-text-fill-color: white !important;
-  background-clip: unset !important;
-  -webkit-background-clip: unset !important;
-  text-shadow: 3px 3px 8px rgba(0, 0, 0, 1) !important;
-  font-weight: 900 !important;
-}
-
-/* Force visibility on all text elements */
-.autonomous-trading-page p,
-.autonomous-trading-page span,
-.autonomous-trading-page div,
-.autonomous-trading-page button,
-.autonomous-trading-page a,
-.autonomous-trading-page label {
-  color: white !important;
-  -webkit-text-fill-color: white !important;
-  text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.9) !important;
-  font-weight: 600 !important;
-}
-
-/* Override any Material-UI or styled component text hiding */
-.autonomous-trading-page [class*="MuiTypography"],
-.autonomous-trading-page [class*="title"],
-.autonomous-trading-page [class*="text"] {
-  color: white !important;
-  -webkit-text-fill-color: white !important;
-  background-clip: unset !important;
-  -webkit-background-clip: unset !important;
-}
-
-/* Add dark overlay to improve text contrast */
 .autonomous-trading-page::after {
   content: "";
   position: fixed;
@@ -140,7 +78,155 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.4);
+  background: rgba(0, 0, 0, 0.15);
+  backdrop-filter: blur(0.8px);
   pointer-events: none;
-  z-index: 0;
+  z-index: 2;
+  background-image:
+    radial-gradient(
+      circle at 25% 25%,
+      rgba(255, 255, 255, 0.05) 1px,
+      transparent 1px
+    ),
+    radial-gradient(
+      circle at 75% 75%,
+      rgba(255, 255, 255, 0.03) 1px,
+      transparent 1px
+    );
+  background-size:
+    50px 50px,
+    75px 75px;
+  animation: float 20s ease-in-out infinite;
+}
+
+/* Floating particles animation */
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0px) translateX(0px);
+  }
+  25% {
+    transform: translateY(-10px) translateX(5px);
+  }
+  50% {
+    transform: translateY(-5px) translateX(-5px);
+  }
+  75% {
+    transform: translateY(-15px) translateX(10px);
+  }
+}
+
+/* Content Layer */
+.autonomous-trading-page > * {
+  position: relative;
+  z-index: 10;
+}
+
+/* Professional Typography System */
+.autonomous-trading-page {
+  color: #ffffff;
+}
+
+.autonomous-trading-page h1,
+.autonomous-trading-page h2,
+.autonomous-trading-page h3,
+.autonomous-trading-page h4,
+.autonomous-trading-page h5,
+.autonomous-trading-page h6 {
+  color: #ffffff;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.5);
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  line-height: 1.2;
+}
+
+.autonomous-trading-page p,
+.autonomous-trading-page span,
+.autonomous-trading-page div {
+  color: rgba(255, 255, 255, 0.95);
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.3);
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+/* Interactive Elements */
+.autonomous-trading-page button {
+  color: #ffffff;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+  font-weight: 600;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 12px;
+}
+
+.autonomous-trading-page button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+}
+
+/* Form Elements */
+.autonomous-trading-page input,
+.autonomous-trading-page select,
+.autonomous-trading-page textarea {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  backdrop-filter: blur(12px);
+  border-radius: 12px;
+  padding: 12px 16px;
+  transition: all 0.3s ease;
+}
+
+.autonomous-trading-page input:focus,
+.autonomous-trading-page select:focus,
+.autonomous-trading-page textarea:focus {
+  outline: none;
+  border-color: rgba(59, 130, 246, 0.6);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.autonomous-trading-page input::placeholder,
+.autonomous-trading-page textarea::placeholder {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+/* Material-UI Overrides */
+.autonomous-trading-page .MuiTypography-root,
+.autonomous-trading-page .MuiButton-root,
+.autonomous-trading-page .MuiChip-root {
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.autonomous-trading-page .MuiTypography-h1,
+.autonomous-trading-page .MuiTypography-h2,
+.autonomous-trading-page .MuiTypography-h3,
+.autonomous-trading-page .MuiTypography-h4,
+.autonomous-trading-page .MuiTypography-h5,
+.autonomous-trading-page .MuiTypography-h6 {
+  color: #ffffff;
+  font-weight: 700;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .autonomous-trading-page {
+    padding: 0;
+  }
+
+  .autonomous-trading-page h1 {
+    font-size: 24px;
+  }
+
+  .autonomous-trading-page h2 {
+    font-size: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .autonomous-trading-page {
+    font-size: 14px;
+  }
+
+  .autonomous-trading-page h1 {
+    font-size: 20px;
+  }
 }

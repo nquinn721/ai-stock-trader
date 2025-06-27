@@ -16,13 +16,14 @@
 }
 
 .enhanced-analytics-dashboard::before {
-  content: '';
+  content: "";
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background: radial-gradient(
+  background:
+    radial-gradient(
       circle at 20% 80%,
       rgba(120, 119, 198, 0.3) 0%,
       transparent 50%
@@ -42,9 +43,15 @@
 }
 
 @keyframes gradientShift {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
 }
 
 /* Main Header Card */
@@ -107,7 +114,11 @@
 }
 
 .analytics-tab.Mui-selected {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0.1) 100%) !important;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.3) 0%,
+    rgba(255, 255, 255, 0.1) 100%
+  ) !important;
   color: white !important;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1) !important;
 }
@@ -137,13 +148,20 @@
 }
 
 .metric-card::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   height: 4px;
-  background: linear-gradient(90deg, #ff6b6b, #feca57, #48dbfb, #ff9ff3, #54a0ff);
+  background: linear-gradient(
+    90deg,
+    #ff6b6b,
+    #feca57,
+    #48dbfb,
+    #ff9ff3,
+    #54a0ff
+  );
   border-radius: 20px 20px 0 0;
 }
 
@@ -231,7 +249,11 @@
 }
 
 .chart-card-header {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%) !important;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.1) 0%,
+    rgba(255, 255, 255, 0.05) 100%
+  ) !important;
 }
 
 .chart-card .MuiCardHeader-root {
@@ -345,20 +367,20 @@
   .enhanced-analytics-dashboard {
     padding: 16px;
   }
-  
+
   .analytics-title {
     font-size: 2rem !important;
   }
-  
+
   .metrics-grid {
     grid-template-columns: 1fr;
     gap: 16px;
   }
-  
+
   .metric-card .MuiCardContent-root {
     padding: 24px !important;
   }
-  
+
   .chart-card .MuiCardHeader-root,
   .chart-card .MuiCardContent-root {
     padding: 20px !important;
@@ -382,10 +404,18 @@
   animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
-.metric-card:nth-child(1) { animation-delay: 0.1s; }
-.metric-card:nth-child(2) { animation-delay: 0.2s; }
-.metric-card:nth-child(3) { animation-delay: 0.3s; }
-.metric-card:nth-child(4) { animation-delay: 0.4s; }
+.metric-card:nth-child(1) {
+  animation-delay: 0.1s;
+}
+.metric-card:nth-child(2) {
+  animation-delay: 0.2s;
+}
+.metric-card:nth-child(3) {
+  animation-delay: 0.3s;
+}
+.metric-card:nth-child(4) {
+  animation-delay: 0.4s;
+}
 
 /* Chart Customizations */
 .recharts-wrapper {

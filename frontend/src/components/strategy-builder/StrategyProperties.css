@@ -99,7 +99,9 @@
   font-size: 14px;
   background: rgba(30, 41, 59, 0.9);
   color: #f1f5f9;
-  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+  transition:
+    border-color 0.15s ease-in-out,
+    box-shadow 0.15s ease-in-out;
 }
 
 .property-input:focus,

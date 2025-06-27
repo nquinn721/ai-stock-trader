@@ -15,7 +15,7 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useStockStore } from "../stores/StoreContext";
 import { Stock } from "../types";
-import "./StockModal_new.css";
+import "./StockModal_enhanced.css";
 
 interface StockModalProps {
   stock: Stock;

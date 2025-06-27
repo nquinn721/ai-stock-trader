@@ -24,9 +24,9 @@ import {
 import { Portfolio } from "../types";
 import TradingAssistantChat from "./ai/TradingAssistantChat";
 import AutonomousAgentDashboard from "./autonomous-trading/AutonomousAgentDashboard";
-import EnhancedPortfolioAnalyticsDashboard from "./CleanPortfolioAnalyticsDashboard";
 import "./Dashboard.css";
 import EmptyState from "./EmptyState";
+import EnhancedPortfolioAnalyticsDashboard from "./EnhancedPortfolioAnalyticsDashboard";
 import { MarketScannerDashboard } from "./MarketScanner/MarketScannerDashboard";
 import { MultiAssetDashboard } from "./multi-asset/MultiAssetDashboard";
 import NotificationCenter from "./NotificationCenter";

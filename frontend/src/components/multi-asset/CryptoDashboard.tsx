@@ -1,21 +1,21 @@
-import React, { useState, useEffect } from 'react';
+import { TrendingDown, TrendingUp } from "@mui/icons-material";
 import {
-  Paper,
-  Typography,
   Box,
   Card,
   CardContent,
+  Chip,
+  LinearProgress,
+  Paper,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  Chip,
-  LinearProgress,
-} from '@mui/material';
-import { TrendingUp, TrendingDown } from '@mui/icons-material';
-import './CryptoDashboard.css';
+  Typography,
+} from "@mui/material";
+import React, { useEffect, useState } from "react";
+import "./CryptoDashboard.css";
 
 interface CryptoData {
   symbol: string;
@@ -49,13 +49,13 @@ export const CryptoDashboard: React.FC = () => {
 
   const fetchCryptoData = async () => {
     try {
-      const response = await fetch('/api/crypto/market-data');
+      const response = await fetch("/api/crypto/market-data");
       if (response.ok) {
         const data = await response.json();
         setCryptoData(data);
       }
     } catch (error) {
-      console.error('Error fetching crypto data:', error);
+      console.error("Error fetching crypto data:", error);
       // Show empty state instead of mock data
       setCryptoData([]);
     }
@@ -64,13 +64,13 @@ export const CryptoDashboard: React.FC = () => {
   const fetchCryptoMetrics = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/crypto/metrics');
+      const response = await fetch("/api/crypto/metrics");
       if (response.ok) {
         const data = await response.json();
         setMetrics(data);
       }
     } catch (error) {
-      console.error('Error fetching crypto metrics:', error);
+      console.error("Error fetching crypto metrics:", error);
       setMetrics(null);
     } finally {
       setLoading(false);
@@ -85,23 +85,23 @@ export const CryptoDashboard: React.FC = () => {
   };
 
   const getPriceChangeColor = (change: number) => {
-    return change >= 0 ? '#4caf50' : '#f44336';
+    return change >= 0 ? "#4caf50" : "#f44336";
   };
 
   const getFearGreedColor = (index: number) => {
-    if (index >= 75) return '#4caf50'; // Extreme Greed
-    if (index >= 55) return '#8bc34a'; // Greed
-    if (index >= 45) return '#ffc107'; // Neutral
-    if (index >= 25) return '#ff9800'; // Fear
-    return '#f44336'; // Extreme Fear
+    if (index >= 75) return "#4caf50"; // Extreme Greed
+    if (index >= 55) return "#8bc34a"; // Greed
+    if (index >= 45) return "#ffc107"; // Neutral
+    if (index >= 25) return "#ff9800"; // Fear
+    return "#f44336"; // Extreme Fear
   };
 
   const getFearGreedLabel = (index: number) => {
-    if (index >= 75) return 'Extreme Greed';
-    if (index >= 55) return 'Greed';
-    if (index >= 45) return 'Neutral';
-    if (index >= 25) return 'Fear';
-    return 'Extreme Fear';
+    if (index >= 75) return "Extreme Greed";
+    if (index >= 55) return "Greed";
+    if (index >= 45) return "Neutral";
+    if (index >= 25) return "Fear";
+    return "Extreme Fear";
   };
 
   if (loading) {
@@ -117,7 +117,11 @@ export const CryptoDashboard: React.FC = () => {
 
   return (
     <div className="crypto-dashboard">
-      <Typography variant="h5" gutterBottom sx={{ color: '#2c3e50', fontWeight: 'bold' }}>
+      <Typography
+        variant="h5"
+        gutterBottom
+        sx={{ color: "#2c3e50", fontWeight: "bold" }}
+      >
         Cryptocurrency Market
       </Typography>
 
@@ -129,7 +133,9 @@ export const CryptoDashboard: React.FC = () => {
               Total Market Cap
             </Typography>
             <Typography variant="h6" component="div">
-              {metrics?.totalMarketCap ? formatCurrency(metrics.totalMarketCap) : 'No data'}
+              {metrics?.totalMarketCap
+                ? formatCurrency(metrics.totalMarketCap)
+                : "No data"}
             </Typography>
           </CardContent>
         </Card>
@@ -140,7 +146,9 @@ export const CryptoDashboard: React.FC = () => {
               BTC Dominance
             </Typography>
             <Typography variant="h6" component="div">
-              {metrics?.btcDominance ? `${metrics.btcDominance.toFixed(1)}%` : 'No data'}
+              {metrics?.btcDominance
+                ? `${metrics.btcDominance.toFixed(1)}%`
+                : "No data"}
             </Typography>
           </CardContent>
         </Card>
@@ -156,15 +164,17 @@ export const CryptoDashboard: React.FC = () => {
                 component="div"
                 sx={{ color: getFearGreedColor(metrics?.fearGreedIndex || 50) }}
               >
-                {metrics?.fearGreedIndex || 'N/A'}
+                {metrics?.fearGreedIndex || "N/A"}
               </Typography>
               <Chip
                 label={getFearGreedLabel(metrics?.fearGreedIndex || 50)}
                 size="small"
                 sx={{
                   ml: 1,
-                  backgroundColor: getFearGreedColor(metrics?.fearGreedIndex || 50),
-                  color: 'white',
+                  backgroundColor: getFearGreedColor(
+                    metrics?.fearGreedIndex || 50
+                  ),
+                  color: "white",
                 }}
               />
             </Box>
@@ -177,14 +187,14 @@ export const CryptoDashboard: React.FC = () => {
               Active Coins
             </Typography>
             <Typography variant="h6" component="div">
-              {metrics?.activeCoins?.toLocaleString() || 'No data'}
+              {metrics?.activeCoins?.toLocaleString() || "No data"}
             </Typography>
           </CardContent>
         </Card>
       </div>
 
       {/* Crypto Table */}
-      <Paper sx={{ width: '100%', overflow: 'hidden' }}>
+      <Paper sx={{ width: "100%", overflow: "hidden" }}>
         <TableContainer sx={{ maxHeight: 600 }}>
           <Table stickyHeader aria-label="crypto table">
             <TableHead>
@@ -232,15 +242,21 @@ export const CryptoDashboard: React.FC = () => {
                       </Typography>
                     </TableCell>
                     <TableCell align="right">
-                      <Box display="flex" alignItems="center" justifyContent="flex-end">
+                      <Box
+                        display="flex"
+                        alignItems="center"
+                        justifyContent="flex-end"
+                      >
                         {crypto.changePercent24h >= 0 ? (
-                          <TrendingUp sx={{ color: '#4caf50', mr: 0.5 }} />
+                          <TrendingUp sx={{ color: "#4caf50", mr: 0.5 }} />
                         ) : (
-                          <TrendingDown sx={{ color: '#f44336', mr: 0.5 }} />
+                          <TrendingDown sx={{ color: "#f44336", mr: 0.5 }} />
                         )}
                         <Typography
                           variant="body2"
-                          sx={{ color: getPriceChangeColor(crypto.changePercent24h) }}
+                          sx={{
+                            color: getPriceChangeColor(crypto.changePercent24h),
+                          }}
                         >
                           {crypto.changePercent24h?.toFixed(2)}%
                         </Typography>
@@ -266,7 +282,9 @@ export const CryptoDashboard: React.FC = () => {
                       {crypto.fundingRate ? (
                         <Typography
                           variant="body2"
-                          sx={{ color: getPriceChangeColor(crypto.fundingRate) }}
+                          sx={{
+                            color: getPriceChangeColor(crypto.fundingRate),
+                          }}
                         >
                           {(crypto.fundingRate * 100).toFixed(4)}%
                         </Typography>

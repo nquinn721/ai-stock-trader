@@ -1,20 +1,19 @@
-import React, { useState, useEffect } from 'react';
+import { TrendingDown, TrendingUp } from "@mui/icons-material";
 import {
-  Paper,
-  Typography,
   Box,
   Card,
   CardContent,
+  LinearProgress,
+  Paper,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  Chip,
-  LinearProgress,
-} from '@mui/material';
-import { TrendingUp, TrendingDown } from '@mui/icons-material';
+  Typography,
+} from "@mui/material";
+import React, { useEffect, useState } from "react";
 
 interface ForexPair {
   symbol: string;
@@ -47,13 +46,13 @@ export const ForexDashboard: React.FC = () => {
 
   const fetchForexData = async () => {
     try {
-      const response = await fetch('/api/forex/market-data');
+      const response = await fetch("/api/forex/market-data");
       if (response.ok) {
         const data = await response.json();
         setForexData(data);
       }
     } catch (error) {
-      console.error('Error fetching forex data:', error);
+      console.error("Error fetching forex data:", error);
       setForexData([]);
     }
   };
@@ -61,13 +60,13 @@ export const ForexDashboard: React.FC = () => {
   const fetchForexMetrics = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/forex/metrics');
+      const response = await fetch("/api/forex/metrics");
       if (response.ok) {
         const data = await response.json();
         setMetrics(data);
       }
     } catch (error) {
-      console.error('Error fetching forex metrics:', error);
+      console.error("Error fetching forex metrics:", error);
       setMetrics(null);
     } finally {
       setLoading(false);
@@ -86,7 +85,7 @@ export const ForexDashboard: React.FC = () => {
   };
 
   const getPriceChangeColor = (change: number) => {
-    return change >= 0 ? '#4caf50' : '#f44336';
+    return change >= 0 ? "#4caf50" : "#f44336";
   };
 
   if (loading) {
@@ -102,7 +101,11 @@ export const ForexDashboard: React.FC = () => {
 
   return (
     <div>
-      <Typography variant="h5" gutterBottom sx={{ color: '#2c3e50', fontWeight: 'bold' }}>
+      <Typography
+        variant="h5"
+        gutterBottom
+        sx={{ color: "#2c3e50", fontWeight: "bold" }}
+      >
         Forex Market
       </Typography>
 
@@ -114,7 +117,9 @@ export const ForexDashboard: React.FC = () => {
               Daily Volume
             </Typography>
             <Typography variant="h6" component="div">
-              {metrics?.totalVolume ? formatVolume(metrics.totalVolume) : 'No data'}
+              {metrics?.totalVolume
+                ? formatVolume(metrics.totalVolume)
+                : "No data"}
             </Typography>
           </CardContent>
         </Card>
@@ -125,7 +130,7 @@ export const ForexDashboard: React.FC = () => {
               Active Pairs
             </Typography>
             <Typography variant="h6" component="div">
-              {metrics?.activePairs || 'No data'}
+              {metrics?.activePairs || "No data"}
             </Typography>
           </CardContent>
         </Card>
@@ -136,7 +141,7 @@ export const ForexDashboard: React.FC = () => {
               Volatility Index
             </Typography>
             <Typography variant="h6" component="div">
-              {metrics?.volatilityIndex?.toFixed(2) || 'No data'}
+              {metrics?.volatilityIndex?.toFixed(2) || "No data"}
             </Typography>
           </CardContent>
         </Card>
@@ -147,14 +152,14 @@ export const ForexDashboard: React.FC = () => {
               Major Pairs
             </Typography>
             <Typography variant="h6" component="div">
-              {metrics?.majorPairsCount || 'No data'}
+              {metrics?.majorPairsCount || "No data"}
             </Typography>
           </CardContent>
         </Card>
       </div>
 
       {/* Forex Table */}
-      <Paper sx={{ width: '100%', overflow: 'hidden' }}>
+      <Paper sx={{ width: "100%", overflow: "hidden" }}>
         <TableContainer sx={{ maxHeight: 600 }}>
           <Table stickyHeader aria-label="forex table">
             <TableHead>
@@ -200,15 +205,21 @@ export const ForexDashboard: React.FC = () => {
                       </Typography>
                     </TableCell>
                     <TableCell align="right">
-                      <Box display="flex" alignItems="center" justifyContent="flex-end">
+                      <Box
+                        display="flex"
+                        alignItems="center"
+                        justifyContent="flex-end"
+                      >
                         {pair.changePercent24h >= 0 ? (
-                          <TrendingUp sx={{ color: '#4caf50', mr: 0.5 }} />
+                          <TrendingUp sx={{ color: "#4caf50", mr: 0.5 }} />
                         ) : (
-                          <TrendingDown sx={{ color: '#f44336', mr: 0.5 }} />
+                          <TrendingDown sx={{ color: "#f44336", mr: 0.5 }} />
                         )}
                         <Typography
                           variant="body2"
-                          sx={{ color: getPriceChangeColor(pair.changePercent24h) }}
+                          sx={{
+                            color: getPriceChangeColor(pair.changePercent24h),
+                          }}
                         >
                           {pair.changePercent24h?.toFixed(2)}%
                         </Typography>
@@ -221,14 +232,16 @@ export const ForexDashboard: React.FC = () => {
                     </TableCell>
                     <TableCell align="right">
                       <Typography variant="body2">
-                        {pair.spread?.toFixed(4) || 'N/A'}
+                        {pair.spread?.toFixed(4) || "N/A"}
                       </Typography>
                     </TableCell>
                     <TableCell align="right">
                       {pair.interestRateDiff ? (
                         <Typography
                           variant="body2"
-                          sx={{ color: getPriceChangeColor(pair.interestRateDiff) }}
+                          sx={{
+                            color: getPriceChangeColor(pair.interestRateDiff),
+                          }}
                         >
                           {pair.interestRateDiff.toFixed(2)}%
                         </Typography>

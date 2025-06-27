@@ -1,20 +1,20 @@
-import React, { useState, useEffect } from 'react';
 import {
-  Paper,
-  Typography,
   Box,
   Card,
   CardContent,
+  Chip,
+  LinearProgress,
+  Paper,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  LinearProgress,
-  Chip,
-} from '@mui/material';
-import { LineChart } from '@mui/x-charts/LineChart';
+  Typography,
+} from "@mui/material";
+import { LineChart } from "@mui/x-charts/LineChart";
+import React, { useEffect, useState } from "react";
 
 interface CorrelationData {
   asset1: string;
@@ -53,26 +53,26 @@ export const CrossAssetAnalytics: React.FC = () => {
 
   const fetchCorrelationData = async () => {
     try {
-      const response = await fetch('/api/multi-asset/correlations');
+      const response = await fetch("/api/multi-asset/correlations");
       if (response.ok) {
         const data = await response.json();
         setCorrelations(data);
       }
     } catch (error) {
-      console.error('Error fetching correlation data:', error);
+      console.error("Error fetching correlation data:", error);
       setCorrelations([]);
     }
   };
 
   const fetchPerformanceData = async () => {
     try {
-      const response = await fetch('/api/multi-asset/performance');
+      const response = await fetch("/api/multi-asset/performance");
       if (response.ok) {
         const data = await response.json();
         setPerformanceData(data);
       }
     } catch (error) {
-      console.error('Error fetching performance data:', error);
+      console.error("Error fetching performance data:", error);
       setPerformanceData([]);
     }
   };
@@ -80,13 +80,13 @@ export const CrossAssetAnalytics: React.FC = () => {
   const fetchMetrics = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/multi-asset/analytics');
+      const response = await fetch("/api/multi-asset/analytics");
       if (response.ok) {
         const data = await response.json();
         setMetrics(data);
       }
     } catch (error) {
-      console.error('Error fetching cross-asset metrics:', error);
+      console.error("Error fetching cross-asset metrics:", error);
       setMetrics(null);
     } finally {
       setLoading(false);
@@ -95,18 +95,18 @@ export const CrossAssetAnalytics: React.FC = () => {
 
   const getCorrelationColor = (correlation: number) => {
     const abs = Math.abs(correlation);
-    if (abs >= 0.8) return '#f44336'; // Strong correlation
-    if (abs >= 0.6) return '#ff9800'; // Moderate correlation
-    if (abs >= 0.3) return '#ffc107'; // Weak correlation
-    return '#4caf50'; // No/Low correlation (good for diversification)
+    if (abs >= 0.8) return "#f44336"; // Strong correlation
+    if (abs >= 0.6) return "#ff9800"; // Moderate correlation
+    if (abs >= 0.3) return "#ffc107"; // Weak correlation
+    return "#4caf50"; // No/Low correlation (good for diversification)
   };
 
   const getCorrelationLabel = (correlation: number) => {
     const abs = Math.abs(correlation);
-    if (abs >= 0.8) return 'Strong';
-    if (abs >= 0.6) return 'Moderate';
-    if (abs >= 0.3) return 'Weak';
-    return 'Low';
+    if (abs >= 0.8) return "Strong";
+    if (abs >= 0.6) return "Moderate";
+    if (abs >= 0.3) return "Weak";
+    return "Low";
   };
 
   const formatPercentage = (value: number) => {
@@ -126,7 +126,11 @@ export const CrossAssetAnalytics: React.FC = () => {
 
   return (
     <div>
-      <Typography variant="h5" gutterBottom sx={{ color: '#2c3e50', fontWeight: 'bold' }}>
+      <Typography
+        variant="h5"
+        gutterBottom
+        sx={{ color: "#2c3e50", fontWeight: "bold" }}
+      >
         Cross-Asset Analytics
       </Typography>
 
@@ -138,7 +142,9 @@ export const CrossAssetAnalytics: React.FC = () => {
               Avg Correlation Strength
             </Typography>
             <Typography variant="h6" component="div">
-              {metrics?.correlationStrength ? formatPercentage(metrics.correlationStrength) : 'No data'}
+              {metrics?.correlationStrength
+                ? formatPercentage(metrics.correlationStrength)
+                : "No data"}
             </Typography>
           </CardContent>
         </Card>
@@ -149,7 +155,7 @@ export const CrossAssetAnalytics: React.FC = () => {
               Diversification Ratio
             </Typography>
             <Typography variant="h6" component="div">
-              {metrics?.diversificationRatio?.toFixed(2) || 'No data'}
+              {metrics?.diversificationRatio?.toFixed(2) || "No data"}
             </Typography>
           </CardContent>
         </Card>
@@ -160,7 +166,9 @@ export const CrossAssetAnalytics: React.FC = () => {
               Risk-Adjusted Return
             </Typography>
             <Typography variant="h6" component="div">
-              {metrics?.riskAdjustedReturn ? formatPercentage(metrics.riskAdjustedReturn) : 'No data'}
+              {metrics?.riskAdjustedReturn
+                ? formatPercentage(metrics.riskAdjustedReturn)
+                : "No data"}
             </Typography>
           </CardContent>
         </Card>
@@ -171,7 +179,7 @@ export const CrossAssetAnalytics: React.FC = () => {
               Sharpe Ratio
             </Typography>
             <Typography variant="h6" component="div">
-              {metrics?.sharpeRatio?.toFixed(2) || 'No data'}
+              {metrics?.sharpeRatio?.toFixed(2) || "No data"}
             </Typography>
           </CardContent>
         </Card>
@@ -183,36 +191,38 @@ export const CrossAssetAnalytics: React.FC = () => {
           Cross-Asset Performance Comparison
         </Typography>
         {performanceData.length > 0 ? (
-          <Box sx={{ width: '100%', height: 400 }}>
+          <Box sx={{ width: "100%", height: 400 }}>
             <LineChart
               width={800}
               height={400}
               series={[
                 {
-                  data: performanceData.map(d => d.stocks),
-                  label: 'Stocks',
-                  color: '#2196f3'
+                  data: performanceData.map((d) => d.stocks),
+                  label: "Stocks",
+                  color: "#2196f3",
                 },
                 {
-                  data: performanceData.map(d => d.crypto),
-                  label: 'Crypto',
-                  color: '#ff9800'
+                  data: performanceData.map((d) => d.crypto),
+                  label: "Crypto",
+                  color: "#ff9800",
                 },
                 {
-                  data: performanceData.map(d => d.forex),
-                  label: 'Forex',
-                  color: '#4caf50'
+                  data: performanceData.map((d) => d.forex),
+                  label: "Forex",
+                  color: "#4caf50",
                 },
                 {
-                  data: performanceData.map(d => d.commodities),
-                  label: 'Commodities',
-                  color: '#9c27b0'
-                }
+                  data: performanceData.map((d) => d.commodities),
+                  label: "Commodities",
+                  color: "#9c27b0",
+                },
               ]}
-              xAxis={[{
-                scaleType: 'point',
-                data: performanceData.map(d => d.date)
-              }]}
+              xAxis={[
+                {
+                  scaleType: "point",
+                  data: performanceData.map((d) => d.date),
+                },
+              ]}
             />
           </Box>
         ) : (
@@ -225,7 +235,7 @@ export const CrossAssetAnalytics: React.FC = () => {
       </Paper>
 
       {/* Correlation Matrix Table */}
-      <Paper sx={{ width: '100%', overflow: 'hidden' }}>
+      <Paper sx={{ width: "100%", overflow: "hidden" }}>
         <Box sx={{ p: 2 }}>
           <Typography variant="h6" gutterBottom>
             Asset Correlation Matrix
@@ -278,8 +288,10 @@ export const CrossAssetAnalytics: React.FC = () => {
                         label={getCorrelationLabel(corr.correlation)}
                         size="small"
                         sx={{
-                          backgroundColor: getCorrelationColor(corr.correlation),
-                          color: 'white',
+                          backgroundColor: getCorrelationColor(
+                            corr.correlation
+                          ),
+                          color: "white",
                         }}
                       />
                     </TableCell>
@@ -289,9 +301,7 @@ export const CrossAssetAnalytics: React.FC = () => {
                       </Typography>
                     </TableCell>
                     <TableCell align="center">
-                      <Typography variant="body2">
-                        {corr.timeframe}
-                      </Typography>
+                      <Typography variant="body2">{corr.timeframe}</Typography>
                     </TableCell>
                   </TableRow>
                 ))

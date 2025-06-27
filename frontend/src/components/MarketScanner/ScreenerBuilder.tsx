@@ -154,32 +154,34 @@ export const ScreenerBuilder: React.FC<ScreenerBuilderProps> = ({
           mb: 3,
         }}
       >
-        <Typography variant="h6" sx={{ color: '#f1f5f9' }}>Custom Screener Builder</Typography>
+        <Typography variant="h6" sx={{ color: "#f1f5f9" }}>
+          Custom Screener Builder
+        </Typography>
         <Box sx={{ display: "flex", gap: 1 }}>
           <Button
             variant="outlined"
             startIcon={<AddIcon />}
             onClick={addFilter}
             sx={{
-              color: '#3b82f6',
-              borderColor: '#3b82f6',
-              '&:hover': {
-                borderColor: '#2563eb',
-                backgroundColor: 'rgba(59, 130, 246, 0.1)',
+              color: "#3b82f6",
+              borderColor: "#3b82f6",
+              "&:hover": {
+                borderColor: "#2563eb",
+                backgroundColor: "rgba(59, 130, 246, 0.1)",
               },
             }}
           >
             Add Filter
           </Button>
-          <Button 
-            variant="outlined" 
+          <Button
+            variant="outlined"
             onClick={clearFilters}
             sx={{
-              color: '#ef4444',
-              borderColor: '#ef4444',
-              '&:hover': {
-                borderColor: '#dc2626',
-                backgroundColor: 'rgba(239, 68, 68, 0.1)',
+              color: "#ef4444",
+              borderColor: "#ef4444",
+              "&:hover": {
+                borderColor: "#dc2626",
+                backgroundColor: "rgba(239, 68, 68, 0.1)",
               },
             }}
           >
@@ -208,13 +210,13 @@ export const ScreenerBuilder: React.FC<ScreenerBuilderProps> = ({
 
       {/* Filters */}
       {filters.map((filter, index) => (
-        <Card 
-          key={filter.id} 
-          sx={{ 
+        <Card
+          key={filter.id}
+          sx={{
             mb: 2,
-            backgroundColor: 'rgba(30, 41, 59, 0.9)',
-            border: '1px solid rgba(148, 163, 184, 0.2)',
-            borderRadius: '12px'
+            backgroundColor: "rgba(30, 41, 59, 0.9)",
+            border: "1px solid rgba(148, 163, 184, 0.2)",
+            borderRadius: "12px",
           }}
         >
           <CardContent>
@@ -229,18 +231,18 @@ export const ScreenerBuilder: React.FC<ScreenerBuilderProps> = ({
                       })
                     }
                     sx={{
-                      color: '#f1f5f9',
-                      '.MuiOutlinedInput-notchedOutline': {
-                        borderColor: 'rgba(148, 163, 184, 0.3)',
+                      color: "#f1f5f9",
+                      ".MuiOutlinedInput-notchedOutline": {
+                        borderColor: "rgba(148, 163, 184, 0.3)",
                       },
-                      '&:hover .MuiOutlinedInput-notchedOutline': {
-                        borderColor: 'rgba(148, 163, 184, 0.5)',
+                      "&:hover .MuiOutlinedInput-notchedOutline": {
+                        borderColor: "rgba(148, 163, 184, 0.5)",
                       },
-                      '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                        borderColor: '#3b82f6',
+                      "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                        borderColor: "#3b82f6",
                       },
-                      '.MuiSvgIcon-root': {
-                        color: '#94a3b8',
+                      ".MuiSvgIcon-root": {
+                        color: "#94a3b8",
                       },
                     }}
                   >
@@ -249,7 +251,7 @@ export const ScreenerBuilder: React.FC<ScreenerBuilderProps> = ({
                   </Select>
                 </FormControl>
               )}
-              <Typography variant="h6" sx={{ minWidth: 60, color: '#f1f5f9' }}>
+              <Typography variant="h6" sx={{ minWidth: 60, color: "#f1f5f9" }}>
                 Filter {index + 1}
               </Typography>
               <IconButton
@@ -274,7 +276,7 @@ export const ScreenerBuilder: React.FC<ScreenerBuilderProps> = ({
               }}
             >
               <FormControl fullWidth size="small">
-                <InputLabel sx={{ color: '#94a3b8' }}>Type</InputLabel>
+                <InputLabel sx={{ color: "#94a3b8" }}>Type</InputLabel>
                 <Select
                   value={filter.type}
                   label="Type"
@@ -287,18 +289,18 @@ export const ScreenerBuilder: React.FC<ScreenerBuilderProps> = ({
                     })
                   }
                   sx={{
-                    color: '#f1f5f9',
-                    '.MuiOutlinedInput-notchedOutline': {
-                      borderColor: 'rgba(148, 163, 184, 0.3)',
+                    color: "#f1f5f9",
+                    ".MuiOutlinedInput-notchedOutline": {
+                      borderColor: "rgba(148, 163, 184, 0.3)",
                     },
-                    '&:hover .MuiOutlinedInput-notchedOutline': {
-                      borderColor: 'rgba(148, 163, 184, 0.5)',
+                    "&:hover .MuiOutlinedInput-notchedOutline": {
+                      borderColor: "rgba(148, 163, 184, 0.5)",
                     },
-                    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                      borderColor: '#3b82f6',
+                    "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                      borderColor: "#3b82f6",
                     },
-                    '.MuiSvgIcon-root': {
-                      color: '#94a3b8',
+                    ".MuiSvgIcon-root": {
+                      color: "#94a3b8",
                     },
                   }}
                 >
@@ -311,7 +313,7 @@ export const ScreenerBuilder: React.FC<ScreenerBuilderProps> = ({
               </FormControl>
 
               <FormControl fullWidth size="small">
-                <InputLabel sx={{ color: '#94a3b8' }}>Field</InputLabel>
+                <InputLabel sx={{ color: "#94a3b8" }}>Field</InputLabel>
                 <Select
                   value={filter.field}
                   label="Field"
@@ -319,18 +321,18 @@ export const ScreenerBuilder: React.FC<ScreenerBuilderProps> = ({
                     updateFilter(index, { field: e.target.value })
                   }
                   sx={{
-                    color: '#f1f5f9',
-                    '.MuiOutlinedInput-notchedOutline': {
-                      borderColor: 'rgba(148, 163, 184, 0.3)',
+                    color: "#f1f5f9",
+                    ".MuiOutlinedInput-notchedOutline": {
+                      borderColor: "rgba(148, 163, 184, 0.3)",
                     },
-                    '&:hover .MuiOutlinedInput-notchedOutline': {
-                      borderColor: 'rgba(148, 163, 184, 0.5)',
+                    "&:hover .MuiOutlinedInput-notchedOutline": {
+                      borderColor: "rgba(148, 163, 184, 0.5)",
                     },
-                    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                      borderColor: '#3b82f6',
+                    "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                      borderColor: "#3b82f6",
                     },
-                    '.MuiSvgIcon-root': {
-                      color: '#94a3b8',
+                    ".MuiSvgIcon-root": {
+                      color: "#94a3b8",
                     },
                   }}
                 >
@@ -343,7 +345,7 @@ export const ScreenerBuilder: React.FC<ScreenerBuilderProps> = ({
               </FormControl>
 
               <FormControl fullWidth size="small">
-                <InputLabel sx={{ color: '#94a3b8' }}>Operator</InputLabel>
+                <InputLabel sx={{ color: "#94a3b8" }}>Operator</InputLabel>
                 <Select
                   value={filter.operator}
                   label="Operator"
@@ -353,18 +355,18 @@ export const ScreenerBuilder: React.FC<ScreenerBuilderProps> = ({
                     })
                   }
                   sx={{
-                    color: '#f1f5f9',
-                    '.MuiOutlinedInput-notchedOutline': {
-                      borderColor: 'rgba(148, 163, 184, 0.3)',
+                    color: "#f1f5f9",
+                    ".MuiOutlinedInput-notchedOutline": {
+                      borderColor: "rgba(148, 163, 184, 0.3)",
                     },
-                    '&:hover .MuiOutlinedInput-notchedOutline': {
-                      borderColor: 'rgba(148, 163, 184, 0.5)',
+                    "&:hover .MuiOutlinedInput-notchedOutline": {
+                      borderColor: "rgba(148, 163, 184, 0.5)",
                     },
-                    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                      borderColor: '#3b82f6',
+                    "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                      borderColor: "#3b82f6",
                     },
-                    '.MuiSvgIcon-root': {
-                      color: '#94a3b8',
+                    ".MuiSvgIcon-root": {
+                      color: "#94a3b8",
                     },
                   }}
                 >
@@ -388,19 +390,19 @@ export const ScreenerBuilder: React.FC<ScreenerBuilderProps> = ({
                   })
                 }
                 sx={{
-                  '& .MuiInputLabel-root': {
-                    color: '#94a3b8',
+                  "& .MuiInputLabel-root": {
+                    color: "#94a3b8",
                   },
-                  '& .MuiOutlinedInput-root': {
-                    color: '#f1f5f9',
-                    '& fieldset': {
-                      borderColor: 'rgba(148, 163, 184, 0.3)',
+                  "& .MuiOutlinedInput-root": {
+                    color: "#f1f5f9",
+                    "& fieldset": {
+                      borderColor: "rgba(148, 163, 184, 0.3)",
                     },
-                    '&:hover fieldset': {
-                      borderColor: 'rgba(148, 163, 184, 0.5)',
+                    "&:hover fieldset": {
+                      borderColor: "rgba(148, 163, 184, 0.5)",
                     },
-                    '&.Mui-focused fieldset': {
-                      borderColor: '#3b82f6',
+                    "&.Mui-focused fieldset": {
+                      borderColor: "#3b82f6",
                     },
                   },
                 }}
@@ -419,19 +421,19 @@ export const ScreenerBuilder: React.FC<ScreenerBuilderProps> = ({
                     })
                   }
                   sx={{
-                    '& .MuiInputLabel-root': {
-                      color: '#94a3b8',
+                    "& .MuiInputLabel-root": {
+                      color: "#94a3b8",
                     },
-                    '& .MuiOutlinedInput-root': {
-                      color: '#f1f5f9',
-                      '& fieldset': {
-                        borderColor: 'rgba(148, 163, 184, 0.3)',
+                    "& .MuiOutlinedInput-root": {
+                      color: "#f1f5f9",
+                      "& fieldset": {
+                        borderColor: "rgba(148, 163, 184, 0.3)",
                       },
-                      '&:hover fieldset': {
-                        borderColor: 'rgba(148, 163, 184, 0.5)',
+                      "&:hover fieldset": {
+                        borderColor: "rgba(148, 163, 184, 0.5)",
                       },
-                      '&.Mui-focused fieldset': {
-                        borderColor: '#3b82f6',
+                      "&.Mui-focused fieldset": {
+                        borderColor: "#3b82f6",
                       },
                     },
                   }}
@@ -443,23 +445,18 @@ export const ScreenerBuilder: React.FC<ScreenerBuilderProps> = ({
       ))}
 
       {filters.length === 0 && (
-        <Card sx={{ 
-          backgroundColor: 'rgba(30, 41, 59, 0.9)',
-          border: '1px solid rgba(148, 163, 184, 0.2)',
-          borderRadius: '12px'
-        }}>
+        <Card
+          sx={{
+            backgroundColor: "rgba(30, 41, 59, 0.9)",
+            border: "1px solid rgba(148, 163, 184, 0.2)",
+            borderRadius: "12px",
+          }}
+        >
           <CardContent sx={{ textAlign: "center", py: 4 }}>
-            <Typography 
-              variant="h6" 
-              gutterBottom
-              sx={{ color: '#94a3b8' }}
-            >
+            <Typography variant="h6" gutterBottom sx={{ color: "#94a3b8" }}>
               No filters added yet
             </Typography>
-            <Typography 
-              variant="body2" 
-              sx={{ mb: 2, color: '#64748b' }}
-            >
+            <Typography variant="body2" sx={{ mb: 2, color: "#64748b" }}>
               Add filters to build your custom screener criteria
             </Typography>
             <Button
@@ -467,11 +464,11 @@ export const ScreenerBuilder: React.FC<ScreenerBuilderProps> = ({
               startIcon={<AddIcon />}
               onClick={addFilter}
               sx={{
-                backgroundColor: '#3b82f6',
-                color: '#ffffff',
-                '&:hover': {
-                  backgroundColor: '#2563eb'
-                }
+                backgroundColor: "#3b82f6",
+                color: "#ffffff",
+                "&:hover": {
+                  backgroundColor: "#2563eb",
+                },
               }}
             >
               Add Your First Filter
@@ -482,18 +479,16 @@ export const ScreenerBuilder: React.FC<ScreenerBuilderProps> = ({
 
       {/* Sorting and Limits */}
       {filters.length > 0 && (
-        <Card sx={{ 
-          mt: 3,
-          backgroundColor: 'rgba(30, 41, 59, 0.9)',
-          border: '1px solid rgba(148, 163, 184, 0.2)',
-          borderRadius: '12px'
-        }}>
+        <Card
+          sx={{
+            mt: 3,
+            backgroundColor: "rgba(30, 41, 59, 0.9)",
+            border: "1px solid rgba(148, 163, 184, 0.2)",
+            borderRadius: "12px",
+          }}
+        >
           <CardContent>
-            <Typography 
-              variant="h6" 
-              gutterBottom
-              sx={{ color: '#f1f5f9' }}
-            >
+            <Typography variant="h6" gutterBottom sx={{ color: "#f1f5f9" }}>
               Output Settings
             </Typography>
             <Box
@@ -504,7 +499,7 @@ export const ScreenerBuilder: React.FC<ScreenerBuilderProps> = ({
               }}
             >
               <FormControl fullWidth size="small">
-                <InputLabel sx={{ color: '#94a3b8' }}>Sort By</InputLabel>
+                <InputLabel sx={{ color: "#94a3b8" }}>Sort By</InputLabel>
                 <Select
                   value={sortBy}
                   label="Sort By"
@@ -513,18 +508,18 @@ export const ScreenerBuilder: React.FC<ScreenerBuilderProps> = ({
                     updateCriteria(filters);
                   }}
                   sx={{
-                    color: '#f1f5f9',
-                    '.MuiOutlinedInput-notchedOutline': {
-                      borderColor: 'rgba(148, 163, 184, 0.3)',
+                    color: "#f1f5f9",
+                    ".MuiOutlinedInput-notchedOutline": {
+                      borderColor: "rgba(148, 163, 184, 0.3)",
                     },
-                    '&:hover .MuiOutlinedInput-notchedOutline': {
-                      borderColor: 'rgba(148, 163, 184, 0.5)',
+                    "&:hover .MuiOutlinedInput-notchedOutline": {
+                      borderColor: "rgba(148, 163, 184, 0.5)",
                     },
-                    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                      borderColor: '#3b82f6',
+                    "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                      borderColor: "#3b82f6",
                     },
-                    '.MuiSvgIcon-root': {
-                      color: '#94a3b8',
+                    ".MuiSvgIcon-root": {
+                      color: "#94a3b8",
                     },
                   }}
                 >
@@ -537,7 +532,7 @@ export const ScreenerBuilder: React.FC<ScreenerBuilderProps> = ({
               </FormControl>
 
               <FormControl fullWidth size="small">
-                <InputLabel sx={{ color: '#94a3b8' }}>Sort Order</InputLabel>
+                <InputLabel sx={{ color: "#94a3b8" }}>Sort Order</InputLabel>
                 <Select
                   value={sortOrder}
                   label="Sort Order"
@@ -546,18 +541,18 @@ export const ScreenerBuilder: React.FC<ScreenerBuilderProps> = ({
                     updateCriteria(filters);
                   }}
                   sx={{
-                    color: '#f1f5f9',
-                    '.MuiOutlinedInput-notchedOutline': {
-                      borderColor: 'rgba(148, 163, 184, 0.3)',
+                    color: "#f1f5f9",
+                    ".MuiOutlinedInput-notchedOutline": {
+                      borderColor: "rgba(148, 163, 184, 0.3)",
                     },
-                    '&:hover .MuiOutlinedInput-notchedOutline': {
-                      borderColor: 'rgba(148, 163, 184, 0.5)',
+                    "&:hover .MuiOutlinedInput-notchedOutline": {
+                      borderColor: "rgba(148, 163, 184, 0.5)",
                     },
-                    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                      borderColor: '#3b82f6',
+                    "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                      borderColor: "#3b82f6",
                     },
-                    '.MuiSvgIcon-root': {
-                      color: '#94a3b8',
+                    ".MuiSvgIcon-root": {
+                      color: "#94a3b8",
                     },
                   }}
                 >
@@ -578,19 +573,19 @@ export const ScreenerBuilder: React.FC<ScreenerBuilderProps> = ({
                 }}
                 inputProps={{ min: 1, max: 1000 }}
                 sx={{
-                  '& .MuiInputLabel-root': {
-                    color: '#94a3b8',
+                  "& .MuiInputLabel-root": {
+                    color: "#94a3b8",
                   },
-                  '& .MuiOutlinedInput-root': {
-                    color: '#f1f5f9',
-                    '& fieldset': {
-                      borderColor: 'rgba(148, 163, 184, 0.3)',
+                  "& .MuiOutlinedInput-root": {
+                    color: "#f1f5f9",
+                    "& fieldset": {
+                      borderColor: "rgba(148, 163, 184, 0.3)",
                     },
-                    '&:hover fieldset': {
-                      borderColor: 'rgba(148, 163, 184, 0.5)',
+                    "&:hover fieldset": {
+                      borderColor: "rgba(148, 163, 184, 0.5)",
                     },
-                    '&.Mui-focused fieldset': {
-                      borderColor: '#3b82f6',
+                    "&.Mui-focused fieldset": {
+                      borderColor: "#3b82f6",
                     },
                   },
                 }}

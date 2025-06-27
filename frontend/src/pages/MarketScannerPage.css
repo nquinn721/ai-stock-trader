@@ -1,14 +1,16 @@
 .market-scanner-page {
-  min-height: 100vh;.page-header h1 {
-  font-size: 24px; /* Reduced from 32px */
-  font-weight: 700;
-  color: #f0f6fc;
-  margin: 0 0 8px 0;
-  background: linear-gradient(135deg, #22c55e, #3b82f6);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}und: linear-gradient(
+  min-height: 100vh;
+  .page-header h1 {
+    font-size: 24px; /* Reduced from 32px */
+    font-weight: 700;
+    color: #f0f6fc;
+    margin: 0 0 8px 0;
+    background: linear-gradient(135deg, #22c55e, #3b82f6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  und: linear-gradient(
     135deg,
     #0d1117 0%,
     #161b22 25%,

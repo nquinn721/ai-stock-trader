@@ -1,21 +1,20 @@
-import React, { useState, useEffect } from 'react';
+import { Info, TrendingDown, TrendingUp, Warning } from "@mui/icons-material";
 import {
-  Paper,
-  Typography,
   Box,
   Card,
   CardContent,
+  Chip,
+  LinearProgress,
+  Paper,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  LinearProgress,
-  Chip,
-  Link,
-} from '@mui/material';
-import { TrendingUp, TrendingDown, Info, Warning } from '@mui/icons-material';
+  Typography,
+} from "@mui/material";
+import React, { useEffect, useState } from "react";
 
 interface AlternativeDataPoint {
   id: string;
@@ -23,7 +22,7 @@ interface AlternativeDataPoint {
   type: string;
   title: string;
   description: string;
-  impact: 'high' | 'medium' | 'low';
+  impact: "high" | "medium" | "low";
   sentiment: number; // -1 to 1
   timestamp: Date;
   relatedAssets: string[];
@@ -42,14 +41,18 @@ interface EconomicIndicator {
   value: number;
   previousValue: number;
   change: number;
-  impact: 'high' | 'medium' | 'low';
+  impact: "high" | "medium" | "low";
   releaseDate: Date;
 }
 
 export const AlternativeDataFeed: React.FC = () => {
-  const [alternativeData, setAlternativeData] = useState<AlternativeDataPoint[]>([]);
+  const [alternativeData, setAlternativeData] = useState<
+    AlternativeDataPoint[]
+  >([]);
   const [socialSentiment, setSocialSentiment] = useState<SocialSentiment[]>([]);
-  const [economicIndicators, setEconomicIndicators] = useState<EconomicIndicator[]>([]);
+  const [economicIndicators, setEconomicIndicators] = useState<
+    EconomicIndicator[]
+  >([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -60,26 +63,26 @@ export const AlternativeDataFeed: React.FC = () => {
 
   const fetchAlternativeData = async () => {
     try {
-      const response = await fetch('/api/alternative-data/feed');
+      const response = await fetch("/api/alternative-data/feed");
       if (response.ok) {
         const data = await response.json();
         setAlternativeData(data);
       }
     } catch (error) {
-      console.error('Error fetching alternative data:', error);
+      console.error("Error fetching alternative data:", error);
       setAlternativeData([]);
     }
   };
 
   const fetchSocialSentiment = async () => {
     try {
-      const response = await fetch('/api/alternative-data/social-sentiment');
+      const response = await fetch("/api/alternative-data/social-sentiment");
       if (response.ok) {
         const data = await response.json();
         setSocialSentiment(data);
       }
     } catch (error) {
-      console.error('Error fetching social sentiment:', error);
+      console.error("Error fetching social sentiment:", error);
       setSocialSentiment([]);
     }
   };
@@ -87,13 +90,13 @@ export const AlternativeDataFeed: React.FC = () => {
   const fetchEconomicIndicators = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/alternative-data/economic-indicators');
+      const response = await fetch("/api/alternative-data/economic-indicators");
       if (response.ok) {
         const data = await response.json();
         setEconomicIndicators(data);
       }
     } catch (error) {
-      console.error('Error fetching economic indicators:', error);
+      console.error("Error fetching economic indicators:", error);
       setEconomicIndicators([]);
     } finally {
       setLoading(false);
@@ -102,17 +105,21 @@ export const AlternativeDataFeed: React.FC = () => {
 
   const getImpactColor = (impact: string) => {
     switch (impact) {
-      case 'high': return '#f44336';
-      case 'medium': return '#ff9800';
-      case 'low': return '#4caf50';
-      default: return '#757575';
+      case "high":
+        return "#f44336";
+      case "medium":
+        return "#ff9800";
+      case "low":
+        return "#4caf50";
+      default:
+        return "#757575";
     }
   };
 
   const getSentimentColor = (sentiment: number) => {
-    if (sentiment > 0.3) return '#4caf50';
-    if (sentiment < -0.3) return '#f44336';
-    return '#ff9800';
+    if (sentiment > 0.3) return "#4caf50";
+    if (sentiment < -0.3) return "#f44336";
+    return "#ff9800";
   };
 
   const getSentimentIcon = (sentiment: number) => {
@@ -122,11 +129,11 @@ export const AlternativeDataFeed: React.FC = () => {
   };
 
   const formatSentiment = (sentiment: number) => {
-    if (sentiment > 0.6) return 'Very Positive';
-    if (sentiment > 0.3) return 'Positive';
-    if (sentiment > -0.3) return 'Neutral';
-    if (sentiment > -0.6) return 'Negative';
-    return 'Very Negative';
+    if (sentiment > 0.6) return "Very Positive";
+    if (sentiment > 0.3) return "Positive";
+    if (sentiment > -0.3) return "Neutral";
+    if (sentiment > -0.6) return "Negative";
+    return "Very Negative";
   };
 
   const formatPercentage = (value: number) => {
@@ -146,7 +153,11 @@ export const AlternativeDataFeed: React.FC = () => {
 
   return (
     <div>
-      <Typography variant="h5" gutterBottom sx={{ color: '#2c3e50', fontWeight: 'bold' }}>
+      <Typography
+        variant="h5"
+        gutterBottom
+        sx={{ color: "#2c3e50", fontWeight: "bold" }}
+      >
         Alternative Data Intelligence
       </Typography>
 
@@ -167,7 +178,12 @@ export const AlternativeDataFeed: React.FC = () => {
           socialSentiment.map((sentiment, index) => (
             <Card key={index} className="metric-card">
               <CardContent>
-                <Box display="flex" alignItems="center" justifyContent="space-between" mb={1}>
+                <Box
+                  display="flex"
+                  alignItems="center"
+                  justifyContent="space-between"
+                  mb={1}
+                >
                   <Typography variant="h6" component="div">
                     {sentiment.platform}
                   </Typography>
@@ -184,14 +200,16 @@ export const AlternativeDataFeed: React.FC = () => {
                   Volume: {sentiment.volume.toLocaleString()} mentions
                 </Typography>
                 <Box mt={1}>
-                  {sentiment.trendingTopics.slice(0, 3).map((topic, topicIndex) => (
-                    <Chip
-                      key={topicIndex}
-                      label={topic}
-                      size="small"
-                      sx={{ mr: 0.5, mb: 0.5 }}
-                    />
-                  ))}
+                  {sentiment.trendingTopics
+                    .slice(0, 3)
+                    .map((topic, topicIndex) => (
+                      <Chip
+                        key={topicIndex}
+                        label={topic}
+                        size="small"
+                        sx={{ mr: 0.5, mb: 0.5 }}
+                      />
+                    ))}
                 </Box>
               </CardContent>
             </Card>
@@ -203,7 +221,7 @@ export const AlternativeDataFeed: React.FC = () => {
       <Typography variant="h6" gutterBottom sx={{ mt: 3, mb: 2 }}>
         Economic Indicators
       </Typography>
-      <Paper sx={{ width: '100%', overflow: 'hidden', mb: 3 }}>
+      <Paper sx={{ width: "100%", overflow: "hidden", mb: 3 }}>
         <TableContainer sx={{ maxHeight: 300 }}>
           <Table stickyHeader aria-label="economic indicators table">
             <TableHead>
@@ -246,17 +264,25 @@ export const AlternativeDataFeed: React.FC = () => {
                       </Typography>
                     </TableCell>
                     <TableCell align="right">
-                      <Box display="flex" alignItems="center" justifyContent="flex-end">
+                      <Box
+                        display="flex"
+                        alignItems="center"
+                        justifyContent="flex-end"
+                      >
                         {indicator.change >= 0 ? (
-                          <TrendingUp sx={{ color: '#4caf50', mr: 0.5 }} />
+                          <TrendingUp sx={{ color: "#4caf50", mr: 0.5 }} />
                         ) : (
-                          <TrendingDown sx={{ color: '#f44336', mr: 0.5 }} />
+                          <TrendingDown sx={{ color: "#f44336", mr: 0.5 }} />
                         )}
                         <Typography
                           variant="body2"
-                          sx={{ color: indicator.change >= 0 ? '#4caf50' : '#f44336' }}
+                          sx={{
+                            color:
+                              indicator.change >= 0 ? "#4caf50" : "#f44336",
+                          }}
                         >
-                          {indicator.change > 0 ? '+' : ''}{indicator.change.toFixed(2)}
+                          {indicator.change > 0 ? "+" : ""}
+                          {indicator.change.toFixed(2)}
                         </Typography>
                       </Box>
                     </TableCell>
@@ -266,8 +292,8 @@ export const AlternativeDataFeed: React.FC = () => {
                         size="small"
                         sx={{
                           backgroundColor: getImpactColor(indicator.impact),
-                          color: 'white',
-                          textTransform: 'capitalize',
+                          color: "white",
+                          textTransform: "capitalize",
                         }}
                       />
                     </TableCell>
@@ -288,7 +314,7 @@ export const AlternativeDataFeed: React.FC = () => {
       <Typography variant="h6" gutterBottom sx={{ mt: 3, mb: 2 }}>
         Alternative Data Feed
       </Typography>
-      <Paper sx={{ width: '100%', overflow: 'hidden' }}>
+      <Paper sx={{ width: "100%", overflow: "hidden" }}>
         <TableContainer sx={{ maxHeight: 500 }}>
           <Table stickyHeader aria-label="alternative data table">
             <TableHead>
@@ -307,13 +333,13 @@ export const AlternativeDataFeed: React.FC = () => {
                 <TableRow>
                   <TableCell colSpan={7} align="center">
                     <Box py={4}>
-                      <Info sx={{ fontSize: 48, color: '#ccc', mb: 2 }} />
+                      <Info sx={{ fontSize: 48, color: "#ccc", mb: 2 }} />
                       <Typography variant="body1" color="textSecondary">
                         No alternative data available
                       </Typography>
                       <Typography variant="body2" color="textSecondary">
-                        Alternative data sources include satellite imagery, social sentiment, 
-                        and other non-traditional market data
+                        Alternative data sources include satellite imagery,
+                        social sentiment, and other non-traditional market data
                       </Typography>
                     </Box>
                   </TableCell>
@@ -337,10 +363,9 @@ export const AlternativeDataFeed: React.FC = () => {
                           {dataPoint.title}
                         </Typography>
                         <Typography variant="body2" color="textSecondary">
-                          {dataPoint.description.length > 100 
+                          {dataPoint.description.length > 100
                             ? `${dataPoint.description.substring(0, 100)}...`
-                            : dataPoint.description
-                          }
+                            : dataPoint.description}
                         </Typography>
                       </Box>
                     </TableCell>
@@ -350,19 +375,23 @@ export const AlternativeDataFeed: React.FC = () => {
                         size="small"
                         sx={{
                           backgroundColor: getImpactColor(dataPoint.impact),
-                          color: 'white',
-                          textTransform: 'capitalize',
+                          color: "white",
+                          textTransform: "capitalize",
                         }}
                       />
                     </TableCell>
                     <TableCell align="center">
-                      <Box display="flex" alignItems="center" justifyContent="center">
+                      <Box
+                        display="flex"
+                        alignItems="center"
+                        justifyContent="center"
+                      >
                         {getSentimentIcon(dataPoint.sentiment)}
                         <Typography
                           variant="body2"
-                          sx={{ 
+                          sx={{
                             ml: 0.5,
-                            color: getSentimentColor(dataPoint.sentiment) 
+                            color: getSentimentColor(dataPoint.sentiment),
                           }}
                         >
                           {formatSentiment(dataPoint.sentiment)}
@@ -376,21 +405,23 @@ export const AlternativeDataFeed: React.FC = () => {
                     </TableCell>
                     <TableCell>
                       <Box>
-                        {dataPoint.relatedAssets.slice(0, 3).map((asset, assetIndex) => (
-                          <Chip
-                            key={assetIndex}
-                            label={asset}
-                            size="small"
-                            variant="outlined"
-                            sx={{ mr: 0.5, mb: 0.5 }}
-                          />
-                        ))}
+                        {dataPoint.relatedAssets
+                          .slice(0, 3)
+                          .map((asset, assetIndex) => (
+                            <Chip
+                              key={assetIndex}
+                              label={asset}
+                              size="small"
+                              variant="outlined"
+                              sx={{ mr: 0.5, mb: 0.5 }}
+                            />
+                          ))}
                         {dataPoint.relatedAssets.length > 3 && (
                           <Chip
                             label={`+${dataPoint.relatedAssets.length - 3} more`}
                             size="small"
                             variant="outlined"
-                            sx={{ color: '#666' }}
+                            sx={{ color: "#666" }}
                           />
                         )}
                       </Box>

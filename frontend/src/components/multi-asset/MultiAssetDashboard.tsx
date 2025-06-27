@@ -1,12 +1,25 @@
-import React, { useState, useEffect } from 'react';
-import { Paper, Typography, Box, Tab, Tabs, Card, CardContent } from '@mui/material';
-import { TrendingUp, AccountBalance, CurrencyBitcoin, Grain } from '@mui/icons-material';
-import './MultiAssetDashboard.css';
-import { CryptoDashboard } from './CryptoDashboard';
-import { ForexDashboard } from './ForexDashboard';
-import { CommoditiesDashboard } from './CommoditiesDashboard';
-import { CrossAssetAnalytics } from './CrossAssetAnalytics';
-import { AlternativeDataFeed } from './AlternativeDataFeed';
+import {
+  AccountBalance,
+  CurrencyBitcoin,
+  Grain,
+  TrendingUp,
+} from "@mui/icons-material";
+import {
+  Box,
+  Card,
+  CardContent,
+  Paper,
+  Tab,
+  Tabs,
+  Typography,
+} from "@mui/material";
+import React, { useEffect, useState } from "react";
+import { AlternativeDataFeed } from "./AlternativeDataFeed";
+import { CommoditiesDashboard } from "./CommoditiesDashboard";
+import { CrossAssetAnalytics } from "./CrossAssetAnalytics";
+import { CryptoDashboard } from "./CryptoDashboard";
+import { ForexDashboard } from "./ForexDashboard";
+import "./MultiAssetDashboard.css";
 
 interface AssetOverview {
   totalValue: number;
@@ -42,7 +55,9 @@ function TabPanel({ children, value, index, ...other }: TabPanelProps) {
 
 export const MultiAssetDashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState(0);
-  const [assetOverview, setAssetOverview] = useState<AssetOverview | null>(null);
+  const [assetOverview, setAssetOverview] = useState<AssetOverview | null>(
+    null
+  );
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -52,13 +67,13 @@ export const MultiAssetDashboard: React.FC = () => {
   const fetchAssetOverview = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/multi-asset/overview');
+      const response = await fetch("/api/multi-asset/overview");
       if (response.ok) {
         const data = await response.json();
         setAssetOverview(data);
       }
     } catch (error) {
-      console.error('Error fetching asset overview:', error);
+      console.error("Error fetching asset overview:", error);
     } finally {
       setLoading(false);
     }
@@ -69,7 +84,7 @@ export const MultiAssetDashboard: React.FC = () => {
   };
 
   const getChangeColor = (change: number) => {
-    return change >= 0 ? '#4caf50' : '#f44336';
+    return change >= 0 ? "#4caf50" : "#f44336";
   };
 
   if (loading) {
@@ -87,10 +102,14 @@ export const MultiAssetDashboard: React.FC = () => {
   return (
     <div className="multi-asset-dashboard">
       <Box sx={{ mb: 3 }}>
-        <Typography variant="h4" gutterBottom sx={{ color: '#2c3e50', fontWeight: 'bold' }}>
+        <Typography
+          variant="h4"
+          gutterBottom
+          sx={{ color: "#2c3e50", fontWeight: "bold" }}
+        >
           Multi-Asset Intelligence Platform
         </Typography>
-        <Typography variant="subtitle1" sx={{ color: '#7f8c8d' }}>
+        <Typography variant="subtitle1" sx={{ color: "#7f8c8d" }}>
           Unified view across stocks, crypto, forex, and commodities
         </Typography>
       </Box>
@@ -99,13 +118,17 @@ export const MultiAssetDashboard: React.FC = () => {
       <div className="overview-cards-container">
         <Card className="overview-card">
           <CardContent>
-            <Box display="flex" alignItems="center" justifyContent="space-between">
+            <Box
+              display="flex"
+              alignItems="center"
+              justifyContent="space-between"
+            >
               <Box>
                 <Typography color="textSecondary" gutterBottom>
                   Total Portfolio Value
                 </Typography>
                 <Typography variant="h5" component="div">
-                  ${assetOverview?.totalValue?.toLocaleString() || '0'}
+                  ${assetOverview?.totalValue?.toLocaleString() || "0"}
                 </Typography>
               </Box>
               <TrendingUp color="primary" />
@@ -115,7 +138,11 @@ export const MultiAssetDashboard: React.FC = () => {
 
         <Card className="overview-card">
           <CardContent>
-            <Box display="flex" alignItems="center" justifyContent="space-between">
+            <Box
+              display="flex"
+              alignItems="center"
+              justifyContent="space-between"
+            >
               <Box>
                 <Typography color="textSecondary" gutterBottom>
                   Daily Change
@@ -123,15 +150,21 @@ export const MultiAssetDashboard: React.FC = () => {
                 <Typography
                   variant="h5"
                   component="div"
-                  sx={{ color: getChangeColor(assetOverview?.dailyChange || 0) }}
+                  sx={{
+                    color: getChangeColor(assetOverview?.dailyChange || 0),
+                  }}
                 >
-                  ${assetOverview?.dailyChange?.toLocaleString() || '0'}
+                  ${assetOverview?.dailyChange?.toLocaleString() || "0"}
                 </Typography>
                 <Typography
                   variant="body2"
-                  sx={{ color: getChangeColor(assetOverview?.dailyChangePercent || 0) }}
+                  sx={{
+                    color: getChangeColor(
+                      assetOverview?.dailyChangePercent || 0
+                    ),
+                  }}
                 >
-                  ({assetOverview?.dailyChangePercent?.toFixed(2) || '0'}%)
+                  ({assetOverview?.dailyChangePercent?.toFixed(2) || "0"}%)
                 </Typography>
               </Box>
               <AccountBalance color="secondary" />
@@ -141,32 +174,42 @@ export const MultiAssetDashboard: React.FC = () => {
 
         <Card className="overview-card">
           <CardContent>
-            <Box display="flex" alignItems="center" justifyContent="space-between">
+            <Box
+              display="flex"
+              alignItems="center"
+              justifyContent="space-between"
+            >
               <Box>
                 <Typography color="textSecondary" gutterBottom>
                   Crypto Allocation
                 </Typography>
                 <Typography variant="h5" component="div">
-                  {assetOverview?.assetDistribution?.crypto?.toFixed(1) || '0'}%
+                  {assetOverview?.assetDistribution?.crypto?.toFixed(1) || "0"}%
                 </Typography>
               </Box>
-              <CurrencyBitcoin sx={{ color: '#f7931a' }} />
+              <CurrencyBitcoin sx={{ color: "#f7931a" }} />
             </Box>
           </CardContent>
         </Card>
 
         <Card className="overview-card">
           <CardContent>
-            <Box display="flex" alignItems="center" justifyContent="space-between">
+            <Box
+              display="flex"
+              alignItems="center"
+              justifyContent="space-between"
+            >
               <Box>
                 <Typography color="textSecondary" gutterBottom>
                   Commodities
                 </Typography>
                 <Typography variant="h5" component="div">
-                  {assetOverview?.assetDistribution?.commodities?.toFixed(1) || '0'}%
+                  {assetOverview?.assetDistribution?.commodities?.toFixed(1) ||
+                    "0"}
+                  %
                 </Typography>
               </Box>
-              <Grain sx={{ color: '#8bc34a' }} />
+              <Grain sx={{ color: "#8bc34a" }} />
             </Box>
           </CardContent>
         </Card>
@@ -180,9 +223,9 @@ export const MultiAssetDashboard: React.FC = () => {
           aria-label="multi-asset dashboard tabs"
           variant="fullWidth"
           sx={{
-            '& .MuiTab-root': {
-              fontSize: '1rem',
-              fontWeight: 'bold',
+            "& .MuiTab-root": {
+              fontSize: "1rem",
+              fontWeight: "bold",
             },
           }}
         >

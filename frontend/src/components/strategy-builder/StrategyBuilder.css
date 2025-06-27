@@ -60,7 +60,9 @@
   height: 100%;
   background: radial-gradient(circle, #ccc 1px, transparent 1px);
   background-size: 20px 20px;
-  background-position: 0 0, 10px 10px;
+  background-position:
+    0 0,
+    10px 10px;
   position: relative;
 }
 

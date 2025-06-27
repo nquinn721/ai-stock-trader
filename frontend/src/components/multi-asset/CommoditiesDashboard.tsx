@@ -1,19 +1,19 @@
-import React, { useState, useEffect } from 'react';
+import { TrendingDown, TrendingUp } from "@mui/icons-material";
 import {
-  Paper,
-  Typography,
   Box,
   Card,
   CardContent,
+  LinearProgress,
+  Paper,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  LinearProgress,
-} from '@mui/material';
-import { TrendingUp, TrendingDown } from '@mui/icons-material';
+  Typography,
+} from "@mui/material";
+import React, { useEffect, useState } from "react";
 
 interface CommodityData {
   symbol: string;
@@ -46,13 +46,13 @@ export const CommoditiesDashboard: React.FC = () => {
 
   const fetchCommodityData = async () => {
     try {
-      const response = await fetch('/api/commodities/market-data');
+      const response = await fetch("/api/commodities/market-data");
       if (response.ok) {
         const data = await response.json();
         setCommodityData(data);
       }
     } catch (error) {
-      console.error('Error fetching commodity data:', error);
+      console.error("Error fetching commodity data:", error);
       setCommodityData([]);
     }
   };
@@ -60,13 +60,13 @@ export const CommoditiesDashboard: React.FC = () => {
   const fetchCommodityMetrics = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/commodities/metrics');
+      const response = await fetch("/api/commodities/metrics");
       if (response.ok) {
         const data = await response.json();
         setMetrics(data);
       }
     } catch (error) {
-      console.error('Error fetching commodity metrics:', error);
+      console.error("Error fetching commodity metrics:", error);
       setMetrics(null);
     } finally {
       setLoading(false);
@@ -85,15 +85,19 @@ export const CommoditiesDashboard: React.FC = () => {
   };
 
   const getPriceChangeColor = (change: number) => {
-    return change >= 0 ? '#4caf50' : '#f44336';
+    return change >= 0 ? "#4caf50" : "#f44336";
   };
 
   const getCategoryColor = (category: string) => {
     switch (category.toLowerCase()) {
-      case 'energy': return '#ff9800';
-      case 'metals': return '#9c27b0';
-      case 'agriculture': return '#4caf50';
-      default: return '#757575';
+      case "energy":
+        return "#ff9800";
+      case "metals":
+        return "#9c27b0";
+      case "agriculture":
+        return "#4caf50";
+      default:
+        return "#757575";
     }
   };
 
@@ -110,7 +114,11 @@ export const CommoditiesDashboard: React.FC = () => {
 
   return (
     <div>
-      <Typography variant="h5" gutterBottom sx={{ color: '#2c3e50', fontWeight: 'bold' }}>
+      <Typography
+        variant="h5"
+        gutterBottom
+        sx={{ color: "#2c3e50", fontWeight: "bold" }}
+      >
         Commodities Market
       </Typography>
 
@@ -122,7 +130,9 @@ export const CommoditiesDashboard: React.FC = () => {
               Daily Volume
             </Typography>
             <Typography variant="h6" component="div">
-              {metrics?.totalVolume ? formatVolume(metrics.totalVolume) : 'No data'}
+              {metrics?.totalVolume
+                ? formatVolume(metrics.totalVolume)
+                : "No data"}
             </Typography>
           </CardContent>
         </Card>
@@ -133,7 +143,7 @@ export const CommoditiesDashboard: React.FC = () => {
               Energy Index
             </Typography>
             <Typography variant="h6" component="div">
-              {metrics?.energyIndex?.toFixed(2) || 'No data'}
+              {metrics?.energyIndex?.toFixed(2) || "No data"}
             </Typography>
           </CardContent>
         </Card>
@@ -144,7 +154,7 @@ export const CommoditiesDashboard: React.FC = () => {
               Metals Index
             </Typography>
             <Typography variant="h6" component="div">
-              {metrics?.metalsIndex?.toFixed(2) || 'No data'}
+              {metrics?.metalsIndex?.toFixed(2) || "No data"}
             </Typography>
           </CardContent>
         </Card>
@@ -155,14 +165,14 @@ export const CommoditiesDashboard: React.FC = () => {
               Agriculture Index
             </Typography>
             <Typography variant="h6" component="div">
-              {metrics?.agricultureIndex?.toFixed(2) || 'No data'}
+              {metrics?.agricultureIndex?.toFixed(2) || "No data"}
             </Typography>
           </CardContent>
         </Card>
       </div>
 
       {/* Commodities Table */}
-      <Paper sx={{ width: '100%', overflow: 'hidden' }}>
+      <Paper sx={{ width: "100%", overflow: "hidden" }}>
         <TableContainer sx={{ maxHeight: 600 }}>
           <Table stickyHeader aria-label="commodities table">
             <TableHead>
@@ -208,15 +218,23 @@ export const CommoditiesDashboard: React.FC = () => {
                       </Typography>
                     </TableCell>
                     <TableCell align="right">
-                      <Box display="flex" alignItems="center" justifyContent="flex-end">
+                      <Box
+                        display="flex"
+                        alignItems="center"
+                        justifyContent="flex-end"
+                      >
                         {commodity.changePercent24h >= 0 ? (
-                          <TrendingUp sx={{ color: '#4caf50', mr: 0.5 }} />
+                          <TrendingUp sx={{ color: "#4caf50", mr: 0.5 }} />
                         ) : (
-                          <TrendingDown sx={{ color: '#f44336', mr: 0.5 }} />
+                          <TrendingDown sx={{ color: "#f44336", mr: 0.5 }} />
                         )}
                         <Typography
                           variant="body2"
-                          sx={{ color: getPriceChangeColor(commodity.changePercent24h) }}
+                          sx={{
+                            color: getPriceChangeColor(
+                              commodity.changePercent24h
+                            ),
+                          }}
                         >
                           {commodity.changePercent24h?.toFixed(2)}%
                         </Typography>
@@ -247,14 +265,14 @@ export const CommoditiesDashboard: React.FC = () => {
                     <TableCell align="center">
                       <Box
                         sx={{
-                          display: 'inline-block',
+                          display: "inline-block",
                           px: 1,
                           py: 0.5,
                           borderRadius: 1,
                           backgroundColor: getCategoryColor(commodity.category),
-                          color: 'white',
-                          fontSize: '0.75rem',
-                          fontWeight: 'bold',
+                          color: "white",
+                          fontSize: "0.75rem",
+                          fontWeight: "bold",
                         }}
                       >
                         {commodity.category}

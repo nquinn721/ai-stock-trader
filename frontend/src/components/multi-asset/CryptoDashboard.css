@@ -45,7 +45,7 @@
   .crypto-dashboard {
     padding: 16px;
   }
-  
+
   .metric-cards-container {
     grid-template-columns: 1fr;
     gap: 16px;

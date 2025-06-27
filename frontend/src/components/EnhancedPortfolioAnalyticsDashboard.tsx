@@ -137,7 +137,7 @@ const EnhancedPortfolioAnalyticsDashboard: React.FC<
     "1M" | "3M" | "6M" | "1Y" | "3Y"
   >("1Y");
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [error] = useState<string | null>(null);
   const [analyticsData, setAnalyticsData] =
     useState<PortfolioAnalyticsData | null>(null);
 
@@ -176,10 +176,13 @@ const EnhancedPortfolioAnalyticsDashboard: React.FC<
       const assets = ["AAPL", "GOOGL", "MSFT", "TSLA", "NVDA"];
       return assets.map((asset) => ({
         asset,
-        correlations: assets.reduce((acc, other) => {
-          acc[other] = asset === other ? 1 : Math.random() * 0.8 + 0.1;
-          return acc;
-        }, {} as { [key: string]: number }),
+        correlations: assets.reduce(
+          (acc, other) => {
+            acc[other] = asset === other ? 1 : Math.random() * 0.8 + 0.1;
+            return acc;
+          },
+          {} as { [key: string]: number }
+        ),
       }));
     };
 

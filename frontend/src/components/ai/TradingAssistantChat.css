@@ -205,7 +205,9 @@
   border-color: rgba(255, 255, 255, 0.5) !important;
 }
 
-.chat-input .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+.chat-input
+  .MuiOutlinedInput-root.Mui-focused
+  .MuiOutlinedInput-notchedOutline {
   border-color: rgba(102, 126, 234, 0.8) !important;
   border-width: 2px !important;
 }
@@ -295,17 +297,17 @@
   .trading-assistant-chat {
     max-width: 100%;
   }
-  
+
   .chat-main-card {
     height: 65vh !important;
     min-height: 400px !important;
   }
-  
+
   .message-bubble {
     max-width: 90% !important;
     padding: 12px 16px !important;
   }
-  
+
   .chat-history {
     padding: 16px !important;
   }
@@ -317,21 +319,21 @@
     min-height: 350px !important;
     border-radius: 16px !important;
   }
-  
+
   .message-bubble {
     max-width: 95% !important;
     padding: 10px 14px !important;
     border-radius: 16px !important;
   }
-  
+
   .message-bubble-user {
     border-radius: 16px 16px 4px 16px !important;
   }
-  
+
   .message-bubble-ai {
     border-radius: 16px 16px 16px 4px !important;
   }
-  
+
   .chat-history {
     padding: 12px !important;
     gap: 12px !important;
