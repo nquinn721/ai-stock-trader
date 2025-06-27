@@ -74,4 +74,13 @@ export const epics: Epic[] = [
     owner: "Quantum Research Team",
     createdDate: "2025-06-25",
   },
+  {
+    id: "E9",
+    title: "Cross-Asset Trading Infrastructure",
+    description:
+      "Comprehensive multi-asset trading platform supporting stocks, forex, and cryptocurrency with advanced account isolation, automated trading capabilities, DeFi integration, and institutional-grade APIs for unified portfolio management.",
+    status: "TODO",
+    owner: "Cross-Asset Team",
+    createdDate: "2025-06-26",
+  },
 ];
