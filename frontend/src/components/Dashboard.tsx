@@ -1,5 +1,4 @@
 import {
-  AccessTime,
   Analytics,
   ArrowDownward,
   ArrowUpward,
@@ -16,6 +15,7 @@ import {
 } from "@mui/icons-material";
 // import { observer } from "mobx-react-lite";
 import React, { useEffect, useState } from "react";
+import AutonomousTradingPage from "../pages/AutonomousTradingPage";
 import {
   usePortfolioStore,
   useStockStore,
@@ -23,18 +23,19 @@ import {
 } from "../stores/StoreContext";
 import { Portfolio } from "../types";
 import TradingAssistantChat from "./ai/TradingAssistantChat";
-import AutonomousAgentDashboard from "./autonomous-trading/AutonomousAgentDashboard";
 import "./Dashboard.css";
 import EmptyState from "./EmptyState";
 import EnhancedPortfolioAnalyticsDashboard from "./EnhancedPortfolioAnalyticsDashboard";
 import { MarketScannerDashboard } from "./MarketScanner/MarketScannerDashboard";
 import { MultiAssetDashboard } from "./multi-asset/MultiAssetDashboard";
 import NotificationCenter from "./NotificationCenter";
+import PortfolioAICard from "./PortfolioAICard";
 import PortfolioCreator from "./PortfolioCreator";
 import PortfolioDetailsModal from "./PortfolioDetailsModal";
 import PortfolioSelector from "./PortfolioSelector";
 import QuickTrade from "./QuickTrade";
 import StockCard from "./StockCard";
+import PageHeader from "./ui/PageHeader";
 
 // Add icons to library - commented out for now
 // library.add(
@@ -69,6 +70,7 @@ const Dashboard: React.FC = () => {
   const [showAIAssistant, setShowAIAssistant] = useState(false);
   const [showMarketScanner, setShowMarketScanner] = useState(false);
   const [showMultiAsset, setShowMultiAsset] = useState(false);
+  const [showAIPortfolios, setShowAIPortfolios] = useState(false);
 
   // Initialize data on component mount
   useEffect(() => {
@@ -214,6 +216,56 @@ const Dashboard: React.FC = () => {
     }
   };
 
+  // AI Portfolio Integration Handlers
+  const handleAssignAgent = (portfolioId: number) => {
+    console.log("Assign agent to portfolio:", portfolioId);
+    setShowAutonomousAgents(true);
+  };
+
+  const handleViewAIPerformance = (portfolioId: number) => {
+    console.log("View AI performance for portfolio:", portfolioId);
+    setShowPortfolioAnalytics(true);
+  };
+
+  const handleToggleAgent = (portfolioId: number, agentId: string) => {
+    console.log("Toggle agent:", agentId, "for portfolio:", portfolioId);
+    // TODO: Implement agent toggle logic
+  };
+
+  const getAssignedAgents = (portfolioId: number) => {
+    // TODO: Replace with real data from portfolio store
+    // For now, return mock data to demonstrate functionality
+    const mockAgents = [
+      {
+        id: "agent-1",
+        name: "DQN Momentum Trader",
+        type: "dqn" as const,
+        status: "running" as const,
+        allocation: 30,
+        riskProfile: "moderate" as const,
+        lastUpdate: new Date().toISOString(),
+        performance: {
+          totalReturn: 12.5,
+          dailyReturn: 0.8,
+          sharpeRatio: 1.6,
+          maxDrawdown: 8.2,
+          currentDrawdown: 2.1,
+          winRate: 68.5,
+          totalTrades: 45,
+          profitableTrades: 31,
+          averageWin: 2.4,
+          averageLoss: 1.8,
+          profitFactor: 1.45,
+          currentValue: 11250,
+          unrealizedPnL: 450,
+          realizedPnL: 800,
+          lastUpdated: new Date().toISOString(),
+        },
+      },
+    ];
+    return portfolioId === 1 ? mockAgents : []; // Only show agents for first portfolio as demo
+  };
+
   const isConnected = webSocketStore.isConnected;
   const stocksWithSignals = stockStore.stocksWithSignals;
   const loading = stockStore.isLoading;
@@ -237,17 +289,21 @@ const Dashboard: React.FC = () => {
   if (showMarketScanner) {
     return (
       <div className="dashboard">
-        <header className="dashboard-header">
-          <div className="header-left">
-            <h1>Market Scanner</h1>
-            <button
-              className="back-button"
-              onClick={() => setShowMarketScanner(false)}
-            >
-              ← Back to Dashboard
-            </button>
-          </div>
-        </header>
+        <PageHeader
+          title="Market Scanner"
+          currentTime={currentTime}
+          isConnected={isConnected}
+          showLiveIndicator={false}
+          actionButtons={[
+            {
+              icon: <span>←</span>,
+              onClick: () => setShowMarketScanner(false),
+              tooltip: "Back to Dashboard",
+              className: "back-button",
+              label: "Back to Dashboard",
+            },
+          ]}
+        />
         <MarketScannerDashboard onStockSelect={handleStockSelect} />
       </div>
     );
@@ -255,37 +311,32 @@ const Dashboard: React.FC = () => {
 
   if (showAutonomousAgents) {
     return (
-      <div className="dashboard">
-        <header className="dashboard-header">
-          <div className="header-left">
-            <h1>Autonomous Trading Agents</h1>
-            <button
-              className="back-button"
-              onClick={() => setShowAutonomousAgents(false)}
-            >
-              ← Back to Dashboard
-            </button>
-          </div>
-        </header>
-        <AutonomousAgentDashboard />
-      </div>
+      <AutonomousTradingPage
+        onNavigateBack={() => setShowAutonomousAgents(false)}
+        currentTime={currentTime}
+        isConnected={isConnected}
+      />
     );
   }
 
   if (showPortfolioAnalytics) {
     return (
       <div className="dashboard">
-        <header className="dashboard-header">
-          <div className="header-left">
-            <h1>Portfolio Analytics</h1>
-            <button
-              className="back-button"
-              onClick={() => setShowPortfolioAnalytics(false)}
-            >
-              ← Back to Dashboard
-            </button>
-          </div>
-        </header>
+        <PageHeader
+          title="Portfolio Analytics"
+          currentTime={currentTime}
+          isConnected={isConnected}
+          showLiveIndicator={false}
+          actionButtons={[
+            {
+              icon: <span>←</span>,
+              onClick: () => setShowPortfolioAnalytics(false),
+              tooltip: "Back to Dashboard",
+              className: "back-button",
+              label: "Back to Dashboard",
+            },
+          ]}
+        />
         {portfolioStore.currentPortfolio ? (
           <EnhancedPortfolioAnalyticsDashboard
             portfolioId={portfolioStore.currentPortfolio.id}
@@ -305,17 +356,21 @@ const Dashboard: React.FC = () => {
   if (showAIAssistant) {
     return (
       <div className="dashboard">
-        <header className="dashboard-header">
-          <div className="header-left">
-            <h1>AI Trading Assistant</h1>
-            <button
-              className="back-button"
-              onClick={() => setShowAIAssistant(false)}
-            >
-              ← Back to Dashboard
-            </button>
-          </div>
-        </header>
+        <PageHeader
+          title="AI Trading Assistant"
+          currentTime={currentTime}
+          isConnected={isConnected}
+          showLiveIndicator={false}
+          actionButtons={[
+            {
+              icon: <span>←</span>,
+              onClick: () => setShowAIAssistant(false),
+              tooltip: "Back to Dashboard",
+              className: "back-button",
+              label: "Back to Dashboard",
+            },
+          ]}
+        />
         <div style={{ padding: "20px", height: "calc(100vh - 120px)" }}>
           <TradingAssistantChat />
         </div>
@@ -335,17 +390,21 @@ const Dashboard: React.FC = () => {
   if (showMultiAsset) {
     return (
       <div className="dashboard">
-        <header className="dashboard-header">
-          <div className="header-left">
-            <h1>Multi-Asset Intelligence</h1>
-            <button
-              className="back-button"
-              onClick={() => setShowMultiAsset(false)}
-            >
-              ← Back to Dashboard
-            </button>
-          </div>
-        </header>
+        <PageHeader
+          title="Multi-Asset Intelligence"
+          currentTime={currentTime}
+          isConnected={isConnected}
+          showLiveIndicator={false}
+          actionButtons={[
+            {
+              icon: <span>←</span>,
+              onClick: () => setShowMultiAsset(false),
+              tooltip: "Back to Dashboard",
+              className: "back-button",
+              label: "Back to Dashboard",
+            },
+          ]}
+        />
         <MultiAssetDashboard />
       </div>
     );
@@ -353,76 +412,52 @@ const Dashboard: React.FC = () => {
 
   return (
     <div className="dashboard">
-      {" "}
       {/* Header */}
-      <header className="dashboard-header">
-        <div className="header-left">
-          <div className="main-title-section">
-            <h1>Trading Dashboard</h1>
-            <div
-              className={`live-indicator-main ${
-                isConnected ? "connected" : "disconnected"
-              }`}
-            >
-              <span className="live-dot"></span>
-              <span className="live-text">
-                {isConnected ? "LIVE" : "OFFLINE"}
-              </span>
-            </div>
-          </div>
-          <div className="market-time">
-            <AccessTime />
-            <span>{currentTime.toLocaleTimeString()}</span>
-            <span className="date">{currentTime.toLocaleDateString()}</span>
-          </div>
-        </div>
-        <div className="header-info">
-          <button
-            className="autonomous-agents-btn"
-            onClick={() => setShowAutonomousAgents(true)}
-            title="Autonomous Trading Agents"
-          >
-            <AutoMode />
-            Agents
-          </button>
-          <button
-            className="analytics-btn"
-            onClick={() => setShowPortfolioAnalytics(true)}
-            title="View Portfolio Analytics"
-          >
-            <Analytics />
-            Analytics
-          </button>
-          <button
-            className="scanner-btn"
-            onClick={() => setShowMarketScanner(true)}
-            title="Open Market Scanner"
-          >
-            <SignalCellularAlt />
-            Scanner
-          </button>
-          <button
-            className="multi-asset-btn"
-            onClick={() => setShowMultiAsset(true)}
-            title="Multi-Asset Intelligence Platform"
-          >
-            <SwapHorizontalCircle />
-            Multi-Asset
-          </button>
-          <button
-            className="ai-assistant-btn"
-            onClick={() => setShowAIAssistant(true)}
-            title="Open AI Trading Assistant"
-          >
-            <Chat />
-            AI Assistant
-          </button>
-          <div className="stats">
-            <span>{stocksWithSignals.length} stocks</span>
-          </div>
-          <NotificationCenter />
-        </div>
-      </header>
+      <PageHeader
+        title="Auto Trading Dashboard"
+        currentTime={currentTime}
+        isConnected={isConnected}
+        statsValue={`${stocksWithSignals.length} stocks`}
+        actionButtons={[
+          {
+            icon: <AutoMode />,
+            onClick: () => setShowAutonomousAgents(true),
+            tooltip: "AI Autonomous Trading Agents",
+            className: "autonomous-agents-btn",
+            label: "AI Agents",
+          },
+          {
+            icon: <Analytics />,
+            onClick: () => setShowPortfolioAnalytics(true),
+            tooltip: "View Portfolio Analytics",
+            className: "analytics-btn",
+            label: "Analytics",
+          },
+          {
+            icon: <SignalCellularAlt />,
+            onClick: () => setShowMarketScanner(true),
+            tooltip: "Open Market Scanner",
+            className: "scanner-btn",
+            label: "Scanner",
+          },
+          {
+            icon: <SwapHorizontalCircle />,
+            onClick: () => setShowMultiAsset(true),
+            tooltip: "Multi-Asset Intelligence Platform",
+            className: "multi-asset-btn",
+            label: "Multi-Asset",
+          },
+          {
+            icon: <Chat />,
+            onClick: () => setShowAIAssistant(true),
+            tooltip: "Open AI Trading Assistant",
+            className: "ai-assistant-btn",
+            label: "AI Assistant",
+          },
+        ]}
+      >
+        <NotificationCenter />
+      </PageHeader>
       {/* Market Overview Cards */}
       <div className="market-overview">
         <div className="metric-card">
@@ -563,6 +598,98 @@ const Dashboard: React.FC = () => {
           </div>
         </div>
       )}
+      {/* AI-Enhanced Portfolio Trading */}
+      <div className="ai-enhanced-trading-section">
+        <h3>
+          <AutoMode /> AI-Enhanced Portfolio Trading
+        </h3>
+        <div className="portfolio-ai-grid">
+          {portfolioStore.portfolios.map((portfolio) => (
+            <PortfolioAICard
+              key={portfolio.id}
+              portfolio={{
+                ...portfolio,
+                aiStrategy: portfolio.id === 1 ? "hybrid" : "none", // Demo: first portfolio has AI
+                agentAllocation: portfolio.id === 1 ? 30 : 0, // Demo: 30% AI allocation
+                performanceComparison:
+                  portfolio.id === 1
+                    ? {
+                        humanTrading: {
+                          totalReturn: 8.2,
+                          dailyReturn: 0.5,
+                          sharpeRatio: 1.2,
+                          maxDrawdown: 12.1,
+                          currentDrawdown: 3.2,
+                          winRate: 62.0,
+                          totalTrades: 28,
+                          profitableTrades: 17,
+                          averageWin: 2.1,
+                          averageLoss: 1.9,
+                          profitFactor: 1.25,
+                          currentValue: 10820,
+                          unrealizedPnL: 320,
+                          realizedPnL: 500,
+                          lastUpdated: new Date().toISOString(),
+                        },
+                        aiTrading: {
+                          totalReturn: 12.5,
+                          dailyReturn: 0.8,
+                          sharpeRatio: 1.6,
+                          maxDrawdown: 8.2,
+                          currentDrawdown: 2.1,
+                          winRate: 68.5,
+                          totalTrades: 45,
+                          profitableTrades: 31,
+                          averageWin: 2.4,
+                          averageLoss: 1.8,
+                          profitFactor: 1.45,
+                          currentValue: 11250,
+                          unrealizedPnL: 450,
+                          realizedPnL: 800,
+                          lastUpdated: new Date().toISOString(),
+                        },
+                        combined: {
+                          totalReturn: 10.8,
+                          dailyReturn: 0.7,
+                          sharpeRatio: 1.4,
+                          maxDrawdown: 9.8,
+                          currentDrawdown: 2.5,
+                          winRate: 65.8,
+                          totalTrades: 73,
+                          profitableTrades: 48,
+                          averageWin: 2.3,
+                          averageLoss: 1.85,
+                          profitFactor: 1.38,
+                          currentValue: 22070,
+                          unrealizedPnL: 770,
+                          realizedPnL: 1300,
+                          lastUpdated: new Date().toISOString(),
+                        },
+                      }
+                    : undefined,
+                lastAgentUpdate:
+                  portfolio.id === 1 ? new Date().toISOString() : undefined,
+              }}
+              assignedAgents={getAssignedAgents(portfolio.id)}
+              onAssignAgent={handleAssignAgent}
+              onViewPerformance={handleViewAIPerformance}
+              onToggleAgent={handleToggleAgent}
+            />
+          ))}
+        </div>
+
+        {portfolioStore.portfolios.length === 0 && (
+          <div className="no-portfolios-message">
+            <p>Create your first portfolio to start AI-enhanced trading</p>
+            <button
+              className="create-portfolio-btn"
+              onClick={handleCreatePortfolio}
+            >
+              Create Portfolio
+            </button>
+          </div>
+        )}
+      </div>
       {/* Paper Trading Section */}
       <div className="paper-trading-section">
         <h3>

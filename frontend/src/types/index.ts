@@ -353,6 +353,16 @@ export interface Portfolio {
   trades?: Trade[];
   createdAt: string;
   updatedAt: string;
+  // AI Agent Integration
+  assignedAgents?: AutonomousAgent[];
+  aiStrategy?: "reinforcement-learning" | "rule-based" | "hybrid" | "none";
+  performanceComparison?: {
+    humanTrading: PerformanceMetrics;
+    aiTrading: PerformanceMetrics;
+    combined: PerformanceMetrics;
+  };
+  agentAllocation?: number; // Percentage of portfolio managed by AI (0-100)
+  lastAgentUpdate?: string;
 }
 
 export interface Position {
@@ -687,4 +697,47 @@ export interface OrderManagementSocketEvents {
     message: string;
     details?: string;
   };
+}
+
+// AI Agent and Performance Interfaces
+export interface AutonomousAgent {
+  id: string;
+  name: string;
+  type: "dqn" | "ppo" | "rule-based" | "hybrid";
+  status: "training" | "ready" | "running" | "paused" | "stopped";
+  performance: PerformanceMetrics;
+  allocation: number; // Percentage of portfolio this agent manages
+  riskProfile: "conservative" | "moderate" | "aggressive";
+  lastUpdate: string;
+  trainingProgress?: number;
+  confidenceScore?: number;
+}
+
+export interface PerformanceMetrics {
+  totalReturn: number;
+  dailyReturn: number;
+  sharpeRatio: number;
+  maxDrawdown: number;
+  currentDrawdown: number;
+  winRate: number;
+  totalTrades: number;
+  profitableTrades: number;
+  averageWin: number;
+  averageLoss: number;
+  profitFactor: number;
+  currentValue: number;
+  unrealizedPnL: number;
+  realizedPnL: number;
+  lastUpdated: string;
+}
+
+export interface HybridSignal {
+  source: "human" | "ai" | "combined";
+  action: "buy" | "sell" | "hold";
+  confidence: number;
+  reasoning: string[];
+  weight: number; // 0-1, how much this signal influences final decision
+  timestamp: string;
+  symbol: string;
+  price: number;
 }

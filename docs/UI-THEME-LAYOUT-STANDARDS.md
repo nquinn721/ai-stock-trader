@@ -15,12 +15,8 @@ All pages must follow this exact structure:
 ```jsx
 // Standard page structure template
 <div className="page-container">
-  <div className="page-header">
-    {/* Standard header implementation */}
-  </div>
-  <div className="page-content">
-    {/* Page-specific content */}
-  </div>
+  <div className="page-header">{/* Standard header implementation */}</div>
+  <div className="page-content">{/* Page-specific content */}</div>
 </div>
 ```
 
@@ -64,13 +60,13 @@ All pages **MUST** include a header similar to the dashboard header with these e
       </div>
     )}
   </div>
-  
+
   <div className="header-info">
     <div className="connection-status connected">
       <div className="status-dot"></div>
       <span>Live</span>
     </div>
-    
+
     {/* Navigation buttons */}
     <button className="nav-btn">Dashboard</button>
     <button className="nav-btn">Analytics</button>
@@ -208,7 +204,12 @@ Use these standardized color variables throughout all pages:
 
 ```css
 /* Background System */
---trading-bg-gradient-dark: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #0f0f0f 100%);
+--trading-bg-gradient-dark: linear-gradient(
+  135deg,
+  #0a0a0a 0%,
+  #1a1a1a 50%,
+  #0f0f0f 100%
+);
 --trading-bg-primary: #0a0e1a;
 --trading-bg-secondary: #111827;
 --trading-bg-card: rgba(31, 41, 55, 0.8);
@@ -321,7 +322,7 @@ All pages must be responsive with these breakpoints:
     gap: 1rem;
     padding: 1rem;
   }
-  
+
   .content-grid {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -332,11 +333,11 @@ All pages must be responsive with these breakpoints:
   .page-header h1 {
     font-size: 1.5rem;
   }
-  
+
   .content-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .header-info {
     flex-direction: column;
     gap: 0.5rem;
@@ -350,8 +351,13 @@ All pages must be responsive with these breakpoints:
 
 ```css
 @keyframes pulse-glow {
-  0%, 100% { opacity: 0.5; }
-  50% { opacity: 1; }
+  0%,
+  100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 1;
+  }
 }
 
 @keyframes slideInUp {
@@ -418,7 +424,7 @@ For every new page, ensure:
       <span className="date">June 27, 2025</span>
     </div>
   </div>
-  
+
   <div className="header-info">
     <div className="connection-status connected">
       <div className="status-dot"></div>
@@ -448,7 +454,7 @@ For every new page, ensure:
       <span className="date">June 27, 2025</span>
     </div>
   </div>
-  
+
   <div className="header-info">
     <div className="stats">
       <span title="Data Sources">12 Sources</span>
@@ -468,6 +474,7 @@ For every new page, ensure:
 ## Maintenance
 
 This documentation should be updated when:
+
 - New design patterns are established
 - Core styling variables change
 - Responsive breakpoints are modified

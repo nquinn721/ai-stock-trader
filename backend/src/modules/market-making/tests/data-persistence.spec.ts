@@ -2,18 +2,17 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import {
-  DataPersistenceService,
-  MarketDataSnapshot,
-  TradingSession,
-  PerformanceMetrics,
-  HistoricalCandle
-} from '../services/data-persistence.service';
-import {
-  ExchangeTicker,
+  ExchangeCandle,
   ExchangeOrderBook,
-  ExchangeTrade,
-  ExchangeCandle
+  ExchangeTicker,
 } from '../interfaces/exchange-connector.interface';
+import {
+  DataPersistenceService,
+  HistoricalCandle,
+  MarketDataSnapshot,
+  PerformanceMetrics,
+  TradingSession,
+} from '../services/data-persistence.service';
 
 describe('DataPersistenceService', () => {
   let service: DataPersistenceService;
@@ -36,11 +35,11 @@ describe('DataPersistenceService', () => {
               andWhere: jest.fn().mockReturnThis(),
               orderBy: jest.fn().mockReturnThis(),
               limit: jest.fn().mockReturnThis(),
-              getMany: jest.fn()
+              getMany: jest.fn(),
             })),
             delete: jest.fn(),
-            count: jest.fn()
-          }
+            count: jest.fn(),
+          },
         },
         {
           provide: getRepositoryToken(TradingSession),
@@ -52,10 +51,10 @@ describe('DataPersistenceService', () => {
               where: jest.fn().mockReturnThis(),
               andWhere: jest.fn().mockReturnThis(),
               orderBy: jest.fn().mockReturnThis(),
-              getMany: jest.fn()
+              getMany: jest.fn(),
             })),
-            count: jest.fn()
-          }
+            count: jest.fn(),
+          },
         },
         {
           provide: getRepositoryToken(PerformanceMetrics),
@@ -68,10 +67,10 @@ describe('DataPersistenceService', () => {
               where: jest.fn().mockReturnThis(),
               andWhere: jest.fn().mockReturnThis(),
               orderBy: jest.fn().mockReturnThis(),
-              getMany: jest.fn()
+              getMany: jest.fn(),
             })),
-            count: jest.fn()
-          }
+            count: jest.fn(),
+          },
         },
         {
           provide: getRepositoryToken(HistoricalCandle),
@@ -83,20 +82,28 @@ describe('DataPersistenceService', () => {
               andWhere: jest.fn().mockReturnThis(),
               orderBy: jest.fn().mockReturnThis(),
               limit: jest.fn().mockReturnThis(),
-              getMany: jest.fn()
+              getMany: jest.fn(),
             })),
             delete: jest.fn(),
-            count: jest.fn()
-          }
-        }
+            count: jest.fn(),
+          },
+        },
       ],
     }).compile();
 
     service = module.get<DataPersistenceService>(DataPersistenceService);
-    marketDataRepository = module.get<Repository<MarketDataSnapshot>>(getRepositoryToken(MarketDataSnapshot));
-    tradingSessionRepository = module.get<Repository<TradingSession>>(getRepositoryToken(TradingSession));
-    performanceRepository = module.get<Repository<PerformanceMetrics>>(getRepositoryToken(PerformanceMetrics));
-    candleRepository = module.get<Repository<HistoricalCandle>>(getRepositoryToken(HistoricalCandle));
+    marketDataRepository = module.get<Repository<MarketDataSnapshot>>(
+      getRepositoryToken(MarketDataSnapshot),
+    );
+    tradingSessionRepository = module.get<Repository<TradingSession>>(
+      getRepositoryToken(TradingSession),
+    );
+    performanceRepository = module.get<Repository<PerformanceMetrics>>(
+      getRepositoryToken(PerformanceMetrics),
+    );
+    candleRepository = module.get<Repository<HistoricalCandle>>(
+      getRepositoryToken(HistoricalCandle),
+    );
   });
 
   describe('Market Data Storage', () => {
@@ -111,7 +118,7 @@ describe('DataPersistenceService', () => {
         close: 45500,
         volume: 1000,
         change: 500,
-        changePercent: 1.11
+        changePercent: 1.11,
       };
 
       const mockOrderBook: ExchangeOrderBook = {
@@ -119,7 +126,7 @@ describe('DataPersistenceService', () => {
         exchange: 'binance',
         timestamp: new Date(),
         bids: [[45000, 1.0]],
-        asks: [[45001, 1.0]]
+        asks: [[45001, 1.0]],
       };
 
       const mockSnapshot = {
@@ -127,7 +134,7 @@ describe('DataPersistenceService', () => {
         symbol: 'BTCUSDT',
         ticker: mockTicker,
         orderBook: mockOrderBook,
-        timestamp: expect.any(Date)
+        timestamp: expect.any(Date),
       };
 
       (marketDataRepository.create as jest.Mock).mockReturnValue(mockSnapshot);
@@ -135,7 +142,7 @@ describe('DataPersistenceService', () => {
 
       await service.storeMarketDataSnapshot('binance', 'BTCUSDT', {
         ticker: mockTicker,
-        orderBook: mockOrderBook
+        orderBook: mockOrderBook,
       });
 
       expect(marketDataRepository.create).toHaveBeenCalledWith({
@@ -144,17 +151,21 @@ describe('DataPersistenceService', () => {
         ticker: mockTicker,
         orderBook: mockOrderBook,
         trades: undefined,
-        timestamp: expect.any(Date)
+        timestamp: expect.any(Date),
       });
       expect(marketDataRepository.save).toHaveBeenCalledWith(mockSnapshot);
     });
 
     it('should handle storage errors gracefully', async () => {
       (marketDataRepository.create as jest.Mock).mockReturnValue({});
-      (marketDataRepository.save as jest.Mock).mockRejectedValue(new Error('Database error'));
+      (marketDataRepository.save as jest.Mock).mockRejectedValue(
+        new Error('Database error'),
+      );
 
       // Should not throw error
-      await expect(service.storeMarketDataSnapshot('binance', 'BTCUSDT', {})).resolves.toBeUndefined();
+      await expect(
+        service.storeMarketDataSnapshot('binance', 'BTCUSDT', {}),
+      ).resolves.toBeUndefined();
     });
   });
 
@@ -172,11 +183,11 @@ describe('DataPersistenceService', () => {
           close: 45050,
           volume: 100,
           quoteVolume: 4505000,
-          trades: 50
-        }
+          trades: 50,
+        },
       ];
 
-      const mockCandleEntities = mockCandles.map(candle => ({
+      const mockCandleEntities = mockCandles.map((candle) => ({
         exchange: candle.exchange,
         symbol: candle.symbol,
         interval: candle.interval,
@@ -187,11 +198,13 @@ describe('DataPersistenceService', () => {
         close: candle.close,
         volume: candle.volume,
         quoteVolume: candle.quoteVolume,
-        trades: candle.trades
+        trades: candle.trades,
       }));
 
       (candleRepository.create as jest.Mock).mockImplementation((data) => data);
-      (candleRepository.save as jest.Mock).mockResolvedValue(mockCandleEntities);
+      (candleRepository.save as jest.Mock).mockResolvedValue(
+        mockCandleEntities,
+      );
 
       await service.storeCandles(mockCandles);
 
@@ -214,8 +227,8 @@ describe('DataPersistenceService', () => {
           volume: 100,
           quoteVolume: 4505000,
           trades: 50,
-          createdAt: new Date()
-        }
+          createdAt: new Date(),
+        },
       ];
 
       const mockQueryBuilder = {
@@ -223,10 +236,12 @@ describe('DataPersistenceService', () => {
         andWhere: jest.fn().mockReturnThis(),
         orderBy: jest.fn().mockReturnThis(),
         limit: jest.fn().mockReturnThis(),
-        getMany: jest.fn().mockResolvedValue(mockCandles)
+        getMany: jest.fn().mockResolvedValue(mockCandles),
       };
 
-      (candleRepository.createQueryBuilder as jest.Mock).mockReturnValue(mockQueryBuilder);
+      (candleRepository.createQueryBuilder as jest.Mock).mockReturnValue(
+        mockQueryBuilder,
+      );
 
       const result = await service.getCandles(
         'binance',
@@ -234,13 +249,22 @@ describe('DataPersistenceService', () => {
         '1m',
         new Date('2023-01-01'),
         new Date('2023-01-02'),
-        100
+        100,
       );
 
       expect(result).toEqual(mockCandles);
-      expect(mockQueryBuilder.where).toHaveBeenCalledWith('candle.exchange = :exchange', { exchange: 'binance' });
-      expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith('candle.symbol = :symbol', { symbol: 'BTCUSDT' });
-      expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith('candle.interval = :interval', { interval: '1m' });
+      expect(mockQueryBuilder.where).toHaveBeenCalledWith(
+        'candle.exchange = :exchange',
+        { exchange: 'binance' },
+      );
+      expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith(
+        'candle.symbol = :symbol',
+        { symbol: 'BTCUSDT' },
+      );
+      expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith(
+        'candle.interval = :interval',
+        { interval: '1m' },
+      );
       expect(mockQueryBuilder.limit).toHaveBeenCalledWith(100);
     });
   });
@@ -257,13 +281,22 @@ describe('DataPersistenceService', () => {
         realizedPnl: 0,
         unrealizedPnl: 0,
         totalTrades: 0,
-        profitableTrades: 0
+        profitableTrades: 0,
       };
 
-      (tradingSessionRepository.create as jest.Mock).mockReturnValue(mockSession);
-      (tradingSessionRepository.save as jest.Mock).mockResolvedValue({ ...mockSession, id: 'session-123' });
+      (tradingSessionRepository.create as jest.Mock).mockReturnValue(
+        mockSession,
+      );
+      (tradingSessionRepository.save as jest.Mock).mockResolvedValue({
+        ...mockSession,
+        id: 'session-123',
+      });
 
-      const sessionId = await service.startTradingSession('binance', 'BTCUSDT', 'strategy-1');
+      const sessionId = await service.startTradingSession(
+        'binance',
+        'BTCUSDT',
+        'strategy-1',
+      );
 
       expect(sessionId).toBe('session-123');
       expect(tradingSessionRepository.create).toHaveBeenCalledWith({
@@ -275,7 +308,7 @@ describe('DataPersistenceService', () => {
         realizedPnl: 0,
         unrealizedPnl: 0,
         totalTrades: 0,
-        profitableTrades: 0
+        profitableTrades: 0,
       });
     });
 
@@ -283,24 +316,34 @@ describe('DataPersistenceService', () => {
       const updates = {
         totalVolume: 1000,
         realizedPnl: 150.5,
-        totalTrades: 5
+        totalTrades: 5,
       };
 
-      (tradingSessionRepository.update as jest.Mock).mockResolvedValue({ affected: 1 });
+      (tradingSessionRepository.update as jest.Mock).mockResolvedValue({
+        affected: 1,
+      });
 
       await service.updateTradingSession('session-123', updates);
 
-      expect(tradingSessionRepository.update).toHaveBeenCalledWith('session-123', updates);
+      expect(tradingSessionRepository.update).toHaveBeenCalledWith(
+        'session-123',
+        updates,
+      );
     });
 
     it('should end a trading session', async () => {
-      (tradingSessionRepository.update as jest.Mock).mockResolvedValue({ affected: 1 });
+      (tradingSessionRepository.update as jest.Mock).mockResolvedValue({
+        affected: 1,
+      });
 
       await service.endTradingSession('session-123');
 
-      expect(tradingSessionRepository.update).toHaveBeenCalledWith('session-123', {
-        endTime: expect.any(Date)
-      });
+      expect(tradingSessionRepository.update).toHaveBeenCalledWith(
+        'session-123',
+        {
+          endTime: expect.any(Date),
+        },
+      );
     });
 
     it('should get trading sessions with filters', async () => {
@@ -318,24 +361,32 @@ describe('DataPersistenceService', () => {
           totalTrades: 3,
           profitableTrades: 2,
           metrics: {},
-          createdAt: new Date()
-        }
+          createdAt: new Date(),
+        },
       ];
 
       const mockQueryBuilder = {
         where: jest.fn().mockReturnThis(),
         andWhere: jest.fn().mockReturnThis(),
         orderBy: jest.fn().mockReturnThis(),
-        getMany: jest.fn().mockResolvedValue(mockSessions)
+        getMany: jest.fn().mockResolvedValue(mockSessions),
       };
 
-      (tradingSessionRepository.createQueryBuilder as jest.Mock).mockReturnValue(mockQueryBuilder);
+      (
+        tradingSessionRepository.createQueryBuilder as jest.Mock
+      ).mockReturnValue(mockQueryBuilder);
 
       const result = await service.getTradingSessions('strategy-1', 'binance');
 
       expect(result).toEqual(mockSessions);
-      expect(mockQueryBuilder.where).toHaveBeenCalledWith('session.strategyId = :strategyId', { strategyId: 'strategy-1' });
-      expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith('session.exchange = :exchange', { exchange: 'binance' });
+      expect(mockQueryBuilder.where).toHaveBeenCalledWith(
+        'session.strategyId = :strategyId',
+        { strategyId: 'strategy-1' },
+      );
+      expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith(
+        'session.exchange = :exchange',
+        { exchange: 'binance' },
+      );
     });
   });
 
@@ -343,12 +394,12 @@ describe('DataPersistenceService', () => {
     it('should store new performance metrics', async () => {
       const metrics = {
         dailyPnl: 150.75,
-        cumulativePnl: 2500.50,
+        cumulativePnl: 2500.5,
         sharpeRatio: 1.8,
         maxDrawdown: 0.12,
         winRate: 0.65,
         volume: 10000,
-        tradeCount: 25
+        tradeCount: 25,
       };
 
       (performanceRepository.findOne as jest.Mock).mockResolvedValue(null);
@@ -357,11 +408,16 @@ describe('DataPersistenceService', () => {
         exchange: 'binance',
         symbol: 'BTCUSDT',
         date: expect.any(Date),
-        ...metrics
+        ...metrics,
       });
       (performanceRepository.save as jest.Mock).mockResolvedValue({});
 
-      await service.storePerformanceMetrics('strategy-1', 'binance', 'BTCUSDT', metrics);
+      await service.storePerformanceMetrics(
+        'strategy-1',
+        'binance',
+        'BTCUSDT',
+        metrics,
+      );
 
       expect(performanceRepository.findOne).toHaveBeenCalled();
       expect(performanceRepository.create).toHaveBeenCalledWith({
@@ -369,7 +425,7 @@ describe('DataPersistenceService', () => {
         exchange: 'binance',
         symbol: 'BTCUSDT',
         date: expect.any(Date),
-        ...metrics
+        ...metrics,
       });
     });
 
@@ -379,7 +435,7 @@ describe('DataPersistenceService', () => {
         strategyId: 'strategy-1',
         exchange: 'binance',
         symbol: 'BTCUSDT',
-        date: new Date()
+        date: new Date(),
       };
 
       const updates = {
@@ -387,17 +443,29 @@ describe('DataPersistenceService', () => {
         cumulativePnl: 2700.75,
         sharpeRatio: 1.9,
         maxDrawdown: 0.15,
-        winRate: 0.70,
+        winRate: 0.7,
         volume: 12000,
-        tradeCount: 30
+        tradeCount: 30,
       };
 
-      (performanceRepository.findOne as jest.Mock).mockResolvedValue(existingMetrics);
-      (performanceRepository.update as jest.Mock).mockResolvedValue({ affected: 1 });
+      (performanceRepository.findOne as jest.Mock).mockResolvedValue(
+        existingMetrics,
+      );
+      (performanceRepository.update as jest.Mock).mockResolvedValue({
+        affected: 1,
+      });
 
-      await service.storePerformanceMetrics('strategy-1', 'binance', 'BTCUSDT', updates);
+      await service.storePerformanceMetrics(
+        'strategy-1',
+        'binance',
+        'BTCUSDT',
+        updates,
+      );
 
-      expect(performanceRepository.update).toHaveBeenCalledWith('metrics-1', updates);
+      expect(performanceRepository.update).toHaveBeenCalledWith(
+        'metrics-1',
+        updates,
+      );
     });
 
     it('should get performance metrics with date range', async () => {
@@ -409,54 +477,65 @@ describe('DataPersistenceService', () => {
           symbol: 'BTCUSDT',
           date: new Date(),
           dailyPnl: 150.75,
-          cumulativePnl: 2500.50,
+          cumulativePnl: 2500.5,
           sharpeRatio: 1.8,
           maxDrawdown: 0.12,
           winRate: 0.65,
           volume: 10000,
           tradeCount: 25,
           detailedMetrics: {},
-          createdAt: new Date()
-        }
+          createdAt: new Date(),
+        },
       ];
 
       const mockQueryBuilder = {
         where: jest.fn().mockReturnThis(),
         andWhere: jest.fn().mockReturnThis(),
         orderBy: jest.fn().mockReturnThis(),
-        getMany: jest.fn().mockResolvedValue(mockMetrics)
+        getMany: jest.fn().mockResolvedValue(mockMetrics),
       };
 
-      (performanceRepository.createQueryBuilder as jest.Mock).mockReturnValue(mockQueryBuilder);
+      (performanceRepository.createQueryBuilder as jest.Mock).mockReturnValue(
+        mockQueryBuilder,
+      );
 
       const result = await service.getPerformanceMetrics(
         'strategy-1',
         new Date('2023-01-01'),
-        new Date('2023-01-31')
+        new Date('2023-01-31'),
       );
 
       expect(result).toEqual(mockMetrics);
-      expect(mockQueryBuilder.where).toHaveBeenCalledWith('metrics.strategyId = :strategyId', { strategyId: 'strategy-1' });
+      expect(mockQueryBuilder.where).toHaveBeenCalledWith(
+        'metrics.strategyId = :strategyId',
+        { strategyId: 'strategy-1' },
+      );
     });
   });
 
   describe('Data Cleanup', () => {
     it('should cleanup old data', async () => {
-      (marketDataRepository.delete as jest.Mock).mockResolvedValue({ affected: 100 });
-      (candleRepository.delete as jest.Mock).mockResolvedValue({ affected: 50 });
+      (marketDataRepository.delete as jest.Mock).mockResolvedValue({
+        affected: 100,
+      });
+      (candleRepository.delete as jest.Mock).mockResolvedValue({
+        affected: 50,
+      });
 
       await service.cleanupOldData(30);
 
       expect(marketDataRepository.delete).toHaveBeenCalledWith({
-        timestamp: expect.any(Object) // LessThan date
+        timestamp: expect.any(Object), // LessThan date
       });
       expect(candleRepository.delete).toHaveBeenCalledWith({
-        timestamp: expect.any(Object) // LessThan date
+        timestamp: expect.any(Object), // LessThan date
       });
     });
 
     it('should handle cleanup errors gracefully', async () => {
-      (marketDataRepository.delete as jest.Mock).mockRejectedValue(new Error('Delete error'));
+      (marketDataRepository.delete as jest.Mock).mockRejectedValue(
+        new Error('Delete error'),
+      );
 
       // Should not throw error
       await expect(service.cleanupOldData(30)).resolves.toBeUndefined();
@@ -476,12 +555,14 @@ describe('DataPersistenceService', () => {
         marketDataSnapshots: 1000,
         tradingSessions: 50,
         performanceMetrics: 200,
-        historicalCandles: 5000
+        historicalCandles: 5000,
       });
     });
 
     it('should handle statistics errors gracefully', async () => {
-      (marketDataRepository.count as jest.Mock).mockRejectedValue(new Error('Count error'));
+      (marketDataRepository.count as jest.Mock).mockRejectedValue(
+        new Error('Count error'),
+      );
 
       const stats = await service.getDatabaseStats();
 
@@ -489,7 +570,7 @@ describe('DataPersistenceService', () => {
         marketDataSnapshots: 0,
         tradingSessions: 0,
         performanceMetrics: 0,
-        historicalCandles: 0
+        historicalCandles: 0,
       });
     });
   });
@@ -504,8 +585,8 @@ describe('DataPersistenceService', () => {
           ticker: { symbol: 'BTCUSDT', exchange: 'binance' },
           orderBook: { symbol: 'BTCUSDT', exchange: 'binance' },
           trades: [],
-          timestamp: new Date()
-        }
+          timestamp: new Date(),
+        },
       ];
 
       const mockQueryBuilder = {
@@ -513,22 +594,30 @@ describe('DataPersistenceService', () => {
         andWhere: jest.fn().mockReturnThis(),
         orderBy: jest.fn().mockReturnThis(),
         limit: jest.fn().mockReturnThis(),
-        getMany: jest.fn().mockResolvedValue(mockSnapshots)
+        getMany: jest.fn().mockResolvedValue(mockSnapshots),
       };
 
-      (marketDataRepository.createQueryBuilder as jest.Mock).mockReturnValue(mockQueryBuilder);
+      (marketDataRepository.createQueryBuilder as jest.Mock).mockReturnValue(
+        mockQueryBuilder,
+      );
 
       const result = await service.getMarketDataSnapshots(
         'binance',
         'BTCUSDT',
         new Date('2023-01-01'),
         new Date('2023-01-02'),
-        100
+        100,
       );
 
       expect(result).toEqual(mockSnapshots);
-      expect(mockQueryBuilder.where).toHaveBeenCalledWith('snapshot.exchange = :exchange', { exchange: 'binance' });
-      expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith('snapshot.symbol = :symbol', { symbol: 'BTCUSDT' });
+      expect(mockQueryBuilder.where).toHaveBeenCalledWith(
+        'snapshot.exchange = :exchange',
+        { exchange: 'binance' },
+      );
+      expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith(
+        'snapshot.symbol = :symbol',
+        { symbol: 'BTCUSDT' },
+      );
       expect(mockQueryBuilder.limit).toHaveBeenCalledWith(100);
     });
 
@@ -538,10 +627,12 @@ describe('DataPersistenceService', () => {
         andWhere: jest.fn().mockReturnThis(),
         orderBy: jest.fn().mockReturnThis(),
         limit: jest.fn().mockReturnThis(),
-        getMany: jest.fn().mockRejectedValue(new Error('Query error'))
+        getMany: jest.fn().mockRejectedValue(new Error('Query error')),
       };
 
-      (marketDataRepository.createQueryBuilder as jest.Mock).mockReturnValue(mockQueryBuilder);
+      (marketDataRepository.createQueryBuilder as jest.Mock).mockReturnValue(
+        mockQueryBuilder,
+      );
 
       const result = await service.getMarketDataSnapshots('binance', 'BTCUSDT');
 

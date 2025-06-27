@@ -5,14 +5,10 @@
    Autonomous Trading Page - Standardized Layout
    ========================================================================== */
 
-/* Page Container - Inherits from UI standards */
-.page-container {
-  /* Uses styles from UI-THEME-LAYOUT-STANDARDS.md */
-}
-
-/* Page Header - Inherits from UI standards */
-.page-header {
-  /* Uses styles from UI-THEME-LAYOUT-STANDARDS.md */
+/* Page Container */
+.page-container.autonomous-trading-page {
+  /* Inherits from shared-styles.css page-container */
+  padding: 0;
 }
 
 /* Page Content */
@@ -21,16 +17,11 @@
 }
 
 /* ==========================================================================
-   Tabs Styling
+   Tabs Styling - Enhanced with Component Library
    ========================================================================== */
 
 .tabs-container {
-  background: rgba(15, 23, 42, 0.8);
-  backdrop-filter: blur(10px);
-  border: 1px solid var(--trading-border-secondary);
-  border-radius: var(--trading-radius-lg);
   margin-bottom: 24px;
-  padding: 8px;
 }
 
 .main-tabs {
@@ -66,130 +57,116 @@
 }
 
 /* ==========================================================================
-   Card and Section Styling
+   Content Layout - Updated for Component Library
    ========================================================================== */
 
-.content-card {
-  background: linear-gradient(
-    135deg,
-    rgba(15, 23, 42, 0.9) 0%,
-    rgba(30, 41, 59, 0.9) 100%
-  );
-  border: 1px solid var(--trading-border-secondary);
-  border-radius: var(--trading-radius-xl);
-  padding: 1.5rem;
-  backdrop-filter: blur(12px);
-  margin-bottom: 1.5rem;
-  transition: all 0.3s ease;
-}
-
-.content-card:hover {
-  border-color: var(--trading-border-accent);
-  transform: translateY(-2px);
-  box-shadow: var(--trading-shadow-glow);
-}
-
-.section-header {
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: var(--trading-text-primary);
-  margin-bottom: 0.5rem;
-}
-
-/* ==========================================================================
-   Overview Tab
-   ========================================================================== */
-
-.global-controls {
+/* Global Controls Card */
+.global-controls .control-content {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 2rem;
+  gap: 1rem;
 }
 
-.status-switch {
+.global-controls .control-left {
   display: flex;
-  align-items: center;
+  flex-direction: column;
   gap: 0.5rem;
 }
 
-.portfolio-card {
+.global-controls .control-right {
+  flex-shrink: 0;
+}
+
+.global-controls .status-switch {
   display: flex;
-  flex-direction: column;
-  height: 100%;
-}
-
-.portfolio-card .card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 1rem;
-}
-
-.portfolio-card .header-left h3 {
-  margin: 0;
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: var(--trading-text-primary);
-}
-
-.portfolio-card .header-left span {
-  font-size: 0.875rem;
-  color: var(--trading-text-secondary);
-}
-
-.portfolio-card .card-content {
-  flex-grow: 1;
-  display: flex;
-  flex-direction: column;
+  align-items: center;
   gap: 0.75rem;
 }
 
-.info-row,
-.strategy-row {
+/* Portfolio Cards Grid */
+.content-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1rem;
+}
+
+.portfolio-card .info-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  margin-bottom: 0.75rem;
 }
 
-.assigned-strategy {
-  background: rgba(0, 0, 0, 0.2);
-  padding: 0.5rem 0.75rem;
+.portfolio-card .strategy-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 1rem 0;
+}
+
+.portfolio-card .assigned-strategy {
+  margin: 0.75rem 0;
+  padding: 0.75rem;
+  background: rgba(59, 130, 246, 0.1);
   border-radius: var(--trading-radius-md);
-  margin-top: 0.5rem;
+  border-left: 3px solid var(--trading-primary-500);
 }
 
-.card-actions {
-  padding: 1rem 0 0 0 !important;
+.portfolio-card .card-actions {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--trading-border-secondary);
 }
 
-.action-btn.start-btn {
-  background: var(--trading-btn-gradient-success);
-}
-
-.action-btn.stop-btn {
-  background: var(--trading-btn-gradient-secondary);
-  opacity: 0.8;
-}
-
-/* ==========================================================================
-   Live Market Data Tab
-   ========================================================================== */
-
-.live-market-header {
+/* Live Market Data Tab */
+.live-market-tab .header-actions {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  gap: 0.75rem;
 }
 
 .stock-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 1.5rem;
-  max-height: 65vh;
-  overflow-y: auto;
-  padding-right: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1rem;
 }
+
+/* ==========================================================================
+   Responsive Design
+   ========================================================================== */
+
+@media (max-width: 768px) {
+  .content-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .global-controls .control-content {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+  }
+
+  .portfolio-card .strategy-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+  }
+
+  .live-market-tab .header-actions {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .stock-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ==========================================================================
+   Additional Custom Styling
+   ========================================================================== */
 
 /* Custom scrollbar for stock grid */
 .stock-grid::-webkit-scrollbar {
@@ -210,41 +187,11 @@
   background: var(--trading-gray-600);
 }
 
-/* ==========================================================================
-   Chips and Buttons
-   ========================================================================== */
-
-.status-chip {
-  font-weight: 700 !important;
-  border-radius: 20px !important;
-  padding: 4px 8px !important;
-}
-
-.status-chip.active {
-  background: rgba(34, 197, 94, 0.15) !important;
-  color: #22c55e !important;
-  border: 1px solid rgba(34, 197, 94, 0.3) !important;
-}
-
-.status-chip.inactive {
-  background: rgba(100, 116, 139, 0.15) !important;
-  color: #94a3b8 !important;
-  border: 1px solid rgba(100, 116, 139, 0.3) !important;
-}
-
-.status-chip.ready {
-  background: rgba(59, 130, 246, 0.15) !important;
-  color: #3b82f6 !important;
-  border: 1px solid rgba(59, 130, 246, 0.3) !important;
-}
-
-.random-btn {
-  border-color: var(--trading-border-secondary) !important;
-  color: var(--trading-text-secondary) !important;
-}
-.random-btn:hover {
-  border-color: var(--trading-border-accent) !important;
-  background-color: rgba(59, 130, 246, 0.1) !important;
+/* Override grid max height for better UX */
+.stock-grid {
+  max-height: 65vh;
+  overflow-y: auto;
+  padding-right: 1rem;
 }
 
 /* ==========================================================================
@@ -284,7 +231,7 @@
 .MuiDialog-paper {
   background: var(--trading-modal-gradient-dark) !important;
   border: 1px solid var(--trading-border-secondary) !important;
-  border-radius: var(--trading-radius-xl) !importan;
+  border-radius: var(--trading-radius-xl) !important;
   backdrop-filter: blur(20px);
 }
 

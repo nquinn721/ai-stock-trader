@@ -157,25 +157,25 @@ export interface ImpermanentLossStrategy {
 export interface LiquidityProvisionService {
   // Strategy management
   implementMeanReversionStrategy(
-    parameters: MeanReversionParams
+    parameters: MeanReversionParams,
   ): Promise<Strategy>;
-  
+
   executeMomentumStrategy(signals: MomentumSignals): Promise<StrategyResult>;
 
   // Cross-venue operations
   detectArbitrageOpportunities(): Promise<ArbitrageOpportunity[]>;
-  
+
   executeCrossVenueArbitrage(
-    opportunity: ArbitrageOpportunity
+    opportunity: ArbitrageOpportunity,
   ): Promise<ArbitrageResult>;
 
   // DeFi integration
   provideLiquidityToDEX(
     pool: LiquidityPool,
-    amount: number
+    amount: number,
   ): Promise<LiquidityResult>;
-  
+
   manageImpermanentLoss(
-    position: DeFiPosition
+    position: DeFiPosition,
   ): Promise<ImpermanentLossStrategy>;
 }

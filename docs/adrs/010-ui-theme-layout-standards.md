@@ -1,9 +1,11 @@
 # ADR-010: UI Theme and Layout Consistency Standards
 
 ## Status
+
 Accepted
 
 ## Date
+
 2025-06-27
 
 ## Context
@@ -17,6 +19,7 @@ The Stock Trading App has grown to include multiple pages with different layouts
 5. **Brand Dilution**: Lack of cohesive visual identity across the application
 
 The dashboard page has established a successful design pattern with:
+
 - Consistent header structure with live indicators
 - Unified color system and typography
 - Responsive layout patterns
@@ -107,21 +110,25 @@ We adopt the dashboard layout and styling as the **mandatory standard** for all 
 ## Implementation Plan
 
 ### Phase 1: Documentation and Standards (Complete)
+
 - [x] Create comprehensive UI standards documentation
 - [x] Document required CSS patterns and component structures
 - [x] Establish code review guidelines for UI consistency
 
 ### Phase 2: Template Creation
+
 - [ ] Create page templates for common layouts
 - [ ] Build reusable header component
 - [ ] Establish shared component library
 
 ### Phase 3: Existing Page Migration
+
 - [ ] Audit all existing pages for compliance
 - [ ] Prioritize high-traffic pages for updates
 - [ ] Gradual migration with A/B testing
 
 ### Phase 4: Enforcement and Tools
+
 - [ ] Add ESLint rules for CSS pattern enforcement
 - [ ] Create development tools for pattern validation
 - [ ] Integrate checks into CI/CD pipeline

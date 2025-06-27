@@ -278,6 +278,129 @@ body {
   z-index: -1;
 }
 
+/* ==========================================================================
+   Animations and Keyframes
+   ========================================================================== */
+
+@keyframes pulse-glow {
+  0%,
+  100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes slideInUp {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInDown {
+  0% {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+@keyframes tick {
+  0%,
+  50%,
+  100% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(5deg);
+  }
+  75% {
+    transform: rotate(-5deg);
+  }
+}
+
+/* ==========================================================================
+   Component Library Base Classes
+   ========================================================================== */
+
+.page-container {
+  min-height: 100vh;
+  background: var(--trading-bg-gradient-dark);
+  background-attachment: fixed;
+  padding: var(--trading-spacing-page);
+  font-family: var(--trading-font-sans);
+  color: var(--trading-text-primary);
+  width: 100%;
+  max-width: none;
+  box-sizing: border-box;
+}
+
+.page-container::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background:
+    radial-gradient(
+      circle at 25% 25%,
+      rgba(59, 130, 246, 0.1) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 75% 75%,
+      rgba(139, 92, 246, 0.1) 0%,
+      transparent 50%
+    );
+  pointer-events: none;
+  z-index: -1;
+}
+
+.page-content {
+  padding-top: 24px;
+}
+
+/* ==========================================================================
+   Grid Utilities
+   ========================================================================== */
+
+.content-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.content-grid--2-col {
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+}
+
+.content-grid--3-col {
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+
+.content-grid--4-col {
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+}
+
 /* Shared Animation Keyframes */
 @keyframes trading-shimmer {
   0% {

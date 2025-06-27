@@ -153,26 +153,26 @@ export interface MarketMakingService {
   // Core market making
   calculateOptimalSpread(
     symbol: string,
-    market: MarketConditions
+    market: MarketConditions,
   ): Promise<OptimalSpread>;
-  
+
   manageInventory(
     position: Position,
-    riskLimits: RiskLimits
+    riskLimits: RiskLimits,
   ): Promise<InventoryAction>;
 
   // Pricing and valuation
   calculateFairValue(
     symbol: string,
-    venue: string
+    venue: string,
   ): Promise<FairValueCalculation>;
-  
+
   optimizePriceQuotes(orderBook: OrderBookDepth): Promise<OptimalQuotes>;
 
   // Execution and hedging
   executeMarketMakingOrders(
-    strategy: MarketMakingStrategy
+    strategy: MarketMakingStrategy,
   ): Promise<ExecutionResult[]>;
-  
+
   hedgePosition(exposure: RiskExposure): Promise<HedgingAction>;
 }

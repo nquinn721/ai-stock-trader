@@ -1,0 +1,426 @@
+/* PageHeader Component Styles */
+@import "../../shared-styles.css";
+
+/* ==========================================================================
+   PageHeader Component - Exact Match to Dashboard Header
+   ========================================================================== */
+
+.page-header.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  padding: 20px 24px;
+  background: linear-gradient(
+    135deg,
+    rgba(13, 17, 23, 0.95) 0%,
+    rgba(22, 27, 34, 0.9) 50%,
+    rgba(30, 35, 42, 0.95) 100%
+  );
+  border: 1px solid rgba(48, 54, 61, 0.8);
+  border-radius: 16px;
+  backdrop-filter: blur(20px);
+  position: relative;
+  overflow: hidden;
+  min-height: 80px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.page-header.dashboard-header.sticky {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.page-header.dashboard-header::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(59, 130, 246, 0.6),
+    rgba(139, 92, 246, 0.6),
+    transparent
+  );
+  animation: pulse-glow 3s ease-in-out infinite;
+}
+
+@keyframes pulse-glow {
+  0%,
+  100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* ==========================================================================
+   Header Left Section
+   ========================================================================== */
+
+.page-header .header-left {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.page-header .main-title-section {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.page-header.dashboard-header h1 {
+  color: #f0f6fc;
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.page-header .market-time {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.75rem;
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+.page-header .market-time svg {
+  color: #3b82f6;
+  animation: tick 1s ease-in-out infinite;
+}
+
+@keyframes tick {
+  0%,
+  50%,
+  100% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(5deg);
+  }
+  75% {
+    transform: rotate(-5deg);
+  }
+}
+
+.page-header .market-time .date {
+  padding-left: 0.5rem;
+  border-left: 1px solid rgba(148, 163, 184, 0.3);
+  color: #cbd5e1;
+}
+
+/* ==========================================================================
+   Live Indicator
+   ========================================================================== */
+
+.page-header .live-indicator-main {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0.8rem;
+  border-radius: 50px;
+  font-weight: 600;
+  font-size: 0.8rem;
+  letter-spacing: 0.5px;
+  transition: all 0.3s ease;
+}
+
+.page-header .live-indicator-main.connected {
+  background: linear-gradient(45deg, #00c851, #00a844);
+  color: #ffffff;
+  box-shadow: 0 4px 15px rgba(0, 200, 81, 0.4);
+  animation: pulse-live 2s infinite;
+}
+
+.page-header .live-indicator-main.disconnected {
+  background: linear-gradient(45deg, #ff4757, #ff3838);
+  color: #ffffff;
+  box-shadow: 0 4px 15px rgba(255, 71, 87, 0.4);
+}
+
+.page-header .live-dot {
+  width: 6px;
+  height: 6px;
+  background: #ffffff;
+  border-radius: 50%;
+  animation: blink-live 1.5s infinite;
+}
+
+.page-header .live-text {
+  color: #ffffff;
+  font-weight: 700;
+}
+
+@keyframes pulse-live {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes blink-live {
+  0%,
+  50% {
+    opacity: 1;
+  }
+  51%,
+  100% {
+    opacity: 0.4;
+  }
+}
+
+/* ==========================================================================
+   Header Right Section
+   ========================================================================== */
+
+.page-header .header-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.page-header .stats {
+  font-size: 13px;
+  color: #8b949e;
+  font-weight: 500;
+}
+
+.page-header .stats > span {
+  background: rgba(13, 17, 23, 0.4);
+  padding: 8px 16px;
+  border-radius: 12px;
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  cursor: help;
+  transition: all 0.3s ease;
+}
+
+.page-header .stats > span:hover {
+  background: rgba(13, 17, 23, 0.6);
+  border-color: rgba(99, 102, 241, 0.4);
+  transform: translateY(-2px);
+}
+
+.page-header .stats > span[title]:hover {
+  box-shadow: 0 8px 24px rgba(99, 102, 241, 0.3);
+}
+
+/* ==========================================================================
+   Action Buttons
+   ========================================================================== */
+
+.page-header .autonomous-agents-btn,
+.page-header .analytics-btn,
+.page-header .ai-assistant-btn,
+.page-header .scanner-btn,
+.page-header .multi-asset-btn,
+.page-header .action-btn {
+  background: linear-gradient(
+    135deg,
+    rgba(59, 130, 246, 0.1) 0%,
+    rgba(139, 92, 246, 0.1) 100%
+  );
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  border-radius: 12px;
+  padding: 12px 20px;
+  color: #f0f6fc;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  backdrop-filter: blur(10px);
+  white-space: nowrap;
+}
+
+.page-header .autonomous-agents-btn:hover,
+.page-header .analytics-btn:hover,
+.page-header .ai-assistant-btn:hover,
+.page-header .scanner-btn:hover,
+.page-header .multi-asset-btn:hover,
+.page-header .action-btn:hover {
+  background: linear-gradient(
+    135deg,
+    rgba(59, 130, 246, 0.2) 0%,
+    rgba(139, 92, 246, 0.2) 100%
+  );
+  border-color: rgba(59, 130, 246, 0.5);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(59, 130, 246, 0.2);
+}
+
+.page-header .autonomous-agents-btn:active,
+.page-header .analytics-btn:active,
+.page-header .ai-assistant-btn:active,
+.page-header .scanner-btn:active,
+.page-header .multi-asset-btn:active,
+.page-header .action-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+/* Special styling for AI Assistant button */
+.page-header .ai-assistant-btn {
+  background: linear-gradient(
+    135deg,
+    rgba(34, 197, 94, 0.1) 0%,
+    rgba(59, 130, 246, 0.1) 100%
+  );
+  border: 1px solid rgba(34, 197, 94, 0.3);
+}
+
+.page-header .ai-assistant-btn:hover {
+  background: linear-gradient(
+    135deg,
+    rgba(34, 197, 94, 0.2) 0%,
+    rgba(59, 130, 246, 0.2) 100%
+  );
+  border-color: rgba(34, 197, 94, 0.5);
+  box-shadow: 0 8px 24px rgba(34, 197, 94, 0.2);
+}
+
+/* Special styling for Autonomous Agents button */
+.page-header .autonomous-agents-btn {
+  background: linear-gradient(
+    135deg,
+    rgba(33, 150, 243, 0.1) 0%,
+    rgba(103, 58, 183, 0.1) 100%
+  );
+  border: 1px solid rgba(33, 150, 243, 0.3);
+}
+
+.page-header .autonomous-agents-btn:hover {
+  background: linear-gradient(
+    135deg,
+    rgba(33, 150, 243, 0.2) 0%,
+    rgba(103, 58, 183, 0.2) 100%
+  );
+  border-color: rgba(33, 150, 243, 0.5);
+  box-shadow: 0 8px 24px rgba(33, 150, 243, 0.2);
+}
+
+/* Special styling for Multi-Asset button */
+.page-header .multi-asset-btn {
+  background: linear-gradient(
+    135deg,
+    rgba(251, 146, 60, 0.1) 0%,
+    rgba(251, 191, 36, 0.1) 100%
+  );
+  border-color: rgba(251, 146, 60, 0.3);
+}
+
+.page-header .multi-asset-btn:hover {
+  background: linear-gradient(
+    135deg,
+    rgba(251, 146, 60, 0.2) 0%,
+    rgba(251, 191, 36, 0.2) 100%
+  );
+  border-color: rgba(251, 146, 60, 0.5);
+  box-shadow: 0 8px 24px rgba(251, 146, 60, 0.2);
+}
+
+.page-header .back-button {
+  background: linear-gradient(
+    135deg,
+    rgba(148, 163, 184, 0.1) 0%,
+    rgba(100, 116, 139, 0.1) 100%
+  );
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  border-radius: 8px;
+  padding: 8px 16px;
+  color: #94a3b8;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(10px);
+  margin-top: 8px;
+}
+
+.page-header .back-button:hover {
+  background: linear-gradient(
+    135deg,
+    rgba(148, 163, 184, 0.2) 0%,
+    rgba(100, 116, 139, 0.2) 100%
+  );
+  border-color: rgba(148, 163, 184, 0.5);
+  color: #f1f5f9;
+}
+
+/* ==========================================================================
+   Responsive Design
+   ========================================================================== */
+
+@media (max-width: 768px) {
+  .page-header.dashboard-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+    padding: 16px;
+  }
+
+  .page-header .header-left {
+    align-items: center;
+    text-align: center;
+  }
+
+  .page-header.dashboard-header h1 {
+    font-size: 18px;
+  }
+
+  .page-header .main-title-section {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .page-header .market-time {
+    justify-content: center;
+  }
+
+  .page-header .header-info {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 480px) {
+  .page-header.dashboard-header h1 {
+    font-size: 16px;
+  }
+
+  .page-header .main-title-section {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .page-header .market-time {
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .page-header .header-info {
+    flex-direction: column;
+    gap: 8px;
+  }
+}

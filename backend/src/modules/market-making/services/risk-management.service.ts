@@ -1,34 +1,34 @@
 import { Injectable, Logger } from '@nestjs/common';
 import {
-  RiskManagementService,
-  Portfolio,
-  VaRCalculation,
-  PortfolioPosition,
-  ConcentrationAnalysis,
-  OptionsPosition,
-  GreeksCalculation,
-  RiskExposure,
-  HedgingExecution,
-  StressScenario,
-  StressTestResults,
-  MarketShock,
-  ShockImpactAnalysis,
-  SectorExposure,
   AssetClassExposure,
-  ConcentrationRecommendation,
-  HedgeInstrument,
-  PnLDistribution,
-  StressTestRiskMetrics,
-  StressTestRecommendation,
-  CorrelationEffect,
   CascadingRisk,
-  MitigationStrategy
+  ConcentrationAnalysis,
+  ConcentrationRecommendation,
+  CorrelationEffect,
+  GreeksCalculation,
+  HedgeInstrument,
+  HedgingExecution,
+  MarketShock,
+  MitigationStrategy,
+  OptionsPosition,
+  PnLDistribution,
+  Portfolio,
+  PortfolioPosition,
+  RiskExposure,
+  RiskManagementService,
+  SectorExposure,
+  ShockImpactAnalysis,
+  StressScenario,
+  StressTestRecommendation,
+  StressTestResults,
+  StressTestRiskMetrics,
+  VaRCalculation,
 } from '../interfaces/risk-management.interface';
 
 @Injectable()
 export class RiskManagementServiceImpl implements RiskManagementService {
   private readonly logger = new Logger(RiskManagementServiceImpl.name);
-  
+
   // Risk model parameters
   private readonly CONFIDENCE_LEVELS = [0.95, 0.99];
   private readonly HISTORICAL_LOOKBACK = 252; // Trading days
@@ -36,26 +36,43 @@ export class RiskManagementServiceImpl implements RiskManagementService {
 
   async calculatePortfolioVaR(
     portfolio: Portfolio,
-    timeframe: string
+    timeframe: string,
   ): Promise<VaRCalculation> {
     try {
       this.logger.debug(`Calculating VaR for portfolio: ${portfolio.id}`);
 
       const timeHorizon = this.parseTimeframe(timeframe);
       const returns = await this.getHistoricalReturns(portfolio);
-      
+
       // Calculate VaR using multiple methodologies
       const historicalVaR = this.calculateHistoricalVaR(returns);
-      const parametricVaR = this.calculateParametricVaR(returns, portfolio.totalValue);
+      const parametricVaR = this.calculateParametricVaR(
+        returns,
+        portfolio.totalValue,
+      );
       const monteCarloVaR = await this.calculateMonteCarloVaR(portfolio);
 
       // Use the most conservative estimate
-      const var95 = Math.max(historicalVaR.var95, parametricVaR.var95, monteCarloVaR.var95);
-      const var99 = Math.max(historicalVaR.var99, parametricVaR.var99, monteCarloVaR.var99);
+      const var95 = Math.max(
+        historicalVaR.var95,
+        parametricVaR.var95,
+        monteCarloVaR.var95,
+      );
+      const var99 = Math.max(
+        historicalVaR.var99,
+        parametricVaR.var99,
+        monteCarloVaR.var99,
+      );
 
       // Calculate Expected Shortfall (Conditional VaR)
-      const expectedShortfall95 = this.calculateExpectedShortfall(returns, 0.95);
-      const expectedShortfall99 = this.calculateExpectedShortfall(returns, 0.99);
+      const expectedShortfall95 = this.calculateExpectedShortfall(
+        returns,
+        0.95,
+      );
+      const expectedShortfall99 = this.calculateExpectedShortfall(
+        returns,
+        0.99,
+      );
 
       const result: VaRCalculation = {
         var95: var95 * Math.sqrt(timeHorizon), // Scale by time
@@ -65,50 +82,67 @@ export class RiskManagementServiceImpl implements RiskManagementService {
         confidenceLevel: 0.95,
         timeHorizon,
         methodology: 'MONTE_CARLO',
-        lastCalculated: new Date()
+        lastCalculated: new Date(),
       };
 
-      this.logger.debug(`VaR calculated for ${portfolio.id}: 95% VaR = ${result.var95}`);
+      this.logger.debug(
+        `VaR calculated for ${portfolio.id}: 95% VaR = ${result.var95}`,
+      );
       return result;
     } catch (error) {
-      this.logger.error(`Error calculating VaR for portfolio ${portfolio.id}:`, error);
+      this.logger.error(
+        `Error calculating VaR for portfolio ${portfolio.id}:`,
+        error,
+      );
       throw new Error(`Failed to calculate portfolio VaR: ${error.message}`);
     }
   }
 
   async assessConcentrationRisk(
-    positions: PortfolioPosition[]
+    positions: PortfolioPosition[],
   ): Promise<ConcentrationAnalysis> {
     try {
       this.logger.debug('Assessing portfolio concentration risk');
 
-      const totalValue = positions.reduce((sum, pos) => sum + pos.marketValue, 0);
-      
+      const totalValue = positions.reduce(
+        (sum, pos) => sum + pos.marketValue,
+        0,
+      );
+
       // Calculate Herfindahl Index
       const herfindahlIndex = this.calculateHerfindahlIndex(positions);
-      
+
       // Calculate top positions weight (top 5 or 10% of positions)
-      const topPositionsWeight = this.calculateTopPositionsWeight(positions, totalValue);
-      
+      const topPositionsWeight = this.calculateTopPositionsWeight(
+        positions,
+        totalValue,
+      );
+
       // Analyze sector concentration
-      const sectorConcentration = this.analyzeSectorConcentration(positions, totalValue);
-      
+      const sectorConcentration = this.analyzeSectorConcentration(
+        positions,
+        totalValue,
+      );
+
       // Analyze asset class concentration
-      const assetClassConcentration = this.analyzeAssetClassConcentration(positions, totalValue);
-      
+      const assetClassConcentration = this.analyzeAssetClassConcentration(
+        positions,
+        totalValue,
+      );
+
       // Calculate overall risk score
       const riskScore = this.calculateConcentrationRiskScore(
         herfindahlIndex,
         topPositionsWeight,
         sectorConcentration,
-        assetClassConcentration
+        assetClassConcentration,
       );
-      
+
       // Generate recommendations
       const recommendations = this.generateConcentrationRecommendations(
         riskScore,
         sectorConcentration,
-        assetClassConcentration
+        assetClassConcentration,
       );
 
       const result: ConcentrationAnalysis = {
@@ -117,7 +151,7 @@ export class RiskManagementServiceImpl implements RiskManagementService {
         sectorConcentration,
         assetClassConcentration,
         riskScore,
-        recommendations
+        recommendations,
       };
 
       this.logger.debug(`Concentration risk assessed: score = ${riskScore}`);
@@ -128,7 +162,9 @@ export class RiskManagementServiceImpl implements RiskManagementService {
     }
   }
 
-  async calculateGreeks(optionsPosition: OptionsPosition): Promise<GreeksCalculation> {
+  async calculateGreeks(
+    optionsPosition: OptionsPosition,
+  ): Promise<GreeksCalculation> {
     try {
       this.logger.debug(`Calculating Greeks for ${optionsPosition.symbol}`);
 
@@ -140,8 +176,16 @@ export class RiskManagementServiceImpl implements RiskManagementService {
       const sigma = optionsPosition.impliedVolatility;
       const q = 0; // Dividend yield (assume 0)
 
-      const greeks = this.blackScholesGreeks(S, K, T, r, sigma, q, optionsPosition.optionType);
-      
+      const greeks = this.blackScholesGreeks(
+        S,
+        K,
+        T,
+        r,
+        sigma,
+        q,
+        optionsPosition.optionType,
+      );
+
       // Convert to dollar terms
       const quantity = optionsPosition.quantity;
       const multiplier = 100; // Standard options multiplier
@@ -157,13 +201,18 @@ export class RiskManagementServiceImpl implements RiskManagementService {
         thetaDollar: greeks.theta * quantity * multiplier,
         vegaDollar: greeks.vega * quantity * multiplier * 0.01,
         rhoDollar: greeks.rho * quantity * multiplier * 0.01,
-        lastUpdated: new Date()
+        lastUpdated: new Date(),
       };
 
-      this.logger.debug(`Greeks calculated for ${optionsPosition.symbol}: Delta = ${result.delta}`);
+      this.logger.debug(
+        `Greeks calculated for ${optionsPosition.symbol}: Delta = ${result.delta}`,
+      );
       return result;
     } catch (error) {
-      this.logger.error(`Error calculating Greeks for ${optionsPosition.symbol}:`, error);
+      this.logger.error(
+        `Error calculating Greeks for ${optionsPosition.symbol}:`,
+        error,
+      );
       throw new Error(`Failed to calculate Greeks: ${error.message}`);
     }
   }
@@ -173,28 +222,37 @@ export class RiskManagementServiceImpl implements RiskManagementService {
       this.logger.debug(`Executing dynamic hedge for ${exposure.symbol}`);
 
       const hedgeId = `HEDGE_${Date.now()}`;
-      
+
       // Determine optimal hedge instruments and quantities
       const hedgeInstruments = this.calculateOptimalHedge(exposure);
-      
+
       // Calculate total hedging cost
-      const totalCost = hedgeInstruments.reduce((sum, instrument) => 
-        sum + (instrument.quantity * instrument.price), 0
+      const totalCost = hedgeInstruments.reduce(
+        (sum, instrument) => sum + instrument.quantity * instrument.price,
+        0,
       );
-      
+
       // Estimate risk reduction
-      const expectedRiskReduction = this.calculateHedgeEffectiveness(exposure, hedgeInstruments);
-      
-      // Execute hedge trades (simulate execution)
-      const executionPromises = hedgeInstruments.map(instrument => 
-        this.executeHedgeTrade(instrument)
+      const expectedRiskReduction = this.calculateHedgeEffectiveness(
+        exposure,
+        hedgeInstruments,
       );
-      
+
+      // Execute hedge trades (simulate execution)
+      const executionPromises = hedgeInstruments.map((instrument) =>
+        this.executeHedgeTrade(instrument),
+      );
+
       const executions = await Promise.all(executionPromises);
-      const allSuccessful = executions.every(exec => exec.status === 'COMPLETED');
-      
+      const allSuccessful = executions.every(
+        (exec) => exec.status === 'COMPLETED',
+      );
+
       // Calculate actual slippage
-      const totalSlippage = executions.reduce((sum, exec) => sum + (exec.slippage || 0), 0);
+      const totalSlippage = executions.reduce(
+        (sum, exec) => sum + (exec.slippage || 0),
+        0,
+      );
       const averageSlippage = totalSlippage / executions.length;
 
       const result: HedgingExecution = {
@@ -205,18 +263,25 @@ export class RiskManagementServiceImpl implements RiskManagementService {
         expectedRiskReduction,
         executionTime: new Date(),
         status: allSuccessful ? 'COMPLETED' : 'PARTIAL',
-        slippage: averageSlippage
+        slippage: averageSlippage,
       };
 
-      this.logger.log(`Dynamic hedge executed: ${hedgeId}, risk reduction: ${expectedRiskReduction}%`);
+      this.logger.log(
+        `Dynamic hedge executed: ${hedgeId}, risk reduction: ${expectedRiskReduction}%`,
+      );
       return result;
     } catch (error) {
-      this.logger.error(`Error executing dynamic hedge for ${exposure.symbol}:`, error);
+      this.logger.error(
+        `Error executing dynamic hedge for ${exposure.symbol}:`,
+        error,
+      );
       throw new Error(`Failed to execute dynamic hedge: ${error.message}`);
     }
   }
 
-  async performStressTesting(scenarios: StressScenario[]): Promise<StressTestResults> {
+  async performStressTesting(
+    scenarios: StressScenario[],
+  ): Promise<StressTestResults> {
     try {
       this.logger.debug('Performing stress testing with multiple scenarios');
 
@@ -228,11 +293,13 @@ export class RiskManagementServiceImpl implements RiskManagementService {
       }
 
       // Combine results and find worst-case scenario
-      const worstCase = results.reduce((worst, current) => 
-        current.portfolioImpact < worst.portfolioImpact ? current : worst
+      const worstCase = results.reduce((worst, current) =>
+        current.portfolioImpact < worst.portfolioImpact ? current : worst,
       );
 
-      this.logger.log(`Stress testing completed: worst case scenario = ${worstCase.scenarioId}`);
+      this.logger.log(
+        `Stress testing completed: worst case scenario = ${worstCase.scenarioId}`,
+      );
       return worstCase;
     } catch (error) {
       this.logger.error('Error performing stress testing:', error);
@@ -240,29 +307,32 @@ export class RiskManagementServiceImpl implements RiskManagementService {
     }
   }
 
-  async simulateMarketShock(shockParams: MarketShock): Promise<ShockImpactAnalysis> {
+  async simulateMarketShock(
+    shockParams: MarketShock,
+  ): Promise<ShockImpactAnalysis> {
     try {
       this.logger.debug(`Simulating market shock: ${shockParams.shockType}`);
 
       const shockId = `SHOCK_${Date.now()}`;
-      
+
       // Calculate immediate impact
       const immediateImpact = this.calculateShockImpact(shockParams);
-      
+
       // Estimate recovery time
       const recoveryTime = this.estimateRecoveryTime(shockParams);
-      
+
       // Assess liquidity impact
       const liquidityImpact = this.assessLiquidityImpact(shockParams);
-      
+
       // Analyze correlation effects
       const correlationEffects = this.analyzeCorrelationEffects(shockParams);
-      
+
       // Identify cascading risks
       const cascadingRisks = this.identifyCascadingRisks(shockParams);
-      
+
       // Generate mitigation strategies
-      const mitigationStrategies = this.generateMitigationStrategies(shockParams);
+      const mitigationStrategies =
+        this.generateMitigationStrategies(shockParams);
 
       const result: ShockImpactAnalysis = {
         shockId,
@@ -271,10 +341,12 @@ export class RiskManagementServiceImpl implements RiskManagementService {
         liquidityImpact,
         correlationEffects,
         cascadingRisks,
-        mitigationStrategies
+        mitigationStrategies,
       };
 
-      this.logger.debug(`Market shock simulation completed: impact = ${immediateImpact}%`);
+      this.logger.debug(
+        `Market shock simulation completed: impact = ${immediateImpact}%`,
+      );
       return result;
     } catch (error) {
       this.logger.error('Error simulating market shock:', error);
@@ -293,11 +365,16 @@ export class RiskManagementServiceImpl implements RiskManagementService {
     const value = parseInt(num);
 
     switch (unit) {
-      case 'd': return value;
-      case 'w': return value * 7;
-      case 'm': return value * 30;
-      case 'y': return value * 365;
-      default: return 1;
+      case 'd':
+        return value;
+      case 'w':
+        return value * 7;
+      case 'm':
+        return value * 30;
+      case 'y':
+        return value * 365;
+      default:
+        return 1;
     }
   }
 
@@ -312,31 +389,41 @@ export class RiskManagementServiceImpl implements RiskManagementService {
     return returns;
   }
 
-  private calculateHistoricalVaR(returns: number[]): { var95: number; var99: number } {
+  private calculateHistoricalVaR(returns: number[]): {
+    var95: number;
+    var99: number;
+  } {
     const sortedReturns = returns.sort((a, b) => a - b);
     const var95Index = Math.floor(sortedReturns.length * 0.05);
     const var99Index = Math.floor(sortedReturns.length * 0.01);
 
     return {
       var95: Math.abs(sortedReturns[var95Index]),
-      var99: Math.abs(sortedReturns[var99Index])
+      var99: Math.abs(sortedReturns[var99Index]),
     };
   }
 
-  private calculateParametricVaR(returns: number[], portfolioValue: number): { var95: number; var99: number } {
+  private calculateParametricVaR(
+    returns: number[],
+    portfolioValue: number,
+  ): { var95: number; var99: number } {
     const mean = returns.reduce((sum, r) => sum + r, 0) / returns.length;
-    const variance = returns.reduce((sum, r) => sum + Math.pow(r - mean, 2), 0) / (returns.length - 1);
+    const variance =
+      returns.reduce((sum, r) => sum + Math.pow(r - mean, 2), 0) /
+      (returns.length - 1);
     const volatility = Math.sqrt(variance);
 
     return {
       var95: 1.645 * volatility * portfolioValue, // 95% confidence
-      var99: 2.326 * volatility * portfolioValue  // 99% confidence
+      var99: 2.326 * volatility * portfolioValue, // 99% confidence
     };
   }
 
-  private async calculateMonteCarloVaR(portfolio: Portfolio): Promise<{ var95: number; var99: number }> {
+  private async calculateMonteCarloVaR(
+    portfolio: Portfolio,
+  ): Promise<{ var95: number; var99: number }> {
     const simulatedReturns: number[] = [];
-    
+
     for (let i = 0; i < this.MONTE_CARLO_SIMULATIONS; i++) {
       const simulatedReturn = this.simulatePortfolioReturn(portfolio);
       simulatedReturns.push(simulatedReturn);
@@ -352,47 +439,72 @@ export class RiskManagementServiceImpl implements RiskManagementService {
     return randomShock * baseVolatility;
   }
 
-  private calculateExpectedShortfall(returns: number[], confidenceLevel: number): number {
+  private calculateExpectedShortfall(
+    returns: number[],
+    confidenceLevel: number,
+  ): number {
     const sortedReturns = returns.sort((a, b) => a - b);
     const varIndex = Math.floor(sortedReturns.length * (1 - confidenceLevel));
     const tailReturns = sortedReturns.slice(0, varIndex);
-    
+
     if (tailReturns.length === 0) return 0;
-    
-    const expectedShortfall = tailReturns.reduce((sum, r) => sum + r, 0) / tailReturns.length;
+
+    const expectedShortfall =
+      tailReturns.reduce((sum, r) => sum + r, 0) / tailReturns.length;
     return Math.abs(expectedShortfall);
   }
 
   private calculateHerfindahlIndex(positions: PortfolioPosition[]): number {
     const totalValue = positions.reduce((sum, pos) => sum + pos.marketValue, 0);
-    
+
     if (totalValue === 0) return 0;
-    
+
     const sumOfSquares = positions.reduce((sum, pos) => {
       const weight = pos.marketValue / totalValue;
-      return sum + (weight * weight);
+      return sum + weight * weight;
     }, 0);
-    
+
     return sumOfSquares;
   }
 
-  private calculateTopPositionsWeight(positions: PortfolioPosition[], totalValue: number): number {
-    const sortedPositions = positions.sort((a, b) => b.marketValue - a.marketValue);
-    const topPositions = sortedPositions.slice(0, Math.min(5, Math.ceil(positions.length * 0.1)));
-    const topValue = topPositions.reduce((sum, pos) => sum + pos.marketValue, 0);
-    
+  private calculateTopPositionsWeight(
+    positions: PortfolioPosition[],
+    totalValue: number,
+  ): number {
+    const sortedPositions = positions.sort(
+      (a, b) => b.marketValue - a.marketValue,
+    );
+    const topPositions = sortedPositions.slice(
+      0,
+      Math.min(5, Math.ceil(positions.length * 0.1)),
+    );
+    const topValue = topPositions.reduce(
+      (sum, pos) => sum + pos.marketValue,
+      0,
+    );
+
     return totalValue > 0 ? topValue / totalValue : 0;
   }
 
-  private analyzeSectorConcentration(positions: PortfolioPosition[], totalValue: number): SectorExposure[] {
-    const sectorMap = new Map<string, { value: number; positions: number; risk: number }>();
-    
-    positions.forEach(pos => {
-      const existing = sectorMap.get(pos.sector) || { value: 0, positions: 0, risk: 0 };
+  private analyzeSectorConcentration(
+    positions: PortfolioPosition[],
+    totalValue: number,
+  ): SectorExposure[] {
+    const sectorMap = new Map<
+      string,
+      { value: number; positions: number; risk: number }
+    >();
+
+    positions.forEach((pos) => {
+      const existing = sectorMap.get(pos.sector) || {
+        value: 0,
+        positions: 0,
+        risk: 0,
+      };
       sectorMap.set(pos.sector, {
         value: existing.value + pos.marketValue,
         positions: existing.positions + 1,
-        risk: Math.max(existing.risk, this.calculatePositionRisk(pos))
+        risk: Math.max(existing.risk, this.calculatePositionRisk(pos)),
       });
     });
 
@@ -400,19 +512,29 @@ export class RiskManagementServiceImpl implements RiskManagementService {
       sector,
       weight: totalValue > 0 ? data.value / totalValue : 0,
       risk: data.risk,
-      positions: data.positions
+      positions: data.positions,
     }));
   }
 
-  private analyzeAssetClassConcentration(positions: PortfolioPosition[], totalValue: number): AssetClassExposure[] {
-    const assetClassMap = new Map<string, { value: number; positions: number; risk: number }>();
-    
-    positions.forEach(pos => {
-      const existing = assetClassMap.get(pos.assetClass) || { value: 0, positions: 0, risk: 0 };
+  private analyzeAssetClassConcentration(
+    positions: PortfolioPosition[],
+    totalValue: number,
+  ): AssetClassExposure[] {
+    const assetClassMap = new Map<
+      string,
+      { value: number; positions: number; risk: number }
+    >();
+
+    positions.forEach((pos) => {
+      const existing = assetClassMap.get(pos.assetClass) || {
+        value: 0,
+        positions: 0,
+        risk: 0,
+      };
       assetClassMap.set(pos.assetClass, {
         value: existing.value + pos.marketValue,
         positions: existing.positions + 1,
-        risk: Math.max(existing.risk, this.calculatePositionRisk(pos))
+        risk: Math.max(existing.risk, this.calculatePositionRisk(pos)),
       });
     });
 
@@ -420,7 +542,7 @@ export class RiskManagementServiceImpl implements RiskManagementService {
       assetClass,
       weight: totalValue > 0 ? data.value / totalValue : 0,
       risk: data.risk,
-      positions: data.positions
+      positions: data.positions,
     }));
   }
 
@@ -435,41 +557,48 @@ export class RiskManagementServiceImpl implements RiskManagementService {
     herfindahlIndex: number,
     topPositionsWeight: number,
     sectorConcentration: SectorExposure[],
-    assetClassConcentration: AssetClassExposure[]
+    assetClassConcentration: AssetClassExposure[],
   ): number {
     // Combine multiple concentration metrics into single score
     const herfindahlScore = Math.min(1, herfindahlIndex * 5); // Scale HHI
     const topPositionsScore = topPositionsWeight;
-    const sectorScore = Math.max(...sectorConcentration.map(s => s.weight));
-    const assetClassScore = Math.max(...assetClassConcentration.map(a => a.weight));
-    
-    return (herfindahlScore + topPositionsScore + sectorScore + assetClassScore) / 4;
+    const sectorScore = Math.max(...sectorConcentration.map((s) => s.weight));
+    const assetClassScore = Math.max(
+      ...assetClassConcentration.map((a) => a.weight),
+    );
+
+    return (
+      (herfindahlScore + topPositionsScore + sectorScore + assetClassScore) / 4
+    );
   }
 
   private generateConcentrationRecommendations(
     riskScore: number,
     sectorConcentration: SectorExposure[],
-    assetClassConcentration: AssetClassExposure[]
+    assetClassConcentration: AssetClassExposure[],
   ): ConcentrationRecommendation[] {
     const recommendations: ConcentrationRecommendation[] = [];
 
     if (riskScore > 0.7) {
       recommendations.push({
         type: 'REDUCE',
-        description: 'Portfolio is highly concentrated. Consider reducing largest positions.',
+        description:
+          'Portfolio is highly concentrated. Consider reducing largest positions.',
         priority: 'HIGH',
-        impactScore: 0.8
+        impactScore: 0.8,
       });
     }
 
     // Check for sector over-concentration
-    const overConcentratedSectors = sectorConcentration.filter(s => s.weight > 0.3);
+    const overConcentratedSectors = sectorConcentration.filter(
+      (s) => s.weight > 0.3,
+    );
     if (overConcentratedSectors.length > 0) {
       recommendations.push({
         type: 'DIVERSIFY',
         description: `Over-concentrated in ${overConcentratedSectors[0].sector} sector. Diversify across sectors.`,
         priority: 'MEDIUM',
-        impactScore: 0.6
+        impactScore: 0.6,
       });
     }
 
@@ -477,31 +606,53 @@ export class RiskManagementServiceImpl implements RiskManagementService {
   }
 
   private blackScholesGreeks(
-    S: number, K: number, T: number, r: number, sigma: number, q: number, optionType: 'CALL' | 'PUT'
-  ): { delta: number; gamma: number; theta: number; vega: number; rho: number } {
+    S: number,
+    K: number,
+    T: number,
+    r: number,
+    sigma: number,
+    q: number,
+    optionType: 'CALL' | 'PUT',
+  ): {
+    delta: number;
+    gamma: number;
+    theta: number;
+    vega: number;
+    rho: number;
+  } {
     // Simplified Black-Scholes Greeks calculation
-    const d1 = (Math.log(S / K) + (r - q + 0.5 * sigma * sigma) * T) / (sigma * Math.sqrt(T));
+    const d1 =
+      (Math.log(S / K) + (r - q + 0.5 * sigma * sigma) * T) /
+      (sigma * Math.sqrt(T));
     const d2 = d1 - sigma * Math.sqrt(T);
-    
+
     const nd1 = this.normalCDF(d1);
     const nd2 = this.normalCDF(d2);
     const npd1 = this.normalPDF(d1);
 
     let delta: number, rho: number;
-    
+
     if (optionType === 'CALL') {
       delta = Math.exp(-q * T) * nd1;
-      rho = K * T * Math.exp(-r * T) * nd2 / 100;
+      rho = (K * T * Math.exp(-r * T) * nd2) / 100;
     } else {
       delta = -Math.exp(-q * T) * this.normalCDF(-d1);
-      rho = -K * T * Math.exp(-r * T) * this.normalCDF(-d2) / 100;
+      rho = (-K * T * Math.exp(-r * T) * this.normalCDF(-d2)) / 100;
     }
 
-    const gamma = Math.exp(-q * T) * npd1 / (S * sigma * Math.sqrt(T));
-    const theta = (-S * npd1 * sigma * Math.exp(-q * T) / (2 * Math.sqrt(T)) 
-                  - r * K * Math.exp(-r * T) * (optionType === 'CALL' ? nd2 : this.normalCDF(-d2))
-                  + q * S * Math.exp(-q * T) * (optionType === 'CALL' ? nd1 : this.normalCDF(-d1))) / 365;
-    const vega = S * Math.sqrt(T) * npd1 * Math.exp(-q * T) / 100;
+    const gamma = (Math.exp(-q * T) * npd1) / (S * sigma * Math.sqrt(T));
+    const theta =
+      ((-S * npd1 * sigma * Math.exp(-q * T)) / (2 * Math.sqrt(T)) -
+        r *
+          K *
+          Math.exp(-r * T) *
+          (optionType === 'CALL' ? nd2 : this.normalCDF(-d2)) +
+        q *
+          S *
+          Math.exp(-q * T) *
+          (optionType === 'CALL' ? nd1 : this.normalCDF(-d1))) /
+      365;
+    const vega = (S * Math.sqrt(T) * npd1 * Math.exp(-q * T)) / 100;
 
     return { delta, gamma, theta, vega, rho };
   }
@@ -513,7 +664,7 @@ export class RiskManagementServiceImpl implements RiskManagementService {
 
   private normalPDF(x: number): number {
     // Standard normal probability density function
-    return Math.exp(-x * x / 2) / Math.sqrt(2 * Math.PI);
+    return Math.exp((-x * x) / 2) / Math.sqrt(2 * Math.PI);
   }
 
   private erf(x: number): number {
@@ -529,7 +680,8 @@ export class RiskManagementServiceImpl implements RiskManagementService {
     x = Math.abs(x);
 
     const t = 1 / (1 + p * x);
-    const y = 1 - (((((a5 * t + a4) * t) + a3) * t + a2) * t + a1) * t * Math.exp(-x * x);
+    const y =
+      1 - ((((a5 * t + a4) * t + a3) * t + a2) * t + a1) * t * Math.exp(-x * x);
 
     return sign * y;
   }
@@ -545,7 +697,7 @@ export class RiskManagementServiceImpl implements RiskManagementService {
         quantity: Math.abs(exposure.delta),
         price: 100, // Placeholder price
         side: exposure.delta > 0 ? 'SELL' : 'BUY',
-        hedgeRatio: 1.0
+        hedgeRatio: 1.0,
       });
     }
 
@@ -557,18 +709,21 @@ export class RiskManagementServiceImpl implements RiskManagementService {
         quantity: Math.abs(exposure.gamma) / 10,
         price: 5, // Placeholder option price
         side: exposure.gamma > 0 ? 'SELL' : 'BUY',
-        hedgeRatio: 0.1
+        hedgeRatio: 0.1,
       });
     }
 
     return instruments;
   }
 
-  private calculateHedgeEffectiveness(exposure: RiskExposure, instruments: HedgeInstrument[]): number {
+  private calculateHedgeEffectiveness(
+    exposure: RiskExposure,
+    instruments: HedgeInstrument[],
+  ): number {
     // Simplified hedge effectiveness calculation
     let riskReduction = 0;
-    
-    instruments.forEach(instrument => {
+
+    instruments.forEach((instrument) => {
       if (instrument.type === 'STOCK') {
         riskReduction += Math.min(50, Math.abs(exposure.delta) * 0.1);
       } else if (instrument.type === 'OPTION') {
@@ -579,14 +734,16 @@ export class RiskManagementServiceImpl implements RiskManagementService {
     return Math.min(90, riskReduction); // Max 90% risk reduction
   }
 
-  private async executeHedgeTrade(instrument: HedgeInstrument): Promise<{ status: string; slippage?: number }> {
+  private async executeHedgeTrade(
+    instrument: HedgeInstrument,
+  ): Promise<{ status: string; slippage?: number }> {
     // Simulate trade execution
     const success = Math.random() > 0.1; // 90% success rate
     const slippage = Math.random() * 0.002; // 0-0.2% slippage
-    
+
     return {
       status: success ? 'COMPLETED' : 'FAILED',
-      slippage: success ? slippage : undefined
+      slippage: success ? slippage : undefined,
     };
   }
 
@@ -595,7 +752,7 @@ export class RiskManagementServiceImpl implements RiskManagementService {
       Math.abs(exposure.delta),
       Math.abs(exposure.gamma),
       Math.abs(exposure.vega),
-      Math.abs(exposure.theta)
+      Math.abs(exposure.theta),
     );
 
     if (primaryRisk === Math.abs(exposure.delta)) return 'DELTA_HEDGE';
@@ -604,7 +761,9 @@ export class RiskManagementServiceImpl implements RiskManagementService {
     return 'THETA_HEDGE';
   }
 
-  private async runStressTestScenario(scenario: StressScenario): Promise<StressTestResults> {
+  private async runStressTestScenario(
+    scenario: StressScenario,
+  ): Promise<StressTestResults> {
     // Placeholder stress test implementation
     const portfolioImpact = -Math.random() * 0.3; // Up to 30% loss
     const worstCaseValue = 1000000 * (1 + portfolioImpact);
@@ -615,7 +774,7 @@ export class RiskManagementServiceImpl implements RiskManagementService {
       probabilityDistribution.push({
         percentile: i,
         value: 1000000 * (1 + portfolioImpact * (i / 100)),
-        probability: 0.01
+        probability: 0.01,
       });
     }
 
@@ -624,7 +783,7 @@ export class RiskManagementServiceImpl implements RiskManagementService {
       timeToRecovery: Math.abs(portfolioImpact) * 365, // Days
       varIncrease: Math.abs(portfolioImpact) * 2,
       liquidityRisk: Math.random() * 0.5,
-      correlationBreakdown: Math.random() * 0.3
+      correlationBreakdown: Math.random() * 0.3,
     };
 
     const recommendations: StressTestRecommendation[] = [];
@@ -634,7 +793,7 @@ export class RiskManagementServiceImpl implements RiskManagementService {
         description: 'Consider hedging major risk exposures',
         costEstimate: 50000,
         riskReduction: 40,
-        priority: 'HIGH'
+        priority: 'HIGH',
       });
     }
 
@@ -645,7 +804,7 @@ export class RiskManagementServiceImpl implements RiskManagementService {
       bestCaseValue,
       probabilityDistribution,
       riskMetrics,
-      recommendations
+      recommendations,
     };
   }
 
@@ -662,7 +821,9 @@ export class RiskManagementServiceImpl implements RiskManagementService {
     return shockParams.magnitude * 0.05; // Simplified liquidity impact
   }
 
-  private analyzeCorrelationEffects(shockParams: MarketShock): CorrelationEffect[] {
+  private analyzeCorrelationEffects(
+    shockParams: MarketShock,
+  ): CorrelationEffect[] {
     return []; // Placeholder
   }
 
@@ -670,7 +831,9 @@ export class RiskManagementServiceImpl implements RiskManagementService {
     return []; // Placeholder
   }
 
-  private generateMitigationStrategies(shockParams: MarketShock): MitigationStrategy[] {
+  private generateMitigationStrategies(
+    shockParams: MarketShock,
+  ): MitigationStrategy[] {
     return []; // Placeholder
   }
 }

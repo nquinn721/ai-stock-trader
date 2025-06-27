@@ -21,6 +21,13 @@ import { TradingStrategy } from './modules/auto-trading/entities/trading-strateg
 import { BehavioralFinanceModule } from './modules/behavioral-finance/behavioral-finance.module';
 import { BreakoutModule } from './modules/breakout/breakout.module';
 import { DataIntelligenceModule } from './modules/data-intelligence/data-intelligence.module';
+import {
+  ArbitrageOpportunityEntity,
+  LiquidityPositionEntity,
+  MarketMakingQuoteEntity,
+  MarketMakingStrategyEntity,
+  RiskExposureEntity,
+} from './modules/market-making/entities/market-making.entities';
 import { MarketMakingModule } from './modules/market-making/market-making.module';
 import {
   MarketAlert,
@@ -45,13 +52,6 @@ import { CrossAssetCorrelation } from './modules/multi-asset/entities/cross-asse
 import { CryptoData } from './modules/multi-asset/entities/crypto-data.entity';
 import { ForexData } from './modules/multi-asset/entities/forex-data.entity';
 import { MultiAssetModule } from './modules/multi-asset/multi-asset.module';
-import {
-  MarketMakingStrategyEntity,
-  MarketMakingQuoteEntity,
-  ArbitrageOpportunityEntity,
-  RiskExposureEntity,
-  LiquidityPositionEntity
-} from './modules/market-making/entities/market-making.entities';
 import { NewsModule } from './modules/news/news.module';
 import {
   NotificationEntity,

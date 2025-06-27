@@ -1,12 +1,12 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { EventEmitter } from 'events';
 import {
+  ExchangeBalance,
   ExchangeConnector,
+  ExchangeOrder,
   ExchangeOrderBook,
   ExchangeTicker,
   ExchangeTrade,
-  ExchangeOrder,
-  ExchangeBalance,
 } from '../interfaces/exchange-connector.interface';
 
 export interface WebSocketSubscription {
@@ -56,7 +56,7 @@ export class WebSocketManagerService extends EventEmitter {
   async subscribeOrderBook(
     exchange: string,
     symbol: string,
-    callback: (data: ExchangeOrderBook) => void
+    callback: (data: ExchangeOrderBook) => void,
   ): Promise<string> {
     const connector = this.exchanges.get(exchange);
     if (!connector) {
@@ -64,18 +64,18 @@ export class WebSocketManagerService extends EventEmitter {
     }
 
     const subscriptionId = `${exchange}_${symbol}_orderbook_${Date.now()}`;
-    
+
     try {
       await connector.subscribeOrderBook(symbol, (data) => {
         // Update cache
         this.updateMarketDataCache(exchange, symbol, { orderBook: data });
-        
+
         // Call user callback
         callback(data);
-        
+
         // Emit event for other listeners
         this.emit('orderbook', { exchange, symbol, data });
-        
+
         // Update subscription
         const sub = this.subscriptions.get(subscriptionId);
         if (sub) {
@@ -90,17 +90,18 @@ export class WebSocketManagerService extends EventEmitter {
         type: 'orderbook',
         active: true,
         callback,
-        lastUpdate: new Date()
+        lastUpdate: new Date(),
       };
 
       this.subscriptions.set(subscriptionId, subscription);
       this.connectionStatus.set(exchange, true);
-      
+
       this.logger.log(`Subscribed to order book: ${exchange}:${symbol}`);
       return subscriptionId;
-
     } catch (error) {
-      this.logger.error(`Failed to subscribe to order book ${exchange}:${symbol}: ${error.message}`);
+      this.logger.error(
+        `Failed to subscribe to order book ${exchange}:${symbol}: ${error.message}`,
+      );
       throw error;
     }
   }
@@ -111,7 +112,7 @@ export class WebSocketManagerService extends EventEmitter {
   async subscribeTicker(
     exchange: string,
     symbol: string,
-    callback: (data: ExchangeTicker) => void
+    callback: (data: ExchangeTicker) => void,
   ): Promise<string> {
     const connector = this.exchanges.get(exchange);
     if (!connector) {
@@ -119,18 +120,18 @@ export class WebSocketManagerService extends EventEmitter {
     }
 
     const subscriptionId = `${exchange}_${symbol}_ticker_${Date.now()}`;
-    
+
     try {
       await connector.subscribeTicker(symbol, (data) => {
         // Update cache
         this.updateMarketDataCache(exchange, symbol, { ticker: data });
-        
+
         // Call user callback
         callback(data);
-        
+
         // Emit event for other listeners
         this.emit('ticker', { exchange, symbol, data });
-        
+
         // Update subscription
         const sub = this.subscriptions.get(subscriptionId);
         if (sub) {
@@ -145,16 +146,17 @@ export class WebSocketManagerService extends EventEmitter {
         type: 'ticker',
         active: true,
         callback,
-        lastUpdate: new Date()
+        lastUpdate: new Date(),
       };
 
       this.subscriptions.set(subscriptionId, subscription);
-      
+
       this.logger.log(`Subscribed to ticker: ${exchange}:${symbol}`);
       return subscriptionId;
-
     } catch (error) {
-      this.logger.error(`Failed to subscribe to ticker ${exchange}:${symbol}: ${error.message}`);
+      this.logger.error(
+        `Failed to subscribe to ticker ${exchange}:${symbol}: ${error.message}`,
+      );
       throw error;
     }
   }
@@ -165,7 +167,7 @@ export class WebSocketManagerService extends EventEmitter {
   async subscribeTrades(
     exchange: string,
     symbol: string,
-    callback: (data: ExchangeTrade) => void
+    callback: (data: ExchangeTrade) => void,
   ): Promise<string> {
     const connector = this.exchanges.get(exchange);
     if (!connector) {
@@ -173,18 +175,18 @@ export class WebSocketManagerService extends EventEmitter {
     }
 
     const subscriptionId = `${exchange}_${symbol}_trades_${Date.now()}`;
-    
+
     try {
       await connector.subscribeTrades(symbol, (data) => {
         // Update cache with latest trade
         this.updateMarketDataCache(exchange, symbol, { trades: [data] });
-        
+
         // Call user callback
         callback(data);
-        
+
         // Emit event for other listeners
         this.emit('trade', { exchange, symbol, data });
-        
+
         // Update subscription
         const sub = this.subscriptions.get(subscriptionId);
         if (sub) {
@@ -199,16 +201,17 @@ export class WebSocketManagerService extends EventEmitter {
         type: 'trades',
         active: true,
         callback,
-        lastUpdate: new Date()
+        lastUpdate: new Date(),
       };
 
       this.subscriptions.set(subscriptionId, subscription);
-      
+
       this.logger.log(`Subscribed to trades: ${exchange}:${symbol}`);
       return subscriptionId;
-
     } catch (error) {
-      this.logger.error(`Failed to subscribe to trades ${exchange}:${symbol}: ${error.message}`);
+      this.logger.error(
+        `Failed to subscribe to trades ${exchange}:${symbol}: ${error.message}`,
+      );
       throw error;
     }
   }
@@ -218,7 +221,7 @@ export class WebSocketManagerService extends EventEmitter {
    */
   async subscribeOrders(
     exchange: string,
-    callback: (data: ExchangeOrder) => void
+    callback: (data: ExchangeOrder) => void,
   ): Promise<string> {
     const connector = this.exchanges.get(exchange);
     if (!connector) {
@@ -226,15 +229,15 @@ export class WebSocketManagerService extends EventEmitter {
     }
 
     const subscriptionId = `${exchange}_orders_${Date.now()}`;
-    
+
     try {
       await connector.subscribeOrders((data) => {
         // Call user callback
         callback(data);
-        
+
         // Emit event for other listeners
         this.emit('order', { exchange, data });
-        
+
         // Update subscription
         const sub = this.subscriptions.get(subscriptionId);
         if (sub) {
@@ -249,16 +252,17 @@ export class WebSocketManagerService extends EventEmitter {
         type: 'orders',
         active: true,
         callback,
-        lastUpdate: new Date()
+        lastUpdate: new Date(),
       };
 
       this.subscriptions.set(subscriptionId, subscription);
-      
+
       this.logger.log(`Subscribed to orders: ${exchange}`);
       return subscriptionId;
-
     } catch (error) {
-      this.logger.error(`Failed to subscribe to orders ${exchange}: ${error.message}`);
+      this.logger.error(
+        `Failed to subscribe to orders ${exchange}: ${error.message}`,
+      );
       throw error;
     }
   }
@@ -268,7 +272,7 @@ export class WebSocketManagerService extends EventEmitter {
    */
   async subscribeBalances(
     exchange: string,
-    callback: (data: ExchangeBalance[]) => void
+    callback: (data: ExchangeBalance[]) => void,
   ): Promise<string> {
     const connector = this.exchanges.get(exchange);
     if (!connector) {
@@ -276,15 +280,15 @@ export class WebSocketManagerService extends EventEmitter {
     }
 
     const subscriptionId = `${exchange}_balances_${Date.now()}`;
-    
+
     try {
       await connector.subscribeBalances((data) => {
         // Call user callback
         callback(data);
-        
+
         // Emit event for other listeners
         this.emit('balances', { exchange, data });
-        
+
         // Update subscription
         const sub = this.subscriptions.get(subscriptionId);
         if (sub) {
@@ -299,16 +303,17 @@ export class WebSocketManagerService extends EventEmitter {
         type: 'balances',
         active: true,
         callback,
-        lastUpdate: new Date()
+        lastUpdate: new Date(),
       };
 
       this.subscriptions.set(subscriptionId, subscription);
-      
+
       this.logger.log(`Subscribed to balances: ${exchange}`);
       return subscriptionId;
-
     } catch (error) {
-      this.logger.error(`Failed to subscribe to balances ${exchange}: ${error.message}`);
+      this.logger.error(
+        `Failed to subscribe to balances ${exchange}: ${error.message}`,
+      );
       throw error;
     }
   }
@@ -348,12 +353,13 @@ export class WebSocketManagerService extends EventEmitter {
 
       subscription.active = false;
       this.subscriptions.delete(subscriptionId);
-      
+
       this.logger.log(`Unsubscribed: ${subscriptionId}`);
       return true;
-
     } catch (error) {
-      this.logger.error(`Failed to unsubscribe ${subscriptionId}: ${error.message}`);
+      this.logger.error(
+        `Failed to unsubscribe ${subscriptionId}: ${error.message}`,
+      );
       return false;
     }
   }
@@ -369,7 +375,7 @@ export class WebSocketManagerService extends EventEmitter {
 
     try {
       await connector.unsubscribeAll();
-      
+
       // Mark all subscriptions as inactive
       for (const [id, subscription] of this.subscriptions) {
         if (subscription.exchange === exchange) {
@@ -380,16 +386,20 @@ export class WebSocketManagerService extends EventEmitter {
 
       this.connectionStatus.set(exchange, false);
       this.logger.log(`Unsubscribed all for exchange: ${exchange}`);
-
     } catch (error) {
-      this.logger.error(`Failed to unsubscribe all for ${exchange}: ${error.message}`);
+      this.logger.error(
+        `Failed to unsubscribe all for ${exchange}: ${error.message}`,
+      );
     }
   }
 
   /**
    * Get market data snapshot
    */
-  getMarketDataSnapshot(exchange: string, symbol: string): MarketDataSnapshot | undefined {
+  getMarketDataSnapshot(
+    exchange: string,
+    symbol: string,
+  ): MarketDataSnapshot | undefined {
     return this.marketDataCache.get(`${exchange}:${symbol}`);
   }
 
@@ -397,7 +407,7 @@ export class WebSocketManagerService extends EventEmitter {
    * Get all active subscriptions
    */
   getActiveSubscriptions(): WebSocketSubscription[] {
-    return Array.from(this.subscriptions.values()).filter(sub => sub.active);
+    return Array.from(this.subscriptions.values()).filter((sub) => sub.active);
   }
 
   /**
@@ -422,12 +432,13 @@ export class WebSocketManagerService extends EventEmitter {
   }> {
     const now = new Date();
     const staleThreshold = 5 * 60 * 1000; // 5 minutes
-    
+
     let staleCount = 0;
     const activeSubscriptions = this.getActiveSubscriptions();
-    
+
     for (const subscription of activeSubscriptions) {
-      const timeSinceLastUpdate = now.getTime() - subscription.lastUpdate.getTime();
+      const timeSinceLastUpdate =
+        now.getTime() - subscription.lastUpdate.getTime();
       if (timeSinceLastUpdate > staleThreshold) {
         staleCount++;
         this.logger.warn(`Stale subscription detected: ${subscription.id}`);
@@ -438,7 +449,7 @@ export class WebSocketManagerService extends EventEmitter {
       totalSubscriptions: this.subscriptions.size,
       activeSubscriptions: activeSubscriptions.length,
       staleSubscriptions: staleCount,
-      connectionStatus: this.getConnectionStatus()
+      connectionStatus: this.getConnectionStatus(),
     };
   }
 
@@ -448,19 +459,19 @@ export class WebSocketManagerService extends EventEmitter {
   private updateMarketDataCache(
     exchange: string,
     symbol: string,
-    update: Partial<MarketDataSnapshot>
+    update: Partial<MarketDataSnapshot>,
   ): void {
     const key = `${exchange}:${symbol}`;
     const existing = this.marketDataCache.get(key) || {
       exchange,
       symbol,
-      timestamp: new Date()
+      timestamp: new Date(),
     };
 
     const updated = {
       ...existing,
       ...update,
-      timestamp: new Date()
+      timestamp: new Date(),
     };
 
     this.marketDataCache.set(key, updated);
@@ -471,7 +482,7 @@ export class WebSocketManagerService extends EventEmitter {
    */
   async onModuleDestroy(): Promise<void> {
     this.logger.log('Cleaning up WebSocket subscriptions...');
-    
+
     for (const [exchangeName] of this.exchanges) {
       await this.unsubscribeExchange(exchangeName);
     }

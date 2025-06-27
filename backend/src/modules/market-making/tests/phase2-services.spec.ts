@@ -1,13 +1,12 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ExchangeConnectorService } from '../services/exchange-connector.service';
-import { WebSocketManagerService } from '../services/websocket-manager.service';
 import { BinanceAdapter } from '../adapters/binance.adapter';
 import {
   ExchangeConfig,
   ExchangeOrderBook,
   ExchangeTicker,
-  ExchangeTrade,
 } from '../interfaces/exchange-connector.interface';
+import { ExchangeConnectorService } from '../services/exchange-connector.service';
+import { WebSocketManagerService } from '../services/websocket-manager.service';
 
 describe('ExchangeConnectorService', () => {
   let service: ExchangeConnectorService;
@@ -21,8 +20,8 @@ describe('ExchangeConnectorService', () => {
     rateLimits: {
       requests: 1200,
       interval: 60000,
-      weight: 1
-    }
+      weight: 1,
+    },
   };
 
   beforeEach(async () => {
@@ -47,8 +46,8 @@ describe('ExchangeConnectorService', () => {
             unsubscribeTicker: jest.fn(),
             unsubscribeTrades: jest.fn(),
             unsubscribeAll: jest.fn(),
-          }
-        }
+          },
+        },
       ],
     }).compile();
 
@@ -63,7 +62,7 @@ describe('ExchangeConnectorService', () => {
     it('should register an exchange connector', () => {
       const exchangeName = 'test-exchange';
       service.registerExchange(exchangeName, binanceAdapter);
-      
+
       expect(service.getExchange(exchangeName)).toBe(binanceAdapter);
       expect(service.getExchanges()).toContain(exchangeName);
     });
@@ -75,7 +74,7 @@ describe('ExchangeConnectorService', () => {
     it('should list all registered exchanges', () => {
       service.registerExchange('test1', binanceAdapter);
       service.registerExchange('test2', binanceAdapter);
-      
+
       const exchanges = service.getExchanges();
       expect(exchanges).toContain('test1');
       expect(exchanges).toContain('test2');
@@ -89,24 +88,38 @@ describe('ExchangeConnectorService', () => {
         symbol: 'BTCUSDT',
         exchange: 'binance',
         timestamp: new Date(),
-        bids: [[45000, 1.5], [44999, 2.0]],
-        asks: [[45001, 1.0], [45002, 1.8]]
+        bids: [
+          [45000, 1.5],
+          [44999, 2.0],
+        ],
+        asks: [
+          [45001, 1.0],
+          [45002, 1.8],
+        ],
       };
 
-      (binanceAdapter.getOrderBook as jest.Mock).mockResolvedValue(mockOrderBook);
+      (binanceAdapter.getOrderBook as jest.Mock).mockResolvedValue(
+        mockOrderBook,
+      );
 
-      const result = await service.getAggregatedOrderBook('BTCUSDT', ['binance']);
-      
+      const result = await service.getAggregatedOrderBook('BTCUSDT', [
+        'binance',
+      ]);
+
       expect(result).toHaveLength(1);
       expect(result[0]).toEqual(mockOrderBook);
       expect(binanceAdapter.getOrderBook).toHaveBeenCalledWith('BTCUSDT');
     });
 
     it('should handle errors gracefully when getting order book', async () => {
-      (binanceAdapter.getOrderBook as jest.Mock).mockRejectedValue(new Error('API Error'));
+      (binanceAdapter.getOrderBook as jest.Mock).mockRejectedValue(
+        new Error('API Error'),
+      );
 
-      const result = await service.getAggregatedOrderBook('BTCUSDT', ['binance']);
-      
+      const result = await service.getAggregatedOrderBook('BTCUSDT', [
+        'binance',
+      ]);
+
       expect(result).toHaveLength(0);
     });
 
@@ -116,13 +129,15 @@ describe('ExchangeConnectorService', () => {
         exchange: 'binance',
         timestamp: new Date(),
         bids: [[45000, 1.5]],
-        asks: [[45001, 1.0]]
+        asks: [[45001, 1.0]],
       };
 
-      (binanceAdapter.getOrderBook as jest.Mock).mockResolvedValue(mockOrderBook);
+      (binanceAdapter.getOrderBook as jest.Mock).mockResolvedValue(
+        mockOrderBook,
+      );
 
       const result = await service.getAggregatedOrderBook('BTCUSDT');
-      
+
       expect(result).toHaveLength(1);
     });
   });
@@ -133,36 +148,50 @@ describe('ExchangeConnectorService', () => {
         symbol: 'BTCUSDT',
         exchange: 'binance',
         timestamp: new Date(),
-        bids: [[45000, 1.5], [44999, 2.0]], // Best bid: 45000
-        asks: [[45002, 1.0], [45003, 1.8]]  // Best ask: 45002
+        bids: [
+          [45000, 1.5],
+          [44999, 2.0],
+        ], // Best bid: 45000
+        asks: [
+          [45002, 1.0],
+          [45003, 1.8],
+        ], // Best ask: 45002
       };
 
       const mockOrderBook2: ExchangeOrderBook = {
         symbol: 'BTCUSDT',
         exchange: 'coinbase',
         timestamp: new Date(),
-        bids: [[44999.5, 1.0], [44998, 1.5]], // Lower bid
-        asks: [[45001, 0.5], [45001.5, 1.0]]  // Better ask: 45001
+        bids: [
+          [44999.5, 1.0],
+          [44998, 1.5],
+        ], // Lower bid
+        asks: [
+          [45001, 0.5],
+          [45001.5, 1.0],
+        ], // Better ask: 45001
       };
 
       service.registerExchange('coinbase', {
         ...binanceAdapter,
-        getOrderBook: jest.fn().mockResolvedValue(mockOrderBook2)
+        getOrderBook: jest.fn().mockResolvedValue(mockOrderBook2),
       } as any);
 
-      (binanceAdapter.getOrderBook as jest.Mock).mockResolvedValue(mockOrderBook1);
+      (binanceAdapter.getOrderBook as jest.Mock).mockResolvedValue(
+        mockOrderBook1,
+      );
 
       const result = await service.getBestQuotes('BTCUSDT');
-      
+
       expect(result.bestBid).toEqual({
         price: 45000,
         quantity: 1.5,
-        exchange: 'binance'
+        exchange: 'binance',
       });
       expect(result.bestAsk).toEqual({
         price: 45001,
         quantity: 0.5,
-        exchange: 'coinbase'
+        exchange: 'coinbase',
       });
     });
 
@@ -172,13 +201,15 @@ describe('ExchangeConnectorService', () => {
         exchange: 'binance',
         timestamp: new Date(),
         bids: [],
-        asks: []
+        asks: [],
       };
 
-      (binanceAdapter.getOrderBook as jest.Mock).mockResolvedValue(mockOrderBook);
+      (binanceAdapter.getOrderBook as jest.Mock).mockResolvedValue(
+        mockOrderBook,
+      );
 
       const result = await service.getBestQuotes('BTCUSDT');
-      
+
       expect(result.bestBid).toBeNull();
       expect(result.bestAsk).toBeNull();
     });
@@ -199,7 +230,7 @@ describe('ExchangeConnectorService', () => {
         filledQuantity: 1.0,
         remainingQuantity: 0,
         timestamp: new Date(),
-        updatedAt: new Date()
+        updatedAt: new Date(),
       };
 
       const mockSellOrder = {
@@ -215,12 +246,12 @@ describe('ExchangeConnectorService', () => {
         filledQuantity: 1.0,
         remainingQuantity: 0,
         timestamp: new Date(),
-        updatedAt: new Date()
+        updatedAt: new Date(),
       };
 
       const sellAdapter = {
         ...binanceAdapter,
-        createOrder: jest.fn().mockResolvedValue(mockSellOrder)
+        createOrder: jest.fn().mockResolvedValue(mockSellOrder),
       };
 
       service.registerExchange('coinbase', sellAdapter as any);
@@ -228,10 +259,10 @@ describe('ExchangeConnectorService', () => {
 
       const result = await service.executeArbitrage(
         'BTCUSDT',
-        'binance',  // buy exchange
+        'binance', // buy exchange
         'coinbase', // sell exchange
         1.0,
-        100 // expected profit
+        100, // expected profit
       );
 
       expect(result.success).toBe(true);
@@ -243,18 +274,20 @@ describe('ExchangeConnectorService', () => {
     it('should handle arbitrage execution errors', async () => {
       const sellAdapter = {
         ...binanceAdapter,
-        createOrder: jest.fn().mockRejectedValue(new Error('Order failed'))
+        createOrder: jest.fn().mockRejectedValue(new Error('Order failed')),
       };
 
       service.registerExchange('coinbase', sellAdapter as any);
-      (binanceAdapter.createOrder as jest.Mock).mockRejectedValue(new Error('Order failed'));
+      (binanceAdapter.createOrder as jest.Mock).mockRejectedValue(
+        new Error('Order failed'),
+      );
 
       const result = await service.executeArbitrage(
         'BTCUSDT',
         'binance',
         'coinbase',
         1.0,
-        100
+        100,
       );
 
       expect(result.success).toBe(false);
@@ -267,7 +300,7 @@ describe('ExchangeConnectorService', () => {
         'non-existent',
         'binance',
         1.0,
-        100
+        100,
       );
 
       expect(result.success).toBe(false);
@@ -280,16 +313,18 @@ describe('ExchangeConnectorService', () => {
       (binanceAdapter.connect as jest.Mock).mockResolvedValue(undefined);
 
       const result = await service.checkConnectivity();
-      
+
       expect(result).toEqual({ binance: true });
       expect(binanceAdapter.connect).toHaveBeenCalled();
     });
 
     it('should handle connectivity failures', async () => {
-      (binanceAdapter.connect as jest.Mock).mockRejectedValue(new Error('Connection failed'));
+      (binanceAdapter.connect as jest.Mock).mockRejectedValue(
+        new Error('Connection failed'),
+      );
 
       const result = await service.checkConnectivity();
-      
+
       expect(result).toEqual({ binance: false });
     });
 
@@ -297,7 +332,7 @@ describe('ExchangeConnectorService', () => {
       (binanceAdapter.isConnected as jest.Mock).mockReturnValue(true);
 
       const result = await service.getExchangeStatus();
-      
+
       expect(result.binance.connected).toBe(true);
       expect(result.binance.rateLimitUsed).toBe(0);
       expect(result.binance.rateLimitRemaining).toBe(1000);
@@ -313,7 +348,7 @@ describe('ExchangeConnectorService', () => {
           available: 0.5,
           locked: 0.1,
           total: 0.6,
-          timestamp: new Date()
+          timestamp: new Date(),
         },
         {
           currency: 'USDT',
@@ -321,14 +356,14 @@ describe('ExchangeConnectorService', () => {
           available: 10000,
           locked: 2000,
           total: 12000,
-          timestamp: new Date()
-        }
+          timestamp: new Date(),
+        },
       ];
 
       (binanceAdapter.getBalances as jest.Mock).mockResolvedValue(mockBalances);
 
       const result = await service.getAggregatedBalances();
-      
+
       expect(result.BTC.total).toBe(0.6);
       expect(result.BTC.exchanges.binance).toBe(0.6);
       expect(result.USDT.total).toBe(12000);
@@ -336,10 +371,12 @@ describe('ExchangeConnectorService', () => {
     });
 
     it('should handle balance retrieval errors', async () => {
-      (binanceAdapter.getBalances as jest.Mock).mockRejectedValue(new Error('Balance error'));
+      (binanceAdapter.getBalances as jest.Mock).mockRejectedValue(
+        new Error('Balance error'),
+      );
 
       const result = await service.getAggregatedBalances();
-      
+
       expect(result).toEqual({});
     });
   });
@@ -376,7 +413,7 @@ describe('WebSocketManagerService', () => {
     it('should register an exchange for WebSocket operations', () => {
       const anotherExchange = { ...mockExchange };
       service.registerExchange('another-exchange', anotherExchange);
-      
+
       const connectionStatus = service.getConnectionStatus();
       expect(connectionStatus['another-exchange']).toBe(false);
     });
@@ -390,32 +427,43 @@ describe('WebSocketManagerService', () => {
         exchange: 'test-exchange',
         timestamp: new Date(),
         bids: [[45000, 1.0]],
-        asks: [[45001, 1.0]]
+        asks: [[45001, 1.0]],
       };
 
-      mockExchange.subscribeOrderBook.mockImplementation((symbol: string, callback: Function) => {
-        callback(mockOrderBook);
-        return Promise.resolve();
-      });
+      mockExchange.subscribeOrderBook.mockImplementation(
+        (symbol: string, callback: Function) => {
+          callback(mockOrderBook);
+          return Promise.resolve();
+        },
+      );
 
-      const subscriptionId = await service.subscribeOrderBook('test-exchange', 'BTCUSDT', mockCallback);
-      
+      const subscriptionId = await service.subscribeOrderBook(
+        'test-exchange',
+        'BTCUSDT',
+        mockCallback,
+      );
+
       expect(subscriptionId).toBeDefined();
       expect(mockCallback).toHaveBeenCalledWith(mockOrderBook);
-      expect(mockExchange.subscribeOrderBook).toHaveBeenCalledWith('BTCUSDT', expect.any(Function));
+      expect(mockExchange.subscribeOrderBook).toHaveBeenCalledWith(
+        'BTCUSDT',
+        expect.any(Function),
+      );
     });
 
     it('should handle subscription errors', async () => {
-      mockExchange.subscribeOrderBook.mockRejectedValue(new Error('Subscription failed'));
+      mockExchange.subscribeOrderBook.mockRejectedValue(
+        new Error('Subscription failed'),
+      );
 
       await expect(
-        service.subscribeOrderBook('test-exchange', 'BTCUSDT', jest.fn())
+        service.subscribeOrderBook('test-exchange', 'BTCUSDT', jest.fn()),
       ).rejects.toThrow('Subscription failed');
     });
 
     it('should throw error for non-existent exchange', async () => {
       await expect(
-        service.subscribeOrderBook('non-existent', 'BTCUSDT', jest.fn())
+        service.subscribeOrderBook('non-existent', 'BTCUSDT', jest.fn()),
       ).rejects.toThrow('Exchange non-existent not found');
     });
   });
@@ -433,16 +481,22 @@ describe('WebSocketManagerService', () => {
         close: 45500,
         volume: 1000,
         change: 500,
-        changePercent: 1.11
+        changePercent: 1.11,
       };
 
-      mockExchange.subscribeTicker.mockImplementation((symbol: string, callback: Function) => {
-        callback(mockTicker);
-        return Promise.resolve();
-      });
+      mockExchange.subscribeTicker.mockImplementation(
+        (symbol: string, callback: Function) => {
+          callback(mockTicker);
+          return Promise.resolve();
+        },
+      );
 
-      const subscriptionId = await service.subscribeTicker('test-exchange', 'BTCUSDT', mockCallback);
-      
+      const subscriptionId = await service.subscribeTicker(
+        'test-exchange',
+        'BTCUSDT',
+        mockCallback,
+      );
+
       expect(subscriptionId).toBeDefined();
       expect(mockCallback).toHaveBeenCalledWith(mockTicker);
     });
@@ -450,9 +504,13 @@ describe('WebSocketManagerService', () => {
 
   describe('Unsubscription', () => {
     it('should unsubscribe from order book', async () => {
-      const subscriptionId = await service.subscribeOrderBook('test-exchange', 'BTCUSDT', jest.fn());
+      const subscriptionId = await service.subscribeOrderBook(
+        'test-exchange',
+        'BTCUSDT',
+        jest.fn(),
+      );
       const result = await service.unsubscribe(subscriptionId);
-      
+
       expect(result).toBe(true);
       expect(mockExchange.unsubscribeOrderBook).toHaveBeenCalledWith('BTCUSDT');
     });
@@ -465,9 +523,9 @@ describe('WebSocketManagerService', () => {
     it('should unsubscribe all from exchange', async () => {
       await service.subscribeOrderBook('test-exchange', 'BTCUSDT', jest.fn());
       await service.subscribeTicker('test-exchange', 'ETHUSDT', jest.fn());
-      
+
       await service.unsubscribeExchange('test-exchange');
-      
+
       expect(mockExchange.unsubscribeAll).toHaveBeenCalled();
       expect(service.getActiveSubscriptions()).toHaveLength(0);
     });
@@ -480,17 +538,22 @@ describe('WebSocketManagerService', () => {
         exchange: 'test-exchange',
         timestamp: new Date(),
         bids: [[45000, 1.0]],
-        asks: [[45001, 1.0]]
+        asks: [[45001, 1.0]],
       };
 
-      mockExchange.subscribeOrderBook.mockImplementation((symbol: string, callback: Function) => {
-        callback(mockOrderBook);
-        return Promise.resolve();
-      });
+      mockExchange.subscribeOrderBook.mockImplementation(
+        (symbol: string, callback: Function) => {
+          callback(mockOrderBook);
+          return Promise.resolve();
+        },
+      );
 
       await service.subscribeOrderBook('test-exchange', 'BTCUSDT', jest.fn());
-      
-      const snapshot = service.getMarketDataSnapshot('test-exchange', 'BTCUSDT');
+
+      const snapshot = service.getMarketDataSnapshot(
+        'test-exchange',
+        'BTCUSDT',
+      );
       expect(snapshot?.orderBook).toEqual(mockOrderBook);
     });
 
@@ -504,9 +567,9 @@ describe('WebSocketManagerService', () => {
     it('should perform health check on subscriptions', async () => {
       await service.subscribeOrderBook('test-exchange', 'BTCUSDT', jest.fn());
       await service.subscribeTicker('test-exchange', 'ETHUSDT', jest.fn());
-      
+
       const healthCheck = await service.healthCheck();
-      
+
       expect(healthCheck.totalSubscriptions).toBe(2);
       expect(healthCheck.activeSubscriptions).toBe(2);
       expect(healthCheck.staleSubscriptions).toBe(0);

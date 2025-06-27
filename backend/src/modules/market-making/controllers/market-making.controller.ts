@@ -1,43 +1,42 @@
 import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Param,
-  Query,
-  UseGuards,
-  Logger,
   BadRequestException,
+  Body,
+  Controller,
+  Delete,
+  Get,
   InternalServerErrorException,
-  Delete
+  Logger,
+  Param,
+  Post,
+  Query,
 } from '@nestjs/common';
-import { MarketMakingServiceImpl } from '../services/market-making.service';
-import { LiquidityProvisionServiceImpl } from '../services/liquidity-provision.service';
-import { RiskManagementServiceImpl } from '../services/risk-management.service';
-import { ExchangeConnectorService } from '../services/exchange-connector.service';
-import { WebSocketManagerService } from '../services/websocket-manager.service';
-import { DataPersistenceService } from '../services/data-persistence.service';
+import {
+  ArbitrageOpportunity,
+  LiquidityPool,
+  MeanReversionParams,
+  MomentumSignals,
+} from '../interfaces/liquidity-provision.interface';
 import {
   MarketConditions,
   MarketMakingStrategy,
   Position,
+  RiskExposure,
   RiskLimits,
-  RiskExposure
 } from '../interfaces/market-making.interface';
 import {
-  MeanReversionParams,
-  MomentumSignals,
-  ArbitrageOpportunity,
-  LiquidityPool
-} from '../interfaces/liquidity-provision.interface';
-import {
+  MarketShock,
+  OptionsPosition,
   Portfolio,
   PortfolioPosition,
-  OptionsPosition,
   StressScenario,
-  MarketShock
 } from '../interfaces/risk-management.interface';
+import { DataPersistenceService } from '../services/data-persistence.service';
+import { ExchangeConnectorService } from '../services/exchange-connector.service';
+import { LiquidityProvisionServiceImpl } from '../services/liquidity-provision.service';
 import { MarketDataServiceImpl } from '../services/market-data.service';
+import { MarketMakingServiceImpl } from '../services/market-making.service';
+import { RiskManagementServiceImpl } from '../services/risk-management.service';
+import { WebSocketManagerService } from '../services/websocket-manager.service';
 
 @Controller('market-making')
 export class MarketMakingController {
@@ -58,47 +57,51 @@ export class MarketMakingController {
   @Post('optimal-spread/:symbol')
   async calculateOptimalSpread(
     @Param('symbol') symbol: string,
-    @Body() marketConditions: MarketConditions
+    @Body() marketConditions: MarketConditions,
   ) {
     try {
       this.logger.log(`Calculating optimal spread for ${symbol}`);
-      
+
       if (!symbol || !marketConditions) {
-        throw new BadRequestException('Symbol and market conditions are required');
+        throw new BadRequestException(
+          'Symbol and market conditions are required',
+        );
       }
 
       const result = await this.marketMakingService.calculateOptimalSpread(
         symbol,
-        marketConditions
+        marketConditions,
       );
 
       return {
         success: true,
         data: result,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
     } catch (error) {
       this.logger.error(`Error calculating optimal spread: ${error.message}`);
-      throw new InternalServerErrorException('Failed to calculate optimal spread');
+      throw new InternalServerErrorException(
+        'Failed to calculate optimal spread',
+      );
     }
   }
 
   @Post('manage-inventory')
   async manageInventory(
-    @Body() request: { position: Position; riskLimits: RiskLimits }
+    @Body() request: { position: Position; riskLimits: RiskLimits },
   ) {
     try {
       this.logger.log(`Managing inventory for ${request.position.symbol}`);
-      
+
       const result = await this.marketMakingService.manageInventory(
         request.position,
-        request.riskLimits
+        request.riskLimits,
       );
 
       return {
         success: true,
         data: result,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
     } catch (error) {
       this.logger.error(`Error managing inventory: ${error.message}`);
@@ -109,17 +112,20 @@ export class MarketMakingController {
   @Get('fair-value/:symbol')
   async calculateFairValue(
     @Param('symbol') symbol: string,
-    @Query('venue') venue: string = 'PRIMARY'
+    @Query('venue') venue: string = 'PRIMARY',
   ) {
     try {
       this.logger.log(`Calculating fair value for ${symbol} on ${venue}`);
-      
-      const result = await this.marketMakingService.calculateFairValue(symbol, venue);
+
+      const result = await this.marketMakingService.calculateFairValue(
+        symbol,
+        venue,
+      );
 
       return {
         success: true,
         data: result,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
     } catch (error) {
       this.logger.error(`Error calculating fair value: ${error.message}`);
@@ -131,18 +137,21 @@ export class MarketMakingController {
   async executeMarketMakingStrategy(@Body() strategy: MarketMakingStrategy) {
     try {
       this.logger.log(`Executing market making strategy: ${strategy.name}`);
-      
-      const result = await this.marketMakingService.executeMarketMakingOrders(strategy);
+
+      const result =
+        await this.marketMakingService.executeMarketMakingOrders(strategy);
 
       return {
         success: true,
         data: result,
         message: `Executed ${result.length} orders for strategy ${strategy.name}`,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
     } catch (error) {
       this.logger.error(`Error executing strategy: ${error.message}`);
-      throw new InternalServerErrorException('Failed to execute market making strategy');
+      throw new InternalServerErrorException(
+        'Failed to execute market making strategy',
+      );
     }
   }
 
@@ -150,13 +159,13 @@ export class MarketMakingController {
   async hedgePosition(@Body() exposure: RiskExposure) {
     try {
       this.logger.log(`Calculating hedge for ${exposure.symbol}`);
-      
+
       const result = await this.marketMakingService.hedgePosition(exposure);
 
       return {
         success: true,
         data: result,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
     } catch (error) {
       this.logger.error(`Error hedging position: ${error.message}`);
@@ -167,21 +176,28 @@ export class MarketMakingController {
   // Liquidity Provision Endpoints
 
   @Post('strategies/mean-reversion')
-  async implementMeanReversionStrategy(@Body() parameters: MeanReversionParams) {
+  async implementMeanReversionStrategy(
+    @Body() parameters: MeanReversionParams,
+  ) {
     try {
       this.logger.log('Implementing mean reversion strategy');
-      
-      const result = await this.liquidityService.implementMeanReversionStrategy(parameters);
+
+      const result =
+        await this.liquidityService.implementMeanReversionStrategy(parameters);
 
       return {
         success: true,
         data: result,
         message: `Mean reversion strategy ${result.id} implemented successfully`,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
     } catch (error) {
-      this.logger.error(`Error implementing mean reversion strategy: ${error.message}`);
-      throw new InternalServerErrorException('Failed to implement mean reversion strategy');
+      this.logger.error(
+        `Error implementing mean reversion strategy: ${error.message}`,
+      );
+      throw new InternalServerErrorException(
+        'Failed to implement mean reversion strategy',
+      );
     }
   }
 
@@ -189,17 +205,20 @@ export class MarketMakingController {
   async executeMomentumStrategy(@Body() signals: MomentumSignals) {
     try {
       this.logger.log(`Executing momentum strategy for ${signals.symbol}`);
-      
-      const result = await this.liquidityService.executeMomentumStrategy(signals);
+
+      const result =
+        await this.liquidityService.executeMomentumStrategy(signals);
 
       return {
         success: true,
         data: result,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
     } catch (error) {
       this.logger.error(`Error executing momentum strategy: ${error.message}`);
-      throw new InternalServerErrorException('Failed to execute momentum strategy');
+      throw new InternalServerErrorException(
+        'Failed to execute momentum strategy',
+      );
     }
   }
 
@@ -207,27 +226,34 @@ export class MarketMakingController {
   async detectArbitrageOpportunities() {
     try {
       this.logger.log('Detecting arbitrage opportunities');
-      
-      const opportunities = await this.liquidityService.detectArbitrageOpportunities();
+
+      const opportunities =
+        await this.liquidityService.detectArbitrageOpportunities();
 
       return {
         success: true,
         data: opportunities,
         count: opportunities.length,
         message: `Found ${opportunities.length} arbitrage opportunities`,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
     } catch (error) {
-      this.logger.error(`Error detecting arbitrage opportunities: ${error.message}`);
-      throw new InternalServerErrorException('Failed to detect arbitrage opportunities');
+      this.logger.error(
+        `Error detecting arbitrage opportunities: ${error.message}`,
+      );
+      throw new InternalServerErrorException(
+        'Failed to detect arbitrage opportunities',
+      );
     }
   }
 
   @Post('arbitrage/execute/:opportunityId')
-  async executeCrossVenueArbitrage(@Param('opportunityId') opportunityId: string) {
+  async executeCrossVenueArbitrage(
+    @Param('opportunityId') opportunityId: string,
+  ) {
     try {
       this.logger.log(`Executing arbitrage opportunity: ${opportunityId}`);
-      
+
       // In a real implementation, you would fetch the opportunity from storage
       const mockOpportunity: ArbitrageOpportunity = {
         id: opportunityId,
@@ -239,16 +265,17 @@ export class MarketMakingController {
         executionTimeframe: 5,
         confidence: 0.8,
         discovered: new Date(),
-        expires: new Date(Date.now() + 5 * 60 * 1000) // 5 minutes
+        expires: new Date(Date.now() + 5 * 60 * 1000), // 5 minutes
       };
 
-      const result = await this.liquidityService.executeCrossVenueArbitrage(mockOpportunity);
+      const result =
+        await this.liquidityService.executeCrossVenueArbitrage(mockOpportunity);
 
       return {
         success: true,
         data: result,
         message: `Arbitrage executed with ${result.actualProfit > 0 ? 'profit' : 'loss'}: ${result.actualProfit}`,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
     } catch (error) {
       this.logger.error(`Error executing arbitrage: ${error.message}`);
@@ -258,25 +285,27 @@ export class MarketMakingController {
 
   @Post('defi/provide-liquidity')
   async provideLiquidityToDEX(
-    @Body() request: { pool: LiquidityPool; amount: number }
+    @Body() request: { pool: LiquidityPool; amount: number },
   ) {
     try {
       this.logger.log(`Providing liquidity to DeFi pool: ${request.pool.id}`);
-      
+
       const result = await this.liquidityService.provideLiquidityToDEX(
         request.pool,
-        request.amount
+        request.amount,
       );
 
       return {
         success: true,
         data: result,
         message: `Liquidity provided to ${request.pool.protocol}`,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
     } catch (error) {
       this.logger.error(`Error providing DeFi liquidity: ${error.message}`);
-      throw new InternalServerErrorException('Failed to provide DeFi liquidity');
+      throw new InternalServerErrorException(
+        'Failed to provide DeFi liquidity',
+      );
     }
   }
 
@@ -284,24 +313,26 @@ export class MarketMakingController {
 
   @Post('risk/var-calculation')
   async calculatePortfolioVaR(
-    @Body() request: { portfolio: Portfolio; timeframe: string }
+    @Body() request: { portfolio: Portfolio; timeframe: string },
   ) {
     try {
       this.logger.log(`Calculating VaR for portfolio: ${request.portfolio.id}`);
-      
+
       const result = await this.riskManagementService.calculatePortfolioVaR(
         request.portfolio,
-        request.timeframe
+        request.timeframe,
       );
 
       return {
         success: true,
         data: result,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
     } catch (error) {
       this.logger.error(`Error calculating VaR: ${error.message}`);
-      throw new InternalServerErrorException('Failed to calculate portfolio VaR');
+      throw new InternalServerErrorException(
+        'Failed to calculate portfolio VaR',
+      );
     }
   }
 
@@ -309,35 +340,44 @@ export class MarketMakingController {
   async assessConcentrationRisk(@Body() positions: PortfolioPosition[]) {
     try {
       this.logger.log('Assessing portfolio concentration risk');
-      
-      const result = await this.riskManagementService.assessConcentrationRisk(positions);
+
+      const result =
+        await this.riskManagementService.assessConcentrationRisk(positions);
 
       return {
         success: true,
         data: result,
-        riskLevel: result.riskScore > 0.7 ? 'HIGH' : result.riskScore > 0.4 ? 'MEDIUM' : 'LOW',
-        timestamp: new Date().toISOString()
+        riskLevel:
+          result.riskScore > 0.7
+            ? 'HIGH'
+            : result.riskScore > 0.4
+              ? 'MEDIUM'
+              : 'LOW',
+        timestamp: new Date().toISOString(),
       };
     } catch (error) {
       this.logger.error(`Error assessing concentration risk: ${error.message}`);
-      throw new InternalServerErrorException('Failed to assess concentration risk');
+      throw new InternalServerErrorException(
+        'Failed to assess concentration risk',
+      );
     }
   }
 
   @Post('risk/greeks/:symbol')
   async calculateGreeks(
     @Param('symbol') symbol: string,
-    @Body() optionsPosition: OptionsPosition
+    @Body() optionsPosition: OptionsPosition,
   ) {
     try {
       this.logger.log(`Calculating Greeks for ${symbol}`);
-      
-      const result = await this.riskManagementService.calculateGreeks(optionsPosition);
+
+      const result =
+        await this.riskManagementService.calculateGreeks(optionsPosition);
 
       return {
         success: true,
         data: result,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
     } catch (error) {
       this.logger.error(`Error calculating Greeks: ${error.message}`);
@@ -349,14 +389,15 @@ export class MarketMakingController {
   async executeDynamicHedge(@Body() exposure: RiskExposure) {
     try {
       this.logger.log(`Executing dynamic hedge for ${exposure.symbol}`);
-      
-      const result = await this.riskManagementService.executeDynamicHedge(exposure);
+
+      const result =
+        await this.riskManagementService.executeDynamicHedge(exposure);
 
       return {
         success: true,
         data: result,
         message: `Dynamic hedge executed with ${result.expectedRiskReduction}% risk reduction`,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
     } catch (error) {
       this.logger.error(`Error executing dynamic hedge: ${error.message}`);
@@ -368,18 +409,21 @@ export class MarketMakingController {
   async performStressTesting(@Body() scenarios: StressScenario[]) {
     try {
       this.logger.log('Performing stress testing');
-      
-      const result = await this.riskManagementService.performStressTesting(scenarios);
+
+      const result =
+        await this.riskManagementService.performStressTesting(scenarios);
 
       return {
         success: true,
         data: result,
         message: `Stress testing completed for ${scenarios.length} scenarios`,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
     } catch (error) {
       this.logger.error(`Error performing stress testing: ${error.message}`);
-      throw new InternalServerErrorException('Failed to perform stress testing');
+      throw new InternalServerErrorException(
+        'Failed to perform stress testing',
+      );
     }
   }
 
@@ -387,14 +431,15 @@ export class MarketMakingController {
   async simulateMarketShock(@Body() shockParams: MarketShock) {
     try {
       this.logger.log(`Simulating market shock: ${shockParams.shockType}`);
-      
-      const result = await this.riskManagementService.simulateMarketShock(shockParams);
+
+      const result =
+        await this.riskManagementService.simulateMarketShock(shockParams);
 
       return {
         success: true,
         data: result,
         message: `Market shock simulation completed with ${result.immediateImpact}% impact`,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
     } catch (error) {
       this.logger.error(`Error simulating market shock: ${error.message}`);
@@ -409,7 +454,10 @@ export class MarketMakingController {
     @Query('exchange') exchange?: string,
   ) {
     try {
-      const marketData = await this.marketDataService.getCurrentMarketData(symbol, exchange);
+      const marketData = await this.marketDataService.getCurrentMarketData(
+        symbol,
+        exchange,
+      );
       return {
         success: true,
         data: marketData,
@@ -433,9 +481,9 @@ export class MarketMakingController {
   ) {
     try {
       const orderBook = await this.marketDataService.getOrderBook(
-        symbol, 
-        exchange, 
-        depth ? parseInt(depth.toString()) : 10
+        symbol,
+        exchange,
+        depth ? parseInt(depth.toString()) : 10,
       );
       return {
         success: true,
@@ -455,7 +503,8 @@ export class MarketMakingController {
   @Get('aggregated-data/:symbol')
   async getAggregatedMarketData(@Param('symbol') symbol: string) {
     try {
-      const aggregatedData = await this.marketDataService.getAggregatedMarketData(symbol);
+      const aggregatedData =
+        await this.marketDataService.getAggregatedMarketData(symbol);
       return {
         success: true,
         data: aggregatedData,
@@ -474,7 +523,8 @@ export class MarketMakingController {
   @Get('market-depth/:symbol')
   async getMarketDepthAnalytics(@Param('symbol') symbol: string) {
     try {
-      const analytics = await this.marketDataService.getMarketDepthAnalytics(symbol);
+      const analytics =
+        await this.marketDataService.getMarketDepthAnalytics(symbol);
       return {
         success: true,
         data: analytics,
@@ -496,7 +546,10 @@ export class MarketMakingController {
     @Query('periods') periods: number = 30,
   ) {
     try {
-      const volatility = await this.marketDataService.calculateVolatility(symbol, periods);
+      const volatility = await this.marketDataService.calculateVolatility(
+        symbol,
+        periods,
+      );
       return {
         success: true,
         data: {
@@ -523,7 +576,10 @@ export class MarketMakingController {
     @Query('timeWindow') timeWindow: number = 60, // minutes
   ) {
     try {
-      const vwap = await this.marketDataService.calculateVWAP(symbol, timeWindow);
+      const vwap = await this.marketDataService.calculateVWAP(
+        symbol,
+        timeWindow,
+      );
       return {
         success: true,
         data: {
@@ -577,7 +633,9 @@ export class MarketMakingController {
   }
 
   @Delete('subscribe/:subscriptionId')
-  async unsubscribeFromMarketData(@Param('subscriptionId') subscriptionId: string) {
+  async unsubscribeFromMarketData(
+    @Param('subscriptionId') subscriptionId: string,
+  ) {
     try {
       const success = await this.marketDataService.unsubscribe(subscriptionId);
       return {
@@ -608,9 +666,9 @@ export class MarketMakingController {
       services: {
         marketMaking: 'HEALTHY',
         liquidityProvision: 'HEALTHY',
-        riskManagement: 'HEALTHY'
+        riskManagement: 'HEALTHY',
       },
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
   }
 
@@ -626,9 +684,9 @@ export class MarketMakingController {
           profitToday: 15420.75,
           riskUtilization: 0.65,
           arbitrageOpportunities: 12,
-          lastUpdate: new Date().toISOString()
+          lastUpdate: new Date().toISOString(),
         },
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
     } catch (error) {
       this.logger.error(`Error getting system status: ${error.message}`);
@@ -646,20 +704,28 @@ export class MarketMakingController {
   @Get('exchanges/orderbook/:symbol')
   async getAggregatedOrderBook(
     @Param('symbol') symbol: string,
-    @Query('exchanges') exchanges?: string
+    @Query('exchanges') exchanges?: string,
   ) {
     try {
       const exchangeList = exchanges ? exchanges.split(',') : undefined;
-      const orderBooks = await this.exchangeConnectorService.getAggregatedOrderBook(symbol, exchangeList);
-      
+      const orderBooks =
+        await this.exchangeConnectorService.getAggregatedOrderBook(
+          symbol,
+          exchangeList,
+        );
+
       return {
         success: true,
         data: orderBooks,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
     } catch (error) {
-      this.logger.error(`Error getting aggregated order book: ${error.message}`);
-      throw new InternalServerErrorException('Failed to get aggregated order book');
+      this.logger.error(
+        `Error getting aggregated order book: ${error.message}`,
+      );
+      throw new InternalServerErrorException(
+        'Failed to get aggregated order book',
+      );
     }
   }
 
@@ -669,16 +735,19 @@ export class MarketMakingController {
   @Get('exchanges/quotes/:symbol')
   async getBestQuotes(
     @Param('symbol') symbol: string,
-    @Query('exchanges') exchanges?: string
+    @Query('exchanges') exchanges?: string,
   ) {
     try {
       const exchangeList = exchanges ? exchanges.split(',') : undefined;
-      const quotes = await this.exchangeConnectorService.getBestQuotes(symbol, exchangeList);
-      
+      const quotes = await this.exchangeConnectorService.getBestQuotes(
+        symbol,
+        exchangeList,
+      );
+
       return {
         success: true,
         data: quotes,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
     } catch (error) {
       this.logger.error(`Error getting best quotes: ${error.message}`);
@@ -691,13 +760,14 @@ export class MarketMakingController {
    */
   @Post('exchanges/arbitrage')
   async executeArbitrage(
-    @Body() request: {
+    @Body()
+    request: {
       symbol: string;
       buyExchange: string;
       sellExchange: string;
       quantity: number;
       expectedProfit: number;
-    }
+    },
   ) {
     try {
       const result = await this.exchangeConnectorService.executeArbitrage(
@@ -705,13 +775,13 @@ export class MarketMakingController {
         request.buyExchange,
         request.sellExchange,
         request.quantity,
-        request.expectedProfit
+        request.expectedProfit,
       );
-      
+
       return {
         success: result.success,
         data: result,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
     } catch (error) {
       this.logger.error(`Error executing arbitrage: ${error.message}`);
@@ -727,16 +797,16 @@ export class MarketMakingController {
     try {
       const [connectivity, status] = await Promise.all([
         this.exchangeConnectorService.checkConnectivity(),
-        this.exchangeConnectorService.getExchangeStatus()
+        this.exchangeConnectorService.getExchangeStatus(),
       ]);
-      
+
       return {
         success: true,
         data: {
           connectivity,
-          status
+          status,
         },
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
     } catch (error) {
       this.logger.error(`Error getting exchange status: ${error.message}`);
@@ -750,16 +820,19 @@ export class MarketMakingController {
   @Get('exchanges/balances')
   async getAggregatedBalances() {
     try {
-      const balances = await this.exchangeConnectorService.getAggregatedBalances();
-      
+      const balances =
+        await this.exchangeConnectorService.getAggregatedBalances();
+
       return {
         success: true,
         data: balances,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
     } catch (error) {
       this.logger.error(`Error getting aggregated balances: ${error.message}`);
-      throw new InternalServerErrorException('Failed to get aggregated balances');
+      throw new InternalServerErrorException(
+        'Failed to get aggregated balances',
+      );
     }
   }
 
@@ -768,33 +841,33 @@ export class MarketMakingController {
    */
   @Post('websocket/subscribe/orderbook')
   async subscribeOrderBook(
-    @Body() request: {
-      exchange: string;
-      symbol: string;
-    }
+    @Body() request: { exchange: string; symbol: string },
   ) {
     try {
-      const subscriptionId = await this.webSocketManagerService.subscribeOrderBook(
-        request.exchange,
-        request.symbol,
-        (data) => {
-          // Store data for persistence
-          this.dataPersistenceService.storeMarketDataSnapshot(
-            request.exchange,
-            request.symbol,
-            { orderBook: data }
-          );
-        }
-      );
-      
+      const subscriptionId =
+        await this.webSocketManagerService.subscribeOrderBook(
+          request.exchange,
+          request.symbol,
+          (data) => {
+            // Store data for persistence
+            this.dataPersistenceService.storeMarketDataSnapshot(
+              request.exchange,
+              request.symbol,
+              { orderBook: data },
+            );
+          },
+        );
+
       return {
         success: true,
         data: { subscriptionId },
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
     } catch (error) {
       this.logger.error(`Error subscribing to order book: ${error.message}`);
-      throw new InternalServerErrorException('Failed to subscribe to order book');
+      throw new InternalServerErrorException(
+        'Failed to subscribe to order book',
+      );
     }
   }
 
@@ -802,12 +875,7 @@ export class MarketMakingController {
    * Subscribe to real-time ticker updates
    */
   @Post('websocket/subscribe/ticker')
-  async subscribeTicker(
-    @Body() request: {
-      exchange: string;
-      symbol: string;
-    }
-  ) {
+  async subscribeTicker(@Body() request: { exchange: string; symbol: string }) {
     try {
       const subscriptionId = await this.webSocketManagerService.subscribeTicker(
         request.exchange,
@@ -817,15 +885,15 @@ export class MarketMakingController {
           this.dataPersistenceService.storeMarketDataSnapshot(
             request.exchange,
             request.symbol,
-            { ticker: data }
+            { ticker: data },
           );
-        }
+        },
       );
-      
+
       return {
         success: true,
         data: { subscriptionId },
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
     } catch (error) {
       this.logger.error(`Error subscribing to ticker: ${error.message}`);
@@ -839,20 +907,21 @@ export class MarketMakingController {
   @Get('websocket/status')
   async getWebSocketStatus() {
     try {
-      const [activeSubscriptions, connectionStatus, healthCheck] = await Promise.all([
-        this.webSocketManagerService.getActiveSubscriptions(),
-        this.webSocketManagerService.getConnectionStatus(),
-        this.webSocketManagerService.healthCheck()
-      ]);
-      
+      const [activeSubscriptions, connectionStatus, healthCheck] =
+        await Promise.all([
+          this.webSocketManagerService.getActiveSubscriptions(),
+          this.webSocketManagerService.getConnectionStatus(),
+          this.webSocketManagerService.healthCheck(),
+        ]);
+
       return {
         success: true,
         data: {
           activeSubscriptions,
           connectionStatus,
-          healthCheck
+          healthCheck,
         },
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
     } catch (error) {
       this.logger.error(`Error getting WebSocket status: ${error.message}`);
@@ -866,12 +935,13 @@ export class MarketMakingController {
   @Delete('websocket/subscribe/:subscriptionId')
   async unsubscribe(@Param('subscriptionId') subscriptionId: string) {
     try {
-      const success = await this.webSocketManagerService.unsubscribe(subscriptionId);
-      
+      const success =
+        await this.webSocketManagerService.unsubscribe(subscriptionId);
+
       return {
         success,
         data: { unsubscribed: success },
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
     } catch (error) {
       this.logger.error(`Error unsubscribing: ${error.message}`);
@@ -884,23 +954,19 @@ export class MarketMakingController {
    */
   @Post('data/trading-session')
   async startTradingSession(
-    @Body() request: {
-      exchange: string;
-      symbol: string;
-      strategyId: string;
-    }
+    @Body() request: { exchange: string; symbol: string; strategyId: string },
   ) {
     try {
       const sessionId = await this.dataPersistenceService.startTradingSession(
         request.exchange,
         request.symbol,
-        request.strategyId
+        request.strategyId,
       );
-      
+
       return {
         success: true,
         data: { sessionId },
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
     } catch (error) {
       this.logger.error(`Error starting trading session: ${error.message}`);
@@ -918,7 +984,7 @@ export class MarketMakingController {
     @Query('interval') interval: string,
     @Query('startTime') startTime?: string,
     @Query('endTime') endTime?: string,
-    @Query('limit') limit?: string
+    @Query('limit') limit?: string,
   ) {
     try {
       const candles = await this.dataPersistenceService.getCandles(
@@ -927,17 +993,19 @@ export class MarketMakingController {
         interval,
         startTime ? new Date(startTime) : undefined,
         endTime ? new Date(endTime) : undefined,
-        limit ? parseInt(limit) : undefined
+        limit ? parseInt(limit) : undefined,
       );
-      
+
       return {
         success: true,
         data: candles,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
     } catch (error) {
       this.logger.error(`Error getting historical candles: ${error.message}`);
-      throw new InternalServerErrorException('Failed to get historical candles');
+      throw new InternalServerErrorException(
+        'Failed to get historical candles',
+      );
     }
   }
 
@@ -948,23 +1016,25 @@ export class MarketMakingController {
   async getPerformanceMetrics(
     @Param('strategyId') strategyId: string,
     @Query('startDate') startDate?: string,
-    @Query('endDate') endDate?: string
+    @Query('endDate') endDate?: string,
   ) {
     try {
       const metrics = await this.dataPersistenceService.getPerformanceMetrics(
         strategyId,
         startDate ? new Date(startDate) : undefined,
-        endDate ? new Date(endDate) : undefined
+        endDate ? new Date(endDate) : undefined,
       );
-      
+
       return {
         success: true,
         data: metrics,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
     } catch (error) {
       this.logger.error(`Error getting performance metrics: ${error.message}`);
-      throw new InternalServerErrorException('Failed to get performance metrics');
+      throw new InternalServerErrorException(
+        'Failed to get performance metrics',
+      );
     }
   }
 
@@ -976,20 +1046,20 @@ export class MarketMakingController {
     @Query('strategyId') strategyId?: string,
     @Query('exchange') exchange?: string,
     @Query('startDate') startDate?: string,
-    @Query('endDate') endDate?: string
+    @Query('endDate') endDate?: string,
   ) {
     try {
       const sessions = await this.dataPersistenceService.getTradingSessions(
         strategyId,
         exchange,
         startDate ? new Date(startDate) : undefined,
-        endDate ? new Date(endDate) : undefined
+        endDate ? new Date(endDate) : undefined,
       );
-      
+
       return {
         success: true,
         data: sessions,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
     } catch (error) {
       this.logger.error(`Error getting trading sessions: ${error.message}`);
@@ -1004,11 +1074,11 @@ export class MarketMakingController {
   async getDatabaseStats() {
     try {
       const stats = await this.dataPersistenceService.getDatabaseStats();
-      
+
       return {
         success: true,
         data: stats,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
     } catch (error) {
       this.logger.error(`Error getting database stats: ${error.message}`);
@@ -1022,19 +1092,24 @@ export class MarketMakingController {
   @Get('websocket/snapshot/:exchange/:symbol')
   async getMarketDataSnapshot(
     @Param('exchange') exchange: string,
-    @Param('symbol') symbol: string
+    @Param('symbol') symbol: string,
   ) {
     try {
-      const snapshot = this.webSocketManagerService.getMarketDataSnapshot(exchange, symbol);
-      
+      const snapshot = this.webSocketManagerService.getMarketDataSnapshot(
+        exchange,
+        symbol,
+      );
+
       return {
         success: true,
         data: snapshot || null,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
     } catch (error) {
       this.logger.error(`Error getting market data snapshot: ${error.message}`);
-      throw new InternalServerErrorException('Failed to get market data snapshot');
+      throw new InternalServerErrorException(
+        'Failed to get market data snapshot',
+      );
     }
   }
 }

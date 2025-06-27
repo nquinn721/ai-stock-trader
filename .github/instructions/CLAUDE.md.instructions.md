@@ -519,6 +519,7 @@ Test API endpoints using available tools and verify WebSocket data flow by check
    - Must use `.page-header` class with proper styling
 
 2. **Base Layout Structure**:
+
    ```jsx
    <div className="page-container">
      <div className="page-header">{/* Standard header */}</div>
@@ -527,6 +528,7 @@ Test API endpoints using available tools and verify WebSocket data flow by check
    ```
 
 3. **Required CSS Import**: Every page stylesheet must import:
+
    ```css
    @import "../shared-styles.css";
    ```

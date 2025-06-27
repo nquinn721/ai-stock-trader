@@ -40,7 +40,11 @@
 }
 
 .status-card.profit {
-  background: linear-gradient(135deg, rgba(76, 175, 80, 0.1), rgba(76, 175, 80, 0.05));
+  background: linear-gradient(
+    135deg,
+    rgba(76, 175, 80, 0.1),
+    rgba(76, 175, 80, 0.05)
+  );
   border-color: var(--color-success);
 }
 
@@ -218,28 +222,28 @@
   .market-making-dashboard {
     padding: 16px;
   }
-  
+
   .dashboard-title {
     font-size: 1.75rem;
   }
-  
+
   .status-overview {
     flex-direction: column;
   }
-  
+
   .status-card {
     margin-bottom: 12px;
   }
-  
+
   .tab-content {
     padding: 16px;
   }
-  
+
   .strategies-table,
   .arbitrage-table {
     font-size: 0.875rem;
   }
-  
+
   .MuiTableCell-root {
     padding: 8px;
   }
@@ -250,11 +254,11 @@
     padding: 12px 16px;
     font-size: 0.875rem;
   }
-  
+
   .status-metric .MuiTypography-h6 {
     font-size: 1.1rem;
   }
-  
+
   .status-icon {
     font-size: 1.5rem;
   }
@@ -262,9 +266,15 @@
 
 /* Loading Animation */
 @keyframes pulse {
-  0% { opacity: 1; }
-  50% { opacity: 0.7; }
-  100% { opacity: 1; }
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+  100% {
+    opacity: 1;
+  }
 }
 
 .loading .MuiLinearProgress-root {
@@ -276,7 +286,7 @@
   .status-card {
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
   }
-  
+
   .status-card:hover {
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
   }

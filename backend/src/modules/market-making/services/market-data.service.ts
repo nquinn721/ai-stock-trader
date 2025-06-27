@@ -1,32 +1,37 @@
 import { Injectable, Logger } from '@nestjs/common';
 import {
-  MarketDataService,
+  ImpactCurve,
+  LiquidityGap,
+  MarketDataAggregation,
   MarketDataProvider,
+  MarketDataService,
   MarketDataSubscription,
   MarketDataUpdate,
-  OrderBookSnapshot,
-  MarketDataAggregation,
   MarketDepthAnalytics,
-  OrderBookLevel,
-  PriceLevel,
-  LiquidityGap,
   MarketImpact,
-  ImpactCurve
+  OrderBookLevel,
+  OrderBookSnapshot,
+  PriceLevel,
 } from '../interfaces/market-data.interface';
 
 @Injectable()
 export class MarketDataServiceImpl implements MarketDataService {
   private readonly logger = new Logger(MarketDataServiceImpl.name);
-  
+
   private subscriptions = new Map<string, MarketDataSubscription>();
   private providers = new Map<string, MarketDataProvider>();
   private marketDataCache = new Map<string, MarketDataUpdate>();
   private orderBookCache = new Map<string, OrderBookSnapshot>();
 
   // Data subscription management
-  async subscribe(subscription: Omit<MarketDataSubscription, 'id' | 'createdAt' | 'lastUpdate'>): Promise<string> {
+  async subscribe(
+    subscription: Omit<
+      MarketDataSubscription,
+      'id' | 'createdAt' | 'lastUpdate'
+    >,
+  ): Promise<string> {
     const subscriptionId = `sub_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    
+
     const newSubscription: MarketDataSubscription = {
       id: subscriptionId,
       ...subscription,
@@ -35,12 +40,14 @@ export class MarketDataServiceImpl implements MarketDataService {
     };
 
     this.subscriptions.set(subscriptionId, newSubscription);
-    
-    this.logger.log(`Created market data subscription ${subscriptionId} for ${subscription.symbol}`);
-    
+
+    this.logger.log(
+      `Created market data subscription ${subscriptionId} for ${subscription.symbol}`,
+    );
+
     // Start data streaming for this subscription
     await this.startDataStream(newSubscription);
-    
+
     return subscriptionId;
   }
 
@@ -52,20 +59,27 @@ export class MarketDataServiceImpl implements MarketDataService {
 
     subscription.isActive = false;
     this.subscriptions.delete(subscriptionId);
-    
-    this.logger.log(`Unsubscribed from market data subscription ${subscriptionId}`);
+
+    this.logger.log(
+      `Unsubscribed from market data subscription ${subscriptionId}`,
+    );
     return true;
   }
 
   async getActiveSubscriptions(): Promise<MarketDataSubscription[]> {
-    return Array.from(this.subscriptions.values()).filter(sub => sub.isActive);
+    return Array.from(this.subscriptions.values()).filter(
+      (sub) => sub.isActive,
+    );
   }
 
   // Real-time data access
-  async getCurrentMarketData(symbol: string, exchange?: string): Promise<MarketDataUpdate> {
+  async getCurrentMarketData(
+    symbol: string,
+    exchange?: string,
+  ): Promise<MarketDataUpdate> {
     const cacheKey = exchange ? `${symbol}_${exchange}` : symbol;
     const cachedData = this.marketDataCache.get(cacheKey);
-    
+
     if (cachedData && this.isDataFresh(cachedData.timestamp)) {
       return cachedData;
     }
@@ -75,14 +89,14 @@ export class MarketDataServiceImpl implements MarketDataService {
       symbol,
       exchange: exchange || 'NASDAQ',
       timestamp: new Date(),
-      bid: 150.00 + (Math.random() - 0.5) * 2,
-      ask: 150.10 + (Math.random() - 0.5) * 2,
+      bid: 150.0 + (Math.random() - 0.5) * 2,
+      ask: 150.1 + (Math.random() - 0.5) * 2,
       last: 150.05 + (Math.random() - 0.5) * 2,
       volume: Math.floor(Math.random() * 1000000) + 100000,
-      high: 151.00 + (Math.random() - 0.5) * 1,
-      low: 149.00 + (Math.random() - 0.5) * 1,
-      open: 150.00 + (Math.random() - 0.5) * 0.5,
-      volatility: 0.15 + Math.random() * 0.20,
+      high: 151.0 + (Math.random() - 0.5) * 1,
+      low: 149.0 + (Math.random() - 0.5) * 1,
+      open: 150.0 + (Math.random() - 0.5) * 0.5,
+      volatility: 0.15 + Math.random() * 0.2,
       vwap: 150.03 + (Math.random() - 0.5) * 1,
     };
 
@@ -90,16 +104,22 @@ export class MarketDataServiceImpl implements MarketDataService {
     return marketData;
   }
 
-  async getOrderBook(symbol: string, exchange?: string, depth: number = 10): Promise<OrderBookSnapshot> {
-    const cacheKey = exchange ? `${symbol}_${exchange}_orderbook` : `${symbol}_orderbook`;
+  async getOrderBook(
+    symbol: string,
+    exchange?: string,
+    depth: number = 10,
+  ): Promise<OrderBookSnapshot> {
+    const cacheKey = exchange
+      ? `${symbol}_${exchange}_orderbook`
+      : `${symbol}_orderbook`;
     const cachedOrderBook = this.orderBookCache.get(cacheKey);
-    
+
     if (cachedOrderBook && this.isDataFresh(cachedOrderBook.timestamp)) {
       return cachedOrderBook;
     }
 
     // Simulate fetching order book data
-    const basePrice = 150.00;
+    const basePrice = 150.0;
     const bids: OrderBookLevel[] = [];
     const asks: OrderBookLevel[] = [];
 
@@ -136,7 +156,9 @@ export class MarketDataServiceImpl implements MarketDataService {
     return orderBook;
   }
 
-  async getAggregatedMarketData(symbol: string): Promise<MarketDataAggregation> {
+  async getAggregatedMarketData(
+    symbol: string,
+  ): Promise<MarketDataAggregation> {
     // Simulate aggregating data from multiple exchanges
     const exchanges = ['NASDAQ', 'NYSE', 'BATS', 'ARCA'];
     const marketDataList: MarketDataUpdate[] = [];
@@ -147,14 +169,18 @@ export class MarketDataServiceImpl implements MarketDataService {
     }
 
     // Find best bid and ask across exchanges
-    const bestBid = Math.max(...marketDataList.map(d => d.bid));
-    const bestAsk = Math.min(...marketDataList.map(d => d.ask));
-    const bestBidExchange = marketDataList.find(d => d.bid === bestBid)?.exchange || 'NASDAQ';
-    const bestAskExchange = marketDataList.find(d => d.ask === bestAsk)?.exchange || 'NASDAQ';
+    const bestBid = Math.max(...marketDataList.map((d) => d.bid));
+    const bestAsk = Math.min(...marketDataList.map((d) => d.ask));
+    const bestBidExchange =
+      marketDataList.find((d) => d.bid === bestBid)?.exchange || 'NASDAQ';
+    const bestAskExchange =
+      marketDataList.find((d) => d.ask === bestAsk)?.exchange || 'NASDAQ';
 
     // Calculate aggregated metrics
     const totalVolume = marketDataList.reduce((sum, d) => sum + d.volume, 0);
-    const weightedPrice = marketDataList.reduce((sum, d) => sum + (d.last * d.volume), 0) / totalVolume;
+    const weightedPrice =
+      marketDataList.reduce((sum, d) => sum + d.last * d.volume, 0) /
+      totalVolume;
 
     return {
       symbol,
@@ -173,18 +199,25 @@ export class MarketDataServiceImpl implements MarketDataService {
   }
 
   // Historical data access
-  async getHistoricalData(symbol: string, fromDate: Date, toDate: Date, interval: string): Promise<MarketDataUpdate[]> {
-    this.logger.log(`Fetching historical data for ${symbol} from ${fromDate} to ${toDate}`);
-    
+  async getHistoricalData(
+    symbol: string,
+    fromDate: Date,
+    toDate: Date,
+    interval: string,
+  ): Promise<MarketDataUpdate[]> {
+    this.logger.log(
+      `Fetching historical data for ${symbol} from ${fromDate} to ${toDate}`,
+    );
+
     // Simulate historical data generation
     const data: MarketDataUpdate[] = [];
     const current = new Date(fromDate);
-    const basePrice = 150.00;
+    const basePrice = 150.0;
 
     while (current <= toDate) {
       const randomWalk = (Math.random() - 0.5) * 2;
       const price = basePrice + randomWalk;
-      
+
       data.push({
         symbol,
         exchange: 'NASDAQ',
@@ -196,18 +229,26 @@ export class MarketDataServiceImpl implements MarketDataService {
         high: price + Math.random() * 0.5,
         low: price - Math.random() * 0.5,
         open: price + (Math.random() - 0.5) * 0.2,
-        volatility: 0.15 + Math.random() * 0.10,
+        volatility: 0.15 + Math.random() * 0.1,
       });
 
       // Move to next interval
-      current.setMinutes(current.getMinutes() + this.getIntervalMinutes(interval));
+      current.setMinutes(
+        current.getMinutes() + this.getIntervalMinutes(interval),
+      );
     }
 
     return data;
   }
 
-  async getHistoricalOrderBook(symbol: string, timestamp: Date, exchange?: string): Promise<OrderBookSnapshot> {
-    this.logger.log(`Fetching historical order book for ${symbol} at ${timestamp}`);
+  async getHistoricalOrderBook(
+    symbol: string,
+    timestamp: Date,
+    exchange?: string,
+  ): Promise<OrderBookSnapshot> {
+    this.logger.log(
+      `Fetching historical order book for ${symbol} at ${timestamp}`,
+    );
     // This would typically fetch from a historical database
     return await this.getOrderBook(symbol, exchange);
   }
@@ -216,45 +257,76 @@ export class MarketDataServiceImpl implements MarketDataService {
   async calculateVWAP(symbol: string, timeWindow: number): Promise<number> {
     const endTime = new Date();
     const startTime = new Date(endTime.getTime() - timeWindow * 60 * 1000);
-    
-    const historicalData = await this.getHistoricalData(symbol, startTime, endTime, '1min');
-    
-    const totalVolumeValue = historicalData.reduce((sum, data) => sum + (data.last * data.volume), 0);
-    const totalVolume = historicalData.reduce((sum, data) => sum + data.volume, 0);
-    
+
+    const historicalData = await this.getHistoricalData(
+      symbol,
+      startTime,
+      endTime,
+      '1min',
+    );
+
+    const totalVolumeValue = historicalData.reduce(
+      (sum, data) => sum + data.last * data.volume,
+      0,
+    );
+    const totalVolume = historicalData.reduce(
+      (sum, data) => sum + data.volume,
+      0,
+    );
+
     return totalVolume > 0 ? totalVolumeValue / totalVolume : 0;
   }
 
   async calculateVolatility(symbol: string, periods: number): Promise<number> {
     const endTime = new Date();
-    const startTime = new Date(endTime.getTime() - periods * 24 * 60 * 60 * 1000);
-    
-    const historicalData = await this.getHistoricalData(symbol, startTime, endTime, '1day');
-    
+    const startTime = new Date(
+      endTime.getTime() - periods * 24 * 60 * 60 * 1000,
+    );
+
+    const historicalData = await this.getHistoricalData(
+      symbol,
+      startTime,
+      endTime,
+      '1day',
+    );
+
     if (historicalData.length < 2) return 0;
 
     const returns: number[] = [];
     for (let i = 1; i < historicalData.length; i++) {
-      const returnValue = Math.log(historicalData[i].last / historicalData[i - 1].last);
+      const returnValue = Math.log(
+        historicalData[i].last / historicalData[i - 1].last,
+      );
       returns.push(returnValue);
     }
 
     const mean = returns.reduce((sum, r) => sum + r, 0) / returns.length;
-    const variance = returns.reduce((sum, r) => sum + Math.pow(r - mean, 2), 0) / returns.length;
-    
+    const variance =
+      returns.reduce((sum, r) => sum + Math.pow(r - mean, 2), 0) /
+      returns.length;
+
     return Math.sqrt(variance * 252); // Annualized volatility
   }
 
   async getMarketDepthAnalytics(symbol: string): Promise<MarketDepthAnalytics> {
     const orderBook = await this.getOrderBook(symbol, undefined, 20);
-    
-    const totalBidVolume = orderBook.bids.reduce((sum, level) => sum + level.size, 0);
-    const totalAskVolume = orderBook.asks.reduce((sum, level) => sum + level.size, 0);
+
+    const totalBidVolume = orderBook.bids.reduce(
+      (sum, level) => sum + level.size,
+      0,
+    );
+    const totalAskVolume = orderBook.asks.reduce(
+      (sum, level) => sum + level.size,
+      0,
+    );
     const imbalanceRatio = totalBidVolume / (totalBidVolume + totalAskVolume);
 
     // Identify support and resistance levels
     const supportLevels = this.identifyPriceLevels(orderBook.bids, 'support');
-    const resistanceLevels = this.identifyPriceLevels(orderBook.asks, 'resistance');
+    const resistanceLevels = this.identifyPriceLevels(
+      orderBook.asks,
+      'resistance',
+    );
 
     // Identify liquidity gaps
     const liquidityGaps = this.identifyLiquidityGaps(orderBook);
@@ -305,10 +377,12 @@ export class MarketDataServiceImpl implements MarketDataService {
     return Date.now() - timestamp.getTime() < maxAgeMs;
   }
 
-  private async startDataStream(subscription: MarketDataSubscription): Promise<void> {
+  private async startDataStream(
+    subscription: MarketDataSubscription,
+  ): Promise<void> {
     // Simulate starting a real-time data stream
     this.logger.log(`Starting data stream for subscription ${subscription.id}`);
-    
+
     const interval = setInterval(async () => {
       if (!subscription.isActive) {
         clearInterval(interval);
@@ -320,17 +394,22 @@ export class MarketDataServiceImpl implements MarketDataService {
         subscription.callback(marketData);
         subscription.lastUpdate = new Date();
       } catch (error) {
-        this.logger.error(`Error in data stream for ${subscription.symbol}:`, error);
+        this.logger.error(
+          `Error in data stream for ${subscription.symbol}:`,
+          error,
+        );
       }
     }, 1000); // Update every second
   }
 
   private calculateLiquidityScore(marketDataList: MarketDataUpdate[]): number {
     const totalVolume = marketDataList.reduce((sum, d) => sum + d.volume, 0);
-    const averageSpread = marketDataList.reduce((sum, d) => sum + (d.ask - d.bid), 0) / marketDataList.length;
-    
+    const averageSpread =
+      marketDataList.reduce((sum, d) => sum + (d.ask - d.bid), 0) /
+      marketDataList.length;
+
     // Simple liquidity score: higher volume and lower spread = higher score
-    return Math.min(100, (totalVolume / 10000) - (averageSpread * 1000));
+    return Math.min(100, totalVolume / 10000 - averageSpread * 1000);
   }
 
   private getIntervalMinutes(interval: string): number {
@@ -344,11 +423,14 @@ export class MarketDataServiceImpl implements MarketDataService {
     return intervalMap[interval] || 1;
   }
 
-  private identifyPriceLevels(levels: OrderBookLevel[], type: 'support' | 'resistance'): PriceLevel[] {
+  private identifyPriceLevels(
+    levels: OrderBookLevel[],
+    type: 'support' | 'resistance',
+  ): PriceLevel[] {
     // Identify significant price levels based on volume
     const significantLevels = levels
-      .filter(level => level.size > 500) // Threshold for significance
-      .map(level => ({
+      .filter((level) => level.size > 500) // Threshold for significance
+      .map((level) => ({
         price: level.price,
         volume: level.size,
         strength: level.size / 1000, // Normalize strength
@@ -367,7 +449,7 @@ export class MarketDataServiceImpl implements MarketDataService {
     for (let i = 0; i < orderBook.bids.length - 1; i++) {
       const currentLevel = orderBook.bids[i];
       const nextLevel = orderBook.bids[i + 1];
-      
+
       if (currentLevel.size < threshold && nextLevel.size < threshold) {
         gaps.push({
           startPrice: nextLevel.price,
@@ -382,7 +464,7 @@ export class MarketDataServiceImpl implements MarketDataService {
     for (let i = 0; i < orderBook.asks.length - 1; i++) {
       const currentLevel = orderBook.asks[i];
       const nextLevel = orderBook.asks[i + 1];
-      
+
       if (currentLevel.size < threshold && nextLevel.size < threshold) {
         gaps.push({
           startPrice: currentLevel.price,
@@ -396,7 +478,10 @@ export class MarketDataServiceImpl implements MarketDataService {
     return gaps;
   }
 
-  private async calculateMarketImpact(symbol: string, orderBook: OrderBookSnapshot): Promise<MarketImpact> {
+  private async calculateMarketImpact(
+    symbol: string,
+    orderBook: OrderBookSnapshot,
+  ): Promise<MarketImpact> {
     const quantities = [100, 500, 1000, 5000, 10000];
     const buyImpact: ImpactCurve[] = [];
     const sellImpact: ImpactCurve[] = [];
@@ -409,12 +494,12 @@ export class MarketDataServiceImpl implements MarketDataService {
       let totalCost = 0;
       for (const askLevel of orderBook.asks) {
         if (remainingQty <= 0) break;
-        
+
         const qtyAtLevel = Math.min(remainingQty, askLevel.size);
         totalCost += qtyAtLevel * askLevel.price;
         remainingQty -= qtyAtLevel;
       }
-      
+
       const avgPrice = totalCost / quantity;
       buyImpact.push({
         quantity,
@@ -427,12 +512,12 @@ export class MarketDataServiceImpl implements MarketDataService {
       totalCost = 0;
       for (const bidLevel of orderBook.bids) {
         if (remainingQty <= 0) break;
-        
+
         const qtyAtLevel = Math.min(remainingQty, bidLevel.size);
         totalCost += qtyAtLevel * bidLevel.price;
         remainingQty -= qtyAtLevel;
       }
-      
+
       const avgSellPrice = totalCost / quantity;
       sellImpact.push({
         quantity,
@@ -450,12 +535,18 @@ export class MarketDataServiceImpl implements MarketDataService {
     };
   }
 
-  private calculateOrderBookLiquidityScore(orderBook: OrderBookSnapshot): number {
-    const bidVolume = orderBook.bids.slice(0, 5).reduce((sum, level) => sum + level.size, 0);
-    const askVolume = orderBook.asks.slice(0, 5).reduce((sum, level) => sum + level.size, 0);
+  private calculateOrderBookLiquidityScore(
+    orderBook: OrderBookSnapshot,
+  ): number {
+    const bidVolume = orderBook.bids
+      .slice(0, 5)
+      .reduce((sum, level) => sum + level.size, 0);
+    const askVolume = orderBook.asks
+      .slice(0, 5)
+      .reduce((sum, level) => sum + level.size, 0);
     const spread = orderBook.asks[0].price - orderBook.bids[0].price;
-    
+
     // Higher volume and lower spread = higher liquidity score
-    return Math.min(100, ((bidVolume + askVolume) / 100) - (spread * 1000));
+    return Math.min(100, (bidVolume + askVolume) / 100 - spread * 1000);
   }
 }

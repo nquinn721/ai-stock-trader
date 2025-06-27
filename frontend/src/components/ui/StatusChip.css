@@ -1,0 +1,209 @@
+/* StatusChip Component Styles */
+@import "../../shared-styles.css";
+
+/* ==========================================================================
+   StatusChip Component - Standardized Status Indicators
+   ========================================================================== */
+
+.status-chip {
+  font-weight: 700 !important;
+  border-radius: 20px !important;
+  transition: all 0.3s ease !important;
+  position: relative !important;
+  overflow: hidden !important;
+}
+
+.status-chip--animated {
+  animation: pulse-status 2s ease-in-out infinite;
+}
+
+@keyframes pulse-status {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.9;
+  }
+}
+
+/* ==========================================================================
+   Size Variants
+   ========================================================================== */
+
+.status-chip--sm {
+  height: 20px !important;
+  font-size: 0.6875rem !important;
+  padding: 2px 6px !important;
+}
+
+.status-chip--md {
+  height: 24px !important;
+  font-size: 0.75rem !important;
+  padding: 4px 8px !important;
+}
+
+.status-chip--lg {
+  height: 28px !important;
+  font-size: 0.8125rem !important;
+  padding: 6px 12px !important;
+}
+
+/* ==========================================================================
+   Status Color Variants
+   ========================================================================== */
+
+.status-chip--active {
+  background: rgba(34, 197, 94, 0.15) !important;
+  color: var(--trading-color-green-400) !important;
+  border: 1px solid rgba(34, 197, 94, 0.3) !important;
+}
+
+.status-chip--active::before {
+  content: "";
+  position: absolute;
+  left: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--trading-color-green-400);
+  box-shadow: 0 0 4px var(--trading-color-green-400);
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+
+.status-chip--inactive {
+  background: rgba(100, 116, 139, 0.15) !important;
+  color: var(--trading-color-gray-400) !important;
+  border: 1px solid rgba(100, 116, 139, 0.3) !important;
+}
+
+.status-chip--ready {
+  background: rgba(59, 130, 246, 0.15) !important;
+  color: var(--trading-primary-400) !important;
+  border: 1px solid rgba(59, 130, 246, 0.3) !important;
+}
+
+.status-chip--loading {
+  background: rgba(168, 85, 247, 0.15) !important;
+  color: var(--trading-color-purple-400) !important;
+  border: 1px solid rgba(168, 85, 247, 0.3) !important;
+}
+
+.status-chip--loading::before {
+  content: "";
+  position: absolute;
+  left: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 6px;
+  height: 6px;
+  border: 1px solid var(--trading-color-purple-400);
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: translateY(-50%) rotate(360deg);
+  }
+}
+
+.status-chip--error {
+  background: rgba(239, 68, 68, 0.15) !important;
+  color: var(--trading-color-red-400) !important;
+  border: 1px solid rgba(239, 68, 68, 0.3) !important;
+}
+
+.status-chip--warning {
+  background: rgba(245, 158, 11, 0.15) !important;
+  color: var(--trading-color-yellow-400) !important;
+  border: 1px solid rgba(245, 158, 11, 0.3) !important;
+}
+
+.status-chip--success {
+  background: rgba(34, 197, 94, 0.15) !important;
+  color: var(--trading-color-green-400) !important;
+  border: 1px solid rgba(34, 197, 94, 0.3) !important;
+}
+
+@keyframes pulse-dot {
+  0%,
+  100% {
+    opacity: 1;
+    transform: translateY(-50%) scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: translateY(-50%) scale(1.2);
+  }
+}
+
+/* ==========================================================================
+   Hover Effects
+   ========================================================================== */
+
+.status-chip:hover {
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+}
+
+.status-chip--active:hover {
+  background: rgba(34, 197, 94, 0.25) !important;
+  border-color: rgba(34, 197, 94, 0.5) !important;
+}
+
+.status-chip--ready:hover {
+  background: rgba(59, 130, 246, 0.25) !important;
+  border-color: rgba(59, 130, 246, 0.5) !important;
+}
+
+.status-chip--error:hover {
+  background: rgba(239, 68, 68, 0.25) !important;
+  border-color: rgba(239, 68, 68, 0.5) !important;
+}
+
+.status-chip--warning:hover {
+  background: rgba(245, 158, 11, 0.25) !important;
+  border-color: rgba(245, 158, 11, 0.5) !important;
+}
+
+/* ==========================================================================
+   Dark Theme Adjustments
+   ========================================================================== */
+
+@media (prefers-color-scheme: dark) {
+  .status-chip {
+    backdrop-filter: blur(10px);
+  }
+}
+
+/* ==========================================================================
+   Responsive Design
+   ========================================================================== */
+
+@media (max-width: 768px) {
+  .status-chip--lg {
+    height: 24px !important;
+    font-size: 0.75rem !important;
+    padding: 4px 8px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .status-chip--md {
+    height: 20px !important;
+    font-size: 0.6875rem !important;
+    padding: 2px 6px !important;
+  }
+
+  .status-chip--lg {
+    height: 22px !important;
+    font-size: 0.7rem !important;
+    padding: 3px 8px !important;
+  }
+}

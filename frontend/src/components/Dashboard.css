@@ -1117,7 +1117,9 @@
 
 .quick-trade-card {
   position: sticky;
-  top: calc(80px + 2rem); /* Account for fixed app header height + original offset */
+  top: calc(
+    80px + 2rem
+  ); /* Account for fixed app header height + original offset */
 }
 
 /* QuickTrade card specific adjustments for sidebar layout */
@@ -1489,4 +1491,131 @@
   100% {
     opacity: 0.4;
   }
+}
+
+/* AI-Enhanced Portfolio Trading Section */
+.ai-enhanced-trading-section {
+  margin-bottom: var(--trading-spacing-section);
+  padding: var(--trading-spacing-card);
+  background: var(--trading-card-bg);
+  border: 1px solid var(--trading-border);
+  border-radius: var(--trading-border-radius);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.ai-enhanced-trading-section h3 {
+  display: flex;
+  align-items: center;
+  gap: var(--trading-spacing-xs);
+  margin: 0 0 var(--trading-spacing-md) 0;
+  font-size: 1.4em;
+  font-weight: 700;
+  color: var(--trading-text-primary);
+  background: linear-gradient(
+    135deg,
+    var(--trading-primary-500),
+    var(--trading-accent-blue)
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.ai-enhanced-trading-section h3 svg {
+  color: var(--trading-primary-500);
+  font-size: 1.2em;
+  -webkit-text-fill-color: var(--trading-primary-500);
+}
+
+.portfolio-ai-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: var(--trading-spacing-md);
+  margin-bottom: var(--trading-spacing-md);
+}
+
+.no-portfolios-message {
+  text-align: center;
+  padding: var(--trading-spacing-xl);
+  color: var(--trading-text-secondary);
+  background: var(--trading-bg-secondary);
+  border-radius: var(--trading-border-radius);
+  border: 2px dashed var(--trading-border);
+}
+
+.no-portfolios-message p {
+  margin: 0 0 var(--trading-spacing-md) 0;
+  font-size: 1.1em;
+}
+
+.create-portfolio-btn {
+  background: linear-gradient(
+    135deg,
+    var(--trading-primary-500),
+    var(--trading-accent-blue)
+  );
+  color: white;
+  border: none;
+  padding: var(--trading-spacing-sm) var(--trading-spacing-lg);
+  border-radius: var(--trading-border-radius);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.create-portfolio-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(59, 130, 246, 0.3);
+}
+
+/* Responsive Design for AI Section */
+@media (max-width: 1200px) {
+  .portfolio-ai-grid {
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .portfolio-ai-grid {
+    grid-template-columns: 1fr;
+    gap: var(--trading-spacing-sm);
+  }
+
+  .ai-enhanced-trading-section {
+    margin: var(--trading-spacing-sm);
+    padding: var(--trading-spacing-sm);
+  }
+}
+
+/* Integration animations */
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.portfolio-ai-grid > * {
+  animation: slideInUp 0.6s ease-out;
+  animation-fill-mode: both;
+}
+
+.portfolio-ai-grid > *:nth-child(1) {
+  animation-delay: 0.1s;
+}
+.portfolio-ai-grid > *:nth-child(2) {
+  animation-delay: 0.2s;
+}
+.portfolio-ai-grid > *:nth-child(3) {
+  animation-delay: 0.3s;
+}
+.portfolio-ai-grid > *:nth-child(4) {
+  animation-delay: 0.4s;
 }

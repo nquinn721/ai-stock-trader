@@ -1,23 +1,9 @@
-import {
-  AccessTime,
-  ChevronRight,
-  Close,
-  PlayArrow,
-  Settings,
-  Shuffle,
-  Stop,
-  TrendingUp,
-} from "@mui/icons-material";
+import { Close, PlayArrow, Settings, Shuffle, Stop } from "@mui/icons-material";
 import {
   Alert,
   Box,
   Button,
-  Card,
-  CardActions,
-  CardContent,
-  CardHeader,
   Chip,
-  CircularProgress,
   Dialog,
   DialogActions,
   DialogContent,
@@ -37,6 +23,13 @@ import {
 import { observer } from "mobx-react-lite";
 import React, { useEffect, useState } from "react";
 import StockCard from "../components/StockCard";
+import {
+  ContentCard,
+  LoadingState,
+  PageHeader,
+  StatusChip,
+  TradingButton,
+} from "../components/ui";
 import autonomousTradingApi, {
   DeploymentConfig,
   Portfolio,
@@ -85,7 +78,17 @@ interface PortfolioTradingStatus {
   };
 }
 
-const AutonomousTradingPage: React.FC = observer(() => {
+interface AutonomousTradingPageProps {
+  onNavigateBack?: () => void;
+  currentTime?: Date;
+  isConnected?: boolean;
+}
+
+const AutonomousTradingPage: React.FC<AutonomousTradingPageProps> = observer(({ 
+  onNavigateBack, 
+  currentTime = new Date(),
+  isConnected = true 
+}) => {
   const [activeTab, setActiveTab] = useState(0);
   const [portfolios, setPortfolios] = useState<Portfolio[]>([]);
   const [portfolioStatuses, setPortfolioStatuses] = useState<
@@ -315,52 +318,58 @@ const AutonomousTradingPage: React.FC = observer(() => {
   const renderOverviewTab = () => (
     <div className="overview-tab">
       {/* Global Controls */}
-      <div className="content-card global-controls">
-        <div className="control-left">
-          <h2 className="section-header">Global Trading Control</h2>
-          <div className="status-switch">
-            <Typography variant="body2">
-              {globalTradingActive ? "Trading Active" : "Trading Stopped"}
-            </Typography>
-            <Switch
-              checked={globalTradingActive}
-              onChange={handleGlobalTradingToggle}
-              color="primary"
-            />
+      <ContentCard
+        title="Global Trading Control"
+        variant="gradient"
+        padding="lg"
+        className="global-controls"
+      >
+        <div className="control-content">
+          <div className="control-left">
+            <div className="status-switch">
+              <Typography variant="body2">
+                {globalTradingActive ? "Trading Active" : "Trading Stopped"}
+              </Typography>
+              <Switch
+                checked={globalTradingActive}
+                onChange={handleGlobalTradingToggle}
+                color="primary"
+              />
+            </div>
+          </div>
+          <div className="control-right">
+            <TradingButton
+              variant="primary"
+              onClick={() => setDeployModalOpen(true)}
+              startIcon={<Settings />}
+              size="md"
+            >
+              Deploy Strategy
+            </TradingButton>
           </div>
         </div>
-        <div className="control-right">
-          <Button
-            variant="contained"
-            onClick={() => setDeployModalOpen(true)}
-            startIcon={<Settings />}
-            className="nav-btn"
-          >
-            Deploy Strategy
-          </Button>
-        </div>
-      </div>
+      </ContentCard>
 
       {/* Portfolio Cards */}
       <div className="content-grid">
         {portfolios.map((portfolio) => {
           const status = portfolioStatuses[portfolio.id];
           return (
-            <div key={portfolio.id} className="content-card portfolio-card">
-              <div className="card-header">
-                <div className="header-left">
-                  <h3>{portfolio.name}</h3>
-                  <span>{`Total Value: $${portfolio.totalValue.toLocaleString()}`}</span>
-                </div>
-                <Chip
+            <ContentCard
+              key={portfolio.id}
+              title={portfolio.name}
+              subtitle={`Total Value: $${portfolio.totalValue.toLocaleString()}`}
+              variant="default"
+              padding="lg"
+              className="portfolio-card"
+              headerActions={
+                <StatusChip
+                  status={status?.isActive ? "success" : "inactive"}
                   label={status?.isActive ? "Active" : "Inactive"}
-                  color={status?.isActive ? "success" : "default"}
-                  size="small"
-                  className={`status-chip ${
-                    status?.isActive ? "active" : "inactive"
-                  }`}
+                  animated={status?.isActive}
                 />
-              </div>
+              }
+            >
               <div className="card-content">
                 <div className="info-row">
                   <Typography variant="body2">Cash Available</Typography>
@@ -378,17 +387,17 @@ const AutonomousTradingPage: React.FC = observer(() => {
 
                 <div className="strategy-row">
                   <Typography variant="body2">Assigned Strategy</Typography>
-                  <Button
-                    size="small"
-                    variant="outlined"
-                    startIcon={<Shuffle />}
+                  <TradingButton
+                    variant="secondary"
+                    size="sm"
                     onClick={() => handleAssignRandomStrategy(portfolio.id)}
                     disabled={loading}
-                    className="random-btn"
+                    startIcon={<Shuffle />}
                   >
                     Random
-                  </Button>
+                  </TradingButton>
                 </div>
+
                 {portfolio.assignedStrategyName ? (
                   <div className="assigned-strategy">
                     <Typography variant="body2" fontWeight="medium">
@@ -412,38 +421,34 @@ const AutonomousTradingPage: React.FC = observer(() => {
                     No strategy assigned
                   </Typography>
                 )}
+
+                <Divider />
+
+                <div className="card-actions">
+                  {status?.isActive ? (
+                    <TradingButton
+                      variant="danger"
+                      onClick={() => handleStopTrading(portfolio.id)}
+                      disabled={loading}
+                      startIcon={<Stop />}
+                      fullWidth
+                    >
+                      Stop Trading
+                    </TradingButton>
+                  ) : (
+                    <TradingButton
+                      variant="success"
+                      onClick={() => handleStartTrading(portfolio.id)}
+                      disabled={loading}
+                      startIcon={<PlayArrow />}
+                      fullWidth
+                    >
+                      Start Trading
+                    </TradingButton>
+                  )}
+                </div>
               </div>
-
-              <Divider />
-
-              <CardActions className="card-actions">
-                {status?.isActive ? (
-                  <Button
-                    variant="outlined"
-                    color="error"
-                    startIcon={<Stop />}
-                    onClick={() => handleStopTrading(portfolio.id)}
-                    fullWidth
-                    disabled={loading}
-                    className="action-btn stop-btn"
-                  >
-                    Stop Trading
-                  </Button>
-                ) : (
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    startIcon={<PlayArrow />}
-                    onClick={() => handleStartTrading(portfolio.id)}
-                    fullWidth
-                    disabled={loading}
-                    className="action-btn start-btn"
-                  >
-                    Start Trading
-                  </Button>
-                )}
-              </CardActions>
-            </div>
+            </ContentCard>
           );
         })}
       </div>
@@ -451,38 +456,29 @@ const AutonomousTradingPage: React.FC = observer(() => {
   );
 
   const renderPerformanceTab = () => (
-    <div>
-      <Typography variant="h6" gutterBottom>
-        Performance Overview
-      </Typography>
+    <ContentCard title="Performance Overview" variant="gradient" padding="lg">
       <Alert severity="info">
         Performance metrics will be displayed here once trading sessions are
         active.
       </Alert>
-    </div>
+    </ContentCard>
   );
 
   const renderHistoryTab = () => (
-    <div>
-      <Typography variant="h6" gutterBottom>
-        Trading History
-      </Typography>
+    <ContentCard title="Trading History" variant="gradient" padding="lg">
       <Alert severity="info">
         Trading history and logs will be displayed here.
       </Alert>
-    </div>
+    </ContentCard>
   );
 
   const renderSettingsTab = () => (
-    <div>
-      <Typography variant="h6" gutterBottom>
-        Trading Settings
-      </Typography>
+    <ContentCard title="Trading Settings" variant="gradient" padding="lg">
       <Alert severity="info">
         Global trading settings and risk management parameters will be
         configured here.
       </Alert>
-    </div>
+    </ContentCard>
   );
 
   const renderLiveMarketDataTab = () => {
@@ -490,103 +486,95 @@ const AutonomousTradingPage: React.FC = observer(() => {
 
     return (
       <div className="live-market-tab">
-        <div className="content-card live-market-header">
-          <div className="header-left">
-            <h2 className="section-header">Live Market Data</h2>
-            <Typography variant="body2" color="text.secondary">
-              Real-time stock prices and trading signals
-            </Typography>
-          </div>
-          <div className="header-right">
-            <Chip
-              label={`${readyStocks.length} stocks ready`}
-              color={readyStocks.length > 0 ? "success" : "default"}
-              size="small"
-              className="status-chip ready"
-            />
-            <Button
-              variant="outlined"
-              size="small"
-              onClick={() => stockStore.fetchStocksWithSignals()}
-              disabled={isLoading}
-              className="nav-btn"
-            >
-              {isLoading ? "Loading..." : "Refresh"}
-            </Button>
-          </div>
-        </div>
-
-        {isLoading && readyStocks.length === 0 ? (
-          <div className="loading-state">
-            <CircularProgress />
-            <Typography variant="body2">Loading market data...</Typography>
-          </div>
-        ) : readyStocks.length === 0 ? (
-          <div className="empty-state">
-            <Typography variant="h6">No Stock Data Ready</Typography>
-            <Typography variant="body2">
-              Waiting for stocks with valid price data. Live updates will appear
-              here automatically.
-            </Typography>
-          </div>
-        ) : (
-          <div className="content-grid stock-grid">
-            {stocksWithSignals.slice(0, 20).map((stock) => (
-              <StockCard
-                key={stock.symbol}
-                stock={stock}
-                signal={stock.tradingSignal || undefined}
+        <ContentCard
+          title="Live Market Data"
+          subtitle="Real-time stock prices and trading signals"
+          variant="gradient"
+          padding="lg"
+          className="live-market-header"
+          headerActions={
+            <div className="header-actions">
+              <StatusChip
+                status={readyStocks.length > 0 ? "success" : "inactive"}
+                label={`${readyStocks.length} stocks ready`}
+                animated={readyStocks.length > 0}
               />
-            ))}
-          </div>
-        )}
+              <TradingButton
+                variant="secondary"
+                size="sm"
+                onClick={() => stockStore.fetchStocksWithSignals()}
+                disabled={isLoading}
+                loading={isLoading}
+              >
+                Refresh
+              </TradingButton>
+            </div>
+          }
+        >
+          {isLoading && readyStocks.length === 0 ? (
+            <LoadingState
+              variant="spinner"
+              message="Loading market data..."
+              size="lg"
+            />
+          ) : readyStocks.length === 0 ? (
+            <LoadingState
+              variant="skeleton"
+              message="Waiting for stocks with valid price data. Live updates will appear here automatically."
+              size="lg"
+            />
+          ) : (
+            <div className="content-grid stock-grid">
+              {stocksWithSignals.slice(0, 20).map((stock) => (
+                <StockCard
+                  key={stock.symbol}
+                  stock={stock}
+                  signal={stock.tradingSignal || undefined}
+                />
+              ))}
+            </div>
+          )}
+        </ContentCard>
       </div>
     );
   };
 
   return (
-    <div className="page-container">
+    <div className="page-container autonomous-trading-page">
       {/* Standardized Page Header */}
-      <div className="page-header">
-        <div className="header-left">
-          <h1 className="page-title">Autonomous Trading</h1>
-          <div className="market-time">
-            <TrendingUp fontSize="small" />
-            <span>
-              {globalTradingActive ? "Trading Active" : "Trading Inactive"}
-            </span>
-          </div>
-        </div>
-        <div className="header-info">
-          <div
-            className={`connection-status ${
-              globalTradingActive ? "connected" : ""
-            }`}
-          >
-            <div className="status-dot"></div>
-            <span>Live</span>
-          </div>
-          <Button className="nav-btn">
-            Dashboard <ChevronRight />
-          </Button>
-          <Button className="nav-btn">
-            Analytics <ChevronRight />
-          </Button>
-        </div>
-      </div>
+      <PageHeader
+        title="Autonomous Trading Agents"
+        currentTime={currentTime}
+        isConnected={isConnected}
+        showLiveIndicator={true}
+        sticky={true}
+        statsValue={`${Object.values(portfolioStatuses).filter((s) => s.isActive).length}/${portfolios.length} portfolios • ${Object.values(portfolioStatuses).reduce((acc, status) => acc + status.activeStrategies.length, 0)} strategies`}
+        actionButtons={[
+          {
+            icon: <span>←</span>,
+            onClick: () => onNavigateBack ? onNavigateBack() : (window.location.href = "/"),
+            tooltip: "Back to Dashboard",
+            className: "back-button",
+            label: "Back to Dashboard",
+          },
+          {
+            icon: <Settings />,
+            onClick: () => setDeployModalOpen(true),
+            tooltip: "Deploy Strategy",
+            className: "action-btn",
+            label: "Deploy",
+          },
+        ]}
+      />
 
       <div className="page-content">
         {error && (
-          <Alert
-            severity="error"
-            sx={{ mb: 2 }}
-            onClose={() => setError(null)}
-          >
+          <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError(null)}>
             {error}
           </Alert>
         )}
 
-        <div className="tabs-container">
+        <ContentCard variant="glass" padding="sm" className="tabs-container">
           <Tabs
             value={activeTab}
             onChange={handleTabChange}
@@ -599,12 +587,15 @@ const AutonomousTradingPage: React.FC = observer(() => {
             <Tab label="History" {...a11yProps(3)} />
             <Tab label="Settings" {...a11yProps(4)} />
           </Tabs>
-        </div>
+        </ContentCard>
 
         {loading && (
-          <div className="loading-indicator">
-            <CircularProgress />
-          </div>
+          <LoadingState
+            variant="spinner"
+            message="Loading autonomous trading data..."
+            size="lg"
+            fullHeight={false}
+          />
         )}
 
         <TabPanel value={activeTab} index={0}>

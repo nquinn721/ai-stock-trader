@@ -1,4 +1,10 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 
 @Entity('market_making_strategies')
 export class MarketMakingStrategyEntity {
@@ -8,17 +14,17 @@ export class MarketMakingStrategyEntity {
   @Column({ length: 100 })
   name: string;
 
-  @Column({ 
+  @Column({
     type: 'enum',
     enum: ['CONSERVATIVE', 'AGGRESSIVE', 'BALANCED', 'SCALPING'],
-    default: 'BALANCED'
+    default: 'BALANCED',
   })
   type: string;
 
-  @Column({ 
+  @Column({
     type: 'enum',
     enum: ['ACTIVE', 'INACTIVE', 'PAUSED', 'ERROR'],
-    default: 'ACTIVE'
+    default: 'ACTIVE',
   })
   status: string;
 
@@ -97,10 +103,10 @@ export class MarketMakingQuoteEntity {
   @Column('decimal', { precision: 10, scale: 4 })
   riskScore: number;
 
-  @Column({ 
+  @Column({
     type: 'enum',
     enum: ['ACTIVE', 'FILLED', 'CANCELLED', 'EXPIRED'],
-    default: 'ACTIVE'
+    default: 'ACTIVE',
   })
   status: string;
 
@@ -125,10 +131,10 @@ export class ArbitrageOpportunityEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ 
+  @Column({
     type: 'enum',
     enum: ['SPATIAL', 'TEMPORAL', 'STATISTICAL', 'TRIANGULAR'],
-    default: 'SPATIAL'
+    default: 'SPATIAL',
   })
   type: string;
 
@@ -150,10 +156,10 @@ export class ArbitrageOpportunityEntity {
   @Column('decimal', { precision: 10, scale: 4 })
   confidence: number;
 
-  @Column({ 
+  @Column({
     type: 'enum',
     enum: ['DETECTED', 'EXECUTING', 'EXECUTED', 'EXPIRED', 'FAILED'],
-    default: 'DETECTED'
+    default: 'DETECTED',
   })
   status: string;
 
@@ -262,10 +268,10 @@ export class LiquidityPositionEntity {
   @Column('decimal', { precision: 10, scale: 4 })
   impermanentLossRisk: number;
 
-  @Column({ 
+  @Column({
     type: 'enum',
     enum: ['ACTIVE', 'WITHDRAWN', 'PARTIALLY_WITHDRAWN'],
-    default: 'ACTIVE'
+    default: 'ACTIVE',
   })
   status: string;
 

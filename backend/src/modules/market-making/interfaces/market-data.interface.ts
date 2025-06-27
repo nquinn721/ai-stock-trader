@@ -65,24 +65,45 @@ export interface MarketDataAggregation {
 
 export interface MarketDataService {
   // Data subscription management
-  subscribe(subscription: Omit<MarketDataSubscription, 'id' | 'createdAt' | 'lastUpdate'>): Promise<string>;
+  subscribe(
+    subscription: Omit<
+      MarketDataSubscription,
+      'id' | 'createdAt' | 'lastUpdate'
+    >,
+  ): Promise<string>;
   unsubscribe(subscriptionId: string): Promise<boolean>;
   getActiveSubscriptions(): Promise<MarketDataSubscription[]>;
-  
+
   // Real-time data access
-  getCurrentMarketData(symbol: string, exchange?: string): Promise<MarketDataUpdate>;
-  getOrderBook(symbol: string, exchange?: string, depth?: number): Promise<OrderBookSnapshot>;
+  getCurrentMarketData(
+    symbol: string,
+    exchange?: string,
+  ): Promise<MarketDataUpdate>;
+  getOrderBook(
+    symbol: string,
+    exchange?: string,
+    depth?: number,
+  ): Promise<OrderBookSnapshot>;
   getAggregatedMarketData(symbol: string): Promise<MarketDataAggregation>;
-  
+
   // Historical data access
-  getHistoricalData(symbol: string, fromDate: Date, toDate: Date, interval: string): Promise<MarketDataUpdate[]>;
-  getHistoricalOrderBook(symbol: string, timestamp: Date, exchange?: string): Promise<OrderBookSnapshot>;
-  
+  getHistoricalData(
+    symbol: string,
+    fromDate: Date,
+    toDate: Date,
+    interval: string,
+  ): Promise<MarketDataUpdate[]>;
+  getHistoricalOrderBook(
+    symbol: string,
+    timestamp: Date,
+    exchange?: string,
+  ): Promise<OrderBookSnapshot>;
+
   // Market analytics
   calculateVWAP(symbol: string, timeWindow: number): Promise<number>;
   calculateVolatility(symbol: string, periods: number): Promise<number>;
   getMarketDepthAnalytics(symbol: string): Promise<MarketDepthAnalytics>;
-  
+
   // Provider management
   addDataProvider(provider: MarketDataProvider): Promise<boolean>;
   removeDataProvider(providerId: string): Promise<boolean>;

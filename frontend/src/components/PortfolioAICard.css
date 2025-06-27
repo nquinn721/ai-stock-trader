@@ -1,0 +1,440 @@
+@import "../shared-styles.css";
+
+.portfolio-ai-card {
+  background: var(--trading-card-bg);
+  border: 1px solid var(--trading-border);
+  border-radius: 12px;
+  padding: 20px;
+  margin: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.portfolio-ai-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  border-color: var(--trading-primary-500);
+}
+
+.portfolio-ai-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(
+    90deg,
+    var(--trading-primary-500),
+    var(--trading-accent-blue)
+  );
+}
+
+/* Portfolio Header */
+.portfolio-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--trading-border);
+}
+
+.portfolio-info h3.portfolio-name {
+  margin: 0 0 4px 0;
+  color: var(--trading-text-primary);
+  font-size: 1.2em;
+  font-weight: 600;
+}
+
+.portfolio-type {
+  color: var(--trading-text-secondary);
+  font-size: 0.9em;
+  opacity: 0.8;
+}
+
+.portfolio-value {
+  text-align: right;
+}
+
+.total-value {
+  font-size: 1.3em;
+  font-weight: 700;
+  color: var(--trading-text-primary);
+  margin-bottom: 4px;
+}
+
+.return-value {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.95em;
+  font-weight: 600;
+}
+
+.return-value.positive {
+  color: var(--trading-success);
+}
+
+.return-value.negative {
+  color: var(--trading-danger);
+}
+
+.return-value svg {
+  font-size: 1.1em;
+}
+
+/* AI Status Section */
+.ai-status-section {
+  margin-bottom: 16px;
+}
+
+.ai-strategy-info {
+  margin-bottom: 12px;
+}
+
+.ai-strategy-type {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--trading-text-primary);
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+
+.ai-strategy-type svg {
+  color: var(--trading-primary-500);
+}
+
+.agent-allocation {
+  color: var(--trading-text-secondary);
+  font-size: 0.9em;
+  margin-left: 24px;
+}
+
+/* Assigned Agents */
+.assigned-agents {
+  background: var(--trading-bg-secondary);
+  border-radius: 8px;
+  padding: 12px;
+  border: 1px solid var(--trading-border);
+}
+
+.agents-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: var(--trading-text-primary);
+}
+
+.total-allocation {
+  color: var(--trading-primary-500);
+  font-size: 0.9em;
+}
+
+.agents-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.agent-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px;
+  background: var(--trading-card-bg);
+  border-radius: 6px;
+  border: 1px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.agent-item.running {
+  border-color: var(--trading-success);
+  background: rgba(46, 204, 113, 0.05);
+}
+
+.agent-item.paused {
+  border-color: var(--trading-warning);
+  background: rgba(241, 196, 15, 0.05);
+}
+
+.agent-item.stopped {
+  border-color: var(--trading-danger);
+  background: rgba(231, 76, 60, 0.05);
+}
+
+.agent-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.agent-name {
+  font-weight: 600;
+  color: var(--trading-text-primary);
+}
+
+.agent-type {
+  font-size: 0.8em;
+  color: var(--trading-text-secondary);
+  background: var(--trading-bg-secondary);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.agent-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.agent-allocation {
+  font-weight: 600;
+  color: var(--trading-primary-500);
+}
+
+.agent-toggle {
+  background: none;
+  border: 1px solid var(--trading-border);
+  border-radius: 4px;
+  padding: 4px;
+  cursor: pointer;
+  color: var(--trading-text-secondary);
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.agent-toggle:hover {
+  background: var(--trading-primary-500);
+  color: white;
+  border-color: var(--trading-primary-500);
+}
+
+.agent-toggle svg {
+  font-size: 1em;
+}
+
+.agent-performance {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.85em;
+}
+
+.agent-return.positive {
+  color: var(--trading-success);
+}
+
+.agent-return.negative {
+  color: var(--trading-danger);
+}
+
+.agent-trades {
+  color: var(--trading-text-secondary);
+}
+
+/* No Agents */
+.no-agents {
+  text-align: center;
+  padding: 20px;
+  color: var(--trading-text-secondary);
+}
+
+.no-agents-message {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.no-agents-message svg {
+  font-size: 2em;
+  opacity: 0.5;
+}
+
+/* Performance Comparison */
+.performance-comparison {
+  background: var(--trading-bg-secondary);
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 16px;
+  border: 1px solid var(--trading-border);
+}
+
+.comparison-title {
+  font-weight: 600;
+  color: var(--trading-text-primary);
+  margin-bottom: 8px;
+  font-size: 0.9em;
+}
+
+.comparison-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+}
+
+.performance-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8px;
+  background: var(--trading-card-bg);
+  border-radius: 4px;
+}
+
+.performance-item .label {
+  font-size: 0.8em;
+  color: var(--trading-text-secondary);
+  margin-bottom: 4px;
+}
+
+.performance-item .value {
+  font-weight: 600;
+  font-size: 0.9em;
+}
+
+.performance-item .value.positive {
+  color: var(--trading-success);
+}
+
+.performance-item .value.negative {
+  color: var(--trading-danger);
+}
+
+/* Action Buttons */
+.portfolio-actions {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.action-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 12px;
+  border: 1px solid var(--trading-border);
+  border-radius: 6px;
+  background: var(--trading-card-bg);
+  color: var(--trading-text-primary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.9em;
+  font-weight: 500;
+}
+
+.action-btn:hover {
+  background: var(--trading-primary-500);
+  color: white;
+  border-color: var(--trading-primary-500);
+  transform: translateY(-1px);
+}
+
+.action-btn svg {
+  font-size: 1.1em;
+}
+
+.assign-agent:hover {
+  background: var(--trading-accent-blue);
+  border-color: var(--trading-accent-blue);
+}
+
+.view-performance:hover {
+  background: var(--trading-accent-purple);
+  border-color: var(--trading-accent-purple);
+}
+
+/* Status Indicators */
+.status-indicators {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.8em;
+}
+
+.status-indicator {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 500;
+}
+
+.status-indicator.active {
+  color: var(--trading-success);
+}
+
+.status-indicator.inactive {
+  color: var(--trading-text-secondary);
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+  animation: pulse 2s infinite;
+}
+
+.status-indicator.inactive .status-dot {
+  animation: none;
+  opacity: 0.5;
+}
+
+.last-update {
+  color: var(--trading-text-secondary);
+  font-size: 0.75em;
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .portfolio-ai-card {
+    margin: 8px;
+    padding: 16px;
+  }
+
+  .portfolio-header {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .portfolio-value {
+    text-align: left;
+  }
+
+  .comparison-grid {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+
+  .portfolio-actions {
+    flex-direction: column;
+  }
+
+  .status-indicators {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+}

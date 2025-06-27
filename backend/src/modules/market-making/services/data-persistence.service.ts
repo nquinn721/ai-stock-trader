@@ -1,17 +1,21 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Between, MoreThan, LessThan } from 'typeorm';
+import { LessThan, Repository } from 'typeorm';
 import {
+  ExchangeCandle,
   ExchangeOrderBook,
   ExchangeTicker,
   ExchangeTrade,
-  ExchangeOrder,
-  ExchangeBalance,
-  ExchangeCandle
 } from '../interfaces/exchange-connector.interface';
 
 // New entities for data persistence
-import { Entity, Column, PrimaryGeneratedColumn, Index, CreateDateColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  Index,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 
 @Entity('market_data_snapshots')
 @Index(['exchange', 'symbol', 'timestamp'])
@@ -195,7 +199,7 @@ export class DataPersistenceService {
       ticker?: ExchangeTicker;
       orderBook?: ExchangeOrderBook;
       trades?: ExchangeTrade[];
-    }
+    },
   ): Promise<void> {
     try {
       const snapshot = this.marketDataRepository.create({
@@ -204,12 +208,14 @@ export class DataPersistenceService {
         ticker: data.ticker,
         orderBook: data.orderBook,
         trades: data.trades,
-        timestamp: new Date()
+        timestamp: new Date(),
       });
 
       await this.marketDataRepository.save(snapshot);
     } catch (error) {
-      this.logger.error(`Failed to store market data snapshot: ${error.message}`);
+      this.logger.error(
+        `Failed to store market data snapshot: ${error.message}`,
+      );
     }
   }
 
@@ -218,7 +224,7 @@ export class DataPersistenceService {
    */
   async storeCandles(candles: ExchangeCandle[]): Promise<void> {
     try {
-      const entities = candles.map(candle => 
+      const entities = candles.map((candle) =>
         this.candleRepository.create({
           exchange: candle.exchange,
           symbol: candle.symbol,
@@ -230,8 +236,8 @@ export class DataPersistenceService {
           close: candle.close,
           volume: candle.volume,
           quoteVolume: candle.quoteVolume,
-          trades: candle.trades
-        })
+          trades: candle.trades,
+        }),
       );
 
       await this.candleRepository.save(entities);
@@ -250,10 +256,11 @@ export class DataPersistenceService {
     interval: string,
     startTime?: Date,
     endTime?: Date,
-    limit?: number
+    limit?: number,
   ): Promise<HistoricalCandle[]> {
     try {
-      const query = this.candleRepository.createQueryBuilder('candle')
+      const query = this.candleRepository
+        .createQueryBuilder('candle')
         .where('candle.exchange = :exchange', { exchange })
         .andWhere('candle.symbol = :symbol', { symbol })
         .andWhere('candle.interval = :interval', { interval });
@@ -261,7 +268,7 @@ export class DataPersistenceService {
       if (startTime && endTime) {
         query.andWhere('candle.timestamp BETWEEN :startTime AND :endTime', {
           startTime,
-          endTime
+          endTime,
         });
       } else if (startTime) {
         query.andWhere('candle.timestamp >= :startTime', { startTime });
@@ -288,7 +295,7 @@ export class DataPersistenceService {
   async startTradingSession(
     exchange: string,
     symbol: string,
-    strategyId: string
+    strategyId: string,
   ): Promise<string> {
     try {
       const session = this.tradingSessionRepository.create({
@@ -300,7 +307,7 @@ export class DataPersistenceService {
         realizedPnl: 0,
         unrealizedPnl: 0,
         totalTrades: 0,
-        profitableTrades: 0
+        profitableTrades: 0,
       });
 
       const saved = await this.tradingSessionRepository.save(session);
@@ -324,7 +331,7 @@ export class DataPersistenceService {
       totalTrades?: number;
       profitableTrades?: number;
       metrics?: Record<string, any>;
-    }
+    },
   ): Promise<void> {
     try {
       await this.tradingSessionRepository.update(sessionId, updates);
@@ -339,7 +346,7 @@ export class DataPersistenceService {
   async endTradingSession(sessionId: string): Promise<void> {
     try {
       await this.tradingSessionRepository.update(sessionId, {
-        endTime: new Date()
+        endTime: new Date(),
       });
       this.logger.log(`Ended trading session: ${sessionId}`);
     } catch (error) {
@@ -363,7 +370,7 @@ export class DataPersistenceService {
       volume: number;
       tradeCount: number;
       detailedMetrics?: Record<string, any>;
-    }
+    },
   ): Promise<void> {
     try {
       const today = new Date();
@@ -375,8 +382,8 @@ export class DataPersistenceService {
           strategyId,
           exchange,
           symbol,
-          date: today
-        }
+          date: today,
+        },
       });
 
       if (existing) {
@@ -389,14 +396,16 @@ export class DataPersistenceService {
           exchange,
           symbol,
           date: today,
-          ...metrics
+          ...metrics,
         });
         await this.performanceRepository.save(performance);
       }
 
       this.logger.log(`Stored performance metrics for ${strategyId}`);
     } catch (error) {
-      this.logger.error(`Failed to store performance metrics: ${error.message}`);
+      this.logger.error(
+        `Failed to store performance metrics: ${error.message}`,
+      );
     }
   }
 
@@ -406,16 +415,17 @@ export class DataPersistenceService {
   async getPerformanceMetrics(
     strategyId: string,
     startDate?: Date,
-    endDate?: Date
+    endDate?: Date,
   ): Promise<PerformanceMetrics[]> {
     try {
-      const query = this.performanceRepository.createQueryBuilder('metrics')
+      const query = this.performanceRepository
+        .createQueryBuilder('metrics')
         .where('metrics.strategyId = :strategyId', { strategyId });
 
       if (startDate && endDate) {
         query.andWhere('metrics.date BETWEEN :startDate AND :endDate', {
           startDate,
-          endDate
+          endDate,
         });
       } else if (startDate) {
         query.andWhere('metrics.date >= :startDate', { startDate });
@@ -439,7 +449,7 @@ export class DataPersistenceService {
     strategyId?: string,
     exchange?: string,
     startDate?: Date,
-    endDate?: Date
+    endDate?: Date,
   ): Promise<TradingSession[]> {
     try {
       const query = this.tradingSessionRepository.createQueryBuilder('session');
@@ -455,7 +465,7 @@ export class DataPersistenceService {
       if (startDate && endDate) {
         query.andWhere('session.startTime BETWEEN :startDate AND :endDate', {
           startDate,
-          endDate
+          endDate,
         });
       }
 
@@ -476,17 +486,18 @@ export class DataPersistenceService {
     symbol: string,
     startTime?: Date,
     endTime?: Date,
-    limit?: number
+    limit?: number,
   ): Promise<MarketDataSnapshot[]> {
     try {
-      const query = this.marketDataRepository.createQueryBuilder('snapshot')
+      const query = this.marketDataRepository
+        .createQueryBuilder('snapshot')
         .where('snapshot.exchange = :exchange', { exchange })
         .andWhere('snapshot.symbol = :symbol', { symbol });
 
       if (startTime && endTime) {
         query.andWhere('snapshot.timestamp BETWEEN :startTime AND :endTime', {
           startTime,
-          endTime
+          endTime,
         });
       }
 
@@ -498,7 +509,9 @@ export class DataPersistenceService {
 
       return await query.getMany();
     } catch (error) {
-      this.logger.error(`Failed to get market data snapshots: ${error.message}`);
+      this.logger.error(
+        `Failed to get market data snapshots: ${error.message}`,
+      );
       return [];
     }
   }
@@ -513,18 +526,22 @@ export class DataPersistenceService {
     try {
       // Clean up old market data snapshots
       const deletedSnapshots = await this.marketDataRepository.delete({
-        timestamp: LessThan(cutoffDate)
+        timestamp: LessThan(cutoffDate),
       });
 
       // Clean up old candles (keep based on interval)
       const cutoffDateCandles = new Date();
-      cutoffDateCandles.setDate(cutoffDateCandles.getDate() - (retentionDays * 2)); // Keep candles longer
+      cutoffDateCandles.setDate(
+        cutoffDateCandles.getDate() - retentionDays * 2,
+      ); // Keep candles longer
 
       const deletedCandles = await this.candleRepository.delete({
-        timestamp: LessThan(cutoffDateCandles)
+        timestamp: LessThan(cutoffDateCandles),
       });
 
-      this.logger.log(`Cleaned up ${deletedSnapshots.affected} snapshots and ${deletedCandles.affected} candles`);
+      this.logger.log(
+        `Cleaned up ${deletedSnapshots.affected} snapshots and ${deletedCandles.affected} candles`,
+      );
     } catch (error) {
       this.logger.error(`Failed to cleanup old data: ${error.message}`);
     }
@@ -544,14 +561,14 @@ export class DataPersistenceService {
         this.marketDataRepository.count(),
         this.tradingSessionRepository.count(),
         this.performanceRepository.count(),
-        this.candleRepository.count()
+        this.candleRepository.count(),
       ]);
 
       return {
         marketDataSnapshots: snapshots,
         tradingSessions: sessions,
         performanceMetrics: metrics,
-        historicalCandles: candles
+        historicalCandles: candles,
       };
     } catch (error) {
       this.logger.error(`Failed to get database stats: ${error.message}`);
@@ -559,7 +576,7 @@ export class DataPersistenceService {
         marketDataSnapshots: 0,
         tradingSessions: 0,
         performanceMetrics: 0,
-        historicalCandles: 0
+        historicalCandles: 0,
       };
     }
   }

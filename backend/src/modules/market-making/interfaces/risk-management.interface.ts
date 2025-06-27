@@ -198,21 +198,21 @@ export interface RiskManagementService {
   // Portfolio risk assessment
   calculatePortfolioVaR(
     portfolio: Portfolio,
-    timeframe: string
+    timeframe: string,
   ): Promise<VaRCalculation>;
-  
+
   assessConcentrationRisk(
-    positions: PortfolioPosition[]
+    positions: PortfolioPosition[],
   ): Promise<ConcentrationAnalysis>;
 
   // Dynamic hedging
   calculateGreeks(optionsPosition: OptionsPosition): Promise<GreeksCalculation>;
-  
+
   executeDynamicHedge(exposure: RiskExposure): Promise<HedgingExecution>;
 
   // Stress testing
   performStressTesting(scenarios: StressScenario[]): Promise<StressTestResults>;
-  
+
   simulateMarketShock(shockParams: MarketShock): Promise<ShockImpactAnalysis>;
 }
 

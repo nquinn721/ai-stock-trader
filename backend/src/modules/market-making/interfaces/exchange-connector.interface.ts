@@ -17,8 +17,8 @@ export interface ExchangeOrderBook {
   symbol: string;
   exchange: string;
   timestamp: Date;
-  bids: [number, number][];  // [price, quantity]
-  asks: [number, number][];  // [price, quantity]
+  bids: [number, number][]; // [price, quantity]
+  asks: [number, number][]; // [price, quantity]
   sequence?: number;
   checksum?: string;
 }
@@ -125,7 +125,11 @@ export interface ExchangeConnector {
   getTickers(symbols?: string[]): Promise<ExchangeTicker[]>;
   getOrderBook(symbol: string, limit?: number): Promise<ExchangeOrderBook>;
   getTrades(symbol: string, limit?: number): Promise<ExchangeTrade[]>;
-  getCandles(symbol: string, interval: string, limit?: number): Promise<ExchangeCandle[]>;
+  getCandles(
+    symbol: string,
+    interval: string,
+    limit?: number,
+  ): Promise<ExchangeCandle[]>;
 
   // Trading
   createOrder(order: CreateOrderRequest): Promise<ExchangeOrder>;
@@ -140,9 +144,18 @@ export interface ExchangeConnector {
   getTradingFees(symbol?: string): Promise<TradingFees>;
 
   // WebSocket streams
-  subscribeOrderBook(symbol: string, callback: (data: ExchangeOrderBook) => void): Promise<void>;
-  subscribeTicker(symbol: string, callback: (data: ExchangeTicker) => void): Promise<void>;
-  subscribeTrades(symbol: string, callback: (data: ExchangeTrade) => void): Promise<void>;
+  subscribeOrderBook(
+    symbol: string,
+    callback: (data: ExchangeOrderBook) => void,
+  ): Promise<void>;
+  subscribeTicker(
+    symbol: string,
+    callback: (data: ExchangeTicker) => void,
+  ): Promise<void>;
+  subscribeTrades(
+    symbol: string,
+    callback: (data: ExchangeTrade) => void,
+  ): Promise<void>;
   subscribeOrders(callback: (data: ExchangeOrder) => void): Promise<void>;
   subscribeBalances(callback: (data: ExchangeBalance[]) => void): Promise<void>;
 
@@ -209,7 +222,12 @@ export interface ExchangeFilter {
 }
 
 export interface SymbolFilter {
-  filterType: 'PRICE_FILTER' | 'LOT_SIZE' | 'MIN_NOTIONAL' | 'ICEBERG_PARTS' | 'MARKET_LOT_SIZE';
+  filterType:
+    | 'PRICE_FILTER'
+    | 'LOT_SIZE'
+    | 'MIN_NOTIONAL'
+    | 'ICEBERG_PARTS'
+    | 'MARKET_LOT_SIZE';
   minPrice?: number;
   maxPrice?: number;
   tickSize?: number;

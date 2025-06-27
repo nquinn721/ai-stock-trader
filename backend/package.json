@@ -33,12 +33,14 @@
     "@xenova/transformers": "^2.17.2",
     "axios": "^1.10.0",
     "brain.js": "^2.0.0-beta.24",
+    "ccxt": "^4.4.91",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.2",
     "ml-matrix": "^6.12.1",
     "ml-regression": "^6.3.0",
     "mysql2": "^3.14.1",
     "natural": "^8.1.0",
+    "node-binance-api": "^1.0.10",
     "node-fetch": "^3.3.2",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.2",
@@ -47,6 +49,7 @@
     "socket.io": "^4.8.1",
     "swagger-ui-express": "^5.0.1",
     "typeorm": "^0.3.25",
+    "ws": "^8.18.2",
     "yahoo-finance2": "^2.13.3"
   },
   "devDependencies": {

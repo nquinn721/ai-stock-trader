@@ -12,6 +12,7 @@ This directory contains all documentation for the Stock Trading App project, inc
 ## Quick Links
 
 ### Architecture Decision Records (ADRs)
+
 - [ADR-001: Development Environment and Tooling Standards](./adrs/001-development-environment-standards.md)
 - [ADR-002: Code Style and Quality Standards](./adrs/002-code-style-standards.md)
 - [ADR-003: Workflow and Process Standards](./adrs/003-workflow-standards.md)
@@ -21,6 +22,7 @@ This directory contains all documentation for the Stock Trading App project, inc
 - [ADR-010: UI Theme and Layout Consistency Standards](./adrs/010-ui-theme-layout-standards.md)
 
 ### UI and Design Standards
+
 - [UI Theme and Layout Standards](./UI-THEME-LAYOUT-STANDARDS.md) - **Mandatory** styling and layout requirements for all pages
 
 ## Development Environment Setup

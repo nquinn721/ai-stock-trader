@@ -1,22 +1,28 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { MarketMakingController } from './controllers/market-making.controller';
-import { MarketMakingServiceImpl } from './services/market-making.service';
-import { LiquidityProvisionServiceImpl } from './services/liquidity-provision.service';
-import { RiskManagementServiceImpl } from './services/risk-management.service';
-import { MarketDataServiceImpl } from './services/market-data.service';
-import { ExchangeConnectorService } from './services/exchange-connector.service';
-import { WebSocketManagerService } from './services/websocket-manager.service';
-import { DataPersistenceService, MarketDataSnapshot, TradingSession, PerformanceMetrics, HistoricalCandle } from './services/data-persistence.service';
 import { BinanceAdapter } from './adapters/binance.adapter';
 import { CoinbaseAdapter } from './adapters/coinbase.adapter';
+import { MarketMakingController } from './controllers/market-making.controller';
 import {
-  MarketMakingStrategyEntity,
-  MarketMakingQuoteEntity,
   ArbitrageOpportunityEntity,
+  LiquidityPositionEntity,
+  MarketMakingQuoteEntity,
+  MarketMakingStrategyEntity,
   RiskExposureEntity,
-  LiquidityPositionEntity
 } from './entities/market-making.entities';
+import {
+  DataPersistenceService,
+  HistoricalCandle,
+  MarketDataSnapshot,
+  PerformanceMetrics,
+  TradingSession,
+} from './services/data-persistence.service';
+import { ExchangeConnectorService } from './services/exchange-connector.service';
+import { LiquidityProvisionServiceImpl } from './services/liquidity-provision.service';
+import { MarketDataServiceImpl } from './services/market-data.service';
+import { MarketMakingServiceImpl } from './services/market-making.service';
+import { RiskManagementServiceImpl } from './services/risk-management.service';
+import { WebSocketManagerService } from './services/websocket-manager.service';
 
 @Module({
   imports: [
@@ -31,8 +37,8 @@ import {
       MarketDataSnapshot,
       TradingSession,
       PerformanceMetrics,
-      HistoricalCandle
-    ])
+      HistoricalCandle,
+    ]),
   ],
   controllers: [MarketMakingController],
   providers: [
@@ -47,7 +53,7 @@ import {
     DataPersistenceService,
     // Exchange adapters
     BinanceAdapter,
-    CoinbaseAdapter
+    CoinbaseAdapter,
   ],
   exports: [
     MarketMakingServiceImpl,
@@ -56,7 +62,7 @@ import {
     MarketDataServiceImpl,
     ExchangeConnectorService,
     WebSocketManagerService,
-    DataPersistenceService
-  ]
+    DataPersistenceService,
+  ],
 })
 export class MarketMakingModule {}

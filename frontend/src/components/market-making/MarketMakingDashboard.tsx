@@ -1,10 +1,34 @@
-import React, { useState, useEffect, useCallback } from 'react';
 import {
+  AccountBalance as AccountBalanceIcon,
+  Refresh as RefreshIcon,
+  Security as SecurityIcon,
+  ShowChart as ShowChartIcon,
+  Speed as SpeedIcon,
+  Timeline as TimelineIcon,
+  TrendingUp as TrendingUpIcon,
+  Wifi as WifiIcon,
+  WifiOff as WifiOffIcon,
+} from "@mui/icons-material";
+import {
+  Alert,
+  AlertTitle,
   Box,
-  Typography,
+  Button,
   Card,
   CardContent,
-  Tabs,
+  Chip,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  FormControl,
+  FormControlLabel,
+  InputLabel,
+  LinearProgress,
+  MenuItem,
+  Paper,
+  Select,
+  Switch,
   Tab,
   Table,
   TableBody,
@@ -12,36 +36,12 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  Paper,
-  Chip,
-  Button,
-  LinearProgress,
-  Alert,
-  AlertTitle,
-  Switch,
-  FormControlLabel,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
+  Tabs,
   TextField,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel
-} from '@mui/material';
-import {
-  TrendingUp as TrendingUpIcon,
-  AccountBalance as AccountBalanceIcon,
-  Speed as SpeedIcon,
-  Security as SecurityIcon,
-  ShowChart as ShowChartIcon,
-  Timeline as TimelineIcon,
-  Wifi as WifiIcon,
-  WifiOff as WifiOffIcon,
-  Refresh as RefreshIcon
-} from '@mui/icons-material';
-import './MarketMakingDashboard.css';
+  Typography,
+} from "@mui/material";
+import React, { useCallback, useEffect, useState } from "react";
+import "./MarketMakingDashboard.css";
 
 // ===================================
 // PHASE 2: REAL-TIME DATA INTERFACES
@@ -72,7 +72,7 @@ interface WebSocketSubscription {
   id: string;
   exchange: string;
   symbol: string;
-  type: 'orderbook' | 'ticker' | 'trades';
+  type: "orderbook" | "ticker" | "trades";
   active: boolean;
   lastUpdate: Date;
 }
@@ -106,8 +106,8 @@ interface TradingSession {
 interface MarketMakingStrategy {
   id: string;
   name: string;
-  type: 'CONSERVATIVE' | 'AGGRESSIVE' | 'BALANCED' | 'SCALPING';
-  status: 'ACTIVE' | 'INACTIVE' | 'PAUSED' | 'ERROR';
+  type: "CONSERVATIVE" | "AGGRESSIVE" | "BALANCED" | "SCALPING";
+  status: "ACTIVE" | "INACTIVE" | "PAUSED" | "ERROR";
   totalPnl: number;
   sharpeRatio: number;
   maxDrawdown: number;
@@ -117,12 +117,12 @@ interface MarketMakingStrategy {
 
 interface ArbitrageOpportunity {
   id: string;
-  type: 'SPATIAL' | 'TEMPORAL' | 'STATISTICAL' | 'TRIANGULAR';
+  type: "SPATIAL" | "TEMPORAL" | "STATISTICAL" | "TRIANGULAR";
   profitPotential: number;
   riskScore: number;
   requiredCapital: number;
   confidence: number;
-  status: 'DETECTED' | 'EXECUTING' | 'EXECUTED' | 'EXPIRED' | 'FAILED';
+  status: "DETECTED" | "EXECUTING" | "EXECUTED" | "EXPIRED" | "FAILED";
 }
 
 interface RiskMetrics {
@@ -145,7 +145,9 @@ interface SystemStatus {
 const MarketMakingDashboard: React.FC = () => {
   const [tabValue, setTabValue] = useState(0);
   const [strategies, setStrategies] = useState<MarketMakingStrategy[]>([]);
-  const [arbitrageOpportunities, setArbitrageOpportunities] = useState<ArbitrageOpportunity[]>([]);
+  const [arbitrageOpportunities, setArbitrageOpportunities] = useState<
+    ArbitrageOpportunity[]
+  >([]);
   const [riskMetrics, setRiskMetrics] = useState<RiskMetrics | null>(null);
   const [systemStatus, setSystemStatus] = useState<SystemStatus | null>(null);
   const [loading, setLoading] = useState(true);
@@ -155,14 +157,22 @@ const MarketMakingDashboard: React.FC = () => {
   // PHASE 2: REAL-TIME DATA STATE
   // ===================================
   const [realTimeEnabled, setRealTimeEnabled] = useState(false);
-  const [exchangeStatuses, setExchangeStatuses] = useState<ExchangeStatus[]>([]);
-  const [webSocketSubscriptions, setWebSocketSubscriptions] = useState<WebSocketSubscription[]>([]);
-  const [orderBooks, setOrderBooks] = useState<Map<string, ExchangeOrderBook>>(new Map());
-  const [tickers, setTickers] = useState<Map<string, ExchangeTicker>>(new Map());
+  const [exchangeStatuses, setExchangeStatuses] = useState<ExchangeStatus[]>(
+    []
+  );
+  const [webSocketSubscriptions, setWebSocketSubscriptions] = useState<
+    WebSocketSubscription[]
+  >([]);
+  const [orderBooks, setOrderBooks] = useState<Map<string, ExchangeOrderBook>>(
+    new Map()
+  );
+  const [tickers, setTickers] = useState<Map<string, ExchangeTicker>>(
+    new Map()
+  );
   const [tradingSessions, setTradingSessions] = useState<TradingSession[]>([]);
   const [subscriptionDialog, setSubscriptionDialog] = useState(false);
-  const [selectedExchange, setSelectedExchange] = useState('');
-  const [selectedSymbol, setSelectedSymbol] = useState('');
+  const [selectedExchange, setSelectedExchange] = useState("");
+  const [selectedSymbol, setSelectedSymbol] = useState("");
 
   useEffect(() => {
     loadDashboardData();
@@ -184,55 +194,55 @@ const MarketMakingDashboard: React.FC = () => {
     try {
       setLoading(true);
       setError(null);
-      
+
       // Simulate API calls with mock data (replace with actual API calls)
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
       // Mock data - replace with actual API integration
       setStrategies([
         {
-          id: '1',
-          name: 'Conservative MM Strategy',
-          type: 'CONSERVATIVE',
-          status: 'ACTIVE',
+          id: "1",
+          name: "Conservative MM Strategy",
+          type: "CONSERVATIVE",
+          status: "ACTIVE",
           totalPnl: 15420.75,
           sharpeRatio: 2.1,
           maxDrawdown: 0.025,
           totalTrades: 1247,
-          winRate: 0.68
+          winRate: 0.68,
         },
         {
-          id: '2',
-          name: 'Aggressive Scalping',
-          type: 'AGGRESSIVE',
-          status: 'ACTIVE',
-          totalPnl: 8932.40,
+          id: "2",
+          name: "Aggressive Scalping",
+          type: "AGGRESSIVE",
+          status: "ACTIVE",
+          totalPnl: 8932.4,
           sharpeRatio: 1.8,
           maxDrawdown: 0.045,
           totalTrades: 3421,
-          winRate: 0.64
-        }
+          winRate: 0.64,
+        },
       ]);
 
       setArbitrageOpportunities([
         {
-          id: '1',
-          type: 'SPATIAL',
+          id: "1",
+          type: "SPATIAL",
           profitPotential: 0.012,
           riskScore: 0.3,
           requiredCapital: 25000,
           confidence: 0.85,
-          status: 'DETECTED'
+          status: "DETECTED",
         },
         {
-          id: '2',
-          type: 'STATISTICAL',
+          id: "2",
+          type: "STATISTICAL",
           profitPotential: 0.008,
           riskScore: 0.4,
           requiredCapital: 15000,
           confidence: 0.72,
-          status: 'EXECUTING'
-        }
+          status: "EXECUTING",
+        },
       ]);
 
       setRiskMetrics({
@@ -240,7 +250,7 @@ const MarketMakingDashboard: React.FC = () => {
         var99: 18750,
         exposureUtilization: 0.65,
         concentrationRisk: 0.28,
-        liquidityRisk: 0.15
+        liquidityRisk: 0.15,
       });
 
       setSystemStatus({
@@ -249,11 +259,11 @@ const MarketMakingDashboard: React.FC = () => {
         profitToday: 2847.35,
         riskUtilization: 0.65,
         arbitrageOpportunities: 12,
-        lastUpdate: new Date().toISOString()
+        lastUpdate: new Date().toISOString(),
       });
     } catch (err) {
-      setError('Failed to load market making dashboard data');
-      console.error('Dashboard load error:', err);
+      setError("Failed to load market making dashboard data");
+      console.error("Dashboard load error:", err);
     } finally {
       setLoading(false);
     }
@@ -265,25 +275,35 @@ const MarketMakingDashboard: React.FC = () => {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'ACTIVE': return 'success';
-      case 'INACTIVE': return 'default';
-      case 'PAUSED': return 'warning';
-      case 'ERROR': return 'error';
-      case 'DETECTED': return 'info';
-      case 'EXECUTING': return 'warning';
-      case 'EXECUTED': return 'success';
-      case 'EXPIRED': return 'default';
-      case 'FAILED': return 'error';
-      default: return 'default';
+      case "ACTIVE":
+        return "success";
+      case "INACTIVE":
+        return "default";
+      case "PAUSED":
+        return "warning";
+      case "ERROR":
+        return "error";
+      case "DETECTED":
+        return "info";
+      case "EXECUTING":
+        return "warning";
+      case "EXECUTED":
+        return "success";
+      case "EXPIRED":
+        return "default";
+      case "FAILED":
+        return "error";
+      default:
+        return "default";
     }
   };
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
       minimumFractionDigits: 2,
-      maximumFractionDigits: 2
+      maximumFractionDigits: 2,
     }).format(amount);
   };
 
@@ -293,155 +313,183 @@ const MarketMakingDashboard: React.FC = () => {
 
   const loadExchangeStatus = useCallback(async () => {
     try {
-      const response = await fetch('http://localhost:8000/market-making/exchanges/status');
+      const response = await fetch(
+        "http://localhost:8000/market-making/exchanges/status"
+      );
       const result = await response.json();
-      
+
       if (result.success) {
-        const statuses: ExchangeStatus[] = Object.entries(result.data.status).map(([exchange, status]: [string, any]) => ({
+        const statuses: ExchangeStatus[] = Object.entries(
+          result.data.status
+        ).map(([exchange, status]: [string, any]) => ({
           exchange,
           connected: status.connected,
           rateLimitUsed: status.rateLimitUsed,
           rateLimitRemaining: status.rateLimitRemaining,
-          lastError: status.lastError
+          lastError: status.lastError,
         }));
-        
+
         setExchangeStatuses(statuses);
       }
     } catch (error) {
-      console.error('Failed to load exchange status:', error);
+      console.error("Failed to load exchange status:", error);
     }
   }, []);
 
   const loadWebSocketStatus = useCallback(async () => {
     try {
-      const response = await fetch('http://localhost:8000/market-making/websocket/status');
+      const response = await fetch(
+        "http://localhost:8000/market-making/websocket/status"
+      );
       const result = await response.json();
-      
+
       if (result.success) {
         setWebSocketSubscriptions(result.data.activeSubscriptions);
       }
     } catch (error) {
-      console.error('Failed to load WebSocket status:', error);
+      console.error("Failed to load WebSocket status:", error);
     }
   }, []);
 
   const subscribeToOrderBook = async (exchange: string, symbol: string) => {
     try {
-      const response = await fetch('http://localhost:8000/market-making/websocket/subscribe/orderbook', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ exchange, symbol })
-      });
-      
+      const response = await fetch(
+        "http://localhost:8000/market-making/websocket/subscribe/orderbook",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ exchange, symbol }),
+        }
+      );
+
       const result = await response.json();
-      
+
       if (result.success) {
         console.log(`Subscribed to order book: ${exchange}:${symbol}`);
         loadWebSocketStatus(); // Refresh subscription list
       }
     } catch (error) {
-      console.error('Failed to subscribe to order book:', error);
+      console.error("Failed to subscribe to order book:", error);
     }
   };
 
   const subscribeToTicker = async (exchange: string, symbol: string) => {
     try {
-      const response = await fetch('http://localhost:8000/market-making/websocket/subscribe/ticker', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ exchange, symbol })
-      });
-      
+      const response = await fetch(
+        "http://localhost:8000/market-making/websocket/subscribe/ticker",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ exchange, symbol }),
+        }
+      );
+
       const result = await response.json();
-      
+
       if (result.success) {
         console.log(`Subscribed to ticker: ${exchange}:${symbol}`);
         loadWebSocketStatus(); // Refresh subscription list
       }
     } catch (error) {
-      console.error('Failed to subscribe to ticker:', error);
+      console.error("Failed to subscribe to ticker:", error);
     }
   };
 
   const unsubscribeFromStream = async (subscriptionId: string) => {
     try {
-      const response = await fetch(`http://localhost:8000/market-making/websocket/subscribe/${subscriptionId}`, {
-        method: 'DELETE'
-      });
-      
+      const response = await fetch(
+        `http://localhost:8000/market-making/websocket/subscribe/${subscriptionId}`,
+        {
+          method: "DELETE",
+        }
+      );
+
       const result = await response.json();
-      
+
       if (result.success) {
         console.log(`Unsubscribed from stream: ${subscriptionId}`);
         loadWebSocketStatus(); // Refresh subscription list
       }
     } catch (error) {
-      console.error('Failed to unsubscribe:', error);
+      console.error("Failed to unsubscribe:", error);
     }
   };
 
   const getAggregatedBalances = async () => {
     try {
-      const response = await fetch('http://localhost:8000/market-making/exchanges/balances');
+      const response = await fetch(
+        "http://localhost:8000/market-making/exchanges/balances"
+      );
       const result = await response.json();
-      
+
       if (result.success) {
-        console.log('Aggregated balances:', result.data);
+        console.log("Aggregated balances:", result.data);
         return result.data;
       }
     } catch (error) {
-      console.error('Failed to get aggregated balances:', error);
+      console.error("Failed to get aggregated balances:", error);
     }
   };
 
   const getBestQuotes = async (symbol: string) => {
     try {
-      const response = await fetch(`http://localhost:8000/market-making/exchanges/quotes/${symbol}`);
+      const response = await fetch(
+        `http://localhost:8000/market-making/exchanges/quotes/${symbol}`
+      );
       const result = await response.json();
-      
+
       if (result.success) {
         return result.data;
       }
     } catch (error) {
-      console.error('Failed to get best quotes:', error);
+      console.error("Failed to get best quotes:", error);
     }
   };
 
-  const startTradingSession = async (exchange: string, symbol: string, strategyId: string) => {
+  const startTradingSession = async (
+    exchange: string,
+    symbol: string,
+    strategyId: string
+  ) => {
     try {
-      const response = await fetch('http://localhost:8000/market-making/data/trading-session', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ exchange, symbol, strategyId })
-      });
-      
+      const response = await fetch(
+        "http://localhost:8000/market-making/data/trading-session",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ exchange, symbol, strategyId }),
+        }
+      );
+
       const result = await response.json();
-      
+
       if (result.success) {
         console.log(`Started trading session: ${result.data.sessionId}`);
         loadTradingSessions(); // Refresh sessions list
       }
     } catch (error) {
-      console.error('Failed to start trading session:', error);
+      console.error("Failed to start trading session:", error);
     }
   };
 
   const loadTradingSessions = async () => {
     try {
-      const response = await fetch('http://localhost:8000/market-making/data/trading-sessions');
+      const response = await fetch(
+        "http://localhost:8000/market-making/data/trading-sessions"
+      );
       const result = await response.json();
-      
+
       if (result.success) {
         setTradingSessions(result.data);
       }
     } catch (error) {
-      console.error('Failed to load trading sessions:', error);
+      console.error("Failed to load trading sessions:", error);
     }
   };
 
@@ -449,11 +497,11 @@ const MarketMakingDashboard: React.FC = () => {
     if (selectedExchange && selectedSymbol) {
       Promise.all([
         subscribeToOrderBook(selectedExchange, selectedSymbol),
-        subscribeToTicker(selectedExchange, selectedSymbol)
+        subscribeToTicker(selectedExchange, selectedSymbol),
       ]);
       setSubscriptionDialog(false);
-      setSelectedExchange('');
-      setSelectedSymbol('');
+      setSelectedExchange("");
+      setSelectedSymbol("");
     }
   };
 
@@ -478,11 +526,7 @@ const MarketMakingDashboard: React.FC = () => {
           <AlertTitle>Error Loading Dashboard</AlertTitle>
           {error}
         </Alert>
-        <Button
-          variant="contained"
-          onClick={loadDashboardData}
-          sx={{ mt: 2 }}
-        >
+        <Button variant="contained" onClick={loadDashboardData} sx={{ mt: 2 }}>
           Retry
         </Button>
       </Box>
@@ -497,53 +541,84 @@ const MarketMakingDashboard: React.FC = () => {
 
       {/* System Status Overview */}
       {systemStatus && (
-        <Box className="status-overview" sx={{ display: 'flex', gap: 2, mb: 3, flexWrap: 'wrap' }}>
-          <Card className="status-card" sx={{ flex: '1 1 200px', minWidth: '200px' }}>
+        <Box
+          className="status-overview"
+          sx={{ display: "flex", gap: 2, mb: 3, flexWrap: "wrap" }}
+        >
+          <Card
+            className="status-card"
+            sx={{ flex: "1 1 200px", minWidth: "200px" }}
+          >
             <CardContent>
               <Box className="status-metric">
                 <AccountBalanceIcon className="status-icon" />
-                <Typography variant="h6">{systemStatus.activeStrategies}</Typography>
+                <Typography variant="h6">
+                  {systemStatus.activeStrategies}
+                </Typography>
                 <Typography variant="body2">Active Strategies</Typography>
               </Box>
             </CardContent>
           </Card>
-          <Card className="status-card" sx={{ flex: '1 1 200px', minWidth: '200px' }}>
+          <Card
+            className="status-card"
+            sx={{ flex: "1 1 200px", minWidth: "200px" }}
+          >
             <CardContent>
               <Box className="status-metric">
                 <ShowChartIcon className="status-icon" />
-                <Typography variant="h6">{formatCurrency(systemStatus.totalVolume24h)}</Typography>
+                <Typography variant="h6">
+                  {formatCurrency(systemStatus.totalVolume24h)}
+                </Typography>
                 <Typography variant="body2">24h Volume</Typography>
               </Box>
             </CardContent>
           </Card>
-          <Card className="status-card profit" sx={{ flex: '1 1 200px', minWidth: '200px' }}>
+          <Card
+            className="status-card profit"
+            sx={{ flex: "1 1 200px", minWidth: "200px" }}
+          >
             <CardContent>
               <Box className="status-metric">
                 <TrendingUpIcon className="status-icon" />
-                <Typography variant="h6">{formatCurrency(systemStatus.profitToday)}</Typography>
+                <Typography variant="h6">
+                  {formatCurrency(systemStatus.profitToday)}
+                </Typography>
                 <Typography variant="body2">Today's P&L</Typography>
               </Box>
             </CardContent>
           </Card>
-          <Card className="status-card" sx={{ flex: '1 1 200px', minWidth: '200px' }}>
+          <Card
+            className="status-card"
+            sx={{ flex: "1 1 200px", minWidth: "200px" }}
+          >
             <CardContent>
               <Box className="status-metric">
                 <SecurityIcon className="status-icon" />
-                <Typography variant="h6">{formatPercentage(systemStatus.riskUtilization)}</Typography>
+                <Typography variant="h6">
+                  {formatPercentage(systemStatus.riskUtilization)}
+                </Typography>
                 <Typography variant="body2">Risk Utilization</Typography>
               </Box>
             </CardContent>
           </Card>
-          <Card className="status-card" sx={{ flex: '1 1 200px', minWidth: '200px' }}>
+          <Card
+            className="status-card"
+            sx={{ flex: "1 1 200px", minWidth: "200px" }}
+          >
             <CardContent>
               <Box className="status-metric">
                 <SpeedIcon className="status-icon" />
-                <Typography variant="h6">{systemStatus.arbitrageOpportunities}</Typography>
+                <Typography variant="h6">
+                  {systemStatus.arbitrageOpportunities}
+                </Typography>
                 <Typography variant="body2">Arb Opportunities</Typography>
               </Box>
             </CardContent>
           </Card>
-          <Card className="status-card" sx={{ flex: '1 1 200px', minWidth: '200px' }}>
+          <Card
+            className="status-card"
+            sx={{ flex: "1 1 200px", minWidth: "200px" }}
+          >
             <CardContent>
               <Box className="status-metric">
                 <TimelineIcon className="status-icon" />
@@ -559,7 +634,11 @@ const MarketMakingDashboard: React.FC = () => {
 
       {/* Main Content Tabs */}
       <Box className="dashboard-content">
-        <Tabs value={tabValue} onChange={handleTabChange} className="dashboard-tabs">
+        <Tabs
+          value={tabValue}
+          onChange={handleTabChange}
+          className="dashboard-tabs"
+        >
           <Tab label="Active Strategies" />
           <Tab label="Arbitrage Opportunities" />
           <Tab label="Risk Management" />
@@ -605,13 +684,24 @@ const MarketMakingDashboard: React.FC = () => {
                           color={getStatusColor(strategy.status) as any}
                         />
                       </TableCell>
-                      <TableCell align="right" className={strategy.totalPnl >= 0 ? 'profit' : 'loss'}>
+                      <TableCell
+                        align="right"
+                        className={strategy.totalPnl >= 0 ? "profit" : "loss"}
+                      >
                         {formatCurrency(strategy.totalPnl)}
                       </TableCell>
-                      <TableCell align="right">{strategy.sharpeRatio.toFixed(2)}</TableCell>
-                      <TableCell align="right">{formatPercentage(strategy.maxDrawdown)}</TableCell>
-                      <TableCell align="right">{formatPercentage(strategy.winRate)}</TableCell>
-                      <TableCell align="right">{strategy.totalTrades.toLocaleString()}</TableCell>
+                      <TableCell align="right">
+                        {strategy.sharpeRatio.toFixed(2)}
+                      </TableCell>
+                      <TableCell align="right">
+                        {formatPercentage(strategy.maxDrawdown)}
+                      </TableCell>
+                      <TableCell align="right">
+                        {formatPercentage(strategy.winRate)}
+                      </TableCell>
+                      <TableCell align="right">
+                        {strategy.totalTrades.toLocaleString()}
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -671,12 +761,14 @@ const MarketMakingDashboard: React.FC = () => {
                         {formatPercentage(opportunity.confidence)}
                       </TableCell>
                       <TableCell>
-                        {opportunity.status === 'DETECTED' && (
+                        {opportunity.status === "DETECTED" && (
                           <Button
                             size="small"
                             variant="contained"
                             color="primary"
-                            onClick={() => console.log('Execute arbitrage:', opportunity.id)}
+                            onClick={() =>
+                              console.log("Execute arbitrage:", opportunity.id)
+                            }
                           >
                             Execute
                           </Button>
@@ -696,8 +788,11 @@ const MarketMakingDashboard: React.FC = () => {
             <Typography variant="h6" gutterBottom>
               Risk Management Dashboard
             </Typography>
-            <Box sx={{ display: 'flex', gap: 3, flexWrap: 'wrap' }}>
-              <Card className="risk-card" sx={{ flex: '1 1 300px', minWidth: '300px' }}>
+            <Box sx={{ display: "flex", gap: 3, flexWrap: "wrap" }}>
+              <Card
+                className="risk-card"
+                sx={{ flex: "1 1 300px", minWidth: "300px" }}
+              >
                 <CardContent>
                   <Typography variant="h6" gutterBottom>
                     Value at Risk (VaR)
@@ -710,7 +805,10 @@ const MarketMakingDashboard: React.FC = () => {
                   </Typography>
                 </CardContent>
               </Card>
-              <Card className="risk-card" sx={{ flex: '1 1 300px', minWidth: '300px' }}>
+              <Card
+                className="risk-card"
+                sx={{ flex: "1 1 300px", minWidth: "300px" }}
+              >
                 <CardContent>
                   <Typography variant="h6" gutterBottom>
                     Risk Utilization
@@ -725,7 +823,10 @@ const MarketMakingDashboard: React.FC = () => {
                   </Typography>
                 </CardContent>
               </Card>
-              <Card className="risk-card" sx={{ flex: '1 1 300px', minWidth: '300px' }}>
+              <Card
+                className="risk-card"
+                sx={{ flex: "1 1 300px", minWidth: "300px" }}
+              >
                 <CardContent>
                   <Typography variant="h6" gutterBottom>
                     Concentration Risk
@@ -733,7 +834,9 @@ const MarketMakingDashboard: React.FC = () => {
                   <LinearProgress
                     variant="determinate"
                     value={riskMetrics.concentrationRisk * 100}
-                    color={riskMetrics.concentrationRisk > 0.5 ? 'error' : 'primary'}
+                    color={
+                      riskMetrics.concentrationRisk > 0.5 ? "error" : "primary"
+                    }
                     className="risk-progress"
                   />
                   <Typography variant="body1">
@@ -741,7 +844,10 @@ const MarketMakingDashboard: React.FC = () => {
                   </Typography>
                 </CardContent>
               </Card>
-              <Card className="risk-card" sx={{ flex: '1 1 300px', minWidth: '300px' }}>
+              <Card
+                className="risk-card"
+                sx={{ flex: "1 1 300px", minWidth: "300px" }}
+              >
                 <CardContent>
                   <Typography variant="h6" gutterBottom>
                     Liquidity Risk
@@ -749,7 +855,9 @@ const MarketMakingDashboard: React.FC = () => {
                   <LinearProgress
                     variant="determinate"
                     value={riskMetrics.liquidityRisk * 100}
-                    color={riskMetrics.liquidityRisk > 0.3 ? 'warning' : 'primary'}
+                    color={
+                      riskMetrics.liquidityRisk > 0.3 ? "warning" : "primary"
+                    }
                     className="risk-progress"
                   />
                   <Typography variant="body1">
@@ -769,8 +877,8 @@ const MarketMakingDashboard: React.FC = () => {
             </Typography>
             <Alert severity="info">
               <AlertTitle>Coming Soon</AlertTitle>
-              Advanced performance analytics and strategy optimization tools will be available here.
-              Features will include:
+              Advanced performance analytics and strategy optimization tools
+              will be available here. Features will include:
               <ul>
                 <li>Real-time P&L tracking and attribution</li>
                 <li>Strategy performance comparison</li>
@@ -785,11 +893,18 @@ const MarketMakingDashboard: React.FC = () => {
         {/* Real-Time Data Tab - PHASE 2 */}
         {tabValue === 4 && (
           <Box className="tab-content">
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                mb: 3,
+              }}
+            >
               <Typography variant="h6" gutterBottom>
                 Real-Time Market Data & Exchange Integration
               </Typography>
-              <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+              <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
                 <FormControlLabel
                   control={
                     <Switch
@@ -822,7 +937,8 @@ const MarketMakingDashboard: React.FC = () => {
             {!realTimeEnabled && (
               <Alert severity="info" sx={{ mb: 3 }}>
                 <AlertTitle>Real-Time Data Disabled</AlertTitle>
-                Enable real-time data to view live market feeds, WebSocket subscriptions, and exchange connectivity status.
+                Enable real-time data to view live market feeds, WebSocket
+                subscriptions, and exchange connectivity status.
               </Alert>
             )}
 
@@ -832,39 +948,60 @@ const MarketMakingDashboard: React.FC = () => {
                 <Typography variant="h6" gutterBottom sx={{ mt: 3 }}>
                   Exchange Connectivity Status
                 </Typography>
-                <Box sx={{ display: 'flex', gap: 2, mb: 3, flexWrap: 'wrap' }}>
+                <Box sx={{ display: "flex", gap: 2, mb: 3, flexWrap: "wrap" }}>
                   {exchangeStatuses.map((status) => (
                     <Card key={status.exchange} sx={{ minWidth: 250 }}>
                       <CardContent>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                        <Box
+                          sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 1,
+                            mb: 1,
+                          }}
+                        >
                           {status.connected ? (
                             <WifiIcon color="success" />
                           ) : (
                             <WifiOffIcon color="error" />
                           )}
-                          <Typography variant="h6" sx={{ textTransform: 'capitalize' }}>
+                          <Typography
+                            variant="h6"
+                            sx={{ textTransform: "capitalize" }}
+                          >
                             {status.exchange}
                           </Typography>
                           <Chip
-                            label={status.connected ? 'Connected' : 'Disconnected'}
-                            color={status.connected ? 'success' : 'error'}
+                            label={
+                              status.connected ? "Connected" : "Disconnected"
+                            }
+                            color={status.connected ? "success" : "error"}
                             size="small"
                           />
                         </Box>
                         {status.connected && (
                           <Box>
                             <Typography variant="body2" color="text.secondary">
-                              Rate Limit: {status.rateLimitUsed || 0}/{status.rateLimitRemaining || 1000}
+                              Rate Limit: {status.rateLimitUsed || 0}/
+                              {status.rateLimitRemaining || 1000}
                             </Typography>
                             <LinearProgress
                               variant="determinate"
-                              value={((status.rateLimitUsed || 0) / (status.rateLimitRemaining || 1000)) * 100}
+                              value={
+                                ((status.rateLimitUsed || 0) /
+                                  (status.rateLimitRemaining || 1000)) *
+                                100
+                              }
                               sx={{ mt: 1 }}
                             />
                           </Box>
                         )}
                         {status.lastError && (
-                          <Typography variant="body2" color="error" sx={{ mt: 1 }}>
+                          <Typography
+                            variant="body2"
+                            color="error"
+                            sx={{ mt: 1 }}
+                          >
                             Last Error: {status.lastError}
                           </Typography>
                         )}
@@ -903,19 +1040,27 @@ const MarketMakingDashboard: React.FC = () => {
                           </TableCell>
                           <TableCell>
                             <Chip
-                              label={subscription.active ? 'Active' : 'Inactive'}
-                              color={subscription.active ? 'success' : 'default'}
+                              label={
+                                subscription.active ? "Active" : "Inactive"
+                              }
+                              color={
+                                subscription.active ? "success" : "default"
+                              }
                               size="small"
                             />
                           </TableCell>
                           <TableCell>
-                            {new Date(subscription.lastUpdate).toLocaleTimeString()}
+                            {new Date(
+                              subscription.lastUpdate
+                            ).toLocaleTimeString()}
                           </TableCell>
                           <TableCell>
                             <Button
                               size="small"
                               color="error"
-                              onClick={() => unsubscribeFromStream(subscription.id)}
+                              onClick={() =>
+                                unsubscribeFromStream(subscription.id)
+                              }
                             >
                               Unsubscribe
                             </Button>
@@ -925,7 +1070,8 @@ const MarketMakingDashboard: React.FC = () => {
                       {webSocketSubscriptions.length === 0 && (
                         <TableRow>
                           <TableCell colSpan={6} align="center">
-                            No active subscriptions. Click "Subscribe to Data" to start receiving real-time updates.
+                            No active subscriptions. Click "Subscribe to Data"
+                            to start receiving real-time updates.
                           </TableCell>
                         </TableRow>
                       )}
@@ -966,13 +1112,18 @@ const MarketMakingDashboard: React.FC = () => {
                           </TableCell>
                           <TableCell>
                             <Typography
-                              color={session.realizedPnl >= 0 ? 'success.main' : 'error.main'}
+                              color={
+                                session.realizedPnl >= 0
+                                  ? "success.main"
+                                  : "error.main"
+                              }
                             >
                               ${session.realizedPnl.toFixed(2)}
                             </Typography>
                           </TableCell>
                           <TableCell>
-                            {session.totalTrades} ({session.profitableTrades} profitable)
+                            {session.totalTrades} ({session.profitableTrades}{" "}
+                            profitable)
                           </TableCell>
                         </TableRow>
                       ))}
@@ -992,10 +1143,15 @@ const MarketMakingDashboard: React.FC = () => {
         )}
 
         {/* Subscription Dialog */}
-        <Dialog open={subscriptionDialog} onClose={() => setSubscriptionDialog(false)}>
+        <Dialog
+          open={subscriptionDialog}
+          onClose={() => setSubscriptionDialog(false)}
+        >
           <DialogTitle>Subscribe to Real-Time Data</DialogTitle>
           <DialogContent>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1 }}>
+            <Box
+              sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 1 }}
+            >
               <FormControl fullWidth>
                 <InputLabel>Exchange</InputLabel>
                 <Select
@@ -1014,13 +1170,15 @@ const MarketMakingDashboard: React.FC = () => {
                 label="Symbol"
                 placeholder="e.g., BTCUSDT, ETHUSDT"
                 value={selectedSymbol}
-                onChange={(e) => setSelectedSymbol(e.target.value.toUpperCase())}
+                onChange={(e) =>
+                  setSelectedSymbol(e.target.value.toUpperCase())
+                }
               />
             </Box>
           </DialogContent>
           <DialogActions>
             <Button onClick={() => setSubscriptionDialog(false)}>Cancel</Button>
-            <Button 
+            <Button
               onClick={handleSubscriptionSubmit}
               variant="contained"
               disabled={!selectedExchange || !selectedSymbol}
