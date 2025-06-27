@@ -4,9 +4,13 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { StockService } from '../../stock/stock.service';
 import { BacktestingService, MarketData, Signal } from '../backtesting.service';
-import { AutoTrade, AutoTradeStatus, TradeType } from '../entities/auto-trade.entity';
+import {
+  AutoTrade,
+  AutoTradeStatus,
+  TradeType,
+} from '../entities/auto-trade.entity';
 import { TradingStrategy } from '../entities/trading-strategy.entity';
-import { StrategyBuilderService } from './strategy-builder.service';
+import { StrategyBuilderService } from '../strategy-builder.service';
 import { RiskManagementService } from './risk-management.service';
 
 export interface DeploymentConfig {

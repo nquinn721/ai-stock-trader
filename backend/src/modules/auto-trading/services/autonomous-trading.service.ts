@@ -9,9 +9,9 @@ import {
   TradeType,
 } from '../entities/auto-trade.entity';
 import { TradingStrategy } from '../entities/trading-strategy.entity';
+import { StrategyBuilderService } from '../strategy-builder.service';
 import { BacktestingService, MarketData, Signal } from './backtesting.service';
 import { RiskManagementService } from './risk-management.service';
-import { StrategyBuilderService } from './strategy-builder.service';
 
 export interface DeploymentConfig {
   mode: 'paper' | 'live';

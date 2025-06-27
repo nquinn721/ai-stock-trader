@@ -11,7 +11,7 @@ import {
   InstancePerformance,
 } from './services/autonomous-trading.service';
 import { BacktestingService } from './services/backtesting.service';
-import { StrategyBuilderService } from './services/strategy-builder.service';
+import { StrategyBuilderService } from './strategy-builder.service';
 
 export class DeployStrategyDto {
   mode: 'paper' | 'live';

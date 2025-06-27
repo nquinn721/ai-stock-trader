@@ -22,7 +22,7 @@ import {
 import {
   StrategyBuilderService,
   StrategyConfig,
-} from './services/strategy-builder.service';
+} from './strategy-builder.service';
 
 export class CreateStrategyDto {
   name: string;

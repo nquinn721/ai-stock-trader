@@ -19,9 +19,9 @@ import { OrderManagementService } from './services/order-management.service';
 import { PositionSizingService } from './services/position-sizing.service';
 import { RiskManagementService } from './services/risk-management.service';
 import { RuleEngineService } from './services/rule-engine.service';
-import { StrategyBuilderService } from './services/strategy-builder.service';
 import { TradeExecutionService } from './services/trade-execution.service';
 import { StrategyBuilderController } from './strategy-builder.controller';
+import { StrategyBuilderService } from './strategy-builder.service';
 
 @Module({
   imports: [
