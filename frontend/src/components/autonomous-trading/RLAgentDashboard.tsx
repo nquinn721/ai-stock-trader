@@ -21,7 +21,6 @@ import {
   DialogTitle,
   FormControl,
   FormControlLabel,
-  Grid,
   IconButton,
   InputLabel,
   LinearProgress,
@@ -33,6 +32,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
+import { Grid } from '../common/GridWrapper';
 import {
   CategoryScale,
   Chart as ChartJS,
@@ -315,9 +315,10 @@ const RLAgentDashboard: React.FC = () => {
   const chartOptions = {
     responsive: true,
     plugins: {
-      legend: {
-        position: "top" as const,
-      },
+      legend:
+        {
+          position: "top" as const,
+        },
       title: {
         display: true,
         text: "Training Progress",
@@ -377,17 +378,17 @@ const RLAgentDashboard: React.FC = () => {
       </Box>
 
       <TabPanel value={activeTab} index={0}>
-        <Grid container spacing={3}>
+        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(2, 1fr)', lg: 'repeat(3, 1fr)' }, gap: 3 }}>
           {agents.map((agent) => (
-            <Grid item xs={12} md={6} lg={4} key={agent.id}>
-              <Card
-                className="agent-card"
-                sx={{
-                  height: "100%",
-                  cursor: "pointer",
-                  "&:hover": { transform: "translateY(-2px)" },
-                  transition: "transform 0.2s",
-                }}
+            <Card
+              key={agent.id}
+              className="agent-card"
+              sx={{
+                height: "100%",
+                cursor: "pointer",
+                "&:hover": { transform: "translateY(-2px)" },
+                transition: "transform 0.2s",
+              }}
                 onClick={() => setSelectedAgent(agent)}
               >
                 <CardContent>
@@ -509,9 +510,8 @@ const RLAgentDashboard: React.FC = () => {
                   </Box>
                 </CardContent>
               </Card>
-            </Grid>
           ))}
-        </Grid>
+        </Box>
       </TabPanel>
 
       <TabPanel value={activeTab} index={1}>

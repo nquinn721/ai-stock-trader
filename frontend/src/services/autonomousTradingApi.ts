@@ -22,6 +22,7 @@ export interface DeploymentConfig {
     email?: string;
     webhook?: string;
   };
+  portfolioId: string; // Add portfolio ID requirement
 }
 
 export interface InstancePerformance {
@@ -56,6 +57,26 @@ export interface ApiResponse<T> {
   data: T;
   message?: string;
   error?: string;
+}
+
+export interface Portfolio {
+  id: string;
+  name: string;
+  currentCash: number;
+  totalValue: number;
+  isActive: boolean;
+  portfolioType: string;
+}
+
+export interface PortfolioPerformance {
+  portfolioId: string;
+  portfolioName: string;
+  currentValue: number;
+  cash: number;
+  totalReturn: number;
+  totalPnL: number;
+  dayTradingEnabled: boolean;
+  dayTradeCount: number;
 }
 
 class AutonomousTradingApi {
@@ -204,6 +225,57 @@ class AutonomousTradingApi {
       return {
         success: false,
         data: {} as InstancePerformance,
+        error: error.response?.data?.message || error.message,
+      };
+    }
+  }
+
+  // Portfolio methods
+  async getAvailablePortfolios(): Promise<{
+    success: boolean;
+    data?: Portfolio[];
+    error?: string;
+  }> {
+    try {
+      const response = await axios.get(
+        `${API_BASE_URL}/api/autonomous-trading/portfolios`
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Failed to fetch portfolios:", error);
+      return { success: false, error: "Failed to fetch portfolios" };
+    }
+  }
+
+  async getPortfolioPerformance(
+    portfolioId: string
+  ): Promise<{
+    success: boolean;
+    data?: PortfolioPerformance;
+    error?: string;
+  }> {
+    try {
+      const response = await axios.get(
+        `${API_BASE_URL}/api/autonomous-trading/portfolios/${portfolioId}/performance`
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Failed to fetch portfolio performance:", error);
+      return { success: false, error: "Failed to fetch portfolio performance" };
+    }
+  }
+
+  async getActiveStrategies(): Promise<ApiResponse<StrategyInstance[]>> {
+    try {
+      const response = await axios.get(`${this.baseURL}/strategies`);
+      return {
+        success: true,
+        data: response.data,
+      };
+    } catch (error: any) {
+      return {
+        success: false,
+        data: [],
         error: error.response?.data?.message || error.message,
       };
     }

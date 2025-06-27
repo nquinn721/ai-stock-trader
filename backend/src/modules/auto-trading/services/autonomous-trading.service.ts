@@ -3,6 +3,7 @@ import { Cron, CronExpression } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { StockService } from '../../stock/stock.service';
+import { PaperTradingService } from '../../paper-trading/paper-trading.service';
 import {
   AutoTrade,
   AutoTradeStatus,
@@ -15,6 +16,7 @@ import { RiskManagementService } from './risk-management.service';
 
 export interface DeploymentConfig {
   mode: 'paper' | 'live';
+  portfolioId: string; // Reference to actual portfolio ID
   initialCapital: number;
   maxPositions: number;
   riskLimits: RiskLimits;
@@ -79,6 +81,7 @@ export class AutonomousTradingService {
     private readonly strategyBuilderService: StrategyBuilderService,
     private readonly riskManagementService: RiskManagementService,
     private readonly stockService: StockService,
+    private readonly paperTradingService: PaperTradingService,
   ) {}
 
   async deployStrategy(
@@ -351,9 +354,9 @@ export class AutonomousTradingService {
         return;
       }
 
-      // Create auto trade record instead of executing real trade for now
+      // Create auto trade record and execute through paper trading service
       const autoTrade = this.autoTradeRepository.create({
-        portfolio_id: `portfolio-${instance.strategy.userId}`, // This would need proper portfolio lookup
+        portfolio_id: instance.config.portfolioId, // Use actual portfolio ID from config
         symbol: signal.symbol,
         trade_type: signal.direction === 'buy' ? TradeType.BUY : TradeType.SELL,
         quantity: adjustedSize,
@@ -370,9 +373,24 @@ export class AutonomousTradingService {
 
       await this.autoTradeRepository.save(autoTrade);
 
-      this.logger.log(
-        `Signal executed for strategy ${instance.strategyId}: ${signal.symbol} ${signal.direction} ${adjustedSize} @ ${marketData.close}`,
-      );
+      // Execute the trade through paper trading service
+      try {
+        await this.paperTradingService.executeTrade({
+          userId: instance.strategy.userId,
+          symbol: signal.symbol,
+          type: signal.direction,
+          quantity: adjustedSize,
+        });
+
+        this.logger.log(
+          `Trade executed through portfolio ${instance.config.portfolioId}: ${signal.symbol} ${signal.direction} ${adjustedSize} @ ${marketData.close}`,
+        );
+      } catch (tradeError) {
+        this.logger.error(`Failed to execute trade in portfolio: ${tradeError.message}`);
+        // Update auto trade status to failed
+        autoTrade.status = AutoTradeStatus.FAILED;
+        await this.autoTradeRepository.save(autoTrade);
+      }
     } catch (error) {
       this.logger.error(`Error executing signal: ${error.message}`);
       throw error;
@@ -625,5 +643,45 @@ export class AutonomousTradingService {
     }
 
     this.runningStrategies.clear();
+  }
+
+  async getAvailablePortfolios() {
+    try {
+      const portfolios = await this.paperTradingService.getPortfolios();
+      return portfolios.map(portfolio => ({
+        id: portfolio.id.toString(),
+        name: portfolio.name,
+        currentCash: portfolio.currentCash,
+        totalValue: portfolio.totalValue,
+        isActive: portfolio.isActive,
+        portfolioType: portfolio.portfolioType,
+      }));
+    } catch (error) {
+      this.logger.error(`Error fetching portfolios: ${error.message}`);
+      return [];
+    }
+  }
+
+  async getPortfolioPerformance(portfolioId: string) {
+    try {
+      const portfolio = await this.paperTradingService.getPortfolio(portfolioId);
+      if (!portfolio) {
+        throw new Error('Portfolio not found');
+      }
+
+      return {
+        portfolioId: portfolio.id.toString(),
+        portfolioName: portfolio.name,
+        currentValue: portfolio.totalValue,
+        cash: portfolio.currentCash,
+        totalReturn: portfolio.totalReturn,
+        totalPnL: portfolio.totalPnL,
+        dayTradingEnabled: portfolio.dayTradingEnabled,
+        dayTradeCount: portfolio.dayTradeCount,
+      };
+    } catch (error) {
+      this.logger.error(`Error fetching portfolio performance: ${error.message}`);
+      throw error;
+    }
   }
 }

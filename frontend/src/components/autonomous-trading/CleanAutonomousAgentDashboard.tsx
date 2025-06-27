@@ -35,6 +35,7 @@ const CleanAutonomousAgentDashboard: React.FC = () => {
       onError: true,
       onRiskBreach: true,
     },
+    portfolioId: "", // Will be set when portfolio is selected
   });
 
   // Demo data for when API is not available

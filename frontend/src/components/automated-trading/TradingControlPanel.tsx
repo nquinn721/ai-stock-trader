@@ -4,7 +4,6 @@ import {
   Card,
   CardContent,
   CardHeader,
-  Grid,
   Button,
   Typography,
   Switch,
@@ -17,6 +16,7 @@ import {
   ListItemIcon,
   Divider,
 } from '@mui/material';
+import { Grid } from '../common/GridWrapper';
 import {
   PlayArrow,
   Stop,
@@ -54,7 +54,7 @@ export const TradingControlPanel: React.FC<TradingControlPanelProps> = ({
   const handleSessionAction = (sessionId: string, action: 'start' | 'pause' | 'stop') => {
     const updatedSessions = sessions.map(session =>
       session.id === sessionId
-        ? { ...session, status: action === 'start' ? 'active' : action }
+        ? { ...session, status: (action === 'start' ? 'active' : action) as "active" | "paused" | "stopped" }
         : session
     );
     onSessionUpdate(updatedSessions);
@@ -107,8 +107,8 @@ export const TradingControlPanel: React.FC<TradingControlPanelProps> = ({
       <Card sx={{ mb: 3 }}>
         <CardHeader title="Global Trading Controls" />
         <CardContent>
-          <Grid container spacing={3} alignItems="center">
-            <Grid item xs={12} md={6}>
+          <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 3, alignItems: 'center' }}>
+            <Box sx={{ flex: 1 }}>
               <FormControlLabel
                 control={
                   <Switch
@@ -127,21 +127,19 @@ export const TradingControlPanel: React.FC<TradingControlPanelProps> = ({
               <Typography variant="body2" color="textSecondary">
                 Enable or disable all automated trading across all portfolios
               </Typography>
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end' }}>
-                <Button
-                  variant="contained"
-                  color="error"
-                  startIcon={<Emergency />}
-                  onClick={handleEmergencyStop}
-                  size="large"
-                >
-                  Emergency Stop All
-                </Button>
-              </Box>
-            </Grid>
-          </Grid>
+            </Box>
+            <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end' }}>
+              <Button
+                variant="contained"
+                color="error"
+                startIcon={<Emergency />}
+                onClick={handleEmergencyStop}
+                size="large"
+              >
+                Emergency Stop All
+              </Button>
+            </Box>
+          </Box>
 
           {!isGlobalActive && (
             <Alert severity="warning" sx={{ mt: 2 }}>
@@ -177,34 +175,26 @@ export const TradingControlPanel: React.FC<TradingControlPanelProps> = ({
                     }
                     secondary={
                       <Box sx={{ mt: 1 }}>
-                        <Grid container spacing={2}>
-                          <Grid item xs={6} md={3}>
-                            <Typography variant="body2" color="textSecondary">
-                              P&L: {' '}
-                              <Typography
-                                component="span"
-                                color={session.profitLoss >= 0 ? 'success.main' : 'error.main'}
-                              >
-                                {formatCurrency(session.profitLoss)}
-                              </Typography>
+                        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr 1fr', md: 'repeat(4, 1fr)' }, gap: 2 }}>
+                          <Typography variant="body2" color="textSecondary">
+                            P&L: {' '}
+                            <Typography
+                              component="span"
+                              color={session.profitLoss >= 0 ? 'success.main' : 'error.main'}
+                            >
+                              {formatCurrency(session.profitLoss)}
                             </Typography>
-                          </Grid>
-                          <Grid item xs={6} md={3}>
-                            <Typography variant="body2" color="textSecondary">
-                              Trades: {session.tradesExecuted}
-                            </Typography>
-                          </Grid>
-                          <Grid item xs={6} md={3}>
-                            <Typography variant="body2" color="textSecondary">
-                              Active Rules: {session.activeRules}
-                            </Typography>
-                          </Grid>
-                          <Grid item xs={6} md={3}>
-                            <Typography variant="body2" color="textSecondary">
-                              Started: {session.startTime.toLocaleTimeString()}
-                            </Typography>
-                          </Grid>
-                        </Grid>
+                          </Typography>
+                          <Typography variant="body2" color="textSecondary">
+                            Trades: {session.tradesExecuted}
+                          </Typography>
+                          <Typography variant="body2" color="textSecondary">
+                            Active Rules: {session.activeRules}
+                          </Typography>
+                          <Typography variant="body2" color="textSecondary">
+                            Started: {session.startTime.toLocaleTimeString()}
+                          </Typography>
+                        </Box>
                       </Box>
                     }
                   />

@@ -46,12 +46,17 @@
   --bg-tertiary: #1f2937;
   --bg-card: rgba(31, 41, 55, 0.8);
   --bg-glass: rgba(17, 24, 39, 0.6);
-  
+
   /* Gradient Backgrounds */
-  --bg-gradient-primary: linear-gradient(135deg, #0a0e1a 0%, #111827 50%, #1f2937 100%);
+  --bg-gradient-primary: linear-gradient(
+    135deg,
+    #0a0e1a 0%,
+    #111827 50%,
+    #1f2937 100%
+  );
   --bg-gradient-secondary: linear-gradient(135deg, #1e293b 0%, #334155 100%);
   --bg-gradient-accent: linear-gradient(135deg, #0ea5e9 0%, #3b82f6 100%);
-  
+
   /* Text Colors */
   --text-primary: #f8fafc;
   --text-secondary: #e2e8f0;
@@ -65,9 +70,12 @@
 
   /* Shadow System */
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  --shadow-md:
+    0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg:
+    0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-xl:
+    0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
   --shadow-glow: 0 0 20px rgba(14, 165, 233, 0.15);
 
   /* Border Radius */
@@ -77,8 +85,9 @@
   --radius-xl: 1rem;
 
   /* Typography */
-  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  --font-mono: 'JetBrains Mono', 'Fira Code', Consolas, monospace;
+  --font-sans:
+    "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", "Fira Code", Consolas, monospace;
 }
 
 * {
@@ -113,16 +122,28 @@ body {
 }
 
 .App::before {
-  content: '';
+  content: "";
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background: 
-    radial-gradient(circle at 20% 30%, rgba(14, 165, 233, 0.1) 0%, transparent 50%),
-    radial-gradient(circle at 80% 70%, rgba(59, 130, 246, 0.08) 0%, transparent 50%),
-    radial-gradient(circle at 50% 50%, rgba(139, 92, 246, 0.06) 0%, transparent 60%);
+  background:
+    radial-gradient(
+      circle at 20% 30%,
+      rgba(14, 165, 233, 0.1) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 80% 70%,
+      rgba(59, 130, 246, 0.08) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 50% 50%,
+      rgba(139, 92, 246, 0.06) 0%,
+      transparent 60%
+    );
   pointer-events: none;
   z-index: -1;
 }
@@ -188,7 +209,9 @@ code {
 
 .btn-primary:hover {
   transform: translateY(-1px);
-  box-shadow: var(--shadow-lg), 0 0 20px rgba(14, 165, 233, 0.3);
+  box-shadow:
+    var(--shadow-lg),
+    0 0 20px rgba(14, 165, 233, 0.3);
 }
 
 .btn-secondary {
@@ -214,19 +237,41 @@ code {
 }
 
 /* Text utilities */
-.text-primary { color: var(--text-primary); }
-.text-secondary { color: var(--text-secondary); }
-.text-tertiary { color: var(--text-tertiary); }
-.text-muted { color: var(--text-muted); }
-.text-success { color: var(--success-500); }
-.text-error { color: var(--error-500); }
-.text-warning { color: var(--warning-500); }
+.text-primary {
+  color: var(--text-primary);
+}
+.text-secondary {
+  color: var(--text-secondary);
+}
+.text-tertiary {
+  color: var(--text-tertiary);
+}
+.text-muted {
+  color: var(--text-muted);
+}
+.text-success {
+  color: var(--success-500);
+}
+.text-error {
+  color: var(--error-500);
+}
+.text-warning {
+  color: var(--warning-500);
+}
 
 /* Background utilities */
-.bg-primary { background: var(--bg-primary); }
-.bg-secondary { background: var(--bg-secondary); }
-.bg-tertiary { background: var(--bg-tertiary); }
-.bg-card { background: var(--bg-card); }
+.bg-primary {
+  background: var(--bg-primary);
+}
+.bg-secondary {
+  background: var(--bg-secondary);
+}
+.bg-tertiary {
+  background: var(--bg-tertiary);
+}
+.bg-card {
+  background: var(--bg-card);
+}
 
 /* Layout utilities */
 .container {
@@ -235,21 +280,47 @@ code {
   padding: 0 1rem;
 }
 
-.flex { display: flex; }
-.flex-col { flex-direction: column; }
-.items-center { align-items: center; }
-.justify-center { justify-content: center; }
-.justify-between { justify-content: space-between; }
-.gap-2 { gap: 0.5rem; }
-.gap-4 { gap: 1rem; }
-.gap-6 { gap: 1.5rem; }
+.flex {
+  display: flex;
+}
+.flex-col {
+  flex-direction: column;
+}
+.items-center {
+  align-items: center;
+}
+.justify-center {
+  justify-content: center;
+}
+.justify-between {
+  justify-content: space-between;
+}
+.gap-2 {
+  gap: 0.5rem;
+}
+.gap-4 {
+  gap: 1rem;
+}
+.gap-6 {
+  gap: 1.5rem;
+}
 
 /* Spacing utilities */
-.p-4 { padding: 1rem; }
-.p-6 { padding: 1.5rem; }
-.m-4 { margin: 1rem; }
-.mt-4 { margin-top: 1rem; }
-.mb-4 { margin-bottom: 1rem; }
+.p-4 {
+  padding: 1rem;
+}
+.p-6 {
+  padding: 1.5rem;
+}
+.m-4 {
+  margin: 1rem;
+}
+.mt-4 {
+  margin-top: 1rem;
+}
+.mb-4 {
+  margin-bottom: 1rem;
+}
 
 /* Animation utilities */
 .animate-fade-in {
@@ -261,16 +332,20 @@ code {
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes slideUp {
-  from { 
+  from {
     opacity: 0;
     transform: translateY(20px);
   }
-  to { 
+  to {
     opacity: 1;
     transform: translateY(0);
   }
@@ -281,7 +356,7 @@ code {
   .container {
     padding: 0 0.75rem;
   }
-  
+
   .btn {
     padding: 0.625rem 1.25rem;
     font-size: 0.813rem;

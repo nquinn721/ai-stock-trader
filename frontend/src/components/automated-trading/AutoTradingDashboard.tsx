@@ -31,6 +31,7 @@ import { TradingSessionMonitor } from './TradingSessionMonitor';
 import { RuleBuilder } from './RuleBuilder';
 import { TradingPerformanceChart } from './TradingPerformanceChart';
 import { AutoTradeHistory } from './AutoTradeHistory';
+import autonomousTradingApi, { Portfolio, DeploymentConfig } from '../../services/autonomousTradingApi';
 import './AutoTradingDashboard.css';
 
 interface TradingSession {
@@ -83,82 +84,241 @@ export const AutoTradingDashboard: React.FC = () => {
   const [isGlobalTradingActive, setIsGlobalTradingActive] = useState(false);
   const [tradingSessions, setTradingSessions] = useState<TradingSession[]>([]);
   const [tradingRules, setTradingRules] = useState<TradingRule[]>([]);
+  const [portfolios, setPortfolios] = useState<Portfolio[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Simulate loading trading data
-    const timer = setTimeout(() => {
-      setTradingSessions([
-        {
-          id: '1',
-          portfolioId: 'portfolio-1',
-          portfolioName: 'Growth Portfolio',
-          status: 'active',
-          startTime: new Date(),
-          profitLoss: 1245.50,
-          tradesExecuted: 12,
-          activeRules: 3,
-        },
-        {
-          id: '2',
-          portfolioId: 'portfolio-2',
-          portfolioName: 'Conservative Portfolio',
-          status: 'paused',
-          startTime: new Date(),
-          profitLoss: -89.25,
-          tradesExecuted: 5,
-          activeRules: 2,
-        },
-      ]);
-
-      setTradingRules([
-        {
-          id: '1',
-          name: 'RSI Oversold Strategy',
-          strategy: 'Mean Reversion',
-          isActive: true,
-          conditions: [],
-          actions: [],
-          performance: {
-            totalTrades: 45,
-            winRate: 67.8,
-            profitLoss: 2840.15,
-          },
-        },
-        {
-          id: '2',
-          name: 'Momentum Breakout',
-          strategy: 'Trend Following',
-          isActive: true,
-          conditions: [],
-          actions: [],
-          performance: {
-            totalTrades: 23,
-            winRate: 52.2,
-            profitLoss: 1205.30,
-          },
-        },
-      ]);
-
-      setLoading(false);
-    }, 1000);
-
-    return () => clearTimeout(timer);
+    loadData();
   }, []);
+
+  const loadData = async () => {
+    setLoading(true);
+    try {
+      // Load available portfolios
+      const portfoliosResult = await autonomousTradingApi.getAvailablePortfolios();
+      if (portfoliosResult.success && portfoliosResult.data) {
+        setPortfolios(portfoliosResult.data);
+        
+        // Create trading sessions based on actual portfolios
+        const sessions = await Promise.all(
+          portfoliosResult.data.map(async (portfolio) => {
+            try {
+              // Try to get performance data for each portfolio
+              const performanceResult = await autonomousTradingApi.getPortfolioPerformance(portfolio.id);
+              const performance = performanceResult.success ? performanceResult.data : null;
+              
+              return {
+                id: portfolio.id,
+                portfolioId: portfolio.id,
+                portfolioName: portfolio.name,
+                status: 'stopped' as const, // Start with all sessions stopped
+                startTime: new Date(),
+                profitLoss: performance?.totalReturn || (portfolio.totalValue - parseFloat(portfolio.currentCash.toString())),
+                tradesExecuted: performance?.dayTradeCount || 0,
+                activeRules: 0, // Will be updated when rules are loaded
+              };
+            } catch (error) {
+              console.warn(`Failed to load performance for portfolio ${portfolio.id}:`, error);
+              return {
+                id: portfolio.id,
+                portfolioId: portfolio.id,
+                portfolioName: portfolio.name,
+                status: 'stopped' as const,
+                startTime: new Date(),
+                profitLoss: portfolio.totalValue - parseFloat(portfolio.currentCash.toString()),
+                tradesExecuted: 0,
+                activeRules: 0,
+              };
+            }
+          })
+        );
+        setTradingSessions(sessions);
+      }
+
+      // Load active trading strategies from backend
+      try {
+        const strategiesResult = await autonomousTradingApi.getActiveStrategies();
+        if (strategiesResult.success && strategiesResult.data) {
+          const rules = strategiesResult.data.map(instance => ({
+            id: instance.id,
+            name: instance.strategy?.name || `Strategy ${instance.strategyId}`,
+            strategy: instance.strategy?.description || 'Auto Trading Strategy',
+            isActive: instance.status === 'running',
+            conditions: [], // These would come from strategy definition
+            actions: [], // These would come from strategy definition
+            performance: {
+              totalTrades: instance.performance?.totalTrades || 0,
+              winRate: instance.performance?.winRate || 0,
+              profitLoss: instance.performance?.totalReturn || 0,
+            },
+          }));
+          setTradingRules(rules);
+          
+          // Update session active rules count
+          setTradingSessions(prev => prev.map(session => ({
+            ...session,
+            activeRules: rules.filter(rule => rule.isActive).length
+          })));
+        }
+      } catch (error) {
+        console.warn('Failed to load trading strategies:', error);
+        // Fallback to basic rules for demo purposes
+        setTradingRules([
+          {
+            id: '1',
+            name: 'RSI Oversold Strategy',
+            strategy: 'Mean Reversion',
+            isActive: false,
+            conditions: [],
+            actions: [],
+            performance: {
+              totalTrades: 0,
+              winRate: 0,
+              profitLoss: 0,
+            },
+          },
+          {
+            id: '2', 
+            name: 'Moving Average Crossover',
+            strategy: 'Trend Following',
+            isActive: false,
+            conditions: [],
+            actions: [],
+            performance: {
+              totalTrades: 0,
+              winRate: 0,
+              profitLoss: 0,
+            },
+          },
+        ]);
+      }
+    } catch (error) {
+      console.error('Error loading auto trading data:', error);
+    }
+    setLoading(false);
+  };
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setActiveTab(newValue);
   };
 
-  const handleEmergencyStop = () => {
-    setIsGlobalTradingActive(false);
-    setTradingSessions(prev => 
-      prev.map(session => ({ ...session, status: 'stopped' as const }))
-    );
+  const handleEmergencyStop = async () => {
+    try {
+      // Stop all active strategies
+      const activeStrategies = tradingRules.filter(rule => rule.isActive);
+      await Promise.all(
+        activeStrategies.map(strategy =>
+          autonomousTradingApi.stopStrategy(strategy.id)
+        )
+      );
+      
+      setIsGlobalTradingActive(false);
+      setTradingSessions(prev => 
+        prev.map(session => ({ ...session, status: 'stopped' as const }))
+      );
+      
+      // Reload data to reflect changes
+      await loadData();
+    } catch (error) {
+      console.error('Error during emergency stop:', error);
+    }
   };
 
-  const toggleGlobalTrading = () => {
-    setIsGlobalTradingActive(!isGlobalTradingActive);
+  const toggleGlobalTrading = async () => {
+    if (isGlobalTradingActive) {
+      await handleEmergencyStop();
+    } else {
+      setIsGlobalTradingActive(true);
+      // Note: Individual strategies would need to be started manually
+      // This just enables the global trading flag
+    }
+  };
+
+  const deployStrategy = async (strategyId: string, deploymentConfig: DeploymentConfig, portfolioId: string) => {
+    try {
+      const configWithPortfolio = {
+        ...deploymentConfig,
+        portfolioId
+      };
+      
+      const result = await autonomousTradingApi.deployStrategy(strategyId, configWithPortfolio);
+      
+      if (result.success) {
+        // Reload data to reflect the new strategy
+        await loadData();
+        return result;
+      } else {
+        throw new Error(result.error || 'Failed to deploy strategy');
+      }
+    } catch (error) {
+      console.error('Error deploying strategy:', error);
+      throw error;
+    }
+  };
+
+  const stopStrategy = async (strategyId: string) => {
+    try {
+      const result = await autonomousTradingApi.stopStrategy(strategyId);
+      if (result.success) {
+        await loadData();
+        return result;
+      } else {
+        throw new Error(result.error || 'Failed to stop strategy');
+      }
+    } catch (error) {
+      console.error('Error stopping strategy:', error);
+      throw error;
+    }
+  };
+
+  const pauseStrategy = async (strategyId: string) => {
+    try {
+      const result = await autonomousTradingApi.pauseStrategy(strategyId);
+      if (result.success) {
+        await loadData();
+        return result;
+      } else {
+        throw new Error(result.error || 'Failed to pause strategy');
+      }
+    } catch (error) {
+      console.error('Error pausing strategy:', error);
+      throw error;
+    }
+  };
+
+  const resumeStrategy = async (strategyId: string) => {
+    try {
+      const result = await autonomousTradingApi.resumeStrategy(strategyId);
+      if (result.success) {
+        await loadData();
+        return result;
+      } else {
+        throw new Error(result.error || 'Failed to resume strategy');
+      }
+    } catch (error) {
+      console.error('Error resuming strategy:', error);
+      throw error;
+    }
+  };
+
+  // Calculate aggregated metrics from real data
+  const calculateTotalPnL = () => {
+    return tradingSessions.reduce((total, session) => total + session.profitLoss, 0);
+  };
+
+  const calculateTotalTrades = () => {
+    return tradingSessions.reduce((total, session) => total + session.tradesExecuted, 0);
+  };
+
+  const calculateWinRate = () => {
+    const totalTrades = tradingRules.reduce((total, rule) => total + rule.performance.totalTrades, 0);
+    if (totalTrades === 0) return 0;
+    
+    const totalWins = tradingRules.reduce((total, rule) => 
+      total + (rule.performance.totalTrades * rule.performance.winRate / 100), 0
+    );
+    
+    return (totalWins / totalTrades) * 100;
   };
 
   if (loading) {
@@ -228,11 +388,14 @@ export const AutoTradingDashboard: React.FC = () => {
             <Typography color="textSecondary" gutterBottom>
               Total P&L Today
             </Typography>
-            <Typography variant="h4" color="success.main">
-              +$1,156.25
+            <Typography 
+              variant="h4" 
+              color={calculateTotalPnL() >= 0 ? 'success.main' : 'error.main'}
+            >
+              {calculateTotalPnL() >= 0 ? '+' : ''}${calculateTotalPnL().toFixed(2)}
             </Typography>
             <Typography variant="body2" color="textSecondary">
-              17 trades executed
+              {calculateTotalTrades()} trades executed
             </Typography>
           </CardContent>
         </Card>
@@ -257,10 +420,10 @@ export const AutoTradingDashboard: React.FC = () => {
               Win Rate
             </Typography>
             <Typography variant="h4">
-              62.5%
+              {calculateWinRate().toFixed(1)}%
             </Typography>
             <Typography variant="body2" color="textSecondary">
-              Last 30 days
+              From active strategies
             </Typography>
           </CardContent>
         </Card>

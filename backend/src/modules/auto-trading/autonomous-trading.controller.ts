@@ -14,6 +14,7 @@ import { BacktestingService } from './services/backtesting.service';
 import { StrategyBuilderService } from './strategy-builder.service';
 
 export class DeployStrategyDto {
+  portfolioId: string;
   mode: 'paper' | 'live';
   initialCapital: number;
   maxPositions: number;
@@ -471,5 +472,47 @@ export class AutonomousTradingController {
         },
       ],
     };
+  }
+
+  @Get('portfolios')
+  @ApiOperation({ summary: 'Get available portfolios for trading' })
+  @ApiResponse({
+    status: 200,
+    description: 'Available portfolios retrieved successfully',
+  })
+  async getAvailablePortfolios() {
+    try {
+      const portfolios = await this.autonomousTradingService.getAvailablePortfolios();
+      return {
+        success: true,
+        data: portfolios,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error.message,
+      };
+    }
+  }
+
+  @Get('portfolios/:portfolioId/performance')
+  @ApiOperation({ summary: 'Get portfolio performance metrics' })
+  @ApiResponse({
+    status: 200,
+    description: 'Portfolio performance retrieved successfully',
+  })
+  async getPortfolioPerformance(@Param('portfolioId') portfolioId: string) {
+    try {
+      const performance = await this.autonomousTradingService.getPortfolioPerformance(portfolioId);
+      return {
+        success: true,
+        data: performance,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error.message,
+      };
+    }
   }
 }

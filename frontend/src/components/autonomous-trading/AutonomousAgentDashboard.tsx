@@ -79,6 +79,7 @@ const AutonomousAgentDashboard: React.FC = () => {
       onError: true,
       onRiskBreach: true,
     },
+    portfolioId: "", // Will be set when portfolio is selected
   });
 
   // Load running strategies from API

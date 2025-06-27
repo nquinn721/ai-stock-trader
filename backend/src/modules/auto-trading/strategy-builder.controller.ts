@@ -231,6 +231,7 @@ export class StrategyBuilderController {
     @Body() deploymentDto: DeployStrategyDto,
   ): Promise<any> {
     const deploymentConfig: DeploymentConfig = {
+      portfolioId: deploymentDto.portfolioId, // Add the required portfolioId
       mode: deploymentDto.enablePaperTrading ? 'paper' : 'live',
       initialCapital: deploymentDto.maxCapitalAllocation,
       maxPositions: 10, // Default value
