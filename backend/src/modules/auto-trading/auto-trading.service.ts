@@ -24,6 +24,12 @@ import {
   TradeExecutionService,
   TradeRequest,
 } from './services/trade-execution.service';
+// ML Services Integration
+import { IntelligentRecommendationService } from '../ml/services/intelligent-recommendation.service';
+import { SignalGenerationService } from '../ml/services/signal-generation.service';
+import { DynamicRiskManagementService } from '../ml/services/dynamic-risk-management.service';
+import { SentimentAnalysisService } from '../ml/services/sentiment-analysis.service';
+import { PatternRecognitionService } from '../ml/services/pattern-recognition.service';
 
 @Injectable()
 export class AutoTradingService {
@@ -45,6 +51,12 @@ export class AutoTradingService {
     private readonly paperTradingService: PaperTradingService,
     private readonly websocketGateway: StockWebSocketGateway,
     private readonly marketHoursService: MarketHoursService,
+    // ML Services
+    private readonly intelligentRecommendationService: IntelligentRecommendationService,
+    private readonly signalGenerationService: SignalGenerationService,
+    private readonly dynamicRiskManagementService: DynamicRiskManagementService,
+    private readonly sentimentAnalysisService: SentimentAnalysisService,
+    private readonly patternRecognitionService: PatternRecognitionService,
   ) {}
 
   // Trading Rules Management
@@ -173,9 +185,9 @@ export class AutoTradingService {
         `Trading session started for portfolio ${portfolioId}: ${savedSession.id}`,
       );
 
-      // Notify via WebSocket - TODO: Add method to StockWebSocketGateway
-      // this.websocketGateway.notifyTradingSessionStarted(portfolioId, savedSession);
-      this.logger.log(`Trading session started notification: ${portfolioId}`);
+      // Notify via WebSocket - TODO: Fix WebSocket method compilation issues
+      // await this.websocketGateway.notifyTradingSessionStarted(portfolioId, savedSession);
+      this.logger.log(`Trading session started notification (WebSocket temporarily disabled): ${portfolioId}`);
 
       return savedSession;
     } catch (error) {
@@ -213,9 +225,9 @@ export class AutoTradingService {
         `Trading session stopped: ${sessionId} - ${reason || 'Manual stop'}`,
       );
 
-      // Notify via WebSocket - TODO: Add method to StockWebSocketGateway
-      // this.websocketGateway.notifyTradingSessionStopped(session.portfolio_id, sessionId, reason);
-      this.logger.log(`Trading session stopped notification: ${sessionId}`);
+      // Notify via WebSocket - TODO: Fix WebSocket method compilation issues
+      // await this.websocketGateway.notifyTradingSessionStopped(session.portfolio_id, sessionId, reason);
+      this.logger.log(`Trading session stopped notification (WebSocket temporarily disabled): ${sessionId}`);
     } catch (error) {
       this.logger.error(`Error stopping trading session ${sessionId}:`, error);
       throw error;
@@ -305,6 +317,9 @@ export class AutoTradingService {
       // Get current stock data for evaluation
       const stocks = await this.stockService.getAllStocks();
 
+      // Check for ML-generated signals for additional trading opportunities
+      await this.checkMLSignals(portfolioId, portfolio, stocks);
+
       for (const stock of stocks) {
         const context = await this.buildTradingContext(stock.symbol, portfolio);
         const triggeredRules: TradingRule[] = [];
@@ -331,11 +346,110 @@ export class AutoTradingService {
     }
   }
 
+  /**
+   * Check for ML-generated trading signals
+   */
+  private async checkMLSignals(portfolioId: string, portfolio: any, stocks: any[]): Promise<void> {
+    try {
+      // Get ML-generated signals for high-confidence trades
+      // Signal generation will be implemented when the service method is available
+      // const signals = await this.signalGenerationService.generateSignals({
+      //   symbols: stocks.map(s => s.symbol),
+      //   portfolioId,
+      //   timeframe: '1h',
+      //   minConfidence: 0.8, // Only high-confidence signals
+      // });
+
+      // for (const signal of signals) {
+      //   if (signal.confidence > 0.85 && signal.signal !== 'HOLD') {
+      //     this.logger.log(
+      //       `High-confidence ML signal detected: ${signal.signal} ${signal.symbol} (confidence: ${signal.confidence})`,
+      //     );
+      //     
+      //     // Notify about ML signal
+      //     await this.websocketGateway.notifyTradingRuleTriggered(portfolioId, {
+      //       type: 'ML_SIGNAL',
+      //       symbol: signal.symbol,
+      //       signal: signal.signal,
+      //       confidence: signal.confidence,
+      //       reasoning: signal.reasoning,
+      //     });
+      //   }
+      // }
+    } catch (error) {
+      this.logger.warn('Failed to check ML signals:', error);
+    }
+  }
+
   private async buildTradingContext(
     symbol: string,
     portfolio: any,
   ): Promise<TradingContext> {
     const stock = await this.stockService.getStockBySymbol(symbol);
+
+    // Get ML-powered recommendation
+    let recommendation = {
+      type: 'HOLD',
+      confidence: 0.5,
+      reasoning: 'No specific recommendation available',
+    };
+
+    try {
+      // Get intelligent recommendation from ML service
+      const mlRecommendation = await this.intelligentRecommendationService.generateRecommendation({
+        symbol,
+        currentPrice: stock?.currentPrice || 0,
+        timeHorizon: '1D',
+      });
+      if (mlRecommendation) {
+        recommendation = {
+          type: mlRecommendation.action,
+          confidence: mlRecommendation.confidence,
+          reasoning: Array.isArray(mlRecommendation.reasoning) ? mlRecommendation.reasoning.join(', ') : (mlRecommendation.reasoning || 'ML-generated recommendation'),
+        };
+      }
+    } catch (error) {
+      this.logger.warn(`Failed to get ML recommendation for ${symbol}:`, error);
+    }
+
+    // Get technical indicators and patterns
+    let technicalIndicators = {
+      rsi: undefined,
+      macd: undefined,
+      volume: stock?.volume || 0,
+      volatility: undefined,
+    };
+
+    try {
+      // Get pattern recognition signals
+      // Pattern recognition will be implemented when the service method is available
+      // const patterns = await this.patternRecognitionService.detectPatterns(symbol);
+      // if (patterns && patterns.length > 0) {
+      //   technicalIndicators = {
+      //     ...technicalIndicators,
+      //     patterns: patterns.map(p => p.pattern),
+      //     patternConfidence: patterns[0]?.confidence || 0,
+      //   };
+      // }
+    } catch (error) {
+      this.logger.warn(`Failed to get pattern recognition for ${symbol}:`, error);
+    }
+
+    // Get sentiment analysis
+    let sentimentScore = 0;
+    try {
+      // Sentiment analysis will be implemented when the service method is available
+      // const sentiment = await this.sentimentAnalysisService.analyzeSymbol(symbol);
+      // if (sentiment) {
+      //   sentimentScore = sentiment.score;
+      //   technicalIndicators = {
+      //     ...technicalIndicators,
+      //     sentiment: sentimentScore,
+      //   };
+      // }
+    } catch (error) {
+      this.logger.warn(`Failed to get sentiment analysis for ${symbol}:`, error);
+    }
 
     return {
       symbol,
@@ -348,12 +462,8 @@ export class AutoTradingService {
         change: 0, // Would calculate from currentPrice - previousClose
         changePercent: stock?.changePercent || 0,
       },
-      // Add recommendation data if available
-      recommendation: {
-        type: 'HOLD', // Default - would integrate with recommendation service
-        confidence: 0.5,
-        reasoning: 'No specific recommendation available',
-      },
+      recommendation,
+      technicalIndicators,
     };
   }
 
@@ -367,6 +477,13 @@ export class AutoTradingService {
         await this.ruleEngineService.conflictResolution(rules);
 
       for (const rule of resolvedRules) {
+        // Apply ML-powered risk management before execution
+        const riskAssessment = await this.assessMLRisk(rule, context);
+        if (!riskAssessment.approved) {
+          this.logger.warn(`Trade blocked by ML risk management: ${riskAssessment.reason}`);
+          continue;
+        }
+
         // Execute rule actions
         const actions = await this.ruleEngineService.executeActions(
           rule.actions,
@@ -379,12 +496,19 @@ export class AutoTradingService {
             continue;
           }
 
+          // Apply ML-powered position sizing
+          const optimizedQuantity = await this.optimizePositionSize(
+            action.quantity,
+            rule.portfolio_id,
+            context,
+          );
+
           // Create and execute trade
           const tradeRequest: TradeRequest = {
             portfolioId: rule.portfolio_id,
             symbol: action.symbol,
             type: action.type,
-            quantity: action.quantity,
+            quantity: optimizedQuantity,
             price: action.price,
             ruleId: rule.id,
           };
@@ -394,19 +518,19 @@ export class AutoTradingService {
 
           if (result.success) {
             this.logger.log(
-              `Auto trade executed: ${action.type} ${action.quantity} ${action.symbol} at $${result.executedPrice}`,
+              `Auto trade executed: ${action.type} ${optimizedQuantity} ${action.symbol} at $${result.executedPrice}`,
             );
 
-            // Notify via WebSocket - TODO: Add method to StockWebSocketGateway
-            // this.websocketGateway.notifyTradeExecuted(rule.portfolio_id, {
+            // Notify via WebSocket - TODO: Fix WebSocket method compilation issues
+            // await this.websocketGateway.notifyTradeExecuted(rule.portfolio_id, {
             //   tradeId: result.tradeId,
             //   symbol: action.symbol,
             //   type: action.type,
-            //   quantity: action.quantity,
+            //   quantity: optimizedQuantity,
             //   price: result.executedPrice,
             //   rule: rule.name,
             // });
-            this.logger.log(`Trade executed notification: ${action.symbol}`);
+            this.logger.log(`Trade executed notification (WebSocket temporarily disabled): ${action.symbol}`);
           } else {
             this.logger.warn(`Auto trade failed: ${result.error}`);
           }
@@ -414,6 +538,67 @@ export class AutoTradingService {
       }
     } catch (error) {
       this.logger.error('Error handling triggered rules:', error);
+    }
+  }
+
+  /**
+   * Assess ML-powered risk for a trade
+   */
+  private async assessMLRisk(rule: TradingRule, context: TradingContext): Promise<{ approved: boolean; reason?: string }> {
+    try {
+      // Use dynamic risk management service
+      // Risk assessment will be implemented when the service method is available
+      // const riskAssessment = await this.dynamicRiskManagementService.assessTradeRisk({
+      //   symbol: context.symbol,
+      //   portfolioId: rule.portfolio_id,
+      //   tradeType: rule.actions[0]?.type || 'buy',
+      //   quantity: rule.actions[0]?.quantity || 0,
+      //   currentPrice: context.currentPrice,
+      //   portfolioValue: context.portfolioValue,
+      //   positions: context.positions,
+      // });
+
+      // return {
+      //   approved: riskAssessment.approved,
+      //   reason: riskAssessment.reason,
+      // };
+      
+      // For now, default to approved until ML service is properly integrated
+      return { approved: true };
+    } catch (error) {
+      this.logger.warn('ML risk assessment failed, defaulting to approved:', error);
+      return { approved: true };
+    }
+  }
+
+  /**
+   * Optimize position size using ML
+   */
+  private async optimizePositionSize(
+    originalQuantity: number,
+    portfolioId: string,
+    context: TradingContext,
+  ): Promise<number> {
+    try {
+      // Use dynamic risk management for position sizing
+      // Position optimization will be implemented when the service method is available
+      // const optimization = await this.dynamicRiskManagementService.optimizePositionSize({
+      //   symbol: context.symbol,
+      //   portfolioId,
+      //   originalQuantity,
+      //   currentPrice: context.currentPrice,
+      //   portfolioValue: context.portfolioValue,
+      //   volatility: context.technicalIndicators?.volatility || 0.2,
+      //   confidence: context.recommendation?.confidence || 0.5,
+      // });
+
+      // return optimization.optimizedQuantity || originalQuantity;
+      
+      // For now, return original quantity until ML service is properly integrated
+      return originalQuantity;
+    } catch (error) {
+      this.logger.warn('ML position sizing failed, using original quantity:', error);
+      return originalQuantity;
     }
   }
 
@@ -428,6 +613,10 @@ export class AutoTradingService {
     for (const session of sessions) {
       await this.stopTradingSession(session.id, reason);
     }
+
+    // Notify about emergency stop via WebSocket - TODO: Fix WebSocket method compilation issues
+    // await this.websocketGateway.notifyEmergencyStopTriggered(portfolioId, reason);
+    this.logger.warn(`Emergency stop notification (WebSocket temporarily disabled): ${portfolioId} - ${reason}`);
   }
 
   // Trade Monitoring

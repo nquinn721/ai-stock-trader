@@ -1604,6 +1604,7 @@ export class StockWebSocketGateway
     return client ? client.conn.transport.name === 'websocket' : false;
   }
 
+<<<<<<< HEAD
   // ========================================
   // S39: Predictive Analytics WebSocket Methods
   // ========================================
@@ -1825,5 +1826,146 @@ export class StockWebSocketGateway
         );
       }
     }
+=======
+  // === Auto-Trading WebSocket Methods ===
+
+  /**
+   * Notify about trading session started
+   */
+  async notifyTradingSessionStarted(portfolioId: string, session: any) {
+    try {
+      this.server.to(`portfolio_${portfolioId}`).emit('trading_session_started', {
+        type: 'trading_session_started',
+        data: session,
+        portfolioId,
+        timestamp: new Date().toISOString(),
+      });
+      console.log(`🎯 Trading session started notification sent for portfolio ${portfolioId}`);
+    } catch (error) {
+      console.error(`Error sending trading session started notification:`, error);
+    }
+  }
+
+  /**
+   * Notify about trading session stopped
+   */
+  async notifyTradingSessionStopped(portfolioId: string, sessionId: string, reason?: string) {
+    try {
+      this.server.to(`portfolio_${portfolioId}`).emit('trading_session_stopped', {
+        type: 'trading_session_stopped',
+        data: {
+          sessionId,
+          reason: reason || 'Manual stop',
+        },
+        portfolioId,
+        timestamp: new Date().toISOString(),
+      });
+      console.log(`🛑 Trading session stopped notification sent for portfolio ${portfolioId}`);
+    } catch (error) {
+      console.error(`Error sending trading session stopped notification:`, error);
+    }
+  }
+
+  /**
+   * Notify about trade executed
+   */
+  async notifyTradeExecuted(portfolioId: string, tradeData: any) {
+    try {
+      // Send to portfolio-specific room
+      this.server.to(`portfolio_${portfolioId}`).emit('trade_executed', {
+        type: 'trade_executed',
+        data: tradeData,
+        portfolioId,
+        timestamp: new Date().toISOString(),
+      });
+
+      // Also send to general trading room for broader notifications
+      this.server.emit('auto_trade_notification', {
+        type: 'trade_executed',
+        data: {
+          portfolioId,
+          symbol: tradeData.symbol,
+          type: tradeData.type,
+          quantity: tradeData.quantity,
+          price: tradeData.price,
+          rule: tradeData.rule,
+        },
+        timestamp: new Date().toISOString(),
+      });
+
+      console.log(`💹 Trade executed notification sent: ${tradeData.type} ${tradeData.quantity} ${tradeData.symbol}`);
+    } catch (error) {
+      console.error(`Error sending trade executed notification:`, error);
+    }
+  }
+
+  /**
+   * Notify about trading rule triggered
+   */
+  async notifyTradingRuleTriggered(portfolioId: string, ruleData: any) {
+    try {
+      this.server.to(`portfolio_${portfolioId}`).emit('trading_rule_triggered', {
+        type: 'trading_rule_triggered',
+        data: ruleData,
+        portfolioId,
+        timestamp: new Date().toISOString(),
+      });
+      console.log(`⚡ Trading rule triggered notification sent for portfolio ${portfolioId}`);
+    } catch (error) {
+      console.error(`Error sending trading rule triggered notification:`, error);
+    }
+  }
+
+  /**
+   * Notify about emergency stop triggered
+   */
+  async notifyEmergencyStopTriggered(portfolioId: string, reason: string) {
+    try {
+      this.server.to(`portfolio_${portfolioId}`).emit('emergency_stop_triggered', {
+        type: 'emergency_stop_triggered',
+        data: {
+          reason,
+          portfolioId,
+        },
+        timestamp: new Date().toISOString(),
+      });
+
+      // Also broadcast as system alert for high visibility
+      await this.broadcastSystemAlert({
+        title: 'Emergency Stop Triggered',
+        message: `Emergency stop activated for portfolio ${portfolioId}: ${reason}`,
+        severity: 'critical',
+        portfolioId,
+      });
+
+      console.log(`🚨 Emergency stop notification sent for portfolio ${portfolioId}`);
+    } catch (error) {
+      console.error(`Error sending emergency stop notification:`, error);
+    }
+  }
+
+  /**
+   * Subscribe to auto-trading notifications
+   */
+  @SubscribeMessage('subscribe_auto_trading')
+  handleSubscribeAutoTrading(
+    @MessageBody() data: { portfolioId: string },
+    @ConnectedSocket() client: Socket,
+  ) {
+    console.log(`Client ${client.id} subscribed to auto-trading for portfolio ${data.portfolioId}`);
+    client.join(`auto_trading_${data.portfolioId}`);
+  }
+
+  /**
+   * Unsubscribe from auto-trading notifications
+   */
+  @SubscribeMessage('unsubscribe_auto_trading')
+  handleUnsubscribeAutoTrading(
+    @MessageBody() data: { portfolioId: string },
+    @ConnectedSocket() client: Socket,
+  ) {
+    console.log(`Client ${client.id} unsubscribed from auto-trading for portfolio ${data.portfolioId}`);
+    client.leave(`auto_trading_${data.portfolioId}`);
+>>>>>>> 6ddc0fc (udpate)
   }
 }

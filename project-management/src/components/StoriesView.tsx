@@ -1,10 +1,12 @@
 import {
+  Archive as ArchiveIcon,
   Block as BlockedIcon,
   TaskAlt as CompleteIcon,
   Delete as DeleteIcon,
   CheckCircle as DoneIcon,
   PauseCircleFilled as PauseCircleFilledIcon,
   RadioButtonUnchecked as TodoIcon,
+  Unarchive as UnarchiveIcon,
 } from "@mui/icons-material";
 import {
   Avatar,
@@ -50,6 +52,8 @@ const getStatusMeta = (status: string) => {
       };
     case "REVIEW":
       return { icon: <TodoIcon sx={{ color: "#9c27b0" }} />, label: "Review" };
+    case "ARCHIVED":
+      return { icon: <ArchiveIcon sx={{ color: "#795548" }} />, label: "Archived" };
     default:
       return { icon: <TodoIcon sx={{ color: "#757575" }} />, label: status };
   }
@@ -72,6 +76,7 @@ const StoriesView: React.FC = () => {
   const [localStories, setLocalStories] = useState<Story[]>(stories);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [storyToDelete, setStoryToDelete] = useState<string | null>(null);
+  const [showArchived, setShowArchived] = useState(false);
 
   const handleMarkComplete = (storyId: string) => {
     setLocalStories((prev) =>
@@ -82,6 +87,34 @@ const StoriesView: React.FC = () => {
               status: "DONE" as const,
               progress: 100,
               completedDate: new Date().toISOString().split("T")[0],
+            }
+          : story
+      )
+    );
+  };
+
+  const handleArchiveStory = (storyId: string) => {
+    setLocalStories((prev) =>
+      prev.map((story) =>
+        story.id === storyId
+          ? {
+              ...story,
+              status: "ARCHIVED" as const,
+              archivedDate: new Date().toISOString().split("T")[0],
+            }
+          : story
+      )
+    );
+  };
+
+  const handleUnarchiveStory = (storyId: string) => {
+    setLocalStories((prev) =>
+      prev.map((story) =>
+        story.id === storyId
+          ? {
+              ...story,
+              status: "TODO" as const,
+              archivedDate: undefined,
             }
           : story
       )
@@ -108,21 +141,41 @@ const StoriesView: React.FC = () => {
     setDeleteDialogOpen(false);
   };
 
-  if (!localStories.length) {
+  const filteredStories = localStories.filter((story) => 
+    showArchived ? story.status === "ARCHIVED" : story.status !== "ARCHIVED"
+  );
+
+  if (!filteredStories.length) {
     return (
       <Box sx={{ mt: 6, textAlign: "center" }}>
         <Typography variant="h5" color="textSecondary">
-          No stories found.
+          {showArchived ? "No archived stories found." : "No active stories found."}
         </Typography>
+        <Button
+          variant="outlined"
+          onClick={() => setShowArchived(!showArchived)}
+          sx={{ mt: 2 }}
+        >
+          {showArchived ? "Show Active Stories" : "Show Archived Stories"}
+        </Button>
       </Box>
     );
   }
 
   return (
     <Box>
-      <Typography variant="h4" gutterBottom>
-        Storyboard
-      </Typography>
+      <Stack direction="row" justifyContent="space-between" alignItems="center" mb={3}>
+        <Typography variant="h4">
+          {showArchived ? "Archived Stories" : "Storyboard"}
+        </Typography>
+        <Button
+          variant="outlined"
+          onClick={() => setShowArchived(!showArchived)}
+          startIcon={showArchived ? <UnarchiveIcon /> : <ArchiveIcon />}
+        >
+          {showArchived ? "Show Active Stories" : "Show Archived Stories"}
+        </Button>
+      </Stack>
       <Box
         sx={{
           display: "grid",
@@ -131,7 +184,7 @@ const StoriesView: React.FC = () => {
         }}
       >
         {" "}
-        {localStories.map((story) => {
+        {filteredStories.map((story) => {
           const statusMeta = getStatusMeta(story.status);
           return (
             <Card
@@ -160,7 +213,7 @@ const StoriesView: React.FC = () => {
                   mb={2}
                   justifyContent="flex-end"
                 >
-                  {story.status !== "DONE" && (
+                  {story.status !== "DONE" && story.status !== "ARCHIVED" && (
                     <Tooltip title="Mark as Complete">
                       <IconButton
                         size="small"
@@ -174,6 +227,39 @@ const StoriesView: React.FC = () => {
                         }}
                       >
                         <CompleteIcon fontSize="small" />
+                      </IconButton>
+                    </Tooltip>
+                  )}
+                  {story.status === "ARCHIVED" ? (
+                    <Tooltip title="Unarchive Story">
+                      <IconButton
+                        size="small"
+                        color="info"
+                        onClick={() => handleUnarchiveStory(story.id)}
+                        sx={{
+                          backgroundColor: "rgba(33, 150, 243, 0.1)",
+                          "&:hover": {
+                            backgroundColor: "rgba(33, 150, 243, 0.2)",
+                          },
+                        }}
+                      >
+                        <UnarchiveIcon fontSize="small" />
+                      </IconButton>
+                    </Tooltip>
+                  ) : (
+                    <Tooltip title="Archive Story">
+                      <IconButton
+                        size="small"
+                        color="warning"
+                        onClick={() => handleArchiveStory(story.id)}
+                        sx={{
+                          backgroundColor: "rgba(121, 85, 72, 0.1)",
+                          "&:hover": {
+                            backgroundColor: "rgba(121, 85, 72, 0.2)",
+                          },
+                        }}
+                      >
+                        <ArchiveIcon fontSize="small" />
                       </IconButton>
                     </Tooltip>
                   )}
@@ -262,6 +348,13 @@ const StoriesView: React.FC = () => {
                   <Box mt={1}>
                     <Typography variant="caption" color="success.main">
                       Completed: {story.completedDate}
+                    </Typography>
+                  </Box>
+                )}
+                {story.archivedDate && (
+                  <Box mt={1}>
+                    <Typography variant="caption" color="warning.main">
+                      Archived: {story.archivedDate}
                     </Typography>
                   </Box>
                 )}

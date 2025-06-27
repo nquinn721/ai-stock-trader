@@ -1,5 +1,6 @@
 import { Box, Paper, Tab, Tabs, Typography } from "@mui/material";
 import React, { useState } from "react";
+import ArchiveView from "./ArchiveView";
 import EpicsView from "./EpicsView";
 import ScriptsView from "./ScriptsView";
 import SprintsView from "./SprintsView";
@@ -65,6 +66,7 @@ const DashboardOverview: React.FC = () => {
           <Tab label="Epics" {...a11yProps(1)} />
           <Tab label="Sprints" {...a11yProps(2)} />
           <Tab label="Actions" {...a11yProps(3)} />
+          <Tab label="Archive" {...a11yProps(4)} />
         </Tabs>
 
         <TabPanel value={value} index={0}>
@@ -78,6 +80,9 @@ const DashboardOverview: React.FC = () => {
         </TabPanel>
         <TabPanel value={value} index={3}>
           <ScriptsView />
+        </TabPanel>
+        <TabPanel value={value} index={4}>
+          <ArchiveView />
         </TabPanel>
       </Paper>
     </Box>

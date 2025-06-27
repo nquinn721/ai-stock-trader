@@ -1,5 +1,22 @@
-// Automated Trading Type Definitions for S30D
+// Automated Trading Type Definitions for S30D - Updated for New Backend
 export interface TradingRule {
+  id: string;
+  portfolio_id: string; // Backend uses snake_case
+  name: string;
+  description?: string;
+  is_active: boolean; // Backend uses snake_case
+  priority: number;
+  rule_type: "entry" | "exit" | "risk"; // Backend uses snake_case
+  conditions: RuleCondition[];
+  actions: RuleAction[];
+  last_triggered?: Date;
+  performance?: RulePerformance;
+  created_at: Date; // Backend uses snake_case
+  updated_at: Date; // Backend uses snake_case
+}
+
+// Frontend display interface (camelCase for UI)
+export interface TradingRuleDisplay {
   id: string;
   portfolioId: string;
   name: string;
@@ -9,8 +26,8 @@ export interface TradingRule {
   ruleType: "entry" | "exit" | "risk";
   conditions: RuleCondition[];
   actions: RuleAction[];
-  lastTriggered?: Date; // Adding for tracking
-  performance?: RulePerformance; // Adding for performance tracking
+  lastTriggered?: Date;
+  performance?: RulePerformance;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -24,58 +41,71 @@ export interface RulePerformance {
 }
 
 export interface RuleCondition {
-  id: string;
   field: string;
-  operator: "equals" | "greater_than" | "less_than" | "contains" | "not_equals";
+  operator: "equals" | "greater_than" | "less_than" | "greater_equal" | "less_equal" | "not_equals";
   value: any;
-  logicalOperator?: "AND" | "OR";
+  logical?: "AND" | "OR"; // Backend uses 'logical' not 'logicalOperator'
 }
 
 export interface RuleAction {
-  id: string;
-  type: "buy" | "sell" | "notify" | "stop_loss" | "take_profit";
-  parameters: {
-    sizingMethod?: "fixed" | "percentage" | "kelly_criterion";
-    sizeValue?: number;
-    maxPositionSize?: number;
-    limitPrice?: number;
-    stopPrice?: number;
-  };
+  type: "buy" | "sell";
+  sizing_method: "fixed" | "percentage" | "full_position" | "kelly"; // Backend structure
+  size_value?: number;
+  price_type?: "market" | "limit" | "stop";
+  price_offset?: number;
 }
 
 export interface TradingSession {
   id: string;
-  portfolioId: string;
-  name: string;
-  status: "active" | "paused" | "stopped" | "error";
-  startedAt: Date;
-  startTime: Date; // Adding for compatibility
-  stoppedAt?: Date;
-  configuration: TradingConfig;
-  performance: SessionPerformance;
-  activeRules: string[]; // Rule IDs
-  tradesExecuted?: number; // Adding for display
-  lastTradeTime?: Date; // Adding for display
+  portfolio_id: string; // Backend uses snake_case
+  session_name: string; // Backend uses session_name
+  is_active: boolean; // Backend uses boolean instead of status string
+  start_time: Date; // Backend uses snake_case
+  end_time?: Date; // Backend uses snake_case
+  stop_reason?: string; // Backend field
+  config?: any; // Backend has generic config
+  created_at: Date;
 }
 
+// Frontend display interface
+export interface TradingSessionDisplay {
+  id: string;
+  portfolioId: string;
+  name: string;
+  status: "active" | "stopped";
+  startedAt: Date;
+  stoppedAt?: Date;
+  stopReason?: string;
+  config?: any;
+  createdAt: Date;
+}
+
+// Simplified config for new backend
 export interface TradingConfig {
+  maxRisk?: number;
+  maxDailyLoss?: number;
+  maxPositions?: number;
+  emergencyStop?: boolean;
+  notificationSettings?: {
+    onTrade: boolean;
+    onError: boolean;
+    onThreshold: boolean;
+  };
+}
+
+// Legacy config interface for backward compatibility
+export interface TradingConfigLegacy {
   maxConcurrentTrades: number;
   riskPerTrade: number;
   maxDailyLoss: number;
-  maxPositionSize?: number; // Adding for position sizing
-  maxDailyTrades?: number; // Adding for trade limiting
-  riskLevel?: "low" | "medium" | "high"; // Adding risk level
+  maxPositionSize?: number;
+  maxDailyTrades?: number;
+  riskLevel?: "low" | "medium" | "high";
   allowedTradingHours?: {
-    start: string; // HH:mm format
-    end: string;
-  };
-  allowedMarketHours?: {
-    // Alternative name for compatibility
     start: string;
     end: string;
-    timezone: string;
   };
-  enableAfterHours?: boolean; // Adding after hours trading
+  enableAfterHours?: boolean;
   emergencyStopLoss: number;
   autoRebalance: boolean;
 }
@@ -97,22 +127,35 @@ export interface SessionPerformance {
 
 export interface AutoTrade {
   id: string;
-  sessionId: string;
-  ruleId: string;
+  portfolio_id: string; // Backend uses snake_case
+  rule_id?: string; // Backend uses snake_case, optional
+  symbol: string;
+  trade_type: "buy" | "sell"; // Backend uses trade_type
+  quantity: number;
+  target_price?: number; // Backend uses target_price
+  executed_price?: number; // Backend uses snake_case
+  status: "pending" | "executed" | "failed"; // Backend statuses
+  error_message?: string; // Backend uses error_message
+  created_at: Date; // Backend uses snake_case
+  executed_at?: Date; // Backend uses snake_case
+}
+
+// Frontend display interface
+export interface AutoTradeDisplay {
+  id: string;
   portfolioId: string;
+  ruleId?: string;
   symbol: string;
   type: "buy" | "sell";
-  action: "buy" | "sell"; // Adding for compatibility
   quantity: number;
-  triggerPrice: number;
-  price: number; // Adding for compatibility
+  targetPrice?: number;
   executedPrice?: number;
-  status: "pending" | "executed" | "cancelled" | "failed";
-  reason: string;
-  ruleName?: string; // Adding rule name for display
-  executedAt?: Date;
+  status: "pending" | "executed" | "failed";
+  errorMessage?: string;
   createdAt: Date;
-  pnl?: number;
+  executedAt?: Date;
+  ruleName?: string; // For display purposes
+  pnl?: number; // Calculated field
 }
 
 export interface TradingPerformance {
@@ -155,13 +198,26 @@ export interface RuleTemplate {
 }
 
 export interface CreateTradingRuleDto {
+  portfolio_id: string; // Backend uses snake_case
+  name: string;
+  description?: string;
+  rule_type: "entry" | "exit" | "risk"; // Backend uses snake_case
+  conditions: RuleCondition[];
+  actions: RuleAction[];
+  priority?: number;
+  is_active?: boolean;
+}
+
+// Frontend DTO (camelCase for forms)
+export interface CreateTradingRuleDtoDisplay {
   portfolioId: string;
   name: string;
   description?: string;
   ruleType: "entry" | "exit" | "risk";
-  conditions: Omit<RuleCondition, "id">[];
-  actions: Omit<RuleAction, "id">[];
+  conditions: RuleCondition[];
+  actions: RuleAction[];
   priority?: number;
+  isActive?: boolean;
 }
 
 export interface TradingContext {
@@ -191,13 +247,53 @@ export interface TradingContext {
   };
 }
 
+// Trading Session DTO for backend
+export interface TradingSessionDto {
+  session_name: string;
+  config?: any;
+}
+
+export interface TradingSessionDtoDisplay {
+  sessionName: string;
+  config?: any;
+}
+
+// Session status response from backend
+export interface SessionStatusResponse {
+  session: TradingSession;
+  totalTrades: number;
+  successfulTrades: number;
+  failedTrades: number;
+  pendingTrades: number;
+}
+
+// Trading performance response
+export interface TradingHistoryResponse {
+  trades: AutoTrade[];
+  totalTrades: number;
+  successfulTrades: number;
+  failedTrades: number;
+  totalPnL: number;
+}
+
+// Session performance response
+export interface SessionPerformanceResponse {
+  session: TradingSession;
+  trades: AutoTrade[];
+  totalTrades: number;
+  successfulTrades: number;
+  failedTrades: number;
+  totalPnL: number;
+  winRate: number;
+}
+
 export interface TradingAlert {
   id: string;
   type: "rule_triggered" | "trade_executed" | "risk_limit" | "session_stopped";
   severity: "info" | "warning" | "error";
   title: string;
   message: string;
-  portfolioId?: string; // Adding for filtering
+  portfolioId?: string;
   data?: any;
   timestamp: Date;
   acknowledged: boolean;
@@ -209,3 +305,65 @@ export interface EmergencyStopConfig {
   consecutiveLossLimit: number;
   enabled: boolean;
 }
+
+// Utility functions for data transformation
+export const transformTradingRuleToDisplay = (rule: TradingRule): TradingRuleDisplay => ({
+  id: rule.id,
+  portfolioId: rule.portfolio_id,
+  name: rule.name,
+  description: rule.description,
+  isActive: rule.is_active,
+  priority: rule.priority,
+  ruleType: rule.rule_type,
+  conditions: rule.conditions,
+  actions: rule.actions,
+  lastTriggered: rule.last_triggered,
+  performance: rule.performance,
+  createdAt: rule.created_at,
+  updatedAt: rule.updated_at,
+});
+
+export const transformTradingSessionToDisplay = (session: TradingSession): TradingSessionDisplay => ({
+  id: session.id,
+  portfolioId: session.portfolio_id,
+  name: session.session_name,
+  status: session.is_active ? "active" : "stopped",
+  startedAt: session.start_time,
+  stoppedAt: session.end_time,
+  stopReason: session.stop_reason,
+  config: session.config,
+  createdAt: session.created_at,
+});
+
+export const transformAutoTradeToDisplay = (trade: AutoTrade): AutoTradeDisplay => ({
+  id: trade.id,
+  portfolioId: trade.portfolio_id,
+  ruleId: trade.rule_id,
+  symbol: trade.symbol,
+  type: trade.trade_type,
+  quantity: trade.quantity,
+  targetPrice: trade.target_price,
+  executedPrice: trade.executed_price,
+  status: trade.status,
+  errorMessage: trade.error_message,
+  createdAt: trade.created_at,
+  executedAt: trade.executed_at,
+  ruleName: undefined, // Will be populated by frontend
+  pnl: undefined, // Will be calculated by frontend
+});
+
+export const transformCreateRuleDtoToBackend = (dto: CreateTradingRuleDtoDisplay): CreateTradingRuleDto => ({
+  portfolio_id: dto.portfolioId,
+  name: dto.name,
+  description: dto.description,
+  rule_type: dto.ruleType,
+  conditions: dto.conditions,
+  actions: dto.actions,
+  priority: dto.priority,
+  is_active: dto.isActive ?? true,
+});
+
+export const transformSessionDtoToBackend = (dto: TradingSessionDtoDisplay): TradingSessionDto => ({
+  session_name: dto.sessionName,
+  config: dto.config,
+});

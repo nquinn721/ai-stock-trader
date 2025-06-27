@@ -1,0 +1,72 @@
+# Node modules
+**/node_modules
+**/npm-debug.log*
+**/yarn-debug.log*
+**/yarn-error.log*
+
+# Frontend development files
+frontend/src
+frontend/public
+frontend/.git
+frontend/build/.git
+
+# Backend development files
+backend/src
+backend/.git
+backend/dist/.git
+
+# Tests
+**/test
+**/tests
+**/*.test.ts
+**/*.test.js
+**/*.spec.ts
+**/*.spec.js
+**/coverage
+**/__tests__
+
+# Development files
+**/.env
+**/.env.local
+**/.env.development
+**/.env.production
+**/README.md
+**/tsconfig.json
+**/jest.config.js
+**/eslint.config.mjs
+
+# Git and version control
+.git
+.gitignore
+**/.gitignore
+
+# IDE files
+.vscode
+.idea
+**/*.swp
+**/*.swo
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Project management
+project-management/
+docs/
+e2e-tests/
+*.md
+*.ps1
+*.js
+
+# Build artifacts
+**/dist
+**/build
+
+# Logs
+**/logs
+**/*.log

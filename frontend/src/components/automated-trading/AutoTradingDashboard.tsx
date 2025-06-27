@@ -58,6 +58,7 @@ interface TradingRule {
   };
 }
 
+<<<<<<< HEAD
 interface TabPanelProps {
   children?: React.ReactNode;
   index: number;
@@ -146,6 +147,21 @@ export const AutoTradingDashboard: React.FC = () => {
           })
         );
         setTradingSessions(sessions);
+=======
+    useEffect(() => {
+      // Load initial data when component mounts
+      if (selectedPortfolioId) {
+        autoTradingStore.fetchTradingRules(selectedPortfolioId);
+        autoTradingStore.fetchTradingSessions(selectedPortfolioId);
+        autoTradingStore.fetchActiveTrades(selectedPortfolioId);
+        autoTradingStore.fetchTradeHistory(selectedPortfolioId);
+        
+        // Get first active session for performance data
+        const activeSessions = autoTradingStore.tradingSessions.filter(s => s.status === 'active');
+        if (activeSessions.length > 0) {
+          autoTradingStore.fetchTradingPerformance(activeSessions[0].id);
+        }
+>>>>>>> 6ddc0fc (udpate)
       }
 
       // Load active trading strategies from backend

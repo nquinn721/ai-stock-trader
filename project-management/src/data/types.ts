@@ -3,17 +3,18 @@ export type Epic = {
   id: string;
   title: string;
   description: string;
-  status: "TODO" | "IN_PROGRESS" | "DONE" | "ON_HOLD";
+  status: "TODO" | "IN_PROGRESS" | "DONE" | "ON_HOLD" | "ARCHIVED";
   owner: string;
   createdDate: string;
   completedDate?: string;
+  archivedDate?: string;
 };
 
 export type Story = {
   id: string;
   title: string;
   description: string;
-  status: "TODO" | "IN_PROGRESS" | "DONE" | "BLOCKED" | "REVIEW";
+  status: "TODO" | "IN_PROGRESS" | "DONE" | "BLOCKED" | "REVIEW" | "ARCHIVED";
   priority: "Low" | "Medium" | "High" | "Critical";
   epic: string;
   storyPoints: number;
@@ -23,6 +24,7 @@ export type Story = {
   dependencies: string[];
   createdDate: string;
   completedDate?: string;
+  archivedDate?: string;
 };
 
 export type Sprint = {

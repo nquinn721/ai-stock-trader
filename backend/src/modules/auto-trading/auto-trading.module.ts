@@ -4,6 +4,7 @@ import { MarketHoursService } from '../../utils/market-hours.service';
 import { PaperTradingModule } from '../paper-trading/paper-trading.module';
 import { StockModule } from '../stock/stock.module';
 import { WebsocketModule } from '../websocket/websocket.module';
+import { MLModule } from '../ml/ml.module';
 import { AutoTradingController } from './auto-trading.controller';
 import { AutoTradingService } from './auto-trading.service';
 import { AutonomousTradingController } from './autonomous-trading.controller';
@@ -36,6 +37,7 @@ import { StrategyBuilderService } from './strategy-builder.service';
     PaperTradingModule,
     StockModule,
     WebsocketModule,
+    MLModule,
   ],
   controllers: [
     AutoTradingController,

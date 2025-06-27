@@ -1,10 +1,12 @@
 import {
+  Archive as ArchiveIcon,
   TaskAlt as CompleteIcon,
   Delete as DeleteIcon,
   CheckCircle as DoneIcon,
   Business as EpicIcon,
   PauseCircleFilled as InProgressIcon,
   RadioButtonUnchecked as TodoIcon,
+  Unarchive as UnarchiveIcon,
 } from "@mui/icons-material";
 import {
   Box,
@@ -47,6 +49,12 @@ const getStatusMeta = (status: string) => {
         label: "Planned",
         color: "#2196f3",
       };
+    case "ARCHIVED":
+      return {
+        icon: <ArchiveIcon sx={{ color: "#795548" }} />,
+        label: "Archived",
+        color: "#795548",
+      };
     default:
       return {
         icon: <TodoIcon sx={{ color: "#757575" }} />,
@@ -60,6 +68,7 @@ const EpicsView: React.FC = () => {
   const [localEpics, setLocalEpics] = useState<Epic[]>(epics);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [epicToDelete, setEpicToDelete] = useState<string | null>(null);
+  const [showArchived, setShowArchived] = useState(false);
 
   const handleMarkComplete = (epicId: string) => {
     setLocalEpics((prev) =>
@@ -69,6 +78,34 @@ const EpicsView: React.FC = () => {
               ...epic,
               status: "DONE" as const,
               completedDate: new Date().toISOString().split("T")[0],
+            }
+          : epic
+      )
+    );
+  };
+
+  const handleArchiveEpic = (epicId: string) => {
+    setLocalEpics((prev) =>
+      prev.map((epic) =>
+        epic.id === epicId
+          ? {
+              ...epic,
+              status: "ARCHIVED" as const,
+              archivedDate: new Date().toISOString().split("T")[0],
+            }
+          : epic
+      )
+    );
+  };
+
+  const handleUnarchiveEpic = (epicId: string) => {
+    setLocalEpics((prev) =>
+      prev.map((epic) =>
+        epic.id === epicId
+          ? {
+              ...epic,
+              status: "TODO" as const,
+              archivedDate: undefined,
             }
           : epic
       )
@@ -93,21 +130,41 @@ const EpicsView: React.FC = () => {
     setDeleteDialogOpen(false);
   };
 
-  if (!localEpics.length) {
+  const filteredEpics = localEpics.filter((epic) => 
+    showArchived ? epic.status === "ARCHIVED" : epic.status !== "ARCHIVED"
+  );
+
+  if (!filteredEpics.length) {
     return (
       <Box sx={{ mt: 6, textAlign: "center" }}>
         <Typography variant="h5" color="textSecondary">
-          No epics found.
+          {showArchived ? "No archived epics found." : "No active epics found."}
         </Typography>
+        <Button
+          variant="outlined"
+          onClick={() => setShowArchived(!showArchived)}
+          sx={{ mt: 2 }}
+        >
+          {showArchived ? "Show Active Epics" : "Show Archived Epics"}
+        </Button>
       </Box>
     );
   }
 
   return (
     <Box>
-      <Typography variant="h4" gutterBottom>
-        Epic Management
-      </Typography>
+      <Stack direction="row" justifyContent="space-between" alignItems="center" mb={3}>
+        <Typography variant="h4">
+          {showArchived ? "Archived Epics" : "Epic Management"}
+        </Typography>
+        <Button
+          variant="outlined"
+          onClick={() => setShowArchived(!showArchived)}
+          startIcon={showArchived ? <UnarchiveIcon /> : <ArchiveIcon />}
+        >
+          {showArchived ? "Show Active Epics" : "Show Archived Epics"}
+        </Button>
+      </Stack>
       <Box
         sx={{
           display: "grid",
@@ -115,7 +172,7 @@ const EpicsView: React.FC = () => {
           gap: 3,
         }}
       >
-        {localEpics.map((epic: Epic) => {
+        {filteredEpics.map((epic: Epic) => {
           const statusMeta = getStatusMeta(epic.status);
           const epicStories = stories.filter((story) => story.epic === epic.id);
           const completedStories = epicStories.filter(
@@ -175,7 +232,7 @@ const EpicsView: React.FC = () => {
                   mb={2}
                   justifyContent="flex-end"
                 >
-                  {epic.status !== "DONE" && (
+                  {epic.status !== "DONE" && epic.status !== "ARCHIVED" && (
                     <Tooltip title="Mark as Complete">
                       <IconButton
                         size="small"
@@ -189,6 +246,39 @@ const EpicsView: React.FC = () => {
                         }}
                       >
                         <CompleteIcon fontSize="small" />
+                      </IconButton>
+                    </Tooltip>
+                  )}
+                  {epic.status === "ARCHIVED" ? (
+                    <Tooltip title="Unarchive Epic">
+                      <IconButton
+                        size="small"
+                        color="info"
+                        onClick={() => handleUnarchiveEpic(epic.id)}
+                        sx={{
+                          backgroundColor: "rgba(33, 150, 243, 0.1)",
+                          "&:hover": {
+                            backgroundColor: "rgba(33, 150, 243, 0.2)",
+                          },
+                        }}
+                      >
+                        <UnarchiveIcon fontSize="small" />
+                      </IconButton>
+                    </Tooltip>
+                  ) : (
+                    <Tooltip title="Archive Epic">
+                      <IconButton
+                        size="small"
+                        color="warning"
+                        onClick={() => handleArchiveEpic(epic.id)}
+                        sx={{
+                          backgroundColor: "rgba(121, 85, 72, 0.1)",
+                          "&:hover": {
+                            backgroundColor: "rgba(121, 85, 72, 0.2)",
+                          },
+                        }}
+                      >
+                        <ArchiveIcon fontSize="small" />
                       </IconButton>
                     </Tooltip>
                   )}
@@ -336,6 +426,13 @@ const EpicsView: React.FC = () => {
                   <Box mt={2}>
                     <Typography variant="caption" color="success.main">
                       Completed: {epic.completedDate}
+                    </Typography>
+                  </Box>
+                )}
+                {epic.archivedDate && (
+                  <Box mt={2}>
+                    <Typography variant="caption" color="warning.main">
+                      Archived: {epic.archivedDate}
                     </Typography>
                   </Box>
                 )}

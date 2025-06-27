@@ -7,7 +7,8 @@ export const stories: Story[] = [
     title: "Add stock price formatting helper",
     description:
       "Create a utility function to format stock prices with proper currency symbols and decimal places.",
-    status: "DONE",
+    status: "ARCHIVED",
+    archivedDate: "2025-06-27",
     priority: "Low",
     epic: "E1",
     storyPoints: 1,
@@ -23,7 +24,8 @@ export const stories: Story[] = [
     title: "Fix WebSocket connection timeout",
     description:
       "Add timeout handling for WebSocket connections to prevent hanging connections.",
-    status: "DONE",
+    status: "ARCHIVED",
+    archivedDate: "2025-06-27",
     priority: "Medium",
     epic: "E1",
     storyPoints: 2,
@@ -38,7 +40,8 @@ export const stories: Story[] = [
     id: "S3",
     title: "Add loading spinner to stock cards",
     description: "Display a loading spinner while stock data is being fetched.",
-    status: "DONE",
+    status: "ARCHIVED",
+    archivedDate: "2025-06-27",
     priority: "Low",
     epic: "E1",
     storyPoints: 1,
@@ -54,7 +57,8 @@ export const stories: Story[] = [
     title: "Validate stock symbol input",
     description:
       "Add client-side validation for stock symbol input fields (uppercase, length limits).",
-    status: "DONE",
+    status: "ARCHIVED",
+    archivedDate: "2025-06-27",
     priority: "Medium",
     epic: "E1",
     storyPoints: 2,
@@ -70,7 +74,8 @@ export const stories: Story[] = [
     title: "Add error boundary to dashboard",
     description:
       "Implement React error boundary to catch and display component errors gracefully.",
-    status: "DONE",
+    status: "ARCHIVED",
+    archivedDate: "2025-06-27",
     priority: "Medium",
     epic: "E1",
     storyPoints: 2,
@@ -86,7 +91,8 @@ export const stories: Story[] = [
     title: "Create empty state component",
     description:
       "Build a reusable component to display when no data is available (no stocks, no portfolio, etc).",
-    status: "DONE",
+    status: "ARCHIVED",
+    archivedDate: "2025-06-27",
     priority: "Low",
     epic: "E1",
     storyPoints: 1,
@@ -102,7 +108,8 @@ export const stories: Story[] = [
     title: "Add stock symbol search autocomplete",
     description:
       "Implement autocomplete dropdown for stock symbol input using predefined stock list.",
-    status: "DONE",
+    status: "ARCHIVED",
+    archivedDate: "2025-06-27",
     priority: "Medium",
     epic: "E2",
     storyPoints: 3,
@@ -118,7 +125,8 @@ export const stories: Story[] = [
     title: "Fix portfolio percentage calculations",
     description:
       "Correct the percentage calculation logic for portfolio gains/losses display.",
-    status: "DONE",
+    status: "ARCHIVED",
+    archivedDate: "2025-06-27",
     priority: "High",
     epic: "E2",
     storyPoints: 2,
@@ -134,7 +142,8 @@ export const stories: Story[] = [
     title: "Create API health check endpoint",
     description:
       "Add a simple /health endpoint to monitor API availability and response time.",
-    status: "DONE",
+    status: "ARCHIVED",
+    archivedDate: "2025-06-27",
     priority: "Medium",
     epic: "E3",
     storyPoints: 1,
@@ -150,7 +159,8 @@ export const stories: Story[] = [
     title: "Write unit tests for React components",
     description:
       "Create comprehensive unit tests for all React components using Jest and React Testing Library. Target 90%+ coverage for Dashboard, QuickTrade, PortfolioChart, and StockCard components.",
-    status: "DONE",
+    status: "ARCHIVED",
+    archivedDate: "2025-06-27",
     priority: "High",
     epic: "E2",
     storyPoints: 5,
@@ -165,7 +175,8 @@ export const stories: Story[] = [
     title: "Write integration tests for API calls",
     description:
       "Create integration tests for all frontend API calls including stock data fetching, portfolio operations, and WebSocket connections. Mock external dependencies properly.",
-    status: "DONE",
+    status: "ARCHIVED",
+    archivedDate: "2025-06-27",
     priority: "High",
     epic: "E2",
     storyPoints: 3,
@@ -180,7 +191,8 @@ export const stories: Story[] = [
     title: "Implement Playwright E2E tests",
     description:
       "Create end-to-end tests using Playwright covering user workflows: login, stock browsing, trading, portfolio viewing, and performance charts.",
-    status: "DONE",
+    status: "ARCHIVED",
+    archivedDate: "2025-06-27",
     priority: "High",
     epic: "E2",
     storyPoints: 5,
@@ -196,7 +208,8 @@ export const stories: Story[] = [
     title: "Add FontAwesome to client application",
     description:
       "Install and configure FontAwesome icons library. Replace existing icons with FontAwesome icons for trading, portfolio, charts, and navigation elements.",
-    status: "DONE",
+    status: "ARCHIVED",
+    archivedDate: "2025-06-27",
     priority: "Medium",
     epic: "E3",
     storyPoints: 2,
@@ -212,7 +225,8 @@ export const stories: Story[] = [
     title: "Implement Technical Analysis Indicators",
     description:
       "Add RSI, MACD, Bollinger Bands, and Moving Averages calculations to backend. These are key indicators day traders use for entry/exit decisions.",
-    status: "DONE",
+    status: "ARCHIVED",
+    archivedDate: "2025-06-27",
     priority: "High",
     epic: "E4",
     storyPoints: 5,
@@ -227,7 +241,8 @@ export const stories: Story[] = [
     title: "Add Volume Analysis System",
     description:
       "Implement volume spike detection, volume-weighted average price (VWAP), and volume trend analysis. High volume confirms price movements for day traders.",
-    status: "DONE",
+    status: "ARCHIVED",
+    archivedDate: "2025-06-27",
     priority: "High",
     epic: "E4",
     storyPoints: 3,
@@ -242,7 +257,8 @@ export const stories: Story[] = [
     title: "Implement Support/Resistance Level Detection",
     description:
       "Create algorithm to identify key support and resistance levels using historical price data. Day traders use these for entry/exit points and stop-loss placement.",
-    status: "DONE",
+    status: "ARCHIVED",
+    archivedDate: "2025-06-27",
     priority: "High",
     epic: "E4",
     storyPoints: 4,
@@ -257,7 +273,8 @@ export const stories: Story[] = [
     title: "Add Momentum and Volatility Indicators",
     description:
       "Implement momentum oscillators (Stochastic, Williams %R) and volatility measures (ATR, volatility percentage). Critical for day trading timing decisions.",
-    status: "DONE",
+    status: "ARCHIVED",
+    archivedDate: "2025-06-27",
     priority: "High",
     epic: "E4",
     storyPoints: 3,
@@ -272,7 +289,8 @@ export const stories: Story[] = [
     title: "Create Pattern Recognition System",
     description:
       "Implement candlestick pattern recognition (Doji, Hammer, Engulfing) and chart patterns (Head & Shoulders, Triangles, Flags) using AI/ML models for automated detection.",
-    status: "DONE",
+    status: "ARCHIVED",
+    archivedDate: "2025-06-27",
     priority: "High",
     epic: "E4",
     storyPoints: 8,
@@ -288,7 +306,8 @@ export const stories: Story[] = [
     title: "Build AI-Powered Trading Recommendations Engine",
     description:
       "Create comprehensive ML-based trading recommendations system integrating ALL implemented indicators and analysis: TECHNICAL INDICATORS (RSI 14-period momentum, MACD 12/26/9 trend-following, Bollinger Bands 20/2 volatility bands, SMA 20/50/200 trend analysis, EMA 9/12/26 exponential smoothing, Stochastic %K/%D 14/3 momentum oscillator, Williams %R 14-period momentum, ATR 14-period volatility measure, Historical/Average Volatility with regime detection), VOLUME ANALYSIS (VWAP intraday benchmark, Volume spike detection with strength analysis, Volume trend analysis increasing/decreasing/stable, Volume confirmation for breakouts), SUPPORT/RESISTANCE (Multi-level support/resistance identification, Pivot points classical/Fibonacci, Key level breakout detection, Comprehensive S/R analysis with strength scoring), PATTERN RECOGNITION (Candlestick patterns: Doji, Hammer, Engulfing, Star formations; Chart patterns: Double Top/Bottom, Head & Shoulders, Triangle/Wedge/Flag/Pennant formations with AI confidence scoring), BREAKOUT ANALYSIS (Trend direction detection upward/downward/sideways, Volatility-based breakout confirmation, Momentum scoring with acceleration analysis), ADVANCED ML FEATURES (Neural Network predictions, SVM-like classification, Ensemble model weighting, LSTM sequence analysis, Transformer attention mechanisms, Mean reversion vs momentum scoring, Fractal dimension analysis, Hurst exponent calculation, Volatility clustering detection), NEWS & SENTIMENT (Real-time news fetching and analysis, Financial sentiment lexicon with 50+ terms, Social sentiment scoring, News impact on price correlation), RISK MANAGEMENT (Dynamic position sizing recommendations, Stop-loss/take-profit level calculation, Risk/reward ratio optimization, Portfolio correlation analysis), and MARKET MICROSTRUCTURE (Bid-ask spread proxy, Order flow inference, Market structure analysis, Relative strength calculations). System integrates 8 modules (breakout, ml-analysis, news, trading, stock, order-management, paper-trading, websocket) to generate real-time BUY/SELL/HOLD/WATCH recommendations with confidence scores 0-1, entry/exit price levels, risk parameters, detailed reasoning, and multi-timeframe analysis (1m/5m/1h/1d).",
-    status: "DONE",
+    status: "ARCHIVED",
+    archivedDate: "2025-06-27",
     priority: "Critical",
     epic: "E5",
     storyPoints: 15,
@@ -303,7 +322,8 @@ export const stories: Story[] = [
     title: "Implement Real-Time Notification System",
     description:
       "Create comprehensive real-time notification system that alerts users to: Trading Opportunities (buy/sell signals from S19 recommendation engine with confidence scores), Pattern Alerts (breakout confirmations, pattern completions, support/resistance breaks), Technical Alerts (RSI overbought/oversold, MACD crossovers, Bollinger Band squeezes, volume spikes), Risk Management (stop-loss triggers, take-profit targets, position sizing alerts), Market Events (news sentiment changes, earnings announcements, analyst upgrades/downgrades), and Multi-timeframe Alerts (1m scalping opportunities, 5m momentum shifts, 1h trend changes). Features: Customizable alert thresholds, priority-based notifications, push notifications, email alerts, in-app notifications, alert history, and smart filtering to prevent notification overload.",
-    status: "DONE",
+    status: "ARCHIVED",
+    archivedDate: "2025-06-27",
     priority: "Critical",
     epic: "E5",
     storyPoints: 6,
@@ -318,7 +338,8 @@ export const stories: Story[] = [
     title: "Add Risk Management Integration",
     description:
       "Integrate position sizing, risk/reward ratios, and portfolio risk assessment into recommendation system. Include stop-loss and take-profit suggestions.",
-    status: "DONE",
+    status: "ARCHIVED",
+    archivedDate: "2025-06-27",
     priority: "High",
     epic: "E5",
     storyPoints: 4,
@@ -333,7 +354,8 @@ export const stories: Story[] = [
     title: "Audit Portfolio Data Sources",
     description:
       "Verify all portfolio data comes from live API endpoints. Remove any mock data from backend portfolio services and ensure real-time data flow.",
-    status: "DONE",
+    status: "ARCHIVED",
+    archivedDate: "2025-06-27",
     priority: "Critical",
     epic: "E1",
     storyPoints: 3,
@@ -348,7 +370,8 @@ export const stories: Story[] = [
     title: "Implement Live Portfolio Performance Tracking",
     description:
       "Ensure portfolio performance metrics (P&L, returns, positions) update in real-time from live market data. Add WebSocket updates for instant portfolio changes.",
-    status: "DONE",
+    status: "ARCHIVED",
+    archivedDate: "2025-06-27",
     priority: "High",
     epic: "E1",
     storyPoints: 4,
@@ -363,7 +386,8 @@ export const stories: Story[] = [
     title: "Add Portfolio Analytics Dashboard",
     description:
       "Create comprehensive portfolio analytics showing sector allocation, performance attribution, risk metrics, and comparison to market benchmarks using live data.",
-    status: "DONE",
+    status: "ARCHIVED",
+    archivedDate: "2025-06-27",
     priority: "Medium",
     epic: "E1",
     storyPoints: 5,
@@ -378,7 +402,8 @@ export const stories: Story[] = [
     title: "Implement Advanced Order Management System",
     description:
       "Build comprehensive order management system supporting entry orders, stop-loss orders, and take-profit orders with automatic execution. Features include: conditional order placement (buy at entry price), automatic stop-loss execution (sell when price drops to stop level), take-profit orders (sell when price reaches profit target), order queue management, real-time price monitoring for order triggers, order status tracking (pending/triggered/executed/cancelled), portfolio integration with order P&L tracking, and WebSocket notifications for order events. All orders execute automatically based on live market data with no manual intervention required.",
-    status: "DONE",
+    status: "ARCHIVED",
+    archivedDate: "2025-06-27",
     priority: "High",
     epic: "E1",
     storyPoints: 8,
@@ -393,7 +418,8 @@ export const stories: Story[] = [
     title: "ML Model Integration Audit and Strategy",
     description:
       "Conduct comprehensive audit of current trading logic and identify opportunities to replace manual calculations with trained machine learning models. Areas to evaluate: breakout strategy calculations (neural network, SVM, ensemble predictions), sentiment analysis enhancement (NLP models for news analysis), portfolio optimization (reinforcement learning for position sizing), risk management (ML-based stop-loss positioning), pattern recognition (CNN models for chart pattern detection), market prediction (LSTM/Transformer models for price forecasting), trading signal generation (ensemble ML models), and performance attribution analysis. Create implementation roadmap prioritizing highest-impact ML integrations with clear ROI metrics.",
-    status: "DONE",
+    status: "ARCHIVED",
+    archivedDate: "2025-06-27",
     priority: "Medium",
     epic: "E4",
     storyPoints: 5,
@@ -408,7 +434,8 @@ export const stories: Story[] = [
     title: "ML Infrastructure Implementation - Phase 1 Foundation",
     description:
       "Implement core ML infrastructure and high-impact models based on S26 audit findings. Build breakout detection ML model using neural networks with 30-40% accuracy improvement. Create dynamic risk management system with 25-35% volatility reduction. Establish feature engineering pipeline, A/B testing framework, and model monitoring with alerting. Set up GPU compute environment and model serving infrastructure. Expected ROI: 25-35% improvement in trading performance.",
-    status: "DONE",
+    status: "ARCHIVED",
+    archivedDate: "2025-06-27",
     priority: "High",
     epic: "E4",
     storyPoints: 13,
@@ -423,7 +450,8 @@ export const stories: Story[] = [
     title: "ML Infrastructure Implementation - Phase 2 Intelligence",
     description:
       "Advanced ML analytics and optimization features. Implement sentiment analysis integration using NLP for financial news with 20-30% timing improvement. Build portfolio optimization algorithms using ML-enhanced Modern Portfolio Theory with 15-25% return improvement. Create advanced pattern recognition models using deep learning with 40-50% detection improvement. Develop performance attribution system with ML insights providing 25-35% strategy optimization.",
-    status: "DONE",
+    status: "ARCHIVED",
+    archivedDate: "2025-06-27",
     priority: "High",
     epic: "E4",
     storyPoints: 13,
@@ -438,7 +466,8 @@ export const stories: Story[] = [
     title: "ML Infrastructure Implementation - Phase 3 Advanced Systems",
     description:
       "Advanced predictive capabilities and ensemble systems. Build market prediction models using time series analysis and deep learning with 20-30% timing improvement. Create advanced signal generation using ensemble models with 35-45% signal accuracy improvement. Implement multi-model ensemble systems with real-time model updates and dynamic weighting. Establish ML center of excellence with automated model retraining and performance optimization.",
-    status: "DONE",
+    status: "ARCHIVED",
+    archivedDate: "2025-06-27",
     priority: "Medium",
     epic: "E4",
     storyPoints: 13,
@@ -453,7 +482,8 @@ export const stories: Story[] = [
     title: "Notification History and Management System",
     description:
       "Extend the notification system (S20) with comprehensive history and management features. Create notification history page showing past alerts with filtering by type, date, and priority. Add notification management dashboard for users to view, delete, and organize notifications. Implement notification analytics showing alert performance and user engagement metrics. Add bulk actions for notification cleanup and archiving. Include search functionality and export capabilities for notification data.",
-    status: "DONE",
+    status: "ARCHIVED",
+    archivedDate: "2025-06-27",
     priority: "Medium",
     epic: "E3",
     storyPoints: 5,
@@ -469,7 +499,8 @@ export const stories: Story[] = [
     title: "Remove Latest Trade Signals from Client",
     description:
       "Clean up the frontend by removing the latest trade signals display from the client dashboard. This includes removing the signals section from the main dashboard, cleaning up related UI components, removing unused signal display logic, and updating the dashboard layout to optimize space utilization. Ensure that real-time trading signals are still available through the appropriate trading interfaces but not cluttering the main dashboard view.",
-    status: "DONE",
+    status: "ARCHIVED",
+    archivedDate: "2025-06-27",
     priority: "Low",
     epic: "E3",
     storyPoints: 2,
@@ -485,7 +516,8 @@ export const stories: Story[] = [
     title: "Advanced Trading Tab in Quick Trade Interface",
     description:
       "Add an advanced trading tab to the existing QuickTrade component with sophisticated trading features. Include advanced order types (stop-limit, trailing stop, bracket orders), technical analysis tools integration, position sizing calculator based on risk percentage, advanced charting with multiple timeframes, options trading interface (if applicable), and algorithmic trading strategy selection. Add real-time P&L tracking, risk metrics display, and trade execution analytics. Ensure proper validation and risk management controls.",
-    status: "DONE",
+    status: "ARCHIVED",
+    archivedDate: "2025-06-27",
     priority: "Medium",
     epic: "E2",
     storyPoints: 8,
@@ -503,7 +535,8 @@ export const stories: Story[] = [
     title: "ML Infrastructure Foundation - Data Pipeline",
     description:
       "Establish the foundational data pipeline for ML model training and inference. Create data ingestion services for historical and real-time market data, implement feature engineering pipeline with technical indicators calculation, establish data validation and quality checks, create data versioning and lineage tracking, and implement efficient data storage solutions optimized for ML workloads. Include automated data preprocessing, normalization, and feature extraction processes.",
-    status: "DONE",
+    status: "ARCHIVED",
+    archivedDate: "2025-06-27",
     priority: "High",
     epic: "E3",
     storyPoints: 13,
@@ -519,7 +552,8 @@ export const stories: Story[] = [
     title: "ML Model Training Infrastructure",
     description:
       "Set up comprehensive ML model training infrastructure including model training pipeline with automated hyperparameter tuning, cross-validation framework for model validation, experiment tracking and management system, model versioning and artifact storage, automated model evaluation and comparison tools, and integration with cloud computing resources for scalable training. Implement MLOps best practices for reproducible model development.",
-    status: "DONE",
+    status: "ARCHIVED",
+    archivedDate: "2025-06-27",
     priority: "High",
     epic: "E3",
     storyPoints: 21,
@@ -535,7 +569,8 @@ export const stories: Story[] = [
     title: "Breakout Detection ML Model Implementation",
     description:
       "Develop and implement the breakout detection ML model using pattern recognition algorithms. Create feature engineering for price patterns, volume analysis, and technical indicators. Implement deep learning models (CNN/RNN) for pattern recognition, train models on historical market data with proper validation, integrate real-time inference capabilities, and establish model performance monitoring. Include backtesting framework and A/B testing infrastructure for model validation.",
-    status: "DONE",
+    status: "ARCHIVED",
+    archivedDate: "2025-06-27",
     priority: "High",
     epic: "E3",
     storyPoints: 21,
@@ -551,7 +586,8 @@ export const stories: Story[] = [
     title: "Dynamic Risk Management ML System",
     description:
       "Implement ML-driven dynamic risk management system that adapts to market conditions. Develop risk assessment models using volatility prediction, correlation analysis, and portfolio optimization techniques. Create dynamic position sizing algorithms, implement adaptive stop-loss mechanisms, establish real-time risk monitoring and alerting, and integrate with existing portfolio management systems. Include stress testing and scenario analysis capabilities.",
-    status: "DONE",
+    status: "ARCHIVED",
+    archivedDate: "2025-06-27",
     priority: "High",
     epic: "E3",
     storyPoints: 21,
@@ -567,7 +603,8 @@ export const stories: Story[] = [
     title: "ML Model Monitoring and A/B Testing Framework",
     description:
       "Establish comprehensive monitoring and testing framework for ML models in production. Implement model performance tracking, drift detection, and automated retraining triggers. Create A/B testing infrastructure for model comparison, establish champion/challenger model deployment patterns, implement real-time model health monitoring, and create alerting systems for model degradation. Include automated rollback capabilities and performance analytics dashboard.",
-    status: "DONE",
+    status: "ARCHIVED",
+    archivedDate: "2025-06-27",
     priority: "High",
     epic: "E3",
     storyPoints: 13,
@@ -585,7 +622,8 @@ export const stories: Story[] = [
     title: "Sentiment Analysis ML Integration",
     description:
       "Implement NLP-based sentiment analysis for market news and social media data. Create news data ingestion pipeline, implement sentiment scoring algorithms using transformer models, establish real-time sentiment monitoring, integrate sentiment signals with trading decisions, and create sentiment-based risk adjustments. Include multi-source sentiment aggregation and temporal sentiment analysis for improved timing.",
-    status: "DONE",
+    status: "ARCHIVED",
+    archivedDate: "2025-06-27",
     priority: "Medium",
     epic: "E3",
     storyPoints: 21,
@@ -601,7 +639,8 @@ export const stories: Story[] = [
     title: "ML-Enhanced Portfolio Optimization",
     description:
       "Develop ML-enhanced Modern Portfolio Theory implementation with dynamic optimization. Create machine learning models for return prediction, risk estimation, and correlation forecasting. Implement dynamic asset allocation algorithms, establish rebalancing triggers based on ML insights, create multi-objective optimization for risk-return-ESG factors, and integrate with existing portfolio management. Include regime detection for adaptive strategies.",
-    status: "DONE",
+    status: "ARCHIVED",
+    archivedDate: "2025-06-27",
     priority: "Medium",
     epic: "E3",
     storyPoints: 21,
@@ -617,7 +656,8 @@ export const stories: Story[] = [
     title: "Advanced Pattern Recognition System",
     description:
       "Implement deep learning-based pattern recognition for complex market patterns. Develop convolutional neural networks for chart pattern recognition, create sequence models for time series patterns, implement ensemble methods combining multiple pattern detection approaches, establish pattern confidence scoring, and integrate with trading signal generation. Include visualization tools for pattern analysis and validation.",
-    status: "DONE",
+    status: "ARCHIVED",
+    archivedDate: "2025-06-27",
     priority: "Medium",
     epic: "E3",
     storyPoints: 21,
@@ -633,7 +673,8 @@ export const stories: Story[] = [
     title: "Advanced Feature Engineering Pipeline",
     description:
       "Create comprehensive ML feature engineering pipeline for market data processing. Implement real-time feature extraction from market data, develop advanced technical indicator calculations, establish feature validation and quality scoring, create multi-timeframe feature aggregation, implement streaming feature updates, and integrate with ML model training infrastructure. Include feature importance analysis, automated feature selection, and performance optimization for large-scale data processing.",
-    status: "DONE",
+    status: "ARCHIVED",
+    archivedDate: "2025-06-27",
     priority: "Medium",
     epic: "E28",
     storyPoints: 13,
@@ -651,7 +692,8 @@ export const stories: Story[] = [
     title: "Market Prediction ML Models",
     description:
       "Develop advanced machine learning models for market prediction using ensemble methods. Create LSTM/GRU networks for time series forecasting, implement transformer models for multi-variate prediction, establish ensemble methods combining multiple prediction approaches, create prediction confidence intervals and uncertainty quantification, and integrate with trading decision systems. Include regime-aware prediction models and adaptive forecasting.",
-    status: "DONE",
+    status: "ARCHIVED",
+    archivedDate: "2025-06-27",
     priority: "High",
     epic: "E28",
     storyPoints: 21,
@@ -667,7 +709,8 @@ export const stories: Story[] = [
     title: "Advanced Signal Generation Ensemble",
     description:
       "Implement sophisticated ensemble system for trading signal generation combining multiple ML models. Create meta-learning algorithms for signal combination, implement dynamic signal weighting based on market conditions, establish signal conflict resolution mechanisms, create multi-timeframe signal fusion, and integrate with risk management systems. Include signal attribution and explainability features.",
-    status: "DONE",
+    status: "ARCHIVED",
+    archivedDate: "2025-06-27",
     priority: "High",
     epic: "E28",
     storyPoints: 21,
@@ -683,7 +726,8 @@ export const stories: Story[] = [
     title: "Real-time ML Model Updates",
     description:
       "Implement system for real-time ML model updates and online learning. Create incremental learning algorithms for model adaptation, implement streaming data processing for real-time feature updates, establish online model validation and deployment, create adaptive model selection based on market conditions, and integrate with existing ML infrastructure. Include automated model lifecycle management and performance optimization.",
-    status: "DONE",
+    status: "ARCHIVED",
+    archivedDate: "2025-06-27",
     priority: "High",
     epic: "E28",
     storyPoints: 21,
@@ -699,7 +743,8 @@ export const stories: Story[] = [
     title: "Multi-Model Ensemble System",
     description:
       "Create comprehensive multi-model ensemble system integrating all ML components. Implement model orchestration for coordinated decision making, create ensemble optimization algorithms, establish model interaction and feedback mechanisms, implement system-wide performance monitoring, and create unified ML API for frontend integration. Include explainable AI features and comprehensive testing framework.",
-    status: "DONE",
+    status: "ARCHIVED",
+    archivedDate: "2025-06-27",
     priority: "High",
     epic: "E28",
     storyPoints: 13,
@@ -733,7 +778,8 @@ export const stories: Story[] = [
     title: "MobX State Management Migration",
     description:
       "Migrate all service calls and data logic from React components to centralized MobX stores. Create centralized stores for stock data, portfolio operations, AI recommendations, user preferences, and WebSocket management. Move all API calls from components to stores, implement intelligent caching strategies, add offline-first capabilities, migrate WebSocket handling to stores, implement proper loading states management, add optimistic updates for better UX, and create data synchronization mechanisms. Update all React components to use MobX stores and remove direct API calls.",
-    status: "DONE",
+    status: "ARCHIVED",
+    archivedDate: "2025-06-27",
     priority: "High",
     epic: "E2", // Frontend Architecture Enhancement
     storyPoints: 13,
@@ -749,7 +795,8 @@ export const stories: Story[] = [
     title: "Automated Trading System Backend",
     description:
       "Create a comprehensive automated trading system that executes trades based on AI recommendations and user-defined portfolio rules. Create AutoTradingService for trade execution logic, implement portfolio rule engine for trade validation, create automated order management system, implement risk management and position sizing, add comprehensive trade logging and audit trails, create automated trading scheduler and job queue, implement emergency stop mechanisms, integrate with existing RecommendationService, connect with portfolio management system, and implement real-time market data processing with WebSocket notifications.",
-    status: "DONE",
+    status: "ARCHIVED",
+    archivedDate: "2025-06-27",
     priority: "High",
     epic: "E28", // Automated Trading & AI Enhancement
     storyPoints: 21,
@@ -764,7 +811,8 @@ export const stories: Story[] = [
     title: "Automated Trading Frontend Interface",
     description:
       "Create a comprehensive frontend interface for the automated trading system, allowing users to configure trading rules, start/stop automated trading sessions per portfolio or globally, and monitor automated trading performance in real-time. Create TradingRulesManager component for rule configuration, implement rule builder with drag-and-drop interface, add rule templates for common strategies, create AutoTradingDashboard for session management, implement per-portfolio and global trading controls, add emergency stop functionality, display live trading activity feed, show real-time P&L tracking, implement trade execution notifications, and create comprehensive trading performance analytics.",
-    status: "DONE",
+    status: "ARCHIVED",
+    archivedDate: "2025-06-27",
     priority: "High",
     epic: "E28", // Automated Trading & AI Enhancement
     storyPoints: 13,
@@ -842,7 +890,8 @@ export const stories: Story[] = [
     title: "Four Stock Portfolios for Day Trading",
     description:
       "Create four specialized portfolio templates optimized for different day trading strategies and account sizes. Include Micro Account Starter ($1,000 - 3 positions max), Small Account Basic ($5,000 - 5 positions max), Day Trading Standard ($25,000+ - unlimited day trades), and Day Trading Pro ($50,000+ - advanced features). Each portfolio type has customized risk management, position sizing rules, and day trading specific features. Add portfolio type selection during portfolio creation and automatic rule enforcement based on portfolio type.",
-    status: "DONE",
+    status: "ARCHIVED",
+    archivedDate: "2025-06-27",
     priority: "High",
     epic: "E2",
     storyPoints: 5,
