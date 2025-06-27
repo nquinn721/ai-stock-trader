@@ -44,6 +44,15 @@ export class Portfolio {
   @Column({ type: 'boolean', default: true })
   isActive: boolean;
 
+  @Column({ type: 'varchar', length: 100, nullable: true })
+  assignedStrategy: string; // Stores the randomly assigned trading strategy ID
+
+  @Column({ type: 'varchar', length: 200, nullable: true })
+  assignedStrategyName: string; // Human-readable name of the assigned strategy
+
+  @Column({ type: 'timestamp', nullable: true })
+  strategyAssignedAt: Date; // When the strategy was assigned
+
   @OneToMany('Position', 'portfolio')
   positions: any[];
 

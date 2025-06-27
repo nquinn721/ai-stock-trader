@@ -93,7 +93,6 @@ export class AutonomousTradingService {
       // Validate strategy exists and belongs to user
       const strategy = await this.strategyRepository.findOne({
         where: { id: strategyId, userId },
-        relations: ['user'],
       });
 
       if (!strategy) {
@@ -657,6 +656,9 @@ export class AutonomousTradingService {
         totalValue: portfolio.totalValue,
         isActive: portfolio.isActive,
         portfolioType: portfolio.portfolioType,
+        assignedStrategy: portfolio.assignedStrategy,
+        assignedStrategyName: portfolio.assignedStrategyName,
+        strategyAssignedAt: portfolio.strategyAssignedAt,
       }));
     } catch (error) {
       this.logger.error(`Error fetching portfolios: ${error.message}`);
@@ -685,6 +687,105 @@ export class AutonomousTradingService {
     } catch (error) {
       this.logger.error(
         `Error fetching portfolio performance: ${error.message}`,
+      );
+      throw error;
+    }
+  }
+
+  async assignRandomStrategy(portfolioId: string) {
+    try {
+      // Define available trading strategies for random assignment
+      const availableStrategies = [
+        {
+          id: 'momentum-breakout-v1',
+          name: 'Momentum Breakout Strategy',
+          description:
+            'Trades breakouts above resistance with volume confirmation',
+          category: 'momentum',
+        },
+        {
+          id: 'mean-reversion-rsi-v2',
+          name: 'RSI Mean Reversion',
+          description:
+            'Buys oversold conditions and sells overbought using RSI',
+          category: 'mean-reversion',
+        },
+        {
+          id: 'ai-sentiment-trader-v1',
+          name: 'AI Sentiment Trader',
+          description:
+            'Uses machine learning and news sentiment for trading decisions',
+          category: 'ai-enhanced',
+        },
+        {
+          id: 'scalping-master-v1',
+          name: 'Scalping Master',
+          description:
+            'High-frequency scalping strategy for small, quick profits',
+          category: 'scalping',
+        },
+        {
+          id: 'trend-following-ema-v1',
+          name: 'EMA Trend Following',
+          description: 'Follows trends using exponential moving averages',
+          category: 'trend-following',
+        },
+        {
+          id: 'pairs-trading-v1',
+          name: 'Pairs Trading Strategy',
+          description: 'Statistical arbitrage using correlated pairs',
+          category: 'arbitrage',
+        },
+        {
+          id: 'volatility-breakout-v1',
+          name: 'Volatility Breakout',
+          description: 'Trades volatility spikes and breakouts',
+          category: 'volatility',
+        },
+        {
+          id: 'swing-trading-macd-v1',
+          name: 'MACD Swing Trading',
+          description: 'Swing trading using MACD crossover signals',
+          category: 'swing-trading',
+        },
+      ];
+
+      // Randomly select a strategy
+      const randomIndex = Math.floor(
+        Math.random() * availableStrategies.length,
+      );
+      const selectedStrategy = availableStrategies[randomIndex];
+
+      // Get the portfolio to update
+      const portfolio =
+        await this.paperTradingService.getPortfolio(portfolioId);
+      if (!portfolio) {
+        throw new Error('Portfolio not found');
+      }
+
+      // Update portfolio with assigned strategy
+      await this.paperTradingService.updatePortfolioStrategy(
+        portfolioId,
+        selectedStrategy.id,
+        selectedStrategy.name,
+      );
+
+      this.logger.log(
+        `Randomly assigned strategy "${selectedStrategy.name}" to portfolio ${portfolioId}`,
+      );
+
+      return {
+        portfolioId: portfolioId,
+        portfolioName: portfolio.name,
+        assignedStrategy: selectedStrategy.id,
+        assignedStrategyName: selectedStrategy.name,
+        strategyDescription: selectedStrategy.description,
+        strategyCategory: selectedStrategy.category,
+        assignedAt: new Date(),
+      };
+    } catch (error) {
+      this.logger.error(
+        `Error assigning random strategy to portfolio ${portfolioId}: ${error.message}`,
       );
       throw error;
     }

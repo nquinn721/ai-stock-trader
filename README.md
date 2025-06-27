@@ -227,10 +227,13 @@ PORT=3000
 │   ├── stories/               # User stories
 │   └── sprints/               # Sprint planning
 ├── test-scripts/              # Development test scripts
+├── node_modules/              # Workspace dependencies (expected/required)
 ├── quick-test.ps1             # Quick test runner
 ├── run-all-tests.ps1          # Full test suite
 └── package.json               # Root workspace configuration
 ```
+
+**Note**: The root `node_modules/` directory is **required and expected** for this npm workspace-based monorepo. It contains shared dependencies and workspace management tools that are essential for the project structure.
 
 ### Workspace Scripts
 

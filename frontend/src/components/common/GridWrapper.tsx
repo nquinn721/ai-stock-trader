@@ -1,7 +1,7 @@
-import React from 'react';
-import { Box, BoxProps } from '@mui/material';
+import { Box, BoxProps } from "@mui/material";
+import React from "react";
 
-interface GridProps extends Omit<BoxProps, 'children'> {
+interface GridProps extends Omit<BoxProps, "children"> {
   container?: boolean;
   item?: boolean;
   xs?: number;
@@ -31,9 +31,9 @@ export const Grid: React.FC<GridProps> = ({
     return (
       <Box
         sx={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(12, 1fr)',
-          gap: spacing ? `${spacing * 8}px` : '16px',
+          display: "grid",
+          gridTemplateColumns: "repeat(12, 1fr)",
+          gap: spacing ? `${spacing * 8}px` : "16px",
           ...sx,
         }}
         {...rest}
@@ -45,13 +45,13 @@ export const Grid: React.FC<GridProps> = ({
 
   // Item styles
   if (item) {
-    const gridColumn = xs ? `span ${xs}` : 'span 12';
-    
+    const gridColumn = xs ? `span ${xs}` : "span 12";
+
     return (
       <Box
         sx={{
           gridColumn: {
-            xs: xs ? `span ${xs}` : 'span 12',
+            xs: xs ? `span ${xs}` : "span 12",
             sm: sm ? `span ${sm}` : undefined,
             md: md ? `span ${md}` : undefined,
             lg: lg ? `span ${lg}` : undefined,

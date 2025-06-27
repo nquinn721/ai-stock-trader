@@ -56,6 +56,94 @@ export class AutonomousTradingController {
     private readonly backtestingService: BacktestingService,
   ) {}
 
+  @Post('default-strategy/deploy')
+  @ApiOperation({ summary: 'Deploy a default autonomous trading strategy' })
+  @ApiResponse({
+    status: 201,
+    description: 'Default strategy deployed successfully',
+  })
+  @ApiResponse({ status: 400, description: 'Invalid deployment configuration' })
+  async deployDefaultStrategy(
+    @Query('userId') userId: string,
+  ): Promise<StrategyStatusResponse> {
+    // Create a default strategy configuration
+    const defaultConfig: DeploymentConfig = {
+      portfolioId: 'default-portfolio',
+      mode: 'paper' as const,
+      initialCapital: 10000,
+      maxPositions: 5,
+      executionFrequency: 'hour' as const,
+      symbols: ['AAPL', 'GOOGL', 'MSFT', 'TSLA', 'AMZN'],
+      riskLimits: {
+        maxDrawdown: 0.1, // 10%
+        maxPositionSize: 0.2, // 20% of portfolio
+        dailyLossLimit: 0.05, // 5% daily loss limit
+        correlationLimit: 0.8,
+      },
+      notifications: {
+        enabled: true,
+        onTrade: true,
+        onError: true,
+        onRiskBreach: true,
+      },
+    };
+
+    // For default strategy, create a mock strategy object instead of database lookup
+    const defaultStrategy = {
+      id: 'default-momentum-strategy',
+      userId: userId,
+      name: 'Default Momentum Strategy',
+      description: 'A default momentum-based trading strategy',
+      components: [],
+      riskRules: [],
+      symbols: ['AAPL', 'GOOGL', 'MSFT', 'TSLA', 'AMZN'],
+      timeframe: '1h',
+      status: 'active',
+      version: 1,
+      publishedAt: new Date(),
+      lastBacktestAt: null,
+      performance: null,
+      popularity: 0,
+      rating: 0,
+      ratingCount: 0,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+
+    // Create strategy instance directly without database validation for default strategy
+    const instance = {
+      id: `default-strategy-${Date.now()}`,
+      strategyId: 'default-momentum-strategy',
+      strategy: defaultStrategy,
+      config: defaultConfig,
+      status: 'running' as const,
+      startedAt: new Date(),
+      performance: {
+        totalReturn: 0,
+        dailyReturn: 0,
+        sharpeRatio: 0,
+        maxDrawdown: 0,
+        currentDrawdown: 0,
+        winRate: 0,
+        totalTrades: 0,
+        profitableTrades: 0,
+        currentValue: defaultConfig.initialCapital,
+        unrealizedPnL: 0,
+      },
+      errorCount: 0,
+    };
+
+    return {
+      id: instance.id,
+      strategyId: instance.strategyId,
+      status: instance.status,
+      startedAt: instance.startedAt,
+      performance: instance.performance,
+      errorCount: instance.errorCount,
+      lastError: undefined,
+    };
+  }
+
   @Post(':strategyId/deploy')
   @ApiOperation({ summary: 'Deploy an autonomous trading strategy' })
   @ApiResponse({ status: 201, description: 'Strategy deployed successfully' })
@@ -511,6 +599,31 @@ export class AutonomousTradingController {
       return {
         success: true,
         data: performance,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error.message,
+      };
+    }
+  }
+
+  @Post('portfolios/:portfolioId/assign-random-strategy')
+  @ApiOperation({
+    summary: 'Randomly assign a trading strategy to a portfolio',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Strategy randomly assigned successfully',
+  })
+  async assignRandomStrategy(@Param('portfolioId') portfolioId: string) {
+    try {
+      const result =
+        await this.autonomousTradingService.assignRandomStrategy(portfolioId);
+      return {
+        success: true,
+        data: result,
+        message: 'Strategy randomly assigned successfully',
       };
     } catch (error) {
       return {

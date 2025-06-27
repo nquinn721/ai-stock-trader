@@ -202,21 +202,22 @@ const DashboardPage: React.FC = observer(() => {
 
   const isConnected = webSocketStore.isConnected;
   const stocksWithSignals = stockStore.stocksWithSignals;
-  const loading = stockStore.isLoading;
+  // Removed loading screen since data comes through WebSockets
+  // const loading = stockStore.isLoading;
 
-  if (loading) {
-    return (
-      <div className="dashboard-page">
-        <EmptyState
-          type="loading"
-          icon={<FontAwesomeIcon icon="clock" />}
-          title="Loading Stock Data"
-          description="Fetching real-time market data and trading signals..."
-          size="large"
-        />
-      </div>
-    );
-  }
+  // if (loading) {
+  //   return (
+  //     <div className="dashboard-page">
+  //       <EmptyState
+  //         type="loading"
+  //         icon={<FontAwesomeIcon icon="clock" />}
+  //         title="Loading Stock Data"
+  //         description="Fetching real-time market data and trading signals..."
+  //         size="large"
+  //       />
+  //     </div>
+  //   );
+  // }
 
   if (showPortfolioCreator) {
     return (

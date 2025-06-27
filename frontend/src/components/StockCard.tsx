@@ -213,7 +213,7 @@ const StockCard: React.FC<StockCardProps> = observer(({ stock, signal }) => {
 
         return (
           <ReferenceDot
-            key={`pattern-${index}`}
+            key={`pattern-${stock.symbol}-${pattern.type}-${pattern.direction}-${index}`}
             x={dataPoint.time}
             y={dataPoint.price}
             r={4}
@@ -221,8 +221,8 @@ const StockCard: React.FC<StockCardProps> = observer(({ stock, signal }) => {
               pattern.direction === "bullish"
                 ? "#10b981"
                 : pattern.direction === "bearish"
-                ? "#ef4444"
-                : "#f59e0b"
+                  ? "#ef4444"
+                  : "#f59e0b"
             }
             stroke="#fff"
             strokeWidth={1}
@@ -340,8 +340,6 @@ const StockCard: React.FC<StockCardProps> = observer(({ stock, signal }) => {
               />
               {/* Pattern markers */}
               {getPatternMarkers()}
-              {/* Pattern markers */}
-              {getPatternMarkers()}
             </LineChart>
           </ResponsiveContainer>
         )}
@@ -362,15 +360,15 @@ const StockCard: React.FC<StockCardProps> = observer(({ stock, signal }) => {
                 stock.breakoutStrategy?.currentTrend === "upward"
                   ? "📈 Rising (Bullish)"
                   : stock.breakoutStrategy?.currentTrend === "downward"
-                  ? "📉 Falling (Bearish)"
-                  : "➡️ Sideways (Neutral)"
+                    ? "📉 Falling (Bearish)"
+                    : "➡️ Sideways (Neutral)"
               }`}
             >
               {stock.breakoutStrategy?.currentTrend === "upward"
                 ? "📈"
                 : stock.breakoutStrategy?.currentTrend === "downward"
-                ? "📉"
-                : "➡️"}
+                  ? "📉"
+                  : "➡️"}
             </span>
           </div>
           <div className="indicator-badge">
@@ -385,8 +383,8 @@ const StockCard: React.FC<StockCardProps> = observer(({ stock, signal }) => {
                 getRSILevel(stock.breakoutStrategy?.rsi) === "overbought"
                   ? "⚠️ Potentially Overvalued (>70)"
                   : getRSILevel(stock.breakoutStrategy?.rsi) === "oversold"
-                  ? "💡 Potentially Undervalued (<30)"
-                  : "✅ Balanced (30-70)"
+                    ? "💡 Potentially Undervalued (<30)"
+                    : "✅ Balanced (30-70)"
               }`}
             >
               {stock.breakoutStrategy?.rsi?.toFixed(0) || "--"}
@@ -402,15 +400,15 @@ const StockCard: React.FC<StockCardProps> = observer(({ stock, signal }) => {
                 stock.tradingSignal?.signal === "buy"
                   ? "🟢 AI suggests buying - Strong positive signals detected"
                   : stock.tradingSignal?.signal === "sell"
-                  ? "🔴 AI suggests selling - Strong negative signals detected"
-                  : "🟡 AI suggests holding - Wait for clearer signals"
+                    ? "🔴 AI suggests selling - Strong negative signals detected"
+                    : "🟡 AI suggests holding - Wait for clearer signals"
               }`}
             >
               {stock.tradingSignal?.signal === "buy"
                 ? "🟢"
                 : stock.tradingSignal?.signal === "sell"
-                ? "🔴"
-                : "🟡"}
+                  ? "🔴"
+                  : "🟡"}
             </span>
           </div>
           {/* AI Recommendation Widget */}

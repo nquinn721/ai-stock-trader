@@ -1,49 +1,24 @@
-/* Modern Autonomous Trading Page - Professional Glassmorphism Design */
+/* Modern Autonomous Trading Page - Matching Market Scanner Theme */
 .autonomous-trading-page {
   background: linear-gradient(
-    135deg,
-    #1e3a8a 0%,
-    #3730a3 25%,
-    #7c3aed 50%,
-    #db2777 75%,
-    #dc2626 100%
+    145deg,
+    #0d1117 0%,
+    #161b22 25%,
+    #21262d 50%,
+    #30363d 75%,
+    #1c2128 100%
   );
-  background-size: 300% 300%;
-  animation: gradientShift 25s ease infinite;
+  background-attachment: fixed;
   min-height: 100vh;
-  padding: 0;
+  padding: 24px;
   position: relative;
   width: 100%;
   overflow-x: hidden;
   font-family:
-    "Inter",
-    -apple-system,
-    BlinkMacSystemFont,
-    "Segoe UI",
-    "Roboto",
-    sans-serif;
+    -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", sans-serif;
 }
 
-/* Sophisticated animated gradient background */
-@keyframes gradientShift {
-  0% {
-    background-position: 0% 50%;
-  }
-  25% {
-    background-position: 100% 50%;
-  }
-  50% {
-    background-position: 100% 100%;
-  }
-  75% {
-    background-position: 0% 100%;
-  }
-  100% {
-    background-position: 0% 50%;
-  }
-}
-
-/* Professional overlay effects */
+/* Professional overlay effects - Matching Market Scanner */
 .autonomous-trading-page::before {
   content: "";
   position: fixed;
@@ -53,50 +28,32 @@
   height: 100%;
   background:
     radial-gradient(
-      circle at 15% 85%,
-      rgba(59, 130, 246, 0.4) 0%,
+      circle at 25% 25%,
+      rgba(34, 197, 94, 0.08) 0%,
       transparent 60%
     ),
     radial-gradient(
-      circle at 85% 15%,
-      rgba(168, 85, 247, 0.4) 0%,
+      circle at 75% 75%,
+      rgba(59, 130, 246, 0.06) 0%,
       transparent 60%
     ),
     radial-gradient(
       circle at 50% 50%,
-      rgba(34, 197, 94, 0.2) 0%,
+      rgba(168, 85, 247, 0.04) 0%,
       transparent 70%
     );
   pointer-events: none;
-  z-index: 1;
+  z-index: -1;
 }
 
-.autonomous-trading-page::after {
-  content: "";
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.15);
-  backdrop-filter: blur(0.8px);
-  pointer-events: none;
-  z-index: 2;
-  background-image:
-    radial-gradient(
-      circle at 25% 25%,
-      rgba(255, 255, 255, 0.05) 1px,
-      transparent 1px
-    ),
-    radial-gradient(
-      circle at 75% 75%,
-      rgba(255, 255, 255, 0.03) 1px,
-      transparent 1px
-    );
-  background-size:
-    50px 50px,
-    75px 75px;
-  animation: float 20s ease-in-out infinite;
+@keyframes subtleFloat {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-3px);
+  }
 }
 
 /* Floating particles animation */

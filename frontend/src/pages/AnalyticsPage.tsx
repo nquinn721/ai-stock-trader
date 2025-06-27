@@ -2,11 +2,18 @@ import {
   faChartLine,
   faClock,
   faExchangeAlt,
+  faPause,
+  faPlay,
+  faRobot,
+  faStop,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { observer } from "mobx-react-lite";
 import React, { useEffect, useState } from "react";
 import EmptyState from "../components/EmptyState";
+import autonomousTradingApi, {
+  StrategyInstance,
+} from "../services/autonomousTradingApi";
 import { usePortfolioStore } from "../stores/StoreContext";
 import "./AnalyticsPage.css";
 
@@ -76,6 +83,26 @@ interface AggregatedAnalytics {
   };
 }
 
+interface StrategyAnalytics {
+  runningStrategies: StrategyInstance[];
+  totalActiveStrategies: number;
+  totalTradesToday: number;
+  totalAutonomousReturn: number;
+  averagePerformance: {
+    totalReturn: number;
+    sharpeRatio: number;
+    winRate: number;
+    dailyReturn: number;
+  };
+  strategyBreakdown: Array<{
+    strategyId: string;
+    status: string;
+    performance: any;
+    errorCount: number;
+    uptime: number;
+  }>;
+}
+
 const AnalyticsPage: React.FC = observer(() => {
   const portfolioStore = usePortfolioStore();
   const [loading, setLoading] = useState(true);
@@ -85,6 +112,9 @@ const AnalyticsPage: React.FC = observer(() => {
   >([]);
   const [aggregatedData, setAggregatedData] =
     useState<AggregatedAnalytics | null>(null);
+  const [strategyAnalytics, setStrategyAnalytics] =
+    useState<StrategyAnalytics | null>(null);
+  const [strategyLoading, setStrategyLoading] = useState(false);
 
   // Fetch analytics for all portfolios
   useEffect(() => {
@@ -171,7 +201,121 @@ const AnalyticsPage: React.FC = observer(() => {
     };
 
     fetchAllPortfolioAnalytics();
+    fetchStrategyAnalytics();
   }, [portfolioStore]);
+
+  // Fetch autonomous trading strategy analytics
+  const fetchStrategyAnalytics = async () => {
+    setStrategyLoading(true);
+    try {
+      const response = await autonomousTradingApi.getRunningStrategies();
+
+      if (response.success && response.data) {
+        const strategies = response.data;
+
+        // Calculate aggregated strategy metrics
+        const totalReturn = strategies.reduce(
+          (sum, strategy) => sum + (strategy.performance?.totalReturn || 0),
+          0
+        );
+
+        const averageReturn =
+          strategies.length > 0 ? totalReturn / strategies.length : 0;
+
+        const averageSharpe =
+          strategies.length > 0
+            ? strategies.reduce(
+                (sum, strategy) =>
+                  sum + (strategy.performance?.sharpeRatio || 0),
+                0
+              ) / strategies.length
+            : 0;
+
+        const averageWinRate =
+          strategies.length > 0
+            ? strategies.reduce(
+                (sum, strategy) => sum + (strategy.performance?.winRate || 0),
+                0
+              ) / strategies.length
+            : 0;
+
+        const averageDailyReturn =
+          strategies.length > 0
+            ? strategies.reduce(
+                (sum, strategy) =>
+                  sum + (strategy.performance?.dailyReturn || 0),
+                0
+              ) / strategies.length
+            : 0;
+
+        const totalTrades = strategies.reduce(
+          (sum, strategy) => sum + (strategy.performance?.totalTrades || 0),
+          0
+        );
+
+        const strategyBreakdown = strategies.map((strategy) => ({
+          strategyId: strategy.strategyId,
+          status: strategy.status,
+          performance: strategy.performance,
+          errorCount: strategy.errorCount || 0,
+          uptime: strategy.startedAt
+            ? Math.floor(
+                (Date.now() - new Date(strategy.startedAt).getTime()) /
+                  (1000 * 60 * 60)
+              )
+            : 0, // hours
+        }));
+
+        setStrategyAnalytics({
+          runningStrategies: strategies,
+          totalActiveStrategies: strategies.filter(
+            (s) => s.status === "running"
+          ).length,
+          totalTradesToday: totalTrades,
+          totalAutonomousReturn: totalReturn,
+          averagePerformance: {
+            totalReturn: averageReturn,
+            sharpeRatio: averageSharpe,
+            winRate: averageWinRate,
+            dailyReturn: averageDailyReturn,
+          },
+          strategyBreakdown,
+        });
+      } else {
+        // No strategies running
+        setStrategyAnalytics({
+          runningStrategies: [],
+          totalActiveStrategies: 0,
+          totalTradesToday: 0,
+          totalAutonomousReturn: 0,
+          averagePerformance: {
+            totalReturn: 0,
+            sharpeRatio: 0,
+            winRate: 0,
+            dailyReturn: 0,
+          },
+          strategyBreakdown: [],
+        });
+      }
+    } catch (error) {
+      console.error("Error fetching strategy analytics:", error);
+      setStrategyAnalytics({
+        runningStrategies: [],
+        totalActiveStrategies: 0,
+        totalTradesToday: 0,
+        totalAutonomousReturn: 0,
+        averagePerformance: {
+          totalReturn: 0,
+          sharpeRatio: 0,
+          winRate: 0,
+          dailyReturn: 0,
+        },
+        strategyBreakdown: [],
+      });
+    } finally {
+      setStrategyLoading(false);
+    }
+  };
 
   const calculateAggregatedAnalytics = (
     analytics: PortfolioAnalytics[]
@@ -381,6 +525,243 @@ const AnalyticsPage: React.FC = observer(() => {
               <div className="card-change">Average volatility</div>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Autonomous Trading Strategy Analytics */}
+      {strategyAnalytics && (
+        <div className="analytics-section">
+          <h2>
+            <FontAwesomeIcon icon={faRobot} style={{ marginRight: "0.5rem" }} />
+            Autonomous Trading Strategies
+          </h2>
+
+          {/* Strategy Overview Cards */}
+          <div className="analytics-overview">
+            <div className="overview-cards">
+              <div className="overview-card">
+                <div className="card-header">
+                  <h3>Active Strategies</h3>
+                  <FontAwesomeIcon icon={faPlay} className="card-icon" />
+                </div>
+                <div className="card-value">
+                  {strategyAnalytics.totalActiveStrategies}
+                </div>
+                <div className="card-change">
+                  {strategyAnalytics.runningStrategies.length} total deployed
+                </div>
+              </div>
+
+              <div className="overview-card">
+                <div className="card-header">
+                  <h3>Total Trades Today</h3>
+                  <FontAwesomeIcon icon={faExchangeAlt} className="card-icon" />
+                </div>
+                <div className="card-value">
+                  {strategyAnalytics.totalTradesToday}
+                </div>
+                <div className="card-change">Automated executions</div>
+              </div>
+
+              <div className="overview-card">
+                <div className="card-header">
+                  <h3>Autonomous Returns</h3>
+                  <FontAwesomeIcon icon={faChartLine} className="card-icon" />
+                </div>
+                <div className="card-value">
+                  $
+                  {strategyAnalytics.totalAutonomousReturn.toLocaleString(
+                    "en-US",
+                    {
+                      maximumFractionDigits: 2,
+                    }
+                  )}
+                </div>
+                <div
+                  className={`card-change ${strategyAnalytics.totalAutonomousReturn >= 0 ? "positive" : "negative"}`}
+                >
+                  {strategyAnalytics.totalAutonomousReturn >= 0 ? "+" : ""}
+                  {(
+                    (strategyAnalytics.totalAutonomousReturn / 10000) *
+                    100
+                  ).toFixed(2)}
+                  % of capital
+                </div>
+              </div>
+
+              <div className="overview-card">
+                <div className="card-header">
+                  <h3>Average Win Rate</h3>
+                  <FontAwesomeIcon icon={faChartLine} className="card-icon" />
+                </div>
+                <div className="card-value">
+                  {(strategyAnalytics.averagePerformance.winRate * 100).toFixed(
+                    1
+                  )}
+                  %
+                </div>
+                <div className="card-change">
+                  Sharpe:{" "}
+                  {strategyAnalytics.averagePerformance.sharpeRatio.toFixed(2)}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Strategy Breakdown */}
+          {strategyAnalytics.runningStrategies.length > 0 ? (
+            <div className="strategy-grid">
+              {strategyAnalytics.runningStrategies.map((strategy) => (
+                <div key={strategy.id} className="strategy-card">
+                  <div className="strategy-card-header">
+                    <h3>{strategy.strategyId}</h3>
+                    <div
+                      className={`strategy-status strategy-status-${strategy.status}`}
+                    >
+                      <FontAwesomeIcon
+                        icon={
+                          strategy.status === "running"
+                            ? faPlay
+                            : strategy.status === "paused"
+                              ? faPause
+                              : faStop
+                        }
+                      />
+                      {strategy.status}
+                    </div>
+                  </div>
+
+                  <div className="strategy-metrics">
+                    <div className="metric-row">
+                      <span className="metric-label">Total Return:</span>
+                      <span
+                        className={`metric-value ${(strategy.performance?.totalReturn || 0) >= 0 ? "positive" : "negative"}`}
+                      >
+                        $
+                        {(
+                          strategy.performance?.totalReturn || 0
+                        ).toLocaleString("en-US", {
+                          maximumFractionDigits: 2,
+                        })}
+                      </span>
+                    </div>
+
+                    <div className="metric-row">
+                      <span className="metric-label">Daily Return:</span>
+                      <span
+                        className={`metric-value ${(strategy.performance?.dailyReturn || 0) >= 0 ? "positive" : "negative"}`}
+                      >
+                        {(
+                          (strategy.performance?.dailyReturn || 0) * 100
+                        ).toFixed(2)}
+                        %
+                      </span>
+                    </div>
+
+                    <div className="metric-row">
+                      <span className="metric-label">Total Trades:</span>
+                      <span className="metric-value">
+                        {strategy.performance?.totalTrades || 0}
+                      </span>
+                    </div>
+
+                    <div className="metric-row">
+                      <span className="metric-label">Win Rate:</span>
+                      <span className="metric-value">
+                        {((strategy.performance?.winRate || 0) * 100).toFixed(
+                          1
+                        )}
+                        %
+                      </span>
+                    </div>
+
+                    <div className="metric-row">
+                      <span className="metric-label">Sharpe Ratio:</span>
+                      <span className="metric-value">
+                        {(strategy.performance?.sharpeRatio || 0).toFixed(2)}
+                      </span>
+                    </div>
+
+                    <div className="metric-row">
+                      <span className="metric-label">Max Drawdown:</span>
+                      <span className="metric-value negative">
+                        {(
+                          (strategy.performance?.maxDrawdown || 0) * 100
+                        ).toFixed(2)}
+                        %
+                      </span>
+                    </div>
+
+                    <div className="metric-row">
+                      <span className="metric-label">Uptime:</span>
+                      <span className="metric-value">
+                        {strategyAnalytics.strategyBreakdown.find(
+                          (s) => s.strategyId === strategy.strategyId
+                        )?.uptime || 0}
+                        h
+                      </span>
+                    </div>
+
+                    <div className="metric-row">
+                      <span className="metric-label">Errors:</span>
+                      <span
+                        className={`metric-value ${strategy.errorCount > 0 ? "negative" : ""}`}
+                      >
+                        {strategy.errorCount}
+                      </span>
+                    </div>
+                  </div>
+
+                  {strategy.performance && (
+                    <div className="strategy-performance">
+                      <h4>Performance Summary</h4>
+                      <div className="performance-row">
+                        <span>Current Value:</span>
+                        <span className="performance-value">
+                          $
+                          {(
+                            strategy.performance.currentValue || 0
+                          ).toLocaleString("en-US", {
+                            maximumFractionDigits: 2,
+                          })}
+                        </span>
+                      </div>
+                      <div className="performance-row">
+                        <span>Unrealized P&L:</span>
+                        <span
+                          className={`performance-value ${(strategy.performance.unrealizedPnL || 0) >= 0 ? "positive" : "negative"}`}
+                        >
+                          $
+                          {(
+                            strategy.performance.unrealizedPnL || 0
+                          ).toLocaleString("en-US", {
+                            maximumFractionDigits: 2,
+                          })}
+                        </span>
+                      </div>
+                      <div className="performance-row">
+                        <span>Profitable Trades:</span>
+                        <span className="performance-value">
+                          {strategy.performance.profitableTrades || 0} /{" "}
+                          {strategy.performance.totalTrades || 0}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="no-strategies">
+              <FontAwesomeIcon
+                icon={faRobot}
+                size="3x"
+                style={{ color: "#6b7280", marginBottom: "1rem" }}
+              />
+              <h3>No Active Strategies</h3>
+              <p>Start autonomous trading to see strategy analytics here.</p>
+            </div>
+          )}
         </div>
       )}
 

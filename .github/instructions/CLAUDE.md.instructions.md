@@ -392,7 +392,7 @@ Test API endpoints using available tools and verify WebSocket data flow by check
 1. **Server hanging**: Use VS Code task management to restart servers
 2. **Port conflicts**: Check using available networking tools
 3. **Build errors**: Check TypeScript errors using get_errors tool, fix imports/types
-4. **File organization**: Move to proper directories using file tools, clean up root
+4. **File organization**: Move to proper directories using file tools, clean up root (Note: `node_modules/` in root is required for workspace structure)
 5. **Test failures**: Run quick-test task to identify issues
 6. **API errors**: Check backend logs and Yahoo Finance API status
 7. **WebSocket issues**: Restart both backend and frontend using tasks

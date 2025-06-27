@@ -37,9 +37,16 @@ Stock-Trading-App-Nest/
 ├── backend/          # NestJS backend application
 ├── frontend/         # React frontend application
 ├── docs/            # Documentation and ADRs
+├── project-management/ # Project tracking and management
+├── e2e-tests/       # End-to-end testing suite
+├── test-scripts/    # Development testing scripts
+├── node_modules/    # Root dependencies (workspace shared dependencies)
 ├── .github/         # GitHub workflows and templates
+├── package.json     # Workspace configuration
 └── README.md        # Project overview
 ```
+
+**Note**: The root `node_modules/` directory is **expected and necessary** for this workspace-based monorepo structure. It contains shared dependencies and workspace management tools.
 
 ## API Documentation
 

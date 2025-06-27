@@ -41,7 +41,7 @@
 ├── docs/                     # All documentation
 ├── e2e-tests/                # End-to-end tests
 ├── frontend/                 # React frontend
-├── node_modules/             # Dependencies
+├── node_modules/             # Root dependencies (acceptable and expected)
 ├── package-lock.json         # Dependency lock
 ├── package.json              # Workspace config
 ├── project-management/       # Project tracking
@@ -50,6 +50,8 @@
 ├── run-all-tests.ps1        # Full test suite
 └── test-scripts/            # Development scripts
 ```
+
+**Note**: The `node_modules/` directory in the root is **acceptable and expected** for workspace-based projects. It contains shared dependencies and workspace management tools that are essential for the monorepo structure.
 
 ## 📁 Files Relocated
 

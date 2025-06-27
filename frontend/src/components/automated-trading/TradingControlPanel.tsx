@@ -1,37 +1,36 @@
-import React from 'react';
 import {
+  CheckCircle,
+  Emergency,
+  Error,
+  Pause,
+  PlayArrow,
+  Stop,
+  Warning,
+} from "@mui/icons-material";
+import {
+  Alert,
   Box,
+  Button,
   Card,
   CardContent,
   CardHeader,
-  Button,
-  Typography,
-  Switch,
-  FormControlLabel,
-  Alert,
   Chip,
+  Divider,
+  FormControlLabel,
   List,
   ListItem,
-  ListItemText,
   ListItemIcon,
-  Divider,
-} from '@mui/material';
-import { Grid } from '../common/GridWrapper';
-import {
-  PlayArrow,
-  Stop,
-  Pause,
-  Emergency,
-  CheckCircle,
-  Error,
-  Warning,
-} from '@mui/icons-material';
+  ListItemText,
+  Switch,
+  Typography,
+} from "@mui/material";
+import React from "react";
 
 interface TradingSession {
   id: string;
   portfolioId: string;
   portfolioName: string;
-  status: 'active' | 'paused' | 'stopped';
+  status: "active" | "paused" | "stopped";
   startTime: Date;
   profitLoss: number;
   tradesExecuted: number;
@@ -51,37 +50,46 @@ export const TradingControlPanel: React.FC<TradingControlPanelProps> = ({
   isGlobalActive,
   onGlobalToggle,
 }) => {
-  const handleSessionAction = (sessionId: string, action: 'start' | 'pause' | 'stop') => {
-    const updatedSessions = sessions.map(session =>
+  const handleSessionAction = (
+    sessionId: string,
+    action: "start" | "pause" | "stop"
+  ) => {
+    const updatedSessions = sessions.map((session) =>
       session.id === sessionId
-        ? { ...session, status: (action === 'start' ? 'active' : action) as "active" | "paused" | "stopped" }
+        ? {
+            ...session,
+            status: (action === "start" ? "active" : action) as
+              | "active"
+              | "paused"
+              | "stopped",
+          }
         : session
     );
     onSessionUpdate(updatedSessions);
   };
 
   const handleEmergencyStop = () => {
-    const stoppedSessions = sessions.map(session => ({
+    const stoppedSessions = sessions.map((session) => ({
       ...session,
-      status: 'stopped' as const,
+      status: "stopped" as const,
     }));
     onSessionUpdate(stoppedSessions);
   };
 
   const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
     }).format(value);
   };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'active':
+      case "active":
         return <CheckCircle color="success" />;
-      case 'paused':
+      case "paused":
         return <Warning color="warning" />;
-      case 'stopped':
+      case "stopped":
         return <Error color="error" />;
       default:
         return <Error />;
@@ -90,14 +98,14 @@ export const TradingControlPanel: React.FC<TradingControlPanelProps> = ({
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'active':
-        return 'success';
-      case 'paused':
-        return 'warning';
-      case 'stopped':
-        return 'error';
+      case "active":
+        return "success";
+      case "paused":
+        return "warning";
+      case "stopped":
+        return "error";
       default:
-        return 'default';
+        return "default";
     }
   };
 
@@ -107,7 +115,14 @@ export const TradingControlPanel: React.FC<TradingControlPanelProps> = ({
       <Card sx={{ mb: 3 }}>
         <CardHeader title="Global Trading Controls" />
         <CardContent>
-          <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 3, alignItems: 'center' }}>
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: { xs: "column", md: "row" },
+              gap: 3,
+              alignItems: "center",
+            }}
+          >
             <Box sx={{ flex: 1 }}>
               <FormControlLabel
                 control={
@@ -119,16 +134,14 @@ export const TradingControlPanel: React.FC<TradingControlPanelProps> = ({
                   />
                 }
                 label={
-                  <Typography variant="h6">
-                    Global Automated Trading
-                  </Typography>
+                  <Typography variant="h6">Global Automated Trading</Typography>
                 }
               />
               <Typography variant="body2" color="textSecondary">
                 Enable or disable all automated trading across all portfolios
               </Typography>
             </Box>
-            <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end' }}>
+            <Box sx={{ display: "flex", gap: 2, justifyContent: "flex-end" }}>
               <Button
                 variant="contained"
                 color="error"
@@ -143,7 +156,8 @@ export const TradingControlPanel: React.FC<TradingControlPanelProps> = ({
 
           {!isGlobalActive && (
             <Alert severity="warning" sx={{ mt: 2 }}>
-              Global trading is currently disabled. Individual portfolio sessions will not execute trades.
+              Global trading is currently disabled. Individual portfolio
+              sessions will not execute trades.
             </Alert>
           )}
         </CardContent>
@@ -157,12 +171,12 @@ export const TradingControlPanel: React.FC<TradingControlPanelProps> = ({
             {sessions.map((session, index) => (
               <React.Fragment key={session.id}>
                 <ListItem>
-                  <ListItemIcon>
-                    {getStatusIcon(session.status)}
-                  </ListItemIcon>
+                  <ListItemIcon>{getStatusIcon(session.status)}</ListItemIcon>
                   <ListItemText
                     primary={
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                      <Box
+                        sx={{ display: "flex", alignItems: "center", gap: 2 }}
+                      >
                         <Typography variant="h6">
                           {session.portfolioName}
                         </Typography>
@@ -175,12 +189,25 @@ export const TradingControlPanel: React.FC<TradingControlPanelProps> = ({
                     }
                     secondary={
                       <Box sx={{ mt: 1 }}>
-                        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr 1fr', md: 'repeat(4, 1fr)' }, gap: 2 }}>
+                        <Box
+                          sx={{
+                            display: "grid",
+                            gridTemplateColumns: {
+                              xs: "1fr 1fr",
+                              md: "repeat(4, 1fr)",
+                            },
+                            gap: 2,
+                          }}
+                        >
                           <Typography variant="body2" color="textSecondary">
-                            P&L: {' '}
+                            P&L:{" "}
                             <Typography
                               component="span"
-                              color={session.profitLoss >= 0 ? 'success.main' : 'error.main'}
+                              color={
+                                session.profitLoss >= 0
+                                  ? "success.main"
+                                  : "error.main"
+                              }
                             >
                               {formatCurrency(session.profitLoss)}
                             </Typography>
@@ -198,25 +225,25 @@ export const TradingControlPanel: React.FC<TradingControlPanelProps> = ({
                       </Box>
                     }
                   />
-                  <Box sx={{ display: 'flex', gap: 1, ml: 2 }}>
-                    {session.status !== 'active' && (
+                  <Box sx={{ display: "flex", gap: 1, ml: 2 }}>
+                    {session.status !== "active" && (
                       <Button
                         variant="contained"
                         color="success"
                         startIcon={<PlayArrow />}
-                        onClick={() => handleSessionAction(session.id, 'start')}
+                        onClick={() => handleSessionAction(session.id, "start")}
                         disabled={!isGlobalActive}
                         size="small"
                       >
                         Start
                       </Button>
                     )}
-                    {session.status === 'active' && (
+                    {session.status === "active" && (
                       <Button
                         variant="contained"
                         color="warning"
                         startIcon={<Pause />}
-                        onClick={() => handleSessionAction(session.id, 'pause')}
+                        onClick={() => handleSessionAction(session.id, "pause")}
                         size="small"
                       >
                         Pause
@@ -226,7 +253,7 @@ export const TradingControlPanel: React.FC<TradingControlPanelProps> = ({
                       variant="outlined"
                       color="error"
                       startIcon={<Stop />}
-                      onClick={() => handleSessionAction(session.id, 'stop')}
+                      onClick={() => handleSessionAction(session.id, "stop")}
                       size="small"
                     >
                       Stop
@@ -240,7 +267,8 @@ export const TradingControlPanel: React.FC<TradingControlPanelProps> = ({
 
           {sessions.length === 0 && (
             <Alert severity="info">
-              No trading sessions found. Create a portfolio and set up trading rules to begin automated trading.
+              No trading sessions found. Create a portfolio and set up trading
+              rules to begin automated trading.
             </Alert>
           )}
         </CardContent>

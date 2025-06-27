@@ -218,20 +218,21 @@ const Dashboard: React.FC = () => {
   const stocksWithSignals = stockStore.stocksWithSignals;
   const loading = stockStore.isLoading;
 
-  if (loading) {
-    return (
-      <div className="dashboard">
-        {" "}
-        <EmptyState
-          type="loading"
-          icon={<AccessTime />}
-          title="Loading Stock Data"
-          description="Fetching real-time market data and trading signals..."
-          size="large"
-        />
-      </div>
-    );
-  }
+  // Removed loading screen since data comes through WebSockets
+  // if (loading) {
+  //   return (
+  //     <div className="dashboard">
+  //       {" "}
+  //       <EmptyState
+  //         type="loading"
+  //         icon={<AccessTime />}
+  //         title="Loading Stock Data"
+  //         description="Fetching real-time market data and trading signals..."
+  //         size="large"
+  //       />
+  //     </div>
+  //   );
+  // }
 
   if (showMarketScanner) {
     return (

@@ -66,6 +66,9 @@ export interface Portfolio {
   totalValue: number;
   isActive: boolean;
   portfolioType: string;
+  assignedStrategy?: string;
+  assignedStrategyName?: string;
+  strategyAssignedAt?: Date;
 }
 
 export interface PortfolioPerformance {
@@ -260,6 +263,27 @@ class AutonomousTradingApi {
     } catch (error) {
       console.error("Failed to fetch portfolio performance:", error);
       return { success: false, error: "Failed to fetch portfolio performance" };
+    }
+  }
+
+  async assignRandomStrategy(portfolioId: string): Promise<{
+    success: boolean;
+    data?: any;
+    error?: string;
+    message?: string;
+  }> {
+    try {
+      const response = await axios.post(
+        `${API_BASE_URL}/api/autonomous-trading/portfolios/${portfolioId}/assign-random-strategy`
+      );
+      return response.data;
+    } catch (error: any) {
+      console.error("Failed to assign random strategy:", error);
+      return {
+        success: false,
+        error:
+          error.response?.data?.message || "Failed to assign random strategy",
+      };
     }
   }
 

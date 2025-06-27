@@ -1,4 +1,4 @@
-import { Close, PlayArrow, Settings, Stop } from "@mui/icons-material";
+import { Close, PlayArrow, Settings, Shuffle, Stop } from "@mui/icons-material";
 import {
   Alert,
   Box,
@@ -248,6 +248,30 @@ const AutonomousTradingPage: React.FC = observer(() => {
     }
   };
 
+  const handleAssignRandomStrategy = async (portfolioId: string) => {
+    try {
+      setLoading(true);
+      const response =
+        await autonomousTradingApi.assignRandomStrategy(portfolioId);
+
+      if (response.success) {
+        // Reload portfolios to show the updated assigned strategy
+        await loadPortfolios();
+
+        // Show success message could be added here
+        console.log(
+          `Random strategy assigned: ${response.data.assignedStrategyName}`
+        );
+      } else {
+        setError(response.error || "Failed to assign random strategy");
+      }
+    } catch (err) {
+      setError("Failed to assign random strategy");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleDeployStrategy = async () => {
     try {
       setLoading(true);
@@ -340,6 +364,50 @@ const AutonomousTradingPage: React.FC = observer(() => {
                     <Typography variant="body2">
                       {status?.activeStrategies.length || 0}
                     </Typography>
+                  </Box>
+
+                  <Box display="flex" flexDirection="column" gap={1}>
+                    <Box
+                      display="flex"
+                      justifyContent="space-between"
+                      alignItems="center"
+                    >
+                      <Typography variant="body2" color="text.secondary">
+                        Assigned Strategy
+                      </Typography>
+                      <Button
+                        size="small"
+                        variant="outlined"
+                        startIcon={<Shuffle />}
+                        onClick={() => handleAssignRandomStrategy(portfolio.id)}
+                        disabled={loading}
+                      >
+                        Random
+                      </Button>
+                    </Box>
+                    {portfolio.assignedStrategyName ? (
+                      <Box>
+                        <Typography variant="body2" fontWeight="medium">
+                          {portfolio.assignedStrategyName}
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          Assigned{" "}
+                          {portfolio.strategyAssignedAt
+                            ? new Date(
+                                portfolio.strategyAssignedAt
+                              ).toLocaleDateString()
+                            : "recently"}
+                        </Typography>
+                      </Box>
+                    ) : (
+                      <Typography
+                        variant="body2"
+                        color="text.secondary"
+                        fontStyle="italic"
+                      >
+                        No strategy assigned
+                      </Typography>
+                    )}
                   </Box>
 
                   <Divider />

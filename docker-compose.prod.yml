@@ -1,0 +1,81 @@
+version: "3.8"
+
+services:
+  # Production Backend
+  backend-prod:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.prod
+    ports:
+      - "8080:8000" # Different port to avoid dev conflicts
+    environment:
+      - NODE_ENV=production
+      - PORT=8000
+      - DATABASE_URL=${PROD_DATABASE_URL}
+      - YAHOO_FINANCE_API_KEY=${YAHOO_FINANCE_API_KEY}
+      - NEWS_API_KEY=${NEWS_API_KEY}
+    volumes:
+      - prod_data:/app/data
+    networks:
+      - prod_network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Production Frontend
+  frontend-prod:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.prod
+      args:
+        - REACT_APP_API_URL=http://localhost:8080
+    ports:
+      - "3080:80" # Different port to avoid dev conflicts
+    depends_on:
+      - backend-prod
+    networks:
+      - prod_network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Production Database (if using PostgreSQL/MySQL)
+  database-prod:
+    image: postgres:15-alpine
+    ports:
+      - "5433:5432" # Different port
+    environment:
+      - POSTGRES_DB=trading_app_prod
+      - POSTGRES_USER=${PROD_DB_USER}
+      - POSTGRES_PASSWORD=${PROD_DB_PASSWORD}
+    volumes:
+      - prod_db_data:/var/lib/postgresql/data
+    networks:
+      - prod_network
+    restart: unless-stopped
+
+  # Redis for production caching/sessions
+  redis-prod:
+    image: redis:7-alpine
+    ports:
+      - "6380:6379" # Different port
+    volumes:
+      - prod_redis_data:/data
+    networks:
+      - prod_network
+    restart: unless-stopped
+
+volumes:
+  prod_data:
+  prod_db_data:
+  prod_redis_data:
+
+networks:
+  prod_network:
+    driver: bridge

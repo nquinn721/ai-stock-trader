@@ -5,9 +5,9 @@ import { Portfolio } from '../../entities/portfolio.entity';
 import { Position } from '../../entities/position.entity';
 import { Stock } from '../../entities/stock.entity';
 import { Trade, TradeStatus, TradeType } from '../../entities/trade.entity';
+import { MarketHoursService } from '../../utils/market-hours.service';
 import { MLService } from '../ml/services/ml.service';
 import { CreatePortfolioDto, PortfolioType } from './dto/create-portfolio.dto';
-import { MarketHoursService } from '../../utils/market-hours.service';
 
 // Portfolio type configurations
 export const PORTFOLIO_CONFIGS = {
@@ -172,6 +172,26 @@ export class PaperTradingService {
 
     return portfolio;
   }
+  async updatePortfolioStrategy(
+    portfolioId: string | number,
+    strategyId: string,
+    strategyName: string,
+  ): Promise<Portfolio> {
+    const portfolio = await this.portfolioRepository.findOne({
+      where: { id: Number(portfolioId) },
+    });
+
+    if (!portfolio) {
+      throw new Error(`Portfolio ${portfolioId} not found`);
+    }
+
+    portfolio.assignedStrategy = strategyId;
+    portfolio.assignedStrategyName = strategyName;
+    portfolio.strategyAssignedAt = new Date();
+
+    return await this.portfolioRepository.save(portfolio);
+  }
+
   async deletePortfolio(id: string | number): Promise<void> {
     const portfolio = await this.portfolioRepository.findOne({
       where: { id: Number(id) },

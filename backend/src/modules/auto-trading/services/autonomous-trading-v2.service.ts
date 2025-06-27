@@ -90,7 +90,6 @@ export class AutonomousTradingService {
       // Validate strategy exists and belongs to user
       const strategy = await this.strategyRepository.findOne({
         where: { id: strategyId, userId },
-        relations: ['user'],
       });
 
       if (!strategy) {
