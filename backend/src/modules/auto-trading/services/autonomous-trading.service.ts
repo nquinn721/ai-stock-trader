@@ -2,8 +2,8 @@ import { Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { StockService } from '../../stock/stock.service';
 import { PaperTradingService } from '../../paper-trading/paper-trading.service';
+import { StockService } from '../../stock/stock.service';
 import {
   AutoTrade,
   AutoTradeStatus,
@@ -386,7 +386,9 @@ export class AutonomousTradingService {
           `Trade executed through portfolio ${instance.config.portfolioId}: ${signal.symbol} ${signal.direction} ${adjustedSize} @ ${marketData.close}`,
         );
       } catch (tradeError) {
-        this.logger.error(`Failed to execute trade in portfolio: ${tradeError.message}`);
+        this.logger.error(
+          `Failed to execute trade in portfolio: ${tradeError.message}`,
+        );
         // Update auto trade status to failed
         autoTrade.status = AutoTradeStatus.FAILED;
         await this.autoTradeRepository.save(autoTrade);
@@ -648,7 +650,7 @@ export class AutonomousTradingService {
   async getAvailablePortfolios() {
     try {
       const portfolios = await this.paperTradingService.getPortfolios();
-      return portfolios.map(portfolio => ({
+      return portfolios.map((portfolio) => ({
         id: portfolio.id.toString(),
         name: portfolio.name,
         currentCash: portfolio.currentCash,
@@ -664,7 +666,8 @@ export class AutonomousTradingService {
 
   async getPortfolioPerformance(portfolioId: string) {
     try {
-      const portfolio = await this.paperTradingService.getPortfolio(portfolioId);
+      const portfolio =
+        await this.paperTradingService.getPortfolio(portfolioId);
       if (!portfolio) {
         throw new Error('Portfolio not found');
       }
@@ -680,7 +683,9 @@ export class AutonomousTradingService {
         dayTradeCount: portfolio.dayTradeCount,
       };
     } catch (error) {
-      this.logger.error(`Error fetching portfolio performance: ${error.message}`);
+      this.logger.error(
+        `Error fetching portfolio performance: ${error.message}`,
+      );
       throw error;
     }
   }

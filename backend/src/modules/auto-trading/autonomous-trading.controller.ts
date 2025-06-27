@@ -482,7 +482,8 @@ export class AutonomousTradingController {
   })
   async getAvailablePortfolios() {
     try {
-      const portfolios = await this.autonomousTradingService.getAvailablePortfolios();
+      const portfolios =
+        await this.autonomousTradingService.getAvailablePortfolios();
       return {
         success: true,
         data: portfolios,
@@ -503,7 +504,10 @@ export class AutonomousTradingController {
   })
   async getPortfolioPerformance(@Param('portfolioId') portfolioId: string) {
     try {
-      const performance = await this.autonomousTradingService.getPortfolioPerformance(portfolioId);
+      const performance =
+        await this.autonomousTradingService.getPortfolioPerformance(
+          portfolioId,
+        );
       return {
         success: true,
         data: performance,

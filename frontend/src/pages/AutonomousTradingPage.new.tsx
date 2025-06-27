@@ -32,6 +32,7 @@ import autonomousTradingApi, {
   Portfolio,
   StrategyInstance,
 } from "../services/autonomousTradingApi";
+import { usePortfolioStore } from "../stores/StoreContext";
 import "./AutonomousTradingPage.css";
 
 interface TabPanelProps {
@@ -75,6 +76,7 @@ interface PortfolioTradingStatus {
 }
 
 const AutonomousTradingPage: React.FC = observer(() => {
+  const portfolioStore = usePortfolioStore();
   const [activeTab, setActiveTab] = useState(0);
   const [portfolios, setPortfolios] = useState<Portfolio[]>([]);
   const [portfolioStatuses, setPortfolioStatuses] = useState<

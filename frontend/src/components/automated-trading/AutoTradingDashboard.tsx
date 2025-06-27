@@ -1,44 +1,43 @@
-import React, { useState, useEffect } from 'react';
+import {
+  Assessment,
+  Emergency,
+  History,
+  PlayArrow,
+  Settings,
+  TrendingUp,
+} from "@mui/icons-material";
 import {
   Box,
+  Button,
   Card,
   CardContent,
   CardHeader,
+  Chip,
+  FormControlLabel,
+  LinearProgress,
+  Switch,
   Tab,
   Tabs,
   Typography,
-  Grid,
-  Button,
-  Alert,
-  Switch,
-  FormControlLabel,
-  Chip,
-  LinearProgress,
-} from '@mui/material';
-import {
-  PlayArrow,
-  Stop,
-  Emergency,
-  Assessment,
-  Settings,
-  History,
-  TrendingUp,
-  Warning,
-} from '@mui/icons-material';
-import { TradingRulesManager } from './TradingRulesManager';
-import { TradingControlPanel } from './TradingControlPanel';
-import { TradingSessionMonitor } from './TradingSessionMonitor';
-import { RuleBuilder } from './RuleBuilder';
-import { TradingPerformanceChart } from './TradingPerformanceChart';
-import { AutoTradeHistory } from './AutoTradeHistory';
-import autonomousTradingApi, { Portfolio, DeploymentConfig } from '../../services/autonomousTradingApi';
-import './AutoTradingDashboard.css';
+} from "@mui/material";
+import React, { useEffect, useState } from "react";
+import autonomousTradingApi, {
+  DeploymentConfig,
+  Portfolio,
+} from "../../services/autonomousTradingApi";
+import { AutoTradeHistory } from "./AutoTradeHistory";
+import "./AutoTradingDashboard.css";
+import { RuleBuilder } from "./RuleBuilder";
+import { TradingControlPanel } from "./TradingControlPanel";
+import { TradingPerformanceChart } from "./TradingPerformanceChart";
+import { TradingRulesManager } from "./TradingRulesManager";
+import { TradingSessionMonitor } from "./TradingSessionMonitor";
 
 interface TradingSession {
   id: string;
   portfolioId: string;
   portfolioName: string;
-  status: 'active' | 'paused' | 'stopped';
+  status: "active" | "paused" | "stopped";
   startTime: Date;
   profitLoss: number;
   tradesExecuted: number;
@@ -95,37 +94,51 @@ export const AutoTradingDashboard: React.FC = () => {
     setLoading(true);
     try {
       // Load available portfolios
-      const portfoliosResult = await autonomousTradingApi.getAvailablePortfolios();
+      const portfoliosResult =
+        await autonomousTradingApi.getAvailablePortfolios();
       if (portfoliosResult.success && portfoliosResult.data) {
         setPortfolios(portfoliosResult.data);
-        
+
         // Create trading sessions based on actual portfolios
         const sessions = await Promise.all(
           portfoliosResult.data.map(async (portfolio) => {
             try {
               // Try to get performance data for each portfolio
-              const performanceResult = await autonomousTradingApi.getPortfolioPerformance(portfolio.id);
-              const performance = performanceResult.success ? performanceResult.data : null;
-              
+              const performanceResult =
+                await autonomousTradingApi.getPortfolioPerformance(
+                  portfolio.id
+                );
+              const performance = performanceResult.success
+                ? performanceResult.data
+                : null;
+
               return {
                 id: portfolio.id,
                 portfolioId: portfolio.id,
                 portfolioName: portfolio.name,
-                status: 'stopped' as const, // Start with all sessions stopped
+                status: "stopped" as const, // Start with all sessions stopped
                 startTime: new Date(),
-                profitLoss: performance?.totalReturn || (portfolio.totalValue - parseFloat(portfolio.currentCash.toString())),
+                profitLoss:
+                  performance?.totalReturn ||
+                  portfolio.totalValue -
+                    parseFloat(portfolio.currentCash.toString()),
                 tradesExecuted: performance?.dayTradeCount || 0,
                 activeRules: 0, // Will be updated when rules are loaded
               };
             } catch (error) {
-              console.warn(`Failed to load performance for portfolio ${portfolio.id}:`, error);
+              console.warn(
+                `Failed to load performance for portfolio ${portfolio.id}:`,
+                error
+              );
               return {
                 id: portfolio.id,
                 portfolioId: portfolio.id,
                 portfolioName: portfolio.name,
-                status: 'stopped' as const,
+                status: "stopped" as const,
                 startTime: new Date(),
-                profitLoss: portfolio.totalValue - parseFloat(portfolio.currentCash.toString()),
+                profitLoss:
+                  portfolio.totalValue -
+                  parseFloat(portfolio.currentCash.toString()),
                 tradesExecuted: 0,
                 activeRules: 0,
               };
@@ -137,13 +150,14 @@ export const AutoTradingDashboard: React.FC = () => {
 
       // Load active trading strategies from backend
       try {
-        const strategiesResult = await autonomousTradingApi.getActiveStrategies();
+        const strategiesResult =
+          await autonomousTradingApi.getActiveStrategies();
         if (strategiesResult.success && strategiesResult.data) {
-          const rules = strategiesResult.data.map(instance => ({
+          const rules = strategiesResult.data.map((instance) => ({
             id: instance.id,
             name: instance.strategy?.name || `Strategy ${instance.strategyId}`,
-            strategy: instance.strategy?.description || 'Auto Trading Strategy',
-            isActive: instance.status === 'running',
+            strategy: instance.strategy?.description || "Auto Trading Strategy",
+            isActive: instance.status === "running",
             conditions: [], // These would come from strategy definition
             actions: [], // These would come from strategy definition
             performance: {
@@ -153,21 +167,23 @@ export const AutoTradingDashboard: React.FC = () => {
             },
           }));
           setTradingRules(rules);
-          
+
           // Update session active rules count
-          setTradingSessions(prev => prev.map(session => ({
-            ...session,
-            activeRules: rules.filter(rule => rule.isActive).length
-          })));
+          setTradingSessions((prev) =>
+            prev.map((session) => ({
+              ...session,
+              activeRules: rules.filter((rule) => rule.isActive).length,
+            }))
+          );
         }
       } catch (error) {
-        console.warn('Failed to load trading strategies:', error);
+        console.warn("Failed to load trading strategies:", error);
         // Fallback to basic rules for demo purposes
         setTradingRules([
           {
-            id: '1',
-            name: 'RSI Oversold Strategy',
-            strategy: 'Mean Reversion',
+            id: "1",
+            name: "RSI Oversold Strategy",
+            strategy: "Mean Reversion",
             isActive: false,
             conditions: [],
             actions: [],
@@ -178,9 +194,9 @@ export const AutoTradingDashboard: React.FC = () => {
             },
           },
           {
-            id: '2', 
-            name: 'Moving Average Crossover',
-            strategy: 'Trend Following',
+            id: "2",
+            name: "Moving Average Crossover",
+            strategy: "Trend Following",
             isActive: false,
             conditions: [],
             actions: [],
@@ -193,7 +209,7 @@ export const AutoTradingDashboard: React.FC = () => {
         ]);
       }
     } catch (error) {
-      console.error('Error loading auto trading data:', error);
+      console.error("Error loading auto trading data:", error);
     }
     setLoading(false);
   };
@@ -205,22 +221,22 @@ export const AutoTradingDashboard: React.FC = () => {
   const handleEmergencyStop = async () => {
     try {
       // Stop all active strategies
-      const activeStrategies = tradingRules.filter(rule => rule.isActive);
+      const activeStrategies = tradingRules.filter((rule) => rule.isActive);
       await Promise.all(
-        activeStrategies.map(strategy =>
+        activeStrategies.map((strategy) =>
           autonomousTradingApi.stopStrategy(strategy.id)
         )
       );
-      
+
       setIsGlobalTradingActive(false);
-      setTradingSessions(prev => 
-        prev.map(session => ({ ...session, status: 'stopped' as const }))
+      setTradingSessions((prev) =>
+        prev.map((session) => ({ ...session, status: "stopped" as const }))
       );
-      
+
       // Reload data to reflect changes
       await loadData();
     } catch (error) {
-      console.error('Error during emergency stop:', error);
+      console.error("Error during emergency stop:", error);
     }
   };
 
@@ -234,24 +250,31 @@ export const AutoTradingDashboard: React.FC = () => {
     }
   };
 
-  const deployStrategy = async (strategyId: string, deploymentConfig: DeploymentConfig, portfolioId: string) => {
+  const deployStrategy = async (
+    strategyId: string,
+    deploymentConfig: DeploymentConfig,
+    portfolioId: string
+  ) => {
     try {
       const configWithPortfolio = {
         ...deploymentConfig,
-        portfolioId
+        portfolioId,
       };
-      
-      const result = await autonomousTradingApi.deployStrategy(strategyId, configWithPortfolio);
-      
+
+      const result = await autonomousTradingApi.deployStrategy(
+        strategyId,
+        configWithPortfolio
+      );
+
       if (result.success) {
         // Reload data to reflect the new strategy
         await loadData();
         return result;
       } else {
-        throw new Error(result.error || 'Failed to deploy strategy');
+        throw new Error(result.error || "Failed to deploy strategy");
       }
     } catch (error) {
-      console.error('Error deploying strategy:', error);
+      console.error("Error deploying strategy:", error);
       throw error;
     }
   };
@@ -263,10 +286,10 @@ export const AutoTradingDashboard: React.FC = () => {
         await loadData();
         return result;
       } else {
-        throw new Error(result.error || 'Failed to stop strategy');
+        throw new Error(result.error || "Failed to stop strategy");
       }
     } catch (error) {
-      console.error('Error stopping strategy:', error);
+      console.error("Error stopping strategy:", error);
       throw error;
     }
   };
@@ -278,10 +301,10 @@ export const AutoTradingDashboard: React.FC = () => {
         await loadData();
         return result;
       } else {
-        throw new Error(result.error || 'Failed to pause strategy');
+        throw new Error(result.error || "Failed to pause strategy");
       }
     } catch (error) {
-      console.error('Error pausing strategy:', error);
+      console.error("Error pausing strategy:", error);
       throw error;
     }
   };
@@ -293,31 +316,42 @@ export const AutoTradingDashboard: React.FC = () => {
         await loadData();
         return result;
       } else {
-        throw new Error(result.error || 'Failed to resume strategy');
+        throw new Error(result.error || "Failed to resume strategy");
       }
     } catch (error) {
-      console.error('Error resuming strategy:', error);
+      console.error("Error resuming strategy:", error);
       throw error;
     }
   };
 
   // Calculate aggregated metrics from real data
   const calculateTotalPnL = () => {
-    return tradingSessions.reduce((total, session) => total + session.profitLoss, 0);
+    return tradingSessions.reduce(
+      (total, session) => total + session.profitLoss,
+      0
+    );
   };
 
   const calculateTotalTrades = () => {
-    return tradingSessions.reduce((total, session) => total + session.tradesExecuted, 0);
+    return tradingSessions.reduce(
+      (total, session) => total + session.tradesExecuted,
+      0
+    );
   };
 
   const calculateWinRate = () => {
-    const totalTrades = tradingRules.reduce((total, rule) => total + rule.performance.totalTrades, 0);
-    if (totalTrades === 0) return 0;
-    
-    const totalWins = tradingRules.reduce((total, rule) => 
-      total + (rule.performance.totalTrades * rule.performance.winRate / 100), 0
+    const totalTrades = tradingRules.reduce(
+      (total, rule) => total + rule.performance.totalTrades,
+      0
     );
-    
+    if (totalTrades === 0) return 0;
+
+    const totalWins = tradingRules.reduce(
+      (total, rule) =>
+        total + (rule.performance.totalTrades * rule.performance.winRate) / 100,
+      0
+    );
+
     return (totalWins / totalTrades) * 100;
   };
 
@@ -325,7 +359,7 @@ export const AutoTradingDashboard: React.FC = () => {
     return (
       <Box className="auto-trading-dashboard">
         <LinearProgress />
-        <Typography variant="h6" sx={{ mt: 2, textAlign: 'center' }}>
+        <Typography variant="h6" sx={{ mt: 2, textAlign: "center" }}>
           Loading Automated Trading Dashboard...
         </Typography>
       </Box>
@@ -340,7 +374,7 @@ export const AutoTradingDashboard: React.FC = () => {
           title="Automated Trading Dashboard"
           subheader="Manage your automated trading strategies and monitor performance"
           action={
-            <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+            <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
               <Button
                 variant="contained"
                 color="error"
@@ -366,33 +400,39 @@ export const AutoTradingDashboard: React.FC = () => {
       </Card>
 
       {/* Status Overview */}
-      <Box sx={{ display: 'flex', gap: 3, flexWrap: 'wrap', mb: 3 }} className="status-overview">
+      <Box
+        sx={{ display: "flex", gap: 3, flexWrap: "wrap", mb: 3 }}
+        className="status-overview"
+      >
         <Card sx={{ flex: 1, minWidth: 250 }}>
           <CardContent>
             <Typography color="textSecondary" gutterBottom>
               Active Sessions
             </Typography>
             <Typography variant="h4">
-              {tradingSessions.filter(s => s.status === 'active').length}
+              {tradingSessions.filter((s) => s.status === "active").length}
             </Typography>
-            <Chip 
-              size="small" 
-              label={isGlobalTradingActive ? 'Trading Active' : 'Trading Paused'}
-              color={isGlobalTradingActive ? 'success' : 'warning'}
+            <Chip
+              size="small"
+              label={
+                isGlobalTradingActive ? "Trading Active" : "Trading Paused"
+              }
+              color={isGlobalTradingActive ? "success" : "warning"}
             />
           </CardContent>
         </Card>
-        
+
         <Card sx={{ flex: 1, minWidth: 250 }}>
           <CardContent>
             <Typography color="textSecondary" gutterBottom>
               Total P&L Today
             </Typography>
-            <Typography 
-              variant="h4" 
-              color={calculateTotalPnL() >= 0 ? 'success.main' : 'error.main'}
+            <Typography
+              variant="h4"
+              color={calculateTotalPnL() >= 0 ? "success.main" : "error.main"}
             >
-              {calculateTotalPnL() >= 0 ? '+' : ''}${calculateTotalPnL().toFixed(2)}
+              {calculateTotalPnL() >= 0 ? "+" : ""}$
+              {calculateTotalPnL().toFixed(2)}
             </Typography>
             <Typography variant="body2" color="textSecondary">
               {calculateTotalTrades()} trades executed
@@ -406,7 +446,7 @@ export const AutoTradingDashboard: React.FC = () => {
               Active Rules
             </Typography>
             <Typography variant="h4">
-              {tradingRules.filter(r => r.isActive).length}
+              {tradingRules.filter((r) => r.isActive).length}
             </Typography>
             <Typography variant="body2" color="textSecondary">
               {tradingRules.length} total rules
@@ -448,21 +488,21 @@ export const AutoTradingDashboard: React.FC = () => {
 
         {/* Tab Panels */}
         <TabPanel value={activeTab} index={0}>
-          <TradingSessionMonitor 
+          <TradingSessionMonitor
             sessions={tradingSessions}
             isGlobalActive={isGlobalTradingActive}
           />
         </TabPanel>
 
         <TabPanel value={activeTab} index={1}>
-          <TradingRulesManager 
+          <TradingRulesManager
             rules={tradingRules}
             onRuleUpdate={setTradingRules}
           />
         </TabPanel>
 
         <TabPanel value={activeTab} index={2}>
-          <TradingControlPanel 
+          <TradingControlPanel
             sessions={tradingSessions}
             onSessionUpdate={setTradingSessions}
             isGlobalActive={isGlobalTradingActive}
@@ -479,9 +519,11 @@ export const AutoTradingDashboard: React.FC = () => {
         </TabPanel>
 
         <TabPanel value={activeTab} index={5}>
-          <RuleBuilder onRuleCreate={(rule: TradingRule) => {
-            setTradingRules(prev => [...prev, rule]);
-          }} />
+          <RuleBuilder
+            onRuleCreate={(rule: TradingRule) => {
+              setTradingRules((prev) => [...prev, rule]);
+            }}
+          />
         </TabPanel>
       </Card>
     </Box>

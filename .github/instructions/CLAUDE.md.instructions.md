@@ -30,6 +30,7 @@ This document provides quick reference guidelines for AI assistants working on t
 7. **NO MOCK DATA** - Never use mock/fake data in the app. Always show proper "no data" states on the client and handle empty responses gracefully
 8. **PROTECT OUTGOING APIs** - Never break Yahoo Finance API, News API, or any external API integrations. These are critical for real-time data
 9. **PERSISTENT DEVELOPMENT SERVERS** - Keep client and server running in separate terminals. Hot reload handles updates automatically - no manual restarts needed
+10. **⚠️ CRITICAL: PRECISE STYLING SCOPE** - When asked to style something, **ONLY** style the specific component/element requested. Do not modify other UI elements, add unnecessary styling, or make changes beyond the exact scope of the request. Focus solely on the requested styling task.
 
 ### Testing Workflow
 

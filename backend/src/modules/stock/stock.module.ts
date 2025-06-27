@@ -14,7 +14,7 @@ import { StockService } from './stock.service';
     forwardRef(() => WebsocketModule),
     forwardRef(() => NewsModule),
     forwardRef(() => TradingModule),
-    BreakoutModule,
+    forwardRef(() => BreakoutModule),
     MLAnalysisModule,
   ],
   controllers: [StockController],

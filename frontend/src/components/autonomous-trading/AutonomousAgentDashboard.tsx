@@ -168,8 +168,8 @@ const AutonomousAgentDashboard: React.FC = () => {
                     action === "resume"
                       ? "running"
                       : action === "stop"
-                      ? "stopped"
-                      : "paused",
+                        ? "stopped"
+                        : "paused",
                 }
               : strategy
           )
@@ -187,8 +187,8 @@ const AutonomousAgentDashboard: React.FC = () => {
                   action === "resume"
                     ? "running"
                     : action === "stop"
-                    ? "stopped"
-                    : "paused",
+                      ? "stopped"
+                      : "paused",
               }
             : strategy
         )

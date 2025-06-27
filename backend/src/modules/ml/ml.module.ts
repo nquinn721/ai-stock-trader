@@ -1,6 +1,8 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { NewsModule } from '../news/news.module';
+import { PaperTradingModule } from '../paper-trading/paper-trading.module';
+import { StockModule } from '../stock/stock.module';
 import { AIController } from './controllers/ai.controller';
 import { ReinforcementLearningController } from './controllers/reinforcement-learning.controller';
 import {
@@ -51,6 +53,8 @@ import { TradingAssistantService } from './services/trading-assistant.service';
 @Module({
   imports: [
     NewsModule,
+    StockModule,
+    forwardRef(() => PaperTradingModule),
     TypeOrmModule.forFeature([
       MLModel,
       MLPrediction,

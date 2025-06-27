@@ -32,7 +32,6 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { Grid } from '../common/GridWrapper';
 import {
   CategoryScale,
   Chart as ChartJS,
@@ -50,6 +49,7 @@ import rlTradingService, {
   RLAgent,
   TrainingConfig,
 } from "../../services/rlTradingService";
+import { Grid } from "../common/GridWrapper";
 import "./RLAgentDashboard.css";
 
 ChartJS.register(
@@ -315,10 +315,9 @@ const RLAgentDashboard: React.FC = () => {
   const chartOptions = {
     responsive: true,
     plugins: {
-      legend:
-        {
-          position: "top" as const,
-        },
+      legend: {
+        position: "top" as const,
+      },
       title: {
         display: true,
         text: "Training Progress",
@@ -378,7 +377,17 @@ const RLAgentDashboard: React.FC = () => {
       </Box>
 
       <TabPanel value={activeTab} index={0}>
-        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(2, 1fr)', lg: 'repeat(3, 1fr)' }, gap: 3 }}>
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: {
+              xs: "1fr",
+              md: "repeat(2, 1fr)",
+              lg: "repeat(3, 1fr)",
+            },
+            gap: 3,
+          }}
+        >
           {agents.map((agent) => (
             <Card
               key={agent.id}
@@ -389,127 +398,127 @@ const RLAgentDashboard: React.FC = () => {
                 "&:hover": { transform: "translateY(-2px)" },
                 transition: "transform 0.2s",
               }}
-                onClick={() => setSelectedAgent(agent)}
-              >
-                <CardContent>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      mb: 2,
-                    }}
-                  >
-                    <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                      {agent.name}
-                    </Typography>
-                    <Chip
-                      icon={getStatusIcon(agent.status)}
-                      label={agent.status.toUpperCase()}
-                      color={getStatusColor(agent.status) as any}
-                      size="small"
-                    />
-                  </Box>
+              onClick={() => setSelectedAgent(agent)}
+            >
+              <CardContent>
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    mb: 2,
+                  }}
+                >
+                  <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                    {agent.name}
+                  </Typography>
+                  <Chip
+                    icon={getStatusIcon(agent.status)}
+                    label={agent.status.toUpperCase()}
+                    color={getStatusColor(agent.status) as any}
+                    size="small"
+                  />
+                </Box>
 
-                  <Box sx={{ mb: 2 }}>
+                <Box sx={{ mb: 2 }}>
+                  <Typography variant="body2" color="text.secondary">
+                    Training Progress
+                  </Typography>
+                  <LinearProgress
+                    variant="determinate"
+                    value={agent.trainingProgress}
+                    sx={{ mt: 1, mb: 1 }}
+                  />
+                  <Typography variant="caption">
+                    {agent.trainingProgress}% ({agent.episodeCount} episodes)
+                  </Typography>
+                </Box>
+
+                <Grid container spacing={2}>
+                  <Grid item xs={6}>
                     <Typography variant="body2" color="text.secondary">
-                      Training Progress
+                      Win Rate
                     </Typography>
-                    <LinearProgress
-                      variant="determinate"
-                      value={agent.trainingProgress}
-                      sx={{ mt: 1, mb: 1 }}
-                    />
-                    <Typography variant="caption">
-                      {agent.trainingProgress}% ({agent.episodeCount} episodes)
+                    <Typography variant="h6" color="success.main">
+                      {agent.performance.winRate}%
                     </Typography>
-                  </Box>
-
-                  <Grid container spacing={2}>
-                    <Grid item xs={6}>
-                      <Typography variant="body2" color="text.secondary">
-                        Win Rate
-                      </Typography>
-                      <Typography variant="h6" color="success.main">
-                        {agent.performance.winRate}%
-                      </Typography>
-                    </Grid>
-                    <Grid item xs={6}>
-                      <Typography variant="body2" color="text.secondary">
-                        Sharpe Ratio
-                      </Typography>
-                      <Typography variant="h6" color="primary.main">
-                        {agent.performance.sharpeRatio}
-                      </Typography>
-                    </Grid>
-                    <Grid item xs={6}>
-                      <Typography variant="body2" color="text.secondary">
-                        Total Return
-                      </Typography>
-                      <Typography variant="h6" color="success.main">
-                        {agent.performance.totalReturn}%
-                      </Typography>
-                    </Grid>
-                    <Grid item xs={6}>
-                      <Typography variant="body2" color="text.secondary">
-                        Max Drawdown
-                      </Typography>
-                      <Typography variant="h6" color="error.main">
-                        {agent.performance.maxDrawdown}%
-                      </Typography>
-                    </Grid>
                   </Grid>
+                  <Grid item xs={6}>
+                    <Typography variant="body2" color="text.secondary">
+                      Sharpe Ratio
+                    </Typography>
+                    <Typography variant="h6" color="primary.main">
+                      {agent.performance.sharpeRatio}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={6}>
+                    <Typography variant="body2" color="text.secondary">
+                      Total Return
+                    </Typography>
+                    <Typography variant="h6" color="success.main">
+                      {agent.performance.totalReturn}%
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={6}>
+                    <Typography variant="body2" color="text.secondary">
+                      Max Drawdown
+                    </Typography>
+                    <Typography variant="h6" color="error.main">
+                      {agent.performance.maxDrawdown}%
+                    </Typography>
+                  </Grid>
+                </Grid>
 
-                  <Box sx={{ mt: 2, display: "flex", gap: 1 }}>
-                    {agent.status === "ready" && (
-                      <>
-                        <Button
-                          size="small"
-                          startIcon={<School />}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setSelectedAgent(agent);
-                            setIsTrainingConfigOpen(true);
-                          }}
-                        >
-                          Train
-                        </Button>
-                        <Button
-                          size="small"
-                          startIcon={<PlayArrow />}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setSelectedAgent(agent);
-                            setIsDeploymentOpen(true);
-                          }}
-                        >
-                          Deploy
-                        </Button>
-                      </>
-                    )}
-                    {agent.status === "training" && (
+                <Box sx={{ mt: 2, display: "flex", gap: 1 }}>
+                  {agent.status === "ready" && (
+                    <>
                       <Button
                         size="small"
-                        startIcon={<Stop />}
+                        startIcon={<School />}
                         onClick={(e) => {
                           e.stopPropagation();
-                          handleStopTraining(agent.id);
+                          setSelectedAgent(agent);
+                          setIsTrainingConfigOpen(true);
                         }}
                       >
-                        Stop
+                        Train
                       </Button>
-                    )}
-                    <IconButton
+                      <Button
+                        size="small"
+                        startIcon={<PlayArrow />}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedAgent(agent);
+                          setIsDeploymentOpen(true);
+                        }}
+                      >
+                        Deploy
+                      </Button>
+                    </>
+                  )}
+                  {agent.status === "training" && (
+                    <Button
                       size="small"
+                      startIcon={<Stop />}
                       onClick={(e) => {
                         e.stopPropagation();
-                        handleDeleteAgent(agent.id);
+                        handleStopTraining(agent.id);
                       }}
                     >
-                      <Delete />
-                    </IconButton>
-                  </Box>
-                </CardContent>
-              </Card>
+                      Stop
+                    </Button>
+                  )}
+                  <IconButton
+                    size="small"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDeleteAgent(agent.id);
+                    }}
+                  >
+                    <Delete />
+                  </IconButton>
+                </Box>
+              </CardContent>
+            </Card>
           ))}
         </Box>
       </TabPanel>

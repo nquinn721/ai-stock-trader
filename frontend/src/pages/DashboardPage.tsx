@@ -4,13 +4,16 @@ import {
   faArrowTrendDown,
   faArrowTrendUp,
   faArrowUp,
+  faBolt,
   faChartLine,
   faCircle,
   faClock,
   faDollarSign,
   faExchangeAlt,
   faEye,
+  faRocket,
   faSignal,
+  faStar,
   faVolumeHigh,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -43,7 +46,10 @@ library.add(
   faClock,
   faArrowUp,
   faArrowDown,
-  faCircle
+  faCircle,
+  faBolt,
+  faRocket,
+  faStar
 );
 
 const DashboardPage: React.FC = observer(() => {
@@ -223,226 +229,234 @@ const DashboardPage: React.FC = observer(() => {
 
   return (
     <div className="dashboard-page">
-      {/* Hero Section */}
-      <div className="hero-section">
-        <div className="hero-content">
-          <div className="hero-badge">
-            <div className={`status-indicator ${isConnected ? "online" : "offline"}`}>
-              <div className="status-dot"></div>
-              <span>{isConnected ? "LIVE MARKET DATA" : "OFFLINE"}</span>
+      {/* Simple Header Section */}
+      <div className="dashboard-header">
+        <div className="header-content">
+          <div className="header-left">
+            <h1 className="dashboard-title">Trading Dashboard</h1>
+            <div className="connection-status">
+              <span
+                className={`status-dot ${isConnected ? "connected" : "disconnected"}`}
+              ></span>
+              <span className="status-text">
+                {isConnected ? "Live Data" : "Offline"}
+              </span>
+              <span className="current-time">
+                {currentTime.toLocaleTimeString("en-US", {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  hour12: true,
+                })}
+              </span>
             </div>
           </div>
-          <h1 className="hero-title">
-            Smart Trading
-            <span className="gradient-text"> Dashboard</span>
-          </h1>
-          <p className="hero-description">
-            Real-time market insights, AI-powered signals, and intelligent portfolio management
-          </p>
-          <div className="hero-stats">
-            <div className="hero-stat">
-              <span className="stat-number">{marketAnalytics.totalStocks}</span>
-              <span className="stat-label">Stocks Tracked</span>
-            </div>
-            <div className="hero-stat">
-              <span className="stat-number">{currentTime.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })}</span>
-              <span className="stat-label">Market Time</span>
-            </div>
-            <div className="hero-stat">
-              <span className="stat-number">{marketAnalytics.buySignals + marketAnalytics.sellSignals}</span>
-              <span className="stat-label">Active Signals</span>
-            </div>
-          </div>
-        </div>
-        <div className="hero-visual">
-          <div className="floating-cards">
-            <div className="float-card card-1">
-              <FontAwesomeIcon icon={faChartLine} />
-              <span>Market Analysis</span>
-            </div>
-            <div className="float-card card-2">
-              <FontAwesomeIcon icon={faArrowTrendUp} />
-              <span>+{marketAnalytics.avgChange.toFixed(1)}%</span>
-            </div>
-            <div className="float-card card-3">
-              <FontAwesomeIcon icon={faSignal} />
-              <span>AI Signals</span>
+          <div className="header-right">
+            <div className="market-summary">
+              <div className="summary-item">
+                <span className="summary-label">Stocks</span>
+                <span className="summary-value">
+                  {marketAnalytics.totalStocks}
+                </span>
+              </div>
+              <div className="summary-item">
+                <span className="summary-label">Signals</span>
+                <span className="summary-value">
+                  {marketAnalytics.buySignals + marketAnalytics.sellSignals}
+                </span>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Market Overview Dashboard */}
-      <div className="market-dashboard">
-        <div className="dashboard-grid">
-          {/* Market Metrics */}
-          <div className="dashboard-section market-metrics">
-            <div className="section-header">
-              <h3>Market Overview</h3>
-              <div className="market-status">
-                <span className="market-open">Market Open</span>
-              </div>
+      {/* Main Dashboard Content */}
+      <div className="dashboard-content">
+        {/* Top Metrics Row */}
+        <div className="metrics-row">
+          <div className="metric-card">
+            <div className="metric-header">
+              <FontAwesomeIcon
+                icon={faArrowTrendUp}
+                className="metric-icon positive"
+              />
+              <span className="metric-title">Gainers</span>
             </div>
-            <div className="metrics-grid">
-              <div className="metric-card gainers">
-                <div className="metric-icon">
-                  <FontAwesomeIcon icon={faArrowTrendUp} />
-                </div>
-                <div className="metric-data">
-                  <span className="metric-value">{marketAnalytics.gainers}</span>
-                  <span className="metric-label">Gainers</span>
-                  <span className="metric-change positive">+{((marketAnalytics.gainers / marketAnalytics.totalStocks) * 100).toFixed(1)}%</span>
-                </div>
-              </div>
+            <div className="metric-value">{marketAnalytics.gainers}</div>
+            <div className="metric-subtitle">
+              {(
+                (marketAnalytics.gainers / marketAnalytics.totalStocks) *
+                100
+              ).toFixed(1)}
+              % of market
+            </div>
+          </div>
 
-              <div className="metric-card losers">
-                <div className="metric-icon">
-                  <FontAwesomeIcon icon={faArrowTrendDown} />
-                </div>
-                <div className="metric-data">
-                  <span className="metric-value">{marketAnalytics.losers}</span>
-                  <span className="metric-label">Losers</span>
-                  <span className="metric-change negative">-{((marketAnalytics.losers / marketAnalytics.totalStocks) * 100).toFixed(1)}%</span>
-                </div>
-              </div>
+          <div className="metric-card">
+            <div className="metric-header">
+              <FontAwesomeIcon
+                icon={faArrowTrendDown}
+                className="metric-icon negative"
+              />
+              <span className="metric-title">Losers</span>
+            </div>
+            <div className="metric-value">{marketAnalytics.losers}</div>
+            <div className="metric-subtitle">
+              {(
+                (marketAnalytics.losers / marketAnalytics.totalStocks) *
+                100
+              ).toFixed(1)}
+              % of market
+            </div>
+          </div>
 
-              <div className="metric-card volume">
-                <div className="metric-icon">
-                  <FontAwesomeIcon icon={faVolumeHigh} />
-                </div>
-                <div className="metric-data">
-                  <span className="metric-value">{(marketAnalytics.totalVolume / 1000000).toFixed(1)}M</span>
-                  <span className="metric-label">Volume</span>
-                  <span className="metric-change neutral">Total</span>
-                </div>
-              </div>
+          <div className="metric-card">
+            <div className="metric-header">
+              <FontAwesomeIcon icon={faSignal} className="metric-icon" />
+              <span className="metric-title">Buy Signals</span>
+            </div>
+            <div className="metric-value">{marketAnalytics.buySignals}</div>
+            <div className="metric-subtitle">AI recommendations</div>
+          </div>
 
-              <div className="metric-card signals">
-                <div className="metric-icon">
-                  <FontAwesomeIcon icon={faSignal} />
-                </div>
-                <div className="metric-data">
-                  <span className="metric-value">{marketAnalytics.buySignals}</span>
-                  <span className="metric-label">Buy Signals</span>
-                  <span className="metric-change positive">Active</span>
-                </div>
+          <div className="metric-card">
+            <div className="metric-header">
+              <FontAwesomeIcon icon={faVolumeHigh} className="metric-icon" />
+              <span className="metric-title">Volume</span>
+            </div>
+            <div className="metric-value">
+              ${(marketAnalytics.totalVolume / 1e9).toFixed(1)}B
+            </div>
+            <div className="metric-subtitle">Total trading volume</div>
+          </div>
+        </div>
+
+        {/* Two Column Layout - Portfolio (75%) + Quick Trade (25%) */}
+        <div className="dashboard-main-row">
+          {/* Portfolio Section - 75% width */}
+          <div className="portfolio-section">
+            <div className="section-card">
+              <div className="section-header">
+                <h3>Portfolio</h3>
+                <button className="action-btn" onClick={handleCreatePortfolio}>
+                  <FontAwesomeIcon icon={faExchangeAlt} />
+                  Create New
+                </button>
+              </div>
+              <div className="section-content">
+                <PortfolioSelector
+                  selectedPortfolioId={portfolioStore.currentPortfolio?.id}
+                  onPortfolioSelect={(portfolio) =>
+                    portfolioStore.setSelectedPortfolio(portfolio.id)
+                  }
+                  onViewDetails={handleViewPortfolioDetails}
+                  onCreatePortfolio={handleCreatePortfolio}
+                />
               </div>
             </div>
           </div>
 
-          {/* Top Movers */}
-          <div className="dashboard-section top-movers">
+          {/* Quick Trade Section - 25% width */}
+          <div className="quick-trade-section">
+            <div className="section-card">
+              <div className="section-header">
+                <h3>Quick Trade</h3>
+                <div className="status-indicator">
+                  <span className="status-dot active"></span>
+                  <span>Ready</span>
+                </div>
+              </div>
+              <div className="section-content">
+                <QuickTrade />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Full Width Market Data Section */}
+        <div className="market-data-section">
+          <div className="section-card">
             <div className="section-header">
-              <h3>Top Movers</h3>
-              <button className="refresh-btn">
+              <h3>Live Market Data</h3>
+              <button
+                className="action-btn"
+                onClick={() => stockStore.fetchStocksWithSignals()}
+              >
                 <FontAwesomeIcon icon={faArrowTrendUp} />
+                Refresh
               </button>
             </div>
-            <div className="movers-list">
-              {marketAnalytics.topGainer && (
-                <div className="mover-item gainer">
-                  <div className="mover-info">
-                    <span className="mover-symbol">{marketAnalytics.topGainer.symbol}</span>
-                    <span className="mover-name">{marketAnalytics.topGainer.name}</span>
-                  </div>
-                  <div className="mover-change positive">
-                    <FontAwesomeIcon icon={faArrowUp} />
-                    +{marketAnalytics.topGainer.changePercent?.toFixed(2)}%
-                  </div>
-                </div>
-              )}
-              {marketAnalytics.topLoser && (
-                <div className="mover-item loser">
-                  <div className="mover-info">
-                    <span className="mover-symbol">{marketAnalytics.topLoser.symbol}</span>
-                    <span className="mover-name">{marketAnalytics.topLoser.name}</span>
-                  </div>
-                  <div className="mover-change negative">
-                    <FontAwesomeIcon icon={faArrowDown} />
-                    {marketAnalytics.topLoser.changePercent?.toFixed(2)}%
-                  </div>
+            <div className="section-content">
+              {stocksWithSignals.length === 0 ? (
+                <EmptyState
+                  type="no-data"
+                  icon={<FontAwesomeIcon icon={faChartLine} />}
+                  title="No Stock Data"
+                  description="Unable to load market data. Check connection and try again."
+                  action={{
+                    label: "Refresh Data",
+                    onClick: () => stockStore.fetchStocksWithSignals(),
+                  }}
+                />
+              ) : (
+                <div className="stocks-grid">
+                  {stocksWithSignals.slice(0, 12).map((stock) => (
+                    <StockCard
+                      key={stock.symbol}
+                      stock={stock}
+                      signal={stock.tradingSignal || undefined}
+                    />
+                  ))}
                 </div>
               )}
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Portfolio and Trading Section */}
-      <div className="trading-dashboard">
-        <div className="dashboard-grid">
-          <div className="dashboard-section portfolio-section">
+        {/* Bottom Section - Top Performers */}
+        {marketAnalytics.topGainer && marketAnalytics.topLoser && (
+          <div className="performers-section">
             <div className="section-header">
-              <h3>Portfolio Management</h3>
-              <button className="create-btn" onClick={handleCreatePortfolio}>
-                <FontAwesomeIcon icon={faExchangeAlt} />
-                Create Portfolio
-              </button>
+              <h3>Today's Top Performers</h3>
             </div>
-            <div className="portfolio-widget">
-              <PortfolioSelector
-                selectedPortfolioId={portfolioStore.currentPortfolio?.id}
-                onPortfolioSelect={(portfolio) =>
-                  portfolioStore.setSelectedPortfolio(portfolio.id)
-                }
-                onViewDetails={handleViewPortfolioDetails}
-                onCreatePortfolio={handleCreatePortfolio}
-              />
-            </div>
-          </div>
+            <div className="performers-grid">
+              <div className="performer-card gainer">
+                <div className="performer-header">
+                  <FontAwesomeIcon
+                    icon={faArrowUp}
+                    className="performer-icon"
+                  />
+                  <span className="performer-title">Top Gainer</span>
+                </div>
+                <div className="performer-symbol">
+                  {marketAnalytics.topGainer.symbol}
+                </div>
+                <div className="performer-price">
+                  ${marketAnalytics.topGainer.currentPrice?.toFixed(2)}
+                </div>
+                <div className="performer-change positive">
+                  +{marketAnalytics.topGainer.changePercent?.toFixed(2)}%
+                </div>
+              </div>
 
-          <div className="dashboard-section trading-section">
-            <div className="section-header">
-              <h3>Quick Trade</h3>
-              <div className="trading-status">
-                <span className="status-dot active"></span>
-                <span>Ready</span>
+              <div className="performer-card loser">
+                <div className="performer-header">
+                  <FontAwesomeIcon
+                    icon={faArrowDown}
+                    className="performer-icon"
+                  />
+                  <span className="performer-title">Top Loser</span>
+                </div>
+                <div className="performer-symbol">
+                  {marketAnalytics.topLoser.symbol}
+                </div>
+                <div className="performer-price">
+                  ${marketAnalytics.topLoser.currentPrice?.toFixed(2)}
+                </div>
+                <div className="performer-change negative">
+                  {marketAnalytics.topLoser.changePercent?.toFixed(2)}%
+                </div>
               </div>
             </div>
-            <div className="trading-widget">
-              <QuickTrade />
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Stock Grid */}
-      <div className="stocks-section">
-        <div className="section-header">
-          <h3>Live Market Data</h3>
-          <div className="stocks-controls">
-            <div className="stocks-stats">
-              <span>{stocksWithSignals.length} stocks • {marketAnalytics.buySignals} buy signals</span>
-            </div>
-            <button className="refresh-btn" onClick={() => stockStore.fetchStocksWithSignals()}>
-              <FontAwesomeIcon icon={faArrowTrendUp} />
-              Refresh
-            </button>
-          </div>
-        </div>
-
-        {stocksWithSignals.length === 0 ? (
-          <div className="empty-state-wrapper">
-            <EmptyState
-              type="no-data"
-              icon={<FontAwesomeIcon icon={faChartLine} />}
-              title="No Stock Data Available"
-              description="Unable to load stock data. Check your connection and try again."
-              action={{
-                label: "Refresh Data",
-                onClick: () => stockStore.fetchStocksWithSignals(),
-              }}
-            />
-          </div>
-        ) : (
-          <div className="stocks-grid">
-            {stocksWithSignals.map((stock) => (
-              <StockCard
-                key={stock.symbol}
-                stock={stock}
-                signal={stock.tradingSignal || undefined}
-              />
-            ))}
           </div>
         )}
       </div>

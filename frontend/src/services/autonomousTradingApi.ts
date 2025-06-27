@@ -247,9 +247,7 @@ class AutonomousTradingApi {
     }
   }
 
-  async getPortfolioPerformance(
-    portfolioId: string
-  ): Promise<{
+  async getPortfolioPerformance(portfolioId: string): Promise<{
     success: boolean;
     data?: PortfolioPerformance;
     error?: string;
