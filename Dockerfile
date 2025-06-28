@@ -1,6 +1,6 @@
 # Multi-stage Docker build for AI Stock Trader - Cloud Run Optimized
 # Stage 1: Build frontend
-FROM node:18-alpine AS frontend-build
+FROM node:22-alpine AS frontend-build
 
 # Set working directory
 WORKDIR /app/frontend
@@ -14,7 +14,7 @@ COPY frontend/ ./
 RUN npm run build
 
 # Stage 2: Build backend
-FROM node:18-alpine AS backend-build
+FROM node:22-alpineAS backend-build
 
 # Set working directory
 WORKDIR /app/backend
@@ -28,7 +28,7 @@ COPY backend/ ./
 RUN npm run build
 
 # Stage 3: Production runtime - optimized for Cloud Run
-FROM node:18-alpine AS production
+FROM node:22-alpine AS production
 
 # Install required system dependencies
 RUN apk add --no-cache \
