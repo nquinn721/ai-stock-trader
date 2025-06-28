@@ -14,7 +14,7 @@ COPY frontend/ ./
 RUN npm run build
 
 # Stage 2: Build backend
-FROM node:22-alpineAS backend-build
+FROM node:22-alpine AS backend-build
 
 # Set working directory
 WORKDIR /app/backend
