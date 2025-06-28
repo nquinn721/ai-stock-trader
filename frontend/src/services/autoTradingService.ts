@@ -91,7 +91,9 @@ export interface PortfolioPerformance {
   dayTradeCount: number;
 }
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:8000";
+import { FRONTEND_API_CONFIG } from "../config/api.config";
+
+const API_BASE_URL = FRONTEND_API_CONFIG.backend.baseUrl;
 
 // Create axios instance for auto-trading API
 const autoTradingApi = axios.create({
@@ -113,12 +115,58 @@ autoTradingApi.interceptors.request.use((config) => {
 
 // Response interceptor for error handling
 autoTradingApi.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    // Log successful responses for debugging
+    if (process.env.NODE_ENV === "development") {
+      console.log(
+        `API Response [${response.config.method?.toUpperCase()} ${response.config.url}]:`,
+        response.data
+      );
+    }
+    return response;
+  },
   (error) => {
-    console.error("Auto-trading API error:", error);
+    console.error("Auto-trading API error:", {
+      url: error.config?.url,
+      method: error.config?.method,
+      status: error.response?.status,
+      statusText: error.response?.statusText,
+      data: error.response?.data,
+      message: error.message,
+    });
     throw error;
   }
 );
+
+// Utility functions for handling backend response formats
+const handleApiResponse = <T>(
+  response: any
+): { success: boolean; data: T; message?: string } => {
+  // Handle wrapped response format: { success: true, data: [...] }
+  if (
+    response.data &&
+    typeof response.data === "object" &&
+    "success" in response.data
+  ) {
+    return {
+      success: response.data.success !== false,
+      data: response.data.data,
+      message: response.data.message,
+    };
+  }
+
+  // Handle direct response format
+  return {
+    success: true,
+    data: response.data,
+  };
+};
+
+const ensureArray = <T>(data: any): T[] => {
+  if (Array.isArray(data)) return data;
+  if (data === null || data === undefined) return [];
+  return [data];
+};
 
 class AutoTradingService {
   // Trading Rules Management
@@ -277,14 +325,20 @@ class AutoTradingService {
   ): Promise<ApiResponse<StrategyInstance>> {
     try {
       const response = await autoTradingApi.post(
-        `/autonomous/${strategyId}/deploy?userId=${userId}`,
+        `/autonomous/strategies/${strategyId}/deploy?userId=${userId}`,
         deploymentConfig
       );
+
+      // Handle wrapped response format
+      const data = response.data?.data ? response.data.data : response.data;
+
       return {
-        success: true,
-        data: response.data,
+        success: response.data?.success !== false,
+        data: data,
+        message: response.data?.message,
       };
     } catch (error: any) {
+      console.error("Failed to deploy strategy:", error);
       return {
         success: false,
         data: {} as StrategyInstance,
@@ -299,13 +353,17 @@ class AutoTradingService {
   ): Promise<ApiResponse<{ message: string }>> {
     try {
       const response = await autoTradingApi.put(
-        `/autonomous/${strategyId}/stop?userId=${userId}`
+        `/autonomous/strategies/${strategyId}/stop?userId=${userId}`
       );
+
       return {
-        success: true,
-        data: response.data,
+        success: response.data?.success !== false,
+        data: response.data?.data ||
+          response.data || { message: "Strategy stopped successfully" },
+        message: response.data?.message,
       };
     } catch (error: any) {
+      console.error("Failed to stop strategy:", error);
       return {
         success: false,
         data: { message: "" },
@@ -320,13 +378,17 @@ class AutoTradingService {
   ): Promise<ApiResponse<{ message: string }>> {
     try {
       const response = await autoTradingApi.put(
-        `/autonomous/${strategyId}/pause?userId=${userId}`
+        `/autonomous/strategies/${strategyId}/pause?userId=${userId}`
       );
+
       return {
-        success: true,
-        data: response.data,
+        success: response.data?.success !== false,
+        data: response.data?.data ||
+          response.data || { message: "Strategy paused successfully" },
+        message: response.data?.message,
       };
     } catch (error: any) {
+      console.error("Failed to pause strategy:", error);
       return {
         success: false,
         data: { message: "" },
@@ -341,13 +403,17 @@ class AutoTradingService {
   ): Promise<ApiResponse<{ message: string }>> {
     try {
       const response = await autoTradingApi.put(
-        `/autonomous/${strategyId}/resume?userId=${userId}`
+        `/autonomous/strategies/${strategyId}/resume?userId=${userId}`
       );
+
       return {
-        success: true,
-        data: response.data,
+        success: response.data?.success !== false,
+        data: response.data?.data ||
+          response.data || { message: "Strategy resumed successfully" },
+        message: response.data?.message,
       };
     } catch (error: any) {
+      console.error("Failed to resume strategy:", error);
       return {
         success: false,
         data: { message: "" },
@@ -361,13 +427,23 @@ class AutoTradingService {
   ): Promise<ApiResponse<StrategyInstance[]>> {
     try {
       const response = await autoTradingApi.get(
-        `/autonomous/strategies?userId=${userId}`
+        `/autonomous/strategies/active?userId=${userId}`
       );
+
+      // Handle wrapped response format
+      const data = response.data?.data
+        ? response.data.data
+        : Array.isArray(response.data)
+          ? response.data
+          : [];
+
       return {
-        success: true,
-        data: response.data,
+        success: response.data?.success !== false,
+        data: data,
+        message: response.data?.message,
       };
     } catch (error: any) {
+      console.error("Failed to get running strategies:", error);
       return {
         success: false,
         data: [],
@@ -382,13 +458,19 @@ class AutoTradingService {
   ): Promise<ApiResponse<StrategyInstance>> {
     try {
       const response = await autoTradingApi.get(
-        `/autonomous/${strategyId}/status?userId=${userId}`
+        `/autonomous/strategies/${strategyId}/status?userId=${userId}`
       );
+
+      // Handle wrapped response format
+      const data = response.data?.data ? response.data.data : response.data;
+
       return {
-        success: true,
-        data: response.data,
+        success: response.data?.success !== false,
+        data: data,
+        message: response.data?.message,
       };
     } catch (error: any) {
+      console.error("Failed to get strategy status:", error);
       return {
         success: false,
         data: {} as StrategyInstance,
@@ -403,13 +485,19 @@ class AutoTradingService {
   ): Promise<ApiResponse<InstancePerformance>> {
     try {
       const response = await autoTradingApi.get(
-        `/autonomous/${strategyId}/performance?userId=${userId}`
+        `/autonomous/strategies/${strategyId}/performance?userId=${userId}`
       );
+
+      // Handle wrapped response format
+      const data = response.data?.data ? response.data.data : response.data;
+
       return {
-        success: true,
-        data: response.data,
+        success: response.data?.success !== false,
+        data: data,
+        message: response.data?.message,
       };
     } catch (error: any) {
+      console.error("Failed to get performance metrics:", error);
       return {
         success: false,
         data: {} as InstancePerformance,
@@ -420,12 +508,20 @@ class AutoTradingService {
 
   async getActiveStrategies(): Promise<ApiResponse<StrategyInstance[]>> {
     try {
-      const response = await autoTradingApi.get(`/autonomous/strategies`);
+      const response = await autoTradingApi.get(
+        `/autonomous/strategies/active`
+      );
+
+      const result = handleApiResponse<StrategyInstance[]>(response);
+      const data = ensureArray<StrategyInstance>(result.data);
+
       return {
-        success: true,
-        data: response.data,
+        success: result.success,
+        data: data,
+        message: result.message,
       };
     } catch (error: any) {
+      console.error("Error fetching active strategies:", error);
       return {
         success: false,
         data: [],
@@ -441,11 +537,24 @@ class AutoTradingService {
     error?: string;
   }> {
     try {
-      const response = await autoTradingApi.get(`/autonomous/portfolios`);
-      return response.data;
-    } catch (error) {
+      // Use paper-trading API for portfolios
+      const response = await axios.get(
+        `${API_BASE_URL}/paper-trading/portfolios`
+      );
+
+      // Handle the response data properly
+      const portfoliosData = Array.isArray(response.data) ? response.data : [];
+
+      return { success: true, data: portfoliosData };
+    } catch (error: any) {
       console.error("Failed to fetch portfolios:", error);
-      return { success: false, error: "Failed to fetch portfolios" };
+      return {
+        success: false,
+        error:
+          error.response?.data?.message ||
+          error.message ||
+          "Failed to fetch portfolios",
+      };
     }
   }
 
@@ -455,13 +564,20 @@ class AutoTradingService {
     error?: string;
   }> {
     try {
-      const response = await autoTradingApi.get(
-        `/autonomous/portfolios/${portfolioId}/performance`
+      // Use paper-trading API for portfolio performance
+      const response = await axios.get(
+        `${API_BASE_URL}/paper-trading/portfolios/${portfolioId}/performance`
       );
-      return response.data;
-    } catch (error) {
+      return { success: true, data: response.data };
+    } catch (error: any) {
       console.error("Failed to fetch portfolio performance:", error);
-      return { success: false, error: "Failed to fetch portfolio performance" };
+      return {
+        success: false,
+        error:
+          error.response?.data?.message ||
+          error.message ||
+          "Failed to fetch portfolio performance",
+      };
     }
   }
 
@@ -472,10 +588,13 @@ class AutoTradingService {
     message?: string;
   }> {
     try {
-      const response = await autoTradingApi.post(
-        `/autonomous/portfolios/${portfolioId}/assign-random-strategy`
-      );
-      return response.data;
+      // This endpoint doesn't exist yet - return proper error
+      console.warn("assignRandomStrategy endpoint not implemented in backend");
+      return {
+        success: false,
+        error: "Strategy assignment not yet implemented",
+        message: "This feature is under development",
+      };
     } catch (error: any) {
       console.error("Failed to assign random strategy:", error);
       return {

@@ -1,4 +1,5 @@
 import axios from "axios";
+import { FRONTEND_API_CONFIG } from "../config/api.config";
 import {
   ApiResponse,
   BacktestRequest,
@@ -9,7 +10,7 @@ import {
   ScreenerTemplate,
 } from "../types/marketScanner";
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:8000";
+const API_BASE_URL = FRONTEND_API_CONFIG.backend.baseUrl;
 
 class MarketScannerApi {
   private baseURL = `${API_BASE_URL}/market-scanner`;

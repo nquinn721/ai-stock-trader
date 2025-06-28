@@ -35,16 +35,31 @@ export interface FrontendApiConfig {
  * Get API base URL from environment or use default
  */
 function getApiBaseUrl(): string {
-  // Use environment variable if available, otherwise default to localhost
-  return process.env.REACT_APP_API_URL || "http://localhost:8000";
+  // In production (when REACT_APP_API_URL is empty), use relative path
+  // In development, use localhost
+  const envUrl = process.env.REACT_APP_API_URL;
+  if (envUrl === "" || envUrl === undefined) {
+    // Production: use relative URL (same origin as React app)
+    return "";
+  }
+  // Development: use localhost
+  return envUrl || "http://localhost:8000";
 }
 
 /**
  * Get WebSocket URL from environment or use default
  */
 function getWebSocketUrlFromEnv(): string {
-  // Use environment variable if available, otherwise default to localhost
-  return process.env.REACT_APP_WS_URL || "ws://localhost:8000";
+  // In production (when REACT_APP_WS_URL is empty), use relative path
+  // In development, use localhost
+  const envUrl = process.env.REACT_APP_WS_URL;
+  if (envUrl === "" || envUrl === undefined) {
+    // Production: construct WebSocket URL from current origin
+    const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+    return `${protocol}//${window.location.host}`;
+  }
+  // Development: use localhost
+  return envUrl || "ws://localhost:8000";
 }
 
 /**

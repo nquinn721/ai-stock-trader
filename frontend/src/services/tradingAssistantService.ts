@@ -1,6 +1,7 @@
 // Trading Assistant Service for AI-powered chat and explanations
+import { FRONTEND_API_CONFIG } from "../config/api.config";
 
-const API_BASE_URL = "http://localhost:8000";
+const API_BASE_URL = FRONTEND_API_CONFIG.backend.baseUrl;
 
 export interface ChatMessage {
   id: string;

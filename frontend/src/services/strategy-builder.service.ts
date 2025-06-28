@@ -1,6 +1,7 @@
 import axios from "axios";
+import { FRONTEND_API_CONFIG } from "../config/api.config";
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:8000";
+const API_BASE_URL = FRONTEND_API_CONFIG.backend.baseUrl;
 
 export interface StrategyComponent {
   id: string;

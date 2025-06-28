@@ -5,6 +5,7 @@
  */
 
 export * from './api-endpoints.config';
+export * from './database.config';
 export * from './http-client.config';
 
 // Re-export commonly used functions and types for convenience
@@ -26,3 +27,12 @@ export {
   type ExternalApiConfig,
   type HttpClientConfig,
 } from './http-client.config';
+
+export {
+  CLOUD_SQL_CONFIG,
+  DATABASE_CONFIGS,
+  getDatabaseConfig,
+  getDatabaseConnectionString,
+  validateDatabaseConfig,
+  type DatabaseConfig,
+} from './database.config';

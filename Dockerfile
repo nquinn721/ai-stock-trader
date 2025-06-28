@@ -1,45 +1,59 @@
-# Multi-stage Docker build for AI Stock Trader
+# Multi-stage Docker build for AI Stock Trader - Cloud Run Optimized
 # Stage 1: Build frontend
 FROM node:18-alpine AS frontend-build
 
+# Set working directory
 WORKDIR /app/frontend
-COPY frontend/package*.json ./
-RUN npm ci --only=production
 
+# Copy package files and install dependencies
+COPY frontend/package*.json ./
+RUN npm ci --only=production --silent
+
+# Copy source and build
 COPY frontend/ ./
 RUN npm run build
 
 # Stage 2: Build backend
 FROM node:18-alpine AS backend-build
 
+# Set working directory
 WORKDIR /app/backend
-COPY backend/package*.json ./
-RUN npm ci --only=production
 
+# Copy package files and install dependencies
+COPY backend/package*.json ./
+RUN npm ci --only=production --silent
+
+# Copy source and build
 COPY backend/ ./
 RUN npm run build
 
-# Stage 3: Production runtime
+# Stage 3: Production runtime - optimized for Cloud Run
 FROM node:18-alpine AS production
 
-# Install required dependencies for production
+# Install required system dependencies
 RUN apk add --no-cache \
     dumb-init \
     curl \
-    && rm -rf /var/cache/apk/*
+    ca-certificates \
+    && rm -rf /var/cache/apk/* \
+    && update-ca-certificates
 
 # Create app directory
 WORKDIR /app
 
-# Copy backend production files
+# Copy package.json for production dependencies
+COPY backend/package*.json ./
+
+# Install only production dependencies
+RUN npm ci --only=production --silent && npm cache clean --force
+
+# Copy backend build files
 COPY --from=backend-build /app/backend/dist ./dist
-COPY --from=backend-build /app/backend/node_modules ./node_modules
-COPY --from=backend-build /app/backend/package*.json ./
 
 # Copy frontend build to be served by backend
 COPY --from=frontend-build /app/frontend/build ./public
 
-# Create non-root user for security
+# Create non-root user for security (Cloud Run best practice)
 RUN addgroup -g 1001 -S nodejs && \
     adduser -S nestjs -u 1001 -G nodejs
 
@@ -47,14 +61,18 @@ RUN addgroup -g 1001 -S nodejs && \
 RUN chown -R nestjs:nodejs /app
 USER nestjs
 
-# Expose port
+# Expose port (Cloud Run will set PORT environment variable)
 EXPOSE 8080
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+# Add environment variables for Cloud Run
+ENV NODE_ENV=production
+ENV PORT=8080
+
+# Health check optimized for Cloud Run
+HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
     CMD curl -f http://localhost:8080/health || exit 1
 
-# Use dumb-init to handle signals properly
+# Use dumb-init to handle signals properly (important for Cloud Run)
 ENTRYPOINT ["dumb-init", "--"]
 
 # Start the application

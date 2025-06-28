@@ -1,4 +1,5 @@
 import axios from "axios";
+import { FRONTEND_API_CONFIG } from "../config/api.config";
 import {
   CreateNotificationRequest,
   MarketEventAlert,
@@ -13,7 +14,7 @@ import {
   TradingOpportunityAlert,
 } from "../types/notification.types";
 
-const API_BASE_URL = "http://localhost:8000";
+const API_BASE_URL = FRONTEND_API_CONFIG.backend.baseUrl;
 
 class NotificationService {
   private baseURL = `${API_BASE_URL}/notifications`;
