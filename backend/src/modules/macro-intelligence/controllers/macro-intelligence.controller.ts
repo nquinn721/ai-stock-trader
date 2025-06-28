@@ -1,42 +1,50 @@
-import { Controller, Get, Post, Body, Param, Query, Logger } from '@nestjs/common';
-import { EconomicIntelligenceService } from '../services/economic-intelligence.service';
-import { MonetaryPolicyService } from '../services/monetary-policy.service';
-import { GeopoliticalAnalysisService } from '../services/geopolitical-analysis.service';
 import {
-  EconomicAnalysis,
-  InflationForecast,
-  GDPForecast,
-  LaborMarketAnalysis,
+  Body,
+  Controller,
+  Get,
+  Logger,
+  Param,
+  Post,
+  Query,
+} from '@nestjs/common';
+import {
   BusinessCyclePhase,
+  EconomicAnalysis,
+  GDPForecast,
+  InflationForecast,
+  LaborMarketAnalysis,
   RecessionProbability,
   YieldCurveAnalysis,
 } from '../interfaces/economic.interfaces';
 import {
+  ConflictData,
+  ConflictRiskAssessment,
+  ElectionData,
+  ElectionPrediction,
+  RefugeeFlowPrediction,
+  RegimeChangeRisk,
+  SafeHavenAnalysis,
+  SanctionData,
+  SanctionsImpact,
+  StabilityScore,
+  TensionAnalysis,
+  TradeWarAnalysis,
+} from '../interfaces/geopolitical.interfaces';
+import {
+  ConsistencyMetrics,
   FedSpeech,
-  PolicyStatement,
-  PolicyStanceAnalysis,
-  RateDecisionPrediction,
-  QEProbabilityAssessment,
+  GuidanceAnalysis,
   ImpactAnalysis,
   InterventionRisk,
   PolicyDivergenceAnalysis,
-  GuidanceAnalysis,
-  ConsistencyMetrics,
+  PolicyStanceAnalysis,
+  PolicyStatement,
+  QEProbabilityAssessment,
+  RateDecisionPrediction,
 } from '../interfaces/monetary-policy.interfaces';
-import {
-  ElectionData,
-  SanctionData,
-  ConflictData,
-  StabilityScore,
-  ElectionPrediction,
-  RegimeChangeRisk,
-  TradeWarAnalysis,
-  SanctionsImpact,
-  TensionAnalysis,
-  ConflictRiskAssessment,
-  SafeHavenAnalysis,
-  RefugeeFlowPrediction,
-} from '../interfaces/geopolitical.interfaces';
+import { EconomicIntelligenceService } from '../services/economic-intelligence.service';
+import { GeopoliticalAnalysisService } from '../services/geopolitical-analysis.service';
+import { MonetaryPolicyService } from '../services/monetary-policy.service';
 
 /**
  * S51: Macro Intelligence Controller
@@ -59,7 +67,9 @@ export class MacroIntelligenceController {
    * Get comprehensive economic analysis for a country
    */
   @Get('economic/analysis/:country')
-  async getEconomicAnalysis(@Param('country') country: string): Promise<EconomicAnalysis> {
+  async getEconomicAnalysis(
+    @Param('country') country: string,
+  ): Promise<EconomicAnalysis> {
     this.logger.log(`Getting economic analysis for ${country}`);
     return this.economicService.analyzeEconomicIndicators(country);
   }
@@ -73,7 +83,9 @@ export class MacroIntelligenceController {
     @Query('region') region: string,
     @Query('timeframe') timeframe: string = '1Y',
   ): Promise<InflationForecast> {
-    this.logger.log(`Getting inflation forecast for ${region} over ${timeframe}`);
+    this.logger.log(
+      `Getting inflation forecast for ${region} over ${timeframe}`,
+    );
     return this.economicService.predictInflationTrend(region, timeframe);
   }
 
@@ -82,7 +94,9 @@ export class MacroIntelligenceController {
    * Get GDP growth forecast for a country
    */
   @Get('economic/gdp/:country')
-  async getGDPForecast(@Param('country') country: string): Promise<GDPForecast> {
+  async getGDPForecast(
+    @Param('country') country: string,
+  ): Promise<GDPForecast> {
     this.logger.log(`Getting GDP forecast for ${country}`);
     return this.economicService.forecastGDPGrowth(country);
   }
@@ -92,7 +106,9 @@ export class MacroIntelligenceController {
    * Get labor market analysis for a region
    */
   @Get('economic/labor/:region')
-  async getLaborMarketAnalysis(@Param('region') region: string): Promise<LaborMarketAnalysis> {
+  async getLaborMarketAnalysis(
+    @Param('region') region: string,
+  ): Promise<LaborMarketAnalysis> {
     this.logger.log(`Getting labor market analysis for ${region}`);
     return this.economicService.analyzeLaborMarket(region);
   }
@@ -102,7 +118,9 @@ export class MacroIntelligenceController {
    * Get business cycle analysis for an economy
    */
   @Get('economic/business-cycle/:economy')
-  async getBusinessCycle(@Param('economy') economy: string): Promise<BusinessCyclePhase> {
+  async getBusinessCycle(
+    @Param('economy') economy: string,
+  ): Promise<BusinessCyclePhase> {
     this.logger.log(`Getting business cycle phase for ${economy}`);
     return this.economicService.identifyBusinessCyclePhase(economy);
   }
@@ -112,7 +130,9 @@ export class MacroIntelligenceController {
    * Get recession probability for a country
    */
   @Get('economic/recession/:country')
-  async getRecessionProbability(@Param('country') country: string): Promise<RecessionProbability> {
+  async getRecessionProbability(
+    @Param('country') country: string,
+  ): Promise<RecessionProbability> {
     this.logger.log(`Getting recession probability for ${country}`);
     return this.economicService.predictRecessionProbability(country);
   }
@@ -122,7 +142,9 @@ export class MacroIntelligenceController {
    * Get yield curve analysis for a country
    */
   @Get('economic/yield-curve/:country')
-  async getYieldCurveAnalysis(@Param('country') country: string): Promise<YieldCurveAnalysis> {
+  async getYieldCurveAnalysis(
+    @Param('country') country: string,
+  ): Promise<YieldCurveAnalysis> {
     this.logger.log(`Getting yield curve analysis for ${country}`);
     return this.economicService.analyzeYieldCurveSignals(country);
   }
@@ -134,7 +156,9 @@ export class MacroIntelligenceController {
    * Analyze Federal Reserve communications
    */
   @Post('monetary/fed-analysis')
-  async analyzeFedCommunication(@Body() speeches: FedSpeech[]): Promise<PolicyStanceAnalysis> {
+  async analyzeFedCommunication(
+    @Body() speeches: FedSpeech[],
+  ): Promise<PolicyStanceAnalysis> {
     this.logger.log(`Analyzing ${speeches.length} Fed communications`);
     return this.monetaryService.analyzeFedCommunication(speeches);
   }
@@ -144,7 +168,9 @@ export class MacroIntelligenceController {
    * Get interest rate decision prediction
    */
   @Get('monetary/rate-prediction')
-  async getRateDecisionPrediction(@Query('meetingDate') meetingDate: string): Promise<RateDecisionPrediction> {
+  async getRateDecisionPrediction(
+    @Query('meetingDate') meetingDate: string,
+  ): Promise<RateDecisionPrediction> {
     const date = new Date(meetingDate);
     this.logger.log(`Getting rate decision prediction for ${date}`);
     return this.monetaryService.predictInterestRateDecision(date);
@@ -155,7 +181,9 @@ export class MacroIntelligenceController {
    * Get QE probability assessment
    */
   @Get('monetary/qe-probability/:centralBank')
-  async getQEProbability(@Param('centralBank') centralBank: string): Promise<QEProbabilityAssessment> {
+  async getQEProbability(
+    @Param('centralBank') centralBank: string,
+  ): Promise<QEProbabilityAssessment> {
     this.logger.log(`Getting QE probability for ${centralBank}`);
     return this.monetaryService.assessQEProbability(centralBank);
   }
@@ -168,8 +196,13 @@ export class MacroIntelligenceController {
   async modelRateImpact(
     @Body() body: { rateChange: number; sectors: string[] },
   ): Promise<ImpactAnalysis> {
-    this.logger.log(`Modeling rate change impact: ${body.rateChange}% on sectors: ${body.sectors.join(', ')}`);
-    return this.monetaryService.modelRateChangeImpact(body.rateChange, body.sectors);
+    this.logger.log(
+      `Modeling rate change impact: ${body.rateChange}% on sectors: ${body.sectors.join(', ')}`,
+    );
+    return this.monetaryService.modelRateChangeImpact(
+      body.rateChange,
+      body.sectors,
+    );
   }
 
   /**
@@ -177,7 +210,9 @@ export class MacroIntelligenceController {
    * Get currency intervention risk analysis
    */
   @Get('monetary/intervention-risk/:currency')
-  async getInterventionRisk(@Param('currency') currency: string): Promise<InterventionRisk> {
+  async getInterventionRisk(
+    @Param('currency') currency: string,
+  ): Promise<InterventionRisk> {
     this.logger.log(`Getting intervention risk for ${currency}`);
     return this.monetaryService.analyzeCurrencyInterventionRisk(currency);
   }
@@ -187,7 +222,9 @@ export class MacroIntelligenceController {
    * Analyze policy divergence between countries
    */
   @Post('monetary/policy-divergence')
-  async analyzePolicyDivergence(@Body() countries: string[]): Promise<PolicyDivergenceAnalysis> {
+  async analyzePolicyDivergence(
+    @Body() countries: string[],
+  ): Promise<PolicyDivergenceAnalysis> {
     this.logger.log(`Analyzing policy divergence for: ${countries.join(', ')}`);
     return this.monetaryService.predictPolicyDivergence(countries);
   }
@@ -197,7 +234,9 @@ export class MacroIntelligenceController {
    * Parse forward guidance statements
    */
   @Post('monetary/forward-guidance')
-  async parseForwardGuidance(@Body() guidance: PolicyStatement): Promise<GuidanceAnalysis> {
+  async parseForwardGuidance(
+    @Body() guidance: PolicyStatement,
+  ): Promise<GuidanceAnalysis> {
     this.logger.log(`Parsing forward guidance from ${guidance.centralBank}`);
     return this.monetaryService.parseForwardGuidance(guidance);
   }
@@ -207,7 +246,9 @@ export class MacroIntelligenceController {
    * Get policy consistency metrics
    */
   @Get('monetary/consistency/:centralBank')
-  async getPolicyConsistency(@Param('centralBank') centralBank: string): Promise<ConsistencyMetrics> {
+  async getPolicyConsistency(
+    @Param('centralBank') centralBank: string,
+  ): Promise<ConsistencyMetrics> {
     this.logger.log(`Getting policy consistency for ${centralBank}`);
     return this.monetaryService.trackPolicyConsistency(centralBank);
   }
@@ -219,7 +260,9 @@ export class MacroIntelligenceController {
    * Get political stability score for a country
    */
   @Get('geopolitical/stability/:country')
-  async getPoliticalStability(@Param('country') country: string): Promise<StabilityScore> {
+  async getPoliticalStability(
+    @Param('country') country: string,
+  ): Promise<StabilityScore> {
     this.logger.log(`Getting political stability for ${country}`);
     return this.geopoliticalService.assessPoliticalStability(country);
   }
@@ -229,7 +272,9 @@ export class MacroIntelligenceController {
    * Predict election outcomes
    */
   @Post('geopolitical/election-prediction')
-  async predictElection(@Body() election: ElectionData): Promise<ElectionPrediction> {
+  async predictElection(
+    @Body() election: ElectionData,
+  ): Promise<ElectionPrediction> {
     this.logger.log(`Predicting election outcome for ${election.country}`);
     return this.geopoliticalService.predictElectionOutcome(election);
   }
@@ -239,7 +284,9 @@ export class MacroIntelligenceController {
    * Get regime change risk assessment
    */
   @Get('geopolitical/regime-risk/:country')
-  async getRegimeChangeRisk(@Param('country') country: string): Promise<RegimeChangeRisk> {
+  async getRegimeChangeRisk(
+    @Param('country') country: string,
+  ): Promise<RegimeChangeRisk> {
     this.logger.log(`Getting regime change risk for ${country}`);
     return this.geopoliticalService.analyzeRegimeChangeRisk(country);
   }
@@ -249,8 +296,12 @@ export class MacroIntelligenceController {
    * Analyze trade war impact
    */
   @Post('geopolitical/trade-war')
-  async analyzeTradeWar(@Body() countries: string[]): Promise<TradeWarAnalysis> {
-    this.logger.log(`Analyzing trade war impact between: ${countries.join(', ')}`);
+  async analyzeTradeWar(
+    @Body() countries: string[],
+  ): Promise<TradeWarAnalysis> {
+    this.logger.log(
+      `Analyzing trade war impact between: ${countries.join(', ')}`,
+    );
     return this.geopoliticalService.analyzeTradeWarImpact(countries);
   }
 
@@ -259,7 +310,9 @@ export class MacroIntelligenceController {
    * Assess sanctions impact
    */
   @Post('geopolitical/sanctions-impact')
-  async assessSanctions(@Body() sanctions: SanctionData): Promise<SanctionsImpact> {
+  async assessSanctions(
+    @Body() sanctions: SanctionData,
+  ): Promise<SanctionsImpact> {
     this.logger.log(`Assessing sanctions impact on ${sanctions.target}`);
     return this.geopoliticalService.assessSanctionsImpact(sanctions);
   }
@@ -269,7 +322,9 @@ export class MacroIntelligenceController {
    * Get diplomatic tension analysis
    */
   @Get('geopolitical/tensions/:region')
-  async getDiplomaticTensions(@Param('region') region: string): Promise<TensionAnalysis> {
+  async getDiplomaticTensions(
+    @Param('region') region: string,
+  ): Promise<TensionAnalysis> {
     this.logger.log(`Getting diplomatic tensions for ${region}`);
     return this.geopoliticalService.predictDiplomaticTensions(region);
   }
@@ -279,7 +334,9 @@ export class MacroIntelligenceController {
    * Assess conflict risk for regions
    */
   @Post('geopolitical/conflict-risk')
-  async assessConflictRisk(@Body() regions: string[]): Promise<ConflictRiskAssessment> {
+  async assessConflictRisk(
+    @Body() regions: string[],
+  ): Promise<ConflictRiskAssessment> {
     this.logger.log(`Assessing conflict risk for: ${regions.join(', ')}`);
     return this.geopoliticalService.assessConflictRisk(regions);
   }
@@ -289,7 +346,9 @@ export class MacroIntelligenceController {
    * Analyze safe haven flows for event type
    */
   @Get('geopolitical/safe-havens/:eventType')
-  async analyzeSafeHavens(@Param('eventType') eventType: string): Promise<SafeHavenAnalysis> {
+  async analyzeSafeHavens(
+    @Param('eventType') eventType: string,
+  ): Promise<SafeHavenAnalysis> {
     this.logger.log(`Analyzing safe haven flows for ${eventType}`);
     return this.geopoliticalService.analyzeSafeHavenFlows(eventType);
   }
@@ -299,8 +358,12 @@ export class MacroIntelligenceController {
    * Predict refugee flows from conflict
    */
   @Post('geopolitical/refugee-flows')
-  async predictRefugeeFlows(@Body() conflict: ConflictData): Promise<RefugeeFlowPrediction> {
-    this.logger.log(`Predicting refugee flows from conflict in ${conflict.regions.join(', ')}`);
+  async predictRefugeeFlows(
+    @Body() conflict: ConflictData,
+  ): Promise<RefugeeFlowPrediction> {
+    this.logger.log(
+      `Predicting refugee flows from conflict in ${conflict.regions.join(', ')}`,
+    );
     return this.geopoliticalService.predictRefugeeFlows(conflict);
   }
 
@@ -345,7 +408,7 @@ export class MacroIntelligenceController {
     this.logger.log('Getting global macroeconomic overview');
 
     const majorEconomies = ['US', 'China', 'Germany', 'Japan', 'UK'];
-    
+
     const economicData = await Promise.all(
       majorEconomies.map(async (country) => {
         const [economic, recession, stability] = await Promise.all([

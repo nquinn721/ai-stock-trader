@@ -1,24 +1,23 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { EconomicIntelligenceService } from '../services/economic-intelligence.service';
-import { MonetaryPolicyService } from '../services/monetary-policy.service';
-import { GeopoliticalAnalysisService } from '../services/geopolitical-analysis.service';
 import {
-  EconomicForecast,
   BusinessCycle,
+  EconomicForecast,
   RecessionProbability,
 } from '../entities/economic.entities';
+import {
+  ConflictRiskAssessment,
+  ElectionPrediction,
+  PoliticalStabilityScore,
+} from '../entities/geopolitical.entities';
 import {
   MonetaryPolicyPrediction,
   PolicyStanceAnalysis,
   QEProbabilityAssessment,
 } from '../entities/monetary-policy.entities';
-import {
-  PoliticalStabilityScore,
-  ElectionPrediction,
-  ConflictRiskAssessment,
-} from '../entities/geopolitical.entities';
+import { EconomicIntelligenceService } from '../services/economic-intelligence.service';
+import { GeopoliticalAnalysisService } from '../services/geopolitical-analysis.service';
+import { MonetaryPolicyService } from '../services/monetary-policy.service';
 
 /**
  * S51: Macro Intelligence Services Tests
@@ -121,9 +120,13 @@ describe('S51 Macro Intelligence Services', () => {
       ],
     }).compile();
 
-    economicService = module.get<EconomicIntelligenceService>(EconomicIntelligenceService);
+    economicService = module.get<EconomicIntelligenceService>(
+      EconomicIntelligenceService,
+    );
     monetaryService = module.get<MonetaryPolicyService>(MonetaryPolicyService);
-    geopoliticalService = module.get<GeopoliticalAnalysisService>(GeopoliticalAnalysisService);
+    geopoliticalService = module.get<GeopoliticalAnalysisService>(
+      GeopoliticalAnalysisService,
+    );
   });
 
   describe('Economic Intelligence Service', () => {
@@ -184,7 +187,9 @@ describe('S51 Macro Intelligence Services', () => {
 
       expect(result).toBeDefined();
       expect(result.economy).toBe('US');
-      expect(['expansion', 'peak', 'contraction', 'trough']).toContain(result.phase);
+      expect(['expansion', 'peak', 'contraction', 'trough']).toContain(
+        result.phase,
+      );
       expect(result.duration).toBeGreaterThan(0);
       expect(result.strength).toBeGreaterThanOrEqual(0);
       expect(result.strength).toBeLessThanOrEqual(100);
@@ -222,7 +227,8 @@ describe('S51 Macro Intelligence Services', () => {
       mockPolicyPredictionRepo.save.mockResolvedValue({});
 
       const meetingDate = new Date('2025-07-30');
-      const result = await monetaryService.predictInterestRateDecision(meetingDate);
+      const result =
+        await monetaryService.predictInterestRateDecision(meetingDate);
 
       expect(result).toBeDefined();
       expect(result.centralBank).toBe('Federal Reserve');
@@ -240,7 +246,8 @@ describe('S51 Macro Intelligence Services', () => {
       mockQERepo.create.mockReturnValue({});
       mockQERepo.save.mockResolvedValue({});
 
-      const result = await monetaryService.assessQEProbability('Federal Reserve');
+      const result =
+        await monetaryService.assessQEProbability('Federal Reserve');
 
       expect(result).toBeDefined();
       expect(result.centralBank).toBe('Federal Reserve');
@@ -255,7 +262,10 @@ describe('S51 Macro Intelligence Services', () => {
     });
 
     it('should model rate change impact', async () => {
-      const result = await monetaryService.modelRateChangeImpact(0.25, ['Technology', 'Financials']);
+      const result = await monetaryService.modelRateChangeImpact(0.25, [
+        'Technology',
+        'Financials',
+      ]);
 
       expect(result).toBeDefined();
       expect(result.rateChange).toBe(0.25);
@@ -311,7 +321,9 @@ describe('S51 Macro Intelligence Services', () => {
     });
 
     it('should analyze safe haven flows', async () => {
-      const result = await geopoliticalService.analyzeSafeHavenFlows('geopolitical_crisis');
+      const result = await geopoliticalService.analyzeSafeHavenFlows(
+        'geopolitical_crisis',
+      );
 
       expect(result).toBeDefined();
       expect(result.eventType).toBe('geopolitical_crisis');
@@ -351,8 +363,12 @@ describe('S51 Macro Intelligence Services', () => {
     it('should provide consistent data types across services', async () => {
       mockEconomicForecastRepo.find.mockResolvedValue([]);
 
-      const economicResult = await economicService.analyzeEconomicIndicators('US');
-      const inflationResult = await economicService.predictInflationTrend('US', '1Y');
+      const economicResult =
+        await economicService.analyzeEconomicIndicators('US');
+      const inflationResult = await economicService.predictInflationTrend(
+        'US',
+        '1Y',
+      );
 
       // Check timestamp consistency
       expect(economicResult.timestamp).toBeInstanceOf(Date);

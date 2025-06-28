@@ -21,6 +21,23 @@ import { TradingStrategy } from './modules/auto-trading/entities/trading-strateg
 import { BehavioralFinanceModule } from './modules/behavioral-finance/behavioral-finance.module';
 import { BreakoutModule } from './modules/breakout/breakout.module';
 import { DataIntelligenceModule } from './modules/data-intelligence/data-intelligence.module';
+import { EconomicIntelligenceModule } from './modules/economic-intelligence/economic-intelligence.module';
+import {
+  BusinessCycle,
+  EconomicForecast,
+  RecessionProbability,
+} from './modules/macro-intelligence/entities/economic.entities';
+import {
+  ConflictRiskAssessment,
+  ElectionPrediction,
+  PoliticalStabilityScore,
+} from './modules/macro-intelligence/entities/geopolitical.entities';
+import {
+  MonetaryPolicyPrediction,
+  PolicyStanceAnalysis,
+  QEProbabilityAssessment,
+} from './modules/macro-intelligence/entities/monetary-policy.entities';
+import { MacroIntelligenceModule } from './modules/macro-intelligence/macro-intelligence.module';
 import {
   ArbitrageOpportunityEntity,
   LiquidityPositionEntity,
@@ -52,22 +69,6 @@ import { CrossAssetCorrelation } from './modules/multi-asset/entities/cross-asse
 import { CryptoData } from './modules/multi-asset/entities/crypto-data.entity';
 import { ForexData } from './modules/multi-asset/entities/forex-data.entity';
 import { MultiAssetModule } from './modules/multi-asset/multi-asset.module';
-import {
-  EconomicForecast,
-  BusinessCycle,
-  RecessionProbability,
-} from './modules/macro-intelligence/entities/economic.entities';
-import {
-  MonetaryPolicyPrediction,
-  PolicyStanceAnalysis,
-  QEProbabilityAssessment,
-} from './modules/macro-intelligence/entities/monetary-policy.entities';
-import {
-  PoliticalStabilityScore,
-  ElectionPrediction,
-  ConflictRiskAssessment,
-} from './modules/macro-intelligence/entities/geopolitical.entities';
-import { MacroIntelligenceModule } from './modules/macro-intelligence/macro-intelligence.module';
 import { NewsModule } from './modules/news/news.module';
 import {
   NotificationEntity,
@@ -166,6 +167,7 @@ import { SeedService } from './services/seed.service';
     MarketScannerModule,
     MultiAssetModule,
     DataIntelligenceModule,
+    EconomicIntelligenceModule,
     MarketMakingModule,
     MacroIntelligenceModule,
   ],

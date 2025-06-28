@@ -10,7 +10,6 @@ import { NotificationProvider } from "./context/NotificationContext";
 import { SocketProvider } from "./context/SocketContext";
 import AIAssistantPage from "./pages/AIAssistantPage";
 import AnalyticsPage from "./pages/AnalyticsPage";
-import AutomatedTradingPage from "./pages/AutomatedTradingPage";
 import AutonomousTradingPage from "./pages/AutonomousTradingPage";
 import BehavioralFinancePage from "./pages/BehavioralFinancePage";
 import DashboardPage from "./pages/DashboardPage";
@@ -38,7 +37,7 @@ function App() {
                       />
                       <Route
                         path="/automated-trading"
-                        element={<AutomatedTradingPage />}
+                        element={<AutonomousTradingPage />}
                       />
                       <Route path="/analytics" element={<AnalyticsPage />} />
                       <Route

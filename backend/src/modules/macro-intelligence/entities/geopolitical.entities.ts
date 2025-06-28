@@ -1,4 +1,10 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 
 @Entity('political_stability_scores')
 export class PoliticalStabilityScore {
@@ -11,16 +17,16 @@ export class PoliticalStabilityScore {
   @Column({ type: 'decimal', precision: 5, scale: 2 })
   overall: number;
 
-  @Column({ type: 'jsonb' })
+  @Column({ type: 'json' })
   components: any;
 
-  @Column({ type: 'jsonb' })
+  @Column({ type: 'json' })
   trends: any;
 
-  @Column({ type: 'jsonb' })
+  @Column({ type: 'json' })
   risks: any;
 
-  @Column({ type: 'jsonb' })
+  @Column({ type: 'json' })
   stabilizers: string[];
 
   @CreateDateColumn()
@@ -44,13 +50,13 @@ export class ElectionPrediction {
   @Column({ type: 'date' })
   electionDate: Date;
 
-  @Column({ type: 'jsonb' })
+  @Column({ type: 'json' })
   predictions: any;
 
-  @Column({ type: 'jsonb' })
+  @Column({ type: 'json' })
   scenarios: any;
 
-  @Column({ type: 'jsonb' })
+  @Column({ type: 'json' })
   keyFactors: string[];
 
   @Column({ type: 'decimal', precision: 5, scale: 4 })
@@ -68,25 +74,25 @@ export class ConflictRiskAssessment {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ type: 'jsonb' })
+  @Column({ type: 'json' })
   regions: string[];
 
   @Column({ type: 'varchar' })
   riskLevel: string;
 
-  @Column({ type: 'jsonb' })
+  @Column({ type: 'json' })
   conflictTypes: any;
 
-  @Column({ type: 'jsonb' })
+  @Column({ type: 'json' })
   drivers: any;
 
-  @Column({ type: 'jsonb' })
+  @Column({ type: 'json' })
   timeframe: any;
 
-  @Column({ type: 'jsonb' })
+  @Column({ type: 'json' })
   spilloverRisk: any;
 
-  @Column({ type: 'jsonb' })
+  @Column({ type: 'json' })
   preventionMeasures: string[];
 
   @CreateDateColumn()

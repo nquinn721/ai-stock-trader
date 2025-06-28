@@ -1,24 +1,24 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { MacroIntelligenceController } from './controllers/macro-intelligence.controller';
-import { EconomicIntelligenceService } from './services/economic-intelligence.service';
-import { MonetaryPolicyService } from './services/monetary-policy.service';
-import { GeopoliticalAnalysisService } from './services/geopolitical-analysis.service';
 import {
-  EconomicForecast,
   BusinessCycle,
+  EconomicForecast,
   RecessionProbability,
 } from './entities/economic.entities';
+import {
+  ConflictRiskAssessment,
+  ElectionPrediction,
+  PoliticalStabilityScore,
+} from './entities/geopolitical.entities';
 import {
   MonetaryPolicyPrediction,
   PolicyStanceAnalysis,
   QEProbabilityAssessment,
 } from './entities/monetary-policy.entities';
-import {
-  PoliticalStabilityScore,
-  ElectionPrediction,
-  ConflictRiskAssessment,
-} from './entities/geopolitical.entities';
+import { EconomicIntelligenceService } from './services/economic-intelligence.service';
+import { GeopoliticalAnalysisService } from './services/geopolitical-analysis.service';
+import { MonetaryPolicyService } from './services/monetary-policy.service';
 
 /**
  * S51: Macro Intelligence Module

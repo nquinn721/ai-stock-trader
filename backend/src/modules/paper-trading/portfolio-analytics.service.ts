@@ -1,6 +1,6 @@
 /**
  * =============================================================================
- * PORTFOLIO ANALYTICS SERVICE - Performance Intelligence Engine
+ * PORTFOLIO ANALYTICS SERVICE - Performance Intelligence ENGINE
  * =============================================================================
  * 
  * Advanced portfolio analytics and performance measurement service that provides
@@ -583,4 +583,167 @@ export class PortfolioAnalyticsService {
 
     // Check for sector overconcentration
     for (const sector of sectorAllocation) {
-      if
+      if (sector.percentage > 30) {
+        suggestions.push({
+          action: 'reduce',
+          symbol: `${sector.sector} sector`,
+          currentWeight: sector.percentage,
+          targetWeight: 25,
+          reasoning: 'Sector concentration exceeds 30% limit',
+        });
+      }
+    }
+
+    return suggestions;
+  }
+
+  private async calculatePeriodReturn(portfolio: any, days: number): Promise<number> {
+    // Simplified calculation - in real implementation, you'd fetch historical data
+    // For now, return estimated return based on current positions
+    if (!portfolio || !portfolio.positions) return 0;
+
+    // Mock calculation based on portfolio performance
+    const totalReturn = Number(portfolio.totalReturn) || 0;
+    const adjustmentFactor = Math.min(days / 365, 1); // Scale down for shorter periods
+    return totalReturn * adjustmentFactor;
+  }
+
+  private getDaysSinceInception(portfolio: any): number {
+    if (!portfolio || !portfolio.createdAt) return 1;
+    
+    const createdDate = new Date(portfolio.createdAt);
+    const currentDate = new Date();
+    const diffTime = Math.abs(currentDate.getTime() - createdDate.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    
+    return Math.max(1, diffDays);
+  }
+
+  private async calculatePortfolioVolatility(portfolio: any): Promise<number> {
+    if (!portfolio || !portfolio.positions || portfolio.positions.length === 0) {
+      return 0.15; // Default volatility
+    }
+
+    // Simplified volatility calculation
+    // In real implementation, you'd calculate based on historical price data
+    let weightedVolatility = 0;
+    const totalValue = Number(portfolio.totalValue) || 0;
+
+    for (const position of portfolio.positions) {
+      const positionValue = Number(position.currentValue) || Number(position.value) || 0;
+      const weight = totalValue > 0 ? positionValue / totalValue : 0;
+      
+      // Mock volatility based on position type/sector (would be calculated from historical data)
+      const estimatedVolatility = this.getEstimatedVolatility(position.symbol);
+      weightedVolatility += weight * estimatedVolatility;
+    }
+
+    return weightedVolatility;
+  }
+
+  private getEstimatedVolatility(symbol: string): number {
+    // Mock volatility estimates - in real implementation, fetch from historical data
+    const volatilityMap: { [key: string]: number } = {
+      // High volatility stocks
+      'TSLA': 0.35, 'NVDA': 0.32, 'AMD': 0.30,
+      // Medium volatility stocks
+      'AAPL': 0.22, 'GOOGL': 0.25, 'MSFT': 0.24,
+      // Low volatility stocks
+      'JNJ': 0.15, 'PG': 0.14, 'KO': 0.16,
+    };
+
+    return volatilityMap[symbol] || 0.25; // Default 25% volatility
+  }
+
+  private async calculateMaxDrawdown(portfolio: any): Promise<number> {
+    // Simplified max drawdown calculation
+    // In real implementation, you'd use historical portfolio values
+    if (!portfolio || !portfolio.positions) return 0;
+
+    // Mock calculation based on current performance
+    const totalReturn = Number(portfolio.totalReturn) || 0;
+    
+    // Estimate max drawdown as a percentage of negative return
+    if (totalReturn < 0) {
+      return Math.abs(totalReturn / 100) * 1.2; // Amplify negative returns for drawdown estimate
+    }
+    
+    // For positive returns, estimate a smaller historical drawdown
+    return 0.05; // 5% estimated max drawdown
+  }
+
+  private async calculateCorrelationMatrix(portfolio: any): Promise<{ [symbol: string]: { [symbol2: string]: number } }> {
+    if (!portfolio || !portfolio.positions || portfolio.positions.length === 0) {
+      return {};
+    }
+
+    const positions = portfolio.positions;
+    const correlationMatrix: { [symbol: string]: { [symbol2: string]: number } } = {};
+
+    // Initialize correlation matrix
+    for (const position1 of positions) {
+      correlationMatrix[position1.symbol] = {};
+      
+      for (const position2 of positions) {
+        if (position1.symbol === position2.symbol) {
+          correlationMatrix[position1.symbol][position2.symbol] = 1.0; // Perfect correlation with itself
+        } else {
+          // Mock correlation calculation - in real implementation, use historical price data
+          correlationMatrix[position1.symbol][position2.symbol] = this.estimateCorrelation(
+            position1.symbol,
+            position2.symbol
+          );
+        }
+      }
+    }
+
+    return correlationMatrix;
+  }
+
+  private estimateCorrelation(symbol1: string, symbol2: string): number {
+    // Mock correlation estimates - in real implementation, calculate from historical data
+    const sectorCorrelations: { [key: string]: string } = {
+      'AAPL': 'tech', 'GOOGL': 'tech', 'MSFT': 'tech', 'NVDA': 'tech', 'TSLA': 'tech',
+      'JPM': 'finance', 'BAC': 'finance', 'WFC': 'finance',
+      'JNJ': 'healthcare', 'PFE': 'healthcare', 'UNH': 'healthcare',
+    };
+
+    const sector1 = sectorCorrelations[symbol1] || 'other';
+    const sector2 = sectorCorrelations[symbol2] || 'other';
+
+    if (sector1 === sector2) {
+      return 0.6 + Math.random() * 0.3; // High correlation within same sector (0.6-0.9)
+    } else {
+      return 0.1 + Math.random() * 0.4; // Lower correlation across sectors (0.1-0.5)
+    }
+  }
+
+  private calculateConcentrationRisk(portfolio: any): number {
+    if (!portfolio || !portfolio.positions || portfolio.positions.length === 0) {
+      return 0;
+    }
+
+    const totalValue = Number(portfolio.totalValue) || 0;
+    if (totalValue === 0) return 0;
+
+    // Calculate Herfindahl Index for concentration risk
+    const weights = portfolio.positions.map((position: any) => {
+      const positionValue = Number(position.currentValue) || Number(position.value) || 0;
+      return positionValue / totalValue;
+    });
+
+    // Herfindahl Index: sum of squared weights
+    const herfindahlIndex = weights.reduce((sum: number, weight: number) => {
+      return sum + (weight * weight);
+    }, 0);
+
+    // Convert to risk score (0-1 scale)
+    // Perfect diversification (n equal positions): HHI = 1/n
+    // Maximum concentration (1 position): HHI = 1
+    const numberOfPositions = portfolio.positions.length;
+    const minHHI = 1 / numberOfPositions; // Perfect diversification
+    const normalizedRisk = (herfindahlIndex - minHHI) / (1 - minHHI);
+
+    return Math.max(0, Math.min(1, normalizedRisk));
+  }
+}

@@ -1,24 +1,11 @@
-import { Injectable, Logger, OnModuleInit } from '@n      };
-
-      // const binanceAdapter = new BinanceAdapter(binanceConfig);
-
-      // Only connect if API keys are provided
-      // if (binanceConfig.apiKey && binanceConfig.secretKey) {
-      //   await binanceAdapter.connect();
-      //   this.logger.log('Binance adapter connected with API authentication');
-      // } else {
-      //   this.logger.warn(
-      //     'Binance API keys not configured - running in read-only mode',
-      //   );
-      // }
-
-      // this.exchanges.set('binance', binanceAdapter);import { ConfigService } from '@nestjs/config';
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import {
   CreateOrderRequest,
+  ExchangeConfig,
   ExchangeConnector,
   ExchangeOrder,
   ExchangeOrderBook,
-  ExchangeConfig,
 } from '../interfaces/exchange-connector.interface';
 // import { BinanceAdapter } from '../adapters/binance.adapter';
 
@@ -28,6 +15,7 @@ export class ExchangeConnectorService implements OnModuleInit {
   private exchanges: Map<string, ExchangeConnector> = new Map();
 
   constructor(private configService: ConfigService) {}
+
   /**
    * Initialize exchange connectors on module startup
    */
@@ -65,19 +53,19 @@ export class ExchangeConnectorService implements OnModuleInit {
         },
       };
 
-      const binanceAdapter = new BinanceAdapter(binanceConfig);
+      // const binanceAdapter = new BinanceAdapter(binanceConfig);
 
       // Only connect if API keys are provided
-      if (binanceConfig.apiKey && binanceConfig.secretKey) {
-        await binanceAdapter.connect();
-        this.logger.log('Binance adapter connected with API authentication');
-      } else {
-        this.logger.warn(
-          'Binance API keys not configured - running in read-only mode',
-        );
-      }
+      // if (binanceConfig.apiKey && binanceConfig.secretKey) {
+      //   await binanceAdapter.connect();
+      //   this.logger.log('Binance adapter connected with API authentication');
+      // } else {
+      //   this.logger.warn(
+      //     'Binance API keys not configured - running in read-only mode',
+      //   );
+      // }
 
-      this.registerExchange('binance', binanceAdapter);
+      // this.registerExchange('binance', binanceAdapter);
     } catch (error) {
       this.logger.error(
         `Failed to initialize Binance adapter: ${error.message}`,

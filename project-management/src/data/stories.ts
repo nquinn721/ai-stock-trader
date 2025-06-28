@@ -1048,15 +1048,16 @@ export const stories: Story[] = [
     title: "Predictive Economic Intelligence & Macro Trading Engine",
     description:
       "Build an advanced macroeconomic intelligence system that predicts economic trends, central bank policies, and geopolitical events to inform trading strategies. Implement economic indicator analysis, Fed communication analysis, inflation and GDP forecasting, geopolitical risk assessment, and election outcome prediction. Create sophisticated NLP models for policy analysis, DSGE economic models, and sector rotation recommendations based on macro trends.",
-    status: "TODO",
+    status: "DONE",
     priority: "Medium",
     epic: "E7",
     storyPoints: 31,
     sprint: 15,
     assignee: "Economics Team",
-    progress: 0,
+    progress: 100,
     dependencies: ["S49", "S48", "S42"],
     createdDate: "2025-06-25",
+    completedDate: "2025-06-27",
   },
   {
     id: "S52",

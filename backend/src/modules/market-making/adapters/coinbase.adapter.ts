@@ -143,23 +143,27 @@ export class CoinbaseAdapter implements ExchangeConnector {
     throw new Error('Get order not implemented in mock Coinbase adapter');
   }
 
-  async getOpenOrders(symbol?: string): Promise<ExchangeOrder[]> {
+  async getOrders(symbol?: string, status?: string): Promise<ExchangeOrder[]> {
+    // Mock implementation - replaces getOpenOrders
     return [];
   }
 
   async getBalance(): Promise<ExchangeBalance> {
+    // Single balance method - kept for backward compatibility
     return {
+      currency: 'USD',
       exchange: 'coinbase',
+      available: 10000,
+      locked: 0,
+      total: 10000,
       timestamp: new Date(),
-      currencies: {},
     };
   }
 
   async getTradingFees(): Promise<TradingFees> {
     return {
-      exchange: 'coinbase',
-      maker: 0.005,
-      taker: 0.005,
+      makerFee: 0.005, // Fixed: was 'maker'
+      takerFee: 0.005, // Fixed: was 'taker' 
       timestamp: new Date(),
     };
   }
@@ -167,9 +171,51 @@ export class CoinbaseAdapter implements ExchangeConnector {
   async getExchangeInfo(): Promise<ExchangeInfo> {
     return {
       name: 'coinbase',
-      symbols: ['BTC-USD', 'ETH-USD'],
-      rateLimits: this.config.rateLimits,
-      timestamp: new Date(),
+      status: 'online',
+      serverTime: new Date(),
+      symbols: [
+        {
+          symbol: 'BTC-USD',
+          status: 'trading',
+          baseAsset: 'BTC',
+          quoteAsset: 'USD',
+          baseAssetPrecision: 8,
+          quoteAssetPrecision: 2,
+          minQuantity: 0.00001,
+          maxQuantity: 9000,
+          stepSize: 0.00001,
+          minPrice: 0.01,
+          maxPrice: 1000000,
+          tickSize: 0.01,
+          minNotional: 10,
+          filters: []
+        },
+        {
+          symbol: 'ETH-USD',
+          status: 'trading',
+          baseAsset: 'ETH',
+          quoteAsset: 'USD',
+          baseAssetPrecision: 8,
+          quoteAssetPrecision: 2,
+          minQuantity: 0.001,
+          maxQuantity: 5000,
+          stepSize: 0.001,
+          minPrice: 0.01,
+          maxPrice: 50000,
+          tickSize: 0.01,
+          minNotional: 10,
+          filters: []
+        }
+      ],
+      rateLimits: [
+        {
+          rateLimitType: 'REQUEST_WEIGHT',
+          interval: 'MINUTE',
+          intervalNum: 1,
+          limit: this.config.rateLimits.requests
+        }
+      ],
+      filters: []
     };
   }
 
@@ -200,5 +246,66 @@ export class CoinbaseAdapter implements ExchangeConnector {
 
   isConnected(): boolean {
     return this.connected;
+  }
+
+  // Missing methods from ExchangeConnector interface
+
+  async getOrderHistory(symbol?: string, limit?: number): Promise<ExchangeOrder[]> {
+    // Mock implementation
+    return [];
+  }
+
+  async getBalances(): Promise<ExchangeBalance[]> {
+    // Mock implementation - return multiple currency balances
+    return [
+      {
+        currency: 'USD',
+        exchange: 'coinbase',
+        available: 10000,
+        locked: 0,
+        total: 10000,
+        timestamp: new Date(),
+      },
+      {
+        currency: 'BTC',
+        exchange: 'coinbase',
+        available: 0.5,
+        locked: 0,
+        total: 0.5,
+        timestamp: new Date(),
+      }
+    ];
+  }
+
+  async subscribeOrders(callback: (data: ExchangeOrder) => void): Promise<void> {
+    this.logger.log('Mock subscription to order updates');
+  }
+
+  async subscribeBalances(callback: (data: ExchangeBalance[]) => void): Promise<void> {
+    this.logger.log('Mock subscription to balance updates');
+  }
+
+  async unsubscribeOrderBook(symbol: string): Promise<void> {
+    this.logger.log(`Mock unsubscribe from order book for ${symbol}`);
+  }
+
+  async unsubscribeTicker(symbol: string): Promise<void> {
+    this.logger.log(`Mock unsubscribe from ticker for ${symbol}`);
+  }
+
+  async unsubscribeTrades(symbol: string): Promise<void> {
+    this.logger.log(`Mock unsubscribe from trades for ${symbol}`);
+  }
+
+  async unsubscribeOrders(): Promise<void> {
+    this.logger.log('Mock unsubscribe from orders');
+  }
+
+  async unsubscribeBalances(): Promise<void> {
+    this.logger.log('Mock unsubscribe from balances');
+  }
+
+  async unsubscribeAll(): Promise<void> {
+    this.logger.log('Mock unsubscribe from all streams');
   }
 }

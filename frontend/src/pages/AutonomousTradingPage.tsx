@@ -1,4 +1,11 @@
-import { Close, PlayArrow, Settings, Shuffle, Stop } from "@mui/icons-material";
+import {
+  Assessment,
+  Close,
+  PlayArrow,
+  Settings,
+  Shuffle,
+  Stop,
+} from "@mui/icons-material";
 import {
   Alert,
   Box,
@@ -23,6 +30,7 @@ import {
 import { observer } from "mobx-react-lite";
 import React, { useEffect, useState } from "react";
 import StockCard from "../components/StockCard";
+import EconomicIntelligenceDashboard from "../components/macro-intelligence/EconomicIntelligenceDashboard";
 import {
   ContentCard,
   LoadingState,
@@ -94,6 +102,8 @@ const AutonomousTradingPage: React.FC<AutonomousTradingPageProps> = observer(
     const [globalTradingActive, setGlobalTradingActive] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [showEconomicIntelligence, setShowEconomicIntelligence] =
+      useState(false);
 
     // Strategy deployment modal
     const [deployModalOpen, setDeployModalOpen] = useState(false);
@@ -127,7 +137,21 @@ const AutonomousTradingPage: React.FC<AutonomousTradingPageProps> = observer(
     useEffect(() => {
       loadPortfolios();
       loadActiveStrategies();
-    }, []);
+
+      // Set up periodic refresh of active strategies
+      const refreshInterval = setInterval(() => {
+        loadActiveStrategies();
+      }, 30000); // Refresh every 30 seconds
+
+      return () => clearInterval(refreshInterval);
+    }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+    // Load active strategies when portfolios change
+    useEffect(() => {
+      if (portfolios.length > 0 && Object.keys(portfolioStatuses).length > 0) {
+        loadActiveStrategies();
+      }
+    }, [portfolios.length]); // eslint-disable-line react-hooks/exhaustive-deps
 
     // Load stock data for live market data tab
     useEffect(() => {
@@ -167,19 +191,39 @@ const AutonomousTradingPage: React.FC<AutonomousTradingPageProps> = observer(
     const loadActiveStrategies = async () => {
       try {
         const response = await autoTradingService.getActiveStrategies();
-        if (response.success) {
-          // Group strategies by portfolio
+        if (response.success && response.data) {
+          // Update portfolio statuses based on active strategies
           const updatedStatuses = { ...portfolioStatuses };
-          response.data.forEach((strategy) => {
-            // Assuming strategy has portfolioId - may need to adjust based on actual API
-            const portfolioId = strategy.id.split("-")[0]; // Placeholder logic
-            if (updatedStatuses[portfolioId]) {
+
+          // Reset all portfolios to inactive first
+          Object.keys(updatedStatuses).forEach((portfolioId) => {
+            updatedStatuses[portfolioId].isActive = false;
+            updatedStatuses[portfolioId].activeStrategies = [];
+          });
+
+          // Mark portfolios with active strategies
+          response.data.forEach((strategy: StrategyInstance) => {
+            // Extract portfolio ID from strategy configuration or ID
+            const portfolioId = strategy.id.includes("-")
+              ? strategy.id.split("-").pop()
+              : strategy.strategyId.includes("-")
+                ? strategy.strategyId.split("-").pop()
+                : null;
+
+            if (portfolioId && updatedStatuses[portfolioId]) {
               updatedStatuses[portfolioId].activeStrategies.push(strategy);
               updatedStatuses[portfolioId].isActive =
                 strategy.status === "running";
             }
           });
+
           setPortfolioStatuses(updatedStatuses);
+
+          // Update global trading status
+          const activePortfolios = Object.values(updatedStatuses).filter(
+            (status) => status.isActive
+          );
+          setGlobalTradingActive(activePortfolios.length > 0);
         }
       } catch (err) {
         console.error("Failed to load active strategies:", err);
@@ -189,17 +233,40 @@ const AutonomousTradingPage: React.FC<AutonomousTradingPageProps> = observer(
     const handleStartTrading = async (portfolioId: string) => {
       try {
         setLoading(true);
-        // Deploy a default strategy to the portfolio
-        const config: DeploymentConfig = {
+        setError(null);
+
+        // First, start a trading session for the portfolio
+        const sessionData = {
+          session_name: `Autonomous Trading - ${new Date().toLocaleString()}`,
+          config: {
+            autoTrading: true,
+            riskLimits: deploymentConfig.riskLimits,
+            maxPositions: deploymentConfig.maxPositions,
+            executionFrequency: deploymentConfig.executionFrequency,
+            notifications: deploymentConfig.notifications,
+          },
+        };
+
+        const session = await autoTradingService.startTradingSession(
+          portfolioId,
+          sessionData
+        );
+
+        // Then deploy the autonomous strategy
+        const strategyConfig: DeploymentConfig = {
           ...deploymentConfig,
           portfolioId,
+          mode: "paper", // Start with paper trading for safety
+          initialCapital:
+            portfolios.find((p) => p.id === portfolioId)?.currentCash || 10000,
         } as DeploymentConfig;
 
-        const response = await autoTradingService.deployStrategy(
-          "default-strategy",
-          config
+        const strategyResponse = await autoTradingService.deployStrategy(
+          `autonomous-strategy-${portfolioId}`,
+          strategyConfig
         );
-        if (response.success) {
+
+        if (strategyResponse.success) {
           setPortfolioStatuses((prev) => ({
             ...prev,
             [portfolioId]: {
@@ -207,15 +274,30 @@ const AutonomousTradingPage: React.FC<AutonomousTradingPageProps> = observer(
               isActive: true,
               activeStrategies: [
                 ...prev[portfolioId].activeStrategies,
-                response.data,
+                strategyResponse.data,
               ],
             },
           }));
+
+          // Show success message
+          console.log(
+            `Autonomous trading started for portfolio ${portfolioId}`
+          );
+          console.log(`Strategy deployed: ${strategyResponse.data.strategyId}`);
+          console.log(`Trading session: ${session.id}`);
         } else {
-          setError(response.error || "Failed to start trading");
+          setError(strategyResponse.error || "Failed to deploy strategy");
+          // Clean up session if strategy deployment failed
+          if (session?.id) {
+            await autoTradingService.stopTradingSession(
+              session.id,
+              "Strategy deployment failed"
+            );
+          }
         }
-      } catch (err) {
-        setError("Failed to start trading");
+      } catch (err: any) {
+        setError(`Failed to start autonomous trading: ${err.message || err}`);
+        console.error("Error starting autonomous trading:", err);
       } finally {
         setLoading(false);
       }
@@ -224,13 +306,53 @@ const AutonomousTradingPage: React.FC<AutonomousTradingPageProps> = observer(
     const handleStopTrading = async (portfolioId: string) => {
       try {
         setLoading(true);
+        setError(null);
         const status = portfolioStatuses[portfolioId];
+
+        if (!status?.activeStrategies?.length) {
+          console.warn(
+            `No active strategies found for portfolio ${portfolioId}`
+          );
+          return;
+        }
 
         // Stop all active strategies for this portfolio
         for (const strategy of status.activeStrategies) {
-          await autoTradingService.stopStrategy(strategy.strategyId);
+          try {
+            const stopResponse = await autoTradingService.stopStrategy(
+              strategy.strategyId
+            );
+            if (!stopResponse.success) {
+              console.error(
+                `Failed to stop strategy ${strategy.strategyId}:`,
+                stopResponse.error
+              );
+            }
+          } catch (err) {
+            console.error(
+              `Error stopping strategy ${strategy.strategyId}:`,
+              err
+            );
+          }
         }
 
+        // Stop any active trading sessions for this portfolio
+        try {
+          const activeSessions =
+            await autoTradingService.getTradingSessions(portfolioId);
+          for (const session of activeSessions) {
+            if (session.is_active) {
+              await autoTradingService.stopTradingSession(
+                session.id,
+                "User requested stop"
+              );
+            }
+          }
+        } catch (err) {
+          console.warn("Could not stop trading sessions:", err);
+        }
+
+        // Update UI state
         setPortfolioStatuses((prev) => ({
           ...prev,
           [portfolioId]: {
@@ -239,8 +361,11 @@ const AutonomousTradingPage: React.FC<AutonomousTradingPageProps> = observer(
             activeStrategies: [],
           },
         }));
-      } catch (err) {
-        setError("Failed to stop trading");
+
+        console.log(`Autonomous trading stopped for portfolio ${portfolioId}`);
+      } catch (err: any) {
+        setError(`Failed to stop autonomous trading: ${err.message || err}`);
+        console.error("Error stopping autonomous trading:", err);
       } finally {
         setLoading(false);
       }
@@ -249,21 +374,74 @@ const AutonomousTradingPage: React.FC<AutonomousTradingPageProps> = observer(
     const handleGlobalTradingToggle = async () => {
       const newState = !globalTradingActive;
       setGlobalTradingActive(newState);
+      setLoading(true);
+      setError(null);
 
-      if (newState) {
-        // Start trading on all portfolios
-        for (const portfolio of portfolios) {
-          if (!portfolioStatuses[portfolio.id]?.isActive) {
-            await handleStartTrading(portfolio.id);
+      try {
+        if (newState) {
+          // Start autonomous trading on all portfolios
+          let successCount = 0;
+          let failCount = 0;
+
+          for (const portfolio of portfolios) {
+            if (!portfolioStatuses[portfolio.id]?.isActive) {
+              try {
+                await handleStartTrading(portfolio.id);
+                successCount++;
+              } catch (err) {
+                failCount++;
+                console.error(
+                  `Failed to start trading for portfolio ${portfolio.id}:`,
+                  err
+                );
+              }
+            }
+          }
+
+          if (failCount > 0) {
+            setError(
+              `Started trading for ${successCount} portfolios, but ${failCount} failed`
+            );
+          } else {
+            console.log(
+              `Successfully started autonomous trading for ${successCount} portfolios`
+            );
+          }
+        } else {
+          // Stop autonomous trading on all portfolios
+          let successCount = 0;
+          let failCount = 0;
+
+          for (const portfolio of portfolios) {
+            if (portfolioStatuses[portfolio.id]?.isActive) {
+              try {
+                await handleStopTrading(portfolio.id);
+                successCount++;
+              } catch (err) {
+                failCount++;
+                console.error(
+                  `Failed to stop trading for portfolio ${portfolio.id}:`,
+                  err
+                );
+              }
+            }
+          }
+
+          if (failCount > 0) {
+            setError(
+              `Stopped trading for ${successCount} portfolios, but ${failCount} failed`
+            );
+          } else {
+            console.log(
+              `Successfully stopped autonomous trading for ${successCount} portfolios`
+            );
           }
         }
-      } else {
-        // Stop trading on all portfolios
-        for (const portfolio of portfolios) {
-          if (portfolioStatuses[portfolio.id]?.isActive) {
-            await handleStopTrading(portfolio.id);
-          }
-        }
+      } catch (err: any) {
+        setError(`Global trading toggle failed: ${err.message || err}`);
+        setGlobalTradingActive(!newState); // Revert state
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -316,7 +494,7 @@ const AutonomousTradingPage: React.FC<AutonomousTradingPageProps> = observer(
       <div className="overview-tab">
         {/* Global Controls */}
         <ContentCard
-          title="Global Trading Control"
+          title="Global Autonomous Trading Control"
           variant="gradient"
           padding="lg"
           className="global-controls"
@@ -325,24 +503,55 @@ const AutonomousTradingPage: React.FC<AutonomousTradingPageProps> = observer(
             <div className="control-left">
               <div className="status-switch">
                 <Typography variant="body2">
-                  {globalTradingActive ? "Trading Active" : "Trading Stopped"}
+                  {globalTradingActive
+                    ? "Autonomous Trading Active"
+                    : "Autonomous Trading Stopped"}
+                </Typography>
+                <Typography
+                  variant="caption"
+                  color="text.secondary"
+                  sx={{ display: "block", mt: 0.5 }}
+                >
+                  {globalTradingActive
+                    ? "AI is actively buying/selling across all active portfolios"
+                    : "Click to start autonomous trading on all portfolios"}
                 </Typography>
                 <Switch
                   checked={globalTradingActive}
                   onChange={handleGlobalTradingToggle}
+                  disabled={loading}
                   color="primary"
                 />
               </div>
             </div>
             <div className="control-right">
-              <TradingButton
-                variant="primary"
-                onClick={() => setDeployModalOpen(true)}
-                startIcon={<Settings />}
-                size="md"
-              >
-                Deploy Strategy
-              </TradingButton>
+              <div className="control-stats">
+                <Typography variant="body2">
+                  Active Portfolios:{" "}
+                  {
+                    Object.values(portfolioStatuses).filter(
+                      (status) => status.isActive
+                    ).length
+                  }{" "}
+                  / {portfolios.length}
+                </Typography>
+                <Typography variant="body2">
+                  Total Active Strategies:{" "}
+                  {Object.values(portfolioStatuses).reduce(
+                    (total, status) => total + status.activeStrategies.length,
+                    0
+                  )}
+                </Typography>
+                <TradingButton
+                  variant="primary"
+                  onClick={() => setDeployModalOpen(true)}
+                  startIcon={<Settings />}
+                  size="md"
+                  sx={{ mt: 1 }}
+                >
+                  Deploy Strategy
+                </TradingButton>
+              </div>
             </div>
           </div>
         </ContentCard>
@@ -382,16 +591,31 @@ const AutonomousTradingPage: React.FC<AutonomousTradingPageProps> = observer(
                     </Typography>
                   </div>
 
+                  {status?.isActive && status?.activeStrategies.length > 0 && (
+                    <div className="info-row">
+                      <Typography variant="body2">Strategy Status</Typography>
+                      <StatusChip
+                        status={
+                          status.activeStrategies[0].status === "running"
+                            ? "success"
+                            : "warning"
+                        }
+                        label={status.activeStrategies[0].status.toUpperCase()}
+                        size="sm"
+                      />
+                    </div>
+                  )}
+
                   <div className="strategy-row">
                     <Typography variant="body2">Assigned Strategy</Typography>
                     <TradingButton
                       variant="secondary"
                       size="sm"
                       onClick={() => handleAssignRandomStrategy(portfolio.id)}
-                      disabled={loading}
+                      disabled={loading || status?.isActive}
                       startIcon={<Shuffle />}
                     >
-                      Random
+                      {status?.isActive ? "Trading Active" : "Random"}
                     </TradingButton>
                   </div>
 
@@ -430,7 +654,7 @@ const AutonomousTradingPage: React.FC<AutonomousTradingPageProps> = observer(
                         startIcon={<Stop />}
                         fullWidth
                       >
-                        Stop Trading
+                        Stop Autonomous Trading
                       </TradingButton>
                     ) : (
                       <TradingButton
@@ -440,8 +664,17 @@ const AutonomousTradingPage: React.FC<AutonomousTradingPageProps> = observer(
                         startIcon={<PlayArrow />}
                         fullWidth
                       >
-                        Start Trading
+                        Start Autonomous Trading
                       </TradingButton>
+                    )}
+
+                    {status?.isActive && (
+                      <Typography
+                        variant="caption"
+                        sx={{ mt: 1, display: "block", textAlign: "center" }}
+                      >
+                        AI system is actively buying/selling stocks
+                      </Typography>
                     )}
                   </div>
                 </div>
@@ -540,12 +773,12 @@ const AutonomousTradingPage: React.FC<AutonomousTradingPageProps> = observer(
       <div className="page-container autonomous-trading-page">
         {/* Standardized Page Header */}
         <PageHeader
-          title="Autonomous Trading Agents"
+          title="Autonomous Trading System"
           currentTime={currentTime}
           isConnected={isConnected}
           showLiveIndicator={true}
           sticky={true}
-          statsValue={`${Object.values(portfolioStatuses).filter((s) => s.isActive).length}/${portfolios.length} portfolios • ${Object.values(portfolioStatuses).reduce((acc, status) => acc + status.activeStrategies.length, 0)} strategies`}
+          statsValue={`${Object.values(portfolioStatuses).filter((s) => s.isActive).length}/${portfolios.length} active • ${Object.values(portfolioStatuses).reduce((acc, status) => acc + status.activeStrategies.length, 0)} strategies running`}
           actionButtons={[
             {
               icon: <span>←</span>,
@@ -558,9 +791,16 @@ const AutonomousTradingPage: React.FC<AutonomousTradingPageProps> = observer(
               label: "Back to Dashboard",
             },
             {
+              icon: <Assessment />,
+              onClick: () => setShowEconomicIntelligence(true),
+              tooltip: "Economic Intelligence & Macro Analysis",
+              className: "action-btn",
+              label: "Economic Intel",
+            },
+            {
               icon: <Settings />,
               onClick: () => setDeployModalOpen(true),
-              tooltip: "Deploy Strategy",
+              tooltip: "Deploy New Strategy",
               className: "action-btn",
               label: "Deploy",
             },
@@ -568,13 +808,26 @@ const AutonomousTradingPage: React.FC<AutonomousTradingPageProps> = observer(
         />
 
         <div className="page-content">
+          {/* Enhanced Error Display */}
           {error && (
             <Alert
               severity="error"
               sx={{ mb: 2 }}
               onClose={() => setError(null)}
             >
+              <Typography variant="body2" fontWeight="medium">
+                Autonomous Trading Error
+              </Typography>
               {error}
+            </Alert>
+          )}
+
+          {/* Loading State */}
+          {loading && (
+            <Alert severity="info" sx={{ mb: 2 }}>
+              <Typography variant="body2">
+                Managing autonomous trading systems... Please wait.
+              </Typography>
             </Alert>
           )}
 
@@ -757,6 +1010,23 @@ const AutonomousTradingPage: React.FC<AutonomousTradingPageProps> = observer(
             </Button>
           </DialogActions>
         </Dialog>
+
+        {/* Economic Intelligence Dashboard Modal */}
+        {showEconomicIntelligence && (
+          <Dialog
+            open={showEconomicIntelligence}
+            onClose={() => setShowEconomicIntelligence(false)}
+            maxWidth="xl"
+            fullWidth
+            fullScreen
+          >
+            <EconomicIntelligenceDashboard
+              currentTime={currentTime}
+              isConnected={isConnected}
+              onNavigateBack={() => setShowEconomicIntelligence(false)}
+            />
+          </Dialog>
+        )}
       </div>
     );
   }

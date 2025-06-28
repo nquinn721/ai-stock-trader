@@ -2,22 +2,22 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import {
-  FedSpeech,
-  PolicyStatement,
-  PolicyStanceAnalysis,
-  RateDecisionPrediction,
-  QEProbabilityAssessment,
-  ImpactAnalysis,
-  InterventionRisk,
-  PolicyDivergenceAnalysis,
-  GuidanceAnalysis,
-  ConsistencyMetrics,
-} from '../interfaces/monetary-policy.interfaces';
-import {
   MonetaryPolicyPrediction,
   PolicyStanceAnalysis as PolicyStanceEntity,
   QEProbabilityAssessment as QEEntity,
 } from '../entities/monetary-policy.entities';
+import {
+  ConsistencyMetrics,
+  FedSpeech,
+  GuidanceAnalysis,
+  ImpactAnalysis,
+  InterventionRisk,
+  PolicyDivergenceAnalysis,
+  PolicyStanceAnalysis,
+  PolicyStatement,
+  QEProbabilityAssessment,
+  RateDecisionPrediction,
+} from '../interfaces/monetary-policy.interfaces';
 
 /**
  * S51: Monetary Policy Service
@@ -39,7 +39,9 @@ export class MonetaryPolicyService {
   /**
    * Analyze Federal Reserve communication patterns
    */
-  async analyzeFedCommunication(speeches: FedSpeech[]): Promise<PolicyStanceAnalysis> {
+  async analyzeFedCommunication(
+    speeches: FedSpeech[],
+  ): Promise<PolicyStanceAnalysis> {
     try {
       this.logger.log(`Analyzing ${speeches.length} Fed communications`);
 
@@ -85,7 +87,9 @@ export class MonetaryPolicyService {
   /**
    * Predict interest rate decision for upcoming meeting
    */
-  async predictInterestRateDecision(meetingDate: Date): Promise<RateDecisionPrediction> {
+  async predictInterestRateDecision(
+    meetingDate: Date,
+  ): Promise<RateDecisionPrediction> {
     try {
       this.logger.log(`Predicting rate decision for ${meetingDate}`);
 
@@ -130,7 +134,9 @@ export class MonetaryPolicyService {
   /**
    * Assess probability of quantitative easing
    */
-  async assessQEProbability(centralBank: string): Promise<QEProbabilityAssessment> {
+  async assessQEProbability(
+    centralBank: string,
+  ): Promise<QEProbabilityAssessment> {
     try {
       this.logger.log(`Assessing QE probability for ${centralBank}`);
 
@@ -163,7 +169,10 @@ export class MonetaryPolicyService {
 
       return assessment;
     } catch (error) {
-      this.logger.error(`Error assessing QE probability for ${centralBank}:`, error);
+      this.logger.error(
+        `Error assessing QE probability for ${centralBank}:`,
+        error,
+      );
       throw error;
     }
   }
@@ -171,9 +180,14 @@ export class MonetaryPolicyService {
   /**
    * Model impact of rate changes on markets
    */
-  async modelRateChangeImpact(rateChange: number, sectors: string[]): Promise<ImpactAnalysis> {
+  async modelRateChangeImpact(
+    rateChange: number,
+    sectors: string[],
+  ): Promise<ImpactAnalysis> {
     try {
-      this.logger.log(`Modeling impact of ${rateChange}% rate change on sectors: ${sectors.join(', ')}`);
+      this.logger.log(
+        `Modeling impact of ${rateChange}% rate change on sectors: ${sectors.join(', ')}`,
+      );
 
       const sectorImpacts = this.calculateSectorImpacts(rateChange, sectors);
       const currencyImpacts = this.calculateCurrencyImpacts(rateChange);
@@ -198,7 +212,9 @@ export class MonetaryPolicyService {
   /**
    * Analyze currency intervention risk
    */
-  async analyzeCurrencyInterventionRisk(currency: string): Promise<InterventionRisk> {
+  async analyzeCurrencyInterventionRisk(
+    currency: string,
+  ): Promise<InterventionRisk> {
     try {
       this.logger.log(`Analyzing intervention risk for ${currency}`);
 
@@ -218,7 +234,10 @@ export class MonetaryPolicyService {
         timestamp: new Date(),
       };
     } catch (error) {
-      this.logger.error(`Error analyzing intervention risk for ${currency}:`, error);
+      this.logger.error(
+        `Error analyzing intervention risk for ${currency}:`,
+        error,
+      );
       throw error;
     }
   }
@@ -226,9 +245,13 @@ export class MonetaryPolicyService {
   /**
    * Predict policy divergence between central banks
    */
-  async predictPolicyDivergence(countries: string[]): Promise<PolicyDivergenceAnalysis> {
+  async predictPolicyDivergence(
+    countries: string[],
+  ): Promise<PolicyDivergenceAnalysis> {
     try {
-      this.logger.log(`Analyzing policy divergence for countries: ${countries.join(', ')}`);
+      this.logger.log(
+        `Analyzing policy divergence for countries: ${countries.join(', ')}`,
+      );
 
       const divergence = this.calculatePolicyDivergence(countries);
       const drivers = this.identifyDivergenceDrivers(countries);
@@ -254,7 +277,9 @@ export class MonetaryPolicyService {
   /**
    * Parse and analyze forward guidance
    */
-  async parseForwardGuidance(guidance: PolicyStatement): Promise<GuidanceAnalysis> {
+  async parseForwardGuidance(
+    guidance: PolicyStatement,
+  ): Promise<GuidanceAnalysis> {
     try {
       this.logger.log(`Parsing forward guidance from ${guidance.centralBank}`);
 
@@ -285,7 +310,9 @@ export class MonetaryPolicyService {
   /**
    * Track policy consistency over time
    */
-  async trackPolicyConsistency(centralBank: string): Promise<ConsistencyMetrics> {
+  async trackPolicyConsistency(
+    centralBank: string,
+  ): Promise<ConsistencyMetrics> {
     try {
       this.logger.log(`Tracking policy consistency for ${centralBank}`);
 
@@ -303,7 +330,10 @@ export class MonetaryPolicyService {
         timestamp: new Date(),
       };
     } catch (error) {
-      this.logger.error(`Error tracking policy consistency for ${centralBank}:`, error);
+      this.logger.error(
+        `Error tracking policy consistency for ${centralBank}:`,
+        error,
+      );
       throw error;
     }
   }
@@ -316,7 +346,9 @@ export class MonetaryPolicyService {
     return sum / speeches.length;
   }
 
-  private determineStance(hawkishScore: number): 'dovish' | 'neutral' | 'hawkish' {
+  private determineStance(
+    hawkishScore: number,
+  ): 'dovish' | 'neutral' | 'hawkish' {
     if (hawkishScore > 0.3) return 'hawkish';
     if (hawkishScore < -0.3) return 'dovish';
     return 'neutral';
@@ -324,11 +356,14 @@ export class MonetaryPolicyService {
 
   private extractKeyThemes(speeches: FedSpeech[]): string[] {
     // Extract common themes from speeches
-    const allTopics = speeches.flatMap(speech => speech.topics);
-    const topicCounts = allTopics.reduce((acc, topic) => {
-      acc[topic] = (acc[topic] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
+    const allTopics = speeches.flatMap((speech) => speech.topics);
+    const topicCounts = allTopics.reduce(
+      (acc, topic) => {
+        acc[topic] = (acc[topic] || 0) + 1;
+        return acc;
+      },
+      {} as Record<string, number>,
+    );
 
     return Object.entries(topicCounts)
       .sort(([, a], [, b]) => b - a)
@@ -359,8 +394,14 @@ export class MonetaryPolicyService {
     return {
       currencies: [
         { currency: 'USD', impact: hawkishScore > 0 ? impact : -impact },
-        { currency: 'EUR', impact: hawkishScore > 0 ? -impact * 0.7 : impact * 0.7 },
-        { currency: 'JPY', impact: hawkishScore > 0 ? -impact * 0.5 : impact * 0.5 },
+        {
+          currency: 'EUR',
+          impact: hawkishScore > 0 ? -impact * 0.7 : impact * 0.7,
+        },
+        {
+          currency: 'JPY',
+          impact: hawkishScore > 0 ? -impact * 0.5 : impact * 0.5,
+        },
       ],
       bonds: [
         { maturity: '2Y', impact: hawkishScore * 0.8 },
@@ -388,7 +429,7 @@ export class MonetaryPolicyService {
     return {
       cut50: 0.05,
       cut25: 0.15,
-      hold: 0.60,
+      hold: 0.6,
       raise25: 0.18,
       raise50: 0.02,
     };
@@ -406,8 +447,8 @@ export class MonetaryPolicyService {
     return [
       { factor: 'Inflation trend', impact: 'hawkish', weight: 0.35 },
       { factor: 'Employment data', impact: 'neutral', weight: 0.25 },
-      { factor: 'Financial conditions', impact: 'dovish', weight: 0.20 },
-      { factor: 'Global economy', impact: 'dovish', weight: 0.20 },
+      { factor: 'Financial conditions', impact: 'dovish', weight: 0.2 },
+      { factor: 'Global economy', impact: 'dovish', weight: 0.2 },
     ];
   }
 
@@ -421,9 +462,21 @@ export class MonetaryPolicyService {
 
   private identifyQEFactors(centralBank: string): any {
     return {
-      economic: ['Recession risk', 'Deflationary pressures', 'Credit market stress'],
-      financial: ['Bond market dysfunction', 'Liquidity crisis', 'Bank funding issues'],
-      political: ['Fiscal policy coordination', 'Political pressure', 'International cooperation'],
+      economic: [
+        'Recession risk',
+        'Deflationary pressures',
+        'Credit market stress',
+      ],
+      financial: [
+        'Bond market dysfunction',
+        'Liquidity crisis',
+        'Bank funding issues',
+      ],
+      political: [
+        'Fiscal policy coordination',
+        'Political pressure',
+        'International cooperation',
+      ],
     };
   }
 
@@ -444,20 +497,25 @@ export class MonetaryPolicyService {
   }
 
   private getHistoricalQEComparisons(centralBank: string): string[] {
-    return ['QE1 (2008-2010)', 'QE2 (2010-2011)', 'QE3 (2012-2014)', 'COVID QE (2020-2022)'];
+    return [
+      'QE1 (2008-2010)',
+      'QE2 (2010-2011)',
+      'QE3 (2012-2014)',
+      'COVID QE (2020-2022)',
+    ];
   }
 
   private calculateSectorImpacts(rateChange: number, sectors: string[]): any[] {
     const sectorSensitivities = {
-      'Financials': 0.6,
-      'Technology': -0.8,
-      'Utilities': -0.4,
+      Financials: 0.6,
+      Technology: -0.8,
+      Utilities: -0.4,
       'Real Estate': -0.9,
       'Consumer Discretionary': -0.5,
-      'Healthcare': -0.2,
+      Healthcare: -0.2,
     };
 
-    return sectors.map(sector => ({
+    return sectors.map((sector) => ({
       sector,
       impact: (sectorSensitivities[sector] || 0) * rateChange,
       reasoning: this.getSectorReasoning(sector, rateChange),
@@ -466,10 +524,14 @@ export class MonetaryPolicyService {
 
   private getSectorReasoning(sector: string, rateChange: number): string {
     if (sector === 'Financials') {
-      return rateChange > 0 ? 'Higher margins from increased spreads' : 'Lower margins from compressed spreads';
+      return rateChange > 0
+        ? 'Higher margins from increased spreads'
+        : 'Lower margins from compressed spreads';
     }
     if (sector === 'Technology') {
-      return rateChange > 0 ? 'Higher discount rates reduce growth valuations' : 'Lower rates support growth valuations';
+      return rateChange > 0
+        ? 'Higher discount rates reduce growth valuations'
+        : 'Lower rates support growth valuations';
     }
     return 'Interest rate sensitivity varies by company fundamentals';
   }
@@ -484,23 +546,54 @@ export class MonetaryPolicyService {
 
   private calculateBondImpacts(rateChange: number): any[] {
     return [
-      { maturity: '2Y', priceImpact: rateChange * -2.0, yieldImpact: rateChange * 0.8 },
-      { maturity: '10Y', priceImpact: rateChange * -6.0, yieldImpact: rateChange * 0.6 },
-      { maturity: '30Y', priceImpact: rateChange * -12.0, yieldImpact: rateChange * 0.5 },
+      {
+        maturity: '2Y',
+        priceImpact: rateChange * -2.0,
+        yieldImpact: rateChange * 0.8,
+      },
+      {
+        maturity: '10Y',
+        priceImpact: rateChange * -6.0,
+        yieldImpact: rateChange * 0.6,
+      },
+      {
+        maturity: '30Y',
+        priceImpact: rateChange * -12.0,
+        yieldImpact: rateChange * 0.5,
+      },
     ];
   }
 
   private calculateCommodityImpacts(rateChange: number): any[] {
     return [
-      { commodity: 'Gold', impact: rateChange * -0.8, mechanism: 'Opportunity cost of holding non-yielding asset' },
-      { commodity: 'Oil', impact: rateChange * -0.3, mechanism: 'Economic growth expectations' },
-      { commodity: 'Copper', impact: rateChange * -0.5, mechanism: 'Industrial demand expectations' },
+      {
+        commodity: 'Gold',
+        impact: rateChange * -0.8,
+        mechanism: 'Opportunity cost of holding non-yielding asset',
+      },
+      {
+        commodity: 'Oil',
+        impact: rateChange * -0.3,
+        mechanism: 'Economic growth expectations',
+      },
+      {
+        commodity: 'Copper',
+        impact: rateChange * -0.5,
+        mechanism: 'Industrial demand expectations',
+      },
     ];
   }
 
-  private assessInterventionRiskLevel(currency: string): 'low' | 'medium' | 'high' | 'critical' {
+  private assessInterventionRiskLevel(
+    currency: string,
+  ): 'low' | 'medium' | 'high' | 'critical' {
     // Simulate risk assessment
-    const riskLevels: ('low' | 'medium' | 'high' | 'critical')[] = ['low', 'medium', 'high', 'critical'];
+    const riskLevels: ('low' | 'medium' | 'high' | 'critical')[] = [
+      'low',
+      'medium',
+      'high',
+      'critical',
+    ];
     return riskLevels[Math.floor(Math.random() * riskLevels.length)];
   }
 
@@ -510,7 +603,7 @@ export class MonetaryPolicyService {
 
   private identifyInterventionTriggers(currency: string): any {
     return {
-      level: 1.10, // Exchange rate level
+      level: 1.1, // Exchange rate level
       volatility: 0.25, // Volatility threshold
       timeframe: '1 week', // Sustained movement timeframe
     };
@@ -553,12 +646,8 @@ export class MonetaryPolicyService {
         { pair: 'USD/EUR', impact: 0.5 },
         { pair: 'USD/JPY', impact: 0.3 },
       ],
-      bonds: [
-        { spread: 'US-German 10Y', impact: 0.25 },
-      ],
-      flows: [
-        { direction: 'USD inflows', magnitude: 0.4 },
-      ],
+      bonds: [{ spread: 'US-German 10Y', impact: 0.25 }],
+      flows: [{ direction: 'USD inflows', magnitude: 0.4 }],
     };
   }
 
@@ -617,12 +706,16 @@ export class MonetaryPolicyService {
 
   private identifyPolicyDeviations(centralBank: string): any[] {
     return [
-      { date: new Date('2023-03-15'), type: 'Rate guidance deviation', impact: 0.02 },
+      {
+        date: new Date('2023-03-15'),
+        type: 'Rate guidance deviation',
+        impact: 0.02,
+      },
     ];
   }
 
   private calculateCredibilityTrend(centralBank: string): number[] {
-    return [0.75, 0.78, 0.80, 0.82, 0.85]; // Increasing trend
+    return [0.75, 0.78, 0.8, 0.82, 0.85]; // Increasing trend
   }
 
   private assessMarketTrust(centralBank: string): number {

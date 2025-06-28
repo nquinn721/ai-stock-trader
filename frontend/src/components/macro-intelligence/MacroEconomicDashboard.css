@@ -1,0 +1,485 @@
+/* Macro Economic Dashboard - Modern UI Styling */
+@import "../shared-styles.css";
+
+.macro-dashboard {
+  min-height: 100vh;
+  background: var(--trading-bg-gradient-dark);
+  color: var(--trading-text-primary);
+  font-family:
+    "Inter",
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    "Roboto",
+    sans-serif;
+}
+
+.page-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.page-content {
+  flex: 1;
+  padding: 32px 40px;
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* Country Selector */
+.country-selector {
+  display: flex;
+  gap: 8px;
+  margin-right: 16px;
+}
+
+/* Trading Action Button */
+.trading-action-btn {
+  background: var(--trading-bg-gradient-accent) !important;
+  color: white !important;
+  border: none !important;
+}
+
+.trading-action-btn:hover {
+  background: var(--trading-primary-600) !important;
+  transform: translateY(-1px);
+}
+
+/* Trading Insights Section */
+.trading-insights-section {
+  margin: 24px 0;
+}
+
+.insights-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.insight-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px;
+  background: var(--trading-bg-glass);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.insight-label {
+  font-size: 14px;
+  color: var(--trading-gray-300);
+  font-weight: 500;
+}
+
+.insight-value {
+  font-size: 16px;
+  color: var(--trading-text-primary);
+  font-weight: 600;
+}
+
+.insight-item:hover {
+  border-color: var(--trading-primary-500);
+  background: var(--trading-bg-card);
+}
+
+/* Trading Recommendations */
+.trading-recommendations {
+  margin-top: 16px;
+}
+
+.recommendation-section {
+  margin-bottom: 24px;
+}
+
+.strategy-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.strategy-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px;
+  background: var(--trading-bg-glass);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+}
+
+.strategy-item:hover {
+  border-color: var(--trading-primary-500);
+  background: var(--trading-bg-card);
+  transform: translateY(-2px);
+}
+
+.strategy-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--trading-primary-400);
+}
+
+.strategy-description {
+  font-size: 14px;
+  color: var(--trading-gray-300);
+  line-height: 1.4;
+}
+
+/* Enhanced responsive design for trading features */
+@media (max-width: 768px) {
+  .insights-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .trading-action-btn {
+    display: none; /* Hide on mobile to save space */
+  }
+}
+
+/* Key Metrics Overview */
+.metrics-overview {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+.metric-card {
+  background: var(--trading-bg-card);
+  border-radius: 12px;
+  padding: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+}
+
+.metric-card:hover {
+  border-color: var(--trading-primary-500);
+  box-shadow: 0 8px 32px rgba(14, 165, 233, 0.15);
+  transform: translateY(-2px);
+}
+
+.metric-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  color: var(--trading-gray-300);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.metric-header svg {
+  color: var(--trading-primary-400);
+}
+
+.metric-value {
+  font-size: 2.5rem;
+  font-weight: 700;
+  line-height: 1;
+  margin-bottom: 8px;
+  color: var(--trading-text-primary);
+}
+
+.metric-subtitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--trading-gray-400);
+}
+
+/* Tab Content Styling */
+.economic-indicators,
+.risk-assessment,
+.political-stability,
+.business-cycle {
+  padding: 24px 0;
+}
+
+/* Indicators Grid */
+.indicators-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+  margin-bottom: 24px;
+}
+
+.indicator-card {
+  background: var(--trading-bg-card) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 12px !important;
+  transition: all 0.3s ease;
+}
+
+.indicator-card:hover {
+  border-color: var(--trading-primary-500) !important;
+  transform: translateY(-2px);
+}
+
+/* Risk Assessment Grid */
+.risk-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 24px;
+}
+
+.recession-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.recession-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.recession-item span:first-child {
+  min-width: 80px;
+  font-weight: 500;
+  color: var(--trading-gray-300);
+}
+
+.recession-item span:last-child {
+  min-width: 60px;
+  text-align: right;
+  font-weight: 600;
+  color: var(--trading-primary-400);
+}
+
+.risks-list,
+.opportunities-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Political Stability Grid */
+.stability-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 24px;
+}
+
+.stability-components {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.component-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.component-item span:first-child {
+  min-width: 80px;
+  font-weight: 500;
+  color: var(--trading-gray-300);
+}
+
+.component-item span:last-child {
+  min-width: 40px;
+  text-align: right;
+  font-weight: 600;
+  color: var(--trading-primary-400);
+}
+
+/* Business Cycle */
+.cycle-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  text-align: center;
+}
+
+.cycle-phase {
+  padding: 24px;
+  background: var(--trading-bg-gradient-accent);
+  border-radius: 16px;
+  color: white;
+  box-shadow: 0 8px 32px rgba(14, 165, 233, 0.3);
+}
+
+.cycle-details {
+  display: flex;
+  gap: 48px;
+  justify-content: center;
+}
+
+.detail-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.detail-item span:first-child {
+  font-size: 14px;
+  color: var(--trading-gray-400);
+  font-weight: 500;
+}
+
+.detail-item span:last-child {
+  font-size: 24px;
+  color: var(--trading-primary-400);
+  font-weight: 700;
+}
+
+/* MUI Component Overrides */
+.macro-dashboard .MuiCard-root {
+  background: var(--trading-bg-card) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 12px !important;
+  color: var(--trading-text-primary) !important;
+}
+
+.macro-dashboard .MuiCardContent-root {
+  color: var(--trading-text-primary) !important;
+}
+
+.macro-dashboard .MuiTypography-root {
+  color: var(--trading-text-primary) !important;
+}
+
+.macro-dashboard .MuiTabs-root {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.macro-dashboard .MuiTab-root {
+  color: var(--trading-gray-400) !important;
+  font-weight: 500;
+}
+
+.macro-dashboard .MuiTab-root.Mui-selected {
+  color: var(--trading-primary-400) !important;
+}
+
+.macro-dashboard .MuiLinearProgress-root {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  border-radius: 4px;
+  height: 8px;
+}
+
+.macro-dashboard .MuiLinearProgress-bar {
+  background: var(--trading-bg-gradient-accent) !important;
+  border-radius: 4px;
+}
+
+.macro-dashboard .MuiChip-root {
+  border-radius: 6px;
+  font-weight: 500;
+}
+
+.macro-dashboard .MuiAlert-root {
+  border-radius: 8px;
+  background: var(--trading-bg-glass) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .page-content {
+    padding: 20px 16px;
+  }
+
+  .metrics-overview {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .indicators-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .risk-grid,
+  .stability-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .cycle-details {
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .country-selector {
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 1024px) {
+  .metrics-overview {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .indicators-grid {
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  }
+}
+
+/* Loading and Error States */
+.macro-dashboard .loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  gap: 24px;
+}
+
+.macro-dashboard .error-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 32px;
+}
+
+/* Animation Utilities */
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.metric-card,
+.indicator-card {
+  animation: slideInUp 0.5s ease-out;
+}
+
+/* Chart Styling */
+.recharts-wrapper {
+  color: var(--trading-text-primary) !important;
+}
+
+.recharts-cartesian-axis-line,
+.recharts-cartesian-axis-tick-line {
+  stroke: rgba(255, 255, 255, 0.2) !important;
+}
+
+.recharts-text {
+  fill: var(--trading-gray-300) !important;
+}
+
+.recharts-cartesian-grid-horizontal line,
+.recharts-cartesian-grid-vertical line {
+  stroke: rgba(255, 255, 255, 0.1) !important;
+}

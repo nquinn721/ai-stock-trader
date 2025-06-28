@@ -30,13 +30,13 @@ import { IntelligentRecommendationService } from '../ml/services/intelligent-rec
 import { PatternRecognitionService } from '../ml/services/pattern-recognition.service';
 import { SentimentAnalysisService } from '../ml/services/sentiment-analysis.service';
 import { SignalGenerationService } from '../ml/services/signal-generation.service';
-import { BacktestingService } from './backtesting.service';
 import {
   AutonomousTradingService,
   DeploymentConfig,
   InstancePerformance,
   StrategyInstance,
 } from './services/autonomous-trading.service';
+import { BacktestingService } from './services/backtesting.service';
 import { StrategyBuilderService } from './strategy-builder.service';
 
 @Injectable()

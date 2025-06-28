@@ -1,0 +1,316 @@
+@import "../../shared-styles.css";
+
+.economic-intelligence-dashboard {
+  background: var(--trading-bg-gradient-dark);
+  min-height: 100vh;
+}
+
+.economic-intelligence-dashboard .page-content {
+  gap: var(--theme-space-6);
+}
+
+/* Economic Analysis Tab */
+.economic-analysis-tab {
+  display: flex;
+  flex-direction: column;
+  gap: var(--theme-space-6);
+}
+
+.metric-display {
+  display: flex;
+  flex-direction: column;
+  gap: var(--theme-space-2);
+}
+
+.trends-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: var(--theme-space-4);
+}
+
+.trend-item {
+  text-align: center;
+  padding: var(--theme-space-3);
+  border: 1px solid var(--trading-border-subtle);
+  border-radius: var(--theme-border-radius-md);
+  background: var(--trading-bg-card);
+}
+
+.indicators-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--theme-space-4);
+}
+
+.indicator-card {
+  padding: var(--theme-space-4);
+  border: 1px solid var(--trading-border-subtle);
+  border-radius: var(--theme-border-radius-md);
+  background: var(--trading-bg-card);
+  transition: all 0.2s ease;
+}
+
+.indicator-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--theme-shadow-lg);
+  border-color: var(--trading-primary-500);
+}
+
+.indicator-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--theme-space-3);
+}
+
+.indicator-trend {
+  display: flex;
+  align-items: center;
+  gap: var(--theme-space-2);
+}
+
+.indicator-values {
+  display: flex;
+  flex-direction: column;
+  gap: var(--theme-space-1);
+}
+
+.risk-list,
+.opportunity-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--theme-space-2);
+}
+
+/* Monetary Policy Tab */
+.monetary-policy-tab {
+  display: flex;
+  flex-direction: column;
+  gap: var(--theme-space-6);
+}
+
+.policy-stance {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.rate-expectations {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--theme-space-4);
+}
+
+.rate-item {
+  text-align: center;
+  padding: var(--theme-space-3);
+  border: 1px solid var(--trading-border-subtle);
+  border-radius: var(--theme-border-radius-md);
+  background: var(--trading-bg-card);
+}
+
+.qe-probability {
+  text-align: center;
+  padding: var(--theme-space-2);
+}
+
+.market-impact-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--theme-space-4);
+}
+
+.impact-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--theme-space-3);
+  border: 1px solid var(--trading-border-subtle);
+  border-radius: var(--theme-border-radius-md);
+  background: var(--trading-bg-card);
+}
+
+/* Geopolitical Tab */
+.geopolitical-tab {
+  display: flex;
+  flex-direction: column;
+  gap: var(--theme-space-6);
+}
+
+.geopolitical-metrics {
+  display: flex;
+  flex-direction: column;
+  gap: var(--theme-space-3);
+}
+
+.metric-row {
+  display: flex;
+  align-items: center;
+  gap: var(--theme-space-2);
+}
+
+.metric-bar {
+  display: flex;
+  align-items: center;
+  flex-grow: 1;
+  gap: var(--theme-space-2);
+}
+
+.key-events {
+  margin-top: var(--theme-space-3);
+}
+
+.sanctions-status {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: var(--theme-space-3);
+  padding: var(--theme-space-2);
+  border: 1px solid var(--trading-border-subtle);
+  border-radius: var(--theme-border-radius-sm);
+  background: var(--trading-bg-surface);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .trends-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .indicators-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .rate-expectations {
+    grid-template-columns: 1fr;
+  }
+  
+  .market-impact-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .sanctions-status {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--theme-space-2);
+  }
+}
+
+/* Animations */
+.indicator-card,
+.rate-item,
+.impact-item {
+  animation: slideInUp 0.5s ease-out;
+}
+
+.metric-display .MuiLinearProgress-root {
+  transition: all 0.3s ease;
+}
+
+.policy-stance .MuiChip-root {
+  animation: pulse-glow 2s infinite;
+}
+
+/* Chart Styling */
+.recharts-wrapper {
+  background: var(--trading-bg-card);
+  border-radius: var(--theme-border-radius-md);
+  padding: var(--theme-space-3);
+}
+
+.recharts-cartesian-axis-tick-value {
+  fill: var(--trading-text-secondary);
+}
+
+.recharts-legend-item-text {
+  color: var(--trading-text-primary) !important;
+}
+
+/* Tab Container Customization */
+.economic-intelligence-dashboard .tabs-container .MuiTab-root {
+  min-height: 60px;
+  font-weight: 500;
+}
+
+.economic-intelligence-dashboard .tabs-container .MuiTab-root.Mui-selected {
+  color: var(--trading-primary-400);
+}
+
+.economic-intelligence-dashboard .tabs-container .MuiTabs-indicator {
+  background-color: var(--trading-primary-500);
+  height: 3px;
+}
+
+/* Loading States */
+.economic-intelligence-dashboard .loading-skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--trading-bg-card) 25%,
+    var(--trading-bg-surface) 50%,
+    var(--trading-bg-card) 75%
+  );
+  background-size: 200% 100%;
+  animation: loading-shimmer 1.5s infinite;
+}
+
+@keyframes loading-shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* Status Indicators */
+.status-positive {
+  color: var(--trading-success-500);
+  background-color: var(--trading-success-50);
+}
+
+.status-negative {
+  color: var(--trading-error-500);
+  background-color: var(--trading-error-50);
+}
+
+.status-neutral {
+  color: var(--trading-warning-500);
+  background-color: var(--trading-warning-50);
+}
+
+/* Economic Intelligence Specific Utilities */
+.risk-high {
+  border-left: 4px solid var(--trading-error-500);
+}
+
+.risk-medium {
+  border-left: 4px solid var(--trading-warning-500);
+}
+
+.risk-low {
+  border-left: 4px solid var(--trading-success-500);
+}
+
+.confidence-score {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--theme-space-1);
+  padding: var(--theme-space-1) var(--theme-space-2);
+  background: var(--trading-bg-surface);
+  border-radius: var(--theme-border-radius-full);
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.outlook-positive {
+  color: var(--trading-success-600);
+}
+
+.outlook-neutral {
+  color: var(--trading-warning-600);
+}
+
+.outlook-negative {
+  color: var(--trading-error-600);
+}

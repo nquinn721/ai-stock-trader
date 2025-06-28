@@ -1,4 +1,10 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 
 @Entity('economic_forecasts')
 export class EconomicForecast {
@@ -26,10 +32,10 @@ export class EconomicForecast {
   @Column({ type: 'text' })
   methodology: string;
 
-  @Column({ type: 'jsonb' })
+  @Column({ type: 'json' })
   drivers: string[];
 
-  @Column({ type: 'jsonb' })
+  @Column({ type: 'json' })
   risks: string[];
 
   @Column({ type: 'varchar' })
@@ -59,10 +65,10 @@ export class BusinessCycle {
   @Column({ type: 'decimal', precision: 5, scale: 2 })
   strength: number;
 
-  @Column({ type: 'jsonb' })
+  @Column({ type: 'json' })
   indicators: any;
 
-  @Column({ type: 'jsonb' })
+  @Column({ type: 'json' })
   nextPhase: any;
 
   @CreateDateColumn()
@@ -89,7 +95,7 @@ export class RecessionProbability {
   @Column({ type: 'decimal', precision: 5, scale: 4 })
   twoYearProbability: number;
 
-  @Column({ type: 'jsonb' })
+  @Column({ type: 'json' })
   indicators: any;
 
   @Column({ type: 'decimal', precision: 5, scale: 4 })

@@ -45,6 +45,7 @@ export interface ScenarioDefinition {
   probability: number;
   marketShock: number;
   correlationShift: number;
+  volatilityMultiplier: number;
 }
 
 export interface Portfolio {

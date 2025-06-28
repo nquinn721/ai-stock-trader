@@ -41,9 +41,9 @@ export interface RateDecisionPrediction {
   meetingDate: Date;
   currentRate: number;
   predictions: {
-    cut50: number;   // probability of 50bp cut
-    cut25: number;   // probability of 25bp cut
-    hold: number;    // probability of no change
+    cut50: number; // probability of 50bp cut
+    cut25: number; // probability of 25bp cut
+    hold: number; // probability of no change
     raise25: number; // probability of 25bp raise
     raise50: number; // probability of 50bp raise
   };

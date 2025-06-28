@@ -490,7 +490,7 @@ export class CognitiveAIService {
   }
 
   private calculateEmotionIntensity(emotions: any): number {
-    const values = Object.values(emotions);
+    const values = Object.values(emotions) as number[];
     return Math.max(...values);
   }
 
@@ -757,8 +757,10 @@ export class CognitiveAIService {
   }
 
   private calculateOverallStress(indicators: any): number {
-    const values = Object.values(indicators);
-    return values.reduce((sum, val) => sum + val, 0) / values.length;
+    const values = Object.values(indicators) as number[];
+    return (
+      values.reduce((sum: number, val: number) => sum + val, 0) / values.length
+    );
   }
 
   private determineStressPhase(level: number): any {
@@ -836,8 +838,10 @@ export class CognitiveAIService {
   }
 
   private calculateOverallCognitiveLoad(components: any): number {
-    const values = Object.values(components);
-    return values.reduce((sum, val) => sum + val, 0) / values.length;
+    const values = Object.values(components) as number[];
+    return (
+      values.reduce((sum: number, val: number) => sum + val, 0) / values.length
+    );
   }
 
   private assessPerformanceImpact(load: number, components: any) {

@@ -412,75 +412,6 @@ export class QuantumOptimizationService {
   }
 
   /**
-   * Execute Variational Quantum Eigensolver
-   */
-  async executeVQE(
-    hamiltonian: Hamiltonian,
-    ansatz: QuantumCircuit,
-  ): Promise<VQEResult> {
-    this.logger.log('Executing Variational Quantum Eigensolver');
-    
-    const startTime = Date.now();
-    const maxIterations = 100;
-    const tolerance = 1e-6;
-    
-    let parameters = [...ansatz.parameters];
-    const optimizationHistory: number[] = [];
-    let bestEnergy = Infinity;
-    let bestParameters = [...parameters];
-    
-    // Optimization loop
-    for (let iter = 0; iter < maxIterations; iter++) {
-      // Prepare quantum state with current parameters
-      const quantumState = this.prepareQuantumState(ansatz, parameters);
-      
-      // Measure expectation value of Hamiltonian
-      const energy = this.measureHamiltonianExpectation(hamiltonian, quantumState);
-      optimizationHistory.push(energy);
-      
-      if (energy < bestEnergy) {
-        bestEnergy = energy;
-        bestParameters = [...parameters];
-      }
-      
-      // Check convergence
-      if (optimizationHistory.length > 10) {
-        const recentEnergies = optimizationHistory.slice(-10);
-        const energyStd = this.calculateStandardDeviation(recentEnergies);
-        if (energyStd < tolerance) {
-          this.logger.log(`VQE converged after ${iter} iterations`);
-          break;
-        }
-      }
-      
-      // Update parameters using gradient descent
-      const gradients = this.calculateVQEGradients(hamiltonian, ansatz, parameters);
-      const learningRate = 0.1;
-      for (let i = 0; i < parameters.length; i++) {
-        parameters[i] -= learningRate * gradients[i];
-      }
-    }
-    
-    // Prepare final state and calculate fidelity
-    const finalState = this.prepareQuantumState(ansatz, bestParameters);
-    const fidelity = this.calculateStateFidelity(finalState);
-    
-    const executionTime = Date.now() - startTime;
-    
-    this.logger.log(
-      `VQE completed in ${executionTime}ms, ground state energy: ${bestEnergy.toFixed(6)}`
-    );
-    
-    return {
-      groundStateEnergy: bestEnergy,
-      eigenstate: finalState,
-      optimizationHistory,
-      quantumCircuitDepth: ansatz.gates.length,
-      fidelity,
-    };
-  }
-
-  /**
    * Train quantum neural network
    */
   async trainQuantumNeuralNetwork(
@@ -1131,7 +1062,7 @@ export class QuantumOptimizationService {
         this.applyParametrizedGate(state, gate, parameters[paramIndex]);
         paramIndex++;
       } else {
-        this.applyQuantumGate(state, gate);
+        this.applyQuantumGate(state, gate, numQubits);
       }
     }
     
@@ -1151,7 +1082,6 @@ export class QuantumOptimizationService {
           if (flippedIndex < state.length) {
             const cos_theta = Math.cos(parameter / 2);
             const sin_theta = Math.sin(parameter / 2);
-            
             const temp = state[i];
             state[i] = cos_theta * temp - sin_theta * state[flippedIndex];
             state[flippedIndex] = sin_theta * temp + cos_theta * state[flippedIndex];
@@ -1159,95 +1089,6 @@ export class QuantumOptimizationService {
         }
       }
     }
-  }
-
-  private applyQuantumGate(state: number[], gate: QuantumGate): void {
-    // Simplified implementation for basic gates
-    if (gate.type === 'H' && gate.qubits.length === 1) {
-      // Hadamard gate
-      const qubit = gate.qubits[0];
-      const sqrt2 = Math.sqrt(2);
-      
-      for (let i = 0; i < state.length; i++) {
-        const bitIndex = (i >> qubit) & 1;
-        if (bitIndex === 0) {
-          const flippedIndex = i | (1 << qubit);
-          if (flippedIndex < state.length) {
-            const temp = state[i];
-            state[i] = (temp + state[flippedIndex]) / sqrt2;
-            state[flippedIndex] = (temp - state[flippedIndex]) / sqrt2;
-          }
-        }
-      }
-    }
-  }
-
-  private measureHamiltonianExpectation(hamiltonian: Hamiltonian, state: number[]): number {
-    let expectation = 0;
-    
-    for (let i = 0; i < hamiltonian.pauliTerms.length; i++) {
-      const term = hamiltonian.pauliTerms[i];
-      const coefficient = hamiltonian.coefficients[i];
-      
-      // Calculate expectation value of Pauli term
-      const termExpectation = this.calculatePauliExpectation(term, state);
-      expectation += coefficient * termExpectation;
-    }
-    
-    return expectation;
-  }
-
-  private calculatePauliExpectation(term: PauliTerm, state: number[]): number {
-    // Simplified Pauli expectation calculation
-    let expectation = 0;
-    
-    for (let i = 0; i < state.length; i++) {
-      expectation += state[i] * state[i]; // |state[i]|^2
-    }
-    
-    return expectation;
-  }
-
-  private calculateStateFidelity(state: number[]): number {
-    // Calculate fidelity as overlap with ideal state
-    let fidelity = 0;
-    for (let i = 0; i < state.length; i++) {
-      fidelity += state[i] * state[i];
-    }
-    return Math.sqrt(fidelity);
-  }
-
-  private calculateVQEGradients(
-    hamiltonian: Hamiltonian,
-    ansatz: QuantumCircuit,
-    parameters: number[],
-  ): number[] {
-    const gradients: number[] = [];
-    const epsilon = 1e-4;
-    
-    for (let i = 0; i < parameters.length; i++) {
-      // Finite difference gradient calculation
-      const paramsPlus = [...parameters];
-      const paramsMinus = [...parameters];
-      paramsPlus[i] += epsilon;
-      paramsMinus[i] -= epsilon;
-      
-      const statePlus = this.prepareQuantumState(ansatz, paramsPlus);
-      const stateMinus = this.prepareQuantumState(ansatz, paramsMinus);
-      
-      const energyPlus = this.measureHamiltonianExpectation(hamiltonian, statePlus);
-      const energyMinus = this.measureHamiltonianExpectation(hamiltonian, stateMinus);
-      
-      gradients.push((energyPlus - energyMinus) / (2 * epsilon));
-    }
-    
-    return gradients;
-  }
-
-  private calculateStandardDeviation(values: number[]): number {
-    const mean = values.reduce((sum, val) => sum + val, 0) / values.length;
-    const variance = values.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / values.length;
-    return Math.sqrt(variance);
   }
 
   // Private helper methods for QNN
@@ -1328,7 +1169,7 @@ export class QuantumOptimizationService {
           type: 'CNOT',
           qubits: [qubit, qubit + 1],
         };
-        this.applyQuantumGate(currentState, cnotGate);
+        this.applyQuantumGate(currentState, cnotGate, architecture.qubits);
       }
     }
     

@@ -91,7 +91,7 @@ export interface PortfolioPerformance {
   dayTradeCount: number;
 }
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:3001";
+const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:8000";
 
 // Create axios instance for auto-trading API
 const autoTradingApi = axios.create({

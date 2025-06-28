@@ -1,4 +1,10 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 
 @Entity('monetary_policy_predictions')
 export class MonetaryPolicyPrediction {
@@ -14,7 +20,7 @@ export class MonetaryPolicyPrediction {
   @Column({ type: 'decimal', precision: 5, scale: 4 })
   currentRate: number;
 
-  @Column({ type: 'jsonb' })
+  @Column({ type: 'json' })
   predictions: any;
 
   @Column({ type: 'decimal', precision: 5, scale: 4 })
@@ -23,7 +29,7 @@ export class MonetaryPolicyPrediction {
   @Column({ type: 'decimal', precision: 5, scale: 4 })
   marketPricing: number;
 
-  @Column({ type: 'jsonb' })
+  @Column({ type: 'json' })
   factors: any;
 
   @Column({ type: 'decimal', precision: 5, scale: 4 })
@@ -53,16 +59,16 @@ export class PolicyStanceAnalysis {
   @Column({ type: 'decimal', precision: 5, scale: 4 })
   change: number;
 
-  @Column({ type: 'jsonb' })
+  @Column({ type: 'json' })
   keyThemes: string[];
 
-  @Column({ type: 'jsonb' })
+  @Column({ type: 'json' })
   concerns: string[];
 
-  @Column({ type: 'jsonb' })
+  @Column({ type: 'json' })
   priorities: string[];
 
-  @Column({ type: 'jsonb' })
+  @Column({ type: 'json' })
   marketImpact: any;
 
   @CreateDateColumn()
@@ -80,19 +86,19 @@ export class QEProbabilityAssessment {
   @Column({ type: 'varchar' })
   centralBank: string;
 
-  @Column({ type: 'jsonb' })
+  @Column({ type: 'json' })
   probability: any;
 
-  @Column({ type: 'jsonb' })
+  @Column({ type: 'json' })
   factors: any;
 
-  @Column({ type: 'jsonb' })
+  @Column({ type: 'json' })
   expectedScale: any;
 
-  @Column({ type: 'jsonb' })
+  @Column({ type: 'json' })
   marketImpact: any;
 
-  @Column({ type: 'jsonb' })
+  @Column({ type: 'json' })
   historicalComparison: string[];
 
   @CreateDateColumn()

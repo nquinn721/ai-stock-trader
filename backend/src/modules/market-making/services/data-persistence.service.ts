@@ -29,13 +29,13 @@ export class MarketDataSnapshot {
   @Column()
   symbol: string;
 
-  @Column('jsonb', { nullable: true })
+  @Column('json', { nullable: true })
   ticker: ExchangeTicker;
 
-  @Column('jsonb', { nullable: true })
+  @Column('json', { nullable: true })
   orderBook: ExchangeOrderBook;
 
-  @Column('jsonb', { nullable: true })
+  @Column('json', { nullable: true })
   trades: ExchangeTrade[];
 
   @CreateDateColumn()
@@ -78,7 +78,7 @@ export class TradingSession {
   @Column('int', { default: 0 })
   profitableTrades: number;
 
-  @Column('jsonb', { nullable: true })
+  @Column('json', { nullable: true })
   metrics: Record<string, any>;
 
   @CreateDateColumn()
@@ -124,7 +124,7 @@ export class PerformanceMetrics {
   @Column('int', { default: 0 })
   tradeCount: number;
 
-  @Column('jsonb', { nullable: true })
+  @Column('json', { nullable: true })
   detailedMetrics: Record<string, any>;
 
   @CreateDateColumn()

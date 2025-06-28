@@ -2,16 +2,20 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import {
+  BusinessCycle,
+  EconomicForecast,
+  RecessionProbability as RecessionEntity,
+} from '../entities/economic.entities';
+import {
+  BusinessCyclePhase,
   EconomicAnalysis,
   EconomicIndicator,
-  InflationForecast,
   GDPForecast,
+  InflationForecast,
   LaborMarketAnalysis,
-  BusinessCyclePhase,
   RecessionProbability,
   YieldCurveAnalysis,
 } from '../interfaces/economic.interfaces';
-import { EconomicForecast, BusinessCycle, RecessionProbability as RecessionEntity } from '../entities/economic.entities';
 
 /**
  * S51: Economic Intelligence Service
@@ -45,7 +49,8 @@ export class EconomicIntelligenceService {
       });
 
       // Simulate comprehensive economic analysis
-      const indicators: EconomicIndicator[] = this.generateEconomicIndicators(country);
+      const indicators: EconomicIndicator[] =
+        this.generateEconomicIndicators(country);
       const overallHealth = this.calculateEconomicHealth(indicators);
       const trends = this.analyzeTrends(indicators);
       const risks = this.identifyRisks(country, indicators);
@@ -64,7 +69,10 @@ export class EconomicIntelligenceService {
         timestamp: new Date(),
       };
     } catch (error) {
-      this.logger.error(`Error analyzing economic indicators for ${country}:`, error);
+      this.logger.error(
+        `Error analyzing economic indicators for ${country}:`,
+        error,
+      );
       throw error;
     }
   }
@@ -72,13 +80,21 @@ export class EconomicIntelligenceService {
   /**
    * Predict inflation trends for a region
    */
-  async predictInflationTrend(region: string, timeframe: string): Promise<InflationForecast> {
+  async predictInflationTrend(
+    region: string,
+    timeframe: string,
+  ): Promise<InflationForecast> {
     try {
-      this.logger.log(`Predicting inflation trend for ${region} over ${timeframe}`);
+      this.logger.log(
+        `Predicting inflation trend for ${region} over ${timeframe}`,
+      );
 
       // Generate inflation forecast based on economic models
       const currentInflation = this.getCurrentInflation(region);
-      const forecasts = this.generateInflationForecasts(region, currentInflation);
+      const forecasts = this.generateInflationForecasts(
+        region,
+        currentInflation,
+      );
       const drivers = this.identifyInflationDrivers(region);
       const risks = this.assessInflationRisks(region);
 
@@ -89,7 +105,12 @@ export class EconomicIntelligenceService {
         drivers,
         risks,
         confidence: 0.82,
-        methodology: ['DSGE Model', 'VAR Analysis', 'ML Ensemble', 'Survey Data'],
+        methodology: [
+          'DSGE Model',
+          'VAR Analysis',
+          'ML Ensemble',
+          'Survey Data',
+        ],
         timestamp: new Date(),
       };
     } catch (error) {
@@ -107,7 +128,11 @@ export class EconomicIntelligenceService {
 
       const currentGDP = this.getCurrentGDP(country);
       const growthRate = this.calculateGrowthRate(country);
-      const forecasts = this.generateGDPForecasts(country, currentGDP, growthRate);
+      const forecasts = this.generateGDPForecasts(
+        country,
+        currentGDP,
+        growthRate,
+      );
       const sectorsContribution = this.analyzeSectorContribution(country);
       const risks = this.identifyGDPRisks(country);
 
@@ -138,7 +163,11 @@ export class EconomicIntelligenceService {
       const employment = this.analyzeEmployment(region);
       const wages = this.analyzeWages(region);
       const sectors = this.analyzeSectorEmployment(region);
-      const outlook = this.determineLaborOutlook(unemployment, employment, wages);
+      const outlook = this.determineLaborOutlook(
+        unemployment,
+        employment,
+        wages,
+      );
 
       return {
         region,
@@ -158,7 +187,9 @@ export class EconomicIntelligenceService {
   /**
    * Identify current business cycle phase
    */
-  async identifyBusinessCyclePhase(economy: string): Promise<BusinessCyclePhase> {
+  async identifyBusinessCyclePhase(
+    economy: string,
+  ): Promise<BusinessCyclePhase> {
     try {
       this.logger.log(`Identifying business cycle phase for ${economy}`);
 
@@ -191,7 +222,10 @@ export class EconomicIntelligenceService {
 
       return businessCycle;
     } catch (error) {
-      this.logger.error(`Error identifying business cycle phase for ${economy}:`, error);
+      this.logger.error(
+        `Error identifying business cycle phase for ${economy}:`,
+        error,
+      );
       throw error;
     }
   }
@@ -199,7 +233,9 @@ export class EconomicIntelligenceService {
   /**
    * Predict recession probability
    */
-  async predictRecessionProbability(country: string): Promise<RecessionProbability> {
+  async predictRecessionProbability(
+    country: string,
+  ): Promise<RecessionProbability> {
     try {
       this.logger.log(`Predicting recession probability for ${country}`);
 
@@ -231,7 +267,10 @@ export class EconomicIntelligenceService {
 
       return recessionProb;
     } catch (error) {
-      this.logger.error(`Error predicting recession probability for ${country}:`, error);
+      this.logger.error(
+        `Error predicting recession probability for ${country}:`,
+        error,
+      );
       throw error;
     }
   }
@@ -246,7 +285,10 @@ export class EconomicIntelligenceService {
       const shape = this.determineYieldCurveShape(country);
       const inversion = this.analyzeYieldCurveInversion(country);
       const signals = this.extractYieldCurveSignals(country, shape);
-      const historicalComparison = this.compareToHistoricalCurves(country, shape);
+      const historicalComparison = this.compareToHistoricalCurves(
+        country,
+        shape,
+      );
 
       return {
         country,
@@ -270,8 +312,18 @@ export class EconomicIntelligenceService {
       { name: 'GDP Growth', value: 2.4, forecast: 2.8, impact: 'high' },
       { name: 'Inflation Rate', value: 3.2, forecast: 2.9, impact: 'high' },
       { name: 'Unemployment', value: 3.8, forecast: 3.6, impact: 'medium' },
-      { name: 'Consumer Confidence', value: 102.5, forecast: 105.0, impact: 'medium' },
-      { name: 'Manufacturing PMI', value: 51.2, forecast: 52.1, impact: 'medium' },
+      {
+        name: 'Consumer Confidence',
+        value: 102.5,
+        forecast: 105.0,
+        impact: 'medium',
+      },
+      {
+        name: 'Manufacturing PMI',
+        value: 51.2,
+        forecast: 52.1,
+        impact: 'medium',
+      },
       { name: 'Retail Sales', value: 4.1, forecast: 4.5, impact: 'medium' },
     ];
 
@@ -290,12 +342,18 @@ export class EconomicIntelligenceService {
 
   private calculateEconomicHealth(indicators: EconomicIndicator[]): number {
     // Calculate composite economic health score (0-100)
-    const weights = { GDP: 0.3, Inflation: 0.2, Unemployment: 0.25, Confidence: 0.15, PMI: 0.1 };
+    const weights = {
+      GDP: 0.3,
+      Inflation: 0.2,
+      Unemployment: 0.25,
+      Confidence: 0.15,
+      PMI: 0.1,
+    };
     let score = 0;
 
     indicators.forEach((indicator) => {
       let indicatorScore = 50; // Neutral score
-      
+
       if (indicator.indicator.includes('GDP')) {
         indicatorScore = Math.min(100, Math.max(0, (indicator.value + 2) * 25));
         score += indicatorScore * weights.GDP;
@@ -315,28 +373,40 @@ export class EconomicIntelligenceService {
 
   private analyzeTrends(indicators: EconomicIndicator[]): any {
     return {
-      gdpGrowth: indicators.find(i => i.indicator.includes('GDP'))?.value || 2.5,
-      inflation: indicators.find(i => i.indicator.includes('Inflation'))?.value || 3.0,
-      unemployment: indicators.find(i => i.indicator.includes('Unemployment'))?.value || 3.8,
+      gdpGrowth:
+        indicators.find((i) => i.indicator.includes('GDP'))?.value || 2.5,
+      inflation:
+        indicators.find((i) => i.indicator.includes('Inflation'))?.value || 3.0,
+      unemployment:
+        indicators.find((i) => i.indicator.includes('Unemployment'))?.value ||
+        3.8,
       productivity: 1.8,
     };
   }
 
-  private identifyRisks(country: string, indicators: EconomicIndicator[]): string[] {
+  private identifyRisks(
+    country: string,
+    indicators: EconomicIndicator[],
+  ): string[] {
     const risks: string[] = [];
-    
-    const inflation = indicators.find(i => i.indicator.includes('Inflation'))?.value || 0;
+
+    const inflation =
+      indicators.find((i) => i.indicator.includes('Inflation'))?.value || 0;
     if (inflation > 4.0) risks.push('High inflation pressure');
-    
-    const unemployment = indicators.find(i => i.indicator.includes('Unemployment'))?.value || 0;
+
+    const unemployment =
+      indicators.find((i) => i.indicator.includes('Unemployment'))?.value || 0;
     if (unemployment > 5.0) risks.push('Rising unemployment');
-    
+
     risks.push('Supply chain disruptions', 'Geopolitical tensions');
-    
+
     return risks;
   }
 
-  private identifyOpportunities(country: string, indicators: EconomicIndicator[]): string[] {
+  private identifyOpportunities(
+    country: string,
+    indicators: EconomicIndicator[],
+  ): string[] {
     return [
       'Technology sector growth',
       'Infrastructure investment',
@@ -345,7 +415,10 @@ export class EconomicIntelligenceService {
     ];
   }
 
-  private determineOutlook(health: number, trends: any): 'positive' | 'neutral' | 'negative' {
+  private determineOutlook(
+    health: number,
+    trends: any,
+  ): 'positive' | 'neutral' | 'negative' {
     if (health > 70) return 'positive';
     if (health < 40) return 'negative';
     return 'neutral';
@@ -353,7 +426,7 @@ export class EconomicIntelligenceService {
 
   private getCurrentInflation(region: string): number {
     // Simulate current inflation data
-    const baseInflation = { 'US': 3.2, 'EU': 2.8, 'UK': 4.1, 'Global': 3.5 };
+    const baseInflation = { US: 3.2, EU: 2.8, UK: 4.1, Global: 3.5 };
     return baseInflation[region] || 3.0;
   }
 
@@ -379,13 +452,17 @@ export class EconomicIntelligenceService {
   private assessInflationRisks(region: string): any {
     return {
       upside: ['Energy price spikes', 'Wage spiral', 'Supply disruptions'],
-      downside: ['Demand destruction', 'Technology deflation', 'Global recession'],
+      downside: [
+        'Demand destruction',
+        'Technology deflation',
+        'Global recession',
+      ],
     };
   }
 
   private getCurrentGDP(country: string): number {
     // Simulate GDP data (in trillions)
-    const gdpData = { 'US': 26.9, 'China': 17.7, 'Germany': 4.3, 'Japan': 4.1 };
+    const gdpData = { US: 26.9, China: 17.7, Germany: 4.3, Japan: 4.1 };
     return gdpData[country] || 2.0;
   }
 
@@ -394,7 +471,11 @@ export class EconomicIntelligenceService {
     return 2.0 + Math.random() * 2.0;
   }
 
-  private generateGDPForecasts(country: string, current: number, growth: number): any {
+  private generateGDPForecasts(
+    country: string,
+    current: number,
+    growth: number,
+  ): any {
     return {
       nextQuarter: current * (1 + growth / 400),
       nextYear: current * (1 + growth / 100),
@@ -405,7 +486,7 @@ export class EconomicIntelligenceService {
   private analyzeSectorContribution(country: string): any[] {
     return [
       { sector: 'Services', contribution: 0.65 },
-      { sector: 'Manufacturing', contribution: 0.20 },
+      { sector: 'Manufacturing', contribution: 0.2 },
       { sector: 'Agriculture', contribution: 0.15 },
     ];
   }
@@ -451,13 +532,24 @@ export class EconomicIntelligenceService {
     ];
   }
 
-  private determineLaborOutlook(unemployment: any, employment: any, wages: any): string {
+  private determineLaborOutlook(
+    unemployment: any,
+    employment: any,
+    wages: any,
+  ): string {
     return 'Tight labor market with moderate wage growth expected';
   }
 
-  private determineBusinessCyclePhase(economy: string): 'expansion' | 'peak' | 'contraction' | 'trough' {
+  private determineBusinessCyclePhase(
+    economy: string,
+  ): 'expansion' | 'peak' | 'contraction' | 'trough' {
     // Simulate business cycle analysis
-    const phases: ('expansion' | 'peak' | 'contraction' | 'trough')[] = ['expansion', 'peak', 'contraction', 'trough'];
+    const phases: ('expansion' | 'peak' | 'contraction' | 'trough')[] = [
+      'expansion',
+      'peak',
+      'contraction',
+      'trough',
+    ];
     return phases[Math.floor(Math.random() * phases.length)];
   }
 
@@ -480,11 +572,29 @@ export class EconomicIntelligenceService {
   private predictNextPhase(economy: string, currentPhase: string): any {
     const transitions = {
       expansion: { phase: 'peak', probability: 0.25, timeframe: '6-12 months' },
-      peak: { phase: 'contraction', probability: 0.35, timeframe: '3-9 months' },
-      contraction: { phase: 'trough', probability: 0.45, timeframe: '6-18 months' },
-      trough: { phase: 'expansion', probability: 0.55, timeframe: '3-12 months' },
+      peak: {
+        phase: 'contraction',
+        probability: 0.35,
+        timeframe: '3-9 months',
+      },
+      contraction: {
+        phase: 'trough',
+        probability: 0.45,
+        timeframe: '6-18 months',
+      },
+      trough: {
+        phase: 'expansion',
+        probability: 0.55,
+        timeframe: '3-12 months',
+      },
     };
-    return transitions[currentPhase] || { phase: 'expansion', probability: 0.3, timeframe: '12 months' };
+    return (
+      transitions[currentPhase] || {
+        phase: 'expansion',
+        probability: 0.3,
+        timeframe: '12 months',
+      }
+    );
   }
 
   private calculateRecessionProbability(country: string): any {
@@ -504,8 +614,15 @@ export class EconomicIntelligenceService {
     ];
   }
 
-  private determineYieldCurveShape(country: string): 'normal' | 'flat' | 'inverted' | 'humped' {
-    const shapes: ('normal' | 'flat' | 'inverted' | 'humped')[] = ['normal', 'flat', 'inverted', 'humped'];
+  private determineYieldCurveShape(
+    country: string,
+  ): 'normal' | 'flat' | 'inverted' | 'humped' {
+    const shapes: ('normal' | 'flat' | 'inverted' | 'humped')[] = [
+      'normal',
+      'flat',
+      'inverted',
+      'humped',
+    ];
     return shapes[Math.floor(Math.random() * shapes.length)];
   }
 
