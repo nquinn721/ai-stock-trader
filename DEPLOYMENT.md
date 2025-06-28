@@ -1,53 +1,50 @@
-# AI Stock Trader - Google Cloud Run Deployment Guide
+# Stock Trading App - CI/CD Deployment Guide
 
-This guide will help you deploy the AI Stock Trader application to Google Cloud Run with automatic database provisioning and CI/CD pipeline setup.
+## ✅ Automatic Deployment with Google Cloud Build
 
-## 📋 Prerequisites
+Your repository is configured for **automatic deployment** to Google Cloud Run. No manual deployment scripts are needed!
 
-Before you begin, ensure you have:
+## � How to Deploy
 
-1. **Google Cloud Platform Account** with billing enabled
-2. **Google Cloud CLI** installed ([Installation Guide](https://cloud.google.com/sdk/docs/install))
-3. **Docker** installed ([Installation Guide](https://docs.docker.com/get-docker/))
-4. **Git** installed and GitHub account (for CI/CD)
-5. **Node.js 18+** installed (for local development)
-
-## 🚀 Quick Start (Automated Setup)
-
-The easiest way to deploy is using our automated setup script:
+### Simple Push to Master
 
 ```bash
-# Make sure you're in the project root directory
-cd ai-stock-trader
-
-# Run the complete setup script
-./scripts/setup-project.sh
+git add .
+git commit -m "Your changes"
+git push origin master
 ```
 
-This script will:
-- ✅ Set up your Google Cloud project
-- ✅ Create and configure Cloud SQL database
-- ✅ Deploy the application to Cloud Run
-- ✅ Set up GitHub Actions for CI/CD
-- ✅ Provide you with all necessary configuration
+**That's it!** Google Cloud Build automatically:
 
-## 🛠️ Manual Setup (Step by Step)
+1. Builds your Docker image using the multi-stage Dockerfile
+2. Pushes to Google Container Registry
+3. Deploys to Cloud Run with your database configuration
+4. Sets up all environment variables and scaling settings
 
-If you prefer to set up manually or need more control:
+## 📊 Monitor Your Deployments
 
-### Step 1: Setup Environment
+- **Build History**: [Google Cloud Build Console](https://console.cloud.google.com/cloud-build/builds)
+- **Service Status**: [Cloud Run Console](https://console.cloud.google.com/run)
+- **Application Logs**: View real-time logs in Cloud Run console
 
-```bash
-# Set your Google Cloud project ID
-export GOOGLE_CLOUD_PROJECT="your-project-id"
-export REGION="us-central1"
+## � Current Configuration
 
-# Authenticate with Google Cloud
-gcloud auth login
-gcloud config set project $GOOGLE_CLOUD_PROJECT
+Your `cloudbuild.yaml` is configured with:
+
+```yaml
+# Database Configuration
+_DB_HOST: "10.11.33.5"
+_DB_USERNAME: "accountantuser"
+_DB_PASSWORD: "Accountant1234"
+_DB_NAME: "stock_trading_db"
+
+# Cloud Run Settings
+- Memory: 2Gi
+- CPU: 2 cores
+- Timeout: 300 seconds
+- Scaling: 0-10 instances
+- Port: 8080
 ```
-
-### Step 2: Enable Required APIs
 
 ```bash
 gcloud services enable \
@@ -66,6 +63,7 @@ gcloud services enable \
 ```
 
 This creates:
+
 - Cloud SQL MySQL 8.0 instance
 - Database with complete schema
 - Database user with secure password
@@ -80,6 +78,7 @@ This creates:
 ```
 
 This will:
+
 - Build the Docker container (backend + frontend)
 - Push to Google Container Registry
 - Deploy to Cloud Run with proper configuration
@@ -103,6 +102,7 @@ This will:
 ### Container Structure
 
 The deployment uses a single container that includes:
+
 - **NestJS Backend** (API server on port 8080)
 - **React Frontend** (served as static files by the backend)
 - **Database connectivity** via Cloud SQL Proxy
@@ -191,6 +191,7 @@ DB_PASSWORD=<from-secret-manager>
 ### Resource Limits
 
 Default Cloud Run configuration:
+
 - **Memory**: 2GB
 - **CPU**: 2 vCPUs
 - **Concurrency**: 80 requests per instance
@@ -226,6 +227,7 @@ gcloud run logs read ai-stock-trader --region=us-central1 --limit=50
 Access monitoring at: [Google Cloud Console - Cloud Run](https://console.cloud.google.com/run)
 
 Available metrics:
+
 - Request latency and count
 - Error rates
 - Instance count
@@ -250,113 +252,114 @@ Available metrics:
 - ✅ **Backup encryption**: Automatic encrypted backups
 - ✅ **Deletion protection**: Prevents accidental deletion
 
+## 🛠️ Local Development
+
+```bash
+# Start all development servers
+npm run dev:start
+
+# Individual services:
+npm run dev:backend     # Backend API (port 8000)
+npm run dev:frontend    # React app (port 3000)
+
+# Backend: http://localhost:8000
+# Frontend: http://localhost:3000
+# Project Management: http://localhost:5000
+```
+
+## 🎯 Production Health Check
+
+After deployment, verify your app:
+
+```bash
+# Get your service URL
+gcloud run services describe stock-trading-app --region=us-central1 --format="value(status.url)"
+
+# Health check
+curl https://your-service-url.run.app/health
+```
+
+Expected response:
+
+```json
+{
+  "status": "ok",
+  "database": "connected",
+  "timestamp": "2025-06-27T...",
+  "environment": "production"
+}
+```
+
+## 📱 Application Architecture
+
+### Single-Service Deployment
+
+- **Frontend**: React SPA served as static files by NestJS
+- **Backend**: NestJS API handling all endpoints and static file serving
+- **Database**: Connected to your existing database at `10.11.33.5`
+
+### URL Structure
+
+- **Frontend App**: `/*` (React SPA)
+- **API Endpoints**: `/api/*`, `/stocks/*`, `/paper-trading/*`
+- **WebSocket**: `/socket.io/*`
+- **Health Check**: `/health`
+- **API Documentation**: `/api` (Swagger UI)
+
+## 🔒 Security Recommendations
+
+### For Production Use:
+
+1. **Move secrets to Google Secret Manager**:
+
+   ```bash
+   # Store database password securely
+   gcloud secrets create db-password --data-file=- <<< "Accountant1234"
+
+   # Update cloudbuild.yaml to use secrets:
+   "--set-secrets", "DB_PASSWORD=db-password:latest"
+   ```
+
+2. **Enable SSL/TLS** for database connections
+3. **Set up monitoring** and alerting
+4. **Configure backup strategy** for your database
+
 ## 🚨 Troubleshooting
 
-### Common Issues
+### Build Failures
 
-1. **Build Failures**
-   ```bash
-   # Check build logs
-   gcloud builds log [BUILD_ID]
-   
-   # Test locally
-   docker build -t test-build .
-   ```
-
-2. **Database Connection Issues**
-   ```bash
-   # Check Cloud SQL status
-   gcloud sql instances describe ai-stock-trader-db
-   
-   # Test connection
-   gcloud sql connect ai-stock-trader-db --user=stocktrader_user
-   ```
-
-3. **Service Not Starting**
-   ```bash
-   # Check service logs
-   gcloud run logs read ai-stock-trader --region=us-central1
-   
-   # Check service status
-   gcloud run services describe ai-stock-trader --region=us-central1
-   ```
-
-4. **GitHub Actions Failing**
-   - Verify all secrets are set correctly
-   - Check service account permissions
-   - Review workflow logs in GitHub
-
-### Health Checks
-
-The application includes health endpoints:
-- `GET /health` - Basic health check
-- `GET /api` - Swagger documentation (indicates backend is working)
-- `GET /` - Frontend (indicates static file serving is working)
-
-## 💰 Cost Optimization
-
-### Estimated Costs (US regions)
-
-- **Cloud Run**: ~$0-50/month (depends on traffic)
-- **Cloud SQL**: ~$7-25/month (db-f1-micro instance)
-- **Storage**: ~$0.02/GB/month
-- **Networking**: Minimal for normal usage
-
-### Cost Optimization Tips
-
-1. **Use minimum resources**: Start with smaller instance types
-2. **Scale to zero**: Let Cloud Run scale down when not in use
-3. **Monitor usage**: Use Cloud Monitoring to track resource usage
-4. **Optimize queries**: Use database indexes effectively
-5. **Enable compression**: Reduce bandwidth costs
-
-## 🔄 Updates and Maintenance
-
-### Updating the Application
+Check Cloud Build logs:
 
 ```bash
-# Manual deployment
-./scripts/deploy.sh
-
-# Or push to GitHub for automatic deployment
-git push origin main
+gcloud builds list --limit=5
+gcloud builds log [BUILD_ID]
 ```
 
-### Database Migrations
+### Runtime Issues
 
-For schema changes:
-1. Update the schema in `scripts/setup-database.sh`
-2. Create migration scripts in a `migrations/` folder
-3. Run migrations manually or integrate into deployment
-
-### Backup and Recovery
+Check Cloud Run logs:
 
 ```bash
-# Create manual backup
-gcloud sql backups create --instance=ai-stock-trader-db
-
-# List backups
-gcloud sql backups list --instance=ai-stock-trader-db
-
-# Restore from backup
-gcloud sql backups restore [BACKUP_ID] --restore-instance=ai-stock-trader-db
+gcloud run services logs read stock-trading-app --region=us-central1 --limit=50
 ```
 
-## 📞 Support
+### Database Connectivity
 
-For issues related to:
-- **Google Cloud**: [Google Cloud Support](https://cloud.google.com/support)
-- **This application**: Create an issue in the GitHub repository
-- **Documentation**: Refer to inline code comments and this guide
+Verify database configuration in `cloudbuild.yaml` substitution variables.
 
-## 🎉 Next Steps
+## 🎉 Benefits of Your CI/CD Setup
 
-After successful deployment:
+✅ **Zero-Touch Deployment**: Push to master = automatic deployment  
+✅ **Consistent Builds**: Same Docker build process every time  
+✅ **Rollback Ready**: Easy to revert via Cloud Run console  
+✅ **Scalable**: Auto-scales based on traffic (0-10 instances)  
+✅ **Cost Effective**: Pay only for actual usage  
+✅ **Integrated**: Database, frontend, and backend in one service
 
-1. **Test the application**: Visit the deployed URL
-2. **Set up monitoring alerts**: Configure Cloud Monitoring
-3. **Customize the application**: Add your own features
-4. **Scale as needed**: Adjust resources based on usage
-5. **Implement monitoring**: Set up proper logging and metrics
+Your deployment is fully automated - just push your code and watch it deploy! 🚀
 
-Your AI Stock Trader application is now running in production on Google Cloud Run! 🚀
+## 📚 Additional Resources
+
+- [Cloud Run Documentation](https://cloud.google.com/run/docs)
+- [Cloud Build Documentation](https://cloud.google.com/build/docs)
+- [Container Registry Documentation](https://cloud.google.com/container-registry/docs)
