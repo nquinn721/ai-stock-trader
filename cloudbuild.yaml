@@ -1,4 +1,7 @@
 # Cloud Build configuration for Stock Trading App
+# This file is automatically triggered when pushing to master branch
+# No manual deployment scripts needed - CI/CD handles everything
+
 steps:
   # Step 1: Build the application using the existing Dockerfile
   - name: "gcr.io/cloud-builders/docker"
@@ -61,11 +64,11 @@ steps:
 substitutions:
   _REGION: "us-central1"
   # Database configuration for Cloud SQL
-  _DB_HOST: "localhost" # Replace with your Cloud SQL instance IP or socket path
+  _DB_HOST: "10.11.33.5" # Replace with your Cloud SQL instance IP or socket path
   _DB_PORT: "3306"
-  _DB_USERNAME: "stocktrader" # Replace with your database username
-  _DB_PASSWORD: "your-secure-password" # Replace with your database password
-  _DB_NAME: "stocktrading" # Replace with your database name
+  _DB_USERNAME: "accountantuser" # Replace with your database username
+  _DB_PASSWORD: "Accountant1234" # Replace with your database password
+  _DB_NAME: "stock_trading_db" # Replace with your database name
   _DB_SSL: "true" # Enable SSL for Cloud SQL connections
 
 # Build options
