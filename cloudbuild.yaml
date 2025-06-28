@@ -1,86 +1,12 @@
-# Cloud Build configuration for Stock Trading App
-# This file is automatically triggered when pushing to master branch
-# No manual deployment scripts needed - CI/CD handles everything
-
 steps:
-  # Step 1: Build the application using the existing Dockerfile
-  - name: "gcr.io/cloud-builders/docker"
+  - name: "gcr.io/cloud-builders/gcloud"
     args:
-      [
-        "build",
-        "-t",
-        "gcr.io/$PROJECT_ID/stock-trading-app:$BUILD_ID",
-        "-t",
-        "gcr.io/$PROJECT_ID/stock-trading-app:latest",
-        "-f",
-        "Dockerfile",
-        ".",
-      ]
-
-  # Step 2: Push the image to Container Registry
-  - name: "gcr.io/cloud-builders/docker"
-    args: ["push", "gcr.io/$PROJECT_ID/stock-trading-app:$BUILD_ID"]
-
-  # Step 3: Push the latest tag
-  - name: "gcr.io/cloud-builders/docker"
-    args: ["push", "gcr.io/$PROJECT_ID/stock-trading-app:latest"]
-
-  # Step 4: Deploy to Cloud Run
-  - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
-    entrypoint: "gcloud"
-    args:
-      [
-        "run",
-        "deploy",
-        "stock-trading-app",
-        "--image",
-        "gcr.io/$PROJECT_ID/stock-trading-app:$BUILD_ID",
-        "--region",
-        "${_REGION}",
-        "--platform",
-        "managed",
-        "--allow-unauthenticated",
-        "--port",
-        "8080",
-        "--memory",
-        "2Gi",
-        "--cpu",
-        "2",
-        "--timeout",
-        "300",
-        "--concurrency",
-        "100",
-        "--min-instances",
-        "0",
-        "--max-instances",
-        "10",
-        "--set-env-vars",
-        "NODE_ENV=production,PORT=8080,DB_HOST=${_DB_HOST},DB_PORT=${_DB_PORT},DB_USERNAME=${_DB_USERNAME},DB_PASSWORD=${_DB_PASSWORD},DB_NAME=${_DB_NAME},DB_SSL=${_DB_SSL}",
-        "--labels",
-        "app=stock-trading,env=production",
-      ]
-
-# Substitution variables
-substitutions:
-  _REGION: "us-central1"
-  # Database configuration for Cloud SQL
-  _DB_HOST: "10.11.33.5" # Replace with your Cloud SQL instance IP or socket path
-  _DB_PORT: "3306"
-  _DB_USERNAME: "accountantuser" # Replace with your database username
-  _DB_PASSWORD: "Accountant1234" # Replace with your database password
-  _DB_NAME: "stock_trading_db" # Replace with your database name
-  _DB_SSL: "true" # Enable SSL for Cloud SQL connections
-
-# Build options
-options:
-  machineType: "E2_HIGHCPU_8"
-  diskSizeGb: "100"
-  logging: "CLOUD_LOGGING_ONLY"
-
-# Build timeout
-timeout: "1200s"
-
-# Images to be stored in Container Registry
-images:
-  - "gcr.io/$PROJECT_ID/stock-trading-app:$BUILD_ID"
-  - "gcr.io/$PROJECT_ID/stock-trading-app:latest"
+      - "run"
+      - "deploy"
+      - "[SERVICE-NAME]"
+      - "--image"
+      - "gcr.io/cloudrun/hello"
+      - "--region"
+      - "[REGION]"
+      - "--platform"
+      - "managed"
