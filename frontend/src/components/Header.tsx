@@ -1,6 +1,17 @@
 import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import "./Header.css";
+import {
+  Dashboard as DashboardIcon,
+  AutoAwesome as AutoAwesomeIcon,
+  Analytics as AnalyticsIcon,
+  Search as SearchIcon,
+  SmartToy as SmartToyIcon,
+  MonetizationOn as MonetizationOnIcon,
+  Psychology as PsychologyIcon,
+  Business as BusinessIcon,
+  RocketLaunch as RocketLaunchIcon,
+} from "@mui/icons-material";
 
 const Header: React.FC = () => {
   const location = useLocation();
@@ -63,17 +74,53 @@ const Header: React.FC = () => {
   }, [isMobileMenuOpen]);
 
   const navItems = [
-    { path: "/", label: "Dashboard", icon: "📊" },
-    { path: "/autonomous-trading", label: "Autonomous Trading", icon: "🤖" },
-    { path: "/analytics", label: "Analytics", icon: "📈" },
-    { path: "/market-scanner", label: "Market Scanner", icon: "🔍" },
-    { path: "/ai-assistant", label: "AI Assistant", icon: "🎯" },
-    { path: "/market-making", label: "Market Making", icon: "💰" },
-    { path: "/behavioral-finance", label: "Behavioral Finance", icon: "🧠" },
+    { 
+      path: "/", 
+      label: "Dashboard", 
+      description: "Main dashboard overview",
+      icon: DashboardIcon 
+    },
+    { 
+      path: "/autonomous-trading", 
+      label: "Auto Trading", 
+      description: "Automated trading strategies",
+      icon: AutoAwesomeIcon 
+    },
+    { 
+      path: "/analytics", 
+      label: "Analytics", 
+      description: "Market analysis and insights",
+      icon: AnalyticsIcon 
+    },
+    { 
+      path: "/market-scanner", 
+      label: "Market Scanner", 
+      description: "Scan markets for opportunities",
+      icon: SearchIcon 
+    },
+    { 
+      path: "/ai-assistant", 
+      label: "AI Assistant", 
+      description: "AI-powered trading assistant",
+      icon: SmartToyIcon 
+    },
+    { 
+      path: "/market-making", 
+      label: "Market Making", 
+      description: "Liquidity provision strategies",
+      icon: MonetizationOnIcon 
+    },
+    { 
+      path: "/behavioral-finance", 
+      label: "Behavioral Finance", 
+      description: "Behavioral analysis tools",
+      icon: PsychologyIcon 
+    },
     {
       path: "/enterprise-intelligence",
       label: "Enterprise Intelligence",
-      icon: "⚡",
+      description: "Advanced business intelligence",
+      icon: BusinessIcon,
     },
   ];
 
@@ -82,7 +129,7 @@ const Header: React.FC = () => {
       <div className="header-container">
         <div className="header-brand">
           <div className="brand-logo">
-            <span className="logo-icon">🚀</span>
+            <RocketLaunchIcon className="logo-icon" />
             <div className="brand-text">
               <h1>TradeHub</h1>
               <span className="brand-subtitle">Pro Trading Platform</span>
@@ -91,22 +138,26 @@ const Header: React.FC = () => {
         </div>
 
         <nav className={`header-nav ${isMobileMenuOpen ? 'mobile-open' : ''}`}>
-          {navItems.map((item) => (
-            <Link
-              key={item.path}
-              to={item.path}
-              className={`nav-item ${
-                location.pathname === item.path ? "active" : ""
-              }`}
-              onClick={closeMobileMenu}
-            >
-              <span className="nav-icon">{item.icon}</span>
-              <span className="nav-label">{item.label}</span>
-              {location.pathname === item.path && (
-                <span className="nav-indicator"></span>
-              )}
-            </Link>
-          ))}
+          {navItems.map((item) => {
+            const IconComponent = item.icon;
+            return (
+              <Link
+                key={item.path}
+                to={item.path}
+                className={`nav-item ${
+                  location.pathname === item.path ? "active" : ""
+                }`}
+                onClick={closeMobileMenu}
+                title={item.description}
+              >
+                <IconComponent className="nav-icon" fontSize="small" />
+                <span className="nav-label">{item.label}</span>
+                {location.pathname === item.path && (
+                  <span className="nav-indicator"></span>
+                )}
+              </Link>
+            );
+          })}
         </nav>
 
         <div className="header-actions">
@@ -123,11 +174,6 @@ const Header: React.FC = () => {
               </span>
             </button>
           )}
-          
-          <div className="market-status">
-            <span className="market-indicator"></span>
-            <span className="market-text">Market Open</span>
-          </div>
         </div>
       </div>
     </header>
