@@ -120,7 +120,7 @@ export function buildFrontendApiUrl(
 export function getFrontendHttpConfig() {
   const baseConfig = FRONTEND_API_CONFIG.http;
   const envConfig = getEnvironmentConfig();
-  
+
   // Merge environment-specific config with base config
   return {
     ...baseConfig,
@@ -135,7 +135,7 @@ export function getFrontendHttpConfig() {
 export function getWebSocketConfig() {
   const baseConfig = FRONTEND_API_CONFIG.websocket;
   const envConfig = getEnvironmentConfig();
-  
+
   // Merge environment-specific config with base config
   return {
     ...baseConfig,

@@ -339,13 +339,13 @@ What would you like to know about the markets today?`,
     <Paper
       elevation={3}
       sx={{
-        height: "450px", // Fixed shorter height
+        height: "800px", // Fixed shorter height
         display: "flex",
         flexDirection: "column",
         bgcolor: theme.palette.background.default,
         width: "100%",
-        maxWidth: "800px", // Wider maximum width
-        minWidth: "600px", // Ensure minimum width
+        maxWidth: "1000px", // Wider maximum width
+        minWidth: "1000px", // Ensure minimum width
       }}
     >
       {/* Header */}
@@ -388,7 +388,7 @@ What would you like to know about the markets today?`,
           flex: 1,
           overflowY: "auto",
           p: 0.5, // Reduced padding for more message space
-          maxHeight: "300px", // Constrain message area height
+          maxHeight: "670px", // Constrain message area height
         }}
       >
         <List sx={{ pb: 0, pt: 0 }}>

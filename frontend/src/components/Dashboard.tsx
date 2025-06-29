@@ -22,7 +22,6 @@ import {
   useWebSocketStore,
 } from "../stores/StoreContext";
 import { Portfolio } from "../types";
-import TradingAssistantChat from "./TradingAssistantChat";
 import "./Dashboard.css";
 import EmptyState from "./EmptyState";
 import EnhancedPortfolioAnalyticsDashboard from "./EnhancedPortfolioAnalyticsDashboard";
@@ -35,6 +34,7 @@ import PortfolioDetailsModal from "./PortfolioDetailsModal";
 import PortfolioSelector from "./PortfolioSelector";
 import QuickTrade from "./QuickTrade";
 import StockCard from "./StockCard";
+import TradingAssistantChat from "./TradingAssistantChat";
 import PageHeader from "./ui/PageHeader";
 
 // Add icons to library - commented out for now
