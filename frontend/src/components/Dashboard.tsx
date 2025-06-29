@@ -22,7 +22,7 @@ import {
   useWebSocketStore,
 } from "../stores/StoreContext";
 import { Portfolio } from "../types";
-import TradingAssistantChat from "./ai/TradingAssistantChat";
+import TradingAssistantChat from "./TradingAssistantChat";
 import "./Dashboard.css";
 import EmptyState from "./EmptyState";
 import EnhancedPortfolioAnalyticsDashboard from "./EnhancedPortfolioAnalyticsDashboard";

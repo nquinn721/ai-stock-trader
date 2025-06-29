@@ -1,5 +1,5 @@
 import React from "react";
-import TradingAssistantChat from "../components/ai/TradingAssistantChat";
+import TradingAssistantChat from "../components/TradingAssistantChat";
 import "./AIAssistantPage.css";
 
 const AIAssistantPage: React.FC = () => {

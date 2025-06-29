@@ -34,7 +34,7 @@ export class WebSocketStore {
 
     this.socket = io(url, {
       transports: ["websocket"],
-      timeout: 10000,
+      timeout: getWebSocketConfig().heartbeatInterval,
     });
 
     this.socket.on("connect", () => {

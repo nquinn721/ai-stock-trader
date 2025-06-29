@@ -1981,6 +1981,36 @@ export class StockWebSocketGateway
   }
 
   /**
+   * Notify about stop-loss set
+   */
+  async notifyStopLossSet(portfolioId: string, stopLossData: any) {
+    try {
+      const message = {
+        type: 'STOP_LOSS_SET',
+        timestamp: new Date().toISOString(),
+        data: {
+          symbol: stopLossData.symbol,
+          tradeId: stopLossData.tradeId,
+          entryPrice: stopLossData.entryPrice,
+          stopLossPrice: stopLossData.stopLossPrice,
+          stopLossType: stopLossData.stopLossType,
+          riskRatio: stopLossData.riskRatio,
+        },
+        message: `Adaptive stop-loss set for ${stopLossData.symbol} at $${stopLossData.stopLossPrice} (${stopLossData.stopLossType})`,
+        severity: 'info',
+        portfolioId,
+      };
+
+      this.server.emit('stop_loss_set', message);
+      console.log(
+        `📊 Stop-loss notification sent for ${stopLossData.symbol} in portfolio ${portfolioId}`,
+      );
+    } catch (error) {
+      console.error(`Error sending stop-loss notification:`, error);
+    }
+  }
+
+  /**
    * Subscribe to auto-trading notifications
    */
   @SubscribeMessage('subscribe_auto_trading')

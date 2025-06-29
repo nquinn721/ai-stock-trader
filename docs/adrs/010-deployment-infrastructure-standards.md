@@ -1,6 +1,7 @@
 # ADR-010: Deployment Infrastructure Standards
 
 ## Status
+
 Accepted
 
 ## Context
@@ -16,6 +17,7 @@ We establish comprehensive deployment infrastructure standards covering Docker c
 ### Current Deployment State
 
 #### Core Functional Modules (✅ Enabled)
+
 - **StockModule**: Core stock data and Yahoo Finance API integration
 - **WebsocketModule**: Real-time data streaming and client communication
 - **NewsModule**: Financial news and sentiment analysis
@@ -29,10 +31,11 @@ We establish comprehensive deployment infrastructure standards covering Docker c
 - **MacroIntelligenceModule**: Economic and geopolitical analysis
 
 #### Temporarily Disabled Modules (⚠️ Commented Out)
+
 ```typescript
 // Disabled in app.module.ts for deployment stability
 // AutoTradingModule, // Path-to-regexp compatibility issues
-// BehavioralFinanceModule, // Path-to-regexp compatibility issues  
+// BehavioralFinanceModule, // Path-to-regexp compatibility issues
 // MultiAssetModule, // Path-to-regexp compatibility issues
 // DataIntelligenceModule, // Path-to-regexp compatibility issues
 // EconomicIntelligenceModule, // Path-to-regexp compatibility issues
@@ -40,6 +43,7 @@ We establish comprehensive deployment infrastructure standards covering Docker c
 ```
 
 #### Removed Dependencies
+
 ```json
 // Removed from backend/package.json for deployment optimization
 // "@tensorflow/tfjs": "^4.22.0", // Heavy ML dependency
@@ -54,12 +58,14 @@ We establish comprehensive deployment infrastructure standards covering Docker c
 ### 1. Docker Infrastructure
 
 #### Main Dockerfile (Multi-stage Production)
+
 - **File**: `Dockerfile`
 - **Purpose**: Cloud Run optimized production deployment
 - **Features**: Multi-stage build, Node.js 22 Alpine, security hardening
 - **Port**: 8080 (Cloud Run standard)
 
 #### Cloud Run Dockerfile
+
 - **File**: `Dockerfile.cloudrun`
 - **Purpose**: Google Cloud Run specific optimizations
 - **Features**: Reduced dependencies, faster startup, smaller image
@@ -67,6 +73,7 @@ We establish comprehensive deployment infrastructure standards covering Docker c
 - **Image Size**: ~800MB (optimized)
 
 #### Deployment Variants
+
 ```bash
 Dockerfile.backend        # Backend-only deployment
 Dockerfile.backend-test   # Backend with testing tools
@@ -78,6 +85,7 @@ Dockerfile.complex        # Full feature set (for future)
 ### 2. Cloud Platform Configurations
 
 #### Google Cloud Run
+
 - **File**: `cloudbuild.yaml`
 - **Memory**: 8Gi
 - **CPU**: 4 cores
@@ -86,18 +94,21 @@ Dockerfile.complex        # Full feature set (for future)
 - **Auto-scaling**: 0-3 instances
 
 #### Kubernetes
+
 - **File**: `k8s-simple-deploy.yaml`
 - **Replicas**: 2-10 (auto-scaling)
 - **Resources**: 4Gi memory, 2 CPU cores
 - **Health checks**: Liveness and readiness probes
 
 #### Vercel
+
 - **File**: `vercel.json`
 - **Function timeout**: 60s
 - **Memory**: 3008MB
 - **Runtime**: Node.js 18
 
 #### Render
+
 - **File**: `render.yaml`
 - **Plan**: Standard
 - **Auto-deploy**: Git-based deployment
@@ -105,6 +116,7 @@ Dockerfile.complex        # Full feature set (for future)
 ### 3. Database Configuration
 
 #### Production Database
+
 ```typescript
 // Cloud SQL MySQL Configuration
 DATABASE_HOST=35.238.63.253
@@ -115,22 +127,25 @@ DATABASE_NAME=stocktrading-mysql
 ```
 
 #### Development Database
+
 ```typescript
 // Local MySQL Configuration
-DATABASE_HOST=localhost
-DATABASE_PORT=3306
-DATABASE_USERNAME=admin
-DATABASE_PASSWORD=password
-DATABASE_NAME=stock_trading_db
+DATABASE_HOST = localhost;
+DATABASE_PORT = 3306;
+DATABASE_USERNAME = admin;
+DATABASE_PASSWORD = password;
+DATABASE_NAME = stock_trading_db;
 ```
 
 ## Systematic Re-enablement Plan
 
 ### Phase 1: Core Stability (✅ Complete)
+
 **Target**: Stable deployment with essential functionality
 **Timeline**: Completed
 
 **Modules Enabled**:
+
 - Core trading operations
 - Real-time data streaming
 - Order management
@@ -138,17 +153,20 @@ DATABASE_NAME=stock_trading_db
 - Basic ML services
 
 **Infrastructure**:
+
 - Docker optimizations
 - Cloud Run deployment
 - Database optimization
 - WebSocket stability
 
 ### Phase 2: Trading Intelligence (🔄 In Progress)
+
 **Target**: Advanced trading capabilities
 **Timeline**: 2-3 weeks
 **Priority**: High
 
 **Modules to Re-enable**:
+
 1. **AutoTradingModule**
    - Autonomous trading strategies
    - Rule-based execution
@@ -164,6 +182,7 @@ DATABASE_NAME=stock_trading_db
    - **Solution**: Namespace controller routes
 
 **Technical Tasks**:
+
 ```typescript
 // Fix path-to-regexp compatibility
 npm install path-to-regexp@^6.2.1
@@ -174,11 +193,13 @@ npm install path-to-regexp@^6.2.1
 ```
 
 ### Phase 3: Multi-Asset Intelligence (📋 Planned)
+
 **Target**: Cross-asset trading capabilities
 **Timeline**: 3-4 weeks
 **Priority**: Medium
 
 **Modules to Re-enable**:
+
 1. **MultiAssetModule**
    - Crypto trading
    - Forex integration
@@ -196,16 +217,19 @@ npm install path-to-regexp@^6.2.1
    - Market regime detection
 
 **Technical Requirements**:
+
 - External API integrations
 - Additional data sources
 - Enhanced caching layer
 
 ### Phase 4: Advanced Market Making (🎯 Future)
+
 **Target**: Professional trading capabilities
 **Timeline**: 4-6 weeks
 **Priority**: Low
 
 **Modules to Re-enable**:
+
 1. **MarketMakingModule**
    - Liquidity provision
    - Arbitrage detection
@@ -215,6 +239,7 @@ npm install path-to-regexp@^6.2.1
 ## Deployment Naming Conventions
 
 ### Docker Images
+
 ```bash
 # Naming Pattern: gcr.io/{PROJECT_ID}/stock-trading-app:{TAG}
 gcr.io/heroic-footing-460117-k8/stock-trading-app:latest
@@ -223,6 +248,7 @@ gcr.io/heroic-footing-460117-k8/stock-trading-app:{BUILD_ID}
 ```
 
 ### Cloud Services
+
 ```bash
 # Google Cloud Run
 stock-trading-app          # Main service
@@ -235,6 +261,7 @@ stock-trading-ingress     # External access
 ```
 
 ### Environment Variables
+
 ```bash
 # Standard naming convention
 NODE_ENV=production
@@ -250,6 +277,7 @@ DATABASE_NAME={DATABASE}
 ## Build Scripts and Automation
 
 ### VS Code Tasks
+
 ```json
 {
   "shell: Start React Dashboard",           // Port 3000
@@ -263,6 +291,7 @@ DATABASE_NAME={DATABASE}
 ```
 
 ### NPM Scripts
+
 ```json
 {
   "prod:deploy": "Deploy production environment",
@@ -275,6 +304,7 @@ DATABASE_NAME={DATABASE}
 ```
 
 ### Deployment Scripts
+
 ```bash
 scripts/deploy-cloud-run.sh        # Google Cloud Run deployment
 scripts/deploy-cloud-run.bat       # Windows version
@@ -286,6 +316,7 @@ scripts/test-docker-images.sh      # Validate Docker images
 ## Security and Performance Standards
 
 ### Docker Security
+
 ```dockerfile
 # Non-root user enforcement
 RUN addgroup -g 1001 -S nodejs && \
@@ -298,6 +329,7 @@ RUN apk add --no-cache dumb-init curl  # Essential tools only
 ```
 
 ### Performance Optimizations
+
 ```dockerfile
 # Multi-stage builds for smaller images
 FROM node:20-alpine AS build-stage
@@ -309,6 +341,7 @@ RUN npm install --omit=dev --ignore-scripts
 ```
 
 ### Health Monitoring
+
 ```dockerfile
 # Comprehensive health checks
 HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
@@ -318,17 +351,21 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
 ## Testing and Validation
 
 ### Deployment Testing
+
 1. **Docker Build Validation**
+
    ```bash
    scripts/test-docker-build.sh
    ```
 
 2. **Image Security Scanning**
+
    ```bash
    docker scan gcr.io/PROJECT/stock-trading-app:latest
    ```
 
 3. **Health Check Verification**
+
    ```bash
    curl -f http://localhost:8080/health
    ```
@@ -339,6 +376,7 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
    ```
 
 ### Rollback Procedures
+
 ```bash
 # Cloud Run rollback
 gcloud run services replace-traffic stock-trading-app \
@@ -353,6 +391,7 @@ docker-compose -f docker-compose.prod.yml up -d
 ## Module Re-enablement Checklist
 
 ### Before Re-enabling Any Module:
+
 - [ ] **Dependency Analysis**: Check for version conflicts
 - [ ] **Router Compatibility**: Verify path-to-regexp compatibility
 - [ ] **Controller Paths**: Ensure unique route patterns
@@ -363,22 +402,26 @@ docker-compose -f docker-compose.prod.yml up -d
 - [ ] **Performance Impact**: Measure resource usage
 
 ### Re-enablement Process:
+
 1. **Local Testing**
+
    ```bash
    # Uncomment module in app.module.ts
    # AutoTradingModule,
-   
+
    npm run test          # Run tests
    npm run start:dev     # Start development
    ```
 
 2. **Integration Testing**
+
    ```bash
    npm run test:e2e      # End-to-end tests
    npm run test:cov      # Coverage validation
    ```
 
 3. **Deployment Testing**
+
    ```bash
    scripts/test-docker-build.sh    # Test build
    npm run prod:deploy             # Deploy to staging
@@ -394,6 +437,7 @@ docker-compose -f docker-compose.prod.yml up -d
 ## Consequences
 
 ### Positive Outcomes
+
 - **Stable Deployments**: Reliable cloud deployment across platforms
 - **Scalable Infrastructure**: Support for multiple deployment targets
 - **Systematic Approach**: Clear path to full functionality restoration
@@ -401,12 +445,14 @@ docker-compose -f docker-compose.prod.yml up -d
 - **Security Hardening**: Non-root containers, minimal attack surface
 
 ### Trade-offs
+
 - **Reduced Functionality**: Temporary loss of advanced features
 - **Technical Debt**: Need to re-enable disabled modules systematically
 - **Complexity**: Multiple Docker configurations to maintain
 - **Resource Usage**: Higher memory/CPU requirements for full feature set
 
 ### Monitoring Requirements
+
 - **Module Status**: Track which modules are enabled/disabled
 - **Performance Metrics**: Monitor resource usage as modules are re-enabled
 - **Error Tracking**: Watch for regressions during re-enablement
@@ -415,12 +461,14 @@ docker-compose -f docker-compose.prod.yml up -d
 ## Future Considerations
 
 ### Architecture Evolution
+
 - **Microservices Migration**: Consider breaking large modules into services
 - **Event-Driven Architecture**: Implement event sourcing for better modularity
 - **API Gateway**: Central routing and authentication
 - **Service Mesh**: Enhanced inter-service communication
 
 ### Technology Updates
+
 - **Node.js Updates**: Regular runtime updates
 - **Dependency Management**: Automated vulnerability scanning
 - **Container Optimization**: Advanced Docker optimizations

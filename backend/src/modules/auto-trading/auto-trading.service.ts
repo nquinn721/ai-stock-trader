@@ -331,6 +331,9 @@ export class AutoTradingService {
         return;
       }
 
+      // Perform real-time ML risk monitoring
+      await this.performMLRiskMonitoring(portfolioId, portfolio);
+
       // Get current stock data for evaluation
       const stocks = await this.stockService.getAllStocks();
 
@@ -451,7 +454,7 @@ export class AutoTradingService {
     }
 
     // Get technical indicators and patterns
-    const technicalIndicators = {
+    let technicalIndicators: any = {
       rsi: undefined,
       macd: undefined,
       volume: stock?.volume || 0,
@@ -460,15 +463,21 @@ export class AutoTradingService {
 
     try {
       // Get pattern recognition signals
-      // Pattern recognition will be implemented when the service method is available
-      // const patterns = await this.patternRecognitionService.detectPatterns(symbol);
-      // if (patterns && patterns.length > 0) {
-      //   technicalIndicators = {
-      //     ...technicalIndicators,
-      //     patterns: patterns.map(p => p.pattern),
-      //     patternConfidence: patterns[0]?.confidence || 0,
-      //   };
-      // }
+      const patterns =
+        await this.patternRecognitionService.recognizePatternsAdvanced(
+          symbol,
+          [], // Would pass historical price data here
+          {
+            timeframes: ['1h', '4h'],
+            confidenceThreshold: 0.7,
+            useEnsemble: true,
+          },
+        );
+      if (patterns && patterns.patterns && patterns.patterns.length > 0) {
+        technicalIndicators.patterns = patterns.patterns.map((p) => p.type);
+        technicalIndicators.patternConfidence =
+          patterns.patterns[0]?.confidence || 0;
+      }
     } catch (error) {
       this.logger.warn(
         `Failed to get pattern recognition for ${symbol}:`,
@@ -477,17 +486,20 @@ export class AutoTradingService {
     }
 
     // Get sentiment analysis
-    const sentimentScore = 0;
+    let sentimentScore = 0;
     try {
-      // Sentiment analysis will be implemented when the service method is available
-      // const sentiment = await this.sentimentAnalysisService.analyzeSymbol(symbol);
-      // if (sentiment) {
-      //   sentimentScore = sentiment.score;
-      //   technicalIndicators = {
-      //     ...technicalIndicators,
-      //     sentiment: sentimentScore,
-      //   };
-      // }
+      // Get sentiment analysis from ML service
+      const sentiment =
+        await this.sentimentAnalysisService.analyzeSentimentAdvanced(
+          symbol,
+          [], // Would pass news data here
+          [], // Social media data
+          [], // Analyst reports
+        );
+      if (sentiment) {
+        sentimentScore = sentiment.overallSentiment;
+        technicalIndicators.sentiment = sentimentScore;
+      }
     } catch (error) {
       this.logger.warn(
         `Failed to get sentiment analysis for ${symbol}:`,
@@ -567,6 +579,16 @@ export class AutoTradingService {
               `Auto trade executed: ${action.type} ${optimizedQuantity} ${action.symbol} at $${result.executedPrice}`,
             );
 
+            // Set up adaptive stop-loss for buy orders
+            if (action.type === 'buy') {
+              await this.setupAdaptiveStopLoss(
+                rule.portfolio_id,
+                action.symbol,
+                result.executedPrice,
+                result.tradeId,
+              );
+            }
+
             // Notify via WebSocket
             await this.stockWebSocketGateway.notifyTradeExecuted(
               rule.portfolio_id,
@@ -597,25 +619,48 @@ export class AutoTradingService {
     context: TradingContext,
   ): Promise<{ approved: boolean; reason?: string }> {
     try {
-      // Use dynamic risk management service
-      // Risk assessment will be implemented when the service method is available
-      // const riskAssessment = await this.dynamicRiskManagementService.assessTradeRisk({
-      //   symbol: context.symbol,
-      //   portfolioId: rule.portfolio_id,
-      //   tradeType: rule.actions[0]?.type || 'buy',
-      //   quantity: rule.actions[0]?.quantity || 0,
-      //   currentPrice: context.currentPrice,
-      //   portfolioValue: context.portfolioValue,
-      //   positions: context.positions,
-      // });
+      // Use dynamic risk management service to assess portfolio risk
+      const riskInput = {
+        portfolioValue: context.portfolioValue,
+        positions: context.positions.map((pos) => ({
+          symbol: pos.symbol,
+          quantity: pos.quantity,
+          currentPrice: pos.currentPrice || context.currentPrice,
+          entryPrice: pos.entryPrice || context.currentPrice,
+          positionValue:
+            pos.positionValue || pos.quantity * context.currentPrice,
+          weight: pos.weight || 0.1,
+        })),
+        marketConditions: {
+          volatilityIndex: 20, // Mock VIX value
+          marketTrend: 'sideways' as const,
+          liquidityConditions: 'medium' as const,
+          correlationMatrix: {},
+        },
+        historicalVolatility: {
+          [context.symbol]: context.technicalIndicators?.volatility || 0.2,
+        },
+        economicIndicators: {
+          interestRates: 0.05,
+          inflationRate: 0.03,
+          gdpGrowth: 0.02,
+          unemploymentRate: 0.04,
+        },
+      };
 
-      // return {
-      //   approved: riskAssessment.approved,
-      //   reason: riskAssessment.reason,
-      // };
+      const riskAssessment =
+        await this.dynamicRiskManagementService.assessPortfolioRisk(riskInput);
 
-      // For now, default to approved until ML service is properly integrated
-      return { approved: true };
+      // Approve if portfolio risk metrics are acceptable
+      const approved =
+        riskAssessment.portfolioRisk.var95 < context.portfolioValue * 0.1; // Max 10% daily VaR
+
+      return {
+        approved,
+        reason: approved
+          ? undefined
+          : `High portfolio VaR: ${riskAssessment.portfolioRisk.var95}`,
+      };
     } catch (error) {
       this.logger.warn(
         'ML risk assessment failed, defaulting to approved:',
@@ -635,20 +680,40 @@ export class AutoTradingService {
   ): Promise<number> {
     try {
       // Use dynamic risk management for position sizing
-      // Position optimization will be implemented when the service method is available
-      // const optimization = await this.dynamicRiskManagementService.optimizePositionSize({
-      //   symbol: context.symbol,
-      //   portfolioId,
-      //   originalQuantity,
-      //   currentPrice: context.currentPrice,
-      //   portfolioValue: context.portfolioValue,
-      //   volatility: context.technicalIndicators?.volatility || 0.2,
-      //   confidence: context.recommendation?.confidence || 0.5,
-      // });
+      const portfolioValue = context.portfolioValue || 100000; // Default if not available
+      const riskTolerance = 0.02; // 2% risk tolerance (configurable)
 
-      // return optimization.optimizedQuantity || originalQuantity;
+      const marketConditions = {
+        volatilityIndex: context.technicalIndicators?.volatility || 0.2,
+        marketTrend: this.determineMarketTrend(context),
+        liquidityConditions: 'medium' as const,
+        correlationMatrix: {},
+      };
 
-      // For now, return original quantity until ML service is properly integrated
+      const positionSizing =
+        await this.dynamicRiskManagementService.calculateDynamicPositionSize(
+          context.symbol,
+          portfolioValue,
+          riskTolerance,
+          marketConditions,
+        );
+
+      if (positionSizing && positionSizing.recommendedSize > 0) {
+        // Convert dollar amount to shares
+        const recommendedShares =
+          positionSizing.recommendedSize / context.currentPrice;
+        const optimizedQuantity = Math.min(
+          recommendedShares,
+          originalQuantity * 2, // Cap at 2x original for safety
+        );
+
+        this.logger.log(
+          `ML position sizing: ${context.symbol} - Original: ${originalQuantity}, Optimized: ${optimizedQuantity} (Kelly: ${positionSizing.kellyFraction})`,
+        );
+
+        return Math.max(1, Math.floor(optimizedQuantity)); // Minimum 1 share
+      }
+
       return originalQuantity;
     } catch (error) {
       this.logger.warn(
@@ -656,6 +721,142 @@ export class AutoTradingService {
         error,
       );
       return originalQuantity;
+    }
+  }
+
+  /**
+   * Determine market trend from trading context
+   */
+  private determineMarketTrend(
+    context: TradingContext,
+  ): 'bull' | 'bear' | 'sideways' {
+    const changePercent = context.marketData?.changePercent || 0;
+
+    if (changePercent > 2) {
+      return 'bull';
+    } else if (changePercent < -2) {
+      return 'bear';
+    } else {
+      return 'sideways';
+    }
+  }
+
+  /**
+   * Set up adaptive stop-loss for a position
+   */
+  private async setupAdaptiveStopLoss(
+    portfolioId: string,
+    symbol: string,
+    entryPrice: number,
+    tradeId: string,
+  ): Promise<void> {
+    try {
+      const marketConditions = {
+        volatilityIndex: 0.2, // Default volatility
+        marketTrend: 'sideways' as const,
+        liquidityConditions: 'medium' as const,
+      };
+
+      const stopLoss =
+        await this.dynamicRiskManagementService.calculateAdaptiveStopLoss(
+          symbol,
+          entryPrice,
+          entryPrice, // Current price same as entry for new positions
+          0, // Position age in hours (new position)
+          marketConditions,
+        );
+
+      if (stopLoss && stopLoss.newStopLoss > 0) {
+        this.logger.log(
+          `Adaptive stop-loss set for ${symbol}: ${stopLoss.newStopLoss} (${stopLoss.stopLossType}, Risk Ratio: ${stopLoss.riskRatio})`,
+        );
+
+        // Store stop-loss information for monitoring
+        // This would typically be stored in a stop-loss tracking entity
+        // For now, we'll just log it and notify via WebSocket
+        await this.stockWebSocketGateway.notifyStopLossSet(portfolioId, {
+          symbol,
+          tradeId,
+          entryPrice,
+          stopLossPrice: stopLoss.newStopLoss,
+          stopLossType: stopLoss.stopLossType,
+          riskRatio: stopLoss.riskRatio,
+        });
+      }
+    } catch (error) {
+      this.logger.warn(
+        `Failed to set up adaptive stop-loss for ${symbol}:`,
+        error,
+      );
+    }
+  }
+
+  /**
+   * Perform real-time ML risk monitoring
+   */
+  private async performMLRiskMonitoring(
+    portfolioId: string,
+    portfolio: any,
+  ): Promise<void> {
+    try {
+      // Build risk assessment input from current portfolio state
+      const riskInput = {
+        portfolioValue: portfolio.totalValue || 100000,
+        positions: (portfolio.positions || []).map((pos: any) => ({
+          symbol: pos.symbol,
+          quantity: pos.quantity,
+          currentPrice: pos.currentPrice || 0,
+          entryPrice: pos.entryPrice || pos.currentPrice || 0,
+          positionValue: pos.positionValue || pos.quantity * pos.currentPrice,
+          weight: pos.weight || pos.positionValue / portfolio.totalValue || 0.1,
+        })),
+        marketConditions: {
+          volatilityIndex: 20, // Would use real VIX data
+          marketTrend: 'sideways' as const,
+          liquidityConditions: 'medium' as const,
+          correlationMatrix: {},
+        },
+        historicalVolatility: {},
+        economicIndicators: {
+          interestRates: 0.05,
+          inflationRate: 0.03,
+          gdpGrowth: 0.02,
+          unemploymentRate: 0.04,
+        },
+      };
+
+      // Use ML service to monitor risks in real-time
+      const riskAlerts =
+        await this.dynamicRiskManagementService.monitorRisks(riskInput);
+
+      // Check for risk alerts and notify via WebSocket
+      if (riskAlerts && riskAlerts.length > 0) {
+        for (const alert of riskAlerts) {
+          this.logger.warn(
+            `ML Risk Alert for portfolio ${portfolioId}: ${alert.type} - ${alert.message}`,
+          );
+
+          // Notify via WebSocket about risk alert
+          await this.stockWebSocketGateway.notifyTradingRuleTriggered(
+            portfolioId,
+            {
+              type: 'RISK_ALERT',
+              severity: alert.severity,
+              message: alert.message,
+              alertType: alert.type,
+              alertId: alert.alertId,
+              recommendations: alert.recommendations,
+              affectedPositions: alert.affectedPositions,
+              requiresAction: alert.requiresAction,
+            },
+          );
+        }
+      }
+    } catch (error) {
+      this.logger.warn(
+        `ML risk monitoring failed for portfolio ${portfolioId}:`,
+        error,
+      );
     }
   }
 
