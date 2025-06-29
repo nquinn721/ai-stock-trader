@@ -58,32 +58,13 @@
   }
 }
 
-.page-header {
+.ai-assistant-header {
   position: relative;
   z-index: 1;
   background: var(--trading-bg-card);
   backdrop-filter: blur(20px);
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  padding: var(--theme-space-4) var(--theme-space-4);
-  text-align: center;
   flex-shrink: 0;
-}
-
-.page-header h1 {
-  font-size: 2.5rem;
-  font-weight: 700;
-  background: var(--trading-text-gradient-primary);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  margin-bottom: var(--theme-space-2);
-}
-
-.page-header p {
-  font-size: 1.1rem;
-  color: var(--trading-text-secondary);
-  max-width: 600px;
-  margin: 0 auto;
 }
 
 .chat-container {
@@ -103,32 +84,12 @@
    ========================================================================== */
 
 @media (max-width: 768px) {
-  .page-header {
-    padding: var(--theme-space-3) var(--theme-space-3);
-  }
-
-  .page-header h1 {
-    font-size: 2rem;
-  }
-
-  .page-header p {
-    font-size: 1rem;
-  }
-
   .chat-container {
     padding: var(--theme-space-3);
   }
 }
 
 @media (max-width: 480px) {
-  .page-header h1 {
-    font-size: 1.8rem;
-  }
-
-  .page-header p {
-    font-size: 0.9rem;
-  }
-
   .chat-container {
     padding: var(--theme-space-2);
   }
