@@ -12,10 +12,25 @@
     "dev:backend": "cd backend && npm run start:dev",
     "dev:frontend": "cd frontend && npm start",
     "build:production": "cd scripts && bash build-production.sh",
-    "setup:database": "cd scripts && bash setup-database.sh"
+    "setup:database": "cd scripts && bash setup-database.sh",
+    "deploy": "gcloud builds submit --config=cloudbuild.yaml",
+    "deploy:staging": "gcloud builds submit --config=cloudbuild.yaml --substitutions=_REGION=us-central1",
+    "deploy:production": "gcloud builds submit --config=cloudbuild.yaml --substitutions=_REGION=us-central1,_ENV=production",
+    "docker:build": "docker build -t stock-trading-app:latest -f Dockerfile.cloudrun .",
+    "docker:run": "docker run -p 8080:8080 --env-file .env.production stock-trading-app:latest",
+    "docker:test": "docker build -t stock-trading-app:test -f Dockerfile.cloudrun . && docker run --rm stock-trading-app:test npm test",
+    "deploy:local": "npm run docker:build && npm run docker:run",
+    "deploy:health": "curl -f http://localhost:8080/health || (echo 'Health check failed' && exit 1)",
+    "prod:deploy": "npm run deploy:production",
+    "prod:build": "npm run docker:build",
+    "prod:start": "npm run docker:run",
+    "prod:stop": "docker stop $(docker ps -q --filter ancestor=stock-trading-app:latest) 2>/dev/null || echo 'No containers to stop'",
+    "prod:logs": "docker logs -f $(docker ps -q --filter ancestor=stock-trading-app:latest) 2>/dev/null || echo 'No containers running'",
+    "prod:health": "npm run deploy:health"
   },
   "dependencies": {
-    "axios": "^1.10.0"
+    "axios": "^1.10.0",
+    "concurrently": "^8.2.2"
   },
   "devDependencies": {
     "node-fetch": "^2.7.0",
