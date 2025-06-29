@@ -1,9 +1,66 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import "./Header.css";
 
 const Header: React.FC = () => {
   const location = useLocation();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Check if we're on mobile
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  const toggleMobileMenu = () => {
+    setIsMobileMenuOpen(!isMobileMenuOpen);
+  };
+
+  const closeMobileMenu = () => {
+    setIsMobileMenuOpen(false);
+  };
+
+  // Handle body scroll lock when mobile menu is open
+  useEffect(() => {
+    if (isMobileMenuOpen) {
+      document.body.classList.add('mobile-menu-open');
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.classList.remove('mobile-menu-open');
+      document.body.style.overflow = '';
+    }
+
+    // Cleanup function
+    return () => {
+      document.body.classList.remove('mobile-menu-open');
+      document.body.style.overflow = '';
+    };
+  }, [isMobileMenuOpen]);
+
+  // Close mobile menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Element;
+      if (isMobileMenuOpen && !target.closest('.header-nav') && !target.closest('.mobile-menu-toggle')) {
+        setIsMobileMenuOpen(false);
+      }
+    };
+
+    if (isMobileMenuOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isMobileMenuOpen]);
 
   const navItems = [
     { path: "/", label: "Dashboard", icon: "📊" },
@@ -33,7 +90,7 @@ const Header: React.FC = () => {
           </div>
         </div>
 
-        <nav className="header-nav">
+        <nav className={`header-nav ${isMobileMenuOpen ? 'mobile-open' : ''}`}>
           {navItems.map((item) => (
             <Link
               key={item.path}
@@ -41,6 +98,7 @@ const Header: React.FC = () => {
               className={`nav-item ${
                 location.pathname === item.path ? "active" : ""
               }`}
+              onClick={closeMobileMenu}
             >
               <span className="nav-icon">{item.icon}</span>
               <span className="nav-label">{item.label}</span>
@@ -52,6 +110,20 @@ const Header: React.FC = () => {
         </nav>
 
         <div className="header-actions">
+          {isMobile && (
+            <button 
+              className="mobile-menu-toggle"
+              onClick={toggleMobileMenu}
+              aria-label="Toggle navigation menu"
+            >
+              <span className={`hamburger ${isMobileMenuOpen ? 'open' : ''}`}>
+                <span></span>
+                <span></span>
+                <span></span>
+              </span>
+            </button>
+          )}
+          
           <div className="market-status">
             <span className="market-indicator live"></span>
             <span className="market-text">Market Open</span>
