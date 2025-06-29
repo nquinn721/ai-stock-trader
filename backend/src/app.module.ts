@@ -14,17 +14,17 @@ import { Position } from './entities/position.entity';
 import { Stock } from './entities/stock.entity';
 import { Trade } from './entities/trade.entity';
 import { TradingSignal } from './entities/trading-signal.entity';
-// import { AutoTradingModule } from './modules/auto-trading/auto-trading.module';
-// import { AutoTrade } from './modules/auto-trading/entities/auto-trade.entity';
-// import { BacktestResult } from './modules/auto-trading/entities/backtest-result.entity';
-// import { StrategyTemplate } from './modules/auto-trading/entities/strategy-template.entity';
-// import { TradingRule } from './modules/auto-trading/entities/trading-rule.entity';
-// import { TradingSession } from './modules/auto-trading/entities/trading-session.entity';
-// // import { TradingStrategy } from './modules/auto-trading/entities/trading-strategy.entity';
-// import { BehavioralFinanceModule } from './modules/behavioral-finance/behavioral-finance.module';
+import { AutoTradingModule } from './modules/auto-trading/auto-trading.module';
+import { AutoTrade } from './modules/auto-trading/entities/auto-trade.entity';
+import { BacktestResult } from './modules/auto-trading/entities/backtest-result.entity';
+import { StrategyTemplate } from './modules/auto-trading/entities/strategy-template.entity';
+import { TradingRule } from './modules/auto-trading/entities/trading-rule.entity';
+import { TradingSession } from './modules/auto-trading/entities/trading-session.entity';
+import { TradingStrategy } from './modules/auto-trading/entities/trading-strategy.entity';
+import { BehavioralFinanceModule } from './modules/behavioral-finance/behavioral-finance.module';
 import { BreakoutModule } from './modules/breakout/breakout.module';
-// import { DataIntelligenceModule } from './modules/data-intelligence/data-intelligence.module';
-// import { EconomicIntelligenceModule } from './modules/economic-intelligence/economic-intelligence.module';
+import { DataIntelligenceModule } from './modules/data-intelligence/data-intelligence.module';
+import { EconomicIntelligenceModule } from './modules/economic-intelligence/economic-intelligence.module';
 import {
   BusinessCycle,
   EconomicForecast,
@@ -41,14 +41,14 @@ import {
   QEProbabilityAssessment,
 } from './modules/macro-intelligence/entities/monetary-policy.entities';
 import { MacroIntelligenceModule } from './modules/macro-intelligence/macro-intelligence.module';
-// import {
-//   ArbitrageOpportunityEntity,
-//   LiquidityPositionEntity,
-//   MarketMakingQuoteEntity,
-//   MarketMakingStrategyEntity,
-//   RiskExposureEntity,
-// } from './modules/market-making/entities/market-making.entities';
-// import { MarketMakingModule } from './modules/market-making/market-making.module';
+import {
+  ArbitrageOpportunityEntity,
+  LiquidityPositionEntity,
+  MarketMakingQuoteEntity,
+  MarketMakingStrategyEntity,
+  RiskExposureEntity,
+} from './modules/market-making/entities/market-making.entities';
+import { MarketMakingModule } from './modules/market-making/market-making.module';
 import {
   MarketAlert,
   ScanResult,
@@ -64,14 +64,14 @@ import {
   MLPrediction,
 } from './modules/ml/entities/ml.entities';
 import { MLModule } from './modules/ml/ml.module';
-// import { AlternativeData } from './modules/multi-asset/entities/alternative-data.entity';
-// import { ArbitrageOpportunity } from './modules/multi-asset/entities/arbitrage-opportunity.entity';
-// import { AssetData } from './modules/multi-asset/entities/asset-data.entity';
-// import { CommodityData } from './modules/multi-asset/entities/commodity-data.entity';
-// import { CrossAssetCorrelation } from './modules/multi-asset/entities/cross-asset-correlation.entity';
-// import { CryptoData } from './modules/multi-asset/entities/crypto-data.entity';
-// import { ForexData } from './modules/multi-asset/entities/forex-data.entity';
-// import { MultiAssetModule } from './modules/multi-asset/multi-asset.module';
+import { AlternativeData } from './modules/multi-asset/entities/alternative-data.entity';
+import { ArbitrageOpportunity } from './modules/multi-asset/entities/arbitrage-opportunity.entity';
+import { AssetData } from './modules/multi-asset/entities/asset-data.entity';
+import { CommodityData } from './modules/multi-asset/entities/commodity-data.entity';
+import { CrossAssetCorrelation } from './modules/multi-asset/entities/cross-asset-correlation.entity';
+import { CryptoData } from './modules/multi-asset/entities/crypto-data.entity';
+import { ForexData } from './modules/multi-asset/entities/forex-data.entity';
+import { MultiAssetModule } from './modules/multi-asset/multi-asset.module';
 import { NewsModule } from './modules/news/news.module';
 import {
   NotificationEntity,
@@ -141,27 +141,27 @@ import { SeedService } from './services/seed.service';
             NotificationEntity,
             NotificationPreferenceEntity,
             NotificationTemplateEntity,
-            // TradingRule,
-            // AutoTrade,
-            // TradingSession,
-            // TradingStrategy,
-            // StrategyTemplate,
-            // BacktestResult,
+            TradingRule,
+            AutoTrade,
+            TradingSession,
+            TradingStrategy,
+            StrategyTemplate,
+            BacktestResult,
             ScreenerTemplate,
             MarketAlert,
             ScanResult,
-            // AssetData,
-            // CryptoData,
-            // ForexData,
-            // CommodityData,
-            // AlternativeData,
-            // CrossAssetCorrelation,
-            //            ArbitrageOpportunity,
-            // MarketMakingStrategyEntity,
-            // MarketMakingQuoteEntity,
-            // ArbitrageOpportunityEntity,
-            // RiskExposureEntity,
-            // LiquidityPositionEntity,
+            AssetData,
+            CryptoData,
+            ForexData,
+            CommodityData,
+            AlternativeData,
+            CrossAssetCorrelation,
+            ArbitrageOpportunity,
+            MarketMakingStrategyEntity,
+            MarketMakingQuoteEntity,
+            ArbitrageOpportunityEntity,
+            RiskExposureEntity,
+            LiquidityPositionEntity,
             // Macro Intelligence entities
             EconomicForecast,
             BusinessCycle,
@@ -189,13 +189,13 @@ import { SeedService } from './services/seed.service';
     BreakoutModule,
     MLModule,
     NotificationModule,
-    // AutoTradingModule, // Temporarily disabled to debug path-to-regexp error
-    // BehavioralFinanceModule, // Temporarily disabled to debug path-to-regexp error
+    AutoTradingModule, // Re-enabled for autonomous trading
+    BehavioralFinanceModule, // Re-enabled for autonomous trading
     MarketScannerModule,
-    // MultiAssetModule, // Temporarily disabled to debug path-to-regexp error
-    // DataIntelligenceModule, // Temporarily disabled to debug path-to-regexp error
-    // EconomicIntelligenceModule, // Temporarily disabled to debug path-to-regexp error
-    // MarketMakingModule, // Temporarily disabled to debug path-to-regexp error
+    MultiAssetModule, // Re-enabled for autonomous trading
+    DataIntelligenceModule, // Re-enabled for autonomous trading
+    EconomicIntelligenceModule, // Re-enabled for autonomous trading
+    MarketMakingModule, // Re-enabled for autonomous trading
     MacroIntelligenceModule, // Re-enabled with controller path fix
   ],
   controllers: [AppController],

@@ -11,20 +11,8 @@
     "dev:start": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
     "dev:backend": "cd backend && npm run start:dev",
     "dev:frontend": "cd frontend && npm start",
-    "prod:build": "docker-compose -f docker-compose.prod.yml build",
-    "prod:start": "docker-compose -f docker-compose.prod.yml up -d",
-    "prod:stop": "docker-compose -f docker-compose.prod.yml down",
-    "prod:logs": "docker-compose -f docker-compose.prod.yml logs -f",
-    "prod:status": "docker-compose -f docker-compose.prod.yml ps",
-    "prod:deploy": "scripts/deploy-production.bat",
-    "prod:health": "curl -f http://localhost:8080/health && curl -f http://localhost:3080/health",
-    "local-prod:build": "docker-compose -f docker-compose.local-prod.yml build",
-    "local-prod:start": "docker-compose -f docker-compose.local-prod.yml up -d",
-    "local-prod:stop": "docker-compose -f docker-compose.local-prod.yml down",
-    "local-prod:logs": "docker-compose -f docker-compose.local-prod.yml logs -f",
-    "local-prod:status": "docker-compose -f docker-compose.local-prod.yml ps",
-    "local-prod:health": "curl -f http://localhost:8100/health && curl -f http://localhost:3100/health",
-    "local-prod:reset": "docker-compose -f docker-compose.local-prod.yml down -v && docker-compose -f docker-compose.local-prod.yml up -d"
+    "build:production": "cd scripts && bash build-production.sh",
+    "setup:database": "cd scripts && bash setup-database.sh"
   },
   "dependencies": {
     "axios": "^1.10.0"

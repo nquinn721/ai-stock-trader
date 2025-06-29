@@ -22,7 +22,10 @@ import { WebSocketHealthService } from './websocket-health.service';
 
 @WebSocketGateway({
   cors: {
-    origin: ['http://localhost:3000', 'http://localhost:3001'], // Frontend on 3000, backend on 3001
+    origin:
+      process.env.NODE_ENV === 'production'
+        ? true // Allow all origins in production (same origin policy will apply)
+        : ['http://localhost:3000', 'http://localhost:3001'], // Development only
     credentials: true,
   },
   transports: ['websocket', 'polling'],

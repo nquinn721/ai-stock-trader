@@ -18,6 +18,7 @@ import {
 } from "@mui/material";
 import axios from "axios";
 import React, { useEffect, useState } from "react";
+import { FRONTEND_API_CONFIG } from "../../config/api.config";
 
 interface CognitiveBias {
   score: number;
@@ -89,7 +90,7 @@ export const BehavioralAnalyticsDashboard: React.FC<
     try {
       setLoading(true);
       const response = await axios.get(
-        `http://localhost:8000/behavioral-finance/behavioral-dashboard/${symbol}`
+        `${FRONTEND_API_CONFIG.backend.baseUrl}/behavioral-finance/behavioral-dashboard/${symbol}`
       );
       setData(response.data);
       setError(null);

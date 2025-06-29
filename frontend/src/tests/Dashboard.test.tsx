@@ -3,6 +3,7 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import axios from "axios";
 import React from "react";
 import Dashboard from "../components/Dashboard";
+import { FRONTEND_API_CONFIG } from "../config/api.config";
 import { SocketProvider } from "../context/SocketContext";
 
 // Mock axios
@@ -327,10 +328,10 @@ describe("Dashboard Component", () => {
 
     await waitFor(() => {
       expect(mockedAxios.get).toHaveBeenCalledWith(
-        "http://localhost:8000/stocks/with-signals/all"
+        `${FRONTEND_API_CONFIG.backend.baseUrl}/stocks/with-signals/all`
       );
       expect(mockedAxios.get).toHaveBeenCalledWith(
-        "http://localhost:8000/trading/signals"
+        `${FRONTEND_API_CONFIG.backend.baseUrl}/trading/signals`
       );
     });
   });

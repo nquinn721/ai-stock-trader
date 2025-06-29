@@ -197,10 +197,10 @@ export class AutoTradingService {
         `Trading session started for portfolio ${portfolioId}: ${savedSession.id}`,
       );
 
-      // Notify via WebSocket - TODO: Fix WebSocket method compilation issues
-      // await this.websocketGateway.notifyTradingSessionStarted(portfolioId, savedSession);
-      this.logger.log(
-        `Trading session started notification (WebSocket temporarily disabled): ${portfolioId}`,
+      // Notify via WebSocket
+      await this.stockWebSocketGateway.notifyTradingSessionStarted(
+        portfolioId,
+        savedSession,
       );
 
       return savedSession;
@@ -239,10 +239,11 @@ export class AutoTradingService {
         `Trading session stopped: ${sessionId} - ${reason || 'Manual stop'}`,
       );
 
-      // Notify via WebSocket - TODO: Fix WebSocket method compilation issues
-      // await this.websocketGateway.notifyTradingSessionStopped(session.portfolio_id, sessionId, reason);
-      this.logger.log(
-        `Trading session stopped notification (WebSocket temporarily disabled): ${sessionId}`,
+      // Notify via WebSocket
+      await this.stockWebSocketGateway.notifyTradingSessionStopped(
+        session.portfolio_id,
+        sessionId,
+        reason,
       );
     } catch (error) {
       this.logger.error(`Error stopping trading session ${sessionId}:`, error);
@@ -373,28 +374,43 @@ export class AutoTradingService {
     try {
       // Get ML-generated signals for high-confidence trades
       // Signal generation will be implemented when the service method is available
-      // const signals = await this.signalGenerationService.generateSignals({
-      //   symbols: stocks.map(s => s.symbol),
-      //   portfolioId,
-      //   timeframe: '1h',
-      //   minConfidence: 0.8, // Only high-confidence signals
-      // });
-      // for (const signal of signals) {
-      //   if (signal.confidence > 0.85 && signal.signal !== 'HOLD') {
-      //     this.logger.log(
-      //       `High-confidence ML signal detected: ${signal.signal} ${signal.symbol} (confidence: ${signal.confidence})`,
-      //     );
-      //
-      //     // Notify about ML signal
-      //     await this.websocketGateway.notifyTradingRuleTriggered(portfolioId, {
-      //       type: 'ML_SIGNAL',
-      //       symbol: signal.symbol,
-      //       signal: signal.signal,
-      //       confidence: signal.confidence,
-      //       reasoning: signal.reasoning,
-      //     });
-      //   }
-      // }
+      // Generate ML signals for each stock in the portfolio
+      for (const stock of stocks) {
+        try {
+          const signal =
+            await this.signalGenerationService.generateAdvancedSignals(
+              stock.symbol,
+              {
+                portfolioContext: { portfolioId },
+                riskProfile: { minConfidence: 0.8 },
+              },
+              { timeframe: '1h' },
+            );
+
+          if (signal.strength > 0.85 && signal.signal !== 'HOLD') {
+            this.logger.log(
+              `High-confidence ML signal detected: ${signal.signal} ${stock.symbol} (strength: ${signal.strength})`,
+            );
+
+            // Notify about ML signal
+            await this.stockWebSocketGateway.notifyTradingRuleTriggered(
+              portfolioId,
+              {
+                type: 'ML_SIGNAL',
+                symbol: stock.symbol,
+                signal: signal.signal,
+                confidence: signal.strength,
+                reasoning: signal.reasoning,
+              },
+            );
+          }
+        } catch (signalError) {
+          this.logger.warn(
+            `Failed to generate ML signals for ${stock.symbol}:`,
+            signalError,
+          );
+        }
+      }
     } catch (error) {
       this.logger.warn('Failed to check ML signals:', error);
     }
@@ -551,17 +567,17 @@ export class AutoTradingService {
               `Auto trade executed: ${action.type} ${optimizedQuantity} ${action.symbol} at $${result.executedPrice}`,
             );
 
-            // Notify via WebSocket - TODO: Fix WebSocket method compilation issues
-            // await this.websocketGateway.notifyTradeExecuted(rule.portfolio_id, {
-            //   tradeId: result.tradeId,
-            //   symbol: action.symbol,
-            //   type: action.type,
-            //   quantity: optimizedQuantity,
-            //   price: result.executedPrice,
-            //   rule: rule.name,
-            // });
-            this.logger.log(
-              `Trade executed notification (WebSocket temporarily disabled): ${action.symbol}`,
+            // Notify via WebSocket
+            await this.stockWebSocketGateway.notifyTradeExecuted(
+              rule.portfolio_id,
+              {
+                tradeId: result.tradeId,
+                symbol: action.symbol,
+                type: action.type,
+                quantity: optimizedQuantity,
+                price: result.executedPrice,
+                rule: rule.name,
+              },
             );
           } else {
             this.logger.warn(`Auto trade failed: ${result.error}`);
@@ -655,10 +671,10 @@ export class AutoTradingService {
       await this.stopTradingSession(session.id, reason);
     }
 
-    // Notify about emergency stop via WebSocket - TODO: Fix WebSocket method compilation issues
-    // await this.websocketGateway.notifyEmergencyStopTriggered(portfolioId, reason);
-    this.logger.warn(
-      `Emergency stop notification (WebSocket temporarily disabled): ${portfolioId} - ${reason}`,
+    // Notify about emergency stop via WebSocket
+    await this.stockWebSocketGateway.notifyEmergencyStopTriggered(
+      portfolioId,
+      reason,
     );
   }
 

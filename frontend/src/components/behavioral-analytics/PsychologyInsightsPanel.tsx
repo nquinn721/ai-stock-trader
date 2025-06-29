@@ -1,33 +1,34 @@
-import React, { useState, useEffect } from 'react';
 import {
+  Assessment,
+  CheckCircle,
+  ExpandMore,
+  Psychology,
+  RemoveRedEye,
+  TrendingDown,
+  TrendingUp,
+  Warning,
+} from "@mui/icons-material";
+import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
+  Alert,
   Box,
-  Typography,
   Card,
   CardContent,
   CardHeader,
-  Alert,
-  CircularProgress,
   Chip,
+  CircularProgress,
+  Divider,
   List,
   ListItem,
-  ListItemText,
   ListItemIcon,
-  Divider,
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
-} from '@mui/material';
-import {
-  Psychology,
-  TrendingUp,
-  TrendingDown,
-  RemoveRedEye,
-  ExpandMore,
-  Assessment,
-  Warning,
-  CheckCircle,
-} from '@mui/icons-material';
-import axios from 'axios';
+  ListItemText,
+  Typography,
+} from "@mui/material";
+import axios from "axios";
+import React, { useEffect, useState } from "react";
+import { FRONTEND_API_CONFIG } from "../../config/api.config";
 
 interface PsychologyInsight {
   symbol: string;
@@ -39,7 +40,7 @@ interface PsychologyInsight {
   };
   herding: {
     score: number;
-    direction: 'bullish' | 'bearish' | 'neutral';
+    direction: "bullish" | "bearish" | "neutral";
     strength: number;
     contrarian_signal: boolean;
   };
@@ -60,9 +61,9 @@ interface PsychologyInsightsPanelProps {
   symbols?: string[];
 }
 
-export const PsychologyInsightsPanel: React.FC<PsychologyInsightsPanelProps> = ({
-  symbols = ['SPY', 'QQQ', 'AAPL', 'TSLA', 'NVDA'],
-}) => {
+export const PsychologyInsightsPanel: React.FC<
+  PsychologyInsightsPanelProps
+> = ({ symbols = ["SPY", "QQQ", "AAPL", "TSLA", "NVDA"] }) => {
   const [data, setData] = useState<PsychologyInsightsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -76,51 +77,53 @@ export const PsychologyInsightsPanel: React.FC<PsychologyInsightsPanelProps> = (
   const fetchPsychologyInsights = async () => {
     try {
       setLoading(true);
-      const symbolsParam = symbols.join(',');
+      const symbolsParam = symbols.join(",");
       const response = await axios.get(
-        `http://localhost:8000/behavioral-finance/psychology-insights?symbols=${symbolsParam}`
+        `${FRONTEND_API_CONFIG.backend.baseUrl}/behavioral-finance/psychology-insights?symbols=${symbolsParam}`
       );
       setData(response.data);
       setError(null);
     } catch (err) {
-      console.error('Error fetching psychology insights:', err);
-      setError('Failed to load psychology insights');
+      console.error("Error fetching psychology insights:", err);
+      setError("Failed to load psychology insights");
     } finally {
       setLoading(false);
     }
   };
 
   const getFearGreedColor = (index: number): string => {
-    if (index <= 20) return '#dc2626'; // Extreme Fear - Red
-    if (index <= 40) return '#f59e0b'; // Fear - Orange
-    if (index <= 60) return '#64748b'; // Neutral - Gray
-    if (index <= 80) return '#22c55e'; // Greed - Green
-    return '#8b5cf6'; // Extreme Greed - Purple
+    if (index <= 20) return "#dc2626"; // Extreme Fear - Red
+    if (index <= 40) return "#f59e0b"; // Fear - Orange
+    if (index <= 60) return "#64748b"; // Neutral - Gray
+    if (index <= 80) return "#22c55e"; // Greed - Green
+    return "#8b5cf6"; // Extreme Greed - Purple
   };
 
   const getFearGreedLabel = (index: number): string => {
-    if (index <= 20) return 'EXTREME FEAR';
-    if (index <= 40) return 'FEAR';
-    if (index <= 60) return 'NEUTRAL';
-    if (index <= 80) return 'GREED';
-    return 'EXTREME GREED';
+    if (index <= 20) return "EXTREME FEAR";
+    if (index <= 40) return "FEAR";
+    if (index <= 60) return "NEUTRAL";
+    if (index <= 80) return "GREED";
+    return "EXTREME GREED";
   };
 
-  const getHerdingColor = (direction: string): 'success' | 'error' | 'default' => {
-    if (direction === 'bullish') return 'success';
-    if (direction === 'bearish') return 'error';
-    return 'default';
+  const getHerdingColor = (
+    direction: string
+  ): "success" | "error" | "default" => {
+    if (direction === "bullish") return "success";
+    if (direction === "bearish") return "error";
+    return "default";
   };
 
-  const getStressColor = (level: string): 'success' | 'warning' | 'error' => {
-    if (level === 'LOW') return 'success';
-    if (level === 'MODERATE') return 'warning';
-    return 'error';
+  const getStressColor = (level: string): "success" | "warning" | "error" => {
+    if (level === "LOW") return "success";
+    if (level === "MODERATE") return "warning";
+    return "error";
   };
 
   const getHerdingIcon = (direction: string) => {
-    if (direction === 'bullish') return <TrendingUp color="success" />;
-    if (direction === 'bearish') return <TrendingDown color="error" />;
+    if (direction === "bullish") return <TrendingUp color="success" />;
+    if (direction === "bearish") return <TrendingDown color="error" />;
     return <RemoveRedEye color="disabled" />;
   };
 
@@ -161,7 +164,8 @@ export const PsychologyInsightsPanel: React.FC<PsychologyInsightsPanelProps> = (
             Psychology Insights
           </Typography>
           <Typography variant="subtitle1" color="textSecondary">
-            Market sentiment and behavioral analysis • Updated {new Date(data.timestamp).toLocaleTimeString()}
+            Market sentiment and behavioral analysis • Updated{" "}
+            {new Date(data.timestamp).toLocaleTimeString()}
           </Typography>
         </Box>
       </Box>
@@ -172,7 +176,7 @@ export const PsychologyInsightsPanel: React.FC<PsychologyInsightsPanelProps> = (
           <Card key={insight.symbol} className="bg-card hover-lift">
             <CardHeader
               title={insight.symbol}
-              titleTypographyProps={{ variant: 'h6', fontWeight: 'bold' }}
+              titleTypographyProps={{ variant: "h6", fontWeight: "bold" }}
               subheader="Market Psychology Overview"
             />
             <CardContent>
@@ -187,9 +191,11 @@ export const PsychologyInsightsPanel: React.FC<PsychologyInsightsPanelProps> = (
                       label={getFearGreedLabel(insight.fearGreed.index)}
                       size="small"
                       sx={{
-                        backgroundColor: getFearGreedColor(insight.fearGreed.index),
-                        color: 'white',
-                        fontWeight: 'bold',
+                        backgroundColor: getFearGreedColor(
+                          insight.fearGreed.index
+                        ),
+                        color: "white",
+                        fontWeight: "bold",
                       }}
                     />
                   </Box>
@@ -280,21 +286,40 @@ export const PsychologyInsightsPanel: React.FC<PsychologyInsightsPanelProps> = (
                 <Box className="space-y-4">
                   {/* Fear & Greed Details */}
                   <Box>
-                    <Typography variant="subtitle1" className="font-semibold mb-2">
+                    <Typography
+                      variant="subtitle1"
+                      className="font-semibold mb-2"
+                    >
                       Fear & Greed Analysis
                     </Typography>
-                    <Typography variant="body2" color="textSecondary" className="mb-3">
+                    <Typography
+                      variant="body2"
+                      color="textSecondary"
+                      className="mb-3"
+                    >
                       {insight.fearGreed.interpretation}
                     </Typography>
-                    
+
                     <Typography variant="body2" className="font-medium mb-2">
                       Component Breakdown:
                     </Typography>
                     <Box className="grid grid-2 gap-2 text-sm">
-                      <Box>Volatility: {insight.fearGreed.components?.volatility || 'N/A'}</Box>
-                      <Box>Momentum: {insight.fearGreed.components?.momentum || 'N/A'}</Box>
-                      <Box>Breadth: {insight.fearGreed.components?.breadth || 'N/A'}</Box>
-                      <Box>Put/Call: {insight.fearGreed.components?.putCall || 'N/A'}</Box>
+                      <Box>
+                        Volatility:{" "}
+                        {insight.fearGreed.components?.volatility || "N/A"}
+                      </Box>
+                      <Box>
+                        Momentum:{" "}
+                        {insight.fearGreed.components?.momentum || "N/A"}
+                      </Box>
+                      <Box>
+                        Breadth:{" "}
+                        {insight.fearGreed.components?.breadth || "N/A"}
+                      </Box>
+                      <Box>
+                        Put/Call:{" "}
+                        {insight.fearGreed.components?.putCall || "N/A"}
+                      </Box>
                     </Box>
                   </Box>
 
@@ -302,64 +327,80 @@ export const PsychologyInsightsPanel: React.FC<PsychologyInsightsPanelProps> = (
 
                   {/* Stress Analysis */}
                   <Box>
-                    <Typography variant="subtitle1" className="font-semibold mb-2">
+                    <Typography
+                      variant="subtitle1"
+                      className="font-semibold mb-2"
+                    >
                       Market Stress Analysis
                     </Typography>
-                    
-                    {insight.stress.implications && insight.stress.implications.length > 0 && (
-                      <List dense>
-                        {insight.stress.implications.map((implication, index) => (
-                          <ListItem key={index} disablePadding>
-                            <ListItemIcon>
-                              {insight.stress.riskLevel === 'HIGH' ? (
-                                <Warning color="error" fontSize="small" />
-                              ) : (
-                                <CheckCircle color="success" fontSize="small" />
-                              )}
-                            </ListItemIcon>
-                            <ListItemText
-                              primary={
-                                <Typography variant="body2">
-                                  {implication}
-                                </Typography>
-                              }
-                            />
-                          </ListItem>
-                        ))}
-                      </List>
-                    )}
+
+                    {insight.stress.implications &&
+                      insight.stress.implications.length > 0 && (
+                        <List dense>
+                          {insight.stress.implications.map(
+                            (implication, index) => (
+                              <ListItem key={index} disablePadding>
+                                <ListItemIcon>
+                                  {insight.stress.riskLevel === "HIGH" ? (
+                                    <Warning color="error" fontSize="small" />
+                                  ) : (
+                                    <CheckCircle
+                                      color="success"
+                                      fontSize="small"
+                                    />
+                                  )}
+                                </ListItemIcon>
+                                <ListItemText
+                                  primary={
+                                    <Typography variant="body2">
+                                      {implication}
+                                    </Typography>
+                                  }
+                                />
+                              </ListItem>
+                            )
+                          )}
+                        </List>
+                      )}
                   </Box>
 
                   <Divider />
 
                   {/* Trading Recommendations */}
                   <Box>
-                    <Typography variant="subtitle1" className="font-semibold mb-2">
+                    <Typography
+                      variant="subtitle1"
+                      className="font-semibold mb-2"
+                    >
                       Behavioral Trading Insights
                     </Typography>
-                    
+
                     <Box className="grid grid-1 gap-2">
                       {insight.herding.contrarian_signal && (
                         <Alert severity="warning" className="text-sm">
-                          <strong>Contrarian Opportunity:</strong> Current herding behavior suggests potential reversal
+                          <strong>Contrarian Opportunity:</strong> Current
+                          herding behavior suggests potential reversal
                         </Alert>
                       )}
-                      
+
                       {insight.fearGreed.index <= 20 && (
                         <Alert severity="success" className="text-sm">
-                          <strong>Buying Opportunity:</strong> Extreme fear often marks market bottoms
+                          <strong>Buying Opportunity:</strong> Extreme fear
+                          often marks market bottoms
                         </Alert>
                       )}
-                      
+
                       {insight.fearGreed.index >= 80 && (
                         <Alert severity="error" className="text-sm">
-                          <strong>Caution Advised:</strong> Extreme greed often precedes market corrections
+                          <strong>Caution Advised:</strong> Extreme greed often
+                          precedes market corrections
                         </Alert>
                       )}
-                      
+
                       {insight.stress.overall > 0.7 && (
                         <Alert severity="warning" className="text-sm">
-                          <strong>High Stress Alert:</strong> Elevated market stress indicates increased volatility
+                          <strong>High Stress Alert:</strong> Elevated market
+                          stress indicates increased volatility
                         </Alert>
                       )}
                     </Box>

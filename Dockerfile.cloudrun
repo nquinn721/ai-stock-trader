@@ -37,7 +37,10 @@ WORKDIR /app/backend
 COPY backend/package*.json ./
 COPY backend/tsconfig*.json ./
 COPY backend/nest-cli.json ./
-RUN npm install --omit=dev --ignore-scripts
+
+# Install all dependencies including dev for build
+RUN npm install --ignore-scripts
+
 COPY backend/src ./src
 RUN npm run build
 
@@ -68,7 +71,7 @@ ENV PORT=8080
 ENV TFJS_BACKEND=cpu
 ENV TFJS_DISABLE_WEBGL=true
 
-# Install production dependencies
+# Install production dependencies with overrides
 RUN npm install --omit=dev --ignore-scripts
 
 # Copy built backend

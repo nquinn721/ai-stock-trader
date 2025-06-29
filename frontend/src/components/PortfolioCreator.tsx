@@ -8,6 +8,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React, { useState } from "react";
+import { FRONTEND_API_CONFIG } from "../config/api.config";
 import "./PortfolioCreator.css";
 
 interface PortfolioType {
@@ -161,7 +162,7 @@ const PortfolioCreator: React.FC<PortfolioCreatorProps> = ({
         return;
       }
       const response = await fetch(
-        "http://localhost:8000/paper-trading/portfolios",
+        `${FRONTEND_API_CONFIG.backend.baseUrl}/paper-trading/portfolios`,
         {
           method: "POST",
           headers: {

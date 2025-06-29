@@ -78,7 +78,8 @@
   },
   "overrides": {
     "inflight": "npm:@isaacs/inflight@^1.0.6",
-    "glob": "^10.3.10"
+    "glob": "^10.3.10",
+    "path-to-regexp": "6.3.0"
   },
   "main": "index.js",
   "directories": {

@@ -11,6 +11,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { observer } from "mobx-react-lite";
 import React, { useEffect, useState } from "react";
 import EmptyState from "../components/EmptyState";
+import { FRONTEND_API_CONFIG } from "../config/api.config";
 import autoTradingService, {
   StrategyInstance,
 } from "../services/autoTradingService";
@@ -138,7 +139,7 @@ const AnalyticsPage: React.FC = observer(() => {
           async (portfolio) => {
             try {
               const response = await fetch(
-                `http://localhost:8000/portfolio-analytics/${portfolio.id}`
+                `${FRONTEND_API_CONFIG.backend.baseUrl}/portfolio-analytics/${portfolio.id}`
               );
               if (!response.ok) {
                 throw new Error(
