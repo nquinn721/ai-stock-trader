@@ -125,7 +125,7 @@ const Header: React.FC = () => {
           )}
           
           <div className="market-status">
-            <span className="market-indicator live"></span>
+            <span className="market-indicator"></span>
             <span className="market-text">Market Open</span>
           </div>
         </div>
