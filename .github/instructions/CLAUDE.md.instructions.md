@@ -33,7 +33,8 @@ This document provides quick reference guidelines for AI assistants working on t
 10. **⚠️ CRITICAL: PRECISE STYLING SCOPE** - When asked to style something, **ONLY** style the specific component/element requested. Do not modify other UI elements, add unnecessary styling, or make changes beyond the exact scope of the request. Focus solely on the requested styling task.
 11. **⚠️ CRITICAL: MINIMAL FILE CHANGES** - When updating files, **ONLY** modify the specific portion that needs to change. Do not rewrite entire files unless the entire file structure needs to be changed. Use precise editing tools (replace_string_in_file, insert_edit_into_file) to make targeted updates while preserving existing code and formatting.
 12. **⚠️ NEVER USE MUI GRID** - Do NOT use Material-UI Grid components (`<Grid>`, `@mui/material/Grid`) due to recurring compatibility issues, version conflicts, and build problems. Use CSS Grid, Flexbox, or our custom CSS grid utilities in `theme.css` instead.
-13. **⚠️ MANDATORY: UI THEME CONSISTENCY** - ALL pages must follow the dashboard layout and styling standards. Every page must include a standardized header, use shared CSS variables, and follow the established design patterns. See [UI Theme and Layout Standards](../../docs/UI-THEME-LAYOUT-STANDARDS.md) for complete requirements.
+13. **⚠️ CRITICAL: NEVER USE `npm ci`** - Always use `npm install` instead of `npm ci`. The `npm ci` command causes dependency resolution issues, package-lock.json conflicts, and deployment failures in this project. Use `npm install` for all package installations in development, production builds, and Docker containers.
+14. **⚠️ MANDATORY: UI THEME CONSISTENCY** - ALL pages must follow the dashboard layout and styling standards. Every page must include a standardized header, use shared CSS variables, and follow the established design patterns. See [UI Theme and Layout Standards](../../docs/UI-THEME-LAYOUT-STANDARDS.md) for complete requirements.
 
 ### Testing Workflow
 
@@ -476,6 +477,51 @@ Test API endpoints using available tools and verify WebSocket data flow by check
 6. **API errors**: Check backend logs and Yahoo Finance API status
 7. **WebSocket issues**: Restart both backend and frontend using tasks
 8. **Performance issues**: Check cron job frequency and API timeouts
+
+## ⚠️ CRITICAL: Package Management Standards
+
+### **NEVER use `npm ci` in this project**
+
+**Always use `npm install` instead of `npm ci` for the following reasons:**
+
+#### **Issues with `npm ci`:**
+
+- **Dependency resolution conflicts** with existing node_modules
+- **Package-lock.json version mismatches** causing build failures
+- **Docker build failures** in Cloud Run and other deployment platforms
+- **Incompatibility** with the project's current dependency structure
+- **Development environment conflicts** between team members
+
+#### **✅ Correct Commands:**
+
+```bash
+# ✅ CORRECT - Use npm install
+npm install
+npm install --production
+npm install --ignore-scripts
+
+# ❌ WRONG - Never use npm ci
+npm ci
+npm ci --only=production
+npm ci --ignore-scripts
+```
+
+#### **Why npm install works better:**
+
+- ✅ **Flexible dependency resolution** that adapts to existing node_modules
+- ✅ **Compatible with package.json** changes and updates
+- ✅ **Works in Docker containers** without package-lock.json issues
+- ✅ **Handles workspace structure** correctly
+- ✅ **No build failures** from lock file conflicts
+
+#### **Apply this rule everywhere:**
+
+- Development environment setup
+- Docker container builds
+- Cloud Build configurations
+- Production deployments
+- CI/CD pipelines
+- All npm scripts and documentation
 
 ## Current Architecture Status
 

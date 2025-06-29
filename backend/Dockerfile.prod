@@ -1,13 +1,40 @@
 # Production Backend Dockerfile
-FROM node:18-alpine AS builder
+FROM node:20-slim AS builder
+
+# Install build dependencies for native modules
+RUN apt-get update && apt-get install -y \
+    python3 \
+    python3-pip \
+    python3-dev \
+    build-essential \
+    pkg-config \
+    libcairo2-dev \
+    libpango1.0-dev \
+    libjpeg-dev \
+    libgif-dev \
+    librsvg2-dev \
+    libpixman-1-dev \
+    git \
+    curl \
+    && rm -rf /var/lib/apt/lists/* \
+    && ln -sf /usr/bin/python3 /usr/bin/python
+
+# Set environment variables for builds
+ENV PYTHON=/usr/bin/python3
+ENV npm_config_build_from_source=false
+ENV npm_config_canvas_binary_host_mirror=https://github.com/Automattic/node-canvas/releases/download/
+ENV TFJS_BACKEND=cpu
+ENV TFJS_DISABLE_WEBGL=true
+ENV NODE_OPTIONS="--max-old-space-size=4096"
 
 WORKDIR /app
 COPY package*.json ./
 COPY tsconfig*.json ./
 COPY nest-cli.json ./
 
-# Install dependencies
-RUN npm ci --only=production && npm cache clean --force
+# Install all dependencies for building (including dev dependencies)
+RUN npm ci --ignore-scripts || npm install --ignore-scripts
+RUN npm cache clean --force
 
 # Copy source code
 COPY src/ ./src/
@@ -16,26 +43,56 @@ COPY src/ ./src/
 RUN npm run build
 
 # Production stage
-FROM node:18-alpine AS production
+FROM node:20-slim AS production
+
+# Install runtime dependencies for native modules and health check
+RUN apt-get update && apt-get install -y \
+    libcairo2 \
+    libpango-1.0-0 \
+    libpangocairo-1.0-0 \
+    libjpeg62-turbo \
+    libgif7 \
+    librsvg2-2 \
+    libpixman-1-0 \
+    curl \
+    ca-certificates \
+    dumb-init \
+    && rm -rf /var/lib/apt/lists/* \
+    && apt-get clean
 
 WORKDIR /app
 
 # Create non-root user for security
-RUN addgroup -g 1001 -S nodejs && \
-    adduser -S nestjs -u 1001
+RUN groupadd -g 1001 nodejs && \
+    useradd -r -u 1001 -g nodejs nestjs
+
+# Copy package files and install production dependencies
+COPY --from=builder --chown=nestjs:nodejs /app/package*.json ./
+
+# Install production dependencies and rebuild native modules for current platform
+RUN npm ci --only=production --ignore-scripts && \
+    npm rebuild sharp --platform=linux --arch=x64 && \
+    npm cache clean --force
 
 # Copy built application
 COPY --from=builder --chown=nestjs:nodejs /app/dist ./dist
-COPY --from=builder --chown=nestjs:nodejs /app/node_modules ./node_modules
-COPY --from=builder --chown=nestjs:nodejs /app/package*.json ./
+
+# Set environment variables
+ENV NODE_ENV=production
+ENV PORT=8080
+ENV TFJS_BACKEND=cpu
+ENV TFJS_DISABLE_WEBGL=true
+ENV NODE_OPTIONS="--max-old-space-size=3072"
 
 # Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD curl -f http://localhost:8000/health || exit 1
+HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
+  CMD curl -f http://localhost:8080/health || exit 1
 
 # Switch to non-root user
 USER nestjs
 
-EXPOSE 8000
+EXPOSE 8080
 
+# Use dumb-init for proper signal handling
+ENTRYPOINT ["dumb-init", "--"]
 CMD ["node", "dist/main.js"]

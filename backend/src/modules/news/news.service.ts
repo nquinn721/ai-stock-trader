@@ -36,7 +36,7 @@
 import { Injectable } from '@nestjs/common';
 import axios from 'axios';
 import { WordTokenizer } from 'natural';
-import * as Sentiment from 'sentiment';
+import Sentiment from 'sentiment';
 import { buildApiUrl, getHttpConfig } from '../../config';
 
 @Injectable()

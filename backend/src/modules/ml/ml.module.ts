@@ -3,8 +3,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { NewsModule } from '../news/news.module';
 import { PaperTradingModule } from '../paper-trading/paper-trading.module';
 import { StockModule } from '../stock/stock.module';
-import { AIController } from './controllers/ai.controller';
-import { ReinforcementLearningController } from './controllers/reinforcement-learning.controller';
+// import { AIController } from './controllers/ai.controller'; // Temporarily disabled due to path-to-regexp issue
+// import { ReinforcementLearningController } from './controllers/reinforcement-learning.controller'; // Temporarily disabled to debug path-to-regexp error
 import {
   AIExplanation,
   ChatMessage,
@@ -68,7 +68,7 @@ import { TradingAssistantService } from './services/trading-assistant.service';
       AIExplanation,
     ]),
   ],
-  controllers: [MLController, AIController, ReinforcementLearningController],
+  controllers: [MLController], // ReinforcementLearningController and AIController temporarily disabled due to path-to-regexp issue
   providers: [
     MLService,
     FeatureEngineeringService,

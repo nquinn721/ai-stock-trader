@@ -1,79 +1,78 @@
-# Multi-stage Docker build for AI Stock Trader - Cloud Run Optimized
-# Stage 1: Build frontend
-FROM node:22-alpine AS frontend-build
+# Multi-stage Dockerfile for Stock Trading App (Backend + Frontend)
+FROM node:18-alpine AS frontend-builder
 
-# Set working directory
+# Install system dependencies for frontend build
+RUN apk add --no-cache python3 make g++
+
 WORKDIR /app/frontend
 
-# Copy package files and install dependencies
-COPY frontend/package*.json ./
-RUN npm ci --only=production --silent
+# Copy frontend package.json and install dependencies
+COPY frontend/package.json ./
+RUN npm install --legacy-peer-deps --no-audit --no-fund
 
-# Copy source and build
-COPY frontend/ ./
+# Copy frontend source and build
+COPY frontend/src ./src
+COPY frontend/public ./public
+COPY frontend/tsconfig.json ./
+COPY frontend/.eslintrc.js ./
 RUN npm run build
 
-# Stage 2: Build backend
-FROM node:22-alpine AS backend-build
+# Backend build stage
+FROM node:18-alpine AS backend-builder
 
-# Set working directory
-WORKDIR /app/backend
+# Install system dependencies
+RUN apk add --no-cache dumb-init python3 make g++
 
-# Copy package files and install dependencies
-COPY backend/package*.json ./
-RUN npm ci --only=production --silent
-
-# Copy source and build
-COPY backend/ ./
-RUN npm run build
-
-# Stage 3: Production runtime - optimized for Cloud Run
-FROM node:22-alpine AS production
-
-# Install required system dependencies
-RUN apk add --no-cache \
-    dumb-init \
-    curl \
-    ca-certificates \
-    && rm -rf /var/cache/apk/* \
-    && update-ca-certificates
-
-# Create app directory
 WORKDIR /app
 
-# Copy package.json for production dependencies
-COPY backend/package*.json ./
+# Copy backend package.json
+COPY backend/package.json ./
 
-# Install only production dependencies
-RUN npm ci --only=production --silent && npm cache clean --force
+# Install ALL dependencies (including dev dependencies needed for build)
+RUN npm install --no-audit --no-fund
 
-# Copy backend build files
-COPY --from=backend-build /app/backend/dist ./dist
+# Copy backend source code
+COPY backend/tsconfig*.json ./
+COPY backend/nest-cli.json ./
+COPY backend/src ./src
 
-# Copy frontend build to be served by backend
-COPY --from=frontend-build /app/frontend/build ./public
+# Build the application
+RUN npm run build
 
-# Create non-root user for security (Cloud Run best practice)
+# Production stage
+FROM node:18-alpine
+
+# Install runtime dependencies
+RUN apk add --no-cache dumb-init
+
+WORKDIR /app
+
+# Copy backend package.json and install production dependencies
+COPY backend/package.json ./
+RUN npm install --only=production --no-audit --no-fund
+
+# Copy built backend from builder stage
+COPY --from=backend-builder /app/dist ./dist
+
+# Copy built frontend from frontend-builder stage
+COPY --from=frontend-builder /app/frontend/build ./public
+
+# Create non-root user
 RUN addgroup -g 1001 -S nodejs && \
-    adduser -S nestjs -u 1001 -G nodejs
+    adduser -S nestjs -u 1001 && \
+    chown -R nestjs:nodejs /app
 
-# Change ownership to non-root user
-RUN chown -R nestjs:nodejs /app
 USER nestjs
 
-# Expose port (Cloud Run will set PORT environment variable)
-EXPOSE 8080
-
-# Add environment variables for Cloud Run
+# Set environment variables
 ENV NODE_ENV=production
 ENV PORT=8080
 
-# Health check optimized for Cloud Run
-HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
-    CMD curl -f http://localhost:8080/health || exit 1
+EXPOSE 8080
 
-# Use dumb-init to handle signals properly (important for Cloud Run)
-ENTRYPOINT ["dumb-init", "--"]
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+  CMD node -e "require('http').get('http://localhost:8080/health', (res) => process.exit(res.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))"
 
 # Start the application
-CMD ["node", "dist/main.js"]
+CMD ["dumb-init", "node", "dist/main.js"]

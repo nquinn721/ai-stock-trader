@@ -1,0 +1,44 @@
+# Simplified Dockerfile for backend only (for testing path-to-regexp fix)
+FROM node:18-alpine
+
+# Install runtime dependencies
+RUN apk add --no-cache dumb-init
+
+WORKDIR /app
+
+# Copy backend package.json and install dependencies
+COPY backend/package.json ./
+RUN npm install --only=production --no-audit --no-fund
+
+# Copy backend source
+COPY backend/src ./src
+COPY backend/tsconfig*.json ./
+COPY backend/nest-cli.json ./
+
+# Install dev dependencies needed for build
+RUN npm install typescript @nestjs/cli --no-audit --no-fund
+
+# Build the application
+RUN npm run build
+
+# Create a simple static frontend placeholder
+RUN mkdir -p public && echo '<!DOCTYPE html><html><head><title>Stock Trading App</title></head><body><h1>Backend is running</h1><p>Path-to-regexp fix test</p></body></html>' > public/index.html
+
+# Create non-root user
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S nestjs -u 1001 && \
+    chown -R nestjs:nodejs /app
+
+USER nestjs
+
+# Set environment variables
+ENV NODE_ENV=production
+
+EXPOSE 8080
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+  CMD node -e "require('http').get('http://localhost:8080/health', (res) => process.exit(res.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))"
+
+# Start the application
+CMD ["dumb-init", "node", "dist/main.js"]

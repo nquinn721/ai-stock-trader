@@ -1,0 +1,65 @@
+# Simplified Backend Dockerfile for Cloud Run (No ML Dependencies)
+FROM node:20-slim AS builder
+
+# Install basic build dependencies
+RUN apt-get update && apt-get install -y \
+    python3 \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# Copy package files
+COPY backend/package*.json ./
+COPY backend/tsconfig*.json ./
+COPY backend/nest-cli.json ./
+
+# Install all dependencies (including dev for building)
+RUN npm install
+
+# Copy source code
+COPY backend/src/ ./src/
+
+# Build the application
+RUN npm run build
+
+# Production stage
+FROM node:20-slim AS production
+
+# Install runtime dependencies
+RUN apt-get update && apt-get install -y \
+    curl \
+    ca-certificates \
+    dumb-init \
+    && rm -rf /var/lib/apt/lists/* \
+    && apt-get clean
+
+WORKDIR /app
+
+# Create non-root user for security
+RUN groupadd -g 1001 nodejs && \
+    useradd -r -u 1001 -g nodejs nestjs
+
+# Copy package files and install production dependencies
+COPY --from=builder --chown=nestjs:nodejs /app/package*.json ./
+RUN npm install --omit=dev && npm cache clean --force
+
+# Copy built application
+COPY --from=builder --chown=nestjs:nodejs /app/dist ./dist
+
+# Set environment variables
+ENV NODE_ENV=production
+ENV PORT=8080
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
+  CMD curl -f http://localhost:8080/health || exit 1
+
+# Switch to non-root user
+USER nestjs
+
+EXPOSE 8080
+
+# Use dumb-init for proper signal handling
+ENTRYPOINT ["dumb-init", "--"]
+CMD ["node", "dist/main.js"]

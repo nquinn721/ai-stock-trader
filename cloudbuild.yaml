@@ -1,12 +1,81 @@
+# Cloud Build configuration for Stock Trading App
 steps:
-  - name: "gcr.io/cloud-builders/gcloud"
+  # Step 1: Build the application using the backend test Dockerfile
+  - name: "gcr.io/cloud-builders/docker"
     args:
-      - "run"
-      - "deploy"
-      - "[SERVICE-NAME]"
-      - "--image"
-      - "gcr.io/cloudrun/hello"
-      - "--region"
-      - "[REGION]"
-      - "--platform"
-      - "managed"
+      [
+        "build",
+        "-t",
+        "gcr.io/$PROJECT_ID/stock-trading-app:$BUILD_ID",
+        "-t",
+        "gcr.io/$PROJECT_ID/stock-trading-app:latest",
+        "-f",
+        "Dockerfile.backend-test",
+        ".",
+      ]
+    timeout: "1800s"
+
+  # Step 2: Push the image to Container Registry
+  - name: "gcr.io/cloud-builders/docker"
+    args: ["push", "gcr.io/$PROJECT_ID/stock-trading-app:$BUILD_ID"]
+    timeout: "600s"
+
+  # Step 3: Push the latest tag
+  - name: "gcr.io/cloud-builders/docker"
+    args: ["push", "gcr.io/$PROJECT_ID/stock-trading-app:latest"]
+    timeout: "600s"
+
+  # Step 4: Deploy to Cloud Run
+  - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
+    entrypoint: "gcloud"
+    args:
+      [
+        "run",
+        "deploy",
+        "stock-trading-app",
+        "--image",
+        "gcr.io/$PROJECT_ID/stock-trading-app:$BUILD_ID",
+        "--region",
+        "${_REGION}",
+        "--platform",
+        "managed",
+        "--allow-unauthenticated",
+        "--port",
+        "8080",
+        "--memory",
+        "4Gi",
+        "--cpu",
+        "2",
+        "--timeout",
+        "900",
+        "--concurrency",
+        "80",
+        "--min-instances",
+        "0",
+        "--max-instances",
+        "10",
+        "--set-env-vars",
+        "NODE_ENV=production,TFJS_BACKEND=cpu,TFJS_DISABLE_WEBGL=true,DATABASE_HOST=35.238.63.253,DATABASE_PORT=3306,DATABASE_USERNAME=stocktrader,DATABASE_PASSWORD=secure_trading_password_2024,DATABASE_NAME=stocktrading",
+        "--labels",
+        "app=stock-trading,env=production",
+      ]
+    timeout: "600s"
+
+# Substitution variables
+substitutions:
+  _REGION: "us-central1"
+
+# Build options
+options:
+  machineType: "E2_HIGHCPU_8"
+  diskSizeGb: "100"
+  logging: "CLOUD_LOGGING_ONLY"
+  substitution_option: "ALLOW_LOOSE"
+
+# Build timeout
+timeout: "2400s"
+
+# Images to be stored in Container Registry
+images:
+  - "gcr.io/$PROJECT_ID/stock-trading-app:$BUILD_ID"
+  - "gcr.io/$PROJECT_ID/stock-trading-app:latest"

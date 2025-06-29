@@ -1,0 +1,59 @@
+# Option 4: Distroless for maximum security and minimal size
+FROM node:20-bullseye AS builder
+
+# Install build dependencies
+RUN apt-get update && apt-get install -y \
+    python3 \
+    python3-pip \
+    python3-dev \
+    build-essential \
+    pkg-config \
+    libcairo2-dev \
+    libpango1.0-dev \
+    libjpeg-dev \
+    libgif-dev \
+    librsvg2-dev \
+    libpixman-1-dev \
+    git \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN ln -sf /usr/bin/python3 /usr/bin/python
+
+ENV PYTHON=/usr/bin/python3
+ENV TFJS_BACKEND=cpu
+ENV TFJS_DISABLE_WEBGL=true
+ENV NODE_OPTIONS="--max-old-space-size=4096"
+
+WORKDIR /app
+
+COPY package*.json ./
+COPY tsconfig*.json ./
+COPY nest-cli.json ./
+
+RUN npm ci --omit=dev --ignore-scripts
+RUN npm cache clean --force
+
+COPY src/ ./src/
+RUN npm run build
+
+# Production stage - Google Distroless (ultra-secure, minimal)
+FROM gcr.io/distroless/nodejs20-debian11:latest AS production
+
+WORKDIR /app
+
+# Copy from builder (distroless doesn't have shell, so no chown)
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/package*.json ./
+
+# Environment variables (distroless runs as non-root by default)
+ENV NODE_ENV=production
+ENV PORT=8000
+ENV TFJS_BACKEND=cpu
+ENV TFJS_DISABLE_WEBGL=true
+ENV NODE_OPTIONS="--max-old-space-size=2048"
+
+EXPOSE 8000
+
+# No shell available, direct node execution
+CMD ["dist/main.js"]

@@ -1,0 +1,126 @@
+# Multi-stage Docker build for AI Stock Trader - Cloud Run Optimized
+# Stage 1: Build frontend
+FROM node:20-slim AS frontend-build
+
+# Install basic build dependencies
+RUN apt-get update && apt-get install -y \
+    git \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set working directory
+WORKDIR /app/frontend
+
+# Copy package files and install dependencies (including dev for build)
+COPY frontend/package*.json ./
+RUN npm ci || npm install
+
+# Copy source and build
+COPY frontend/ ./
+RUN npm run build
+
+# Stage 2: Build backend  
+FROM node:20-slim AS backend-build
+
+# Install Python and build dependencies for native modules
+RUN apt-get update && apt-get install -y \
+    python3 \
+    python3-pip \
+    python3-dev \
+    build-essential \
+    pkg-config \
+    libcairo2-dev \
+    libpango1.0-dev \
+    libjpeg-dev \
+    libgif-dev \
+    librsvg2-dev \
+    libpixman-1-dev \
+    git \
+    curl \
+    && rm -rf /var/lib/apt/lists/* \
+    && ln -sf /usr/bin/python3 /usr/bin/python
+
+# Set working directory
+WORKDIR /app/backend
+
+# Copy package files and install dependencies
+COPY backend/package*.json ./
+COPY backend/tsconfig*.json ./
+COPY backend/nest-cli.json ./
+
+# Set environment variables to disable GPU and WebGL
+ENV TFJS_BACKEND=cpu
+ENV TFJS_DISABLE_WEBGL=true
+ENV PYTHON=/usr/bin/python3
+ENV npm_config_build_from_source=false
+ENV NODE_OPTIONS="--max-old-space-size=4096"
+
+# Install ALL dependencies for build stage (including dev dependencies like @nestjs/cli)
+RUN npm ci --ignore-scripts || npm install --ignore-scripts
+
+# Copy source and build
+COPY backend/src ./src
+RUN npm run build
+
+# Stage 3: Production runtime - optimized for Cloud Run
+FROM node:20-slim AS production
+
+# Install required system dependencies
+RUN apt-get update && apt-get install -y \
+    dumb-init \
+    curl \
+    ca-certificates \
+    libcairo2 \
+    libpango-1.0-0 \
+    libpangocairo-1.0-0 \
+    libjpeg62-turbo \
+    libgif7 \
+    librsvg2-2 \
+    libpixman-1-0 \
+    && rm -rf /var/lib/apt/lists/* \
+    && apt-get clean
+
+# Create app directory
+WORKDIR /app
+
+# Set environment variables to disable GPU and WebGL
+ENV TFJS_BACKEND=cpu
+ENV TFJS_DISABLE_WEBGL=true
+ENV NODE_ENV=production
+ENV NODE_OPTIONS="--max-old-space-size=3072"
+
+# Copy backend package.json and install production dependencies
+COPY backend/package*.json ./
+
+# Install production dependencies only (this will ensure sharp is built for the correct architecture)
+RUN npm ci --omit=dev --platform=linux --arch=x64
+
+# Rebuild sharp specifically for linux-x64 if it exists
+RUN if [ -d node_modules/sharp ]; then npm rebuild sharp --platform=linux --arch=x64; fi
+
+# Copy backend build files
+COPY --from=backend-build /app/backend/dist ./dist
+
+# Copy frontend build to be served by backend
+COPY --from=frontend-build /app/frontend/build ./public
+
+# Create non-root user for security (Cloud Run best practice)
+RUN groupadd -g 1001 nodejs && \
+    useradd -r -u 1001 -g nodejs nestjs
+
+# Change ownership to non-root user
+RUN chown -R nestjs:nodejs /app
+USER nestjs
+
+# Expose port (Cloud Run will set PORT environment variable dynamically)
+EXPOSE $PORT
+
+# Health check optimized for Cloud Run (use PORT env var)
+HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
+    CMD curl -f http://localhost:${PORT:-8080}/health || exit 1
+
+# Use dumb-init to handle signals properly (important for Cloud Run)
+ENTRYPOINT ["dumb-init", "--"]
+
+# Start the application
+CMD ["node", "dist/main.js"]

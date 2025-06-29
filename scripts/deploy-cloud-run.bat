@@ -3,7 +3,10 @@ REM Cloud Run Deployment Script for Stock Trading App - Windows Version
 REM This script builds and deploys the application to Google Cloud Run
 
 setlocal enabledelayedexpansion
-
+set GOOGLE_CLOUD_PROJECT=heroic-footing-460117-k8
+set GOOGLE_CLOUD_REGION=us-east1
+set DB_HOST=/cloudsql/heroic-footing-460117-k8:us-central1:accountant
+set DB_PASSWORD=Accountant1234
 REM Configuration
 if "%GOOGLE_CLOUD_PROJECT%"=="" (
     echo ❌ GOOGLE_CLOUD_PROJECT is not set. Please set it:

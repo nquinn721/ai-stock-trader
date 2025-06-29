@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { HistoricalData } from '../breakout/breakout.service';
 
-// Import Hugging Face transformers
-import { pipeline } from '@xenova/transformers';
+// Temporarily disabled for deployment
+// import { pipeline } from '@xenova/transformers';
 
 export interface MLPrediction {
   confidence: number;
@@ -33,40 +33,28 @@ export class MLAnalysisService {
   }
 
   /**
-   * Initialize Hugging Face transformer models
+   * Initialize Hugging Face transformer models (STUBBED FOR DEPLOYMENT)
    */
   private async initializeTransformerModels() {
     if (this.isModelLoading) return;
     this.isModelLoading = true;
 
     try {
-      console.log('🤖 Loading Hugging Face AI models...');
+      console.log('🤖 Using simulation models for deployment compatibility...');
 
-      // Load FinBERT for financial sentiment analysis
-      this.transformerModels.sentimentAnalysis = await pipeline(
-        'sentiment-analysis',
-        'ProsusAI/finbert',
-        { quantized: true },
-      );
+      // Stubbed: Load FinBERT for financial sentiment analysis
+      this.transformerModels.sentimentAnalysis = null; // Stubbed out for deployment
 
-      // Load BERT for text classification
-      this.transformerModels.sequenceClassification = await pipeline(
-        'text-classification',
-        'nlptown/bert-base-multilingual-uncased-sentiment',
-        { quantized: true },
-      );
+      // Stubbed: Load BERT for text classification
+      this.transformerModels.sequenceClassification = null; // Stubbed out for deployment
 
-      // Load DistilBERT for text classification
-      this.transformerModels.textClassification = await pipeline(
-        'text-classification',
-        'distilbert-base-uncased-finetuned-sst-2-english',
-        { quantized: true },
-      );
+      // Stubbed: Load DistilBERT for text classification
+      this.transformerModels.textClassification = null; // Stubbed out for deployment
 
-      console.log('✅ All Hugging Face AI models loaded successfully!');
+      console.log('✅ Using simulation models successfully!');
     } catch (error) {
-      console.error('❌ Error loading transformer models:', error);
-      console.log('🔄 Falling back to simulation models');
+      console.error('❌ Error in simulation setup:', error);
+      console.log('🔄 Falling back to basic simulation models');
     } finally {
       this.isModelLoading = false;
     }

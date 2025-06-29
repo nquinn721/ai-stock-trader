@@ -1,4 +1,5 @@
 import axios from "axios";
+import { FRONTEND_API_CONFIG } from "../config/api.config";
 import {
   AutoTrade,
   CreateTradingRuleDto,
@@ -90,8 +91,6 @@ export interface PortfolioPerformance {
   dayTradingEnabled: boolean;
   dayTradeCount: number;
 }
-
-import { FRONTEND_API_CONFIG } from "../config/api.config";
 
 const API_BASE_URL = FRONTEND_API_CONFIG.backend.baseUrl;
 

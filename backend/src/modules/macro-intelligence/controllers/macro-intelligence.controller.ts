@@ -50,7 +50,7 @@ import { MonetaryPolicyService } from '../services/monetary-policy.service';
  * S51: Macro Intelligence Controller
  * REST API endpoints for macroeconomic intelligence and geopolitical analysis
  */
-@Controller('api/macro-intelligence')
+@Controller('macro-intelligence')
 export class MacroIntelligenceController {
   private readonly logger = new Logger(MacroIntelligenceController.name);
 

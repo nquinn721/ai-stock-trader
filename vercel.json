@@ -1,0 +1,22 @@
+{
+  "builds": [
+    {
+      "src": "backend/package.json",
+      "use": "@vercel/node",
+      "config": {
+        "includeFiles": ["backend/dist/**"]
+      }
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "backend/dist/main.js"
+    }
+  ],
+  "env": {
+    "NODE_ENV": "production",
+    "TFJS_BACKEND": "cpu",
+    "TFJS_DISABLE_WEBGL": "true"
+  }
+}
