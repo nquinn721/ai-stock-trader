@@ -2,10 +2,12 @@
 .quick-trade-card {
   position: sticky;
   top: calc(80px + 2rem); /* Account for fixed app header height + original offset */
+  height: fit-content;
   min-height: 500px;
   display: flex;
   flex-direction: column;
   gap: 20px;
+  align-self: stretch; /* Allow the card to stretch to match container height */
 }
 
 .quick-trade-card::after {
@@ -137,7 +139,8 @@
   display: flex;
   flex-direction: column;
   gap: 20px;
-  flex: 1;
+  flex: 1; /* Take up remaining space in the card */
+  min-height: 0; /* Allow shrinking if needed */
 }
 
 .form-row {
@@ -1196,6 +1199,11 @@
 .advanced-trading-form {
   max-width: 600px;
   margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  flex: 1; /* Take up remaining space in the card */
+  min-height: 0; /* Allow shrinking if needed */
 }
 
 .advanced-input-section {
