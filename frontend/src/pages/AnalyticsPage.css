@@ -45,38 +45,6 @@
   z-index: 1;
 }
 
-/* Page Header */
-.page-header {
-  margin-bottom: 3rem;
-  text-align: center;
-  padding: 2rem 0;
-  background: rgba(15, 23, 42, 0.4);
-  border: 1px solid rgba(139, 163, 247, 0.2);
-  border-radius: 20px;
-  backdrop-filter: blur(20px);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-}
-
-.page-header h1 {
-  font-size: 3rem;
-  font-weight: 800;
-  color: var(--trading-text-primary);
-  margin: 0 0 1rem 0;
-  background: var(--trading-text-gradient-primary);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  text-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-  letter-spacing: -0.02em;
-}
-
-.page-header p {
-  font-size: 1.125rem;
-  color: rgba(139, 163, 247, 0.8);
-  margin: 0;
-  font-weight: 500;
-}
-
 /* No Portfolio Message */
 .no-portfolio-message {
   text-align: center;
@@ -735,10 +703,6 @@
     padding: 1.5rem 1rem;
   }
 
-  .page-header h1 {
-    font-size: 2.5rem;
-  }
-
   .overview-cards {
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
     gap: 1rem;
@@ -750,14 +714,6 @@
 }
 
 @media (max-width: 768px) {
-  .page-header {
-    padding: 1.5rem 1rem;
-  }
-
-  .page-header h1 {
-    font-size: 2rem;
-  }
-
   .analytics-section {
     padding: 1.5rem 1rem;
   }
@@ -790,10 +746,6 @@
 @media (max-width: 480px) {
   .analytics-page {
     padding: 1rem 0.75rem;
-  }
-
-  .page-header h1 {
-    font-size: 1.75rem;
   }
 
   .card-value {
