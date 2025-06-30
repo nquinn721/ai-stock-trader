@@ -28,10 +28,7 @@ import PortfolioSelector from "../components/PortfolioSelector";
 import QuickTradeContent from "../components/QuickTradeContent";
 import StockCard from "../components/StockCard";
 import PageHeader from "../components/ui/PageHeader";
-import {
-  usePortfolioStore,
-  useStockStore,
-} from "../stores/StoreContext";
+import { usePortfolioStore, useStockStore } from "../stores/StoreContext";
 import { Portfolio } from "../types";
 import "./DashboardPage.css";
 

@@ -1,43 +1,35 @@
-import React, { useState, useEffect } from 'react';
 import {
-  Box,
-  Card,
-  CardContent,
-  Typography,
-  Tabs,
-  Tab,
-  Chip,
-  LinearProgress,
-  Alert,
-  Button,
-  IconButton,
-  Tooltip,
-} from '@mui/material';
-import {
-  TrendingUp,
-  TrendingDown,
+  AccountBalance,
   Assessment,
   Public,
-  AccountBalance,
-  Warning,
   Refresh,
-  Info,
   ShowChart,
-  Language,
-  Security,
-} from '@mui/icons-material';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell } from 'recharts';
-import PageHeader, { PageHeaderActionButton } from '../ui/PageHeader';
-import ContentCard from '../ui/ContentCard';
-import LoadingState from '../ui/LoadingState';
-import StatusChip from '../ui/StatusChip';
-import macroIntelligenceService, { 
-  EconomicAnalysis, 
-  MonetaryPolicyAnalysis, 
-  GeopoliticalRisk 
-} from '../../services/macroIntelligenceService';
-import '../../shared-styles.css';
-import './EconomicIntelligenceDashboard.css';
+  TrendingDown,
+  TrendingUp,
+  Warning,
+} from "@mui/icons-material";
+import {
+  Alert,
+  Box,
+  Button,
+  Chip,
+  LinearProgress,
+  Tab,
+  Tabs,
+  Typography,
+} from "@mui/material";
+import React, { useEffect, useState } from "react";
+import macroIntelligenceService, {
+  EconomicAnalysis,
+  GeopoliticalRisk,
+  MonetaryPolicyAnalysis,
+} from "../../services/macroIntelligenceService";
+import "../../shared-styles.css";
+import ContentCard from "../ui/ContentCard";
+import LoadingState from "../ui/LoadingState";
+import PageHeader from "../ui/PageHeader";
+import StatusChip from "../ui/StatusChip";
+import "./EconomicIntelligenceDashboard.css";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -63,7 +55,7 @@ function TabPanel(props: TabPanelProps) {
 function a11yProps(index: number) {
   return {
     id: `economic-intelligence-tab-${index}`,
-    'aria-controls': `economic-intelligence-tabpanel-${index}`,
+    "aria-controls": `economic-intelligence-tabpanel-${index}`,
   };
 }
 
@@ -73,20 +65,23 @@ interface EconomicIntelligenceDashboardProps {
   onNavigateBack?: () => void;
 }
 
-const EconomicIntelligenceDashboard: React.FC<EconomicIntelligenceDashboardProps> = ({
-  currentTime = new Date(),
-  isConnected = true,
-  onNavigateBack,
-}) => {
+const EconomicIntelligenceDashboard: React.FC<
+  EconomicIntelligenceDashboardProps
+> = ({ currentTime = new Date(), isConnected = true, onNavigateBack }) => {
   const [activeTab, setActiveTab] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [selectedCountry, setSelectedCountry] = useState('US');
-  
+  const [selectedCountry, setSelectedCountry] = useState("US");
+
   // Real API data - no more mock data
-  const [economicData, setEconomicData] = useState<EconomicAnalysis | null>(null);
-  const [monetaryData, setMonetaryData] = useState<MonetaryPolicyAnalysis | null>(null);
-  const [geopoliticalData, setGeopoliticalData] = useState<GeopoliticalRisk[]>([]);
+  const [economicData, setEconomicData] = useState<EconomicAnalysis | null>(
+    null
+  );
+  const [monetaryData, setMonetaryData] =
+    useState<MonetaryPolicyAnalysis | null>(null);
+  const [geopoliticalData, setGeopoliticalData] = useState<GeopoliticalRisk[]>(
+    []
+  );
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setActiveTab(newValue);
@@ -95,35 +90,44 @@ const EconomicIntelligenceDashboard: React.FC<EconomicIntelligenceDashboardProps
   const loadEconomicData = async () => {
     setLoading(true);
     setError(null);
-    
+
     try {
       // Load real data from API
-      const data = await macroIntelligenceService.getDashboardData(selectedCountry);
-      
+      const data =
+        await macroIntelligenceService.getDashboardData(selectedCountry);
+
       setEconomicData(data.economic);
       setMonetaryData(data.monetary);
       setGeopoliticalData(data.geopolitical);
-      
+
       setLoading(false);
     } catch (err: any) {
-      console.error('Error loading economic intelligence data:', err);
-      
+      console.error("Error loading economic intelligence data:", err);
+
       // Handle API errors gracefully with proper "no data" states
       if (err.response?.status === 404) {
-        setError(`No economic data available for ${selectedCountry}. Please try another country.`);
+        setError(
+          `No economic data available for ${selectedCountry}. Please try another country.`
+        );
       } else if (err.response?.status >= 500) {
-        setError('Economic intelligence service is temporarily unavailable. Please try again later.');
-      } else if (err.code === 'ECONNREFUSED') {
-        setError('Unable to connect to the economic intelligence service. Please check if the backend is running.');
+        setError(
+          "Economic intelligence service is temporarily unavailable. Please try again later."
+        );
+      } else if (err.code === "ECONNREFUSED") {
+        setError(
+          "Unable to connect to the economic intelligence service. Please check if the backend is running."
+        );
       } else {
-        setError(`Failed to load economic intelligence data: ${err.message || 'Unknown error'}`);
+        setError(
+          `Failed to load economic intelligence data: ${err.message || "Unknown error"}`
+        );
       }
-      
+
       // Clear data on error to show empty states
       setEconomicData(null);
       setMonetaryData(null);
       setGeopoliticalData([]);
-      
+
       setLoading(false);
     }
   };
@@ -134,9 +138,9 @@ const EconomicIntelligenceDashboard: React.FC<EconomicIntelligenceDashboardProps
 
   const getTrendIcon = (trend: string) => {
     switch (trend) {
-      case 'rising':
+      case "rising":
         return <TrendingUp color="success" fontSize="small" />;
-      case 'falling':
+      case "falling":
         return <TrendingDown color="error" fontSize="small" />;
       default:
         return <ShowChart color="action" fontSize="small" />;
@@ -145,21 +149,21 @@ const EconomicIntelligenceDashboard: React.FC<EconomicIntelligenceDashboardProps
 
   const getImpactColor = (impact: string) => {
     switch (impact) {
-      case 'high':
-        return 'error';
-      case 'medium':
-        return 'warning';
-      case 'low':
-        return 'success';
+      case "high":
+        return "error";
+      case "medium":
+        return "warning";
+      case "low":
+        return "success";
       default:
-        return 'default';
+        return "default";
     }
   };
 
   const getRiskColor = (risk: number) => {
-    if (risk >= 70) return 'error';
-    if (risk >= 50) return 'warning';
-    return 'success';
+    if (risk >= 70) return "error";
+    if (risk >= 50) return "warning";
+    return "success";
   };
 
   const renderEconomicAnalysisTab = () => (
@@ -175,7 +179,13 @@ const EconomicIntelligenceDashboard: React.FC<EconomicIntelligenceDashboardProps
               headerActions={
                 <Chip
                   label={`${economicData.overallHealth}/100`}
-                  color={economicData.overallHealth >= 70 ? 'success' : economicData.overallHealth >= 50 ? 'warning' : 'error'}
+                  color={
+                    economicData.overallHealth >= 70
+                      ? "success"
+                      : economicData.overallHealth >= 50
+                        ? "warning"
+                        : "error"
+                  }
                   size="small"
                 />
               }
@@ -184,11 +194,19 @@ const EconomicIntelligenceDashboard: React.FC<EconomicIntelligenceDashboardProps
                 <LinearProgress
                   variant="determinate"
                   value={economicData.overallHealth}
-                  color={economicData.overallHealth >= 70 ? 'success' : economicData.overallHealth >= 50 ? 'warning' : 'error'}
+                  color={
+                    economicData.overallHealth >= 70
+                      ? "success"
+                      : economicData.overallHealth >= 50
+                        ? "warning"
+                        : "error"
+                  }
                   sx={{ height: 8, borderRadius: 4, mb: 2 }}
                 />
                 <Typography variant="body2" color="text.secondary">
-                  {economicData.outlook.charAt(0).toUpperCase() + economicData.outlook.slice(1)} outlook with {economicData.confidence}% confidence
+                  {economicData.outlook.charAt(0).toUpperCase() +
+                    economicData.outlook.slice(1)}{" "}
+                  outlook with {economicData.confidence}% confidence
                 </Typography>
               </div>
             </ContentCard>
@@ -200,20 +218,36 @@ const EconomicIntelligenceDashboard: React.FC<EconomicIntelligenceDashboardProps
             >
               <div className="trends-grid">
                 <div className="trend-item">
-                  <Typography variant="body2" color="text.secondary">GDP Growth</Typography>
-                  <Typography variant="h6" color="success.main">+{economicData.trends.gdpGrowth}%</Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    GDP Growth
+                  </Typography>
+                  <Typography variant="h6" color="success.main">
+                    +{economicData.trends.gdpGrowth}%
+                  </Typography>
                 </div>
                 <div className="trend-item">
-                  <Typography variant="body2" color="text.secondary">Inflation</Typography>
-                  <Typography variant="h6" color="warning.main">{economicData.trends.inflation}%</Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Inflation
+                  </Typography>
+                  <Typography variant="h6" color="warning.main">
+                    {economicData.trends.inflation}%
+                  </Typography>
                 </div>
                 <div className="trend-item">
-                  <Typography variant="body2" color="text.secondary">Unemployment</Typography>
-                  <Typography variant="h6" color="info.main">{economicData.trends.unemployment}%</Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Unemployment
+                  </Typography>
+                  <Typography variant="h6" color="info.main">
+                    {economicData.trends.unemployment}%
+                  </Typography>
                 </div>
                 <div className="trend-item">
-                  <Typography variant="body2" color="text.secondary">Productivity</Typography>
-                  <Typography variant="h6" color="success.main">+{economicData.trends.productivity}%</Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Productivity
+                  </Typography>
+                  <Typography variant="h6" color="success.main">
+                    +{economicData.trends.productivity}%
+                  </Typography>
                 </div>
               </div>
             </ContentCard>
@@ -249,7 +283,8 @@ const EconomicIntelligenceDashboard: React.FC<EconomicIntelligenceDashboardProps
                         {indicator.value}
                       </Typography>
                       <Typography variant="caption" color="text.secondary">
-                        Previous: {indicator.previousValue} | Forecast: {indicator.forecast}
+                        Previous: {indicator.previousValue} | Forecast:{" "}
+                        {indicator.forecast}
                       </Typography>
                     </div>
                   </div>
@@ -257,7 +292,8 @@ const EconomicIntelligenceDashboard: React.FC<EconomicIntelligenceDashboardProps
               </div>
             ) : (
               <Alert severity="info">
-                No economic indicators available for {selectedCountry}. Data may be updating.
+                No economic indicators available for {selectedCountry}. Data may
+                be updating.
               </Alert>
             )}
           </ContentCard>
@@ -314,16 +350,17 @@ const EconomicIntelligenceDashboard: React.FC<EconomicIntelligenceDashboardProps
           padding="lg"
         >
           <Alert severity="info" sx={{ mb: 2 }}>
-            Economic analysis data is not available for {selectedCountry}. This could be due to:
+            Economic analysis data is not available for {selectedCountry}. This
+            could be due to:
           </Alert>
           <Typography variant="body2" component="ul" sx={{ pl: 2 }}>
             <li>Data is still being processed</li>
             <li>Country not supported by our economic intelligence system</li>
             <li>Temporary service unavailability</li>
           </Typography>
-          <Button 
-            variant="outlined" 
-            onClick={loadEconomicData} 
+          <Button
+            variant="outlined"
+            onClick={loadEconomicData}
             sx={{ mt: 2 }}
             startIcon={<Refresh />}
           >
@@ -347,12 +384,19 @@ const EconomicIntelligenceDashboard: React.FC<EconomicIntelligenceDashboardProps
             >
               <div className="policy-stance">
                 <StatusChip
-                  status={monetaryData.currentStance === 'hawkish' ? 'error' : monetaryData.currentStance === 'dovish' ? 'success' : 'warning'}
+                  status={
+                    monetaryData.currentStance === "hawkish"
+                      ? "error"
+                      : monetaryData.currentStance === "dovish"
+                        ? "success"
+                        : "warning"
+                  }
                   label={monetaryData.currentStance.toUpperCase()}
                   size="lg"
                 />
                 <Typography variant="body2" sx={{ mt: 2 }}>
-                  {monetaryData.centralBank} maintains a {monetaryData.currentStance} policy stance
+                  {monetaryData.centralBank} maintains a{" "}
+                  {monetaryData.currentStance} policy stance
                 </Typography>
               </div>
             </ContentCard>
@@ -364,25 +408,33 @@ const EconomicIntelligenceDashboard: React.FC<EconomicIntelligenceDashboardProps
             >
               <div className="rate-expectations">
                 <div className="rate-item">
-                  <Typography variant="body2" color="text.secondary">Next Meeting</Typography>
-                  <Typography variant="h6">{monetaryData.rateExpectations.nextMeeting}%</Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Next Meeting
+                  </Typography>
+                  <Typography variant="h6">
+                    {monetaryData.rateExpectations.nextMeeting}%
+                  </Typography>
                 </div>
                 <div className="rate-item">
-                  <Typography variant="body2" color="text.secondary">6 Months</Typography>
-                  <Typography variant="h6">{monetaryData.rateExpectations.sixMonth}%</Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    6 Months
+                  </Typography>
+                  <Typography variant="h6">
+                    {monetaryData.rateExpectations.sixMonth}%
+                  </Typography>
                 </div>
                 <div className="rate-item">
-                  <Typography variant="body2" color="text.secondary">1 Year</Typography>
-                  <Typography variant="h6">{monetaryData.rateExpectations.oneYear}%</Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    1 Year
+                  </Typography>
+                  <Typography variant="h6">
+                    {monetaryData.rateExpectations.oneYear}%
+                  </Typography>
                 </div>
               </div>
             </ContentCard>
 
-            <ContentCard
-              title="QE Probability"
-              variant="default"
-              padding="lg"
-            >
+            <ContentCard title="QE Probability" variant="default" padding="lg">
               <div className="qe-probability">
                 <Typography variant="h4" color="primary">
                   {monetaryData.qeProbability}%
@@ -393,7 +445,11 @@ const EconomicIntelligenceDashboard: React.FC<EconomicIntelligenceDashboardProps
                   color="primary"
                   sx={{ mt: 1, height: 6, borderRadius: 3 }}
                 />
-                <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  sx={{ mt: 1 }}
+                >
                   Probability of quantitative easing within 12 months
                 </Typography>
               </div>
@@ -407,23 +463,47 @@ const EconomicIntelligenceDashboard: React.FC<EconomicIntelligenceDashboardProps
           >
             <div className="market-impact-grid">
               <div className="impact-item">
-                <Typography variant="body2" fontWeight="medium">Equities</Typography>
+                <Typography variant="body2" fontWeight="medium">
+                  Equities
+                </Typography>
                 <StatusChip
-                  status={monetaryData.marketImpact.equities === 'positive' ? 'success' : monetaryData.marketImpact.equities === 'negative' ? 'error' : 'warning'}
+                  status={
+                    monetaryData.marketImpact.equities === "positive"
+                      ? "success"
+                      : monetaryData.marketImpact.equities === "negative"
+                        ? "error"
+                        : "warning"
+                  }
                   label={monetaryData.marketImpact.equities}
                 />
               </div>
               <div className="impact-item">
-                <Typography variant="body2" fontWeight="medium">Bonds</Typography>
+                <Typography variant="body2" fontWeight="medium">
+                  Bonds
+                </Typography>
                 <StatusChip
-                  status={monetaryData.marketImpact.bonds === 'positive' ? 'success' : monetaryData.marketImpact.bonds === 'negative' ? 'error' : 'warning'}
+                  status={
+                    monetaryData.marketImpact.bonds === "positive"
+                      ? "success"
+                      : monetaryData.marketImpact.bonds === "negative"
+                        ? "error"
+                        : "warning"
+                  }
                   label={monetaryData.marketImpact.bonds}
                 />
               </div>
               <div className="impact-item">
-                <Typography variant="body2" fontWeight="medium">Currency</Typography>
+                <Typography variant="body2" fontWeight="medium">
+                  Currency
+                </Typography>
                 <StatusChip
-                  status={monetaryData.marketImpact.currency === 'positive' ? 'success' : monetaryData.marketImpact.currency === 'negative' ? 'error' : 'warning'}
+                  status={
+                    monetaryData.marketImpact.currency === "positive"
+                      ? "success"
+                      : monetaryData.marketImpact.currency === "negative"
+                        ? "error"
+                        : "warning"
+                  }
                   label={monetaryData.marketImpact.currency}
                 />
               </div>
@@ -437,16 +517,17 @@ const EconomicIntelligenceDashboard: React.FC<EconomicIntelligenceDashboardProps
           padding="lg"
         >
           <Alert severity="info" sx={{ mb: 2 }}>
-            Monetary policy analysis data is not available for {selectedCountry}. This could be due to:
+            Monetary policy analysis data is not available for {selectedCountry}
+            . This could be due to:
           </Alert>
           <Typography variant="body2" component="ul" sx={{ pl: 2 }}>
             <li>Central bank communication data is being processed</li>
             <li>Country's monetary policy not tracked by our system</li>
             <li>Temporary service unavailability</li>
           </Typography>
-          <Button 
-            variant="outlined" 
-            onClick={loadEconomicData} 
+          <Button
+            variant="outlined"
+            onClick={loadEconomicData}
             sx={{ mt: 2 }}
             startIcon={<Refresh />}
           >
@@ -485,10 +566,12 @@ const EconomicIntelligenceDashboard: React.FC<EconomicIntelligenceDashboardProps
                       color={getRiskColor(100 - region.politicalStability)}
                       sx={{ flexGrow: 1, mx: 1 }}
                     />
-                    <Typography variant="body2">{region.politicalStability}%</Typography>
+                    <Typography variant="body2">
+                      {region.politicalStability}%
+                    </Typography>
                   </div>
                 </div>
-                
+
                 <div className="metric-row">
                   <Typography variant="body2">Conflict Risk</Typography>
                   <div className="metric-bar">
@@ -498,7 +581,9 @@ const EconomicIntelligenceDashboard: React.FC<EconomicIntelligenceDashboardProps
                       color={getRiskColor(100 - region.conflictRisk)}
                       sx={{ flexGrow: 1, mx: 1 }}
                     />
-                    <Typography variant="body2">{region.conflictRisk}%</Typography>
+                    <Typography variant="body2">
+                      {region.conflictRisk}%
+                    </Typography>
                   </div>
                 </div>
 
@@ -516,7 +601,11 @@ const EconomicIntelligenceDashboard: React.FC<EconomicIntelligenceDashboardProps
                 </div>
 
                 <div className="key-events">
-                  <Typography variant="body2" fontWeight="medium" sx={{ mb: 1 }}>
+                  <Typography
+                    variant="body2"
+                    fontWeight="medium"
+                    sx={{ mb: 1 }}
+                  >
                     Key Events
                   </Typography>
                   {region.keyEvents.length > 0 ? (
@@ -538,10 +627,10 @@ const EconomicIntelligenceDashboard: React.FC<EconomicIntelligenceDashboardProps
 
                 <div className="sanctions-status">
                   <Typography variant="body2" fontWeight="medium">
-                    Sanctions Active: {region.sanctions ? 'Yes' : 'No'}
+                    Sanctions Active: {region.sanctions ? "Yes" : "No"}
                   </Typography>
                   <StatusChip
-                    status={region.sanctions ? 'error' : 'success'}
+                    status={region.sanctions ? "error" : "success"}
                     label={`Market Impact: ${region.marketImpact}`}
                     size="sm"
                   />
@@ -557,16 +646,19 @@ const EconomicIntelligenceDashboard: React.FC<EconomicIntelligenceDashboardProps
           padding="lg"
         >
           <Alert severity="info" sx={{ mb: 2 }}>
-            Geopolitical risk analysis data is not available. This could be due to:
+            Geopolitical risk analysis data is not available. This could be due
+            to:
           </Alert>
           <Typography variant="body2" component="ul" sx={{ pl: 2 }}>
             <li>Geopolitical events data is being processed</li>
-            <li>No significant geopolitical risks detected for selected regions</li>
+            <li>
+              No significant geopolitical risks detected for selected regions
+            </li>
             <li>Temporary service unavailability</li>
           </Typography>
-          <Button 
-            variant="outlined" 
-            onClick={loadEconomicData} 
+          <Button
+            variant="outlined"
+            onClick={loadEconomicData}
             sx={{ mt: 2 }}
             startIcon={<Refresh />}
           >
@@ -581,25 +673,22 @@ const EconomicIntelligenceDashboard: React.FC<EconomicIntelligenceDashboardProps
     <div className="page-container economic-intelligence-dashboard">
       <PageHeader
         title="Economic Intelligence & Macro Analysis"
-        currentTime={currentTime}
-        isConnected={isConnected}
-        showLiveIndicator={true}
-        sticky={true}
         statsValue={`${selectedCountry} • Health: ${economicData?.overallHealth || 0}/100`}
         actionButtons={[
           {
             icon: <span>←</span>,
-            onClick: () => onNavigateBack ? onNavigateBack() : (window.location.href = '/'),
-            tooltip: 'Back to Dashboard',
-            className: 'back-button',
-            label: 'Back',
+            onClick: () =>
+              onNavigateBack ? onNavigateBack() : (window.location.href = "/"),
+            tooltip: "Back to Dashboard",
+            className: "back-button",
+            label: "Back",
           },
           {
             icon: <Refresh />,
             onClick: loadEconomicData,
-            tooltip: 'Refresh Data',
-            className: 'action-btn',
-            label: 'Refresh',
+            tooltip: "Refresh Data",
+            className: "action-btn",
+            label: "Refresh",
           },
         ]}
       />
@@ -618,9 +707,21 @@ const EconomicIntelligenceDashboard: React.FC<EconomicIntelligenceDashboardProps
             aria-label="economic intelligence tabs"
             className="main-tabs"
           >
-            <Tab icon={<Assessment />} label="Economic Analysis" {...a11yProps(0)} />
-            <Tab icon={<AccountBalance />} label="Monetary Policy" {...a11yProps(1)} />
-            <Tab icon={<Public />} label="Geopolitical Risk" {...a11yProps(2)} />
+            <Tab
+              icon={<Assessment />}
+              label="Economic Analysis"
+              {...a11yProps(0)}
+            />
+            <Tab
+              icon={<AccountBalance />}
+              label="Monetary Policy"
+              {...a11yProps(1)}
+            />
+            <Tab
+              icon={<Public />}
+              label="Geopolitical Risk"
+              {...a11yProps(2)}
+            />
           </Tabs>
         </ContentCard>
 

@@ -54,19 +54,42 @@ async function bootstrap() {
   // const document = SwaggerModule.createDocument(app, config);
   // SwaggerModule.setup('api', app, document);
 
-  // Add a simple health check endpoint for Cloud Run
+  // Add a comprehensive health check endpoint for Cloud Run and debugging
   // This responds immediately for startup probes, even if ML modules are still loading
-  app.getHttpAdapter().get('/health', (req: any, res: any) => {
-    res.status(200).json({
-      status: 'ok',
-      timestamp: new Date().toISOString(),
-      uptime: process.uptime(),
-      environment: process.env.NODE_ENV || 'development',
-      memory: {
-        used: Math.round(process.memoryUsage().heapUsed / 1024 / 1024),
-        total: Math.round(process.memoryUsage().heapTotal / 1024 / 1024),
-      },
-    });
+  app.getHttpAdapter().get('/health', async (req: any, res: any) => {
+    try {
+      const appContext = app.get('DatabaseInitializationService');
+      let dbHealth = { database: false, tables: {}, connection: {} };
+
+      if (appContext) {
+        try {
+          dbHealth = await appContext.healthCheck();
+        } catch (error) {
+          console.error('Database health check failed:', error);
+        }
+      }
+
+      const healthStatus = {
+        status: 'ok',
+        timestamp: new Date().toISOString(),
+        uptime: process.uptime(),
+        environment: process.env.NODE_ENV || 'development',
+        memory: {
+          used: Math.round(process.memoryUsage().heapUsed / 1024 / 1024),
+          total: Math.round(process.memoryUsage().heapTotal / 1024 / 1024),
+        },
+        database: dbHealth,
+      };
+
+      res.status(200).json(healthStatus);
+    } catch (error) {
+      console.error('Health check error:', error);
+      res.status(500).json({
+        status: 'error',
+        timestamp: new Date().toISOString(),
+        error: error.message,
+      });
+    }
   });
 
   // SPA routing support - serve index.html for non-API routes in production

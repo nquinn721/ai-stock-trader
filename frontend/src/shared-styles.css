@@ -379,6 +379,11 @@ body {
   padding-top: 24px;
 }
 
+/* When page-content is used inside dashboard-page, add horizontal padding */
+.dashboard-page .page-content {
+  padding: 24px var(--trading-spacing-page);
+}
+
 /* ==========================================================================
    Grid Utilities
    ========================================================================== */

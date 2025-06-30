@@ -15,7 +15,7 @@ const MarketScannerPage: React.FC = observer(() => {
   };
 
   return (
-    <div className="page-container">
+    <div className="dashboard-page">
       <PageHeader
         title="Market Scanner"
         statsValue="Live Market Data"

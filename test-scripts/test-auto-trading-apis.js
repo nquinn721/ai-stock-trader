@@ -20,7 +20,7 @@ async function testAutoTradingAPIs() {
     },
     {
       name: "Autonomous Trading - Get Running Strategies",
-      url: `${BASE_URL}/api/autonomous-trading/strategies`,
+      url: `${BASE_URL}/api/auto-trading/autonomous/strategies/active`,
       method: "GET",
     },
     {

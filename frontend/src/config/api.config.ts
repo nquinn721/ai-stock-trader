@@ -40,6 +40,7 @@ function getApiBaseUrl(): string {
   const envUrl = process.env.REACT_APP_API_URL;
   if (envUrl === "" || envUrl === undefined) {
     // Production: use relative URL (same origin as React app)
+    // The /api prefix will be added by individual endpoints
     return "";
   }
   // Development: use localhost
@@ -70,14 +71,14 @@ export const FRONTEND_API_CONFIG: FrontendApiConfig = {
     baseUrl: getApiBaseUrl(),
     wsUrl: getWebSocketUrlFromEnv(),
     endpoints: {
-      stocks: "/stocks",
-      stocksWithSignals: "/stocks/with-signals/all",
-      stockHistory: "/stocks/{symbol}/history",
-      tradingSignals: "/trading/signals",
-      paperTrading: "/paper-trading",
-      portfolios: "/paper-trading/portfolios",
-      news: "/news",
-      health: "/health",
+      stocks: "/api/stocks",
+      stocksWithSignals: "/api/stocks/with-signals/all",
+      stockHistory: "/api/stocks/{symbol}/history",
+      tradingSignals: "/api/trading/signals",
+      paperTrading: "/api/paper-trading",
+      portfolios: "/api/paper-trading/portfolios",
+      news: "/api/news",
+      health: "/api/health",
     },
   },
   http: {

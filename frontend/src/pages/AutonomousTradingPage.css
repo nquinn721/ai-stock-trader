@@ -2,12 +2,12 @@
 @import "../shared-styles.css";
 
 /* ==========================================================================
-   Autonomous Trading Page - Standardized Layout
+   Autonomous Trading Page - Uses standardized .dashboard-page
    ========================================================================== */
 
 /* Page Container */
-.page-container.autonomous-trading-page {
-  /* Inherits from shared-styles.css page-container */
+.dashboard-page {
+  /* Inherits from shared-styles.css dashboard-page */
   padding: 0;
 }
 

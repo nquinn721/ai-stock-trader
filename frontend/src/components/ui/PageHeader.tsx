@@ -1,7 +1,7 @@
 import { AccessTime } from "@mui/icons-material";
 import React, { useEffect, useState } from "react";
-import { useWebSocketStore } from "../../stores/StoreContext";
 import { useWebSocketConnection } from "../../hooks/useWebSocketConnection";
+import { useWebSocketStore } from "../../stores/StoreContext";
 import "./PageHeader.css";
 
 export interface PageHeaderActionButton {
@@ -32,10 +32,10 @@ const PageHeader: React.FC<PageHeaderProps> = ({
   // Automatically manage WebSocket connection and get status
   useWebSocketConnection();
   const webSocketStore = useWebSocketStore();
-  
+
   // Automatically update current time every second
   const [currentTime, setCurrentTime] = useState(new Date());
-  
+
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentTime(new Date());

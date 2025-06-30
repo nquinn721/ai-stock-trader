@@ -73,7 +73,7 @@ export class DeployStrategyDto {
   };
 }
 
-@Controller('api/strategy-builder')
+@Controller('strategy-builder')
 export class StrategyBuilderController {
   constructor(
     private readonly strategyBuilderService: StrategyBuilderService,

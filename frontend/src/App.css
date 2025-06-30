@@ -310,26 +310,6 @@ code {
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
 }
 
-.page-header {
-  margin-bottom: 30px;
-  padding: 20px 0;
-  border-bottom: 2px solid #30363d;
-}
-
-.page-header h1 {
-  color: #f0f6fc;
-  font-size: 2rem;
-  font-weight: 600;
-  margin-bottom: 8px;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-}
-
-.page-header p {
-  color: #8b949e;
-  font-size: 1.1rem;
-  margin: 0;
-}
-
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .app-main {
@@ -339,13 +319,5 @@ code {
   .page-wrapper {
     margin: 10px;
     padding: 15px;
-  }
-
-  .page-header h1 {
-    font-size: 1.6rem;
-  }
-
-  .page-header p {
-    font-size: 1rem;
   }
 }

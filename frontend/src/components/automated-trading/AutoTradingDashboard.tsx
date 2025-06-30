@@ -353,10 +353,6 @@ export const AutoTradingDashboard: React.FC = () => {
       <div className="page-container">
         <PageHeader
           title="Auto Trading Dashboard"
-          currentTime={new Date()}
-          isConnected={false}
-          showLiveIndicator={true}
-          sticky={true}
           statsValue="Loading..."
           actionButtons={[
             {
@@ -383,10 +379,6 @@ export const AutoTradingDashboard: React.FC = () => {
       {/* Standardized Header */}
       <PageHeader
         title="Auto Trading Dashboard"
-        currentTime={new Date()}
-        isConnected={isGlobalTradingActive}
-        showLiveIndicator={true}
-        sticky={true}
         statsValue={`${tradingSessions.filter((s) => s.status === "active").length} active sessions • ${tradingSessions.reduce((acc, session) => acc + session.tradesExecuted, 0)} trades`}
         actionButtons={[
           {

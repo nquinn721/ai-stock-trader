@@ -144,7 +144,7 @@ const AnalyticsPage: React.FC = observer(() => {
           async (portfolio) => {
             try {
               const response = await fetch(
-                `${FRONTEND_API_CONFIG.backend.baseUrl}/portfolio-analytics/${portfolio.id}`
+                `${FRONTEND_API_CONFIG.backend.baseUrl}/api/portfolio-analytics/${portfolio.id}`
               );
               if (!response.ok) {
                 throw new Error(
@@ -401,7 +401,7 @@ const AnalyticsPage: React.FC = observer(() => {
 
   if (loading) {
     return (
-      <div className="page-container">
+      <div className="dashboard-page">
         <PageHeader
           title="Portfolio Analytics"
           statsValue="Loading..."
@@ -441,7 +441,7 @@ const AnalyticsPage: React.FC = observer(() => {
 
   if (error) {
     return (
-      <div className="page-container">
+      <div className="dashboard-page">
         <PageHeader
           title="Portfolio Analytics"
           statsValue="Error"
@@ -484,7 +484,7 @@ const AnalyticsPage: React.FC = observer(() => {
 
   if (!portfolioStore.isInitialized || portfolioStore.portfolios.length === 0) {
     return (
-      <div className="page-container">
+      <div className="dashboard-page">
         <PageHeader
           title="Portfolio Analytics"
           statsValue="0 portfolios"
@@ -526,7 +526,7 @@ const AnalyticsPage: React.FC = observer(() => {
   }
 
   return (
-    <div className="page-container">
+    <div className="dashboard-page">
       {/* Page Header */}
       <PageHeader
         title="Portfolio Analytics"

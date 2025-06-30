@@ -96,7 +96,7 @@ const API_BASE_URL = FRONTEND_API_CONFIG.backend.baseUrl;
 
 // Create axios instance for auto-trading API
 const autoTradingApi = axios.create({
-  baseURL: `${API_BASE_URL}/auto-trading`,
+  baseURL: `${API_BASE_URL}/api/auto-trading`,
   headers: {
     "Content-Type": "application/json",
   },

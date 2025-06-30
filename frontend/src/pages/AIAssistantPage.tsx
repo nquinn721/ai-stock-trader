@@ -1,4 +1,4 @@
-import { AutoMode, Chat, Dashboard, Psychology } from "@mui/icons-material";
+import { AutoMode, Dashboard, Psychology } from "@mui/icons-material";
 import { observer } from "mobx-react-lite";
 import React from "react";
 import { useNavigate } from "react-router-dom";
@@ -34,7 +34,7 @@ const AIAssistantPage: React.FC = observer(() => {
   ];
 
   return (
-    <div className="page-container">
+    <div className="dashboard-page">
       <PageHeader
         title="AI Trading Assistant"
         actionButtons={actionButtons}

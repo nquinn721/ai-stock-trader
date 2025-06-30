@@ -770,7 +770,7 @@ const AutonomousTradingPage: React.FC<AutonomousTradingPageProps> = observer(
     };
 
     return (
-      <div className="page-container autonomous-trading-page">
+      <div className="dashboard-page">
         {/* Standardized Page Header */}
         <PageHeader
           title="Autonomous Trading System"

@@ -87,7 +87,7 @@ export const BehavioralFinancePage: React.FC = observer(() => {
   ];
 
   return (
-    <Box className="min-h-screen bg-primary">
+    <div className="dashboard-page">
       {/* Header */}
       <PageHeader
         title="Behavioral Finance & Cognitive AI"
@@ -189,7 +189,7 @@ export const BehavioralFinancePage: React.FC = observer(() => {
           </Box>
         </Container>
       </Box>
-    </Box>
+    </div>
   );
 });
 
