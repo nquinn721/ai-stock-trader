@@ -1,4 +1,5 @@
 import axios from "axios";
+import { FRONTEND_API_CONFIG } from "../config/api.config";
 
 // Mock axios
 jest.mock("axios");
@@ -41,11 +42,11 @@ describe("Frontend API Integration Tests", () => {
       mockedAxios.get.mockResolvedValue({ data: mockStocksWithSignals });
 
       const response = await axios.get(
-        "http://localhost:8000/stocks/with-signals/all"
+        `${FRONTEND_API_CONFIG.backend.baseUrl}/stocks/with-signals/all`
       );
 
       expect(mockedAxios.get).toHaveBeenCalledWith(
-        "http://localhost:8000/stocks/with-signals/all"
+        `${FRONTEND_API_CONFIG.backend.baseUrl}/stocks/with-signals/all`
       );
       expect(response.data).toEqual(mockStocksWithSignals);
     });
@@ -54,7 +55,9 @@ describe("Frontend API Integration Tests", () => {
       mockedAxios.get.mockRejectedValue(new Error("Network Error"));
 
       await expect(
-        axios.get("http://localhost:8000/stocks/with-signals/all")
+        axios.get(
+          `${FRONTEND_API_CONFIG.backend.baseUrl}/stocks/with-signals/all`
+        )
       ).rejects.toThrow("Network Error");
     });
 
@@ -69,10 +72,12 @@ describe("Frontend API Integration Tests", () => {
 
       mockedAxios.get.mockResolvedValue({ data: mockStock });
 
-      const response = await axios.get("http://localhost:8000/stocks/AAPL");
+      const response = await axios.get(
+        `${FRONTEND_API_CONFIG.backend.baseUrl}/stocks/AAPL`
+      );
 
       expect(mockedAxios.get).toHaveBeenCalledWith(
-        "http://localhost:8000/stocks/AAPL"
+        `${FRONTEND_API_CONFIG.backend.baseUrl}/stocks/AAPL`
       );
       expect(response.data).toEqual(mockStock);
     });
@@ -95,11 +100,11 @@ describe("Frontend API Integration Tests", () => {
       mockedAxios.get.mockResolvedValue({ data: mockPortfolios });
 
       const response = await axios.get(
-        "http://localhost:8000/paper-trading/portfolios"
+        `${FRONTEND_API_CONFIG.backend.baseUrl}/paper-trading/portfolios`
       );
 
       expect(mockedAxios.get).toHaveBeenCalledWith(
-        "http://localhost:8000/paper-trading/portfolios"
+        `${FRONTEND_API_CONFIG.backend.baseUrl}/paper-trading/portfolios`
       );
       expect(response.data).toEqual(mockPortfolios);
     });
@@ -126,11 +131,11 @@ describe("Frontend API Integration Tests", () => {
       mockedAxios.get.mockResolvedValue({ data: mockPortfolio });
 
       const response = await axios.get(
-        "http://localhost:8000/paper-trading/portfolios/1"
+        `${FRONTEND_API_CONFIG.backend.baseUrl}/paper-trading/portfolios/1`
       );
 
       expect(mockedAxios.get).toHaveBeenCalledWith(
-        "http://localhost:8000/paper-trading/portfolios/1"
+        `${FRONTEND_API_CONFIG.backend.baseUrl}/paper-trading/portfolios/1`
       );
       expect(response.data).toEqual(mockPortfolio);
     });
@@ -153,12 +158,12 @@ describe("Frontend API Integration Tests", () => {
       mockedAxios.post.mockResolvedValue({ data: createdPortfolio });
 
       const response = await axios.post(
-        "http://localhost:8000/paper-trading/portfolios",
+        `${FRONTEND_API_CONFIG.backend.baseUrl}/paper-trading/portfolios`,
         newPortfolio
       );
 
       expect(mockedAxios.post).toHaveBeenCalledWith(
-        "http://localhost:8000/paper-trading/portfolios",
+        `${FRONTEND_API_CONFIG.backend.baseUrl}/paper-trading/portfolios`,
         newPortfolio
       );
       expect(response.data).toEqual(createdPortfolio);
@@ -183,12 +188,12 @@ describe("Frontend API Integration Tests", () => {
       mockedAxios.post.mockResolvedValue({ data: executedTrade });
 
       const response = await axios.post(
-        "http://localhost:8000/paper-trading/trade",
+        `${FRONTEND_API_CONFIG.backend.baseUrl}/paper-trading/trade`,
         tradeData
       );
 
       expect(mockedAxios.post).toHaveBeenCalledWith(
-        "http://localhost:8000/paper-trading/trade",
+        `${FRONTEND_API_CONFIG.backend.baseUrl}/paper-trading/trade`,
         tradeData
       );
       expect(response.data).toEqual(executedTrade);
@@ -210,10 +215,12 @@ describe("Frontend API Integration Tests", () => {
 
       mockedAxios.get.mockResolvedValue({ data: mockSignals });
 
-      const response = await axios.get("http://localhost:8000/trading/signals");
+      const response = await axios.get(
+        `${FRONTEND_API_CONFIG.backend.baseUrl}/trading/signals`
+      );
 
       expect(mockedAxios.get).toHaveBeenCalledWith(
-        "http://localhost:8000/trading/signals"
+        `${FRONTEND_API_CONFIG.backend.baseUrl}/trading/signals`
       );
       expect(response.data).toEqual(mockSignals);
     });
@@ -229,11 +236,11 @@ describe("Frontend API Integration Tests", () => {
       mockedAxios.get.mockResolvedValue({ data: mockBreakout });
 
       const response = await axios.get(
-        "http://localhost:8000/trading/breakout/AAPL"
+        `${FRONTEND_API_CONFIG.backend.baseUrl}/trading/breakout/AAPL`
       );
 
       expect(mockedAxios.get).toHaveBeenCalledWith(
-        "http://localhost:8000/trading/breakout/AAPL"
+        `${FRONTEND_API_CONFIG.backend.baseUrl}/trading/breakout/AAPL`
       );
       expect(response.data).toEqual(mockBreakout);
     });
@@ -253,10 +260,12 @@ describe("Frontend API Integration Tests", () => {
 
       mockedAxios.get.mockResolvedValue({ data: mockNews });
 
-      const response = await axios.get("http://localhost:8000/news/AAPL");
+      const response = await axios.get(
+        `${FRONTEND_API_CONFIG.backend.baseUrl}/news/AAPL`
+      );
 
       expect(mockedAxios.get).toHaveBeenCalledWith(
-        "http://localhost:8000/news/AAPL"
+        `${FRONTEND_API_CONFIG.backend.baseUrl}/news/AAPL`
       );
       expect(response.data).toEqual(mockNews);
     });
@@ -272,11 +281,11 @@ describe("Frontend API Integration Tests", () => {
       mockedAxios.get.mockResolvedValue({ data: mockSentiment });
 
       const response = await axios.get(
-        "http://localhost:8000/news/AAPL/sentiment"
+        `${FRONTEND_API_CONFIG.backend.baseUrl}/news/AAPL/sentiment`
       );
 
       expect(mockedAxios.get).toHaveBeenCalledWith(
-        "http://localhost:8000/news/AAPL/sentiment"
+        `${FRONTEND_API_CONFIG.backend.baseUrl}/news/AAPL/sentiment`
       );
       expect(response.data).toEqual(mockSentiment);
     });
@@ -289,7 +298,7 @@ describe("Frontend API Integration Tests", () => {
       });
 
       await expect(
-        axios.get("http://localhost:8000/stocks/NONEXISTENT")
+        axios.get(`${FRONTEND_API_CONFIG.backend.baseUrl}/stocks/NONEXISTENT`)
       ).rejects.toMatchObject({
         response: { status: 404 },
       });
@@ -301,7 +310,9 @@ describe("Frontend API Integration Tests", () => {
       });
 
       await expect(
-        axios.get("http://localhost:8000/stocks/with-signals/all")
+        axios.get(
+          `${FRONTEND_API_CONFIG.backend.baseUrl}/stocks/with-signals/all`
+        )
       ).rejects.toMatchObject({
         response: { status: 500 },
       });
@@ -311,7 +322,9 @@ describe("Frontend API Integration Tests", () => {
       mockedAxios.get.mockRejectedValue(new Error("Network Error"));
 
       await expect(
-        axios.get("http://localhost:8000/stocks/with-signals/all")
+        axios.get(
+          `${FRONTEND_API_CONFIG.backend.baseUrl}/stocks/with-signals/all`
+        )
       ).rejects.toThrow("Network Error");
     });
   });
@@ -324,9 +337,12 @@ describe("Frontend API Integration Tests", () => {
       });
 
       await expect(
-        axios.get("http://localhost:8000/stocks/AAPL/historical/1mo", {
-          timeout: 5000,
-        })
+        axios.get(
+          `${FRONTEND_API_CONFIG.backend.baseUrl}/stocks/AAPL/historical/1mo`,
+          {
+            timeout: 5000,
+          }
+        )
       ).rejects.toMatchObject({
         code: "ECONNABORTED",
       });
@@ -345,9 +361,11 @@ describe("Frontend API Integration Tests", () => {
         .mockResolvedValueOnce(mockResponses[2]);
 
       const promises = [
-        axios.get("http://localhost:8000/stocks/with-signals/all"),
-        axios.get("http://localhost:8000/trading/signals"),
-        axios.get("http://localhost:8000/news/AAPL"),
+        axios.get(
+          `${FRONTEND_API_CONFIG.backend.baseUrl}/stocks/with-signals/all`
+        ),
+        axios.get(`${FRONTEND_API_CONFIG.backend.baseUrl}/trading/signals`),
+        axios.get(`${FRONTEND_API_CONFIG.backend.baseUrl}/news/AAPL`),
       ];
 
       const results = await Promise.all(promises);

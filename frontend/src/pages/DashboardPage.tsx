@@ -17,19 +17,18 @@ import {
   faVolumeHigh,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { Analytics, AutoMode, Chat } from "@mui/icons-material";
 import { observer } from "mobx-react-lite";
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import EmptyState from "../components/EmptyState";
 import PortfolioCreator from "../components/PortfolioCreator";
 import PortfolioDetailsModal from "../components/PortfolioDetailsModal";
 import PortfolioSelector from "../components/PortfolioSelector";
-import QuickTrade from "../components/QuickTrade";
+import QuickTradeContent from "../components/QuickTradeContent";
 import StockCard from "../components/StockCard";
-import {
-  usePortfolioStore,
-  useStockStore,
-  useWebSocketStore,
-} from "../stores/StoreContext";
+import PageHeader from "../components/ui/PageHeader";
+import { usePortfolioStore, useStockStore } from "../stores/StoreContext";
 import { Portfolio } from "../types";
 import "./DashboardPage.css";
 
@@ -53,15 +52,14 @@ library.add(
 );
 
 const DashboardPage: React.FC = observer(() => {
+  const navigate = useNavigate();
   const stockStore = useStockStore();
   const portfolioStore = usePortfolioStore();
-  const webSocketStore = useWebSocketStore();
 
   const [showPortfolioCreator, setShowPortfolioCreator] = useState(false);
   const [showPortfolioDetails, setShowPortfolioDetails] = useState(false);
   const [portfolioForDetails, setPortfolioForDetails] =
     useState<Portfolio | null>(null);
-  const [currentTime, setCurrentTime] = useState(new Date());
 
   // Initialize data only if stores are empty or need fresh data
   useEffect(() => {
@@ -88,35 +86,6 @@ const DashboardPage: React.FC = observer(() => {
       console.log("Dashboard: Using existing portfolio data");
     }
   }, []); // Remove dependencies to prevent re-runs
-
-  // Connect WebSocket if not already connected - only connect once
-  useEffect(() => {
-    if (!webSocketStore.isConnected && !webSocketStore.isConnecting) {
-      console.log("Dashboard: Connecting WebSocket for real-time updates");
-      webSocketStore.connect();
-    } else if (webSocketStore.isConnected) {
-      console.log(
-        "Dashboard: WebSocket already connected, real-time updates active"
-      );
-    }
-
-    // Cleanup function to prevent multiple connections
-    return () => {
-      // Don't disconnect WebSocket when dashboard unmounts - keep it alive for the app
-      console.log(
-        "Dashboard: Component unmounting, keeping WebSocket alive for other components"
-      );
-    };
-  }, []); // No dependencies - connect once and keep alive
-
-  // Update clock every second
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentTime(new Date());
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, []);
 
   // Calculate market analytics
   const marketAnalytics = React.useMemo(() => {
@@ -200,7 +169,6 @@ const DashboardPage: React.FC = observer(() => {
     setPortfolioForDetails(null);
   };
 
-  const isConnected = webSocketStore.isConnected;
   const stocksWithSignals = stockStore.stocksWithSignals;
   // Removed loading screen since data comes through WebSockets
   // const loading = stockStore.isLoading;
@@ -229,53 +197,35 @@ const DashboardPage: React.FC = observer(() => {
   }
 
   return (
-    <div className="dashboard-page fade-in">
-      {/* Enhanced Header Section */}
-      <div className="dashboard-header">
-        <div className="header-content">
-          <div className="header-left">
-            <h1 className="dashboard-title">Trading Dashboard</h1>
-            <p className="dashboard-subtitle">
-              Real-time market intelligence & portfolio management
-            </p>
-          </div>
-          <div className="header-right">
-            <div className="connection-status">
-              <div
-                className={`status-indicator ${isConnected ? "connected" : "disconnected"}`}
-              ></div>
-              <span className="status-text">
-                {isConnected ? "Live Data" : "Offline"}
-              </span>
-            </div>
-            <div className="header-stats">
-              <div className="stat-item">
-                <div className="stat-label">Stocks</div>
-                <div className="stat-value">{marketAnalytics.totalStocks}</div>
-              </div>
-              <div className="stat-item">
-                <div className="stat-label">Signals</div>
-                <div className="stat-value">
-                  {marketAnalytics.buySignals + marketAnalytics.sellSignals}
-                </div>
-              </div>
-              <div className="stat-item">
-                <div className="stat-label">Time</div>
-                <div className="stat-value">
-                  {currentTime.toLocaleTimeString("en-US", {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                    hour12: true,
-                  })}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+    <div className="dashboard-page">
+      {/* Page Header */}
+      <PageHeader
+        title="Trading Dashboard"
+        statsValue={`${marketAnalytics.totalStocks} Stocks • ${marketAnalytics.buySignals + marketAnalytics.sellSignals} Signals`}
+        actionButtons={[
+          {
+            icon: <Analytics />,
+            onClick: () => navigate("/dashboard"),
+            tooltip: "Dashboard Analytics",
+            label: "Analytics",
+          },
+          {
+            icon: <AutoMode />,
+            onClick: () => navigate("/autonomous-trading"),
+            tooltip: "Autonomous Trading",
+            label: "Auto Trade",
+          },
+          {
+            icon: <Chat />,
+            onClick: () => navigate("/ai-assistant"),
+            tooltip: "AI Trading Assistant",
+            label: "AI Chat",
+          },
+        ]}
+      />
 
       {/* Main Dashboard Content */}
-      <div className="dashboard-content">
+      <div className="page-content">
         {/* Enhanced Metrics Grid */}
         <div className="dashboard-grid grid-small">
           <div className="dashboard-card trading-card slide-up">
@@ -414,7 +364,7 @@ const DashboardPage: React.FC = observer(() => {
                   </div>
                   <div className="status-indicator connected"></div>
                 </div>
-                <QuickTrade />
+                <QuickTradeContent />
               </div>
             </div>
           </div>

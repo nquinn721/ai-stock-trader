@@ -13,64 +13,27 @@ import {
   TableRow,
   Typography,
 } from "@mui/material";
-import React, { useEffect, useState } from "react";
+import { observer } from "mobx-react-lite";
+import React, { useEffect } from "react";
+import { useStore } from "../../stores/StoreContext";
 
-interface ForexPair {
-  symbol: string;
-  baseCurrency: string;
-  quoteCurrency: string;
-  price: number;
-  change24h: number;
-  changePercent24h: number;
-  volume24h: number;
-  spread: number;
-  interestRateDiff?: number;
-}
+// Remove local interfaces - use the ones from MultiAssetStore
 
-interface ForexMetrics {
-  totalVolume: number;
-  activePairs: number;
-  volatilityIndex: number;
-  majorPairsCount: number;
-}
-
-export const ForexDashboard: React.FC = () => {
-  const [forexData, setForexData] = useState<ForexPair[]>([]);
-  const [metrics, setMetrics] = useState<ForexMetrics | null>(null);
-  const [loading, setLoading] = useState(true);
+export const ForexDashboard: React.FC = observer(() => {
+  const rootStore = useStore();
+  const multiAssetStore = rootStore.multiAssetStore;
 
   useEffect(() => {
-    fetchForexData();
-    fetchForexMetrics();
-  }, []);
+    multiAssetStore.fetchForexMarketData();
+    multiAssetStore.fetchForexMetrics();
+  }, [multiAssetStore]);
 
   const fetchForexData = async () => {
-    try {
-      const response = await fetch("/api/forex/market-data");
-      if (response.ok) {
-        const data = await response.json();
-        setForexData(data);
-      }
-    } catch (error) {
-      console.error("Error fetching forex data:", error);
-      setForexData([]);
-    }
+    // This method is no longer needed - data comes from store
   };
 
   const fetchForexMetrics = async () => {
-    try {
-      setLoading(true);
-      const response = await fetch("/api/forex/metrics");
-      if (response.ok) {
-        const data = await response.json();
-        setMetrics(data);
-      }
-    } catch (error) {
-      console.error("Error fetching forex metrics:", error);
-      setMetrics(null);
-    } finally {
-      setLoading(false);
-    }
+    // This method is no longer needed - data comes from store  
   };
 
   const formatCurrency = (value: number) => {
@@ -88,7 +51,11 @@ export const ForexDashboard: React.FC = () => {
     return change >= 0 ? "#4caf50" : "#f44336";
   };
 
-  if (loading) {
+  // Use store data
+  const forexData = multiAssetStore.forexPairs;
+  const metrics = multiAssetStore.forexMetrics;
+
+  if (multiAssetStore.isLoading) {
     return (
       <div>
         <Typography variant="h6" gutterBottom>
@@ -114,11 +81,11 @@ export const ForexDashboard: React.FC = () => {
         <Card className="metric-card">
           <CardContent>
             <Typography color="textSecondary" gutterBottom>
-              Daily Volume
+              Total Volume
             </Typography>
             <Typography variant="h6" component="div">
-              {metrics?.totalVolume
-                ? formatVolume(metrics.totalVolume)
+              {forexData.length > 0
+                ? formatVolume(forexData.reduce((sum, pair) => sum + pair.volume, 0))
                 : "No data"}
             </Typography>
           </CardContent>
@@ -130,7 +97,7 @@ export const ForexDashboard: React.FC = () => {
               Active Pairs
             </Typography>
             <Typography variant="h6" component="div">
-              {metrics?.activePairs || "No data"}
+              {forexData.length || "No data"}
             </Typography>
           </CardContent>
         </Card>
@@ -141,7 +108,7 @@ export const ForexDashboard: React.FC = () => {
               Volatility Index
             </Typography>
             <Typography variant="h6" component="div">
-              {metrics?.volatilityIndex?.toFixed(2) || "No data"}
+              {metrics?.volatility?.toFixed(2) || "No data"}
             </Typography>
           </CardContent>
         </Card>
@@ -149,10 +116,10 @@ export const ForexDashboard: React.FC = () => {
         <Card className="metric-card">
           <CardContent>
             <Typography color="textSecondary" gutterBottom>
-              Major Pairs
+              Liquidity Level
             </Typography>
             <Typography variant="h6" component="div">
-              {metrics?.majorPairsCount || "No data"}
+              {metrics?.liquidity?.toFixed(2) || "No data"}
             </Typography>
           </CardContent>
         </Card>
@@ -166,10 +133,10 @@ export const ForexDashboard: React.FC = () => {
               <TableRow>
                 <TableCell>Currency Pair</TableCell>
                 <TableCell align="right">Price</TableCell>
-                <TableCell align="right">24h Change</TableCell>
-                <TableCell align="right">Volume (24h)</TableCell>
+                <TableCell align="right">Change</TableCell>
+                <TableCell align="right">Volume</TableCell>
                 <TableCell align="right">Spread</TableCell>
-                <TableCell align="right">Interest Rate Diff</TableCell>
+                <TableCell align="right">Bid/Ask</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -194,9 +161,6 @@ export const ForexDashboard: React.FC = () => {
                         <Typography variant="body1" fontWeight="bold">
                           {pair.symbol}
                         </Typography>
-                        <Typography variant="body2" color="textSecondary">
-                          {pair.baseCurrency}/{pair.quoteCurrency}
-                        </Typography>
                       </Box>
                     </TableCell>
                     <TableCell align="right">
@@ -210,7 +174,7 @@ export const ForexDashboard: React.FC = () => {
                         alignItems="center"
                         justifyContent="flex-end"
                       >
-                        {pair.changePercent24h >= 0 ? (
+                        {pair.changePercent >= 0 ? (
                           <TrendingUp sx={{ color: "#4caf50", mr: 0.5 }} />
                         ) : (
                           <TrendingDown sx={{ color: "#f44336", mr: 0.5 }} />
@@ -218,16 +182,16 @@ export const ForexDashboard: React.FC = () => {
                         <Typography
                           variant="body2"
                           sx={{
-                            color: getPriceChangeColor(pair.changePercent24h),
+                            color: getPriceChangeColor(pair.changePercent),
                           }}
                         >
-                          {pair.changePercent24h?.toFixed(2)}%
+                          {pair.changePercent?.toFixed(2)}%
                         </Typography>
                       </Box>
                     </TableCell>
                     <TableCell align="right">
                       <Typography variant="body2">
-                        {formatVolume(pair.volume24h)}
+                        {formatVolume(pair.volume)}
                       </Typography>
                     </TableCell>
                     <TableCell align="right">
@@ -236,20 +200,9 @@ export const ForexDashboard: React.FC = () => {
                       </Typography>
                     </TableCell>
                     <TableCell align="right">
-                      {pair.interestRateDiff ? (
-                        <Typography
-                          variant="body2"
-                          sx={{
-                            color: getPriceChangeColor(pair.interestRateDiff),
-                          }}
-                        >
-                          {pair.interestRateDiff.toFixed(2)}%
-                        </Typography>
-                      ) : (
-                        <Typography variant="body2" color="textSecondary">
-                          N/A
-                        </Typography>
-                      )}
+                      <Typography variant="body2">
+                        {formatCurrency(pair.bid)} / {formatCurrency(pair.ask)}
+                      </Typography>
                     </TableCell>
                   </TableRow>
                 ))
@@ -260,4 +213,4 @@ export const ForexDashboard: React.FC = () => {
       </Paper>
     </div>
   );
-};
+});

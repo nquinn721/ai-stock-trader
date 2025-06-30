@@ -1,19 +1,53 @@
+import { AutoMode, Dashboard, Psychology } from "@mui/icons-material";
+import { observer } from "mobx-react-lite";
 import React from "react";
-import TradingAssistantChat from "../components/ai/TradingAssistantChat";
+import { useNavigate } from "react-router-dom";
+import TradingAssistantChat from "../components/TradingAssistantChat";
+import PageHeader from "../components/ui/PageHeader";
 import "./AIAssistantPage.css";
 
-const AIAssistantPage: React.FC = () => {
+const AIAssistantPage: React.FC = observer(() => {
+  const navigate = useNavigate();
+
+  const actionButtons = [
+    {
+      icon: <Dashboard />,
+      onClick: () => navigate("/dashboard"),
+      tooltip: "Trading Dashboard",
+      label: "Dashboard",
+    },
+    {
+      icon: <AutoMode />,
+      onClick: () => navigate("/autonomous-trading"),
+      tooltip: "Autonomous Trading",
+      label: "Auto Trade",
+    },
+    {
+      icon: <Psychology />,
+      onClick: () => {
+        // TODO: Add AI insights functionality
+        console.log("AI insights clicked");
+      },
+      tooltip: "AI Insights",
+      label: "Insights",
+    },
+  ];
+
   return (
-    <div className="ai-assistant-page">
-      <div className="page-header">
-        <h1>AI Trading Assistant</h1>
-        <p>Get intelligent insights and trading recommendations</p>
-      </div>
-      <div className="chat-container">
-        <TradingAssistantChat />
+    <div className="dashboard-page">
+      <PageHeader
+        title="AI Trading Assistant"
+        actionButtons={actionButtons}
+        statsValue="GPT-4 Enabled"
+        className="ai-assistant-header"
+      />
+      <div className="page-content">
+        <div className="chat-container">
+          <TradingAssistantChat />
+        </div>
       </div>
     </div>
   );
-};
+});
 
 export default AIAssistantPage;

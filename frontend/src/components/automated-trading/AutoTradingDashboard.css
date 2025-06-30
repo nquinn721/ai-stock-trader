@@ -44,7 +44,7 @@
   z-index: 1;
   padding: var(--theme-space-6) var(--theme-space-4);
   max-width: 1600px;
-  margin: 0 auto;
+  margin: 64px auto 0;
 }
 
 /* ==========================================================================
@@ -881,6 +881,7 @@
 @media (max-width: 768px) {
   .page-content {
     padding: var(--theme-space-4) var(--theme-space-3) !important;
+    margin-top: 64px !important;
   }
 
   .status-overview {

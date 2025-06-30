@@ -41,6 +41,7 @@ import {
   Typography,
 } from "@mui/material";
 import React, { useCallback, useEffect, useState } from "react";
+import { FRONTEND_API_CONFIG } from "../../config/api.config";
 import "./MarketMakingDashboard.css";
 
 // ===================================
@@ -314,7 +315,7 @@ const MarketMakingDashboard: React.FC = () => {
   const loadExchangeStatus = useCallback(async () => {
     try {
       const response = await fetch(
-        "http://localhost:8000/market-making/exchanges/status"
+        `${FRONTEND_API_CONFIG.backend.baseUrl}/market-making/exchanges/status`
       );
       const result = await response.json();
 
@@ -339,7 +340,7 @@ const MarketMakingDashboard: React.FC = () => {
   const loadWebSocketStatus = useCallback(async () => {
     try {
       const response = await fetch(
-        "http://localhost:8000/market-making/websocket/status"
+        `${FRONTEND_API_CONFIG.backend.baseUrl}/market-making/websocket/status`
       );
       const result = await response.json();
 
@@ -354,7 +355,7 @@ const MarketMakingDashboard: React.FC = () => {
   const subscribeToOrderBook = async (exchange: string, symbol: string) => {
     try {
       const response = await fetch(
-        "http://localhost:8000/market-making/websocket/subscribe/orderbook",
+        `${FRONTEND_API_CONFIG.backend.baseUrl}/market-making/websocket/subscribe/orderbook`,
         {
           method: "POST",
           headers: {
@@ -378,7 +379,7 @@ const MarketMakingDashboard: React.FC = () => {
   const subscribeToTicker = async (exchange: string, symbol: string) => {
     try {
       const response = await fetch(
-        "http://localhost:8000/market-making/websocket/subscribe/ticker",
+        `${FRONTEND_API_CONFIG.backend.baseUrl}/market-making/websocket/subscribe/ticker`,
         {
           method: "POST",
           headers: {
@@ -402,7 +403,7 @@ const MarketMakingDashboard: React.FC = () => {
   const unsubscribeFromStream = async (subscriptionId: string) => {
     try {
       const response = await fetch(
-        `http://localhost:8000/market-making/websocket/subscribe/${subscriptionId}`,
+        `${FRONTEND_API_CONFIG.backend.baseUrl}/market-making/websocket/subscribe/${subscriptionId}`,
         {
           method: "DELETE",
         }
@@ -422,7 +423,7 @@ const MarketMakingDashboard: React.FC = () => {
   const getAggregatedBalances = async () => {
     try {
       const response = await fetch(
-        "http://localhost:8000/market-making/exchanges/balances"
+        `${FRONTEND_API_CONFIG.backend.baseUrl}/market-making/exchanges/balances`
       );
       const result = await response.json();
 
@@ -438,7 +439,7 @@ const MarketMakingDashboard: React.FC = () => {
   const getBestQuotes = async (symbol: string) => {
     try {
       const response = await fetch(
-        `http://localhost:8000/market-making/exchanges/quotes/${symbol}`
+        `${FRONTEND_API_CONFIG.backend.baseUrl}/market-making/exchanges/quotes/${symbol}`
       );
       const result = await response.json();
 
@@ -457,7 +458,7 @@ const MarketMakingDashboard: React.FC = () => {
   ) => {
     try {
       const response = await fetch(
-        "http://localhost:8000/market-making/data/trading-session",
+        `${FRONTEND_API_CONFIG.backend.baseUrl}/market-making/data/trading-session`,
         {
           method: "POST",
           headers: {
@@ -481,7 +482,7 @@ const MarketMakingDashboard: React.FC = () => {
   const loadTradingSessions = async () => {
     try {
       const response = await fetch(
-        "http://localhost:8000/market-making/data/trading-sessions"
+        `${FRONTEND_API_CONFIG.backend.baseUrl}/market-making/data/trading-sessions`
       );
       const result = await response.json();
 
@@ -633,7 +634,7 @@ const MarketMakingDashboard: React.FC = () => {
       )}
 
       {/* Main Content Tabs */}
-      <Box className="dashboard-content">
+      <Box className="page-content">
         <Tabs
           value={tabValue}
           onChange={handleTabChange}

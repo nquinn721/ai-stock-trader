@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import * as io from "socket.io-client";
+import { FRONTEND_API_CONFIG } from "../config/api.config";
 import {
   BenchmarkComparison,
   CreateOrderDto,
@@ -61,10 +62,10 @@ const SocketContext = createContext<SocketContextType>({
   subscribeToSelectiveStocks: () => {},
   getPortfolioPerformance: async () => null,
   getPositionDetails: async () => null,
-  getPortfolioAnalytics: async () => ({} as PortfolioAnalytics),
+  getPortfolioAnalytics: async () => ({}) as PortfolioAnalytics,
   getSectorAllocation: async () => [],
-  getPerformanceAttribution: async () => ({} as PerformanceAttribution),
-  getRiskMetrics: async () => ({} as RiskMetrics),
+  getPerformanceAttribution: async () => ({}) as PerformanceAttribution,
+  getRiskMetrics: async () => ({}) as RiskMetrics,
   getBenchmarkComparison: async () => [],
   getRebalancingSuggestions: async () => [],
   // Order management defaults
@@ -458,7 +459,7 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
   };
 
   useEffect(() => {
-    const newSocket = io.connect("http://localhost:8000", {
+    const newSocket = io.connect(FRONTEND_API_CONFIG.backend.wsUrl, {
       transports: ["websocket", "polling"],
       timeout: 20000,
       reconnection: true,

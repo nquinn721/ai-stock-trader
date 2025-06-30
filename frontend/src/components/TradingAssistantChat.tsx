@@ -30,7 +30,6 @@ import {
   SuggestedAction,
   tradingAssistantService,
 } from "../services/tradingAssistantService";
-import "./TradingAssistantChat.css";
 
 interface ChatMessage {
   id: string;
@@ -224,14 +223,15 @@ What would you like to know about the markets today?`,
         sx={{
           flexDirection: "column",
           alignItems: isUser ? "flex-end" : "flex-start",
-          mb: 2,
+          mb: 1, // Reduced margin between messages
+          py: 0.5, // Reduced vertical padding
         }}
       >
         <Box
           sx={{
             display: "flex",
             alignItems: "flex-start",
-            gap: 1,
+            gap: 0.5, // Reduced gap between avatar and message
             width: "100%",
             flexDirection: isUser ? "row-reverse" : "row",
           }}
@@ -241,8 +241,8 @@ What would you like to know about the markets today?`,
               bgcolor: isUser
                 ? theme.palette.primary.main
                 : theme.palette.secondary.main,
-              width: 32,
-              height: 32,
+              width: 28, // Smaller avatar
+              height: 28, // Smaller avatar
             }}
           >
             {isUser ? (
@@ -255,8 +255,8 @@ What would you like to know about the markets today?`,
           <Paper
             elevation={1}
             sx={{
-              p: 2,
-              maxWidth: "75%",
+              p: 1.5, // Reduced padding inside message bubbles
+              maxWidth: "80%", // Increased max width for wider messages
               bgcolor: isUser
                 ? theme.palette.primary.main
                 : theme.palette.background.paper,
@@ -268,11 +268,12 @@ What would you like to know about the markets today?`,
             }}
           >
             <Typography
-              variant="body1"
+              variant="body2" // Smaller text size
               sx={{
                 whiteSpace: "pre-line",
                 "& strong": { fontWeight: 600 },
                 "& em": { fontStyle: "italic" },
+                lineHeight: 1.4, // Tighter line height
               }}
             >
               {message.content}
@@ -286,8 +287,8 @@ What would you like to know about the markets today?`,
                   message.confidence > 0.7
                     ? "success"
                     : message.confidence > 0.5
-                    ? "warning"
-                    : "error"
+                      ? "warning"
+                      : "error"
                 }
                 sx={{ mt: 1 }}
               />
@@ -298,7 +299,7 @@ What would you like to know about the markets today?`,
               color="text.secondary"
               sx={{
                 display: "block",
-                mt: 1,
+                mt: 0.5, // Reduced margin for timestamp
                 opacity: 0.7,
                 textAlign: isUser ? "right" : "left",
               }}
@@ -309,7 +310,9 @@ What would you like to know about the markets today?`,
         </Box>
 
         {message.actions && message.actions.length > 0 && (
-          <Box sx={{ mt: 1, display: "flex", gap: 1, flexWrap: "wrap" }}>
+          <Box sx={{ mt: 0.5, display: "flex", gap: 0.5, flexWrap: "wrap" }}>
+            {" "}
+            {/* Reduced spacing for action buttons */}
             {message.actions.map((action, index) => (
               <Button
                 key={index}
@@ -318,8 +321,9 @@ What would you like to know about the markets today?`,
                 startIcon={getActionIcon(action.type)}
                 onClick={() => handleActionClick(action)}
                 sx={{
-                  fontSize: "0.75rem",
+                  fontSize: "0.7rem", // Smaller button text
                   textTransform: "none",
+                  py: 0.25, // Reduced button padding
                 }}
               >
                 {action.description}
@@ -335,26 +339,32 @@ What would you like to know about the markets today?`,
     <Paper
       elevation={3}
       sx={{
-        height: "600px",
+        height: "800px", // Fixed shorter height
         display: "flex",
         flexDirection: "column",
         bgcolor: theme.palette.background.default,
+        width: "100%",
+        maxWidth: "1000px", // Wider maximum width
+        minWidth: "1000px", // Ensure minimum width
       }}
     >
       {/* Header */}
       <Box
         sx={{
-          p: 2,
+          p: 1.5, // Reduced padding for more compact header
           bgcolor: theme.palette.primary.main,
           color: theme.palette.primary.contrastText,
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
+          width: "100%",
         }}
       >
         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
           <AIIcon />
-          <Typography variant="h6" fontWeight="bold">
+          <Typography variant="subtitle1" fontWeight="bold">
+            {" "}
+            {/* Smaller header text */}
             AI Trading Assistant
           </Typography>
         </Box>
@@ -377,17 +387,21 @@ What would you like to know about the markets today?`,
         sx={{
           flex: 1,
           overflowY: "auto",
-          p: 1,
+          p: 0.5, // Reduced padding for more message space
+          maxHeight: "670px", // Constrain message area height
         }}
       >
-        <List sx={{ pb: 0 }}>
+        <List sx={{ pb: 0, pt: 0 }}>
+          {" "}
+          {/* Reduced top padding */}
           {messages.map(renderMessage)}
-
           {isLoading && (
-            <ListItem sx={{ justifyContent: "center", py: 2 }}>
+            <ListItem sx={{ justifyContent: "center", py: 1 }}>
+              {" "}
+              {/* Reduced loading item padding */}
               <Fade in={isLoading}>
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                  <CircularProgress size={20} />
+                  <CircularProgress size={16} /> {/* Smaller loading spinner */}
                   <Typography variant="body2" color="text.secondary">
                     AI is thinking...
                   </Typography>
@@ -402,12 +416,14 @@ What would you like to know about the markets today?`,
       <Divider />
 
       {/* Input */}
-      <Box sx={{ p: 2 }}>
-        <Box sx={{ display: "flex", gap: 1 }}>
+      <Box sx={{ p: 1.5, width: "100%" }}>
+        {" "}
+        {/* Reduced padding for more compact input area */}
+        <Box sx={{ display: "flex", gap: 1, width: "100%" }}>
           <TextField
             fullWidth
             multiline
-            maxRows={3}
+            maxRows={2} // Reduced max rows for more compact input
             placeholder="Ask me about stocks, trading strategies, or market insights..."
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}

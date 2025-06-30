@@ -1,47 +1,48 @@
-import React, { useState } from 'react';
 import {
+  CheckCircle,
+  Info,
+  Psychology,
+  Send,
+  TrendingDown,
+  TrendingUp,
+  Warning,
+} from "@mui/icons-material";
+import {
+  Alert,
   Box,
-  Typography,
+  Button,
   Card,
   CardContent,
   CardHeader,
-  Button,
-  TextField,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
-  Alert,
-  CircularProgress,
   Chip,
+  CircularProgress,
   Divider,
+  FormControl,
+  FormControlLabel,
+  InputLabel,
   List,
   ListItem,
-  ListItemText,
   ListItemIcon,
+  ListItemText,
+  MenuItem,
+  Select,
   Slider,
   Switch,
-  FormControlLabel,
-} from '@mui/material';
-import {
-  Psychology,
-  TrendingUp,
-  TrendingDown,
-  CheckCircle,
-  Warning,
-  Info,
-  Send,
-} from '@mui/icons-material';
-import axios from 'axios';
+  TextField,
+  Typography,
+} from "@mui/material";
+import axios from "axios";
+import React, { useState } from "react";
+import { FRONTEND_API_CONFIG } from "../../config/api.config";
 
 interface BehavioralSignalResponse {
   symbol: string;
   timestamp: string;
   signal: {
-    action: 'BUY' | 'SELL' | 'HOLD';
+    action: "BUY" | "SELL" | "HOLD";
     confidence: number;
     reasoning: string[];
-    risk: 'LOW' | 'MEDIUM' | 'HIGH';
+    risk: "LOW" | "MEDIUM" | "HIGH";
     factors: {
       bullish: number;
       bearish: number;
@@ -54,9 +55,9 @@ interface BehavioralSignalResponse {
 }
 
 export const BehavioralTradingInterface: React.FC = () => {
-  const [symbol, setSymbol] = useState('AAPL');
+  const [symbol, setSymbol] = useState("AAPL");
   const [riskTolerance, setRiskTolerance] = useState(0.5);
-  const [timeframe, setTimeframe] = useState('1d');
+  const [timeframe, setTimeframe] = useState("1d");
   const [includeEmotional, setIncludeEmotional] = useState(true);
   const [signal, setSignal] = useState<BehavioralSignalResponse | null>(null);
   const [loading, setLoading] = useState(false);
@@ -66,9 +67,9 @@ export const BehavioralTradingInterface: React.FC = () => {
     try {
       setLoading(true);
       setError(null);
-      
+
       const response = await axios.post(
-        'http://localhost:8000/behavioral-finance/behavioral-trading-signal',
+        `${FRONTEND_API_CONFIG.backend.baseUrl}/behavioral-finance/behavioral-trading-signal`,
         {
           symbol,
           riskTolerance,
@@ -76,44 +77,44 @@ export const BehavioralTradingInterface: React.FC = () => {
           includeEmotional,
         }
       );
-      
+
       setSignal(response.data);
     } catch (err) {
-      console.error('Error generating behavioral signal:', err);
-      setError('Failed to generate behavioral trading signal');
+      console.error("Error generating behavioral signal:", err);
+      setError("Failed to generate behavioral trading signal");
     } finally {
       setLoading(false);
     }
   };
 
-  const getActionColor = (action: string): 'success' | 'error' | 'default' => {
-    if (action === 'BUY') return 'success';
-    if (action === 'SELL') return 'error';
-    return 'default';
+  const getActionColor = (action: string): "success" | "error" | "default" => {
+    if (action === "BUY") return "success";
+    if (action === "SELL") return "error";
+    return "default";
   };
 
   const getActionIcon = (action: string) => {
-    if (action === 'BUY') return <TrendingUp color="success" />;
-    if (action === 'SELL') return <TrendingDown color="error" />;
+    if (action === "BUY") return <TrendingUp color="success" />;
+    if (action === "SELL") return <TrendingDown color="error" />;
     return <Info color="disabled" />;
   };
 
-  const getRiskColor = (risk: string): 'success' | 'warning' | 'error' => {
-    if (risk === 'LOW') return 'success';
-    if (risk === 'MEDIUM') return 'warning';
-    return 'error';
+  const getRiskColor = (risk: string): "success" | "warning" | "error" => {
+    if (risk === "LOW") return "success";
+    if (risk === "MEDIUM") return "warning";
+    return "error";
   };
 
   const getConfidenceColor = (confidence: number): string => {
-    if (confidence >= 0.8) return '#22c55e'; // High confidence - Green
-    if (confidence >= 0.6) return '#f59e0b'; // Medium confidence - Orange
-    return '#ef4444'; // Low confidence - Red
+    if (confidence >= 0.8) return "#22c55e"; // High confidence - Green
+    if (confidence >= 0.6) return "#f59e0b"; // Medium confidence - Orange
+    return "#ef4444"; // Low confidence - Red
   };
 
   const getRiskToleranceLabel = (value: number): string => {
-    if (value <= 0.3) return 'Conservative';
-    if (value <= 0.7) return 'Moderate';
-    return 'Aggressive';
+    if (value <= 0.3) return "Conservative";
+    if (value <= 0.7) return "Moderate";
+    return "Aggressive";
   };
 
   return (
@@ -126,7 +127,8 @@ export const BehavioralTradingInterface: React.FC = () => {
             Behavioral Trading Interface
           </Typography>
           <Typography variant="subtitle1" color="textSecondary">
-            AI-powered trading signals based on market psychology and behavioral finance
+            AI-powered trading signals based on market psychology and behavioral
+            finance
           </Typography>
         </Box>
       </Box>
@@ -177,9 +179,9 @@ export const BehavioralTradingInterface: React.FC = () => {
                   max={1}
                   step={0.1}
                   marks={[
-                    { value: 0, label: 'Conservative' },
-                    { value: 0.5, label: 'Moderate' },
-                    { value: 1, label: 'Aggressive' },
+                    { value: 0, label: "Conservative" },
+                    { value: 0.5, label: "Moderate" },
+                    { value: 1, label: "Aggressive" },
                   ]}
                   valueLabelDisplay="auto"
                   valueLabelFormat={(value) => `${(value * 100).toFixed(0)}%`}
@@ -208,7 +210,9 @@ export const BehavioralTradingInterface: React.FC = () => {
                 startIcon={loading ? <CircularProgress size={20} /> : <Send />}
                 className="mt-4"
               >
-                {loading ? 'Generating Signal...' : 'Generate Behavioral Signal'}
+                {loading
+                  ? "Generating Signal..."
+                  : "Generate Behavioral Signal"}
               </Button>
             </Box>
           </CardContent>
@@ -229,7 +233,8 @@ export const BehavioralTradingInterface: React.FC = () => {
 
             {!signal && !loading && (
               <Alert severity="info">
-                Configure parameters and click "Generate Signal" to get behavioral trading insights
+                Configure parameters and click "Generate Signal" to get
+                behavioral trading insights
               </Alert>
             )}
 
@@ -260,12 +265,16 @@ export const BehavioralTradingInterface: React.FC = () => {
                 {/* Confidence & Risk */}
                 <div className="grid grid-2 gap-4">
                   <Box>
-                    <Typography variant="body2" color="textSecondary" className="mb-1">
+                    <Typography
+                      variant="body2"
+                      color="textSecondary"
+                      className="mb-1"
+                    >
                       Confidence Level
                     </Typography>
                     <Box className="flex items-center gap-2">
-                      <Typography 
-                        variant="h5" 
+                      <Typography
+                        variant="h5"
                         className="font-bold"
                         style={{ color: getConfidenceColor(signal.confidence) }}
                       >
@@ -273,13 +282,19 @@ export const BehavioralTradingInterface: React.FC = () => {
                       </Typography>
                       <Chip
                         label={
-                          signal.confidence >= 0.8 ? 'HIGH' :
-                          signal.confidence >= 0.6 ? 'MEDIUM' : 'LOW'
+                          signal.confidence >= 0.8
+                            ? "HIGH"
+                            : signal.confidence >= 0.6
+                              ? "MEDIUM"
+                              : "LOW"
                         }
                         size="small"
                         color={
-                          signal.confidence >= 0.8 ? 'success' :
-                          signal.confidence >= 0.6 ? 'warning' : 'error'
+                          signal.confidence >= 0.8
+                            ? "success"
+                            : signal.confidence >= 0.6
+                              ? "warning"
+                              : "error"
                         }
                         variant="outlined"
                       />
@@ -287,7 +302,11 @@ export const BehavioralTradingInterface: React.FC = () => {
                   </Box>
 
                   <Box>
-                    <Typography variant="body2" color="textSecondary" className="mb-1">
+                    <Typography
+                      variant="body2"
+                      color="textSecondary"
+                      className="mb-1"
+                    >
                       Risk Assessment
                     </Typography>
                     <Box className="flex items-center gap-2">
@@ -308,7 +327,10 @@ export const BehavioralTradingInterface: React.FC = () => {
 
                 {/* Signal Factors */}
                 <Box>
-                  <Typography variant="subtitle2" className="mb-2 font-semibold">
+                  <Typography
+                    variant="subtitle2"
+                    className="mb-2 font-semibold"
+                  >
                     Behavioral Factors
                   </Typography>
                   <div className="grid grid-3 gap-2 text-center">
@@ -316,7 +338,10 @@ export const BehavioralTradingInterface: React.FC = () => {
                       <Typography variant="body2" color="textSecondary">
                         Bullish
                       </Typography>
-                      <Typography variant="h6" className="font-bold text-success">
+                      <Typography
+                        variant="h6"
+                        className="font-bold text-success"
+                      >
                         {signal.signal.factors.bullish}
                       </Typography>
                     </Box>
@@ -332,15 +357,20 @@ export const BehavioralTradingInterface: React.FC = () => {
                       <Typography variant="body2" color="textSecondary">
                         Net Score
                       </Typography>
-                      <Typography 
-                        variant="h6" 
+                      <Typography
+                        variant="h6"
                         className="font-bold"
-                        style={{ 
-                          color: signal.signal.factors.net > 0 ? '#22c55e' : 
-                                 signal.signal.factors.net < 0 ? '#ef4444' : '#64748b'
+                        style={{
+                          color:
+                            signal.signal.factors.net > 0
+                              ? "#22c55e"
+                              : signal.signal.factors.net < 0
+                                ? "#ef4444"
+                                : "#64748b",
                         }}
                       >
-                        {signal.signal.factors.net > 0 ? '+' : ''}{signal.signal.factors.net}
+                        {signal.signal.factors.net > 0 ? "+" : ""}
+                        {signal.signal.factors.net}
                       </Typography>
                     </Box>
                   </div>
@@ -350,16 +380,19 @@ export const BehavioralTradingInterface: React.FC = () => {
 
                 {/* Reasoning */}
                 <Box>
-                  <Typography variant="subtitle2" className="mb-2 font-semibold">
+                  <Typography
+                    variant="subtitle2"
+                    className="mb-2 font-semibold"
+                  >
                     Signal Reasoning
                   </Typography>
                   <List dense>
                     {signal.reasoning.map((reason, index) => (
                       <ListItem key={index} disablePadding>
                         <ListItemIcon>
-                          {signal.signal.action === 'BUY' ? (
+                          {signal.signal.action === "BUY" ? (
                             <CheckCircle color="success" fontSize="small" />
-                          ) : signal.signal.action === 'SELL' ? (
+                          ) : signal.signal.action === "SELL" ? (
                             <Warning color="error" fontSize="small" />
                           ) : (
                             <Info color="info" fontSize="small" />
@@ -367,9 +400,7 @@ export const BehavioralTradingInterface: React.FC = () => {
                         </ListItemIcon>
                         <ListItemText
                           primary={
-                            <Typography variant="body2">
-                              {reason}
-                            </Typography>
+                            <Typography variant="body2">{reason}</Typography>
                           }
                         />
                       </ListItem>
@@ -378,20 +409,23 @@ export const BehavioralTradingInterface: React.FC = () => {
                 </Box>
 
                 {/* Trading Recommendation */}
-                <Alert 
+                <Alert
                   severity={
-                    signal.signal.action === 'BUY' ? 'success' :
-                    signal.signal.action === 'SELL' ? 'warning' : 'info'
+                    signal.signal.action === "BUY"
+                      ? "success"
+                      : signal.signal.action === "SELL"
+                        ? "warning"
+                        : "info"
                   }
                   className="mt-4"
                 >
                   <Typography variant="body2" className="font-medium">
-                    Behavioral Analysis Recommendation: {signal.signal.action} {signal.symbol}
+                    Behavioral Analysis Recommendation: {signal.signal.action}{" "}
+                    {signal.symbol}
                   </Typography>
                   <Typography variant="body2">
-                    Confidence: {(signal.confidence * 100).toFixed(1)}% | 
-                    Risk: {signal.riskAssessment} | 
-                    Timeframe: {timeframe}
+                    Confidence: {(signal.confidence * 100).toFixed(1)}% | Risk:{" "}
+                    {signal.riskAssessment} | Timeframe: {timeframe}
                   </Typography>
                 </Alert>
               </Box>

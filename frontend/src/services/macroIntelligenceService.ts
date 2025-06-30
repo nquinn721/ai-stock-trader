@@ -1,5 +1,5 @@
-import axios from "axios";
 import { FRONTEND_API_CONFIG } from "../config/api.config";
+import { apiStore } from "../stores/ApiStore";
 
 const API_BASE_URL = FRONTEND_API_CONFIG.backend.baseUrl;
 
@@ -79,106 +79,104 @@ export interface GlobalOverviewData {
 }
 
 class MacroIntelligenceService {
-  private baseURL = `${API_BASE_URL}/api/macro-intelligence`;
-
   /**
    * Get comprehensive economic analysis for a country
    */
   async getEconomicAnalysis(country: string): Promise<EconomicAnalysis> {
-    const response = await axios.get(
-      `${this.baseURL}/economic/analysis/${country}`
+    const response = await apiStore.get<EconomicAnalysis>(
+      `/api/macro-intelligence/economic/analysis/${country}`
     );
-    return response.data;
+    return response;
   }
 
   /**
    * Get inflation forecast for a region
    */
   async getInflationForecast(region: string, timeframe: string = "1Y") {
-    const response = await axios.get(`${this.baseURL}/inflation-forecast`, {
-      params: { region, timeframe },
-    });
-    return response.data;
+    const response = await apiStore.get(
+      `/api/macro-intelligence/inflation-forecast?region=${region}&timeframe=${timeframe}`
+    );
+    return response;
   }
 
   /**
    * Get GDP growth forecast for a country
    */
   async getGDPForecast(country: string) {
-    const response = await axios.get(
-      `${this.baseURL}/gdp-forecast?country=${country}`
+    const response = await apiStore.get(
+      `/api/macro-intelligence/gdp-forecast?country=${country}`
     );
-    return response.data;
+    return response;
   }
 
   /**
    * Get recession probability for a country
    */
   async getRecessionProbability(country: string) {
-    const response = await axios.get(
-      `${this.baseURL}/recession-probability?country=${country}`
+    const response = await apiStore.get(
+      `/api/macro-intelligence/recession-probability?country=${country}`
     );
-    return response.data;
+    return response;
   }
 
   /**
    * Get QE probability assessment for a central bank
    */
   async getQEProbability(centralBank: string) {
-    const response = await axios.get(
-      `${this.baseURL}/monetary-policy/qe-assessment?centralBank=${centralBank}`
+    const response = await apiStore.get(
+      `/api/macro-intelligence/monetary-policy/qe-assessment?centralBank=${centralBank}`
     );
-    return response.data;
+    return response;
   }
 
   /**
    * Get political stability score for a country
    */
   async getPoliticalStability(country: string) {
-    const response = await axios.get(
-      `${this.baseURL}/geopolitical/political-stability?country=${country}`
+    const response = await apiStore.get(
+      `/api/macro-intelligence/geopolitical/political-stability?country=${country}`
     );
-    return response.data;
+    return response;
   }
 
   /**
    * Get diplomatic tension analysis for a region
    */
   async getDiplomaticTensions(region: string) {
-    const response = await axios.get(
-      `${this.baseURL}/geopolitical/diplomatic-tensions?region=${region}`
+    const response = await apiStore.get(
+      `/api/macro-intelligence/geopolitical/diplomatic-tensions?region=${region}`
     );
-    return response.data;
+    return response;
   }
 
   /**
    * Get comprehensive macro dashboard data for a country
    */
   async getMacroDashboard(country: string): Promise<MacroDashboardData> {
-    const response = await axios.get(
-      `${this.baseURL}/comprehensive-analysis?country=${country}`
+    const response = await apiStore.get<MacroDashboardData>(
+      `/api/macro-intelligence/comprehensive-analysis?country=${country}`
     );
-    return response.data;
+    return response;
   }
 
   /**
    * Get global macroeconomic overview
    */
   async getGlobalOverview(): Promise<GlobalOverviewData> {
-    const response = await axios.get(
-      `${this.baseURL}/comprehensive-analysis?country=GLOBAL`
+    const response = await apiStore.get<GlobalOverviewData>(
+      `/api/macro-intelligence/comprehensive-analysis?country=GLOBAL`
     );
-    return response.data;
+    return response;
   }
 
   /**
    * Get system health and status
    */
   async getSystemHealth() {
-    const response = await axios.get(
-      `${this.baseURL}/comprehensive-analysis?country=US`
+    const response = await apiStore.get(
+      `/api/macro-intelligence/comprehensive-analysis?country=US`
     );
-    return response.data;
+    return response;
   }
 
   /**

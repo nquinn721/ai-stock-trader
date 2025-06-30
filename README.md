@@ -1,8 +1,8 @@
 # AI Stock Trader
 
-A comprehensive stock trading application with real-time data, sentiment analysis, and AI-powered trading signals.
+A comprehensive stock trading application with real-time data, sentiment analysis, and AI-powered trading signals featuring advanced machine learning and trading intelligence modules.
 
-## 🚀 Features
+## 🚀 Core Features
 
 - **Real-time Stock Data**: Live stock prices from Yahoo Finance API
 - **WebSocket Integration**: Real-time price updates via Socket.IO
@@ -11,6 +11,60 @@ A comprehensive stock trading application with real-time data, sentiment analysi
 - **Technical Analysis**: RSI, moving averages, and breakout detection
 - **Modern UI**: Beautiful, responsive React dashboard
 - **API Documentation**: Swagger/OpenAPI documentation
+
+## 🧠 Advanced ML/AI Features
+
+### AutoTradingModule ✅
+
+- **Autonomous Trading Strategies**: Rule-based execution engine
+- **Dynamic Position Sizing**: ML-powered position optimization
+- **Adaptive Stop-Loss**: Real-time risk-adjusted stop losses
+- **Real-time Risk Monitoring**: Continuous portfolio risk assessment
+- **Endpoint**: `/auto-trading/sessions/status`
+
+### BehavioralFinanceModule ✅
+
+- **Cognitive Bias Detection**: Identify and mitigate trading biases
+- **Market Psychology Analysis**: Crowd behavior and sentiment cycles
+- **Fear & Greed Index**: Market emotion quantification
+- **Herding Behavior Detection**: Identify mass market movements
+- **Loss Aversion Modeling**: Behavioral pattern recognition
+- **Endpoint**: `/behavioral-finance/health`
+
+### DataIntelligenceModule ✅
+
+- **Real-time Data Pipeline**: Ultra-low latency data processing
+- **Market Anomaly Detection**: Identify unusual market patterns
+- **Arbitrage Opportunity Detection**: Cross-market price discrepancies
+- **Data Quality Monitoring**: Ensure data integrity and reliability
+- **Advanced Analytics Engine**: Complex financial calculations
+- **Endpoint**: `/data-intelligence/dashboard`
+
+### EconomicIntelligenceModule ✅
+
+- **Economic Indicator Analysis**: GDP, inflation, employment tracking
+- **Fed Communication Analysis**: Central bank sentiment analysis
+- **Geopolitical Risk Assessment**: Global event impact modeling
+- **Market Regime Detection**: Bull/bear market identification
+- **Macro Trading Strategies**: Economic-driven trading signals
+- **Endpoint**: `/economic-intelligence/economic-indicators`
+
+### MarketMakingModule ✅
+
+- **Liquidity Provision Algorithms**: Professional market making
+- **Arbitrage Detection Engine**: Cross-venue opportunity identification
+- **Risk Management Systems**: Advanced position and exposure control
+- **Market Making Strategies**: Bid-ask spread optimization
+- **Professional Trading Tools**: Institutional-grade capabilities
+- **Endpoint**: `/market-making/health`
+
+### MultiAssetModule ⚠️
+
+- **Cross-Asset Trading**: Stocks, crypto, forex, commodities
+- **Asset Correlation Analysis**: Multi-asset relationship modeling
+- **Cross-Asset Arbitrage**: Opportunity detection across asset classes
+- **Currency Risk Management**: FX exposure monitoring
+- **Endpoint**: `/multi-asset/health` (external APIs pending)
 
 ## 🏗️ Architecture
 
@@ -269,6 +323,7 @@ npm run test:recommendations # Test recommendation system
 - Input validation with class-validator
 - CORS protection
 - Rate limiting (future)
+- **Database Protection**: See [Database Protection Guide](docs/DATABASE-PROTECTION-GUIDE.md) for critical procedures to prevent accidental data loss
 
 ## 🚀 Deployment
 

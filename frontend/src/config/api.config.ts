@@ -17,6 +17,10 @@ export interface FrontendApiConfig {
       portfolios: string;
       news: string;
       health: string;
+      autoTrading: string;
+      autoTradingSessions: string;
+      autoTradingSessionsStart: string;
+      autoTradingSessionsActive: string;
     };
   };
   http: {
@@ -40,6 +44,7 @@ function getApiBaseUrl(): string {
   const envUrl = process.env.REACT_APP_API_URL;
   if (envUrl === "" || envUrl === undefined) {
     // Production: use relative URL (same origin as React app)
+    // The /api prefix will be added by individual endpoints
     return "";
   }
   // Development: use localhost
@@ -70,18 +75,22 @@ export const FRONTEND_API_CONFIG: FrontendApiConfig = {
     baseUrl: getApiBaseUrl(),
     wsUrl: getWebSocketUrlFromEnv(),
     endpoints: {
-      stocks: "/stocks",
-      stocksWithSignals: "/stocks/with-signals/all",
-      stockHistory: "/stocks/{symbol}/history",
-      tradingSignals: "/trading/signals",
-      paperTrading: "/paper-trading",
-      portfolios: "/paper-trading/portfolios",
-      news: "/news",
-      health: "/health",
+      stocks: "/api/stocks",
+      stocksWithSignals: "/api/stocks/with-signals/all",
+      stockHistory: "/api/stocks/{symbol}/history",
+      tradingSignals: "/api/trading/signals",
+      paperTrading: "/api/paper-trading",
+      portfolios: "/api/paper-trading/portfolios",
+      news: "/api/news",
+      health: "/api/health",
+      autoTrading: "/api/auto-trading",
+      autoTradingSessions: "/api/auto-trading/sessions",
+      autoTradingSessionsStart: "/api/auto-trading/sessions/start",
+      autoTradingSessionsActive: "/api/auto-trading/sessions/active/all",
     },
   },
   http: {
-    timeout: 10000, // 10 seconds
+    timeout: 30000, // 30 seconds - increased for ML processing
     retries: 2,
     retryDelay: 1000, // 1 second
   },
@@ -115,18 +124,32 @@ export function buildFrontendApiUrl(
 
 /**
  * Get HTTP configuration for frontend requests
- * @returns HTTP configuration object
+ * @returns HTTP configuration object with environment overrides applied
  */
 export function getFrontendHttpConfig() {
-  return FRONTEND_API_CONFIG.http;
+  const baseConfig = FRONTEND_API_CONFIG.http;
+  const envConfig = getEnvironmentConfig();
+
+  // Merge environment-specific config with base config
+  return {
+    ...baseConfig,
+    ...envConfig.http,
+  };
 }
 
 /**
  * Get WebSocket configuration for frontend connections
- * @returns WebSocket configuration object
+ * @returns WebSocket configuration object with environment overrides applied
  */
 export function getWebSocketConfig() {
-  return FRONTEND_API_CONFIG.websocket;
+  const baseConfig = FRONTEND_API_CONFIG.websocket;
+  const envConfig = getEnvironmentConfig();
+
+  // Merge environment-specific config with base config
+  return {
+    ...baseConfig,
+    ...envConfig.websocket,
+  };
 }
 
 /**
@@ -147,7 +170,7 @@ export function getEnvironmentConfig(): Partial<FrontendApiConfig> {
   if (isProduction) {
     return {
       http: {
-        timeout: 15000, // Longer timeout in production
+        timeout: 45000, // Extended timeout for ML processing in production
         retries: 3,
         retryDelay: 2000,
       },

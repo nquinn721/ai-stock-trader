@@ -4,7 +4,8 @@
   min-height: 100vh;
   background: var(--trading-bg-gradient-dark);
   background-attachment: fixed;
-  padding: var(--trading-spacing-page);
+  padding: 0 var(--trading-spacing-page) var(--trading-spacing-page)
+    var(--trading-spacing-page);
   font-family: var(--trading-font-sans);
   color: var(--trading-text-primary);
   width: 100%;
@@ -562,6 +563,9 @@
 
 /* Paper Trading Section */
 .paper-trading-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
   background: linear-gradient(
     135deg,
     rgba(15, 23, 42, 0.98) 0%,
@@ -1105,17 +1109,18 @@
 
 /* Trading row layout for portfolios and quick trade */
 .trading-row {
-  display: grid;
-  grid-template-columns: 1fr 400px;
+  display: flex;
   gap: 2rem;
-  align-items: start;
+  align-items: stretch; /* This makes both columns the same height */
 }
 
 .portfolios-container {
+  flex: 1;
   min-width: 0; /* Prevent overflow */
 }
 
 .quick-trade-card {
+  flex: 0 0 400px; /* Fixed width but can grow in height */
   position: sticky;
   top: calc(
     80px + 2rem
@@ -1150,19 +1155,20 @@
 
 /* Responsive adjustments */
 @media (max-width: 1200px) {
-  .trading-row {
-    grid-template-columns: 1fr 350px;
-    gap: 1.5rem;
+  .quick-trade-card {
+    flex: 0 0 350px;
   }
 }
 
 @media (max-width: 992px) {
   .trading-row {
-    grid-template-columns: 1fr;
+    flex-direction: column;
     gap: 2rem;
+    align-items: stretch;
   }
 
   .quick-trade-card {
+    flex: none;
     position: static;
     max-width: 600px;
     margin: 0 auto;

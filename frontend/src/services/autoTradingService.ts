@@ -1,4 +1,5 @@
 import axios from "axios";
+import { FRONTEND_API_CONFIG } from "../config/api.config";
 import {
   AutoTrade,
   CreateTradingRuleDto,
@@ -8,6 +9,8 @@ import {
   TradingRule,
   TradingSession,
   TradingSessionDto,
+  TradingSessionDtoDisplay,
+  transformSessionDtoToBackend,
 } from "../types/autoTrading.types";
 
 // Import autonomous trading types
@@ -91,13 +94,11 @@ export interface PortfolioPerformance {
   dayTradeCount: number;
 }
 
-import { FRONTEND_API_CONFIG } from "../config/api.config";
-
 const API_BASE_URL = FRONTEND_API_CONFIG.backend.baseUrl;
 
 // Create axios instance for auto-trading API
 const autoTradingApi = axios.create({
-  baseURL: `${API_BASE_URL}/auto-trading`,
+  baseURL: `${API_BASE_URL}/api/auto-trading`,
   headers: {
     "Content-Type": "application/json",
   },
@@ -205,17 +206,25 @@ class AutoTradingService {
   // Trading Sessions Management
   async startTradingSession(
     portfolioId: string,
-    sessionData: TradingSessionDto
+    sessionData: TradingSessionDtoDisplay
   ): Promise<TradingSession> {
+    // Transform display DTO to backend DTO with portfolio_id
+    const backendSessionData = transformSessionDtoToBackend(
+      sessionData,
+      portfolioId
+    );
+
     const response = await autoTradingApi.post(
-      `/sessions/${portfolioId}/start`,
-      sessionData
+      `/sessions/start`,
+      backendSessionData
     );
     return response.data;
   }
 
   async stopTradingSession(sessionId: string, reason?: string): Promise<void> {
-    await autoTradingApi.post(`/sessions/${sessionId}/stop`, { reason });
+    await autoTradingApi.post(`/sessions/${sessionId}/stop`, {
+      stop_reason: reason,
+    });
   }
 
   async getTradingSessions(portfolioId: string): Promise<TradingSession[]> {
@@ -238,7 +247,7 @@ class AutoTradingService {
   }
 
   async getActiveSessions(): Promise<TradingSession[]> {
-    const response = await autoTradingApi.get("/sessions/active");
+    const response = await autoTradingApi.get("/sessions/active/all");
     return response.data;
   }
 
@@ -539,7 +548,7 @@ class AutoTradingService {
     try {
       // Use paper-trading API for portfolios
       const response = await axios.get(
-        `${API_BASE_URL}/paper-trading/portfolios`
+        `${API_BASE_URL}/api/paper-trading/portfolios`
       );
 
       // Handle the response data properly
@@ -566,7 +575,7 @@ class AutoTradingService {
     try {
       // Use paper-trading API for portfolio performance
       const response = await axios.get(
-        `${API_BASE_URL}/paper-trading/portfolios/${portfolioId}/performance`
+        `${API_BASE_URL}/api/paper-trading/portfolios/${portfolioId}/performance`
       );
       return { success: true, data: response.data };
     } catch (error: any) {
@@ -631,8 +640,12 @@ class AutoTradingService {
     };
   }
 
-  transformSessionForBackend(session: any): TradingSessionDto {
+  transformSessionForBackend(
+    session: any,
+    portfolioId: string
+  ): TradingSessionDto {
     return {
+      portfolio_id: portfolioId,
       session_name: session.sessionName || session.name,
       config: session.config || {},
     };

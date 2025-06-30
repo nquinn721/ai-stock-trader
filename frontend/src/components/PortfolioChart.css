@@ -9,7 +9,9 @@
   padding: 16px;
   color: white;
   font-family: "Inter", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15), 0 8px 16px rgba(0, 0, 0, 0.1),
+  box-shadow:
+    0 20px 40px rgba(0, 0, 0, 0.15),
+    0 8px 16px rgba(0, 0, 0, 0.1),
     inset 0 1px 0 rgba(255, 255, 255, 0.1);
   position: relative;
   overflow: hidden;
@@ -130,7 +132,8 @@
   padding: 12px;
   backdrop-filter: blur(20px);
   border: 1px solid rgba(148, 163, 184, 0.1);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1),
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
     0 4px 12px rgba(0, 0, 0, 0.1);
   flex: 1;
   min-height: 180px;
@@ -379,7 +382,9 @@
 
 /* Animation for chart appearance */
 .portfolio-chart-svg {
-  animation: fadeIn 0.6s ease-out;
+  /* Removed animation: fadeIn 0.6s ease-out; */
+  opacity: 1;
+  transform: translateY(0);
 }
 
 @keyframes fadeIn {

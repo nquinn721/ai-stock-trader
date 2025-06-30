@@ -22,7 +22,6 @@ import {
   useWebSocketStore,
 } from "../stores/StoreContext";
 import { Portfolio } from "../types";
-import TradingAssistantChat from "./ai/TradingAssistantChat";
 import "./Dashboard.css";
 import EmptyState from "./EmptyState";
 import EnhancedPortfolioAnalyticsDashboard from "./EnhancedPortfolioAnalyticsDashboard";
@@ -35,6 +34,7 @@ import PortfolioDetailsModal from "./PortfolioDetailsModal";
 import PortfolioSelector from "./PortfolioSelector";
 import QuickTrade from "./QuickTrade";
 import StockCard from "./StockCard";
+import TradingAssistantChat from "./TradingAssistantChat";
 import PageHeader from "./ui/PageHeader";
 
 // Add icons to library - commented out for now
@@ -291,9 +291,6 @@ const Dashboard: React.FC = () => {
       <div className="dashboard">
         <PageHeader
           title="Market Scanner"
-          currentTime={currentTime}
-          isConnected={isConnected}
-          showLiveIndicator={false}
           actionButtons={[
             {
               icon: <span>←</span>,
@@ -313,8 +310,6 @@ const Dashboard: React.FC = () => {
     return (
       <AutonomousTradingPage
         onNavigateBack={() => setShowAutonomousAgents(false)}
-        currentTime={currentTime}
-        isConnected={isConnected}
       />
     );
   }
@@ -324,9 +319,6 @@ const Dashboard: React.FC = () => {
       <div className="dashboard">
         <PageHeader
           title="Portfolio Analytics"
-          currentTime={currentTime}
-          isConnected={isConnected}
-          showLiveIndicator={false}
           actionButtons={[
             {
               icon: <span>←</span>,
@@ -358,9 +350,6 @@ const Dashboard: React.FC = () => {
       <div className="dashboard">
         <PageHeader
           title="AI Trading Assistant"
-          currentTime={currentTime}
-          isConnected={isConnected}
-          showLiveIndicator={false}
           actionButtons={[
             {
               icon: <span>←</span>,
@@ -392,9 +381,6 @@ const Dashboard: React.FC = () => {
       <div className="dashboard">
         <PageHeader
           title="Multi-Asset Intelligence"
-          currentTime={currentTime}
-          isConnected={isConnected}
-          showLiveIndicator={false}
           actionButtons={[
             {
               icon: <span>←</span>,
@@ -415,8 +401,6 @@ const Dashboard: React.FC = () => {
       {/* Header */}
       <PageHeader
         title="Auto Trading Dashboard"
-        currentTime={currentTime}
-        isConnected={isConnected}
         statsValue={`${stocksWithSignals.length} stocks`}
         actionButtons={[
           {

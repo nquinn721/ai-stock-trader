@@ -16,6 +16,7 @@ yarn-error.log*
 /backend/dist/
 /frontend/build/
 /frontend/.next/
+/production/
 .out/
 
 # Logs

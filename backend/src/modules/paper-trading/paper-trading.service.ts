@@ -178,11 +178,37 @@ export class PaperTradingService {
     }
   }
   async getPortfolios(): Promise<Portfolio[]> {
-    return await this.portfolioRepository.find({
-      where: { isActive: true },
-      relations: ['positions', 'trades'],
-      order: { createdAt: 'DESC' },
-    });
+    try {
+      console.log('🔍 Querying portfolios from database...');
+
+      // Check database connection first
+      const connection = this.portfolioRepository.manager.connection;
+      if (!connection.isConnected) {
+        console.error('❌ Database connection is not established');
+        throw new Error('Database connection not available');
+      }
+
+      console.log('✅ Database connection is active');
+
+      const portfolios = await this.portfolioRepository.find({
+        where: { isActive: true },
+        relations: ['positions', 'trades'],
+        order: { createdAt: 'DESC' },
+      });
+
+      console.log(`📊 Found ${portfolios.length} active portfolios`);
+      return portfolios;
+    } catch (error) {
+      console.error('❌ Error in getPortfolios:', error);
+      console.error('Database error details:', {
+        message: error.message,
+        code: error.code,
+        errno: error.errno,
+        sqlState: error.sqlState,
+        sqlMessage: error.sqlMessage,
+      });
+      throw error;
+    }
   }
   async getPortfolio(id: string | number): Promise<Portfolio> {
     const portfolio = await this.portfolioRepository.findOne({

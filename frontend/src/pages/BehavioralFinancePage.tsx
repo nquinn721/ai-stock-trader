@@ -1,30 +1,27 @@
-import React, { useState } from 'react';
 import {
-  Box,
-  Typography,
-  Tabs,
-  Tab,
-  Container,
-  AppBar,
-  Toolbar,
-  IconButton,
-  Menu,
-  MenuItem,
-  Chip,
-} from '@mui/material';
-import {
-  Psychology,
   Dashboard,
   Insights,
-  TrendingUp,
-  Settings,
   MoreVert,
-} from '@mui/icons-material';
+  Psychology,
+  TrendingUp,
+} from "@mui/icons-material";
+import {
+  Box,
+  Container,
+  Menu,
+  MenuItem,
+  Tab,
+  Tabs,
+  Typography,
+} from "@mui/material";
+import { observer } from "mobx-react-lite";
+import React, { useState } from "react";
 import {
   BehavioralAnalyticsDashboard,
-  PsychologyInsightsPanel,
   BehavioralTradingInterface,
-} from '../components/behavioral-analytics';
+  PsychologyInsightsPanel,
+} from "../components/behavioral-analytics";
+import PageHeader from "../components/ui/PageHeader";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -51,13 +48,13 @@ function TabPanel(props: TabPanelProps) {
 function a11yProps(index: number) {
   return {
     id: `behavioral-tab-${index}`,
-    'aria-controls': `behavioral-tabpanel-${index}`,
+    "aria-controls": `behavioral-tabpanel-${index}`,
   };
 }
 
-export const BehavioralFinancePage: React.FC = () => {
+export const BehavioralFinancePage: React.FC = observer(() => {
   const [activeTab, setActiveTab] = useState(0);
-  const [selectedSymbol, setSelectedSymbol] = useState('AAPL');
+  const [selectedSymbol, setSelectedSymbol] = useState("AAPL");
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
@@ -77,58 +74,58 @@ export const BehavioralFinancePage: React.FC = () => {
     handleMenuClose();
   };
 
-  const popularSymbols = ['AAPL', 'TSLA', 'NVDA', 'MSFT', 'GOOGL', 'AMZN', 'META', 'SPY', 'QQQ'];
+  const popularSymbols = [
+    "AAPL",
+    "TSLA",
+    "NVDA",
+    "MSFT",
+    "GOOGL",
+    "AMZN",
+    "META",
+    "SPY",
+    "QQQ",
+  ];
 
   return (
-    <Box className="min-h-screen bg-primary">
+    <div className="dashboard-page">
       {/* Header */}
-      <AppBar position="static" className="bg-gradient-card shadow-lg">
-        <Toolbar>
-          <Psychology sx={{ fontSize: 32, mr: 2 }} />
-          <Box className="flex-1">
-            <Typography variant="h5" className="font-bold text-gradient-primary">
-              Behavioral Finance & Cognitive AI
-            </Typography>
-            <Typography variant="body2" color="textSecondary">
-              Advanced market psychology and behavioral analysis platform
-            </Typography>
-          </Box>
-          
-          <Box className="flex items-center gap-2">
-            <Chip
-              label={`Symbol: ${selectedSymbol}`}
-              variant="outlined"
-              color="primary"
-              onClick={handleMenuClick}
-              icon={<TrendingUp />}
-            />
-            <IconButton onClick={handleMenuClick}>
-              <MoreVert />
-            </IconButton>
-          </Box>
+      <PageHeader
+        title="Behavioral Finance & Cognitive AI"
+        actionButtons={[
+          {
+            icon: <TrendingUp />,
+            onClick: () => handleMenuClick({} as React.MouseEvent<HTMLElement>),
+            label: `Symbol: ${selectedSymbol}`,
+            className: "action-btn",
+          },
+          {
+            icon: <MoreVert />,
+            onClick: () => handleMenuClick({} as React.MouseEvent<HTMLElement>),
+            className: "action-btn",
+          },
+        ]}
+      />
 
-          <Menu
-            anchorEl={anchorEl}
-            open={Boolean(anchorEl)}
-            onClose={handleMenuClose}
+      <Menu
+        anchorEl={anchorEl}
+        open={Boolean(anchorEl)}
+        onClose={handleMenuClose}
+      >
+        <MenuItem disabled>
+          <Typography variant="subtitle2" className="font-semibold">
+            Select Symbol
+          </Typography>
+        </MenuItem>
+        {popularSymbols.map((symbol) => (
+          <MenuItem
+            key={symbol}
+            onClick={() => handleSymbolChange(symbol)}
+            selected={symbol === selectedSymbol}
           >
-            <MenuItem disabled>
-              <Typography variant="subtitle2" className="font-semibold">
-                Select Symbol
-              </Typography>
-            </MenuItem>
-            {popularSymbols.map((symbol) => (
-              <MenuItem
-                key={symbol}
-                onClick={() => handleSymbolChange(symbol)}
-                selected={symbol === selectedSymbol}
-              >
-                {symbol}
-              </MenuItem>
-            ))}
-          </Menu>
-        </Toolbar>
-      </AppBar>
+            {symbol}
+          </MenuItem>
+        ))}
+      </Menu>
 
       {/* Navigation Tabs */}
       <Box className="bg-secondary border-b border-gray-700">
@@ -168,11 +165,11 @@ export const BehavioralFinancePage: React.FC = () => {
         <TabPanel value={activeTab} index={0}>
           <BehavioralAnalyticsDashboard symbol={selectedSymbol} />
         </TabPanel>
-        
+
         <TabPanel value={activeTab} index={1}>
-          <PsychologyInsightsPanel symbols={[selectedSymbol, 'SPY', 'QQQ']} />
+          <PsychologyInsightsPanel symbols={[selectedSymbol, "SPY", "QQQ"]} />
         </TabPanel>
-        
+
         <TabPanel value={activeTab} index={2}>
           <BehavioralTradingInterface />
         </TabPanel>
@@ -186,13 +183,14 @@ export const BehavioralFinancePage: React.FC = () => {
               Behavioral Finance & Cognitive AI Trading Platform
             </Typography>
             <Typography variant="caption" color="textSecondary">
-              Powered by advanced psychology models, sentiment analysis, and behavioral economics
+              Powered by advanced psychology models, sentiment analysis, and
+              behavioral economics
             </Typography>
           </Box>
         </Container>
       </Box>
-    </Box>
+    </div>
   );
-};
+});
 
 export default BehavioralFinancePage;

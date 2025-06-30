@@ -4,14 +4,11 @@
 **/yarn-debug.log*
 **/yarn-error.log*
 
-# Frontend development files
-frontend/src
-frontend/public
+# Frontend development files (exclude only git directories)
 frontend/.git
 frontend/build/.git
 
 # Backend development files
-backend/src
 backend/.git
 backend/dist/.git
 
@@ -31,7 +28,8 @@ backend/dist/.git
 **/.env.development
 **/.env.production
 **/README.md
-**/tsconfig.json
+# Keep TypeScript config files for build
+# **/tsconfig.json
 **/jest.config.js
 **/eslint.config.mjs
 

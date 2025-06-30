@@ -2,11 +2,12 @@
 
 /* ==========================================================================
    AI ASSISTANT PAGE - Modern Chat Interface Design
+   Uses standardized .dashboard-page
    ========================================================================== */
 
 .ai-assistant-page {
   background: var(--trading-bg-gradient-dark);
-  min-height: 100vh;
+  height: 100vh;
   padding: 0;
   font-family: var(--trading-font-sans);
   color: var(--trading-text-primary);
@@ -14,6 +15,8 @@
   box-sizing: border-box;
   position: relative;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 .ai-assistant-page::before {
@@ -56,151 +59,30 @@
   }
 }
 
-.page-header {
-  position: relative;
-  z-index: 1;
-  background: var(--trading-bg-card);
-  backdrop-filter: blur(20px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  padding: var(--theme-space-6) var(--theme-space-4);
-  text-align: center;
-}
-
-.page-header h1 {
-  font-size: 2.5rem;
-  font-weight: 700;
-  background: var(--trading-text-gradient-primary);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  margin-bottom: var(--theme-space-2);
-}
-
-.page-header p {
-  font-size: 1.1rem;
-  color: var(--trading-text-secondary);
-  max-width: 600px;
-  margin: 0 auto;
-}
-
 .chat-container {
   position: relative;
   z-index: 1;
   max-width: 1200px;
   margin: 0 auto;
-  padding: var(--theme-space-6) var(--theme-space-4);
-  height: calc(100vh - 200px);
+  padding: var(--theme-space-4);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
 }
 
 /* ==========================================================================
-   CHAT INTERFACE ENHANCEMENTS
+   RESPONSIVE DESIGN
    ========================================================================== */
 
-.chat-interface {
-  background: var(--trading-bg-card);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: var(--trading-radius-xl);
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  box-shadow: var(--trading-shadow-xl);
-}
-
-.chat-messages {
-  flex: 1;
-  overflow-y: auto;
-  padding: var(--theme-space-4);
-  background: var(--trading-bg-glass);
-}
-
-.chat-input-area {
-  padding: var(--theme-space-4);
-  background: var(--trading-bg-secondary);
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.message-bubble {
-  margin-bottom: var(--theme-space-3);
-  padding: var(--theme-space-3) var(--theme-space-4);
-  border-radius: var(--trading-radius-lg);
-  max-width: 80%;
-  word-wrap: break-word;
-}
-
-.message-bubble.user {
-  background: var(--trading-bg-gradient-accent);
-  color: white;
-  margin-left: auto;
-  margin-right: 0;
-}
-
-.message-bubble.assistant {
-  background: var(--trading-bg-card);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: var(--trading-text-primary);
-}
-
-.message-bubble.system {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: var(--trading-text-secondary);
-  text-align: center;
-  margin: 0 auto;
-  font-size: 0.9rem;
-}
-
-.page-header p {
-  font-size: 12px; /* Reduced from 14px */
-  color: rgba(255, 255, 255, 0.7);
-  margin: 0;
-}
-
-.chat-container {
-  height: calc(100vh - 140px);
-  max-width: 1000px;
-  margin: 0 auto;
-  padding: 120px 24px 24px 24px;
-  box-sizing: border-box;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-/* Responsive Design */
 @media (max-width: 768px) {
   .chat-container {
-    padding: 100px 16px 16px 16px;
-    height: calc(100vh - 120px);
-  }
-
-  .page-header {
-    top: 16px;
-    left: 16px;
-    right: 16px;
-    transform: none;
-    width: auto;
-  }
-
-  .page-header h1 {
-    font-size: 16px;
-  }
-
-  .page-header p {
-    font-size: 11px;
+    padding: var(--theme-space-3);
   }
 }
 
 @media (max-width: 480px) {
   .chat-container {
-    padding: 90px 12px 12px 12px;
-  }
-
-  .page-header {
-    top: 12px;
-    left: 12px;
-    right: 12px;
-    padding: 12px 16px;
+    padding: var(--theme-space-2);
   }
 }

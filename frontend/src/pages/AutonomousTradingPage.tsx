@@ -88,17 +88,17 @@ interface PortfolioTradingStatus {
 
 interface AutonomousTradingPageProps {
   onNavigateBack?: () => void;
-  currentTime?: Date;
-  isConnected?: boolean;
 }
 
 const AutonomousTradingPage: React.FC<AutonomousTradingPageProps> = observer(
-  ({ onNavigateBack, currentTime = new Date(), isConnected = true }) => {
+  ({ onNavigateBack }) => {
     const [activeTab, setActiveTab] = useState(0);
     const [portfolios, setPortfolios] = useState<Portfolio[]>([]);
     const [portfolioStatuses, setPortfolioStatuses] = useState<
       Record<string, PortfolioTradingStatus>
     >({});
+
+    // Get real connection status from WebSocket store
     const [globalTradingActive, setGlobalTradingActive] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -237,7 +237,7 @@ const AutonomousTradingPage: React.FC<AutonomousTradingPageProps> = observer(
 
         // First, start a trading session for the portfolio
         const sessionData = {
-          session_name: `Autonomous Trading - ${new Date().toLocaleString()}`,
+          sessionName: `Autonomous Trading - ${new Date().toLocaleString()}`,
           config: {
             autoTrading: true,
             riskLimits: deploymentConfig.riskLimits,
@@ -770,14 +770,10 @@ const AutonomousTradingPage: React.FC<AutonomousTradingPageProps> = observer(
     };
 
     return (
-      <div className="page-container autonomous-trading-page">
+      <div className="dashboard-page">
         {/* Standardized Page Header */}
         <PageHeader
           title="Autonomous Trading System"
-          currentTime={currentTime}
-          isConnected={isConnected}
-          showLiveIndicator={true}
-          sticky={true}
           statsValue={`${Object.values(portfolioStatuses).filter((s) => s.isActive).length}/${portfolios.length} active • ${Object.values(portfolioStatuses).reduce((acc, status) => acc + status.activeStrategies.length, 0)} strategies running`}
           actionButtons={[
             {
@@ -1021,8 +1017,6 @@ const AutonomousTradingPage: React.FC<AutonomousTradingPageProps> = observer(
             fullScreen
           >
             <EconomicIntelligenceDashboard
-              currentTime={currentTime}
-              isConnected={isConnected}
               onNavigateBack={() => setShowEconomicIntelligence(false)}
             />
           </Dialog>

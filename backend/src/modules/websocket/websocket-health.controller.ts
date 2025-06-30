@@ -1,7 +1,7 @@
 import { Controller, Get } from '@nestjs/common';
 import { WebSocketHealthService } from './websocket-health.service';
 
-@Controller('websocket')
+@Controller('websocket/health')
 export class WebSocketHealthController {
   constructor(private readonly healthService: WebSocketHealthService) {}
 

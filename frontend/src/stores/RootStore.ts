@@ -1,9 +1,15 @@
+import { AIStore } from "./AIStore";
 import { ApiStore } from "./ApiStore";
 import { AutoTradingStore } from "./AutoTradingStore";
+import { MacroIntelligenceStore } from "./MacroIntelligenceStore";
+import { MultiAssetStore } from "./MultiAssetStore";
+import { NotificationStore } from "./NotificationStore";
+import { OrderManagementStore } from "./OrderManagementStore";
 import { PortfolioStore } from "./PortfolioStore";
 import { RecommendationStore } from "./RecommendationStore";
 import { StockStore } from "./StockStore";
 import { TradeStore } from "./TradeStore";
+import { TradingAssistantStore } from "./TradingAssistantStore";
 import { UserStore } from "./UserStore";
 import { WebSocketStore } from "./WebSocketStore";
 
@@ -16,6 +22,12 @@ export class RootStore {
   autoTradingStore: AutoTradingStore;
   recommendationStore: RecommendationStore;
   userStore: UserStore;
+  aiStore: AIStore;
+  notificationStore: NotificationStore;
+  macroIntelligenceStore: MacroIntelligenceStore;
+  multiAssetStore: MultiAssetStore;
+  orderManagementStore: OrderManagementStore;
+  tradingAssistantStore: TradingAssistantStore;
 
   constructor() {
     this.apiStore = new ApiStore();
@@ -26,6 +38,12 @@ export class RootStore {
     this.autoTradingStore = new AutoTradingStore(this.apiStore);
     this.recommendationStore = new RecommendationStore();
     this.userStore = new UserStore();
+    this.aiStore = new AIStore();
+    this.notificationStore = new NotificationStore();
+    this.macroIntelligenceStore = new MacroIntelligenceStore(this.apiStore);
+    this.multiAssetStore = new MultiAssetStore(this.apiStore);
+    this.orderManagementStore = new OrderManagementStore(this.apiStore);
+    this.tradingAssistantStore = new TradingAssistantStore(this.apiStore);
 
     // Set up real-time price updates for portfolio
     this.setupPortfolioUpdates();

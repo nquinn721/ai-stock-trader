@@ -202,8 +202,6 @@ export const MacroEconomicDashboard: React.FC = () => {
       <div className="page-container">
         <PageHeader
           title="Macro Economic Intelligence"
-          showLiveIndicator={true}
-          isConnected={false}
           statsValue="Loading Analysis..."
         />
         <div className="page-content">
@@ -230,8 +228,6 @@ export const MacroEconomicDashboard: React.FC = () => {
       <div className="page-container">
         <PageHeader
           title="Macro Economic Intelligence"
-          showLiveIndicator={true}
-          isConnected={false}
           statsValue="Error Loading"
           actionButtons={[retryButton]}
         />
@@ -249,7 +245,6 @@ export const MacroEconomicDashboard: React.FC = () => {
       <div className="page-container">
         <PageHeader
           title="Macro Economic Intelligence"
-          showLiveIndicator={false}
           statsValue="No Data Available"
         />
         <div className="page-content">
@@ -293,8 +288,6 @@ export const MacroEconomicDashboard: React.FC = () => {
     <div className="page-container macro-dashboard">
       <PageHeader
         title="Macro Economic Intelligence"
-        showLiveIndicator={true}
-        isConnected={true}
         statsValue={`${selectedCountry} Economic Analysis`}
         actionButtons={headerButtons}
       >

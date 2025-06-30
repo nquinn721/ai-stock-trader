@@ -32,7 +32,20 @@ export class PaperTradingController {
   @ApiOperation({ summary: 'Get all portfolios' })
   @ApiResponse({ status: 200, description: 'List of all portfolios' })
   async getPortfolios(): Promise<any[]> {
-    return this.paperTradingService.getPortfolios();
+    try {
+      console.log('📊 Fetching all portfolios...');
+      const portfolios = await this.paperTradingService.getPortfolios();
+      console.log(`✅ Successfully fetched ${portfolios.length} portfolios`);
+      return portfolios;
+    } catch (error) {
+      console.error('❌ Error fetching portfolios:', error);
+      console.error('Error details:', {
+        message: error.message,
+        stack: error.stack,
+        name: error.name,
+      });
+      throw error;
+    }
   }
   @Get('portfolios/:id')
   @ApiOperation({ summary: 'Get portfolio by ID' })

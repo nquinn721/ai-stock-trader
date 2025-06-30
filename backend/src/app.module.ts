@@ -1,3 +1,6 @@
+// CRITICAL: Load crypto polyfill FIRST
+require('./setup-crypto');
+
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
@@ -81,6 +84,7 @@ import { PaperTradingModule } from './modules/paper-trading/paper-trading.module
 import { StockModule } from './modules/stock/stock.module';
 import { TradingModule } from './modules/trading/trading.module';
 import { WebsocketModule } from './modules/websocket/websocket.module';
+import { DatabaseInitializationService } from './services/database-initialization.service';
 import { SeedService } from './services/seed.service';
 
 @Module({
@@ -91,68 +95,126 @@ import { SeedService } from './services/seed.service';
     ScheduleModule.forRoot(),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
-      useFactory: (configService: ConfigService) => ({
-        type: 'mysql',
-        host: configService.get('DATABASE_HOST'),
-        port: +configService.get('DATABASE_PORT'),
-        username: configService.get('DATABASE_USERNAME'),
-        password: configService.get('DATABASE_PASSWORD'),
-        database: configService.get('DATABASE_NAME'),
-        entities: [
-          Stock,
-          News,
-          TradingSignal,
-          Portfolio,
-          Position,
-          Trade,
-          Order,
-          MLModel,
-          MLPrediction,
-          MLMetric,
-          MLABTest,
-          MLFeatureImportance,
-          MLModelPerformance,
-          NotificationEntity,
-          NotificationPreferenceEntity,
-          NotificationTemplateEntity,
-          TradingRule,
-          AutoTrade,
-          TradingSession,
-          TradingStrategy,
-          StrategyTemplate,
-          BacktestResult,
-          ScreenerTemplate,
-          MarketAlert,
-          ScanResult,
-          AssetData,
-          CryptoData,
-          ForexData,
-          CommodityData,
-          AlternativeData,
-          CrossAssetCorrelation,
-          ArbitrageOpportunity,
-          MarketMakingStrategyEntity,
-          MarketMakingQuoteEntity,
-          ArbitrageOpportunityEntity,
-          RiskExposureEntity,
-          LiquidityPositionEntity,
-          // Macro Intelligence entities
-          EconomicForecast,
-          BusinessCycle,
-          RecessionProbability,
-          MonetaryPolicyPrediction,
-          PolicyStanceAnalysis,
-          QEProbabilityAssessment,
-          PoliticalStabilityScore,
-          ElectionPrediction,
-          ConflictRiskAssessment,
-        ],
-        synchronize: true, // Don't use in production
-        logging: false, // Disabled to clean up console output
-      }),
+      useFactory: (configService: ConfigService) => {
+        const dbHost = configService.get('DATABASE_HOST');
+        const dbPort = configService.get('DATABASE_PORT') || '3306';
+        const dbUsername = configService.get('DATABASE_USERNAME');
+        const dbPassword = configService.get('DATABASE_PASSWORD');
+        const dbName = configService.get('DATABASE_NAME');
+
+        // Check if required database configuration is provided
+        if (!dbHost || !dbUsername || !dbPassword || !dbName) {
+          console.error(
+            '❌ Missing required database configuration for MySQL:',
+          );
+          console.error(`DATABASE_HOST: ${dbHost ? '✓' : '❌ (empty)'}`);
+          console.error(
+            `DATABASE_USERNAME: ${dbUsername ? '✓' : '❌ (empty)'}`,
+          );
+          console.error(
+            `DATABASE_PASSWORD: ${dbPassword ? '✓' : '❌ (empty)'}`,
+          );
+          console.error(`DATABASE_NAME: ${dbName ? '✓' : '❌ (empty)'}`);
+          console.error('');
+          console.error('🔧 For local development:');
+          console.error('   1. Set up a local MySQL instance, OR');
+          console.error(
+            '   2. Use a cloud MySQL service (AWS RDS, Google Cloud SQL, etc.), OR',
+          );
+          console.error('   3. Use a free MySQL hosting service');
+          console.error('');
+          console.error(
+            '📝 Then update backend/.env with your MySQL credentials:',
+          );
+          console.error('   DATABASE_HOST=your-mysql-host');
+          console.error('   DATABASE_USERNAME=your-username');
+          console.error('   DATABASE_PASSWORD=your-password');
+          console.error('   DATABASE_NAME=your-database-name');
+          console.error('');
+          console.error(
+            '🚀 For production: Database credentials are handled via Google Secret Manager',
+          );
+
+          throw new Error(
+            'Missing required database configuration. Please set DATABASE_HOST, DATABASE_USERNAME, DATABASE_PASSWORD, and DATABASE_NAME environment variables.',
+          );
+        }
+
+        console.log(
+          `🔗 Connecting to MySQL database at ${dbHost}:${dbPort}/${dbName}`,
+        );
+
+        return {
+          type: 'mysql',
+          host: dbHost,
+          port: +dbPort,
+          username: dbUsername,
+          password: dbPassword,
+          database: dbName,
+          entities: [
+            Stock,
+            News,
+            TradingSignal,
+            Portfolio,
+            Position,
+            Trade,
+            Order,
+            MLModel,
+            MLPrediction,
+            MLMetric,
+            MLABTest,
+            MLFeatureImportance,
+            MLModelPerformance,
+            NotificationEntity,
+            NotificationPreferenceEntity,
+            NotificationTemplateEntity,
+            TradingRule,
+            AutoTrade,
+            TradingSession,
+            TradingStrategy,
+            StrategyTemplate,
+            BacktestResult,
+            ScreenerTemplate,
+            MarketAlert,
+            ScanResult,
+            AssetData,
+            CryptoData,
+            ForexData,
+            CommodityData,
+            AlternativeData,
+            CrossAssetCorrelation,
+            ArbitrageOpportunity,
+            MarketMakingStrategyEntity,
+            MarketMakingQuoteEntity,
+            ArbitrageOpportunityEntity,
+            RiskExposureEntity,
+            LiquidityPositionEntity,
+            // Macro Intelligence entities
+            EconomicForecast,
+            BusinessCycle,
+            RecessionProbability,
+            MonetaryPolicyPrediction,
+            PolicyStanceAnalysis,
+            QEProbabilityAssessment,
+            PoliticalStabilityScore,
+            ElectionPrediction,
+            ConflictRiskAssessment,
+          ],
+          synchronize: true,
+          logging: ['error', 'warn'],
+          extra: {
+            connectionLimit: 10,
+            acquireTimeout: 60000,
+            timeout: 60000,
+            reconnect: true,
+          },
+          retryAttempts: 5,
+          retryDelay: 3000,
+        };
+      },
       inject: [ConfigService],
     }),
-    TypeOrmModule.forFeature([Stock]),
+    TypeOrmModule.forFeature([Stock, Portfolio, NotificationEntity]),
     StockModule,
     WebsocketModule,
     NewsModule,
@@ -162,16 +224,16 @@ import { SeedService } from './services/seed.service';
     BreakoutModule,
     MLModule,
     NotificationModule,
-    AutoTradingModule,
-    BehavioralFinanceModule,
+    AutoTradingModule, // Re-enabled - routing issue was fixed
+    BehavioralFinanceModule, // Re-enabled
     MarketScannerModule,
-    MultiAssetModule,
-    DataIntelligenceModule,
-    EconomicIntelligenceModule,
-    MarketMakingModule,
-    MacroIntelligenceModule,
+    MultiAssetModule, // Re-enabled - routing issue was fixed
+    DataIntelligenceModule, // Re-enabled - routing issue was fixed
+    EconomicIntelligenceModule, // Re-enabled - routing issue was fixed
+    MarketMakingModule, // Re-enabled - routing issue was fixed
+    MacroIntelligenceModule, // Keep this one enabled for testing
   ],
   controllers: [AppController],
-  providers: [AppService, SeedService],
+  providers: [AppService, SeedService, DatabaseInitializationService],
 })
 export class AppModule {}
