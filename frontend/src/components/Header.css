@@ -221,6 +221,10 @@
     transform: translateY(0);
   }
 
+  .header-nav.mobile-open .nav-label {
+    display: block;
+  }
+
   .nav-item {
     width: 100%;
     justify-content: flex-start;
@@ -230,6 +234,17 @@
     font-size: 0.875rem;
     background: rgba(30, 41, 59, 0.3);
     color: #94a3b8;
+    gap: 0.75rem;
+  }
+
+  .nav-item .nav-icon {
+    flex-shrink: 0;
+  }
+
+  .nav-item .nav-label {
+    flex: 1;
+    text-align: left;
+    font-weight: 500;
   }
 
   .nav-item:hover {
@@ -319,11 +334,12 @@
   }
 }
 
-.nav-label {
+/* Default: Hide nav labels except in mobile menu */
+.header-nav:not(.mobile-open) .nav-label {
   display: none;
 }
 
-.nav-item:hover .nav-label {
+.header-nav:not(.mobile-open) .nav-item:hover .nav-label {
   display: block;
   position: absolute;
   top: 100%;
@@ -331,4 +347,9 @@
   transform: translateX(-50%);
   background: rgba(15, 23, 42, 0.9);
   padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  white-space: nowrap;
+  z-index: 1000;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
 }

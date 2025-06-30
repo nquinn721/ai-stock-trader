@@ -1,5 +1,7 @@
+import { AutoMode, Chat, Dashboard } from "@mui/icons-material";
 import { observer } from "mobx-react-lite";
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import { MarketScannerDashboard } from "../components/MarketScanner/MarketScannerDashboard";
 import PageHeader from "../components/ui/PageHeader";
 import { useWebSocketConnection } from "../hooks/useWebSocketConnection";
@@ -8,6 +10,7 @@ import "./MarketScannerPage.css";
 
 const MarketScannerPage: React.FC = observer(() => {
   const webSocketStore = useWebSocketStore();
+  const navigate = useNavigate();
 
   // Ensure WebSocket connection is established
   useWebSocketConnection();
@@ -18,14 +21,37 @@ const MarketScannerPage: React.FC = observer(() => {
   };
 
   return (
-    <div className="market-scanner-page">
+    <div className="page-container">
       <PageHeader
         title="Market Scanner"
         showLiveIndicator={true}
         isConnected={webSocketStore.isConnected}
         sticky={true}
+        statsValue="Live Market Data"
+        actionButtons={[
+          {
+            icon: <Dashboard />,
+            onClick: () => navigate("/dashboard"),
+            tooltip: "Trading Dashboard",
+            label: "Dashboard",
+          },
+          {
+            icon: <AutoMode />,
+            onClick: () => navigate("/autonomous-trading"),
+            tooltip: "Autonomous Trading",
+            label: "Auto Trade",
+          },
+          {
+            icon: <Chat />,
+            onClick: () => navigate("/ai-assistant"),
+            tooltip: "AI Trading Assistant",
+            label: "AI Chat",
+          },
+        ]}
       />
-      <MarketScannerDashboard onStockSelect={handleStockSelect} />
+      <div className="page-content">
+        <MarketScannerDashboard onStockSelect={handleStockSelect} />
+      </div>
     </div>
   );
 });
