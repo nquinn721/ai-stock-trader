@@ -237,7 +237,7 @@ const AutonomousTradingPage: React.FC<AutonomousTradingPageProps> = observer(
 
         // First, start a trading session for the portfolio
         const sessionData = {
-          session_name: `Autonomous Trading - ${new Date().toLocaleString()}`,
+          sessionName: `Autonomous Trading - ${new Date().toLocaleString()}`,
           config: {
             autoTrading: true,
             riskLimits: deploymentConfig.riskLimits,

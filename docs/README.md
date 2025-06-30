@@ -25,6 +25,10 @@ This directory contains all documentation for the Stock Trading App project, inc
 
 - [UI Theme and Layout Standards](./UI-THEME-LAYOUT-STANDARDS.md) - **Mandatory** styling and layout requirements for all pages
 
+### Database and Security
+
+- [Database Protection Guide](./DATABASE-PROTECTION-GUIDE.md) - **CRITICAL** procedures to prevent accidental deletion of the production database
+
 ## Development Environment Setup
 
 This project uses:

@@ -8,7 +8,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React, { useState } from "react";
-import { FRONTEND_API_CONFIG } from "../config/api.config";
+import { usePortfolioStore } from "../stores/StoreContext";
 import "./PortfolioCreator.css";
 
 interface PortfolioType {
@@ -135,6 +135,7 @@ const PortfolioCreator: React.FC<PortfolioCreatorProps> = ({
   onPortfolioCreated,
   onCancel,
 }) => {
+  const portfolioStore = usePortfolioStore();
   const [selectedType, setSelectedType] = useState<PortfolioType | null>(null);
   const [customBalance, setCustomBalance] = useState<string>("");
   const [userId] = useState("user-123"); // TODO: Get from auth context
@@ -161,26 +162,12 @@ const PortfolioCreator: React.FC<PortfolioCreatorProps> = ({
         setCreating(false);
         return;
       }
-      const response = await fetch(
-        `${FRONTEND_API_CONFIG.backend.baseUrl}/paper-trading/portfolios`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            userId,
-            portfolioType: selectedType.key,
-            initialBalance,
-          }),
-        }
-      );
+      const portfolioData = {
+        name: selectedType.name,
+        initialCash: initialBalance,
+      };
 
-      if (!response.ok) {
-        throw new Error("Failed to create portfolio");
-      }
-
-      const portfolio = await response.json();
+      const portfolio = await portfolioStore.createPortfolio(portfolioData);
       onPortfolioCreated(portfolio);
     } catch (error) {
       console.error("Error creating portfolio:", error);

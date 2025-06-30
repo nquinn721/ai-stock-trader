@@ -27,13 +27,32 @@ export class WebSocketStore {
       return;
     }
 
+    console.log("🔌 WebSocket: Attempting connection...");
+    console.log("🔌 WebSocket: URL:", url);
+    console.log("🔌 WebSocket: Config:", FRONTEND_API_CONFIG.backend);
+
     runInAction(() => {
       this.isConnecting = true;
       this.error = null;
     });
 
     this.socket = io(url, {
-      transports: ["websocket"],
+      transports: ["polling", "websocket"],
+      timeout: getWebSocketConfig().heartbeatInterval,
+      autoConnect: true,
+      forceNew: true, // Force new connection
+      upgrade: true,
+      rememberUpgrade: false,
+      // Add timestamp to avoid caching
+      query: {
+        t: Date.now(),
+      },
+    });
+
+    // Add detailed logging for debugging
+    console.log("🔌 WebSocket: Creating connection to", url);
+    console.log("🔌 WebSocket: Configuration:", {
+      transports: ["polling", "websocket"],
       timeout: getWebSocketConfig().heartbeatInterval,
     });
 
@@ -44,7 +63,8 @@ export class WebSocketStore {
         this.reconnectAttempts = 0;
         this.error = null;
       });
-      console.log("WebSocket connected");
+      console.log("✅ WebSocket connected successfully!");
+      console.log("🔌 Socket ID:", this.socket?.id);
     });
 
     this.socket.on("disconnect", (reason) => {
@@ -61,7 +81,11 @@ export class WebSocketStore {
         this.isConnecting = false;
         this.error = error.message;
       });
-      console.error("WebSocket connection error:", error);
+      console.error("❌ WebSocket connection error:", error);
+      console.error("❌ Error details:", {
+        message: error.message,
+        stack: error.stack,
+      });
       this.handleReconnect();
     });
 

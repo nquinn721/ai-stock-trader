@@ -377,11 +377,13 @@ body {
 
 .page-content {
   padding-top: 24px;
+  margin-top: 64px;
 }
 
 /* When page-content is used inside dashboard-page, add horizontal padding */
 .dashboard-page .page-content {
-  padding: 24px var(--trading-spacing-page);
+  padding: 0 var(--trading-spacing-page) 12px; /* Removed top padding */
+  margin-top: 64px; /* Add margin-top for sticky header spacing */
 }
 
 /* ==========================================================================

@@ -51,11 +51,14 @@ code {
 /* Main content area styles */
 .app-main {
   min-height: calc(100vh - 64px);
-  margin-top: 64px; /* Account for fixed header */
-  padding: 0;
+  padding-top: 64px; /* Use padding instead of margin for better layout flow */
+  padding-left: 0;
+  padding-right: 0;
+  padding-bottom: 0;
   background: transparent;
   width: 100%;
   box-sizing: border-box;
+  overflow-x: hidden; /* Prevent horizontal scroll */
 }
 
 .app-main-content {

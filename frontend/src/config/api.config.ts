@@ -17,6 +17,10 @@ export interface FrontendApiConfig {
       portfolios: string;
       news: string;
       health: string;
+      autoTrading: string;
+      autoTradingSessions: string;
+      autoTradingSessionsStart: string;
+      autoTradingSessionsActive: string;
     };
   };
   http: {
@@ -79,6 +83,10 @@ export const FRONTEND_API_CONFIG: FrontendApiConfig = {
       portfolios: "/api/paper-trading/portfolios",
       news: "/api/news",
       health: "/api/health",
+      autoTrading: "/api/auto-trading",
+      autoTradingSessions: "/api/auto-trading/sessions",
+      autoTradingSessionsStart: "/api/auto-trading/sessions/start",
+      autoTradingSessionsActive: "/api/auto-trading/sessions/active/all",
     },
   },
   http: {

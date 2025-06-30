@@ -7,7 +7,7 @@
 /* ===== MAIN DASHBOARD LAYOUT ===== */
 
 .dashboard-page {
-  min-height: 100vh;
+  min-height: calc(100vh - 64px); /* Account for app header height */
   background: var(--theme-gradient-primary);
   color: var(--theme-text-primary);
   font-family: var(--theme-font-sans);
@@ -44,9 +44,10 @@
 
 /* ===== MAIN CONTENT AREA ===== */
 
-.dashboard-content {
+.page-content {
   width: 100%;
   padding: var(--theme-space-8) var(--theme-space-6);
+  margin-top: 64px;
   display: flex;
   flex-direction: column;
   gap: var(--theme-space-8);
@@ -443,7 +444,7 @@
 /* ===== RESPONSIVE DESIGN ===== */
 
 @media (max-width: 768px) {
-  .dashboard-content {
+  .page-content {
     padding: var(--theme-space-6) var(--theme-space-4);
     gap: var(--theme-space-6);
   }
@@ -470,7 +471,7 @@
 }
 
 @media (max-width: 480px) {
-  .dashboard-content {
+  .page-content {
     padding: var(--theme-space-4) var(--theme-space-3);
   }
 

@@ -1,5 +1,6 @@
 import axios from "axios";
 import { FRONTEND_API_CONFIG } from "../config/api.config";
+import { apiStore } from "../stores/ApiStore";
 import {
   CreateNotificationRequest,
   MarketEventAlert,
@@ -17,7 +18,11 @@ import {
 const API_BASE_URL = FRONTEND_API_CONFIG.backend.baseUrl;
 
 class NotificationService {
-  private baseURL = `${API_BASE_URL}/notifications`;
+  private readonly baseURL: string;
+
+  constructor() {
+    this.baseURL = `${API_BASE_URL}/api/notifications`;
+  }
 
   // === Core Notification Management ===
 
@@ -25,8 +30,11 @@ class NotificationService {
     notification: CreateNotificationRequest
   ): Promise<Notification> {
     try {
-      const response = await axios.post(this.baseURL, notification);
-      return response.data.data;
+      const response = await apiStore.post<{ data: Notification }>(
+        "/api/notifications",
+        notification
+      );
+      return response.data;
     } catch (error) {
       console.error("Failed to create notification:", error);
       throw error;
@@ -53,16 +61,17 @@ class NotificationService {
       if (filter.toDate) params.append("toDate", filter.toDate.toISOString());
       if (filter.limit) params.append("limit", filter.limit.toString());
       if (filter.offset) params.append("offset", filter.offset.toString());
-      const response = await axios.get(`${this.baseURL}?${params.toString()}`);
+      const response = await apiStore.get<{
+        data: Notification[];
+        total: number;
+        pagination: any;
+      }>(`/api/notifications?${params.toString()}`);
 
       // Handle the structured response from backend
-      const backendResponse = response.data;
       return {
-        notifications: Array.isArray(backendResponse.data)
-          ? backendResponse.data
-          : [],
-        total: backendResponse.total || 0,
-        pagination: backendResponse.pagination || {},
+        notifications: Array.isArray(response.data) ? response.data : [],
+        total: response.total || 0,
+        pagination: response.pagination || {},
       };
     } catch (error) {
       console.error("Failed to get notifications:", error);
@@ -76,11 +85,11 @@ class NotificationService {
   }
   async getUnreadCount(userId: string): Promise<number> {
     try {
-      const response = await axios.get(
-        `${this.baseURL}/unread-count/${userId}`
+      const response = await apiStore.get<{ data: { count: number } }>(
+        `/api/notifications/unread-count/${userId}`
       );
       // Handle backend response structure
-      return response.data?.data?.count || 0;
+      return response.data?.count || 0;
     } catch (error) {
       console.error("Failed to get unread count:", error);
       return 0;
@@ -160,8 +169,10 @@ class NotificationService {
 
   async getUserPreferences(userId: string): Promise<NotificationPreference[]> {
     try {
-      const response = await axios.get(`${this.baseURL}/preferences/${userId}`);
-      return response.data.data;
+      const response = await apiStore.get<{ data: NotificationPreference[] }>(
+        `/api/notifications/preferences/${userId}`
+      );
+      return response.data;
     } catch (error) {
       console.error("Failed to get user preferences:", error);
       return [];

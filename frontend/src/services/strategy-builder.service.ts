@@ -1,5 +1,5 @@
-import axios from "axios";
 import { FRONTEND_API_CONFIG } from "../config/api.config";
+import { apiStore } from "../stores/ApiStore";
 
 const API_BASE_URL = FRONTEND_API_CONFIG.backend.baseUrl;
 
@@ -126,21 +126,19 @@ export interface ApiResponse<T> {
 }
 
 class StrategyBuilderService {
-  private baseURL = `${API_BASE_URL}/api/strategy-builder`;
-
   // Strategy Management
   async createStrategy(
     strategyConfig: StrategyConfig,
     userId: string = "demo-user"
   ): Promise<ApiResponse<TradingStrategy>> {
     try {
-      const response = await axios.post(
-        `${this.baseURL}/strategies?userId=${userId}`,
+      const response = await apiStore.post<TradingStrategy>(
+        `/api/strategy-builder/strategies?userId=${userId}`,
         strategyConfig
       );
       return {
         success: true,
-        data: response.data,
+        data: response,
       };
     } catch (error: any) {
       return {
@@ -155,12 +153,12 @@ class StrategyBuilderService {
     userId: string = "demo-user"
   ): Promise<ApiResponse<TradingStrategy[]>> {
     try {
-      const response = await axios.get(
-        `${this.baseURL}/strategies?userId=${userId}`
+      const response = await apiStore.get<TradingStrategy[]>(
+        `/api/strategy-builder/strategies?userId=${userId}`
       );
       return {
         success: true,
-        data: response.data,
+        data: response,
       };
     } catch (error: any) {
       return {
@@ -173,12 +171,12 @@ class StrategyBuilderService {
 
   async getStrategy(strategyId: string): Promise<ApiResponse<TradingStrategy>> {
     try {
-      const response = await axios.get(
-        `${this.baseURL}/strategies/${strategyId}`
+      const response = await apiStore.get<TradingStrategy>(
+        `/api/strategy-builder/strategies/${strategyId}`
       );
       return {
         success: true,
-        data: response.data,
+        data: response,
       };
     } catch (error: any) {
       return {
@@ -194,13 +192,13 @@ class StrategyBuilderService {
     updates: Partial<StrategyConfig>
   ): Promise<ApiResponse<TradingStrategy>> {
     try {
-      const response = await axios.put(
-        `${this.baseURL}/strategies/${strategyId}`,
+      const response = await apiStore.put<TradingStrategy>(
+        `/api/strategy-builder/strategies/${strategyId}`,
         updates
       );
       return {
         success: true,
-        data: response.data,
+        data: response,
       };
     } catch (error: any) {
       return {
@@ -215,7 +213,9 @@ class StrategyBuilderService {
     strategyId: string
   ): Promise<ApiResponse<{ message: string }>> {
     try {
-      await axios.delete(`${this.baseURL}/strategies/${strategyId}`);
+      await apiStore.delete<{ message: string }>(
+        `/api/strategy-builder/strategies/${strategyId}`
+      );
       return {
         success: true,
         data: { message: "Strategy deleted successfully" },
@@ -235,13 +235,13 @@ class StrategyBuilderService {
     newName?: string
   ): Promise<ApiResponse<TradingStrategy>> {
     try {
-      const response = await axios.post(
-        `${this.baseURL}/strategies/${strategyId}/duplicate?userId=${userId}`,
+      const response = await apiStore.post<TradingStrategy>(
+        `/api/strategy-builder/strategies/${strategyId}/duplicate?userId=${userId}`,
         { newName }
       );
       return {
         success: true,
-        data: response.data,
+        data: response,
       };
     } catch (error: any) {
       return {
@@ -256,12 +256,12 @@ class StrategyBuilderService {
     strategyId: string
   ): Promise<ApiResponse<ValidationResult>> {
     try {
-      const response = await axios.post(
-        `${this.baseURL}/strategies/${strategyId}/validate`
+      const response = await apiStore.post<ValidationResult>(
+        `/api/strategy-builder/strategies/${strategyId}/validate`
       );
       return {
         success: true,
-        data: response.data,
+        data: response,
       };
     } catch (error: any) {
       return {
@@ -278,13 +278,13 @@ class StrategyBuilderService {
     backtestParams: BacktestParams
   ): Promise<ApiResponse<BacktestResult>> {
     try {
-      const response = await axios.post(
-        `${this.baseURL}/strategies/${strategyId}/backtest`,
+      const response = await apiStore.post<BacktestResult>(
+        `/api/strategy-builder/strategies/${strategyId}/backtest`,
         backtestParams
       );
       return {
         success: true,
-        data: response.data,
+        data: response,
       };
     } catch (error: any) {
       return {
@@ -299,12 +299,12 @@ class StrategyBuilderService {
     strategyId: string
   ): Promise<ApiResponse<BacktestResult[]>> {
     try {
-      const response = await axios.get(
-        `${this.baseURL}/strategies/${strategyId}/backtests`
+      const response = await apiStore.get<BacktestResult[]>(
+        `/api/strategy-builder/strategies/${strategyId}/backtests`
       );
       return {
         success: true,
-        data: response.data,
+        data: response,
       };
     } catch (error: any) {
       return {
@@ -318,10 +318,12 @@ class StrategyBuilderService {
   // Templates
   async getTemplates(): Promise<ApiResponse<StrategyTemplate[]>> {
     try {
-      const response = await axios.get(`${this.baseURL}/templates`);
+      const response = await apiStore.get<StrategyTemplate[]>(
+        `/api/strategy-builder/templates`
+      );
       return {
         success: true,
-        data: response.data,
+        data: response,
       };
     } catch (error: any) {
       return {
@@ -338,13 +340,13 @@ class StrategyBuilderService {
     userId: string = "demo-user"
   ): Promise<ApiResponse<TradingStrategy>> {
     try {
-      const response = await axios.post(
-        `${this.baseURL}/templates/${templateId}/create-strategy?userId=${userId}`,
+      const response = await apiStore.post<TradingStrategy>(
+        `/api/strategy-builder/templates/${templateId}/create-strategy?userId=${userId}`,
         { name }
       );
       return {
         success: true,
-        data: response.data,
+        data: response,
       };
     } catch (error: any) {
       return {
@@ -358,10 +360,12 @@ class StrategyBuilderService {
   // Component Library
   async getComponentLibrary(): Promise<ApiResponse<ComponentDefinition[]>> {
     try {
-      const response = await axios.get(`${this.baseURL}/components`);
+      const response = await apiStore.get<ComponentDefinition[]>(
+        `/api/strategy-builder/components`
+      );
       return {
         success: true,
-        data: response.data,
+        data: response,
       };
     } catch (error: any) {
       return {
@@ -374,10 +378,12 @@ class StrategyBuilderService {
 
   async getComponentCategories(): Promise<ApiResponse<string[]>> {
     try {
-      const response = await axios.get(`${this.baseURL}/components/categories`);
+      const response = await apiStore.get<string[]>(
+        `/api/strategy-builder/components/categories`
+      );
       return {
         success: true,
-        data: response.data,
+        data: response,
       };
     } catch (error: any) {
       return {
@@ -399,13 +405,13 @@ class StrategyBuilderService {
     }
   ): Promise<ApiResponse<{ message: string }>> {
     try {
-      const response = await axios.post(
-        `${this.baseURL}/strategies/${strategyId}/publish`,
+      const response = await apiStore.post<{ message: string }>(
+        `/api/strategy-builder/strategies/${strategyId}/publish`,
         publishConfig
       );
       return {
         success: true,
-        data: response.data,
+        data: response,
       };
     } catch (error: any) {
       return {
@@ -432,12 +438,12 @@ class StrategyBuilderService {
         params.append("minRating", query.minRating.toString());
       if (query.sortBy) params.append("sortBy", query.sortBy);
 
-      const response = await axios.get(
-        `${this.baseURL}/marketplace/search?${params}`
+      const response = await apiStore.get<StrategyTemplate[]>(
+        `/api/strategy-builder/marketplace/search?${params}`
       );
       return {
         success: true,
-        data: response.data,
+        data: response,
       };
     } catch (error: any) {
       return {

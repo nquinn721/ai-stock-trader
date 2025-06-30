@@ -634,7 +634,7 @@ const MarketMakingDashboard: React.FC = () => {
       )}
 
       {/* Main Content Tabs */}
-      <Box className="dashboard-content">
+      <Box className="page-content">
         <Tabs
           value={tabValue}
           onChange={handleTabChange}

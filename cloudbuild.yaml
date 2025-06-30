@@ -56,6 +56,8 @@ steps:
         "2",
         "--set-env-vars",
         "NODE_ENV=production,TFJS_BACKEND=cpu,TFJS_DISABLE_WEBGL=true",
+        "--set-secrets",
+        "DATABASE_HOST=database-host:latest,DATABASE_PORT=database-port:latest,DATABASE_USERNAME=database-username:latest,DATABASE_PASSWORD=database-password:latest,DATABASE_NAME=database-name:latest",
       ]
     timeout: "600s"
 

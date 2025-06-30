@@ -33,7 +33,7 @@ export const ForexDashboard: React.FC = observer(() => {
   };
 
   const fetchForexMetrics = async () => {
-    // This method is no longer needed - data comes from store  
+    // This method is no longer needed - data comes from store
   };
 
   const formatCurrency = (value: number) => {
@@ -85,7 +85,9 @@ export const ForexDashboard: React.FC = observer(() => {
             </Typography>
             <Typography variant="h6" component="div">
               {forexData.length > 0
-                ? formatVolume(forexData.reduce((sum, pair) => sum + pair.volume, 0))
+                ? formatVolume(
+                    forexData.reduce((sum, pair) => sum + pair.volume, 0)
+                  )
                 : "No data"}
             </Typography>
           </CardContent>

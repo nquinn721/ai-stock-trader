@@ -231,23 +231,16 @@ const QuickTradeContent: React.FC = observer(() => {
 
       console.log("Executing trade:", tradeData);
 
-      const response = await fetch(
-        "http://localhost:8000/paper-trading/trade",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(tradeData),
-        }
-      );
+      // Adapt data to TradeRequest format
+      const tradeRequest = {
+        symbol: tradeData.symbol,
+        type: tradeData.type,
+        quantity: tradeData.quantity,
+        price: tradeData.price,
+        orderType: "market" as const,
+      };
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Trade execution failed");
-      }
-
-      const result = await response.json();
+      const result = await tradeStore.executeTrade(1, tradeRequest);
       console.log("Trade executed successfully:", result);
 
       addNotification({

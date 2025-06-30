@@ -95,286 +95,126 @@ import { SeedService } from './services/seed.service';
     ScheduleModule.forRoot(),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
-      useFactory: async (configService: ConfigService) => {
+      useFactory: (configService: ConfigService) => {
         const dbHost = configService.get('DATABASE_HOST');
         const dbPort = configService.get('DATABASE_PORT') || '3306';
         const dbUsername = configService.get('DATABASE_USERNAME');
         const dbPassword = configService.get('DATABASE_PASSWORD');
         const dbName = configService.get('DATABASE_NAME');
-        const isProduction = process.env.NODE_ENV === 'production';
-
-        // In production Cloud Run, if MySQL connection fails, use SQLite as fallback
-        if (isProduction && (!dbHost || !dbUsername || !dbPassword || !dbName)) {
-          console.log('⚠️ MySQL configuration missing in production, using SQLite fallback');
-          return {
-            type: 'sqlite',
-            database: '/tmp/stock_trading.db', // Use /tmp for Cloud Run
-            entities: [
-              Stock,
-              News,
-              TradingSignal,
-              Portfolio,
-              Position,
-              Trade,
-              Order,
-              MLModel,
-              MLPrediction,
-              MLMetric,
-              MLABTest,
-              MLFeatureImportance,
-              MLModelPerformance,
-              NotificationEntity,
-              NotificationPreferenceEntity,
-              NotificationTemplateEntity,
-              TradingRule,
-              AutoTrade,
-              TradingSession,
-              TradingStrategy,
-              StrategyTemplate,
-              BacktestResult,
-              ScreenerTemplate,
-              MarketAlert,
-              ScanResult,
-              AssetData,
-              CryptoData,
-              ForexData,
-              CommodityData,
-              AlternativeData,
-              CrossAssetCorrelation,
-              ArbitrageOpportunity,
-              MarketMakingStrategyEntity,
-              MarketMakingQuoteEntity,
-              ArbitrageOpportunityEntity,
-              RiskExposureEntity,
-              LiquidityPositionEntity,
-              // Macro Intelligence entities
-              EconomicForecast,
-              BusinessCycle,
-              RecessionProbability,
-              MonetaryPolicyPrediction,
-              PolicyStanceAnalysis,
-              QEProbabilityAssessment,
-              PoliticalStabilityScore,
-              ElectionPrediction,
-              ConflictRiskAssessment,
-            ],
-            synchronize: true,
-            logging: ['error', 'warn'],
-          };
-        }
 
         // Check if required database configuration is provided
         if (!dbHost || !dbUsername || !dbPassword || !dbName) {
-          console.error('❌ Missing required database configuration:');
-          console.error(`DATABASE_HOST: ${dbHost ? '✓' : '❌'}`);
-          console.error(`DATABASE_USERNAME: ${dbUsername ? '✓' : '❌'}`);
-          console.error(`DATABASE_PASSWORD: ${dbPassword ? '✓' : '❌'}`);
-          console.error(`DATABASE_NAME: ${dbName ? '✓' : '❌'}`);
-          
-          if (isProduction) {
-            console.log('🔄 Falling back to SQLite for production deployment');
-            return {
-              type: 'sqlite',
-              database: '/tmp/stock_trading.db',
-              entities: [
-                Stock,
-                News,
-                TradingSignal,
-                Portfolio,
-                Position,
-                Trade,
-                Order,
-                MLModel,
-                MLPrediction,
-                MLMetric,
-                MLABTest,
-                MLFeatureImportance,
-                MLModelPerformance,
-                NotificationEntity,
-                NotificationPreferenceEntity,
-                NotificationTemplateEntity,
-                TradingRule,
-                AutoTrade,
-                TradingSession,
-                TradingStrategy,
-                StrategyTemplate,
-                BacktestResult,
-                ScreenerTemplate,
-                MarketAlert,
-                ScanResult,
-                AssetData,
-                CryptoData,
-                ForexData,
-                CommodityData,
-                AlternativeData,
-                CrossAssetCorrelation,
-                ArbitrageOpportunity,
-                MarketMakingStrategyEntity,
-                MarketMakingQuoteEntity,
-                ArbitrageOpportunityEntity,
-                RiskExposureEntity,
-                LiquidityPositionEntity,
-                // Macro Intelligence entities
-                EconomicForecast,
-                BusinessCycle,
-                RecessionProbability,
-                MonetaryPolicyPrediction,
-                PolicyStanceAnalysis,
-                QEProbabilityAssessment,
-                PoliticalStabilityScore,
-                ElectionPrediction,
-                ConflictRiskAssessment,
-              ],
-              synchronize: true,
-              logging: ['error', 'warn'],
-            };
-          } else {
-            throw new Error(
-              'Missing required database configuration. Please set DATABASE_HOST, DATABASE_USERNAME, DATABASE_PASSWORD, and DATABASE_NAME environment variables.',
-            );
-          }
+          console.error(
+            '❌ Missing required database configuration for MySQL:',
+          );
+          console.error(`DATABASE_HOST: ${dbHost ? '✓' : '❌ (empty)'}`);
+          console.error(
+            `DATABASE_USERNAME: ${dbUsername ? '✓' : '❌ (empty)'}`,
+          );
+          console.error(
+            `DATABASE_PASSWORD: ${dbPassword ? '✓' : '❌ (empty)'}`,
+          );
+          console.error(`DATABASE_NAME: ${dbName ? '✓' : '❌ (empty)'}`);
+          console.error('');
+          console.error('🔧 For local development:');
+          console.error('   1. Set up a local MySQL instance, OR');
+          console.error(
+            '   2. Use a cloud MySQL service (AWS RDS, Google Cloud SQL, etc.), OR',
+          );
+          console.error('   3. Use a free MySQL hosting service');
+          console.error('');
+          console.error(
+            '📝 Then update backend/.env with your MySQL credentials:',
+          );
+          console.error('   DATABASE_HOST=your-mysql-host');
+          console.error('   DATABASE_USERNAME=your-username');
+          console.error('   DATABASE_PASSWORD=your-password');
+          console.error('   DATABASE_NAME=your-database-name');
+          console.error('');
+          console.error(
+            '🚀 For production: Database credentials are handled via Google Secret Manager',
+          );
+
+          throw new Error(
+            'Missing required database configuration. Please set DATABASE_HOST, DATABASE_USERNAME, DATABASE_PASSWORD, and DATABASE_NAME environment variables.',
+          );
         }
 
         console.log(
           `🔗 Connecting to MySQL database at ${dbHost}:${dbPort}/${dbName}`,
         );
 
-        try {
-          return {
-            type: 'mysql',
-            host: dbHost,
-            port: +dbPort,
-            username: dbUsername,
-            password: dbPassword,
-            database: dbName,
-            entities: [
-              Stock,
-              News,
-              TradingSignal,
-              Portfolio,
-              Position,
-              Trade,
-              Order,
-              MLModel,
-              MLPrediction,
-              MLMetric,
-              MLABTest,
-              MLFeatureImportance,
-              MLModelPerformance,
-              NotificationEntity,
-              NotificationPreferenceEntity,
-              NotificationTemplateEntity,
-              TradingRule,
-              AutoTrade,
-              TradingSession,
-              TradingStrategy,
-              StrategyTemplate,
-              BacktestResult,
-              ScreenerTemplate,
-              MarketAlert,
-              ScanResult,
-              AssetData,
-              CryptoData,
-              ForexData,
-              CommodityData,
-              AlternativeData,
-              CrossAssetCorrelation,
-              ArbitrageOpportunity,
-              MarketMakingStrategyEntity,
-              MarketMakingQuoteEntity,
-              ArbitrageOpportunityEntity,
-              RiskExposureEntity,
-              LiquidityPositionEntity,
-              // Macro Intelligence entities
-              EconomicForecast,
-              BusinessCycle,
-              RecessionProbability,
-              MonetaryPolicyPrediction,
-              PolicyStanceAnalysis,
-              QEProbabilityAssessment,
-              PoliticalStabilityScore,
-              ElectionPrediction,
-              ConflictRiskAssessment,
-            ],
-            synchronize: true, // Enable for both dev and production to ensure tables exist
-            logging: ['error', 'warn'], // Log errors and warnings for debugging
-            extra: {
-              connectionLimit: 10,
-              acquireTimeout: 60000,
-              timeout: 60000,
-              reconnect: true,
-            },
-            // Enable retries for connection issues
-            retryAttempts: 5,
-            retryDelay: 3000,
-          };
-        } catch (error) {
-          console.error('❌ MySQL connection failed:', error);
-          if (isProduction) {
-            console.log('🔄 Falling back to SQLite for production deployment');
-            return {
-              type: 'sqlite',
-              database: '/tmp/stock_trading.db',
-              entities: [
-                Stock,
-                News,
-                TradingSignal,
-                Portfolio,
-                Position,
-                Trade,
-                Order,
-                MLModel,
-                MLPrediction,
-                MLMetric,
-                MLABTest,
-                MLFeatureImportance,
-                MLModelPerformance,
-                NotificationEntity,
-                NotificationPreferenceEntity,
-                NotificationTemplateEntity,
-                TradingRule,
-                AutoTrade,
-                TradingSession,
-                TradingStrategy,
-                StrategyTemplate,
-                BacktestResult,
-                ScreenerTemplate,
-                MarketAlert,
-                ScanResult,
-                AssetData,
-                CryptoData,
-                ForexData,
-                CommodityData,
-                AlternativeData,
-                CrossAssetCorrelation,
-                ArbitrageOpportunity,
-                MarketMakingStrategyEntity,
-                MarketMakingQuoteEntity,
-                ArbitrageOpportunityEntity,
-                RiskExposureEntity,
-                LiquidityPositionEntity,
-                // Macro Intelligence entities
-                EconomicForecast,
-                BusinessCycle,
-                RecessionProbability,
-                MonetaryPolicyPrediction,
-                PolicyStanceAnalysis,
-                QEProbabilityAssessment,
-                PoliticalStabilityScore,
-                ElectionPrediction,
-                ConflictRiskAssessment,
-              ],
-              synchronize: true,
-              logging: ['error', 'warn'],
-            };
-          } else {
-            throw error;
-          }
-        }
+        return {
+          type: 'mysql',
+          host: dbHost,
+          port: +dbPort,
+          username: dbUsername,
+          password: dbPassword,
+          database: dbName,
+          entities: [
+            Stock,
+            News,
+            TradingSignal,
+            Portfolio,
+            Position,
+            Trade,
+            Order,
+            MLModel,
+            MLPrediction,
+            MLMetric,
+            MLABTest,
+            MLFeatureImportance,
+            MLModelPerformance,
+            NotificationEntity,
+            NotificationPreferenceEntity,
+            NotificationTemplateEntity,
+            TradingRule,
+            AutoTrade,
+            TradingSession,
+            TradingStrategy,
+            StrategyTemplate,
+            BacktestResult,
+            ScreenerTemplate,
+            MarketAlert,
+            ScanResult,
+            AssetData,
+            CryptoData,
+            ForexData,
+            CommodityData,
+            AlternativeData,
+            CrossAssetCorrelation,
+            ArbitrageOpportunity,
+            MarketMakingStrategyEntity,
+            MarketMakingQuoteEntity,
+            ArbitrageOpportunityEntity,
+            RiskExposureEntity,
+            LiquidityPositionEntity,
+            // Macro Intelligence entities
+            EconomicForecast,
+            BusinessCycle,
+            RecessionProbability,
+            MonetaryPolicyPrediction,
+            PolicyStanceAnalysis,
+            QEProbabilityAssessment,
+            PoliticalStabilityScore,
+            ElectionPrediction,
+            ConflictRiskAssessment,
+          ],
+          synchronize: true,
+          logging: ['error', 'warn'],
+          extra: {
+            connectionLimit: 10,
+            acquireTimeout: 60000,
+            timeout: 60000,
+            reconnect: true,
+          },
+          retryAttempts: 5,
+          retryDelay: 3000,
+        };
       },
       inject: [ConfigService],
     }),
-    TypeOrmModule.forFeature([Stock]),
+    TypeOrmModule.forFeature([Stock, Portfolio, NotificationEntity]),
     StockModule,
     WebsocketModule,
     NewsModule,

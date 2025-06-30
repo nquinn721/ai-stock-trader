@@ -1,40 +1,48 @@
-import axios, { AxiosResponse } from "axios";
-import { makeAutoObservable, runInAction } from "mobx";
+import axios, {
+  AxiosInstance,
+  AxiosResponse,
+  InternalAxiosRequestConfig,
+} from "axios";
+import { action, makeObservable, observable, runInAction } from "mobx";
 import {
   FRONTEND_API_CONFIG,
   getFrontendHttpConfig,
 } from "../config/api.config";
 
-export interface ApiConfig {
-  baseURL: string;
-  timeout: number;
-}
-
 export class ApiStore {
-  private config: ApiConfig = {
-    baseURL: FRONTEND_API_CONFIG.backend.baseUrl,
-    timeout: getFrontendHttpConfig().timeout,
-  };
-
+  private axiosInstance: AxiosInstance;
   isLoading = false;
   error: string | null = null;
 
   constructor() {
-    makeAutoObservable(this);
+    // Initialize axios instance first, before making observable
+    this.axiosInstance = axios.create({
+      baseURL: FRONTEND_API_CONFIG.backend.baseUrl,
+      timeout: getFrontendHttpConfig().timeout,
+    });
+
+    // Make only specific properties observable
+    makeObservable(this, {
+      isLoading: observable,
+      error: observable,
+      clearError: action,
+      setLoading: action,
+    });
+
     this.setupAxiosInterceptors();
   }
 
   private setupAxiosInterceptors() {
     // Request interceptor
-    axios.interceptors.request.use(
-      (config) => {
+    this.axiosInstance.interceptors.request.use(
+      (config: InternalAxiosRequestConfig) => {
         runInAction(() => {
           this.isLoading = true;
           this.error = null;
         });
         return config;
       },
-      (error) => {
+      (error: any) => {
         runInAction(() => {
           this.isLoading = false;
           this.error = error.message;
@@ -44,17 +52,20 @@ export class ApiStore {
     );
 
     // Response interceptor
-    axios.interceptors.response.use(
-      (response) => {
+    this.axiosInstance.interceptors.response.use(
+      (response: AxiosResponse) => {
         runInAction(() => {
           this.isLoading = false;
         });
         return response;
       },
-      (error) => {
+      (error: any) => {
         runInAction(() => {
           this.isLoading = false;
-          this.error = error.response?.data?.message || error.message;
+          this.error =
+            error.response?.data?.message ||
+            error.message ||
+            "Unknown error occurred";
         });
         return Promise.reject(error);
       }
@@ -63,10 +74,7 @@ export class ApiStore {
 
   async get<T>(url: string): Promise<T> {
     try {
-      const response: AxiosResponse<T> = await axios.get(
-        `${this.config.baseURL}${url}`,
-        { timeout: this.config.timeout }
-      );
+      const response: AxiosResponse<T> = await this.axiosInstance.get(url);
       // Ensure response exists before accessing data
       if (!response) {
         throw new Error("No response received from API");
@@ -81,10 +89,9 @@ export class ApiStore {
 
   async post<T>(url: string, data?: any): Promise<T> {
     try {
-      const response: AxiosResponse<T> = await axios.post(
-        `${this.config.baseURL}${url}`,
-        data,
-        { timeout: this.config.timeout }
+      const response: AxiosResponse<T> = await this.axiosInstance.post(
+        url,
+        data
       );
       // Ensure response exists before accessing data
       if (!response) {
@@ -100,10 +107,9 @@ export class ApiStore {
 
   async put<T>(url: string, data?: any): Promise<T> {
     try {
-      const response: AxiosResponse<T> = await axios.put(
-        `${this.config.baseURL}${url}`,
-        data,
-        { timeout: this.config.timeout }
+      const response: AxiosResponse<T> = await this.axiosInstance.put(
+        url,
+        data
       );
       // Ensure response exists before accessing data
       if (!response) {
@@ -119,9 +125,24 @@ export class ApiStore {
 
   async delete<T>(url: string): Promise<T> {
     try {
-      const response: AxiosResponse<T> = await axios.delete(
-        `${this.config.baseURL}${url}`,
-        { timeout: this.config.timeout }
+      const response: AxiosResponse<T> = await this.axiosInstance.delete(url);
+      // Ensure response exists before accessing data
+      if (!response) {
+        throw new Error("No response received from API");
+      }
+      // Handle cases where response.data might be undefined
+      return response.data !== undefined ? response.data : ({} as T);
+    } catch (error) {
+      this.handleError(error);
+      throw error;
+    }
+  }
+
+  async patch<T>(url: string, data?: any): Promise<T> {
+    try {
+      const response: AxiosResponse<T> = await this.axiosInstance.patch(
+        url,
+        data
       );
       // Ensure response exists before accessing data
       if (!response) {

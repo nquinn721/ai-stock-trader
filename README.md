@@ -323,6 +323,7 @@ npm run test:recommendations # Test recommendation system
 - Input validation with class-validator
 - CORS protection
 - Rate limiting (future)
+- **Database Protection**: See [Database Protection Guide](docs/DATABASE-PROTECTION-GUIDE.md) for critical procedures to prevent accidental data loss
 
 ## 🚀 Deployment
 

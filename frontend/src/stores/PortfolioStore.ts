@@ -98,7 +98,7 @@ export class PortfolioStore {
     });
     try {
       const response = (await this.apiStore.get(
-        `/paper-trading/portfolios/${userId}`
+        `/api/paper-trading/portfolios/${userId}`
       )) as Portfolio;
       runInAction(() => {
         this.portfolio = response;
@@ -120,7 +120,7 @@ export class PortfolioStore {
     });
     try {
       const response = (await this.apiStore.get(
-        `/paper-trading/portfolios/${portfolioId}`
+        `/api/paper-trading/portfolios/${portfolioId}`
       )) as Portfolio;
       runInAction(() => {
         this.portfolio = response;
@@ -148,7 +148,7 @@ export class PortfolioStore {
     });
     try {
       const response = (await this.apiStore.get(
-        `/paper-trading/portfolios/${portfolioId}/performance?period=${period}`
+        `/api/paper-trading/portfolios/${portfolioId}/performance?period=${period}`
       )) as any;
       runInAction(() => {
         // Handle different possible response structures
@@ -196,7 +196,7 @@ export class PortfolioStore {
   async fetchPortfolioPerformance(portfolioId: number) {
     try {
       const response = (await this.apiStore.get(
-        `/paper-trading/portfolios/${portfolioId}/performance`
+        `/api/paper-trading/portfolios/${portfolioId}/performance`
       )) as any;
       return response;
     } catch (error: any) {
@@ -211,7 +211,7 @@ export class PortfolioStore {
     });
     try {
       const response = (await this.apiStore.get(
-        "/paper-trading/portfolios"
+        "/api/paper-trading/portfolios"
       )) as any;
       runInAction(() => {
         // Handle different possible response structures
@@ -245,7 +245,7 @@ export class PortfolioStore {
     });
     try {
       const response = (await this.apiStore.post(
-        "/paper-trading/portfolios",
+        "/api/paper-trading/portfolios",
         portfolioData
       )) as Portfolio;
       runInAction(() => {
@@ -270,7 +270,7 @@ export class PortfolioStore {
     });
     try {
       const response = await this.apiStore.post(
-        "/paper-trading/trade",
+        "/api/paper-trading/trade",
         tradeData
       );
       runInAction(() => {
@@ -292,7 +292,9 @@ export class PortfolioStore {
       this.error = null;
     });
     try {
-      await this.apiStore.delete(`/paper-trading/portfolios/${portfolioId}`);
+      await this.apiStore.delete(
+        `/api/paper-trading/portfolios/${portfolioId}`
+      );
       runInAction(() => {
         this.isLoading = false;
         // Remove from local portfolios array

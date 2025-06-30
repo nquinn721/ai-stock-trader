@@ -15,10 +15,8 @@ import { useNavigate } from "react-router-dom";
 import EmptyState from "../components/EmptyState";
 import PageHeader from "../components/ui/PageHeader";
 import { FRONTEND_API_CONFIG } from "../config/api.config";
-import autoTradingService, {
-  StrategyInstance,
-} from "../services/autoTradingService";
-import { usePortfolioStore } from "../stores/StoreContext";
+import { StrategyInstance } from "../stores/AutoTradingStore";
+import { useAutoTradingStore, usePortfolioStore } from "../stores/StoreContext";
 import "./AnalyticsPage.css";
 
 interface PortfolioAnalytics {
@@ -109,6 +107,7 @@ interface StrategyAnalytics {
 
 const AnalyticsPage: React.FC = observer(() => {
   const portfolioStore = usePortfolioStore();
+  const autoTradingStore = useAutoTradingStore();
   const navigate = useNavigate();
 
   const [loading, setLoading] = useState(true);
@@ -143,6 +142,7 @@ const AnalyticsPage: React.FC = observer(() => {
         const analyticsPromises = portfolioStore.portfolios.map(
           async (portfolio) => {
             try {
+              // Use a direct API call for now - should be moved to portfolioStore
               const response = await fetch(
                 `${FRONTEND_API_CONFIG.backend.baseUrl}/api/portfolio-analytics/${portfolio.id}`
               );
@@ -214,7 +214,7 @@ const AnalyticsPage: React.FC = observer(() => {
   const fetchStrategyAnalytics = async () => {
     setStrategyLoading(true);
     try {
-      const response = await autoTradingService.getRunningStrategies();
+      const response = await autoTradingStore.getRunningStrategies();
 
       if (response.success && response.data) {
         const strategies = response.data;

@@ -271,8 +271,9 @@ export interface TradingContext {
 
 // Trading Session DTO for backend
 export interface TradingSessionDto {
-  session_name: string;
-  config?: any;
+  portfolio_id: string;
+  session_name?: string;
+  config: any;
 }
 
 export interface TradingSessionDtoDisplay {
@@ -394,8 +395,10 @@ export const transformCreateRuleDtoToBackend = (
 });
 
 export const transformSessionDtoToBackend = (
-  dto: TradingSessionDtoDisplay
+  dto: TradingSessionDtoDisplay,
+  portfolioId: string
 ): TradingSessionDto => ({
+  portfolio_id: portfolioId,
   session_name: dto.sessionName,
   config: dto.config,
 });
