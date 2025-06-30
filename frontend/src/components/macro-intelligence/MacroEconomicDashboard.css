@@ -20,7 +20,7 @@
   min-height: 100vh;
 }
 
-.page-content {
+.dashboard-content {
   flex: 1;
   padding: 32px 40px;
   max-width: 1400px;
@@ -390,7 +390,7 @@
 
 /* Responsive Design */
 @media (max-width: 768px) {
-  .page-content {
+  .dashboard-content {
     padding: 20px 16px;
     margin-top: 64px;
   }

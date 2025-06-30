@@ -44,7 +44,7 @@
 
 /* ===== MAIN CONTENT AREA ===== */
 
-.page-content {
+.dashboard-content {
   width: 100%;
   padding: var(--theme-space-8) var(--theme-space-6);
   margin-top: 64px;
@@ -444,7 +444,7 @@
 /* ===== RESPONSIVE DESIGN ===== */
 
 @media (max-width: 768px) {
-  .page-content {
+  .dashboard-content {
     padding: var(--theme-space-6) var(--theme-space-4);
     gap: var(--theme-space-6);
   }
@@ -471,7 +471,7 @@
 }
 
 @media (max-width: 480px) {
-  .page-content {
+  .dashboard-content {
     padding: var(--theme-space-4) var(--theme-space-3);
   }
 

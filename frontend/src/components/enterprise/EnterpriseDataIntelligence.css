@@ -107,7 +107,7 @@
   color: white;
 }
 
-.page-content {
+.dashboard-content {
   /* Removed animation: fadeIn 0.3s ease; */
   opacity: 1;
   transform: translateY(0);

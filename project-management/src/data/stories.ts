@@ -997,15 +997,16 @@ export const stories: Story[] = [
     title: "Recommendation-to-Order Integration Pipeline",
     description:
       "Build a seamless integration pipeline that automatically converts AI trading recommendations into actionable trading orders with full risk management, position sizing, and advanced order features. This system will bridge the gap between the recommendation engine and order execution.",
-    status: "TODO",
+    status: "COMPLETED",
     priority: "High",
     epic: "E5",
     storyPoints: 13,
     sprint: 5,
     assignee: "AI Development Team",
-    progress: 0,
+    progress: 100,
     dependencies: ["S19", "S25", "S41", "S42"],
     createdDate: "2025-06-30",
+    completedDate: "2025-06-30",
   },
   {
     id: "S44",

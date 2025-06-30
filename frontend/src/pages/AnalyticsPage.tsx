@@ -479,7 +479,7 @@ const AnalyticsPage: React.FC = observer(() => {
             },
           ]}
         />
-        <div className="page-content">
+        <div className="dashboard-content">
           <EmptyState
             type="loading"
             icon={<FontAwesomeIcon icon={faClock} />}

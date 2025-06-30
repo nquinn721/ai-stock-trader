@@ -32,6 +32,7 @@ import {
   ContentCard,
   LoadingState,
   PageHeader,
+  SectionHeader,
   StatusChip,
   TradingButton,
 } from "../components/ui";
@@ -767,11 +768,10 @@ const AutonomousTradingPage: React.FC<AutonomousTradingPageProps> = observer(
 
       return (
         <div className="live-market-tab">
-          <ContentCard
+          <SectionHeader
             title="Live Market Data"
             subtitle="Real-time stock prices and trading signals"
             variant="gradient"
-            padding="lg"
             className="live-market-header"
             headerActions={
               <div className="header-actions">
@@ -815,7 +815,7 @@ const AutonomousTradingPage: React.FC<AutonomousTradingPageProps> = observer(
                 ))}
               </div>
             )}
-          </ContentCard>
+          </SectionHeader>
         </div>
       );
     };

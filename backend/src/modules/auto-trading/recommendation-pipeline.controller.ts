@@ -10,12 +10,13 @@ import {
   BadRequestException,
   NotFoundException,
 } from '@nestjs/common';
+import { RiskLevel } from '../../entities/auto-trading-order.entity';
 import { 
   RecommendationPipelineService, 
   TradingRecommendation,
   RecommendationToOrderRequest,
   PipelineConfiguration,
-} from '../services/recommendation-pipeline.service';
+} from './services/recommendation-pipeline.service';
 
 export class GenerateRecommendationsDto {
   symbols: string[];
@@ -45,7 +46,7 @@ export class UpdateConfigDto {
   enabled?: boolean;
   autoExecutionEnabled?: boolean;
   minimumConfidence?: number;
-  maximumRiskLevel?: 'LOW' | 'MEDIUM' | 'HIGH';
+  maximumRiskLevel?: RiskLevel;
   supportedTimeframes?: string[];
   portfolioFilters?: number[];
   symbolFilters?: string[];

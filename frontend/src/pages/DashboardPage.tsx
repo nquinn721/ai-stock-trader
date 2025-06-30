@@ -225,7 +225,7 @@ const DashboardPage: React.FC = observer(() => {
       />
 
       {/* Main Dashboard Content */}
-      <div className="page-content">
+      <div className="dashboard-content">
         {/* Enhanced Metrics Grid */}
         <div className="dashboard-grid grid-small">
           <div className="dashboard-card trading-card slide-up">

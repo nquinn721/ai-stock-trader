@@ -4,6 +4,7 @@
 export { default as ContentCard } from "./ContentCard";
 export { default as LoadingState } from "./LoadingState";
 export { default as PageHeader } from "./PageHeader";
+export { default as SectionHeader } from "./SectionHeader";
 export { default as StatusChip } from "./StatusChip";
 export { default as TradingButton } from "./TradingButton";
 
@@ -11,5 +12,6 @@ export { default as TradingButton } from "./TradingButton";
 export type { ContentCardProps } from "./ContentCard";
 export type { LoadingStateProps } from "./LoadingState";
 export type { PageHeaderActionButton, PageHeaderProps } from "./PageHeader";
+export type { SectionHeaderProps } from "./SectionHeader";
 export type { StatusChipProps } from "./StatusChip";
 export type { TradingButtonProps } from "./TradingButton";

@@ -25,8 +25,10 @@ import { PositionSizingService } from './services/position-sizing.service';
 import { RiskManagementService } from './services/risk-management.service';
 import { RuleEngineService } from './services/rule-engine.service';
 import { TradeExecutionService } from './services/trade-execution.service';
+import { RecommendationPipelineService } from './services/recommendation-pipeline.service';
 import { StrategyBuilderController } from './strategy-builder.controller';
 import { StrategyBuilderService } from './strategy-builder.service';
+import { RecommendationPipelineController } from './recommendation-pipeline.controller';
 
 @Module({
   imports: [
@@ -46,7 +48,7 @@ import { StrategyBuilderService } from './strategy-builder.service';
     WebsocketModule,
     MLModule,
   ],
-  controllers: [AutoTradingController, StrategyBuilderController],
+  controllers: [AutoTradingController, StrategyBuilderController, RecommendationPipelineController],
   providers: [
     AutoTradingService,
     StrategyBuilderService,
@@ -59,6 +61,7 @@ import { StrategyBuilderService } from './strategy-builder.service';
     RiskManagementService,
     PositionSizingService,
     OrderManagementService,
+    RecommendationPipelineService,
     MarketHoursService,
   ],
   exports: [
@@ -66,6 +69,7 @@ import { StrategyBuilderService } from './strategy-builder.service';
     StrategyBuilderService,
     BacktestingService,
     AutonomousTradingService,
+    RecommendationPipelineService,
   ],
 })
 export class AutoTradingModule {}

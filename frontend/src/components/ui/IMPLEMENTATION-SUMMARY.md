@@ -27,7 +27,7 @@ Successfully migrated `AutonomousTradingPage.tsx` to use the new PageHeader comp
 Updated `frontend/src/shared-styles.css` with:
 
 - Essential keyframe animations (pulse-glow, slideInUp, slideInDown, shimmer, tick)
-- Base component classes (page-container, page-content)
+- Base component classes (page-container, dashboard-content)
 - Grid utility classes (content-grid with variants)
 - Page background patterns and gradients
 

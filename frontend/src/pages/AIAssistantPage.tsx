@@ -41,7 +41,7 @@ const AIAssistantPage: React.FC = observer(() => {
         statsValue="GPT-4 Enabled"
         className="ai-assistant-header"
       />
-      <div className="page-content">
+      <div className="dashboard-content">
         <div className="chat-container">
           <TradingAssistantChat />
         </div>

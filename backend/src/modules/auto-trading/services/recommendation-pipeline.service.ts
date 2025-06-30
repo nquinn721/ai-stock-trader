@@ -132,7 +132,7 @@ export class RecommendationPipelineService {
       // Step 2: Convert ML signals to trading recommendations
       const recommendations: TradingRecommendation[] = [];
       
-      if (signals && signals.primarySignal) {
+      if (signals) {
         const recommendation = await this.convertSignalToRecommendation(
           symbol,
           signals,
@@ -168,31 +168,31 @@ export class RecommendationPipelineService {
     ensembleDetails: any,
     options: any,
   ): Promise<TradingRecommendation | null> {
-    const signal = signals.primarySignal;
+    // Use the signals object directly since it contains the signal information
     
     // Extract action from signal
-    const action = this.determineActionFromSignal(signal);
+    const action = this.determineActionFromSignal(signals);
     if (action === 'HOLD' && !this.shouldIncludeHoldSignals()) {
       return null; // Skip HOLD signals unless specifically requested
     }
 
     // Calculate risk parameters
-    const currentPrice = signal.currentPrice || 100; // Use actual price in production
-    const confidence = signal.confidence || 0;
+    const currentPrice = signals.levels?.currentPrice || 100; // Use actual price from signals
+    const confidence = signals.confidence || 0;
     
     // Calculate stop loss and take profit levels
     const { stopLoss, takeProfit } = this.calculateRiskLevels(
       currentPrice,
       action,
-      signal.volatility || 0.02,
+      signals.riskMetrics?.volatility || 0.02,
       confidence,
     );
 
     // Determine risk level based on signal characteristics
-    const riskLevel = this.determineRiskLevel(signal, confidence);
+    const riskLevel = this.determineRiskLevel(signals, confidence);
     
     // Generate reasoning from signal data
-    const reasoning = this.generateRecommendationReasoning(signal, ensembleDetails);
+    const reasoning = this.generateRecommendationReasoning(signals, ensembleDetails);
 
     const recommendation: TradingRecommendation = {
       id: this.generateRecommendationId(symbol, action),
@@ -208,18 +208,18 @@ export class RecommendationPipelineService {
       timeHorizon: this.determineTimeHorizon(signals),
       expiryTime: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours default
       technicalSignals: {
-        rsi: signal.technicalSignals?.rsi,
-        macd: signal.technicalSignals?.macd,
-        bollinger: signal.technicalSignals?.bollinger,
-        volume: signal.technicalSignals?.volume,
+        rsi: signals.factors?.technicalSignals?.rsi,
+        macd: signals.factors?.technicalSignals?.macd,
+        bollinger: signals.factors?.technicalSignals?.bollinger,
+        volume: signals.factors?.technicalSignals?.volume,
       },
       marketConditions: {
-        trend: signal.marketConditions?.trend,
-        volatility: signal.volatility,
-        strength: signal.strength,
+        trend: signals.factors?.marketConditions?.trend,
+        volatility: signals.riskMetrics?.volatility,
+        strength: signals.strength,
       },
       riskRewardRatio: this.calculateRiskRewardRatio(currentPrice, stopLoss, takeProfit),
-      maxDrawdown: signal.risk?.maxDrawdown || 0.05,
+      maxDrawdown: signals.riskMetrics?.maxDrawdown || 0.05,
       createdAt: new Date(),
     };
 
@@ -415,10 +415,10 @@ export class RecommendationPipelineService {
 
   // ==================== PRIVATE HELPER METHODS ====================
 
-  private determineActionFromSignal(signal: any): 'BUY' | 'SELL' | 'HOLD' | 'WATCH' {
-    if (!signal || typeof signal.signal !== 'string') return 'HOLD';
+  private determineActionFromSignal(signals: TradingSignals): 'BUY' | 'SELL' | 'HOLD' | 'WATCH' {
+    if (!signals || typeof signals.signal !== 'string') return 'HOLD';
     
-    const signalType = signal.signal.toUpperCase();
+    const signalType = signals.signal.toUpperCase();
     if (signalType.includes('BUY') || signalType.includes('LONG')) return 'BUY';
     if (signalType.includes('SELL') || signalType.includes('SHORT')) return 'SELL';
     if (signalType.includes('WATCH')) return 'WATCH';
@@ -456,36 +456,38 @@ export class RecommendationPipelineService {
     return { stopLoss, takeProfit };
   }
 
-  private determineRiskLevel(signal: any, confidence: number): RiskLevel {
-    if (confidence >= 0.85) return RiskLevel.LOW;
-    if (confidence >= 0.75) return RiskLevel.MEDIUM;
+  private determineRiskLevel(signals: TradingSignals, confidence: number): RiskLevel {
+    // Base risk on confidence and signal strength
+    const riskScore = (1 - confidence) + (1 - signals.strength);
+    
+    if (riskScore < 0.3) return RiskLevel.LOW;
+    if (riskScore < 0.6) return RiskLevel.MEDIUM;
     return RiskLevel.HIGH;
   }
 
-  private generateRecommendationReasoning(signal: any, ensembleDetails: any): string[] {
+  private generateRecommendationReasoning(signals: TradingSignals, ensembleDetails: any): string[] {
     const reasoning: string[] = [];
     
-    reasoning.push(`ML Ensemble Signal: ${signal.signal || 'Unknown'}`);
-    reasoning.push(`Confidence Score: ${((signal.confidence || 0) * 100).toFixed(1)}%`);
+    // Add basic signal reasoning
+    reasoning.push(`Signal: ${signals.signal} with ${(signals.strength * 100).toFixed(1)}% strength`);
+    reasoning.push(`Confidence: ${(signals.confidence * 100).toFixed(1)}%`);
     
-    if (signal.technicalSignals) {
-      reasoning.push(`Technical Analysis: RSI ${signal.technicalSignals.rsi?.toFixed(1) || 'N/A'}`);
+    // Add technical indicators if available
+    if (signals.factors?.technicalSignals) {
+      reasoning.push(`Technical indicators support the ${signals.signal} signal`);
     }
     
-    if (signal.marketConditions) {
-      reasoning.push(`Market Trend: ${signal.marketConditions.trend || 'Unknown'}`);
+    // Add risk assessment
+    if (signals.riskMetrics) {
+      reasoning.push(`Risk metrics: Volatility ${(signals.riskMetrics.volatility * 100).toFixed(1)}%, Max Drawdown ${(signals.riskMetrics.maxDrawdown * 100).toFixed(1)}%`);
     }
     
-    if (ensembleDetails?.modelsContributing) {
-      reasoning.push(`Models Used: ${ensembleDetails.modelsContributing} contributing models`);
+    // Add execution priority
+    if (signals.executionPriority) {
+      reasoning.push(`Execution priority: ${signals.executionPriority}`);
     }
     
     return reasoning;
-  }
-
-  private determineTimeHorizon(signals: TradingSignals): '1D' | '1W' | '1M' {
-    // Default to 1D for now, could be enhanced based on signal characteristics
-    return '1D';
   }
 
   private calculateRiskRewardRatio(
@@ -495,7 +497,16 @@ export class RecommendationPipelineService {
   ): number {
     const risk = Math.abs(entryPrice - stopLoss);
     const reward = Math.abs(takeProfit - entryPrice);
-    return risk > 0 ? reward / risk : 1;
+    
+    if (risk === 0) return 0;
+    return reward / risk;
+  }
+
+  private determineTimeHorizon(signals: TradingSignals): '1D' | '1W' | '1M' {
+    // Determine time horizon based on signal characteristics
+    if (signals.executionPriority === 'HIGH') return '1D';
+    if (signals.strength > 0.8) return '1W';
+    return '1M'; // Default to longer term for lower confidence signals
   }
 
   private generateRecommendationId(symbol: string, action: string): string {
@@ -585,13 +596,14 @@ export class RecommendationPipelineService {
       const orderDto = {
         portfolioId: portfolio.id,
         symbol: recommendation.symbol,
-        action: recommendation.action === 'BUY' ? AutoTradingOrderAction.BUY : AutoTradingOrderAction.SELL,
-        quantity: positionSize,
-        orderType: AutoTradingOrderType.BRACKET, // Use bracket orders for stop/profit
+        strategy: 'BRACKET' as any, // Default to bracket strategy
+        recommendationId: recommendation.id,
+        side: recommendation.action === 'BUY' ? 'BUY' as any : 'SELL' as any,
+        baseQuantity: positionSize,
+        orderType: 'MARKET' as any,
         limitPrice: recommendation.entryPrice,
         stopLossPrice: recommendation.stopLoss,
         takeProfitPrice: recommendation.takeProfit,
-        recommendationId: recommendation.id,
         confidence: recommendation.confidence,
         reasoning: recommendation.reasoning,
         riskLevel: recommendation.riskLevel,

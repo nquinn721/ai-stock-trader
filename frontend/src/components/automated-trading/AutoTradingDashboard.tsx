@@ -364,7 +364,7 @@ export const AutoTradingDashboard: React.FC = () => {
             },
           ]}
         />
-        <div className="page-content">
+        <div className="dashboard-content">
           <LinearProgress />
           <Typography variant="h6" sx={{ mt: 2, textAlign: "center" }}>
             Loading Automated Trading Dashboard...
@@ -411,7 +411,7 @@ export const AutoTradingDashboard: React.FC = () => {
         />
       </PageHeader>
 
-      <div className="page-content">
+      <div className="dashboard-content">
         {/* Status Overview Cards with Modern Design */}
         <div className="status-overview">
           <div className="status-card">
