@@ -399,13 +399,16 @@
 }
 
 .scanner-header {
-  animation: slideInFromTop 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  /* Removed animation: slideInFromTop 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards; */
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .status-card,
 .main-content-card {
-  animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-  opacity: 0;
+  /* Removed animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards; */
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .status-card:nth-child(1) {

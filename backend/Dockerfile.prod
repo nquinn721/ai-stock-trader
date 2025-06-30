@@ -33,7 +33,7 @@ COPY tsconfig*.json ./
 COPY nest-cli.json ./
 
 # Install all dependencies for building (including dev dependencies)
-RUN npm ci --ignore-scripts || npm install --ignore-scripts
+RUN npm install --ignore-scripts
 RUN npm cache clean --force
 
 # Copy source code
@@ -70,7 +70,7 @@ RUN groupadd -g 1001 nodejs && \
 COPY --from=builder --chown=nestjs:nodejs /app/package*.json ./
 
 # Install production dependencies and rebuild native modules for current platform
-RUN npm ci --only=production --ignore-scripts && \
+RUN npm install --production --ignore-scripts && \
     npm rebuild sharp --platform=linux --arch=x64 && \
     npm cache clean --force
 

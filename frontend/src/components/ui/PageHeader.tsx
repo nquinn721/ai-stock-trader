@@ -29,13 +29,13 @@ const PageHeader: React.FC<PageHeaderProps> = ({
   statsValue,
   actionButtons = [],
   showLiveIndicator = true,
-  sticky = false,
+  sticky = true,
   className = "",
   children,
 }) => {
   return (
     <div
-      className={`page-header dashboard-header ${sticky ? "sticky" : ""} ${className}`}
+      className={`page-header ${sticky ? "sticky" : ""} ${className}`}
       data-testid="page-header"
     >
       <div className="header-left">

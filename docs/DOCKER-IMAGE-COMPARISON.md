@@ -1,17 +1,18 @@
-# Docker Base Image Comparison for Stock Trading App
+# Docker Configuration for Stock Trading App
 
-## Current Issues with Alpine
+## Current Docker Setup
 
-- **Size**: Very small (~5MB base)
-- **Package Management**: Uses `apk` (Alpine Package Keeper)
-- **Library Compatibility**: Can have issues with native modules and AI/ML libraries
-- **Python/AI Support**: Limited, requires many build dependencies
+After cleanup, the project now uses a streamlined Docker configuration:
 
-## Recommended Docker Base Images
+**Backend**: `backend/Dockerfile.prod` (node:20-slim based)
+**Frontend**: `frontend/Dockerfile.prod` (node:18-alpine + nginx)  
+**Cloud Run**: `Dockerfile.cloudrun` (combined deployment)
 
-### 1. **Node.js Slim (RECOMMENDED)**
+## Production Docker Image
 
-**File**: `Dockerfile.node-slim`
+### **Node.js Slim Production Image**
+
+**File**: `backend/Dockerfile.prod`
 **Base**: `node:20-slim`
 
 **Pros**:
@@ -126,35 +127,26 @@ Given your dependencies (TensorFlow.js, transformers, Brain.js, ML libraries):
 
 ## Migration Steps
 
-1. **Test locally** with Node.js Slim first
-2. **Build and run** to verify all dependencies work
-3. **Performance test** with your ML workloads
-4. **Switch Cloud Run** to use new Dockerfile
-5. **Monitor** for any runtime issues
-
-## Usage Commands
+## Current Usage
 
 ```bash
-# Test Node.js Slim
-docker build -f backend/Dockerfile.node-slim -t stock-app-slim .
+# Build production backend
+docker build -f backend/Dockerfile.prod -t stock-app-backend .
 
-# Test Ubuntu
-docker build -f backend/Dockerfile.ubuntu -t stock-app-ubuntu .
+# Build production frontend
+docker build -f frontend/Dockerfile.prod -t stock-app-frontend .
 
-# Test TensorFlow optimized
-docker build -f backend/Dockerfile.tensorflow -t stock-app-tf .
-
-# Test Distroless
-docker build -f backend/Dockerfile.distroless -t stock-app-distroless .
+# Build for Cloud Run (full app)
+docker build -f Dockerfile.cloudrun -t stock-app-cloudrun .
 ```
 
-## Environment Variables Optimizations
+## Environment Variables
 
-All new Dockerfiles include:
+The production Docker configuration includes optimizations:
 
-- `NODE_OPTIONS="--max-old-space-size=X"` - Optimized memory for AI/ML
+- `NODE_OPTIONS="--max-old-space-size=4096"` - Memory optimization
 - `TFJS_BACKEND=cpu` - Force CPU backend for consistency
 - `TFJS_DISABLE_WEBGL=true` - Disable WebGL in server environment
-- `TF_CPP_MIN_LOG_LEVEL=2` - Reduce TensorFlow logging noise
+- Production-ready health checks and security settings
 
-Choose based on your priority: **Size**, **Compatibility**, **Security**, or **Performance**.
+The streamlined setup reduces maintenance overhead while providing production-ready containers.

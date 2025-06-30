@@ -189,14 +189,14 @@ import { SeedService } from './services/seed.service';
     BreakoutModule,
     MLModule,
     NotificationModule,
-    AutoTradingModule, // Re-enabled for autonomous trading
-    BehavioralFinanceModule, // Re-enabled for autonomous trading
+    AutoTradingModule, // Re-enabled - routing issue was fixed
+    BehavioralFinanceModule, // Re-enabled
     MarketScannerModule,
-    MultiAssetModule, // Re-enabled for autonomous trading
-    DataIntelligenceModule, // Re-enabled for autonomous trading
-    EconomicIntelligenceModule, // Re-enabled for autonomous trading
-    MarketMakingModule, // Re-enabled for autonomous trading
-    MacroIntelligenceModule, // Re-enabled with controller path fix
+    MultiAssetModule, // Re-enabled - routing issue was fixed
+    DataIntelligenceModule, // Re-enabled - routing issue was fixed
+    EconomicIntelligenceModule, // Re-enabled - routing issue was fixed
+    MarketMakingModule, // Re-enabled - routing issue was fixed
+    MacroIntelligenceModule, // Keep this one enabled for testing
   ],
   controllers: [AppController],
   providers: [AppService, SeedService],

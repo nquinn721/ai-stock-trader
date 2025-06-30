@@ -27,6 +27,9 @@ async function bootstrap() {
     credentials: true,
   });
 
+  // Set global API prefix
+  app.setGlobalPrefix('api');
+
   // Enable validation pipes
   app.useGlobalPipes(
     new ValidationPipe({
@@ -52,26 +55,51 @@ async function bootstrap() {
   // SwaggerModule.setup('api', app, document);
 
   // Add a simple health check endpoint for Cloud Run
+  // This responds immediately for startup probes, even if ML modules are still loading
   app.getHttpAdapter().get('/health', (req: any, res: any) => {
     res.status(200).json({
       status: 'ok',
       timestamp: new Date().toISOString(),
       uptime: process.uptime(),
+      environment: process.env.NODE_ENV || 'development',
+      memory: {
+        used: Math.round(process.memoryUsage().heapUsed / 1024 / 1024),
+        total: Math.round(process.memoryUsage().heapTotal / 1024 / 1024),
+      },
     });
   });
 
-  // Add a root endpoint for debugging
-  app.getHttpAdapter().get('/', (req: any, res: any) => {
-    res.status(200).json({
-      message: 'Stock Trading App API',
-      status: 'running',
-      timestamp: new Date().toISOString(),
-      version: '1.0.0',
-    });
-  });
+  // SPA routing support - serve index.html for non-API routes in production
+  // This approach avoids path-to-regexp errors with wildcard routes
+  if (isProduction) {
+    app.getHttpAdapter().use((req: any, res: any, next: any) => {
+      // Skip for API routes, static files, and health checks
+      if (
+        req.url.startsWith('/api') ||
+        req.url.startsWith('/socket.io') ||
+        req.url.startsWith('/health') ||
+        req.url.includes('.') // Skip files with extensions (CSS, JS, etc.)
+      ) {
+        return next();
+      }
 
-  // Catch-all handler temporarily disabled for Cloud Run deployment
-  // Will be re-enabled once path-to-regexp compatibility is resolved
+      // For all other routes, serve the React app's index.html
+      res.sendFile(join(__dirname, '..', 'public', 'index.html'));
+    });
+  }
+
+  if (!isProduction) {
+    // Development mode - show API info at root
+    app.getHttpAdapter().get('/', (req: any, res: any) => {
+      res.status(200).json({
+        message: 'Stock Trading App API - Development Mode',
+        status: 'running',
+        timestamp: new Date().toISOString(),
+        version: '1.0.0',
+        frontend: 'http://localhost:3000',
+      });
+    });
+  }
 
   const port = process.env.PORT || 8080;
   await app.listen(port, '0.0.0.0');

@@ -1,17 +1,17 @@
-import React, { useState, useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
-import "./Header.css";
 import {
-  Dashboard as DashboardIcon,
-  AutoAwesome as AutoAwesomeIcon,
   Analytics as AnalyticsIcon,
-  Search as SearchIcon,
-  SmartToy as SmartToyIcon,
+  AutoAwesome as AutoAwesomeIcon,
+  Business as BusinessIcon,
+  Dashboard as DashboardIcon,
   MonetizationOn as MonetizationOnIcon,
   Psychology as PsychologyIcon,
-  Business as BusinessIcon,
   RocketLaunch as RocketLaunchIcon,
+  Search as SearchIcon,
+  SmartToy as SmartToyIcon,
 } from "@mui/icons-material";
+import React, { useEffect, useState } from "react";
+import { Link, useLocation } from "react-router-dom";
+import "./Header.css";
 
 const Header: React.FC = () => {
   const location = useLocation();
@@ -23,11 +23,11 @@ const Header: React.FC = () => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth <= 768);
     };
-    
+
     checkMobile();
-    window.addEventListener('resize', checkMobile);
-    
-    return () => window.removeEventListener('resize', checkMobile);
+    window.addEventListener("resize", checkMobile);
+
+    return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
   const toggleMobileMenu = () => {
@@ -41,17 +41,17 @@ const Header: React.FC = () => {
   // Handle body scroll lock when mobile menu is open
   useEffect(() => {
     if (isMobileMenuOpen) {
-      document.body.classList.add('mobile-menu-open');
-      document.body.style.overflow = 'hidden';
+      document.body.classList.add("mobile-menu-open");
+      document.body.style.overflow = "hidden";
     } else {
-      document.body.classList.remove('mobile-menu-open');
-      document.body.style.overflow = '';
+      document.body.classList.remove("mobile-menu-open");
+      document.body.style.overflow = "";
     }
 
     // Cleanup function
     return () => {
-      document.body.classList.remove('mobile-menu-open');
-      document.body.style.overflow = '';
+      document.body.classList.remove("mobile-menu-open");
+      document.body.style.overflow = "";
     };
   }, [isMobileMenuOpen]);
 
@@ -59,62 +59,66 @@ const Header: React.FC = () => {
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as Element;
-      if (isMobileMenuOpen && !target.closest('.header-nav') && !target.closest('.mobile-menu-toggle')) {
+      if (
+        isMobileMenuOpen &&
+        !target.closest(".header-nav") &&
+        !target.closest(".mobile-menu-toggle")
+      ) {
         setIsMobileMenuOpen(false);
       }
     };
 
     if (isMobileMenuOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener("mousedown", handleClickOutside);
     }
 
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [isMobileMenuOpen]);
 
   const navItems = [
-    { 
-      path: "/", 
-      label: "Dashboard", 
+    {
+      path: "/",
+      label: "Dashboard",
       description: "Main dashboard overview",
-      icon: DashboardIcon 
+      icon: DashboardIcon,
     },
-    { 
-      path: "/autonomous-trading", 
-      label: "Auto Trading", 
+    {
+      path: "/autonomous-trading",
+      label: "Auto Trading",
       description: "Automated trading strategies",
-      icon: AutoAwesomeIcon 
+      icon: AutoAwesomeIcon,
     },
-    { 
-      path: "/analytics", 
-      label: "Analytics", 
+    {
+      path: "/analytics",
+      label: "Analytics",
       description: "Market analysis and insights",
-      icon: AnalyticsIcon 
+      icon: AnalyticsIcon,
     },
-    { 
-      path: "/market-scanner", 
-      label: "Market Scanner", 
+    {
+      path: "/market-scanner",
+      label: "Market Scanner",
       description: "Scan markets for opportunities",
-      icon: SearchIcon 
+      icon: SearchIcon,
     },
-    { 
-      path: "/ai-assistant", 
-      label: "AI Assistant", 
+    {
+      path: "/ai-assistant",
+      label: "AI Assistant",
       description: "AI-powered trading assistant",
-      icon: SmartToyIcon 
+      icon: SmartToyIcon,
     },
-    { 
-      path: "/market-making", 
-      label: "Market Making", 
+    {
+      path: "/market-making",
+      label: "Market Making",
       description: "Liquidity provision strategies",
-      icon: MonetizationOnIcon 
+      icon: MonetizationOnIcon,
     },
-    { 
-      path: "/behavioral-finance", 
-      label: "Behavioral Finance", 
+    {
+      path: "/behavioral-finance",
+      label: "Behavioral Finance",
       description: "Behavioral analysis tools",
-      icon: PsychologyIcon 
+      icon: PsychologyIcon,
     },
     {
       path: "/enterprise-intelligence",
@@ -137,7 +141,7 @@ const Header: React.FC = () => {
           </div>
         </div>
 
-        <nav className={`header-nav ${isMobileMenuOpen ? 'mobile-open' : ''}`}>
+        <nav className={`header-nav ${isMobileMenuOpen ? "mobile-open" : ""}`}>
           {navItems.map((item) => {
             const IconComponent = item.icon;
             return (
@@ -162,12 +166,12 @@ const Header: React.FC = () => {
 
         <div className="header-actions">
           {isMobile && (
-            <button 
+            <button
               className="mobile-menu-toggle"
               onClick={toggleMobileMenu}
               aria-label="Toggle navigation menu"
             >
-              <span className={`hamburger ${isMobileMenuOpen ? 'open' : ''}`}>
+              <span className={`hamburger ${isMobileMenuOpen ? "open" : ""}`}>
                 <span></span>
                 <span></span>
                 <span></span>

@@ -11,11 +11,13 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { observer } from "mobx-react-lite";
 import React, { useEffect, useState } from "react";
 import EmptyState from "../components/EmptyState";
+import PageHeader from "../components/ui/PageHeader";
 import { FRONTEND_API_CONFIG } from "../config/api.config";
+import { useWebSocketConnection } from "../hooks/useWebSocketConnection";
 import autoTradingService, {
   StrategyInstance,
 } from "../services/autoTradingService";
-import { usePortfolioStore } from "../stores/StoreContext";
+import { usePortfolioStore, useWebSocketStore } from "../stores/StoreContext";
 import "./AnalyticsPage.css";
 
 interface PortfolioAnalytics {
@@ -106,6 +108,11 @@ interface StrategyAnalytics {
 
 const AnalyticsPage: React.FC = observer(() => {
   const portfolioStore = usePortfolioStore();
+  const webSocketStore = useWebSocketStore();
+
+  // Ensure WebSocket connection is established
+  useWebSocketConnection();
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [portfolioAnalytics, setPortfolioAnalytics] = useState<
@@ -453,13 +460,13 @@ const AnalyticsPage: React.FC = observer(() => {
   return (
     <div className="analytics-page">
       {/* Page Header */}
-      <div className="page-header">
-        <h1>Portfolio Analytics</h1>
-        <p>
-          Comprehensive analytics across {portfolioStore.portfolios.length}{" "}
-          portfolios
-        </p>
-      </div>
+      <PageHeader
+        title="Portfolio Analytics"
+        showLiveIndicator={true}
+        isConnected={webSocketStore.isConnected}
+        sticky={true}
+        statsValue={`${portfolioStore.portfolios.length} portfolios`}
+      />
 
       {/* Overview Cards */}
       {aggregatedData && (

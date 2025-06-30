@@ -38,12 +38,14 @@ import {
   StatusChip,
   TradingButton,
 } from "../components/ui";
+import { useWebSocketConnection } from "../hooks/useWebSocketConnection";
 import autoTradingService, {
   DeploymentConfig,
   Portfolio,
   StrategyInstance,
 } from "../services/autoTradingService";
 import { stockStore } from "../stores/StockStore";
+import { useWebSocketStore } from "../stores/StoreContext";
 import "./AutonomousTradingPage.css";
 
 interface TabPanelProps {
@@ -93,12 +95,19 @@ interface AutonomousTradingPageProps {
 }
 
 const AutonomousTradingPage: React.FC<AutonomousTradingPageProps> = observer(
-  ({ onNavigateBack, currentTime = new Date(), isConnected = true }) => {
+  ({ onNavigateBack, currentTime = new Date(), isConnected = false }) => {
+    const webSocketStore = useWebSocketStore();
+
+    // Ensure WebSocket connection is established
+    useWebSocketConnection();
+
     const [activeTab, setActiveTab] = useState(0);
     const [portfolios, setPortfolios] = useState<Portfolio[]>([]);
     const [portfolioStatuses, setPortfolioStatuses] = useState<
       Record<string, PortfolioTradingStatus>
     >({});
+
+    // Get real connection status from WebSocket store
     const [globalTradingActive, setGlobalTradingActive] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -775,7 +784,7 @@ const AutonomousTradingPage: React.FC<AutonomousTradingPageProps> = observer(
         <PageHeader
           title="Autonomous Trading System"
           currentTime={currentTime}
-          isConnected={isConnected}
+          isConnected={webSocketStore.isConnected}
           showLiveIndicator={true}
           sticky={true}
           statsValue={`${Object.values(portfolioStatuses).filter((s) => s.isActive).length}/${portfolios.length} active • ${Object.values(portfolioStatuses).reduce((acc, status) => acc + status.activeStrategies.length, 0)} strategies running`}
@@ -1022,7 +1031,7 @@ const AutonomousTradingPage: React.FC<AutonomousTradingPageProps> = observer(
           >
             <EconomicIntelligenceDashboard
               currentTime={currentTime}
-              isConnected={isConnected}
+              isConnected={webSocketStore.isConnected}
               onNavigateBack={() => setShowEconomicIntelligence(false)}
             />
           </Dialog>

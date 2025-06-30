@@ -1,10 +1,18 @@
-import React from "react";
 import { Psychology } from "@mui/icons-material";
-import PageHeader from "../components/ui/PageHeader";
+import { observer } from "mobx-react-lite";
+import React from "react";
 import TradingAssistantChat from "../components/TradingAssistantChat";
+import PageHeader from "../components/ui/PageHeader";
+import { useWebSocketConnection } from "../hooks/useWebSocketConnection";
+import { useWebSocketStore } from "../stores/StoreContext";
 import "./AIAssistantPage.css";
 
-const AIAssistantPage: React.FC = () => {
+const AIAssistantPage: React.FC = observer(() => {
+  const webSocketStore = useWebSocketStore();
+
+  // Ensure WebSocket connection is established
+  useWebSocketConnection();
+
   const actionButtons = [
     {
       icon: <Psychology />,
@@ -23,6 +31,8 @@ const AIAssistantPage: React.FC = () => {
       <PageHeader
         title="AI Trading Assistant"
         showLiveIndicator={true}
+        isConnected={webSocketStore.isConnected}
+        sticky={true}
         actionButtons={actionButtons}
         statsValue="GPT-4 Enabled"
         className="ai-assistant-header"
@@ -32,6 +42,6 @@ const AIAssistantPage: React.FC = () => {
       </div>
     </div>
   );
-};
+});
 
 export default AIAssistantPage;

@@ -4,7 +4,8 @@
   min-height: 100vh;
   background: var(--trading-bg-gradient-dark);
   background-attachment: fixed;
-  padding: var(--trading-spacing-page);
+  padding: 0 var(--trading-spacing-page) var(--trading-spacing-page)
+    var(--trading-spacing-page);
   font-family: var(--trading-font-sans);
   color: var(--trading-text-primary);
   width: 100%;

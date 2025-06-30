@@ -29,24 +29,20 @@
 # Test current setup
 npm run prod:build
 
-# Test new Node.js Slim (recommended)
-docker build -f backend/Dockerfile.node-slim -t stock-app-slim .
-docker run -p 8001:8000 stock-app-slim
+# Build production backend
+docker build -f backend/Dockerfile.prod -t stock-app-backend .
+docker run -p 8001:8000 stock-app-backend
 
-# Test Ubuntu (if Slim has issues)
-docker build -f backend/Dockerfile.ubuntu -t stock-app-ubuntu .
-docker run -p 8002:8000 stock-app-ubuntu
-
-# Test Distroless (maximum security)
-docker build -f backend/Dockerfile.distroless -t stock-app-distroless .
-docker run -p 8003:8000 stock-app-distroless
+# Build production frontend
+docker build -f frontend/Dockerfile.prod -t stock-app-frontend .
+docker run -p 3001:80 stock-app-frontend
 ```
 
 ## Deployment Changes
 
 ### Cloud Run (Already Updated ✅)
 
-Your main `Dockerfile` now uses Node.js Slim. Deploy normally:
+Your main `Dockerfile.cloudrun` handles full deployment:
 
 ```bash
 ./scripts/deploy-cloud-run.sh
@@ -54,19 +50,23 @@ Your main `Dockerfile` now uses Node.js Slim. Deploy normally:
 
 ### Local Production
 
-Update `docker-compose.prod.yml` to use new Dockerfile:
+Use the production Docker files:
 
 ```yaml
 services:
   backend:
     build:
       context: .
-      dockerfile: backend/Dockerfile.node-slim # Change this line
+      dockerfile: backend/Dockerfile.prod
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile.prod
 ```
 
 ## Performance Optimization
 
-All new Dockerfiles include these optimizations:
+The production Dockerfiles include these optimizations:
 
 ```dockerfile
 # Memory optimization for AI/ML workloads

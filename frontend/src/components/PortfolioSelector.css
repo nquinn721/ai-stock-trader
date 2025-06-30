@@ -149,8 +149,9 @@
   right: 1rem;
   color: var(--success-color, #10b981);
   font-size: 1.25rem;
-  opacity: 0;
-  animation: fadeInScale 0.3s ease forwards;
+  opacity: 1;
+  /* Removed animation: fadeInScale 0.3s ease forwards; */
+  transform: scale(1);
 }
 
 .portfolio-actions {

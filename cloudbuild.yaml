@@ -56,6 +56,8 @@ steps:
         "0",
         "--max-instances",
         "3",
+        "--execution-environment",
+        "gen2",
         "--set-env-vars",
         "NODE_ENV=production,TFJS_BACKEND=cpu,TFJS_DISABLE_WEBGL=true,DATABASE_HOST=35.238.63.253,DATABASE_PORT=3306,DATABASE_USERNAME=stocktrader,DATABASE_PASSWORD=secure_trading_password_2024,DATABASE_NAME=stocktrading",
         "--labels",
