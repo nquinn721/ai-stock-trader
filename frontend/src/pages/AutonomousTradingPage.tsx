@@ -28,11 +28,11 @@ import { observer } from "mobx-react-lite";
 import React, { useEffect, useState } from "react";
 import StockCard from "../components/StockCard";
 import EconomicIntelligenceDashboard from "../components/macro-intelligence/EconomicIntelligenceDashboard";
+import OrderExecutionDashboard from "../components/order/OrderExecutionDashboard";
 import {
   ContentCard,
   LoadingState,
   PageHeader,
-  SectionHeader,
   StatusChip,
   TradingButton,
 } from "../components/ui";
@@ -737,9 +737,42 @@ const AutonomousTradingPage: React.FC<AutonomousTradingPageProps> = observer(
 
     const renderEconomicIntelligenceTab = () => (
       <div className="economic-intelligence-tab">
-        <EconomicIntelligenceDashboard />
+        <ContentCard
+          title="Economic Intelligence & Macro Analysis"
+          subtitle="Global market conditions and economic indicators"
+          variant="gradient"
+          padding="lg"
+          className="economic-intelligence-header"
+          headerActions={
+            <div className="header-actions">
+              <StatusChip status="success" label="Data Live" animated={true} />
+              <TradingButton
+                variant="secondary"
+                size="sm"
+                onClick={() => {
+                  /* Refresh economic data */
+                }}
+                disabled={loading}
+              >
+                Refresh
+              </TradingButton>
+            </div>
+          }
+        >
+          <EconomicIntelligenceDashboard />
+        </ContentCard>
       </div>
     );
+
+    const renderOrderManagementTab = () => {
+      const portfolioIds = portfolios.map((p) => Number(p.id));
+
+      return (
+        <div className="order-management-tab">
+          <OrderExecutionDashboard portfolioIds={portfolioIds} />
+        </div>
+      );
+    };
 
     const renderAnalyticsTab = () => (
       <ContentCard
@@ -768,10 +801,11 @@ const AutonomousTradingPage: React.FC<AutonomousTradingPageProps> = observer(
 
       return (
         <div className="live-market-tab">
-          <SectionHeader
+          <ContentCard
             title="Live Market Data"
             subtitle="Real-time stock prices and trading signals"
             variant="gradient"
+            padding="lg"
             className="live-market-header"
             headerActions={
               <div className="header-actions">
@@ -815,7 +849,7 @@ const AutonomousTradingPage: React.FC<AutonomousTradingPageProps> = observer(
                 ))}
               </div>
             )}
-          </SectionHeader>
+          </ContentCard>
         </div>
       );
     };
@@ -860,8 +894,9 @@ const AutonomousTradingPage: React.FC<AutonomousTradingPageProps> = observer(
                 <Tab label="Portfolios" {...a11yProps(0)} />
                 <Tab label="Live Market Data" {...a11yProps(1)} />
                 <Tab label="Economic Intelligence" {...a11yProps(2)} />
-                <Tab label="Analytics" {...a11yProps(3)} />
-                <Tab label="Settings" {...a11yProps(4)} />
+                <Tab label="Order Management" {...a11yProps(3)} />
+                <Tab label="Analytics" {...a11yProps(4)} />
+                <Tab label="Settings" {...a11yProps(5)} />
               </Tabs>
 
               <TabPanel value={activeTab} index={0}>
@@ -877,10 +912,14 @@ const AutonomousTradingPage: React.FC<AutonomousTradingPageProps> = observer(
               </TabPanel>
 
               <TabPanel value={activeTab} index={3}>
-                {renderAnalyticsTab()}
+                {renderOrderManagementTab()}
               </TabPanel>
 
               <TabPanel value={activeTab} index={4}>
+                {renderAnalyticsTab()}
+              </TabPanel>
+
+              <TabPanel value={activeTab} index={5}>
                 {renderSettingsTab()}
               </TabPanel>
             </div>

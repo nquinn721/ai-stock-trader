@@ -26,31 +26,66 @@
 .tabs-container {
   margin-bottom: 32px;
   position: relative;
+  padding: 4px;
 }
 
-.main-tabs {
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+.tabs-container::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(59, 130, 246, 0.03) 0%,
+    transparent 70%
+  );
+  border-radius: 20px;
+  z-index: 0;
+}
+
+.dashboard-tabs {
+  border-bottom: none;
   background: linear-gradient(
     135deg,
-    rgba(15, 23, 42, 0.9) 0%,
-    rgba(30, 41, 59, 0.8) 100%
+    rgba(15, 23, 42, 0.98) 0%,
+    rgba(30, 41, 59, 0.96) 100%
   );
-  border-radius: var(--trading-radius-lg);
+  border-radius: 16px;
   padding: 8px;
   box-shadow:
-    0 4px 16px rgba(0, 0, 0, 0.3),
+    0 4px 20px rgba(0, 0, 0, 0.25),
     0 2px 8px rgba(59, 130, 246, 0.1),
     inset 0 1px 0 rgba(255, 255, 255, 0.05);
   backdrop-filter: blur(20px);
-  border: 1px solid rgba(59, 130, 246, 0.2);
+  border: 1px solid rgba(59, 130, 246, 0.15);
+  position: relative;
+  overflow: hidden;
 }
 
-.main-tabs .MuiTab-root {
-  color: var(--trading-text-secondary);
+.dashboard-tabs::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(59, 130, 246, 0.03),
+    transparent
+  );
+  animation: shimmer 4s ease-in-out infinite;
+}
+
+.dashboard-tabs .MuiTab-root {
+  color: rgba(148, 163, 184, 0.9);
   font-weight: 600;
   text-transform: none;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  border-radius: var(--trading-radius-md);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 12px;
   margin: 0 4px;
   min-height: 48px;
   padding: 12px 24px;
@@ -61,9 +96,10 @@
   backdrop-filter: blur(10px);
   font-size: 14px;
   letter-spacing: 0.5px;
+  z-index: 1;
 }
 
-.main-tabs .MuiTab-root::before {
+.dashboard-tabs .MuiTab-root::before {
   content: "";
   position: absolute;
   top: 0;
@@ -72,108 +108,144 @@
   bottom: 0;
   background: linear-gradient(
     135deg,
-    rgba(59, 130, 246, 0.1) 0%,
-    rgba(139, 92, 246, 0.08) 50%,
-    rgba(16, 185, 129, 0.06) 100%
+    rgba(59, 130, 246, 0.08) 0%,
+    rgba(139, 92, 246, 0.06) 50%,
+    rgba(16, 185, 129, 0.04) 100%
   );
   opacity: 0;
-  transition: opacity 0.3s ease;
-  border-radius: var(--trading-radius-md);
+  transition: all 0.3s ease;
+  border-radius: 11px;
 }
 
-.main-tabs .MuiTab-root:hover {
+.dashboard-tabs .MuiTab-root:hover {
   background: linear-gradient(
     135deg,
-    rgba(59, 130, 246, 0.15) 0%,
-    rgba(139, 92, 246, 0.12) 50%,
-    rgba(16, 185, 129, 0.1) 100%
+    rgba(59, 130, 246, 0.12) 0%,
+    rgba(139, 92, 246, 0.1) 50%,
+    rgba(16, 185, 129, 0.08) 100%
   );
-  color: var(--trading-text-primary);
-  border-color: rgba(59, 130, 246, 0.3);
+  color: rgba(255, 255, 255, 0.95);
+  border-color: rgba(59, 130, 246, 0.25);
   transform: translateY(-2px);
   box-shadow:
-    0 4px 12px rgba(59, 130, 246, 0.2),
-    0 2px 6px rgba(139, 92, 246, 0.15),
+    0 8px 20px rgba(59, 130, 246, 0.15),
+    0 4px 12px rgba(139, 92, 246, 0.1),
     inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
-.main-tabs .MuiTab-root:hover::before {
+.dashboard-tabs .MuiTab-root:hover::before {
   opacity: 1;
 }
 
-.main-tabs .MuiTab-root.Mui-selected {
+.dashboard-tabs .MuiTab-root.Mui-selected {
   background: linear-gradient(
     135deg,
     rgba(59, 130, 246, 0.9) 0%,
-    rgba(99, 102, 241, 0.95) 25%,
-    rgba(139, 92, 246, 0.9) 50%,
-    rgba(147, 51, 234, 0.85) 100%
+    rgba(99, 102, 241, 0.85) 30%,
+    rgba(139, 92, 246, 0.8) 70%,
+    rgba(16, 185, 129, 0.75) 100%
   ) !important;
   color: white !important;
   font-weight: 700;
-  border-color: rgba(59, 130, 246, 0.6);
+  border-color: rgba(59, 130, 246, 0.4);
   box-shadow:
-    0 6px 20px rgba(59, 130, 246, 0.4),
-    0 3px 10px rgba(139, 92, 246, 0.3),
-    0 1px 3px rgba(147, 51, 234, 0.2),
+    0 12px 28px rgba(59, 130, 246, 0.3),
+    0 6px 16px rgba(139, 92, 246, 0.25),
+    0 3px 8px rgba(147, 51, 234, 0.2),
     inset 0 1px 0 rgba(255, 255, 255, 0.2);
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
   transform: translateY(-3px);
-  animation: tab-glow 2s ease-in-out infinite;
+  animation: selected-tab-glow 2.5s ease-in-out infinite;
 }
 
-.main-tabs .MuiTab-root.Mui-selected::after {
+.dashboard-tabs .MuiTab-root.Mui-selected::before {
+  opacity: 1;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.1) 0%,
+    rgba(255, 255, 255, 0.05) 50%,
+    rgba(255, 255, 255, 0.02) 100%
+  );
+}
+
+.dashboard-tabs .MuiTab-root.Mui-selected::after {
   content: "";
   position: absolute;
   bottom: 0;
   left: 50%;
   transform: translateX(-50%);
-  width: 40px;
-  height: 3px;
+  width: 60%;
+  height: 2px;
   background: linear-gradient(
     90deg,
     transparent,
-    rgba(255, 255, 255, 0.8),
+    rgba(255, 255, 255, 0.6),
     transparent
   );
-  border-radius: 2px;
+  border-radius: 1px;
   animation: pulse-line 2s ease-in-out infinite;
 }
 
-@keyframes tab-glow {
+@keyframes selected-tab-glow {
   0%,
   100% {
     box-shadow:
-      0 6px 20px rgba(59, 130, 246, 0.4),
-      0 3px 10px rgba(139, 92, 246, 0.3),
+      0 12px 28px rgba(59, 130, 246, 0.3),
+      0 6px 16px rgba(139, 92, 246, 0.25),
+      0 3px 8px rgba(147, 51, 234, 0.2),
       inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    filter: brightness(1);
   }
   50% {
     box-shadow:
-      0 8px 25px rgba(59, 130, 246, 0.5),
-      0 4px 15px rgba(139, 92, 246, 0.4),
-      0 0 0 1px rgba(59, 130, 246, 0.3),
+      0 16px 36px rgba(59, 130, 246, 0.4),
+      0 8px 20px rgba(139, 92, 246, 0.3),
+      0 4px 12px rgba(147, 51, 234, 0.25),
+      0 0 0 1px rgba(16, 185, 129, 0.2),
       inset 0 1px 0 rgba(255, 255, 255, 0.25);
+    filter: brightness(1.05);
+  }
+}
+
+@keyframes shimmer {
+  0%,
+  100% {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  50% {
+    transform: translateX(100%);
+    opacity: 0.5;
   }
 }
 
 @keyframes pulse-line {
   0%,
   100% {
-    opacity: 0.5;
+    opacity: 0.4;
     transform: translateX(-50%) scaleX(0.8);
   }
   50% {
-    opacity: 1;
-    transform: translateX(-50%) scaleX(1.2);
+    opacity: 0.8;
+    transform: translateX(-50%) scaleX(1.1);
   }
 }
 
-.main-tabs .MuiTabs-indicator {
+@keyframes tab-glow {
+  0%,
+  100% {
+    filter: brightness(1) saturate(1);
+  }
+  50% {
+    filter: brightness(1.1) saturate(1.2);
+  }
+}
+
+.dashboard-tabs .MuiTabs-indicator {
   display: none;
 }
 
-.main-tabs .MuiTabs-flexContainer {
+.dashboard-tabs .MuiTabs-flexContainer {
   gap: 8px;
 }
 
@@ -482,9 +554,24 @@
   gap: 0.75rem;
 }
 
-.stock-grid {
+.live-market-tab .stock-grid {
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 1rem;
+}
+
+/* Economic Intelligence Tab */
+.economic-intelligence-tab .header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.economic-intelligence-tab .economic-intelligence-dashboard {
+  margin-top: 0;
+}
+
+.economic-intelligence-tab .dashboard-content {
+  padding: 0;
 }
 
 /* ==========================================================================
@@ -492,6 +579,32 @@
    ========================================================================== */
 
 @media (max-width: 768px) {
+  .tabs-container {
+    margin-bottom: 24px;
+    padding: 4px;
+  }
+
+  .dashboard-tabs {
+    padding: 6px;
+    border-radius: 12px;
+  }
+
+  .dashboard-tabs .MuiTab-root {
+    min-height: 44px;
+    padding: 10px 18px;
+    font-size: 13px;
+    margin: 0 2px;
+    letter-spacing: 0.3px;
+  }
+
+  .dashboard-tabs .MuiTab-root:hover {
+    transform: translateY(-1px);
+  }
+
+  .dashboard-tabs .MuiTab-root.Mui-selected {
+    transform: translateY(-2px);
+  }
+
   .content-grid {
     grid-template-columns: 1fr;
     gap: 1.5rem;

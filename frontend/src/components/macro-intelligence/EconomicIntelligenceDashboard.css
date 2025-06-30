@@ -1,9 +1,6 @@
 @import "../../shared-styles.css";
 
-.economic-intelligence-dashboard {
-  background: var(--trading-bg-gradient-dark);
-  min-height: 100vh;
-}
+/* Economic Intelligence Dashboard - Inherits styling from parent ContentCard */
 
 .economic-intelligence-dashboard .dashboard-content {
   gap: var(--theme-space-6);

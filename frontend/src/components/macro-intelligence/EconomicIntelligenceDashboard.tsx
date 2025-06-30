@@ -27,7 +27,6 @@ import macroIntelligenceService, {
 import "../../shared-styles.css";
 import ContentCard from "../ui/ContentCard";
 import LoadingState from "../ui/LoadingState";
-import SectionHeader from "../ui/SectionHeader";
 import StatusChip from "../ui/StatusChip";
 import "./EconomicIntelligenceDashboard.css";
 
@@ -671,54 +670,6 @@ const EconomicIntelligenceDashboard: React.FC<
 
   return (
     <div className="economic-intelligence-dashboard">
-      <SectionHeader
-        title="Economic Intelligence & Macro Analysis"
-        subtitle={`${selectedCountry} • Health: ${economicData?.overallHealth || 0}/100`}
-        variant="gradient"
-        className="economic-intelligence-header"
-        headerActions={
-          <div className="header-actions">
-            <StatusChip
-              status={economicData ? "success" : "inactive"}
-              label={economicData ? "Data Loaded" : "Loading..."}
-              animated={loading}
-            />
-            <Button
-              variant="outlined"
-              size="small"
-              onClick={loadEconomicData}
-              disabled={loading}
-              startIcon={<Refresh />}
-              sx={{
-                borderColor: 'rgba(59, 130, 246, 0.5)',
-                color: 'var(--trading-text-primary)',
-                '&:hover': {
-                  borderColor: 'rgba(59, 130, 246, 0.8)',
-                  backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                }
-              }}
-            >
-              Refresh
-            </Button>
-            <Button
-              variant="outlined"
-              size="small"
-              onClick={() => onNavigateBack ? onNavigateBack() : (window.location.href = "/")}
-              sx={{
-                borderColor: 'rgba(107, 114, 128, 0.5)',
-                color: 'var(--trading-text-secondary)',
-                '&:hover': {
-                  borderColor: 'rgba(107, 114, 128, 0.8)',
-                  backgroundColor: 'rgba(107, 114, 128, 0.1)',
-                }
-              }}
-            >
-              ← Back
-            </Button>
-          </div>
-        }
-      />
-
       <div className="dashboard-content">
         {error && (
           <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError(null)}>

@@ -1,0 +1,230 @@
+/* Order Execution Dashboard Styles */
+.order-management-tab {
+  width: 100%;
+}
+
+.order-execution-dashboard {
+  width: 100%;
+  padding: var(--theme-space-6);
+}
+
+.dashboard-header {
+  margin-bottom: var(--theme-space-6);
+}
+
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--theme-space-4);
+  margin-bottom: var(--theme-space-6);
+}
+
+.metric-card {
+  background: var(--trading-card-bg);
+  border: 1px solid var(--trading-border-color);
+  border-radius: var(--theme-border-radius);
+  padding: var(--theme-space-4);
+  transition: all 0.3s ease;
+}
+
+.metric-card:hover {
+  border-color: var(--trading-primary-500);
+  box-shadow: 0 4px 12px rgba(0, 123, 255, 0.15);
+}
+
+.metric-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--theme-space-3);
+}
+
+.metric-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--trading-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.metric-value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--trading-text-primary);
+  margin-bottom: var(--theme-space-2);
+}
+
+.metric-change {
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.metric-change.positive {
+  color: var(--trading-success-500);
+}
+
+.metric-change.negative {
+  color: var(--trading-danger-500);
+}
+
+.metric-change.neutral {
+  color: var(--trading-text-secondary);
+}
+
+.pipeline-status {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: var(--theme-space-3);
+  margin-top: var(--theme-space-4);
+}
+
+.pipeline-stage {
+  text-align: center;
+  padding: var(--theme-space-3);
+  background: var(--trading-surface-dark);
+  border-radius: var(--theme-border-radius);
+  border: 1px solid var(--trading-border-color);
+}
+
+.pipeline-stage.active {
+  border-color: var(--trading-primary-500);
+  background: rgba(0, 123, 255, 0.1);
+}
+
+.pipeline-count {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--trading-text-primary);
+  margin-bottom: var(--theme-space-1);
+}
+
+.pipeline-label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--trading-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.charts-section {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: var(--theme-space-6);
+  margin-top: var(--theme-space-6);
+}
+
+.chart-card {
+  background: var(--trading-card-bg);
+  border: 1px solid var(--trading-border-color);
+  border-radius: var(--theme-border-radius);
+  padding: var(--theme-space-5);
+}
+
+.chart-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--trading-text-primary);
+  margin-bottom: var(--theme-space-4);
+  display: flex;
+  align-items: center;
+  gap: var(--theme-space-2);
+}
+
+.performance-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--theme-space-4);
+  margin-top: var(--theme-space-4);
+}
+
+.summary-item {
+  text-align: center;
+  padding: var(--theme-space-3);
+  background: var(--trading-surface-dark);
+  border-radius: var(--theme-border-radius);
+}
+
+.summary-value {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--trading-text-primary);
+  margin-bottom: var(--theme-space-1);
+}
+
+.summary-label {
+  font-size: 0.875rem;
+  color: var(--trading-text-secondary);
+  font-weight: 500;
+}
+
+.error-state {
+  text-align: center;
+  padding: var(--theme-space-6);
+  color: var(--trading-danger-500);
+}
+
+.loading-state {
+  text-align: center;
+  padding: var(--theme-space-6);
+  color: var(--trading-text-secondary);
+}
+
+.refresh-indicator {
+  display: flex;
+  align-items: center;
+  gap: var(--theme-space-2);
+  font-size: 0.875rem;
+  color: var(--trading-text-secondary);
+}
+
+.status-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: var(--theme-space-2);
+}
+
+.status-indicator.success {
+  background-color: var(--trading-success-500);
+}
+
+.status-indicator.warning {
+  background-color: var(--trading-warning-500);
+}
+
+.status-indicator.danger {
+  background-color: var(--trading-danger-500);
+}
+
+.status-indicator.inactive {
+  background-color: var(--trading-text-disabled);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .metrics-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .charts-section {
+    grid-template-columns: 1fr;
+  }
+  
+  .pipeline-status {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .performance-summary {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .pipeline-status {
+    grid-template-columns: 1fr;
+  }
+  
+  .performance-summary {
+    grid-template-columns: 1fr;
+  }
+}
