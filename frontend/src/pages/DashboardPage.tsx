@@ -370,6 +370,57 @@ const DashboardPage: React.FC = observer(() => {
           </div>
         </div>
 
+        {/* Enhanced Top Performers Section */}
+        {marketAnalytics.topGainer && marketAnalytics.topLoser && (
+          <div className="dashboard-grid">
+            <div className="dashboard-card performance-card slide-up">
+              <div className="card-header">
+                <div className="card-title">
+                  <FontAwesomeIcon
+                    icon={faArrowUp}
+                    className="card-title-icon trading-bull"
+                  />
+                  Top Gainer
+                </div>
+                <div className="card-actions">
+                  <span className="signal-badge buy">
+                    +{marketAnalytics.topGainer.changePercent?.toFixed(2)}%
+                  </span>
+                </div>
+              </div>
+              <div className="stat-value">
+                {marketAnalytics.topGainer.symbol}
+              </div>
+              <div className="card-subtitle">
+                ${marketAnalytics.topGainer.currentPrice?.toFixed(2)}
+              </div>
+            </div>
+
+            <div className="dashboard-card alert-card slide-up">
+              <div className="card-header">
+                <div className="card-title">
+                  <FontAwesomeIcon
+                    icon={faArrowDown}
+                    className="card-title-icon trading-bear"
+                  />
+                  Top Loser
+                </div>
+                <div className="card-actions">
+                  <span className="signal-badge sell">
+                    {marketAnalytics.topLoser.changePercent?.toFixed(2)}%
+                  </span>
+                </div>
+              </div>
+              <div className="stat-value">
+                {marketAnalytics.topLoser.symbol}
+              </div>
+              <div className="card-subtitle">
+                ${marketAnalytics.topLoser.currentPrice?.toFixed(2)}
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Enhanced Market Data Section */}
         <div className="dashboard-card slide-up dashboard-section-full">
           <div className="card-header">
@@ -422,57 +473,6 @@ const DashboardPage: React.FC = observer(() => {
             </div>
           )}
         </div>
-
-        {/* Enhanced Top Performers Section */}
-        {marketAnalytics.topGainer && marketAnalytics.topLoser && (
-          <div className="dashboard-grid">
-            <div className="dashboard-card performance-card slide-up">
-              <div className="card-header">
-                <div className="card-title">
-                  <FontAwesomeIcon
-                    icon={faArrowUp}
-                    className="card-title-icon trading-bull"
-                  />
-                  Top Gainer
-                </div>
-                <div className="card-actions">
-                  <span className="signal-badge buy">
-                    +{marketAnalytics.topGainer.changePercent?.toFixed(2)}%
-                  </span>
-                </div>
-              </div>
-              <div className="stat-value">
-                {marketAnalytics.topGainer.symbol}
-              </div>
-              <div className="card-subtitle">
-                ${marketAnalytics.topGainer.currentPrice?.toFixed(2)}
-              </div>
-            </div>
-
-            <div className="dashboard-card alert-card slide-up">
-              <div className="card-header">
-                <div className="card-title">
-                  <FontAwesomeIcon
-                    icon={faArrowDown}
-                    className="card-title-icon trading-bear"
-                  />
-                  Top Loser
-                </div>
-                <div className="card-actions">
-                  <span className="signal-badge sell">
-                    {marketAnalytics.topLoser.changePercent?.toFixed(2)}%
-                  </span>
-                </div>
-              </div>
-              <div className="stat-value">
-                {marketAnalytics.topLoser.symbol}
-              </div>
-              <div className="card-subtitle">
-                ${marketAnalytics.topLoser.currentPrice?.toFixed(2)}
-              </div>
-            </div>
-          </div>
-        )}
       </div>
 
       {/* Portfolio Details Modal */}
