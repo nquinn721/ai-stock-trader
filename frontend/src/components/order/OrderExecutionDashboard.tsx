@@ -20,33 +20,22 @@
 import {
   Assessment,
   AutoGraph,
+  BarChart,
   CheckCircle,
   Error,
   HourglassEmpty,
   Schedule,
-  TrendingUp,
-  BarChart,
-  PieChart,
   Timeline,
+  TrendingUp,
 } from "@mui/icons-material";
-import {
-  Box,
-  Card,
-  CardContent,
-  Typography,
-  LinearProgress,
-  Grid,
-  Chip,
-  Alert,
-} from "@mui/material";
+import { Alert, Box, Chip, LinearProgress, Typography } from "@mui/material";
 import React, { useEffect, useState } from "react";
-import { ContentCard, LoadingState, StatusChip, TradingButton } from "../ui";
 import orderManagementService, {
   DailyOrderSummary,
   OrderExecutionMetrics,
   ProcessingStatus,
-  OrderStatistics,
 } from "../../services/orderManagementService";
+import { ContentCard, LoadingState, StatusChip, TradingButton } from "../ui";
 import "./OrderExecutionDashboard.css";
 
 interface OrderExecutionDashboardProps {
@@ -68,8 +57,11 @@ const OrderExecutionDashboard: React.FC<OrderExecutionDashboardProps> = ({
 }) => {
   const [metrics, setMetrics] = useState<OrderExecutionMetrics[]>([]);
   const [aggregatedMetrics, setAggregatedMetrics] = useState<any>(null);
-  const [processingStatus, setProcessingStatus] = useState<ProcessingStatus | null>(null);
-  const [todaysSummaries, setTodaysSummaries] = useState<DailyOrderSummary[]>([]);
+  const [processingStatus, setProcessingStatus] =
+    useState<ProcessingStatus | null>(null);
+  const [todaysSummaries, setTodaysSummaries] = useState<DailyOrderSummary[]>(
+    []
+  );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
@@ -94,35 +86,35 @@ const OrderExecutionDashboard: React.FC<OrderExecutionDashboardProps> = ({
   const loadOrderData = async () => {
     try {
       setError(null);
-      
+
       // Load data in parallel
-      const [
-        portfolioMetrics,
-        aggregated,
-        status,
-        summaries,
-      ] = await Promise.all([
-        Promise.all(portfolioIds.map(id => 
-          orderManagementService.getOrderExecutionMetrics(id)
-        )),
-        orderManagementService.getAllPortfoliosMetrics(portfolioIds),
-        orderManagementService.getProcessingStatus(),
-        Promise.all(portfolioIds.map(id => 
-          orderManagementService.getTodayOrderSummary(id)
-        )),
-      ]);
+      const [portfolioMetrics, aggregated, status, summaries] =
+        await Promise.all([
+          Promise.all(
+            portfolioIds.map((id) =>
+              orderManagementService.getOrderExecutionMetrics(id)
+            )
+          ),
+          orderManagementService.getAllPortfoliosMetrics(portfolioIds),
+          orderManagementService.getProcessingStatus(),
+          Promise.all(
+            portfolioIds.map((id) =>
+              orderManagementService.getTodayOrderSummary(id)
+            )
+          ),
+        ]);
 
       setMetrics(portfolioMetrics);
       setAggregatedMetrics(aggregated);
       setProcessingStatus(status);
       setTodaysSummaries(summaries);
-      
+
       // Update pipeline status based on metrics
       updatePipelineStatus(portfolioMetrics);
-      
+
       setLastUpdate(new Date());
     } catch (err: any) {
-      console.error('Error loading order data:', err);
+      console.error("Error loading order data:", err);
       setError(`Failed to load order data: ${err.message}`);
     } finally {
       setLoading(false);
@@ -135,21 +127,25 @@ const OrderExecutionDashboard: React.FC<OrderExecutionDashboardProps> = ({
       triggered: 0, // Would come from real-time data
       executing: 0, // Would come from real-time data
       completed: metrics.reduce((sum, m) => sum + m.executedOrdersToday, 0),
-      failed: metrics.reduce((sum, m) => sum + (m.totalOrdersToday - m.executedOrdersToday - m.pendingOrders), 0),
+      failed: metrics.reduce(
+        (sum, m) =>
+          sum + (m.totalOrdersToday - m.executedOrdersToday - m.pendingOrders),
+        0
+      ),
     };
-    
+
     setPipelineStatus(status);
   };
 
   const formatCurrency = (amount: number): string => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
     }).format(amount);
   };
 
   const formatNumber = (num: number): string => {
-    return new Intl.NumberFormat('en-US').format(num);
+    return new Intl.NumberFormat("en-US").format(num);
   };
 
   const formatTime = (dateString: string): string => {
@@ -182,8 +178,10 @@ const OrderExecutionDashboard: React.FC<OrderExecutionDashboardProps> = ({
     );
   }
 
-  const totalOrders = pipelineStatus.pending + pipelineStatus.completed + pipelineStatus.failed;
-  const completionRate = totalOrders > 0 ? (pipelineStatus.completed / totalOrders) * 100 : 0;
+  const totalOrders =
+    pipelineStatus.pending + pipelineStatus.completed + pipelineStatus.failed;
+  const completionRate =
+    totalOrders > 0 ? (pipelineStatus.completed / totalOrders) * 100 : 0;
 
   return (
     <div className="order-execution-dashboard">
@@ -192,14 +190,14 @@ const OrderExecutionDashboard: React.FC<OrderExecutionDashboardProps> = ({
         <div className="status-section">
           <StatusChip
             status={processingStatus?.isValidTradingDay ? "success" : "warning"}
-            label={`Market ${processingStatus?.marketStatus || 'Unknown'}`}
+            label={`Market ${processingStatus?.marketStatus || "Unknown"}`}
             animated={processingStatus?.isValidTradingDay}
           />
           <Typography variant="body2" color="text.secondary">
             Last updated: {lastUpdate.toLocaleTimeString()}
           </Typography>
         </div>
-        
+
         <TradingButton
           variant="secondary"
           size="sm"
@@ -295,8 +293,8 @@ const OrderExecutionDashboard: React.FC<OrderExecutionDashboardProps> = ({
             <Typography variant="body2" gutterBottom>
               Completion Rate: {completionRate.toFixed(1)}%
             </Typography>
-            <LinearProgress 
-              variant="determinate" 
+            <LinearProgress
+              variant="determinate"
               value={completionRate}
               sx={{ height: 8, borderRadius: 4 }}
             />
@@ -320,7 +318,8 @@ const OrderExecutionDashboard: React.FC<OrderExecutionDashboardProps> = ({
                 <TrendingUp className="metric-icon success" />
                 <div className="metric-data">
                   <Typography variant="h5">
-                    {formatNumber(aggregatedMetrics.totalExecuted)}/{formatNumber(aggregatedMetrics.totalOrders)}
+                    {formatNumber(aggregatedMetrics.totalExecuted)}/
+                    {formatNumber(aggregatedMetrics.totalOrders)}
                   </Typography>
                   <Typography variant="body2">Orders Executed</Typography>
                 </div>
@@ -361,7 +360,9 @@ const OrderExecutionDashboard: React.FC<OrderExecutionDashboardProps> = ({
 
         {/* Portfolio-specific metrics */}
         {metrics.map((metric, index) => {
-          const summary = todaysSummaries.find(s => s.portfolioId === metric.portfolioId);
+          const summary = todaysSummaries.find(
+            (s) => s.portfolioId === metric.portfolioId
+          );
           return (
             <ContentCard
               key={metric.portfolioId}
@@ -372,7 +373,9 @@ const OrderExecutionDashboard: React.FC<OrderExecutionDashboardProps> = ({
               className="portfolio-metrics-card"
               headerActions={
                 <StatusChip
-                  status={metric.executedOrdersToday > 0 ? "success" : "inactive"}
+                  status={
+                    metric.executedOrdersToday > 0 ? "success" : "inactive"
+                  }
                   label={`${metric.executedOrdersToday} executed`}
                   animated={metric.pendingOrders > 0}
                 />
@@ -404,8 +407,8 @@ const OrderExecutionDashboard: React.FC<OrderExecutionDashboardProps> = ({
 
                 <div className="metric-row">
                   <Typography variant="body2">P&L Today:</Typography>
-                  <Typography 
-                    variant="body1" 
+                  <Typography
+                    variant="body1"
                     fontWeight="bold"
                     color={metric.pnlToday >= 0 ? "success.main" : "error.main"}
                   >
@@ -440,7 +443,9 @@ const OrderExecutionDashboard: React.FC<OrderExecutionDashboardProps> = ({
             <div className="event-item">
               <Schedule className="event-icon" />
               <div className="event-info">
-                <Typography variant="body2" fontWeight="bold">Market Open</Typography>
+                <Typography variant="body2" fontWeight="bold">
+                  Market Open
+                </Typography>
                 <Typography variant="body2" color="text.secondary">
                   {formatTime(processingStatus.nextScheduledRuns.marketOpen)}
                 </Typography>
@@ -450,7 +455,9 @@ const OrderExecutionDashboard: React.FC<OrderExecutionDashboardProps> = ({
             <div className="event-item">
               <Schedule className="event-icon" />
               <div className="event-info">
-                <Typography variant="body2" fontWeight="bold">Market Close</Typography>
+                <Typography variant="body2" fontWeight="bold">
+                  Market Close
+                </Typography>
                 <Typography variant="body2" color="text.secondary">
                   {formatTime(processingStatus.nextScheduledRuns.marketClose)}
                 </Typography>
@@ -460,7 +467,9 @@ const OrderExecutionDashboard: React.FC<OrderExecutionDashboardProps> = ({
             <div className="event-item">
               <Assessment className="event-icon" />
               <div className="event-info">
-                <Typography variant="body2" fontWeight="bold">EOD Processing</Typography>
+                <Typography variant="body2" fontWeight="bold">
+                  EOD Processing
+                </Typography>
                 <Typography variant="body2" color="text.secondary">
                   {formatTime(processingStatus.nextScheduledRuns.eodProcessing)}
                 </Typography>
@@ -470,9 +479,13 @@ const OrderExecutionDashboard: React.FC<OrderExecutionDashboardProps> = ({
             <div className="event-item">
               <AutoGraph className="event-icon" />
               <div className="event-info">
-                <Typography variant="body2" fontWeight="bold">Hourly Maintenance</Typography>
+                <Typography variant="body2" fontWeight="bold">
+                  Hourly Maintenance
+                </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  {formatTime(processingStatus.nextScheduledRuns.hourlyMaintenance)}
+                  {formatTime(
+                    processingStatus.nextScheduledRuns.hourlyMaintenance
+                  )}
                 </Typography>
               </div>
             </div>

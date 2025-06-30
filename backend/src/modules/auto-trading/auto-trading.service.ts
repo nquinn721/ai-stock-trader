@@ -993,6 +993,19 @@ export class AutoTradingService {
   }
 
   /**
+   * Automatically deploy a strategy for a portfolio based on its balance and characteristics
+   */
+  async autoDeployStrategyForPortfolio(
+    userId: string,
+    portfolioId: string,
+  ): Promise<StrategyInstance> {
+    return this.autonomousTradingService.autoDeployStrategyForPortfolio(
+      userId,
+      portfolioId,
+    );
+  }
+
+  /**
    * Stop an autonomous trading strategy
    */
   async stopStrategy(userId: string, strategyId: string): Promise<void> {

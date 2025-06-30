@@ -76,7 +76,7 @@ export interface OrderExecutionMetrics {
 }
 
 class OrderManagementService {
-  private readonly baseUrl = "http://localhost:8000/daily-order-management";
+  private readonly baseUrl = "http://localhost:8000/api/daily-order-management";
 
   /**
    * Get today's order summary for a specific portfolio

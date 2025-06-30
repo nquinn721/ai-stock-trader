@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { Portfolio } from '../../../entities/portfolio.entity';
 import { PaperTradingService } from '../../paper-trading/paper-trading.service';
 import { StockService } from '../../stock/stock.service';
 import {
@@ -13,6 +14,62 @@ import { TradingStrategy } from '../entities/trading-strategy.entity';
 import { StrategyBuilderService } from '../strategy-builder.service';
 import { BacktestingService, MarketData, Signal } from './backtesting.service';
 import { RiskManagementService } from './risk-management.service';
+
+// Constants for automatic strategy assignment
+const PDT_MINIMUM_BALANCE = 25000; // SEC requirement for Pattern Day Trading
+
+// Predefined strategy configurations for automatic assignment
+const PREDEFINED_STRATEGIES = {
+  DAY_TRADING_AGGRESSIVE: {
+    id: 'day-trading-aggressive',
+    name: 'Day Trading Aggressive',
+    description:
+      'High-frequency day trading strategy for PDT-eligible accounts',
+    type: 'day_trading',
+    minBalance: 25000,
+    riskLevel: 'aggressive',
+    maxPositions: 10,
+    defaultStopLoss: 2, // 2%
+    defaultTakeProfit: 4, // 4%
+    executionFrequency: 'minute' as const,
+  },
+  DAY_TRADING_CONSERVATIVE: {
+    id: 'day-trading-conservative',
+    name: 'Day Trading Conservative',
+    description: 'Conservative day trading strategy for PDT-eligible accounts',
+    type: 'day_trading',
+    minBalance: 25000,
+    riskLevel: 'conservative',
+    maxPositions: 5,
+    defaultStopLoss: 1.5, // 1.5%
+    defaultTakeProfit: 3, // 3%
+    executionFrequency: 'minute' as const,
+  },
+  SWING_TRADING_GROWTH: {
+    id: 'swing-trading-growth',
+    name: 'Swing Trading Growth',
+    description: 'Growth-focused swing trading for non-PDT accounts',
+    type: 'swing_trading',
+    minBalance: 0,
+    riskLevel: 'moderate',
+    maxPositions: 3,
+    defaultStopLoss: 5, // 5%
+    defaultTakeProfit: 10, // 10%
+    executionFrequency: 'hour' as const,
+  },
+  SWING_TRADING_VALUE: {
+    id: 'swing-trading-value',
+    name: 'Swing Trading Value',
+    description: 'Value-focused swing trading for smaller accounts',
+    type: 'swing_trading',
+    minBalance: 0,
+    riskLevel: 'conservative',
+    maxPositions: 2,
+    defaultStopLoss: 3, // 3%
+    defaultTakeProfit: 8, // 8%
+    executionFrequency: 'daily' as const,
+  },
+};
 
 export interface DeploymentConfig {
   mode: 'paper' | 'live';
@@ -77,6 +134,8 @@ export class AutonomousTradingService {
     private readonly strategyRepository: Repository<TradingStrategy>,
     @InjectRepository(AutoTrade)
     private readonly autoTradeRepository: Repository<AutoTrade>,
+    @InjectRepository(Portfolio)
+    private readonly portfolioRepository: Repository<Portfolio>,
     private readonly backtestingService: BacktestingService,
     private readonly strategyBuilderService: StrategyBuilderService,
     private readonly riskManagementService: RiskManagementService,
@@ -596,6 +655,262 @@ export class AutonomousTradingService {
       signal.size > 0 &&
       signal.timestamp
     );
+  }
+
+  /**
+   * Automatically selects an appropriate trading strategy based on portfolio balance and type
+   * @param portfolio - The portfolio to select a strategy for
+   * @returns Strategy configuration for the portfolio
+   */
+  private selectStrategyForPortfolio(portfolio: Portfolio) {
+    const totalValue =
+      Number(portfolio.totalValue) || Number(portfolio.currentCash) || 0;
+    const isPDTEligible = totalValue >= PDT_MINIMUM_BALANCE;
+
+    this.logger.log(
+      `Selecting strategy for portfolio ${portfolio.id}: balance=$${totalValue}, PDT eligible=${isPDTEligible}`,
+    );
+
+    if (isPDTEligible) {
+      // PDT-eligible accounts get day trading strategies
+      if (totalValue >= 50000) {
+        return PREDEFINED_STRATEGIES.DAY_TRADING_AGGRESSIVE;
+      } else {
+        return PREDEFINED_STRATEGIES.DAY_TRADING_CONSERVATIVE;
+      }
+    } else {
+      // Non-PDT accounts get swing trading strategies
+      if (totalValue >= 5000) {
+        return PREDEFINED_STRATEGIES.SWING_TRADING_GROWTH;
+      } else {
+        return PREDEFINED_STRATEGIES.SWING_TRADING_VALUE;
+      }
+    }
+  }
+
+  /**
+   * Creates a deployment configuration automatically based on portfolio characteristics
+   * @param portfolio - The portfolio to create config for
+   * @param selectedStrategy - The selected strategy configuration
+   * @returns Deployment configuration
+   */
+  private createAutoDeploymentConfig(
+    portfolio: Portfolio,
+    selectedStrategy: any,
+  ): DeploymentConfig {
+    const totalValue =
+      Number(portfolio.totalValue) || Number(portfolio.currentCash) || 0;
+
+    return {
+      mode: 'paper' as const,
+      portfolioId: String(portfolio.id),
+      initialCapital: totalValue,
+      maxPositions: selectedStrategy.maxPositions,
+      executionFrequency: selectedStrategy.executionFrequency,
+      riskLimits: {
+        maxDrawdown:
+          selectedStrategy.riskLevel === 'aggressive'
+            ? 15
+            : selectedStrategy.riskLevel === 'moderate'
+              ? 10
+              : 5,
+        maxPositionSize:
+          selectedStrategy.riskLevel === 'aggressive'
+            ? 25
+            : selectedStrategy.riskLevel === 'moderate'
+              ? 15
+              : 10,
+        dailyLossLimit:
+          totalValue *
+          (selectedStrategy.riskLevel === 'aggressive'
+            ? 0.05
+            : selectedStrategy.riskLevel === 'moderate'
+              ? 0.03
+              : 0.02),
+        correlationLimit: 0.7,
+      },
+      notifications: {
+        enabled: true,
+        onTrade: true,
+        onError: true,
+        onRiskBreach: true,
+      },
+    };
+  }
+
+  /**
+   * Automatically deploys a strategy for a portfolio based on its balance and characteristics
+   * @param userId - User ID
+   * @param portfolioId - Portfolio ID to deploy strategy for
+   * @returns Strategy instance
+   */
+  async autoDeployStrategyForPortfolio(
+    userId: string,
+    portfolioId: string,
+  ): Promise<StrategyInstance> {
+    try {
+      // Get portfolio information
+      const portfolio = await this.portfolioRepository.findOne({
+        where: { id: Number(portfolioId) },
+      });
+
+      if (!portfolio) {
+        throw new Error(`Portfolio ${portfolioId} not found`);
+      }
+
+      // Select appropriate strategy
+      const selectedStrategy = this.selectStrategyForPortfolio(portfolio);
+
+      // Create deployment configuration
+      const deploymentConfig = this.createAutoDeploymentConfig(
+        portfolio,
+        selectedStrategy,
+      );
+
+      // Create or find the strategy in database
+      let strategy = await this.strategyRepository.findOne({
+        where: { name: selectedStrategy.name, userId },
+      });
+
+      if (!strategy) {
+        // Create a new strategy entry for this user
+        strategy = this.strategyRepository.create({
+          userId,
+          name: selectedStrategy.name,
+          description: selectedStrategy.description,
+          components: this.createDefaultStrategyComponents(selectedStrategy),
+          riskRules: this.createDefaultRiskRules(selectedStrategy),
+          symbols: [], // Will be populated dynamically
+          timeframe:
+            selectedStrategy.executionFrequency === 'minute'
+              ? '1m'
+              : selectedStrategy.executionFrequency === 'hour'
+                ? '1h'
+                : '1d',
+          status: 'active',
+        });
+
+        strategy = await this.strategyRepository.save(strategy);
+      }
+
+      // Update portfolio with assigned strategy
+      portfolio.assignedStrategy = strategy.id;
+      portfolio.assignedStrategyName = selectedStrategy.name;
+      portfolio.strategyAssignedAt = new Date();
+      await this.portfolioRepository.save(portfolio);
+
+      // Deploy the strategy using existing method
+      const instance = await this.deployStrategy(
+        userId,
+        strategy.id,
+        deploymentConfig,
+      );
+
+      this.logger.log(
+        `Auto-deployed strategy "${selectedStrategy.name}" for portfolio ${portfolioId} (balance: $${Number(portfolio.totalValue || portfolio.currentCash)})`,
+      );
+
+      return instance;
+    } catch (error) {
+      this.logger.error(
+        `Error auto-deploying strategy for portfolio ${portfolioId}: ${error.message}`,
+      );
+      throw error;
+    }
+  }
+
+  /**
+   * Creates default strategy components based on strategy type
+   */
+  private createDefaultStrategyComponents(strategyConfig: any) {
+    const baseComponents = [
+      {
+        id: 'entry-signal',
+        type: 'condition' as const,
+        name: 'Entry Signal',
+        category: 'signal',
+        parameters: {
+          indicators: ['RSI', 'MACD', 'Volume'],
+          thresholds:
+            strategyConfig.type === 'day_trading'
+              ? { rsi: [30, 70], volume_spike: 1.5 }
+              : { rsi: [25, 75], volume_spike: 1.2 },
+        },
+      },
+      {
+        id: 'position-sizing',
+        type: 'action' as const,
+        name: 'Position Sizing',
+        category: 'risk',
+        parameters: {
+          method: 'percentage',
+          maxPositionSize: strategyConfig.maxPositions,
+          riskPerTrade:
+            strategyConfig.riskLevel === 'aggressive'
+              ? 0.03
+              : strategyConfig.riskLevel === 'moderate'
+                ? 0.02
+                : 0.01,
+        },
+      },
+      {
+        id: 'stop-loss',
+        type: 'action' as const,
+        name: 'Stop Loss',
+        category: 'risk',
+        parameters: {
+          type: 'percentage',
+          value: strategyConfig.defaultStopLoss,
+        },
+      },
+      {
+        id: 'take-profit',
+        type: 'action' as const,
+        name: 'Take Profit',
+        category: 'risk',
+        parameters: {
+          type: 'percentage',
+          value: strategyConfig.defaultTakeProfit,
+        },
+      },
+    ];
+
+    return baseComponents;
+  }
+
+  /**
+   * Creates default risk rules based on strategy type
+   */
+  private createDefaultRiskRules(strategyConfig: any) {
+    return [
+      {
+        id: 'max-position-size',
+        type: 'position_size' as const,
+        parameters: { maxPercent: strategyConfig.maxPositions * 5 }, // 5% per position max
+      },
+      {
+        id: 'stop-loss-rule',
+        type: 'stop_loss' as const,
+        parameters: { percentage: strategyConfig.defaultStopLoss },
+      },
+      {
+        id: 'take-profit-rule',
+        type: 'take_profit' as const,
+        parameters: { percentage: strategyConfig.defaultTakeProfit },
+      },
+      {
+        id: 'max-drawdown-rule',
+        type: 'max_drawdown' as const,
+        parameters: {
+          percentage:
+            strategyConfig.riskLevel === 'aggressive'
+              ? 15
+              : strategyConfig.riskLevel === 'moderate'
+                ? 10
+                : 5,
+        },
+      },
+    ];
   }
 
   // Scheduled task to monitor strategy health

@@ -58,6 +58,8 @@ steps:
         "NODE_ENV=production,TFJS_BACKEND=cpu,TFJS_DISABLE_WEBGL=true",
         "--set-secrets",
         "DATABASE_HOST=database-host:latest,DATABASE_PORT=database-port:latest,DATABASE_USERNAME=database-username:latest,DATABASE_PASSWORD=database-password:latest,DATABASE_NAME=database-name:latest",
+        "--add-cloudsql-instances",
+        "$PROJECT_ID:us-central1:stocktrading-mysql",
       ]
     timeout: "600s"
 

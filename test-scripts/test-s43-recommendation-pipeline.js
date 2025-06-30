@@ -29,9 +29,15 @@ async function testS43RecommendationPipeline() {
       );
       console.log("✅ Pipeline configuration endpoint working");
       console.log(`   - Enabled: ${configResponse.data.enabled}`);
-      console.log(`   - Auto Execution: ${configResponse.data.autoExecutionEnabled}`);
-      console.log(`   - Max Risk Level: ${configResponse.data.maximumRiskLevel}`);
-      console.log(`   - Min Confidence: ${configResponse.data.minimumConfidence}`);
+      console.log(
+        `   - Auto Execution: ${configResponse.data.autoExecutionEnabled}`
+      );
+      console.log(
+        `   - Max Risk Level: ${configResponse.data.maximumRiskLevel}`
+      );
+      console.log(
+        `   - Min Confidence: ${configResponse.data.minimumConfidence}`
+      );
     } catch (error) {
       console.log(
         `❌ Pipeline configuration error: ${error.response?.status || error.message}`
@@ -48,16 +54,22 @@ async function testS43RecommendationPipeline() {
           symbols: ["AAPL", "TSLA"],
           timeframes: ["1D", "1W"],
           includeRiskAnalysis: true,
-          targetPortfolios: [1, 2]
+          targetPortfolios: [1, 2],
         }
       );
       console.log("✅ Recommendation generation successful");
-      console.log(`   - Generated ${generateResponse.data.recommendations?.length || 0} recommendations`);
-      
+      console.log(
+        `   - Generated ${generateResponse.data.recommendations?.length || 0} recommendations`
+      );
+
       if (generateResponse.data.recommendations?.length > 0) {
         const firstRec = generateResponse.data.recommendations[0];
-        console.log(`   - First recommendation: ${firstRec.action} ${firstRec.symbol}`);
-        console.log(`   - Confidence: ${(firstRec.confidence * 100).toFixed(1)}%`);
+        console.log(
+          `   - First recommendation: ${firstRec.action} ${firstRec.symbol}`
+        );
+        console.log(
+          `   - Confidence: ${(firstRec.confidence * 100).toFixed(1)}%`
+        );
         console.log(`   - Risk Level: ${firstRec.riskLevel}`);
       }
     } catch (error) {
@@ -74,9 +86,15 @@ async function testS43RecommendationPipeline() {
         `${API_BASE_URL}/api/recommendation-pipeline/stats`
       );
       console.log("✅ Pipeline statistics endpoint working");
-      console.log(`   - Total Recommendations: ${statsResponse.data.totalRecommendations || 0}`);
-      console.log(`   - Converted to Orders: ${statsResponse.data.convertedToOrders || 0}`);
-      console.log(`   - Success Rate: ${(statsResponse.data.conversionRate * 100 || 0).toFixed(1)}%`);
+      console.log(
+        `   - Total Recommendations: ${statsResponse.data.totalRecommendations || 0}`
+      );
+      console.log(
+        `   - Converted to Orders: ${statsResponse.data.convertedToOrders || 0}`
+      );
+      console.log(
+        `   - Success Rate: ${(statsResponse.data.conversionRate * 100 || 0).toFixed(1)}%`
+      );
     } catch (error) {
       console.log(
         `❌ Pipeline statistics error: ${error.response?.status || error.message}`
@@ -95,13 +113,17 @@ async function testS43RecommendationPipeline() {
           riskParameters: {
             maxPositionSize: 0.05,
             stopLossThreshold: 0.02,
-            takeProfitRatio: 2.0
-          }
+            takeProfitRatio: 2.0,
+          },
         }
       );
       console.log("✅ Pipeline processing successful");
-      console.log(`   - Processed ${processResponse.data.processedRecommendations || 0} recommendations`);
-      console.log(`   - Generated ${processResponse.data.generatedOrders || 0} orders`);
+      console.log(
+        `   - Processed ${processResponse.data.processedRecommendations || 0} recommendations`
+      );
+      console.log(
+        `   - Generated ${processResponse.data.generatedOrders || 0} orders`
+      );
     } catch (error) {
       console.log(
         `❌ Pipeline processing error: ${error.response?.status || error.message}`
@@ -119,13 +141,15 @@ async function testS43RecommendationPipeline() {
           mockData: {
             price: 220.0,
             volume: 1000000,
-            volatility: 0.25
-          }
+            volatility: 0.25,
+          },
         }
       );
       console.log("✅ Symbol-specific pipeline test successful");
       console.log(`   - Test Result: ${symbolTestResponse.data.testResult}`);
-      console.log(`   - Execution Time: ${symbolTestResponse.data.executionTime}ms`);
+      console.log(
+        `   - Execution Time: ${symbolTestResponse.data.executionTime}ms`
+      );
     } catch (error) {
       console.log(
         `❌ Symbol-specific pipeline test error: ${error.response?.status || error.message}`
@@ -142,11 +166,13 @@ async function testS43RecommendationPipeline() {
           minimumConfidence: 0.75,
           maximumRiskLevel: "MEDIUM",
           autoExecutionEnabled: false,
-          maxOrdersPerDay: 10
+          maxOrdersPerDay: 10,
         }
       );
       console.log("✅ Pipeline configuration update successful");
-      console.log(`   - Updated configuration: ${updateConfigResponse.data.message}`);
+      console.log(
+        `   - Updated configuration: ${updateConfigResponse.data.message}`
+      );
     } catch (error) {
       console.log(
         `❌ Pipeline configuration update error: ${error.response?.status || error.message}`
@@ -163,7 +189,6 @@ async function testS43RecommendationPipeline() {
     console.log("   ✅ Statistics and monitoring endpoints work");
     console.log("   ✅ Processing pipeline works");
     console.log("   🚀 S43 Story Implementation is FUNCTIONAL!");
-
   } catch (error) {
     console.log("❌ Unexpected error during testing:", error.message);
   }

@@ -16,19 +16,19 @@ import { StrategyTemplate } from './entities/strategy-template.entity';
 import { TradingRule } from './entities/trading-rule.entity';
 import { TradingSession } from './entities/trading-session.entity';
 import { TradingStrategy } from './entities/trading-strategy.entity';
+import { RecommendationPipelineController } from './recommendation-pipeline.controller';
 import { AdvancedOrderExecutionService } from './services/advanced-order-execution.service';
 import { AutoTradingOrderPreviewService } from './services/auto-trading-order-preview.service';
 import { AutonomousTradingService } from './services/autonomous-trading.service';
 import { BacktestingService } from './services/backtesting.service';
 import { OrderManagementService } from './services/order-management.service';
 import { PositionSizingService } from './services/position-sizing.service';
+import { RecommendationPipelineService } from './services/recommendation-pipeline.service';
 import { RiskManagementService } from './services/risk-management.service';
 import { RuleEngineService } from './services/rule-engine.service';
 import { TradeExecutionService } from './services/trade-execution.service';
-import { RecommendationPipelineService } from './services/recommendation-pipeline.service';
 import { StrategyBuilderController } from './strategy-builder.controller';
 import { StrategyBuilderService } from './strategy-builder.service';
-import { RecommendationPipelineController } from './recommendation-pipeline.controller';
 
 @Module({
   imports: [
@@ -48,7 +48,11 @@ import { RecommendationPipelineController } from './recommendation-pipeline.cont
     WebsocketModule,
     MLModule,
   ],
-  controllers: [AutoTradingController, StrategyBuilderController, RecommendationPipelineController],
+  controllers: [
+    AutoTradingController,
+    StrategyBuilderController,
+    RecommendationPipelineController,
+  ],
   providers: [
     AutoTradingService,
     StrategyBuilderService,

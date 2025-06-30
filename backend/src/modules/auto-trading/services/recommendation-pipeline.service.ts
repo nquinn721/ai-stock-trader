@@ -1,14 +1,17 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { AutoTradingOrder, AutoTradingOrderStatus, AutoTradingOrderAction, AutoTradingOrderType, RiskLevel } from '../../../entities/auto-trading-order.entity';
+import {
+  AutoTradingOrder,
+  RiskLevel,
+} from '../../../entities/auto-trading-order.entity';
 import { Portfolio } from '../../../entities/portfolio.entity';
 import { Stock } from '../../../entities/stock.entity';
+import { TradingSignals } from '../../ml/interfaces/ml.interfaces';
 import { SignalGenerationService } from '../../ml/services/signal-generation.service';
 import { AdvancedOrderExecutionService } from './advanced-order-execution.service';
-import { RiskManagementService } from './risk-management.service';
 import { PositionSizingService } from './position-sizing.service';
-import { TradingSignals } from '../../ml/interfaces/ml.interfaces';
+import { RiskManagementService } from './risk-management.service';
 
 export interface TradingRecommendation {
   id: string;
@@ -56,9 +59,9 @@ export interface PipelineConfiguration {
 
 /**
  * S43: Recommendation-to-Order Integration Pipeline Service
- * 
+ *
  * This service bridges the gap between AI trading recommendations and actual order execution.
- * It automatically converts high-confidence AI signals into actionable trading orders with 
+ * It automatically converts high-confidence AI signals into actionable trading orders with
  * comprehensive risk management and position sizing.
  */
 @Injectable()
@@ -113,25 +116,24 @@ export class RecommendationPipelineService {
     } = {},
   ): Promise<TradingRecommendation[]> {
     this.logger.log(`S43: Generating recommendations for ${symbol}`);
-    
+
     try {
       // Step 1: Get ensemble signals from the ML pipeline (S19 dependency)
-      const signalResponse = await this.signalGenerationService.generateEnsembleSignals(
-        symbol,
-        {
-          timeframes: options.timeframes || this.pipelineConfig.supportedTimeframes,
+      const signalResponse =
+        await this.signalGenerationService.generateEnsembleSignals(symbol, {
+          timeframes:
+            options.timeframes || this.pipelineConfig.supportedTimeframes,
           includeConflictResolution: true,
           ensembleMethod: 'meta_learning',
           confidenceThreshold: this.pipelineConfig.minimumConfidence,
           enableRealTimeStream: true,
-        },
-      );
+        });
 
       const signals = signalResponse.signals;
-      
+
       // Step 2: Convert ML signals to trading recommendations
       const recommendations: TradingRecommendation[] = [];
-      
+
       if (signals) {
         const recommendation = await this.convertSignalToRecommendation(
           symbol,
@@ -139,13 +141,13 @@ export class RecommendationPipelineService {
           signalResponse.ensembleDetails,
           options,
         );
-        
+
         if (recommendation) {
           recommendations.push(recommendation);
-          
+
           // Cache for tracking
           this.recommendationCache.set(recommendation.id, recommendation);
-          
+
           this.logger.log(
             `S43: Generated ${recommendation.action} recommendation for ${symbol} with ${recommendation.confidence} confidence`,
           );
@@ -154,7 +156,10 @@ export class RecommendationPipelineService {
 
       return recommendations;
     } catch (error) {
-      this.logger.error(`S43: Error generating recommendations for ${symbol}:`, error);
+      this.logger.error(
+        `S43: Error generating recommendations for ${symbol}:`,
+        error,
+      );
       return [];
     }
   }
@@ -169,7 +174,7 @@ export class RecommendationPipelineService {
     options: any,
   ): Promise<TradingRecommendation | null> {
     // Use the signals object directly since it contains the signal information
-    
+
     // Extract action from signal
     const action = this.determineActionFromSignal(signals);
     if (action === 'HOLD' && !this.shouldIncludeHoldSignals()) {
@@ -179,7 +184,7 @@ export class RecommendationPipelineService {
     // Calculate risk parameters
     const currentPrice = signals.levels?.currentPrice || 100; // Use actual price from signals
     const confidence = signals.confidence || 0;
-    
+
     // Calculate stop loss and take profit levels
     const { stopLoss, takeProfit } = this.calculateRiskLevels(
       currentPrice,
@@ -190,9 +195,12 @@ export class RecommendationPipelineService {
 
     // Determine risk level based on signal characteristics
     const riskLevel = this.determineRiskLevel(signals, confidence);
-    
+
     // Generate reasoning from signal data
-    const reasoning = this.generateRecommendationReasoning(signals, ensembleDetails);
+    const reasoning = this.generateRecommendationReasoning(
+      signals,
+      ensembleDetails,
+    );
 
     const recommendation: TradingRecommendation = {
       id: this.generateRecommendationId(symbol, action),
@@ -218,7 +226,11 @@ export class RecommendationPipelineService {
         volatility: signals.riskMetrics?.volatility,
         strength: signals.strength,
       },
-      riskRewardRatio: this.calculateRiskRewardRatio(currentPrice, stopLoss, takeProfit),
+      riskRewardRatio: this.calculateRiskRewardRatio(
+        currentPrice,
+        stopLoss,
+        takeProfit,
+      ),
       maxDrawdown: signals.riskMetrics?.maxDrawdown || 0.05,
       createdAt: new Date(),
     };
@@ -237,11 +249,15 @@ export class RecommendationPipelineService {
     errors?: string[];
     recommendation?: TradingRecommendation;
   }> {
-    this.logger.log(`S43: Converting recommendation ${request.recommendationId} to order`);
+    this.logger.log(
+      `S43: Converting recommendation ${request.recommendationId} to order`,
+    );
 
     try {
       // Step 1: Validate recommendation exists
-      const recommendation = this.recommendationCache.get(request.recommendationId);
+      const recommendation = this.recommendationCache.get(
+        request.recommendationId,
+      );
       if (!recommendation) {
         return {
           success: false,
@@ -291,7 +307,8 @@ export class RecommendationPipelineService {
 
       if (orderResult.success && orderResult.orderId) {
         // Track order history
-        const existingOrders = this.orderHistory.get(request.recommendationId) || [];
+        const existingOrders =
+          this.orderHistory.get(request.recommendationId) || [];
         existingOrders.push(orderResult.orderId);
         this.orderHistory.set(request.recommendationId, existingOrders);
 
@@ -322,30 +339,36 @@ export class RecommendationPipelineService {
   /**
    * Get all active recommendations
    */
-  async getActiveRecommendations(filters: {
-    symbols?: string[];
-    minConfidence?: number;
-    actions?: string[];
-    maxAge?: number; // hours
-  } = {}): Promise<TradingRecommendation[]> {
+  async getActiveRecommendations(
+    filters: {
+      symbols?: string[];
+      minConfidence?: number;
+      actions?: string[];
+      maxAge?: number; // hours
+    } = {},
+  ): Promise<TradingRecommendation[]> {
     const recommendations = Array.from(this.recommendationCache.values());
-    
+
     return recommendations.filter((rec) => {
       // Age filter
       if (filters.maxAge) {
-        const ageHours = (Date.now() - rec.createdAt.getTime()) / (1000 * 60 * 60);
+        const ageHours =
+          (Date.now() - rec.createdAt.getTime()) / (1000 * 60 * 60);
         if (ageHours > filters.maxAge) return false;
       }
-      
+
       // Symbol filter
-      if (filters.symbols && !filters.symbols.includes(rec.symbol)) return false;
-      
+      if (filters.symbols && !filters.symbols.includes(rec.symbol))
+        return false;
+
       // Confidence filter
-      if (filters.minConfidence && rec.confidence < filters.minConfidence) return false;
-      
+      if (filters.minConfidence && rec.confidence < filters.minConfidence)
+        return false;
+
       // Action filter
-      if (filters.actions && !filters.actions.includes(rec.action)) return false;
-      
+      if (filters.actions && !filters.actions.includes(rec.action))
+        return false;
+
       return true;
     });
   }
@@ -362,11 +385,17 @@ export class RecommendationPipelineService {
     errors: string[];
   }> {
     if (!this.pipelineConfig.enabled) {
-      return { totalRecommendations: 0, ordersCreated: 0, errors: ['Pipeline disabled'] };
+      return {
+        totalRecommendations: 0,
+        ordersCreated: 0,
+        errors: ['Pipeline disabled'],
+      };
     }
 
-    this.logger.log(`S43: Processing automated pipeline for ${symbols.length} symbols`);
-    
+    this.logger.log(
+      `S43: Processing automated pipeline for ${symbols.length} symbols`,
+    );
+
     const results = {
       totalRecommendations: 0,
       ordersCreated: 0,
@@ -382,7 +411,9 @@ export class RecommendationPipelineService {
         // Convert high-confidence recommendations to orders if auto-execution enabled
         if (this.pipelineConfig.autoExecutionEnabled) {
           for (const recommendation of recommendations) {
-            if (recommendation.confidence >= this.pipelineConfig.minimumConfidence) {
+            if (
+              recommendation.confidence >= this.pipelineConfig.minimumConfidence
+            ) {
               for (const portfolioId of portfolioIds) {
                 const orderResult = await this.convertRecommendationToOrder({
                   recommendationId: recommendation.id,
@@ -409,18 +440,21 @@ export class RecommendationPipelineService {
     this.logger.log(
       `S43: Automated pipeline completed - ${results.totalRecommendations} recommendations, ${results.ordersCreated} orders`,
     );
-    
+
     return results;
   }
 
   // ==================== PRIVATE HELPER METHODS ====================
 
-  private determineActionFromSignal(signals: TradingSignals): 'BUY' | 'SELL' | 'HOLD' | 'WATCH' {
+  private determineActionFromSignal(
+    signals: TradingSignals,
+  ): 'BUY' | 'SELL' | 'HOLD' | 'WATCH' {
     if (!signals || typeof signals.signal !== 'string') return 'HOLD';
-    
+
     const signalType = signals.signal.toUpperCase();
     if (signalType.includes('BUY') || signalType.includes('LONG')) return 'BUY';
-    if (signalType.includes('SELL') || signalType.includes('SHORT')) return 'SELL';
+    if (signalType.includes('SELL') || signalType.includes('SHORT'))
+      return 'SELL';
     if (signalType.includes('WATCH')) return 'WATCH';
     return 'HOLD';
   }
@@ -438,10 +472,10 @@ export class RecommendationPipelineService {
   ): { stopLoss: number; takeProfit: number } {
     const baseRiskPercent = 0.02; // 2% base risk
     const adjustedRisk = baseRiskPercent * (1 + volatility) * (2 - confidence);
-    
+
     let stopLoss: number;
     let takeProfit: number;
-    
+
     if (action === 'BUY') {
       stopLoss = currentPrice * (1 - adjustedRisk);
       takeProfit = currentPrice * (1 + adjustedRisk * 2); // 2:1 risk/reward
@@ -452,41 +486,53 @@ export class RecommendationPipelineService {
       stopLoss = currentPrice;
       takeProfit = currentPrice;
     }
-    
+
     return { stopLoss, takeProfit };
   }
 
-  private determineRiskLevel(signals: TradingSignals, confidence: number): RiskLevel {
+  private determineRiskLevel(
+    signals: TradingSignals,
+    confidence: number,
+  ): RiskLevel {
     // Base risk on confidence and signal strength
-    const riskScore = (1 - confidence) + (1 - signals.strength);
-    
+    const riskScore = 1 - confidence + (1 - signals.strength);
+
     if (riskScore < 0.3) return RiskLevel.LOW;
     if (riskScore < 0.6) return RiskLevel.MEDIUM;
     return RiskLevel.HIGH;
   }
 
-  private generateRecommendationReasoning(signals: TradingSignals, ensembleDetails: any): string[] {
+  private generateRecommendationReasoning(
+    signals: TradingSignals,
+    ensembleDetails: any,
+  ): string[] {
     const reasoning: string[] = [];
-    
+
     // Add basic signal reasoning
-    reasoning.push(`Signal: ${signals.signal} with ${(signals.strength * 100).toFixed(1)}% strength`);
+    reasoning.push(
+      `Signal: ${signals.signal} with ${(signals.strength * 100).toFixed(1)}% strength`,
+    );
     reasoning.push(`Confidence: ${(signals.confidence * 100).toFixed(1)}%`);
-    
+
     // Add technical indicators if available
     if (signals.factors?.technicalSignals) {
-      reasoning.push(`Technical indicators support the ${signals.signal} signal`);
+      reasoning.push(
+        `Technical indicators support the ${signals.signal} signal`,
+      );
     }
-    
+
     // Add risk assessment
     if (signals.riskMetrics) {
-      reasoning.push(`Risk metrics: Volatility ${(signals.riskMetrics.volatility * 100).toFixed(1)}%, Max Drawdown ${(signals.riskMetrics.maxDrawdown * 100).toFixed(1)}%`);
+      reasoning.push(
+        `Risk metrics: Volatility ${(signals.riskMetrics.volatility * 100).toFixed(1)}%, Max Drawdown ${(signals.riskMetrics.maxDrawdown * 100).toFixed(1)}%`,
+      );
     }
-    
+
     // Add execution priority
     if (signals.executionPriority) {
       reasoning.push(`Execution priority: ${signals.executionPriority}`);
     }
-    
+
     return reasoning;
   }
 
@@ -497,7 +543,7 @@ export class RecommendationPipelineService {
   ): number {
     const risk = Math.abs(entryPrice - stopLoss);
     const reward = Math.abs(takeProfit - entryPrice);
-    
+
     if (risk === 0) return 0;
     return reward / risk;
   }
@@ -520,44 +566,57 @@ export class RecommendationPipelineService {
     request: RecommendationToOrderRequest,
   ): Promise<{ valid: boolean; errors: string[] }> {
     const errors: string[] = [];
-    
+
     // Check if recommendation is expired
     if (recommendation.expiryTime < new Date()) {
       errors.push('Recommendation has expired');
     }
-    
+
     // Check confidence threshold
     if (recommendation.confidence < this.pipelineConfig.minimumConfidence) {
-      errors.push(`Confidence ${recommendation.confidence} below threshold ${this.pipelineConfig.minimumConfidence}`);
+      errors.push(
+        `Confidence ${recommendation.confidence} below threshold ${this.pipelineConfig.minimumConfidence}`,
+      );
     }
-    
+
     // Check risk level
-    if (this.getRiskLevelValue(recommendation.riskLevel) > this.getRiskLevelValue(this.pipelineConfig.maximumRiskLevel)) {
-      errors.push(`Risk level ${recommendation.riskLevel} exceeds maximum ${this.pipelineConfig.maximumRiskLevel}`);
+    if (
+      this.getRiskLevelValue(recommendation.riskLevel) >
+      this.getRiskLevelValue(this.pipelineConfig.maximumRiskLevel)
+    ) {
+      errors.push(
+        `Risk level ${recommendation.riskLevel} exceeds maximum ${this.pipelineConfig.maximumRiskLevel}`,
+      );
     }
-    
+
     // Check daily order limits
     const todayOrders = await this.getTodayOrderCount();
     if (todayOrders >= this.pipelineConfig.maxOrdersPerDay) {
-      errors.push(`Daily order limit ${this.pipelineConfig.maxOrdersPerDay} reached`);
+      errors.push(
+        `Daily order limit ${this.pipelineConfig.maxOrdersPerDay} reached`,
+      );
     }
-    
+
     return { valid: errors.length === 0, errors };
   }
 
   private getRiskLevelValue(riskLevel: RiskLevel): number {
     switch (riskLevel) {
-      case RiskLevel.LOW: return 1;
-      case RiskLevel.MEDIUM: return 2;
-      case RiskLevel.HIGH: return 3;
-      default: return 2;
+      case RiskLevel.LOW:
+        return 1;
+      case RiskLevel.MEDIUM:
+        return 2;
+      case RiskLevel.HIGH:
+        return 3;
+      default:
+        return 2;
     }
   }
 
   private async getTodayOrderCount(): Promise<number> {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    
+
     return this.autoTradingOrderRepository.count({
       where: {
         createdAt: { $gte: today } as any,
@@ -575,13 +634,13 @@ export class RecommendationPipelineService {
     const entryPrice = recommendation.entryPrice;
     const stopLoss = recommendation.stopLoss;
     const riskPerShare = Math.abs(entryPrice - stopLoss);
-    
+
     if (riskPerShare === 0) return 0;
-    
+
     const maxShares = Math.floor(riskAmount / riskPerShare);
     const maxValue = portfolio.totalValue * 0.1; // Max 10% position size
     const maxSharesByValue = Math.floor(maxValue / entryPrice);
-    
+
     return Math.min(maxShares, maxSharesByValue);
   }
 
@@ -598,7 +657,8 @@ export class RecommendationPipelineService {
         symbol: recommendation.symbol,
         strategy: 'BRACKET' as any, // Default to bracket strategy
         recommendationId: recommendation.id,
-        side: recommendation.action === 'BUY' ? 'BUY' as any : 'SELL' as any,
+        side:
+          recommendation.action === 'BUY' ? ('BUY' as any) : ('SELL' as any),
         baseQuantity: positionSize,
         orderType: 'MARKET' as any,
         limitPrice: recommendation.entryPrice,
@@ -611,8 +671,9 @@ export class RecommendationPipelineService {
       };
 
       // Create the order using advanced execution service
-      const order = await this.advancedOrderExecutionService.createAdvancedOrder(orderDto);
-      
+      const order =
+        await this.advancedOrderExecutionService.createAdvancedOrder(orderDto);
+
       return {
         success: true,
         orderId: order.id,
@@ -654,10 +715,12 @@ export class RecommendationPipelineService {
       (sum, orders) => sum + orders.length,
       0,
     );
-    
-    const avgConfidence = activeRecs.length > 0 
-      ? activeRecs.reduce((sum, rec) => sum + rec.confidence, 0) / activeRecs.length
-      : 0;
+
+    const avgConfidence =
+      activeRecs.length > 0
+        ? activeRecs.reduce((sum, rec) => sum + rec.confidence, 0) /
+          activeRecs.length
+        : 0;
 
     return {
       activeRecommendations: activeRecs.length,

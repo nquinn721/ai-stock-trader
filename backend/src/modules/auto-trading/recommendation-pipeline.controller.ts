@@ -1,21 +1,20 @@
-import { 
-  Controller, 
-  Post, 
-  Get, 
-  Put,
-  Body, 
-  Query, 
-  Param, 
-  Logger,
+import {
   BadRequestException,
+  Body,
+  Controller,
+  Get,
+  Logger,
   NotFoundException,
+  Param,
+  Post,
+  Put,
+  Query,
 } from '@nestjs/common';
 import { RiskLevel } from '../../entities/auto-trading-order.entity';
-import { 
-  RecommendationPipelineService, 
-  TradingRecommendation,
-  RecommendationToOrderRequest,
+import {
   PipelineConfiguration,
+  RecommendationPipelineService,
+  TradingRecommendation,
 } from './services/recommendation-pipeline.service';
 
 export class GenerateRecommendationsDto {
@@ -56,7 +55,7 @@ export class UpdateConfigDto {
 
 /**
  * S43: Recommendation Pipeline Controller
- * 
+ *
  * Provides REST API endpoints for the AI recommendation-to-order integration pipeline.
  * Allows users to generate recommendations, convert them to orders, and manage the pipeline.
  */
@@ -81,7 +80,9 @@ export class RecommendationPipelineController {
     totalGenerated: number;
     errors?: string[];
   }> {
-    this.logger.log(`S43: Generating recommendations for ${generateDto.symbols.length} symbols`);
+    this.logger.log(
+      `S43: Generating recommendations for ${generateDto.symbols.length} symbols`,
+    );
 
     if (!generateDto.symbols || generateDto.symbols.length === 0) {
       throw new BadRequestException('At least one symbol is required');
@@ -93,14 +94,15 @@ export class RecommendationPipelineController {
     try {
       for (const symbol of generateDto.symbols) {
         try {
-          const recommendations = await this.recommendationPipelineService.generateRecommendations(
-            symbol,
-            {
-              timeframes: generateDto.timeframes,
-              includeRiskAnalysis: generateDto.includeRiskAnalysis,
-              targetPortfolios: generateDto.targetPortfolios,
-            },
-          );
+          const recommendations =
+            await this.recommendationPipelineService.generateRecommendations(
+              symbol,
+              {
+                timeframes: generateDto.timeframes,
+                includeRiskAnalysis: generateDto.includeRiskAnalysis,
+                targetPortfolios: generateDto.targetPortfolios,
+              },
+            );
           allRecommendations.push(...recommendations);
         } catch (error) {
           errors.push(`${symbol}: ${error.message}`);
@@ -115,7 +117,9 @@ export class RecommendationPipelineController {
       };
     } catch (error) {
       this.logger.error('S43: Error in generateRecommendations:', error);
-      throw new BadRequestException(`Failed to generate recommendations: ${error.message}`);
+      throw new BadRequestException(
+        `Failed to generate recommendations: ${error.message}`,
+      );
     }
   }
 
@@ -132,29 +136,38 @@ export class RecommendationPipelineController {
     errors?: string[];
     recommendation?: TradingRecommendation;
   }> {
-    this.logger.log(`S43: Converting recommendation ${convertDto.recommendationId} to order`);
+    this.logger.log(
+      `S43: Converting recommendation ${convertDto.recommendationId} to order`,
+    );
 
     if (!convertDto.recommendationId || !convertDto.portfolioId) {
-      throw new BadRequestException('Recommendation ID and Portfolio ID are required');
+      throw new BadRequestException(
+        'Recommendation ID and Portfolio ID are required',
+      );
     }
 
     try {
-      const result = await this.recommendationPipelineService.convertRecommendationToOrder({
-        recommendationId: convertDto.recommendationId,
-        portfolioId: convertDto.portfolioId,
-        autoExecute: convertDto.autoExecute,
-        customRiskParams: convertDto.customRiskParams,
-        orderStrategy: convertDto.orderStrategy,
-      });
+      const result =
+        await this.recommendationPipelineService.convertRecommendationToOrder({
+          recommendationId: convertDto.recommendationId,
+          portfolioId: convertDto.portfolioId,
+          autoExecute: convertDto.autoExecute,
+          customRiskParams: convertDto.customRiskParams,
+          orderStrategy: convertDto.orderStrategy,
+        });
 
       if (!result.success) {
-        this.logger.warn(`S43: Failed to convert recommendation to order: ${result.errors?.join(', ')}`);
+        this.logger.warn(
+          `S43: Failed to convert recommendation to order: ${result.errors?.join(', ')}`,
+        );
       }
 
       return result;
     } catch (error) {
       this.logger.error('S43: Error in convertRecommendationToOrder:', error);
-      throw new BadRequestException(`Failed to convert recommendation: ${error.message}`);
+      throw new BadRequestException(
+        `Failed to convert recommendation: ${error.message}`,
+      );
     }
   }
 
@@ -178,19 +191,22 @@ export class RecommendationPipelineController {
       const filters: any = {};
 
       if (symbols) {
-        filters.symbols = symbols.split(',').map(s => s.trim());
+        filters.symbols = symbols.split(',').map((s) => s.trim());
       }
       if (minConfidence !== undefined) {
         filters.minConfidence = Number(minConfidence);
       }
       if (actions) {
-        filters.actions = actions.split(',').map(a => a.trim().toUpperCase());
+        filters.actions = actions.split(',').map((a) => a.trim().toUpperCase());
       }
       if (maxAge !== undefined) {
         filters.maxAge = Number(maxAge);
       }
 
-      const recommendations = await this.recommendationPipelineService.getActiveRecommendations(filters);
+      const recommendations =
+        await this.recommendationPipelineService.getActiveRecommendations(
+          filters,
+        );
 
       return {
         success: true,
@@ -200,7 +216,9 @@ export class RecommendationPipelineController {
       };
     } catch (error) {
       this.logger.error('S43: Error in getActiveRecommendations:', error);
-      throw new BadRequestException(`Failed to get recommendations: ${error.message}`);
+      throw new BadRequestException(
+        `Failed to get recommendations: ${error.message}`,
+      );
     }
   }
 
@@ -209,19 +227,22 @@ export class RecommendationPipelineController {
    * GET /recommendation-pipeline/recommendations/:id
    */
   @Get('recommendations/:id')
-  async getRecommendationById(
-    @Param('id') recommendationId: string,
-  ): Promise<{
+  async getRecommendationById(@Param('id') recommendationId: string): Promise<{
     success: boolean;
     recommendation?: TradingRecommendation;
     error?: string;
   }> {
     try {
-      const recommendations = await this.recommendationPipelineService.getActiveRecommendations();
-      const recommendation = recommendations.find(r => r.id === recommendationId);
+      const recommendations =
+        await this.recommendationPipelineService.getActiveRecommendations();
+      const recommendation = recommendations.find(
+        (r) => r.id === recommendationId,
+      );
 
       if (!recommendation) {
-        throw new NotFoundException(`Recommendation ${recommendationId} not found`);
+        throw new NotFoundException(
+          `Recommendation ${recommendationId} not found`,
+        );
       }
 
       return {
@@ -232,7 +253,7 @@ export class RecommendationPipelineController {
       if (error instanceof NotFoundException) {
         throw error;
       }
-      
+
       this.logger.error('S43: Error in getRecommendationById:', error);
       return {
         success: false,
@@ -254,7 +275,9 @@ export class RecommendationPipelineController {
     ordersCreated: number;
     errors: string[];
   }> {
-    this.logger.log(`S43: Processing automated pipeline for ${processDto.symbols.length} symbols`);
+    this.logger.log(
+      `S43: Processing automated pipeline for ${processDto.symbols.length} symbols`,
+    );
 
     if (!processDto.symbols || processDto.symbols.length === 0) {
       throw new BadRequestException('At least one symbol is required');
@@ -264,10 +287,11 @@ export class RecommendationPipelineController {
     }
 
     try {
-      const result = await this.recommendationPipelineService.processAutomatedPipeline(
-        processDto.symbols,
-        processDto.portfolioIds,
-      );
+      const result =
+        await this.recommendationPipelineService.processAutomatedPipeline(
+          processDto.symbols,
+          processDto.portfolioIds,
+        );
 
       return {
         success: true,
@@ -275,7 +299,9 @@ export class RecommendationPipelineController {
       };
     } catch (error) {
       this.logger.error('S43: Error in processAutomatedPipeline:', error);
-      throw new BadRequestException(`Failed to process pipeline: ${error.message}`);
+      throw new BadRequestException(
+        `Failed to process pipeline: ${error.message}`,
+      );
     }
   }
 
@@ -289,15 +315,18 @@ export class RecommendationPipelineController {
     config: PipelineConfiguration;
   }> {
     try {
-      const config = this.recommendationPipelineService.getPipelineConfiguration();
-      
+      const config =
+        this.recommendationPipelineService.getPipelineConfiguration();
+
       return {
         success: true,
         config,
       };
     } catch (error) {
       this.logger.error('S43: Error in getPipelineConfiguration:', error);
-      throw new BadRequestException(`Failed to get configuration: ${error.message}`);
+      throw new BadRequestException(
+        `Failed to get configuration: ${error.message}`,
+      );
     }
   }
 
@@ -316,25 +345,35 @@ export class RecommendationPipelineController {
     try {
       // Validate configuration values
       if (updateDto.minimumConfidence !== undefined) {
-        if (updateDto.minimumConfidence < 0 || updateDto.minimumConfidence > 1) {
-          throw new BadRequestException('Minimum confidence must be between 0 and 1');
+        if (
+          updateDto.minimumConfidence < 0 ||
+          updateDto.minimumConfidence > 1
+        ) {
+          throw new BadRequestException(
+            'Minimum confidence must be between 0 and 1',
+          );
         }
       }
 
       if (updateDto.maxOrdersPerDay !== undefined) {
         if (updateDto.maxOrdersPerDay < 1 || updateDto.maxOrdersPerDay > 1000) {
-          throw new BadRequestException('Max orders per day must be between 1 and 1000');
+          throw new BadRequestException(
+            'Max orders per day must be between 1 and 1000',
+          );
         }
       }
 
       if (updateDto.cooldownMinutes !== undefined) {
         if (updateDto.cooldownMinutes < 0 || updateDto.cooldownMinutes > 1440) {
-          throw new BadRequestException('Cooldown minutes must be between 0 and 1440');
+          throw new BadRequestException(
+            'Cooldown minutes must be between 0 and 1440',
+          );
         }
       }
 
       this.recommendationPipelineService.updatePipelineConfiguration(updateDto);
-      const updatedConfig = this.recommendationPipelineService.getPipelineConfiguration();
+      const updatedConfig =
+        this.recommendationPipelineService.getPipelineConfiguration();
 
       this.logger.log('S43: Pipeline configuration updated successfully');
 
@@ -345,7 +384,9 @@ export class RecommendationPipelineController {
       };
     } catch (error) {
       this.logger.error('S43: Error in updatePipelineConfiguration:', error);
-      throw new BadRequestException(`Failed to update configuration: ${error.message}`);
+      throw new BadRequestException(
+        `Failed to update configuration: ${error.message}`,
+      );
     }
   }
 
@@ -368,8 +409,10 @@ export class RecommendationPipelineController {
     };
   }> {
     try {
-      const stats = await this.recommendationPipelineService.getPipelineStatistics();
-      const config = this.recommendationPipelineService.getPipelineConfiguration();
+      const stats =
+        await this.recommendationPipelineService.getPipelineStatistics();
+      const config =
+        this.recommendationPipelineService.getPipelineConfiguration();
 
       return {
         success: true,
@@ -381,7 +424,9 @@ export class RecommendationPipelineController {
       };
     } catch (error) {
       this.logger.error('S43: Error in getPipelineStatistics:', error);
-      throw new BadRequestException(`Failed to get statistics: ${error.message}`);
+      throw new BadRequestException(
+        `Failed to get statistics: ${error.message}`,
+      );
     }
   }
 
@@ -405,10 +450,11 @@ export class RecommendationPipelineController {
 
     try {
       steps.push('1. Generating recommendation...');
-      const recommendations = await this.recommendationPipelineService.generateRecommendations(
-        symbol,
-        { timeframes: ['1h'], includeRiskAnalysis: true },
-      );
+      const recommendations =
+        await this.recommendationPipelineService.generateRecommendations(
+          symbol,
+          { timeframes: ['1h'], includeRiskAnalysis: true },
+        );
 
       if (recommendations.length === 0) {
         errors.push('No recommendations generated');
@@ -416,22 +462,29 @@ export class RecommendationPipelineController {
       }
 
       const recommendation = recommendations[0];
-      steps.push(`2. Generated ${recommendation.action} recommendation with ${recommendation.confidence} confidence`);
+      steps.push(
+        `2. Generated ${recommendation.action} recommendation with ${recommendation.confidence} confidence`,
+      );
 
       let orderId: string | undefined;
       if (portfolioId) {
         steps.push('3. Converting to order...');
-        const orderResult = await this.recommendationPipelineService.convertRecommendationToOrder({
-          recommendationId: recommendation.id,
-          portfolioId: Number(portfolioId),
-          autoExecute: false,
-        });
+        const orderResult =
+          await this.recommendationPipelineService.convertRecommendationToOrder(
+            {
+              recommendationId: recommendation.id,
+              portfolioId: Number(portfolioId),
+              autoExecute: false,
+            },
+          );
 
         if (orderResult.success) {
           orderId = orderResult.orderId;
           steps.push(`4. Order created successfully: ${orderId}`);
         } else {
-          errors.push(`Order creation failed: ${orderResult.errors?.join(', ')}`);
+          errors.push(
+            `Order creation failed: ${orderResult.errors?.join(', ')}`,
+          );
         }
       } else {
         steps.push('3. Skipping order creation (no portfolio ID provided)');

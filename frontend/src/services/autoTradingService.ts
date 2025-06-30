@@ -356,6 +356,38 @@ class AutoTradingService {
     }
   }
 
+  /**
+   * Automatically deploys a strategy for a portfolio based on its balance and PDT eligibility
+   */
+  async autoDeployStrategyForPortfolio(
+    portfolioId: string,
+    userId: string = "demo-user"
+  ): Promise<ApiResponse<StrategyInstance>> {
+    try {
+      const response = await autoTradingApi.post(
+        `/autonomous/portfolios/${portfolioId}/auto-deploy?userId=${userId}`
+      );
+
+      // Handle wrapped response format
+      const data = response.data?.data ? response.data.data : response.data;
+
+      return {
+        success: response.data?.success !== false,
+        data: data,
+        message:
+          response.data?.message ||
+          "Strategy automatically deployed based on portfolio balance",
+      };
+    } catch (error: any) {
+      console.error("Failed to auto-deploy strategy:", error);
+      return {
+        success: false,
+        data: {} as StrategyInstance,
+        error: error.response?.data?.message || error.message,
+      };
+    }
+  }
+
   async stopStrategy(
     strategyId: string,
     userId: string = "demo-user"

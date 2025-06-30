@@ -487,6 +487,34 @@ export class AutoTradingController {
     }
   }
 
+  @Post('autonomous/portfolios/:portfolioId/auto-deploy')
+  async autoDeployStrategyForPortfolio(
+    @Param('portfolioId') portfolioId: string,
+    @Query('userId') userId: string = 'default-user',
+  ) {
+    try {
+      const instance =
+        await this.autoTradingService.autoDeployStrategyForPortfolio(
+          userId,
+          portfolioId,
+        );
+      return {
+        success: true,
+        data: instance,
+        message:
+          'Strategy automatically deployed based on portfolio balance and PDT eligibility',
+      };
+    } catch (error) {
+      throw new HttpException(
+        {
+          success: false,
+          message: error.message,
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
   @Post('autonomous/strategies/:strategyId/stop')
   async stopStrategy(
     @Param('strategyId') strategyId: string,

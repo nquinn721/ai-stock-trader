@@ -407,20 +407,20 @@ const AutonomousTradingPage: React.FC<AutonomousTradingPageProps> = observer(
         setLoading(true);
         setError(null);
 
+        // Start trading session
         const sessionData = {
           sessionName: `Autonomous Trading - ${new Date().toLocaleString()}`,
           config: {
             max_daily_trades: 50,
-            max_position_size:
-              deploymentConfig.riskLimits?.maxPositionSize || 20,
-            daily_loss_limit: deploymentConfig.riskLimits?.dailyLossLimit || 5,
+            max_position_size: 20,
+            daily_loss_limit: 5,
             enable_risk_management: true,
             trading_hours: {
               start: "09:30",
               end: "16:00",
               timezone: "US/Eastern",
             },
-            allowed_symbols: deploymentConfig.symbols || [],
+            allowed_symbols: [],
             excluded_symbols: [],
           },
         };
@@ -430,14 +430,11 @@ const AutonomousTradingPage: React.FC<AutonomousTradingPageProps> = observer(
           sessionData
         );
 
-        const strategyConfig = createCompleteDeploymentConfig(portfolioId);
-        strategyConfig.initialCapital =
-          portfolios.find((p) => p.id === portfolioId)?.currentCash || 10000;
-
-        const strategyResponse = await autoTradingService.deployStrategy(
-          `autonomous-strategy-${portfolioId}`,
-          strategyConfig
-        );
+        // Use automatic strategy deployment based on portfolio balance and PDT eligibility
+        const strategyResponse =
+          await autoTradingService.autoDeployStrategyForPortfolio(
+            String(portfolioId)
+          );
 
         if (strategyResponse.success) {
           setPortfolioStatuses((prev) => ({
@@ -456,12 +453,12 @@ const AutonomousTradingPage: React.FC<AutonomousTradingPageProps> = observer(
           }));
 
           console.log(
-            `Autonomous trading started for portfolio ${portfolioId}`
+            `Autonomous trading started for portfolio ${portfolioId} with auto-selected strategy: ${strategyResponse.data.strategy?.name || "Unknown"}`
           );
         } else {
           const errorMsg =
-            strategyResponse.error || "Failed to deploy strategy";
-          setError(`Strategy deployment failed: ${errorMsg}`);
+            strategyResponse.error || "Failed to auto-deploy strategy";
+          setError(`Strategy auto-deployment failed: ${errorMsg}`);
 
           if (session?.id) {
             await autoTradingService.stopTradingSession(
@@ -888,7 +885,7 @@ const AutonomousTradingPage: React.FC<AutonomousTradingPageProps> = observer(
                 value={activeTab}
                 onChange={handleTabChange}
                 variant="scrollable"
-                scrollButtons="auto"
+                scrollButtons={false}
                 className="dashboard-tabs"
               >
                 <Tab label="Portfolios" {...a11yProps(0)} />
