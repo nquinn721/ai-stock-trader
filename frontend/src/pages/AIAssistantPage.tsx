@@ -1,19 +1,27 @@
-import { Psychology } from "@mui/icons-material";
+import { AutoMode, Chat, Dashboard, Psychology } from "@mui/icons-material";
 import { observer } from "mobx-react-lite";
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import TradingAssistantChat from "../components/TradingAssistantChat";
 import PageHeader from "../components/ui/PageHeader";
-import { useWebSocketConnection } from "../hooks/useWebSocketConnection";
-import { useWebSocketStore } from "../stores/StoreContext";
 import "./AIAssistantPage.css";
 
 const AIAssistantPage: React.FC = observer(() => {
-  const webSocketStore = useWebSocketStore();
-
-  // Ensure WebSocket connection is established
-  useWebSocketConnection();
+  const navigate = useNavigate();
 
   const actionButtons = [
+    {
+      icon: <Dashboard />,
+      onClick: () => navigate("/dashboard"),
+      tooltip: "Trading Dashboard",
+      label: "Dashboard",
+    },
+    {
+      icon: <AutoMode />,
+      onClick: () => navigate("/autonomous-trading"),
+      tooltip: "Autonomous Trading",
+      label: "Auto Trade",
+    },
     {
       icon: <Psychology />,
       onClick: () => {
@@ -22,23 +30,21 @@ const AIAssistantPage: React.FC = observer(() => {
       },
       tooltip: "AI Insights",
       label: "Insights",
-      className: "nav-btn",
     },
   ];
 
   return (
-    <div className="ai-assistant-page">
+    <div className="page-container">
       <PageHeader
         title="AI Trading Assistant"
-        showLiveIndicator={true}
-        isConnected={webSocketStore.isConnected}
-        sticky={true}
         actionButtons={actionButtons}
         statsValue="GPT-4 Enabled"
         className="ai-assistant-header"
       />
-      <div className="chat-container">
-        <TradingAssistantChat />
+      <div className="page-content">
+        <div className="chat-container">
+          <TradingAssistantChat />
+        </div>
       </div>
     </div>
   );

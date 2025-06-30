@@ -1,5 +1,7 @@
 import { AccessTime } from "@mui/icons-material";
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { useWebSocketStore } from "../../stores/StoreContext";
+import { useWebSocketConnection } from "../../hooks/useWebSocketConnection";
 import "./PageHeader.css";
 
 export interface PageHeaderActionButton {
@@ -12,11 +14,8 @@ export interface PageHeaderActionButton {
 
 export interface PageHeaderProps {
   title: string;
-  currentTime?: Date;
-  isConnected?: boolean;
   statsValue?: string | number;
   actionButtons?: PageHeaderActionButton[];
-  showLiveIndicator?: boolean;
   sticky?: boolean;
   className?: string;
   children?: React.ReactNode;
@@ -24,15 +23,27 @@ export interface PageHeaderProps {
 
 const PageHeader: React.FC<PageHeaderProps> = ({
   title,
-  currentTime = new Date(),
-  isConnected = true,
   statsValue,
   actionButtons = [],
-  showLiveIndicator = true,
   sticky = true,
   className = "",
   children,
 }) => {
+  // Automatically manage WebSocket connection and get status
+  useWebSocketConnection();
+  const webSocketStore = useWebSocketStore();
+  
+  // Automatically update current time every second
+  const [currentTime, setCurrentTime] = useState(new Date());
+  
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, []);
+
   return (
     <div
       className={`page-header ${sticky ? "sticky" : ""} ${className}`}
@@ -41,18 +52,16 @@ const PageHeader: React.FC<PageHeaderProps> = ({
       <div className="header-left">
         <div className="main-title-section">
           <h1>{title}</h1>
-          {showLiveIndicator && (
-            <div
-              className={`live-indicator-main ${
-                isConnected ? "connected" : "disconnected"
-              }`}
-            >
-              <span className="live-dot"></span>
-              <span className="live-text">
-                {isConnected ? "LIVE" : "OFFLINE"}
-              </span>
-            </div>
-          )}
+          <div
+            className={`live-indicator-main ${
+              webSocketStore.isConnected ? "connected" : "disconnected"
+            }`}
+          >
+            <span className="live-dot"></span>
+            <span className="live-text">
+              {webSocketStore.isConnected ? "LIVE" : "OFFLINE"}
+            </span>
+          </div>
         </div>
         <div className="market-time">
           <AccessTime />

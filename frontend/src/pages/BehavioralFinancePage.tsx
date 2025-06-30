@@ -22,8 +22,6 @@ import {
   PsychologyInsightsPanel,
 } from "../components/behavioral-analytics";
 import PageHeader from "../components/ui/PageHeader";
-import { useWebSocketConnection } from "../hooks/useWebSocketConnection";
-import { useWebSocketStore } from "../stores/StoreContext";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -55,11 +53,6 @@ function a11yProps(index: number) {
 }
 
 export const BehavioralFinancePage: React.FC = observer(() => {
-  const webSocketStore = useWebSocketStore();
-
-  // Ensure WebSocket connection is established
-  useWebSocketConnection();
-
   const [activeTab, setActiveTab] = useState(0);
   const [selectedSymbol, setSelectedSymbol] = useState("AAPL");
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -98,9 +91,6 @@ export const BehavioralFinancePage: React.FC = observer(() => {
       {/* Header */}
       <PageHeader
         title="Behavioral Finance & Cognitive AI"
-        showLiveIndicator={true}
-        isConnected={webSocketStore.isConnected}
-        sticky={true}
         actionButtons={[
           {
             icon: <TrendingUp />,

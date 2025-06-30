@@ -2,13 +2,21 @@
 @import "../../shared-styles.css";
 
 /* ==========================================================================
-   PageHeader Component - Standardized Header Styles
+   PageHeader Component - Standardized Header with Default Padding & Auto Time/Status
+   
+   Default Features:
+   - Automatic time updates every second
+   - Automatic WebSocket connection status (LIVE/OFFLINE)
+   - Standard padding: 4px vertical, 24px horizontal
+   - Full-width header that extends beyond page container margins
+   - Responsive padding for mobile devices
    ========================================================================== */
 
 .page-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  /* Default padding and margin - automatically applied */
   margin: -24px -24px 8px -24px;
   padding: 4px 24px 4px 24px;
   background: linear-gradient(

@@ -38,14 +38,12 @@ import {
   StatusChip,
   TradingButton,
 } from "../components/ui";
-import { useWebSocketConnection } from "../hooks/useWebSocketConnection";
 import autoTradingService, {
   DeploymentConfig,
   Portfolio,
   StrategyInstance,
 } from "../services/autoTradingService";
 import { stockStore } from "../stores/StockStore";
-import { useWebSocketStore } from "../stores/StoreContext";
 import "./AutonomousTradingPage.css";
 
 interface TabPanelProps {
@@ -90,17 +88,10 @@ interface PortfolioTradingStatus {
 
 interface AutonomousTradingPageProps {
   onNavigateBack?: () => void;
-  currentTime?: Date;
-  isConnected?: boolean;
 }
 
 const AutonomousTradingPage: React.FC<AutonomousTradingPageProps> = observer(
-  ({ onNavigateBack, currentTime = new Date(), isConnected = false }) => {
-    const webSocketStore = useWebSocketStore();
-
-    // Ensure WebSocket connection is established
-    useWebSocketConnection();
-
+  ({ onNavigateBack }) => {
     const [activeTab, setActiveTab] = useState(0);
     const [portfolios, setPortfolios] = useState<Portfolio[]>([]);
     const [portfolioStatuses, setPortfolioStatuses] = useState<
@@ -783,10 +774,6 @@ const AutonomousTradingPage: React.FC<AutonomousTradingPageProps> = observer(
         {/* Standardized Page Header */}
         <PageHeader
           title="Autonomous Trading System"
-          currentTime={currentTime}
-          isConnected={webSocketStore.isConnected}
-          showLiveIndicator={true}
-          sticky={true}
           statsValue={`${Object.values(portfolioStatuses).filter((s) => s.isActive).length}/${portfolios.length} active • ${Object.values(portfolioStatuses).reduce((acc, status) => acc + status.activeStrategies.length, 0)} strategies running`}
           actionButtons={[
             {
@@ -1030,8 +1017,6 @@ const AutonomousTradingPage: React.FC<AutonomousTradingPageProps> = observer(
             fullScreen
           >
             <EconomicIntelligenceDashboard
-              currentTime={currentTime}
-              isConnected={webSocketStore.isConnected}
               onNavigateBack={() => setShowEconomicIntelligence(false)}
             />
           </Dialog>

@@ -28,11 +28,9 @@ import PortfolioSelector from "../components/PortfolioSelector";
 import QuickTradeContent from "../components/QuickTradeContent";
 import StockCard from "../components/StockCard";
 import PageHeader from "../components/ui/PageHeader";
-import { useWebSocketConnection } from "../hooks/useWebSocketConnection";
 import {
   usePortfolioStore,
   useStockStore,
-  useWebSocketStore,
 } from "../stores/StoreContext";
 import { Portfolio } from "../types";
 import "./DashboardPage.css";
@@ -60,16 +58,11 @@ const DashboardPage: React.FC = observer(() => {
   const navigate = useNavigate();
   const stockStore = useStockStore();
   const portfolioStore = usePortfolioStore();
-  const webSocketStore = useWebSocketStore();
-
-  // Ensure WebSocket connection is established
-  useWebSocketConnection();
 
   const [showPortfolioCreator, setShowPortfolioCreator] = useState(false);
   const [showPortfolioDetails, setShowPortfolioDetails] = useState(false);
   const [portfolioForDetails, setPortfolioForDetails] =
     useState<Portfolio | null>(null);
-  const [currentTime, setCurrentTime] = useState(new Date());
 
   // Initialize data only if stores are empty or need fresh data
   useEffect(() => {
@@ -96,15 +89,6 @@ const DashboardPage: React.FC = observer(() => {
       console.log("Dashboard: Using existing portfolio data");
     }
   }, []); // Remove dependencies to prevent re-runs
-
-  // Update clock every second
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentTime(new Date());
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, []);
 
   // Calculate market analytics
   const marketAnalytics = React.useMemo(() => {
@@ -220,9 +204,6 @@ const DashboardPage: React.FC = observer(() => {
       {/* Page Header */}
       <PageHeader
         title="Trading Dashboard"
-        currentTime={currentTime}
-        isConnected={webSocketStore.isConnected}
-        sticky={true}
         statsValue={`${marketAnalytics.totalStocks} Stocks • ${marketAnalytics.buySignals + marketAnalytics.sellSignals} Signals`}
         actionButtons={[
           {
@@ -244,7 +225,6 @@ const DashboardPage: React.FC = observer(() => {
             label: "AI Chat",
           },
         ]}
-        showLiveIndicator={true}
       />
 
       {/* Main Dashboard Content */}

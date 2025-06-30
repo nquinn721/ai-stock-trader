@@ -4,16 +4,10 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import { MarketScannerDashboard } from "../components/MarketScanner/MarketScannerDashboard";
 import PageHeader from "../components/ui/PageHeader";
-import { useWebSocketConnection } from "../hooks/useWebSocketConnection";
-import { useWebSocketStore } from "../stores/StoreContext";
 import "./MarketScannerPage.css";
 
 const MarketScannerPage: React.FC = observer(() => {
-  const webSocketStore = useWebSocketStore();
   const navigate = useNavigate();
-
-  // Ensure WebSocket connection is established
-  useWebSocketConnection();
 
   const handleStockSelect = (symbol: string) => {
     console.log("Stock selected:", symbol);
@@ -24,9 +18,6 @@ const MarketScannerPage: React.FC = observer(() => {
     <div className="page-container">
       <PageHeader
         title="Market Scanner"
-        showLiveIndicator={true}
-        isConnected={webSocketStore.isConnected}
-        sticky={true}
         statsValue="Live Market Data"
         actionButtons={[
           {

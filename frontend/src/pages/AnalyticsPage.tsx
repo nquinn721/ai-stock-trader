@@ -15,11 +15,10 @@ import { useNavigate } from "react-router-dom";
 import EmptyState from "../components/EmptyState";
 import PageHeader from "../components/ui/PageHeader";
 import { FRONTEND_API_CONFIG } from "../config/api.config";
-import { useWebSocketConnection } from "../hooks/useWebSocketConnection";
 import autoTradingService, {
   StrategyInstance,
 } from "../services/autoTradingService";
-import { usePortfolioStore, useWebSocketStore } from "../stores/StoreContext";
+import { usePortfolioStore } from "../stores/StoreContext";
 import "./AnalyticsPage.css";
 
 interface PortfolioAnalytics {
@@ -110,11 +109,7 @@ interface StrategyAnalytics {
 
 const AnalyticsPage: React.FC = observer(() => {
   const portfolioStore = usePortfolioStore();
-  const webSocketStore = useWebSocketStore();
   const navigate = useNavigate();
-
-  // Ensure WebSocket connection is established
-  useWebSocketConnection();
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -406,56 +401,126 @@ const AnalyticsPage: React.FC = observer(() => {
 
   if (loading) {
     return (
-      <div className="analytics-page">
-        <EmptyState
-          type="loading"
-          icon={<FontAwesomeIcon icon={faClock} />}
-          title="Loading Analytics"
-          description="Compiling comprehensive portfolio analytics from all your portfolios..."
-          size="large"
+      <div className="page-container">
+        <PageHeader
+          title="Portfolio Analytics"
+          statsValue="Loading..."
+          actionButtons={[
+            {
+              icon: <Dashboard />,
+              onClick: () => navigate("/dashboard"),
+              tooltip: "Trading Dashboard",
+              label: "Dashboard",
+            },
+            {
+              icon: <AutoMode />,
+              onClick: () => navigate("/autonomous-trading"),
+              tooltip: "Autonomous Trading",
+              label: "Auto Trade",
+            },
+            {
+              icon: <Chat />,
+              onClick: () => navigate("/ai-assistant"),
+              tooltip: "AI Trading Assistant",
+              label: "AI Chat",
+            },
+          ]}
         />
+        <div className="page-content">
+          <EmptyState
+            type="loading"
+            icon={<FontAwesomeIcon icon={faClock} />}
+            title="Loading Analytics"
+            description="Compiling comprehensive portfolio analytics from all your portfolios..."
+            size="large"
+          />
+        </div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="analytics-page">
-        <div className="page-header">
-          <h1>Portfolio Analytics</h1>
-          <p>Comprehensive analytics across all portfolios</p>
-        </div>
-        <EmptyState
-          type="error"
-          icon={<FontAwesomeIcon icon={faChartLine} />}
-          title="Analytics Unavailable"
-          description={error}
-          action={{
-            label: "Retry",
-            onClick: () => window.location.reload(),
-          }}
+      <div className="page-container">
+        <PageHeader
+          title="Portfolio Analytics"
+          statsValue="Error"
+          actionButtons={[
+            {
+              icon: <Dashboard />,
+              onClick: () => navigate("/dashboard"),
+              tooltip: "Trading Dashboard",
+              label: "Dashboard",
+            },
+            {
+              icon: <AutoMode />,
+              onClick: () => navigate("/autonomous-trading"),
+              tooltip: "Autonomous Trading",
+              label: "Auto Trade",
+            },
+            {
+              icon: <Chat />,
+              onClick: () => navigate("/ai-assistant"),
+              tooltip: "AI Trading Assistant",
+              label: "AI Chat",
+            },
+          ]}
         />
+        <div className="page-content">
+          <EmptyState
+            type="error"
+            icon={<FontAwesomeIcon icon={faChartLine} />}
+            title="Analytics Unavailable"
+            description={error}
+            action={{
+              label: "Retry",
+              onClick: () => window.location.reload(),
+            }}
+          />
+        </div>
       </div>
     );
   }
 
   if (!portfolioStore.isInitialized || portfolioStore.portfolios.length === 0) {
     return (
-      <div className="analytics-page">
-        <div className="page-header">
-          <h1>Portfolio Analytics</h1>
-          <p>Comprehensive analytics across all portfolios</p>
-        </div>
-        <EmptyState
-          type="no-data"
-          icon={<FontAwesomeIcon icon={faExchangeAlt} />}
-          title="No Portfolios Available"
-          description="Create your first portfolio to start viewing comprehensive analytics."
-          action={{
-            label: "Go to Dashboard",
-            onClick: () => (window.location.href = "/"),
-          }}
+      <div className="page-container">
+        <PageHeader
+          title="Portfolio Analytics"
+          statsValue="0 portfolios"
+          actionButtons={[
+            {
+              icon: <Dashboard />,
+              onClick: () => navigate("/dashboard"),
+              tooltip: "Trading Dashboard",
+              label: "Dashboard",
+            },
+            {
+              icon: <AutoMode />,
+              onClick: () => navigate("/autonomous-trading"),
+              tooltip: "Autonomous Trading",
+              label: "Auto Trade",
+            },
+            {
+              icon: <Chat />,
+              onClick: () => navigate("/ai-assistant"),
+              tooltip: "AI Trading Assistant",
+              label: "AI Chat",
+            },
+          ]}
         />
+        <div className="page-content">
+          <EmptyState
+            type="no-data"
+            icon={<FontAwesomeIcon icon={faExchangeAlt} />}
+            title="No Portfolios Available"
+            description="Create your first portfolio to start viewing comprehensive analytics."
+            action={{
+              label: "Go to Dashboard",
+              onClick: () => (window.location.href = "/"),
+            }}
+          />
+        </div>
       </div>
     );
   }
@@ -465,9 +530,6 @@ const AnalyticsPage: React.FC = observer(() => {
       {/* Page Header */}
       <PageHeader
         title="Portfolio Analytics"
-        showLiveIndicator={true}
-        isConnected={webSocketStore.isConnected}
-        sticky={true}
         statsValue={`${portfolioStore.portfolios.length} portfolios`}
         actionButtons={[
           {
