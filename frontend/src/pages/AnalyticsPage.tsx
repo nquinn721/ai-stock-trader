@@ -8,8 +8,10 @@ import {
   faStop,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { AutoMode, Chat, Dashboard } from "@mui/icons-material";
 import { observer } from "mobx-react-lite";
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import EmptyState from "../components/EmptyState";
 import PageHeader from "../components/ui/PageHeader";
 import { FRONTEND_API_CONFIG } from "../config/api.config";
@@ -109,6 +111,7 @@ interface StrategyAnalytics {
 const AnalyticsPage: React.FC = observer(() => {
   const portfolioStore = usePortfolioStore();
   const webSocketStore = useWebSocketStore();
+  const navigate = useNavigate();
 
   // Ensure WebSocket connection is established
   useWebSocketConnection();
@@ -458,7 +461,7 @@ const AnalyticsPage: React.FC = observer(() => {
   }
 
   return (
-    <div className="analytics-page">
+    <div className="page-container">
       {/* Page Header */}
       <PageHeader
         title="Portfolio Analytics"
@@ -466,449 +469,488 @@ const AnalyticsPage: React.FC = observer(() => {
         isConnected={webSocketStore.isConnected}
         sticky={true}
         statsValue={`${portfolioStore.portfolios.length} portfolios`}
+        actionButtons={[
+          {
+            icon: <Dashboard />,
+            onClick: () => navigate("/dashboard"),
+            tooltip: "Trading Dashboard",
+            label: "Dashboard",
+          },
+          {
+            icon: <AutoMode />,
+            onClick: () => navigate("/autonomous-trading"),
+            tooltip: "Autonomous Trading",
+            label: "Auto Trade",
+          },
+          {
+            icon: <Chat />,
+            onClick: () => navigate("/ai-assistant"),
+            tooltip: "AI Trading Assistant",
+            label: "AI Chat",
+          },
+        ]}
       />
-
-      {/* Overview Cards */}
-      {aggregatedData && (
-        <div className="analytics-overview">
-          <div className="overview-cards">
-            <div className="overview-card">
-              <div className="card-header">
-                <h3>Total Portfolio Value</h3>
-                <FontAwesomeIcon icon={faChartLine} className="card-icon" />
-              </div>
-              <div className="card-value">
-                $
-                {aggregatedData.totalPortfolioValue.toLocaleString("en-US", {
-                  maximumFractionDigits: 2,
-                })}
-              </div>
-              <div
-                className={`card-change ${aggregatedData.totalDayChangePercent >= 0 ? "positive" : "negative"}`}
-              >
-                {aggregatedData.totalDayChangePercent >= 0 ? "+" : ""}
-                {aggregatedData.totalDayChangePercent.toFixed(2)}% today
-              </div>
-            </div>
-
-            <div className="overview-card">
-              <div className="card-header">
-                <h3>Total Return</h3>
-                <FontAwesomeIcon icon={faExchangeAlt} className="card-icon" />
-              </div>
-              <div className="card-value">
-                $
-                {aggregatedData.overallPerformance.totalReturn.toLocaleString(
-                  "en-US",
-                  { maximumFractionDigits: 2 }
-                )}
-              </div>
-              <div
-                className={`card-change ${aggregatedData.overallPerformance.totalReturn >= 0 ? "positive" : "negative"}`}
-              >
-                Annualized:{" "}
-                {aggregatedData.overallPerformance.annualizedReturn.toFixed(2)}%
-              </div>
-            </div>
-
-            <div className="overview-card">
-              <div className="card-header">
-                <h3>Portfolio Count</h3>
-                <FontAwesomeIcon icon={faExchangeAlt} className="card-icon" />
-              </div>
-              <div className="card-value">
-                {aggregatedData.riskOverview.portfolioCount}
-              </div>
-              <div className="card-change">Active portfolios</div>
-            </div>
-
-            <div className="overview-card">
-              <div className="card-header">
-                <h3>Risk Level</h3>
-                <FontAwesomeIcon icon={faChartLine} className="card-icon" />
-              </div>
-              <div className="card-value">
-                {aggregatedData.riskOverview.averageVolatility.toFixed(1)}%
-              </div>
-              <div className="card-change">Average volatility</div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Autonomous Trading Strategy Analytics */}
-      {strategyAnalytics && (
-        <div className="analytics-section">
-          <h2>
-            <FontAwesomeIcon icon={faRobot} style={{ marginRight: "0.5rem" }} />
-            Autonomous Trading Strategies
-          </h2>
-
-          {/* Strategy Overview Cards */}
+      {/* Page Content */}
+      <div className="page-content">
+        {/* Overview Cards */}
+        {aggregatedData && (
           <div className="analytics-overview">
             <div className="overview-cards">
               <div className="overview-card">
                 <div className="card-header">
-                  <h3>Active Strategies</h3>
-                  <FontAwesomeIcon icon={faPlay} className="card-icon" />
-                </div>
-                <div className="card-value">
-                  {strategyAnalytics.totalActiveStrategies}
-                </div>
-                <div className="card-change">
-                  {strategyAnalytics.runningStrategies.length} total deployed
-                </div>
-              </div>
-
-              <div className="overview-card">
-                <div className="card-header">
-                  <h3>Total Trades Today</h3>
-                  <FontAwesomeIcon icon={faExchangeAlt} className="card-icon" />
-                </div>
-                <div className="card-value">
-                  {strategyAnalytics.totalTradesToday}
-                </div>
-                <div className="card-change">Automated executions</div>
-              </div>
-
-              <div className="overview-card">
-                <div className="card-header">
-                  <h3>Autonomous Returns</h3>
+                  <h3>Total Portfolio Value</h3>
                   <FontAwesomeIcon icon={faChartLine} className="card-icon" />
                 </div>
                 <div className="card-value">
                   $
-                  {strategyAnalytics.totalAutonomousReturn.toLocaleString(
-                    "en-US",
-                    {
-                      maximumFractionDigits: 2,
-                    }
-                  )}
-                </div>
-                <div
-                  className={`card-change ${strategyAnalytics.totalAutonomousReturn >= 0 ? "positive" : "negative"}`}
-                >
-                  {strategyAnalytics.totalAutonomousReturn >= 0 ? "+" : ""}
-                  {(
-                    (strategyAnalytics.totalAutonomousReturn / 10000) *
-                    100
-                  ).toFixed(2)}
-                  % of capital
-                </div>
-              </div>
-
-              <div className="overview-card">
-                <div className="card-header">
-                  <h3>Average Win Rate</h3>
-                  <FontAwesomeIcon icon={faChartLine} className="card-icon" />
-                </div>
-                <div className="card-value">
-                  {(strategyAnalytics.averagePerformance.winRate * 100).toFixed(
-                    1
-                  )}
-                  %
-                </div>
-                <div className="card-change">
-                  Sharpe:{" "}
-                  {strategyAnalytics.averagePerformance.sharpeRatio.toFixed(2)}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Strategy Breakdown */}
-          {strategyAnalytics.runningStrategies.length > 0 ? (
-            <div className="strategy-grid">
-              {strategyAnalytics.runningStrategies.map((strategy) => (
-                <div key={strategy.id} className="strategy-card">
-                  <div className="strategy-card-header">
-                    <h3>{strategy.strategyId}</h3>
-                    <div
-                      className={`strategy-status strategy-status-${strategy.status}`}
-                    >
-                      <FontAwesomeIcon
-                        icon={
-                          strategy.status === "running"
-                            ? faPlay
-                            : strategy.status === "paused"
-                              ? faPause
-                              : faStop
-                        }
-                      />
-                      {strategy.status}
-                    </div>
-                  </div>
-
-                  <div className="strategy-metrics">
-                    <div className="metric-row">
-                      <span className="metric-label">Total Return:</span>
-                      <span
-                        className={`metric-value ${(strategy.performance?.totalReturn || 0) >= 0 ? "positive" : "negative"}`}
-                      >
-                        $
-                        {(
-                          strategy.performance?.totalReturn || 0
-                        ).toLocaleString("en-US", {
-                          maximumFractionDigits: 2,
-                        })}
-                      </span>
-                    </div>
-
-                    <div className="metric-row">
-                      <span className="metric-label">Daily Return:</span>
-                      <span
-                        className={`metric-value ${(strategy.performance?.dailyReturn || 0) >= 0 ? "positive" : "negative"}`}
-                      >
-                        {(
-                          (strategy.performance?.dailyReturn || 0) * 100
-                        ).toFixed(2)}
-                        %
-                      </span>
-                    </div>
-
-                    <div className="metric-row">
-                      <span className="metric-label">Total Trades:</span>
-                      <span className="metric-value">
-                        {strategy.performance?.totalTrades || 0}
-                      </span>
-                    </div>
-
-                    <div className="metric-row">
-                      <span className="metric-label">Win Rate:</span>
-                      <span className="metric-value">
-                        {((strategy.performance?.winRate || 0) * 100).toFixed(
-                          1
-                        )}
-                        %
-                      </span>
-                    </div>
-
-                    <div className="metric-row">
-                      <span className="metric-label">Sharpe Ratio:</span>
-                      <span className="metric-value">
-                        {(strategy.performance?.sharpeRatio || 0).toFixed(2)}
-                      </span>
-                    </div>
-
-                    <div className="metric-row">
-                      <span className="metric-label">Max Drawdown:</span>
-                      <span className="metric-value negative">
-                        {(
-                          (strategy.performance?.maxDrawdown || 0) * 100
-                        ).toFixed(2)}
-                        %
-                      </span>
-                    </div>
-
-                    <div className="metric-row">
-                      <span className="metric-label">Uptime:</span>
-                      <span className="metric-value">
-                        {strategyAnalytics.strategyBreakdown.find(
-                          (s) => s.strategyId === strategy.strategyId
-                        )?.uptime || 0}
-                        h
-                      </span>
-                    </div>
-
-                    <div className="metric-row">
-                      <span className="metric-label">Errors:</span>
-                      <span
-                        className={`metric-value ${strategy.errorCount > 0 ? "negative" : ""}`}
-                      >
-                        {strategy.errorCount}
-                      </span>
-                    </div>
-                  </div>
-
-                  {strategy.performance && (
-                    <div className="strategy-performance">
-                      <h4>Performance Summary</h4>
-                      <div className="performance-row">
-                        <span>Current Value:</span>
-                        <span className="performance-value">
-                          $
-                          {(
-                            strategy.performance.currentValue || 0
-                          ).toLocaleString("en-US", {
-                            maximumFractionDigits: 2,
-                          })}
-                        </span>
-                      </div>
-                      <div className="performance-row">
-                        <span>Unrealized P&L:</span>
-                        <span
-                          className={`performance-value ${(strategy.performance.unrealizedPnL || 0) >= 0 ? "positive" : "negative"}`}
-                        >
-                          $
-                          {(
-                            strategy.performance.unrealizedPnL || 0
-                          ).toLocaleString("en-US", {
-                            maximumFractionDigits: 2,
-                          })}
-                        </span>
-                      </div>
-                      <div className="performance-row">
-                        <span>Profitable Trades:</span>
-                        <span className="performance-value">
-                          {strategy.performance.profitableTrades || 0} /{" "}
-                          {strategy.performance.totalTrades || 0}
-                        </span>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="no-strategies">
-              <FontAwesomeIcon
-                icon={faRobot}
-                size="3x"
-                style={{ color: "#6b7280", marginBottom: "1rem" }}
-              />
-              <h3>No Active Strategies</h3>
-              <p>Start autonomous trading to see strategy analytics here.</p>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Portfolio Breakdown */}
-      <div className="analytics-section">
-        <h2>Portfolio Breakdown</h2>
-        <div className="portfolio-grid">
-          {portfolioAnalytics.map((portfolio) => (
-            <div key={portfolio.portfolioId} className="portfolio-card">
-              <div className="portfolio-card-header">
-                <h3>{portfolio.portfolioName}</h3>
-                <div className="portfolio-value">
-                  $
-                  {portfolio.totalValue.toLocaleString("en-US", {
+                  {aggregatedData.totalPortfolioValue.toLocaleString("en-US", {
                     maximumFractionDigits: 2,
                   })}
                 </div>
-              </div>
-
-              <div className="portfolio-metrics">
-                <div className="metric-row">
-                  <span className="metric-label">Total Return:</span>
-                  <span
-                    className={`metric-value ${portfolio.performanceSummary.totalReturn >= 0 ? "positive" : "negative"}`}
-                  >
-                    $
-                    {portfolio.performanceSummary.totalReturn.toLocaleString(
-                      "en-US",
-                      { maximumFractionDigits: 2 }
-                    )}
-                  </span>
-                </div>
-
-                <div className="metric-row">
-                  <span className="metric-label">Day Return:</span>
-                  <span
-                    className={`metric-value ${portfolio.performanceSummary.dayReturn >= 0 ? "positive" : "negative"}`}
-                  >
-                    {portfolio.performanceSummary.dayReturn.toFixed(2)}%
-                  </span>
-                </div>
-
-                <div className="metric-row">
-                  <span className="metric-label">Volatility:</span>
-                  <span className="metric-value">
-                    {portfolio.riskMetrics.portfolioVolatility.toFixed(1)}%
-                  </span>
-                </div>
-
-                <div className="metric-row">
-                  <span className="metric-label">Sharpe Ratio:</span>
-                  <span className="metric-value">
-                    {portfolio.riskMetrics.sharpeRatio.toFixed(2)}
-                  </span>
+                <div
+                  className={`card-change ${aggregatedData.totalDayChangePercent >= 0 ? "positive" : "negative"}`}
+                >
+                  {aggregatedData.totalDayChangePercent >= 0 ? "+" : ""}
+                  {aggregatedData.totalDayChangePercent.toFixed(2)}% today
                 </div>
               </div>
 
-              {portfolio.topHoldings.length > 0 && (
-                <div className="top-holdings">
-                  <h4>Top Holdings</h4>
-                  {portfolio.topHoldings.slice(0, 3).map((holding, index) => (
-                    <div key={index} className="holding-item">
-                      <span className="holding-symbol">{holding.symbol}</span>
-                      <span className="holding-weight">
-                        {holding.weight.toFixed(1)}%
-                      </span>
-                    </div>
-                  ))}
+              <div className="overview-card">
+                <div className="card-header">
+                  <h3>Total Return</h3>
+                  <FontAwesomeIcon icon={faExchangeAlt} className="card-icon" />
                 </div>
-              )}
-            </div>
-          ))}
-        </div>
-      </div>
+                <div className="card-value">
+                  $
+                  {aggregatedData.overallPerformance.totalReturn.toLocaleString(
+                    "en-US",
+                    { maximumFractionDigits: 2 }
+                  )}
+                </div>
+                <div
+                  className={`card-change ${aggregatedData.overallPerformance.totalReturn >= 0 ? "positive" : "negative"}`}
+                >
+                  Annualized:{" "}
+                  {aggregatedData.overallPerformance.annualizedReturn.toFixed(
+                    2
+                  )}
+                  %
+                </div>
+              </div>
 
-      {/* Sector Allocation */}
-      {aggregatedData &&
-        Object.keys(aggregatedData.aggregatedSectors).length > 0 && (
-          <div className="analytics-section">
-            <h2>Aggregated Sector Allocation</h2>
-            <div className="sector-allocation">
-              {Object.entries(aggregatedData.aggregatedSectors)
-                .sort(([, a], [, b]) => b.value - a.value)
-                .map(([sector, data]) => (
-                  <div key={sector} className="sector-item">
-                    <div className="sector-info">
-                      <span className="sector-name">{sector}</span>
-                      <span className="sector-value">
-                        $
-                        {data.value.toLocaleString("en-US", {
-                          maximumFractionDigits: 0,
-                        })}
-                      </span>
-                    </div>
-                    <div className="sector-bar">
-                      <div
-                        className="sector-fill"
-                        style={{ width: `${Math.min(data.percentage, 100)}%` }}
-                      ></div>
-                    </div>
-                    <span className="sector-percentage">
-                      {data.percentage.toFixed(1)}%
-                    </span>
-                  </div>
-                ))}
+              <div className="overview-card">
+                <div className="card-header">
+                  <h3>Portfolio Count</h3>
+                  <FontAwesomeIcon icon={faExchangeAlt} className="card-icon" />
+                </div>
+                <div className="card-value">
+                  {aggregatedData.riskOverview.portfolioCount}
+                </div>
+                <div className="card-change">Active portfolios</div>
+              </div>
+
+              <div className="overview-card">
+                <div className="card-header">
+                  <h3>Risk Level</h3>
+                  <FontAwesomeIcon icon={faChartLine} className="card-icon" />
+                </div>
+                <div className="card-value">
+                  {aggregatedData.riskOverview.averageVolatility.toFixed(1)}%
+                </div>
+                <div className="card-change">Average volatility</div>
+              </div>
             </div>
           </div>
         )}
 
-      {/* Top Performing Portfolios */}
-      {aggregatedData && aggregatedData.topPerformingPortfolios.length > 0 && (
-        <div className="analytics-section">
-          <h2>Top Performing Portfolios</h2>
-          <div className="top-performers">
-            {aggregatedData.topPerformingPortfolios.map((portfolio, index) => (
-              <div key={index} className="performer-item">
-                <div className="performer-rank">#{index + 1}</div>
-                <div className="performer-info">
-                  <div className="performer-name">{portfolio.name}</div>
-                  <div className="performer-value">
+        {/* Autonomous Trading Strategy Analytics */}
+        {strategyAnalytics && (
+          <div className="analytics-section">
+            <h2>
+              <FontAwesomeIcon
+                icon={faRobot}
+                style={{ marginRight: "0.5rem" }}
+              />
+              Autonomous Trading Strategies
+            </h2>
+
+            {/* Strategy Overview Cards */}
+            <div className="analytics-overview">
+              <div className="overview-cards">
+                <div className="overview-card">
+                  <div className="card-header">
+                    <h3>Active Strategies</h3>
+                    <FontAwesomeIcon icon={faPlay} className="card-icon" />
+                  </div>
+                  <div className="card-value">
+                    {strategyAnalytics.totalActiveStrategies}
+                  </div>
+                  <div className="card-change">
+                    {strategyAnalytics.runningStrategies.length} total deployed
+                  </div>
+                </div>
+
+                <div className="overview-card">
+                  <div className="card-header">
+                    <h3>Total Trades Today</h3>
+                    <FontAwesomeIcon
+                      icon={faExchangeAlt}
+                      className="card-icon"
+                    />
+                  </div>
+                  <div className="card-value">
+                    {strategyAnalytics.totalTradesToday}
+                  </div>
+                  <div className="card-change">Automated executions</div>
+                </div>
+
+                <div className="overview-card">
+                  <div className="card-header">
+                    <h3>Autonomous Returns</h3>
+                    <FontAwesomeIcon icon={faChartLine} className="card-icon" />
+                  </div>
+                  <div className="card-value">
                     $
-                    {portfolio.value.toLocaleString("en-US", {
-                      maximumFractionDigits: 0,
+                    {strategyAnalytics.totalAutonomousReturn.toLocaleString(
+                      "en-US",
+                      {
+                        maximumFractionDigits: 2,
+                      }
+                    )}
+                  </div>
+                  <div
+                    className={`card-change ${strategyAnalytics.totalAutonomousReturn >= 0 ? "positive" : "negative"}`}
+                  >
+                    {strategyAnalytics.totalAutonomousReturn >= 0 ? "+" : ""}
+                    {(
+                      (strategyAnalytics.totalAutonomousReturn / 10000) *
+                      100
+                    ).toFixed(2)}
+                    % of capital
+                  </div>
+                </div>
+
+                <div className="overview-card">
+                  <div className="card-header">
+                    <h3>Average Win Rate</h3>
+                    <FontAwesomeIcon icon={faChartLine} className="card-icon" />
+                  </div>
+                  <div className="card-value">
+                    {(
+                      strategyAnalytics.averagePerformance.winRate * 100
+                    ).toFixed(1)}
+                    %
+                  </div>
+                  <div className="card-change">
+                    Sharpe:{" "}
+                    {strategyAnalytics.averagePerformance.sharpeRatio.toFixed(
+                      2
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Strategy Breakdown */}
+            {strategyAnalytics.runningStrategies.length > 0 ? (
+              <div className="strategy-grid">
+                {strategyAnalytics.runningStrategies.map((strategy) => (
+                  <div key={strategy.id} className="strategy-card">
+                    <div className="strategy-card-header">
+                      <h3>{strategy.strategyId}</h3>
+                      <div
+                        className={`strategy-status strategy-status-${strategy.status}`}
+                      >
+                        <FontAwesomeIcon
+                          icon={
+                            strategy.status === "running"
+                              ? faPlay
+                              : strategy.status === "paused"
+                                ? faPause
+                                : faStop
+                          }
+                        />
+                        {strategy.status}
+                      </div>
+                    </div>
+
+                    <div className="strategy-metrics">
+                      <div className="metric-row">
+                        <span className="metric-label">Total Return:</span>
+                        <span
+                          className={`metric-value ${(strategy.performance?.totalReturn || 0) >= 0 ? "positive" : "negative"}`}
+                        >
+                          $
+                          {(
+                            strategy.performance?.totalReturn || 0
+                          ).toLocaleString("en-US", {
+                            maximumFractionDigits: 2,
+                          })}
+                        </span>
+                      </div>
+
+                      <div className="metric-row">
+                        <span className="metric-label">Daily Return:</span>
+                        <span
+                          className={`metric-value ${(strategy.performance?.dailyReturn || 0) >= 0 ? "positive" : "negative"}`}
+                        >
+                          {(
+                            (strategy.performance?.dailyReturn || 0) * 100
+                          ).toFixed(2)}
+                          %
+                        </span>
+                      </div>
+
+                      <div className="metric-row">
+                        <span className="metric-label">Total Trades:</span>
+                        <span className="metric-value">
+                          {strategy.performance?.totalTrades || 0}
+                        </span>
+                      </div>
+
+                      <div className="metric-row">
+                        <span className="metric-label">Win Rate:</span>
+                        <span className="metric-value">
+                          {((strategy.performance?.winRate || 0) * 100).toFixed(
+                            1
+                          )}
+                          %
+                        </span>
+                      </div>
+
+                      <div className="metric-row">
+                        <span className="metric-label">Sharpe Ratio:</span>
+                        <span className="metric-value">
+                          {(strategy.performance?.sharpeRatio || 0).toFixed(2)}
+                        </span>
+                      </div>
+
+                      <div className="metric-row">
+                        <span className="metric-label">Max Drawdown:</span>
+                        <span className="metric-value negative">
+                          {(
+                            (strategy.performance?.maxDrawdown || 0) * 100
+                          ).toFixed(2)}
+                          %
+                        </span>
+                      </div>
+
+                      <div className="metric-row">
+                        <span className="metric-label">Uptime:</span>
+                        <span className="metric-value">
+                          {strategyAnalytics.strategyBreakdown.find(
+                            (s) => s.strategyId === strategy.strategyId
+                          )?.uptime || 0}
+                          h
+                        </span>
+                      </div>
+
+                      <div className="metric-row">
+                        <span className="metric-label">Errors:</span>
+                        <span
+                          className={`metric-value ${strategy.errorCount > 0 ? "negative" : ""}`}
+                        >
+                          {strategy.errorCount}
+                        </span>
+                      </div>
+                    </div>
+
+                    {strategy.performance && (
+                      <div className="strategy-performance">
+                        <h4>Performance Summary</h4>
+                        <div className="performance-row">
+                          <span>Current Value:</span>
+                          <span className="performance-value">
+                            $
+                            {(
+                              strategy.performance.currentValue || 0
+                            ).toLocaleString("en-US", {
+                              maximumFractionDigits: 2,
+                            })}
+                          </span>
+                        </div>
+                        <div className="performance-row">
+                          <span>Unrealized P&L:</span>
+                          <span
+                            className={`performance-value ${(strategy.performance.unrealizedPnL || 0) >= 0 ? "positive" : "negative"}`}
+                          >
+                            $
+                            {(
+                              strategy.performance.unrealizedPnL || 0
+                            ).toLocaleString("en-US", {
+                              maximumFractionDigits: 2,
+                            })}
+                          </span>
+                        </div>
+                        <div className="performance-row">
+                          <span>Profitable Trades:</span>
+                          <span className="performance-value">
+                            {strategy.performance.profitableTrades || 0} /{" "}
+                            {strategy.performance.totalTrades || 0}
+                          </span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="no-strategies">
+                <FontAwesomeIcon
+                  icon={faRobot}
+                  size="3x"
+                  style={{ color: "#6b7280", marginBottom: "1rem" }}
+                />
+                <h3>No Active Strategies</h3>
+                <p>Start autonomous trading to see strategy analytics here.</p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Portfolio Breakdown */}
+        <div className="analytics-section">
+          <h2>Portfolio Breakdown</h2>
+          <div className="portfolio-grid">
+            {portfolioAnalytics.map((portfolio) => (
+              <div key={portfolio.portfolioId} className="portfolio-card">
+                <div className="portfolio-card-header">
+                  <h3>{portfolio.portfolioName}</h3>
+                  <div className="portfolio-value">
+                    $
+                    {portfolio.totalValue.toLocaleString("en-US", {
+                      maximumFractionDigits: 2,
                     })}
                   </div>
                 </div>
-                <div
-                  className={`performer-return ${portfolio.return >= 0 ? "positive" : "negative"}`}
-                >
-                  {portfolio.return >= 0 ? "+" : ""}$
-                  {portfolio.return.toLocaleString("en-US", {
-                    maximumFractionDigits: 2,
-                  })}
+
+                <div className="portfolio-metrics">
+                  <div className="metric-row">
+                    <span className="metric-label">Total Return:</span>
+                    <span
+                      className={`metric-value ${portfolio.performanceSummary.totalReturn >= 0 ? "positive" : "negative"}`}
+                    >
+                      $
+                      {portfolio.performanceSummary.totalReturn.toLocaleString(
+                        "en-US",
+                        { maximumFractionDigits: 2 }
+                      )}
+                    </span>
+                  </div>
+
+                  <div className="metric-row">
+                    <span className="metric-label">Day Return:</span>
+                    <span
+                      className={`metric-value ${portfolio.performanceSummary.dayReturn >= 0 ? "positive" : "negative"}`}
+                    >
+                      {portfolio.performanceSummary.dayReturn.toFixed(2)}%
+                    </span>
+                  </div>
+
+                  <div className="metric-row">
+                    <span className="metric-label">Volatility:</span>
+                    <span className="metric-value">
+                      {portfolio.riskMetrics.portfolioVolatility.toFixed(1)}%
+                    </span>
+                  </div>
+
+                  <div className="metric-row">
+                    <span className="metric-label">Sharpe Ratio:</span>
+                    <span className="metric-value">
+                      {portfolio.riskMetrics.sharpeRatio.toFixed(2)}
+                    </span>
+                  </div>
                 </div>
+
+                {portfolio.topHoldings.length > 0 && (
+                  <div className="top-holdings">
+                    <h4>Top Holdings</h4>
+                    {portfolio.topHoldings.slice(0, 3).map((holding, index) => (
+                      <div key={index} className="holding-item">
+                        <span className="holding-symbol">{holding.symbol}</span>
+                        <span className="holding-weight">
+                          {holding.weight.toFixed(1)}%
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             ))}
           </div>
         </div>
-      )}
+
+        {/* Sector Allocation */}
+        {aggregatedData &&
+          Object.keys(aggregatedData.aggregatedSectors).length > 0 && (
+            <div className="analytics-section">
+              <h2>Aggregated Sector Allocation</h2>
+              <div className="sector-allocation">
+                {Object.entries(aggregatedData.aggregatedSectors)
+                  .sort(([, a], [, b]) => b.value - a.value)
+                  .map(([sector, data]) => (
+                    <div key={sector} className="sector-item">
+                      <div className="sector-info">
+                        <span className="sector-name">{sector}</span>
+                        <span className="sector-value">
+                          $
+                          {data.value.toLocaleString("en-US", {
+                            maximumFractionDigits: 0,
+                          })}
+                        </span>
+                      </div>
+                      <div className="sector-bar">
+                        <div
+                          className="sector-fill"
+                          style={{
+                            width: `${Math.min(data.percentage, 100)}%`,
+                          }}
+                        ></div>
+                      </div>
+                      <span className="sector-percentage">
+                        {data.percentage.toFixed(1)}%
+                      </span>
+                    </div>
+                  ))}
+              </div>
+            </div>
+          )}
+
+        {/* Top Performing Portfolios */}
+        {aggregatedData &&
+          aggregatedData.topPerformingPortfolios.length > 0 && (
+            <div className="analytics-section">
+              <h2>Top Performing Portfolios</h2>
+              <div className="top-performers">
+                {aggregatedData.topPerformingPortfolios.map(
+                  (portfolio, index) => (
+                    <div key={index} className="performer-item">
+                      <div className="performer-rank">#{index + 1}</div>
+                      <div className="performer-info">
+                        <div className="performer-name">{portfolio.name}</div>
+                        <div className="performer-value">
+                          $
+                          {portfolio.value.toLocaleString("en-US", {
+                            maximumFractionDigits: 0,
+                          })}
+                        </div>
+                      </div>
+                      <div
+                        className={`performer-return ${portfolio.return >= 0 ? "positive" : "negative"}`}
+                      >
+                        {portfolio.return >= 0 ? "+" : ""}$
+                        {portfolio.return.toLocaleString("en-US", {
+                          maximumFractionDigits: 2,
+                        })}
+                      </div>
+                    </div>
+                  )
+                )}
+              </div>
+            </div>
+          )}
+      </div>{" "}
+      {/* Close page-content */}
     </div>
   );
 });

@@ -1,49 +1,9 @@
 /* Modern Analytics Page */
 @import "../shared-styles.css";
 
-.analytics-page {
-  min-height: 100vh;
-  background: var(--trading-bg-gradient-dark);
-  background-attachment: fixed;
-  padding: 2rem 1.5rem;
-  font-family: var(--trading-font-sans);
-  color: var(--trading-text-primary);
-  width: 100%;
-  box-sizing: border-box;
-  position: relative;
-}
-
-.analytics-page::before {
-  content: "";
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background:
-    radial-gradient(
-      circle at 25% 25%,
-      rgba(139, 163, 247, 0.15) 0%,
-      transparent 50%
-    ),
-    radial-gradient(
-      circle at 75% 75%,
-      rgba(168, 85, 247, 0.15) 0%,
-      transparent 50%
-    ),
-    radial-gradient(
-      circle at 50% 50%,
-      rgba(16, 185, 129, 0.1) 0%,
-      transparent 70%
-    );
-  pointer-events: none;
-  z-index: 0;
-}
-
-.analytics-page > * {
-  position: relative;
-  z-index: 1;
-}
+/* ==========================================================================
+   Analytics Page Specific Styles - Uses standardized .page-container
+   ========================================================================== */
 
 /* No Portfolio Message */
 .no-portfolio-message {
@@ -699,10 +659,6 @@
 
 /* Responsive Design */
 @media (max-width: 1024px) {
-  .analytics-page {
-    padding: 1.5rem 1rem;
-  }
-
   .overview-cards {
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
     gap: 1rem;
@@ -744,10 +700,6 @@
 }
 
 @media (max-width: 480px) {
-  .analytics-page {
-    padding: 1rem 0.75rem;
-  }
-
   .card-value {
     font-size: 1.75rem;
   }
