@@ -10,20 +10,31 @@ import {
   Put,
   Query,
 } from '@nestjs/common';
-import { AutoTradingService, DeploymentConfig } from './auto-trading.service';
+import { AutoTradingService } from './auto-trading.service';
+import {
+  CreateAdvancedOrderDto,
+  ModifyAdvancedOrderDto,
+} from './dto/advanced-order.dto';
 import { TradeFiltersDto } from './dto/auto-trade-config.dto';
 import {
   CreateTradingRuleDto,
   UpdateTradingRuleDto,
 } from './dto/create-trading-rule.dto';
+import { DeploymentConfigDto } from './dto/deployment-config.dto';
 import {
   StopTradingSessionDto,
   TradingSessionDto,
 } from './dto/trading-session.dto';
+import { AdvancedOrderExecutionService } from './services/advanced-order-execution.service';
+import { AutoTradingOrderPreviewService } from './services/auto-trading-order-preview.service';
 
 @Controller('auto-trading')
 export class AutoTradingController {
-  constructor(private readonly autoTradingService: AutoTradingService) {}
+  constructor(
+    private readonly autoTradingService: AutoTradingService,
+    private readonly autoTradingOrderPreviewService: AutoTradingOrderPreviewService,
+    private readonly advancedOrderExecutionService: AdvancedOrderExecutionService,
+  ) {}
 
   // Trading Rules Management Endpoints
   @Post('rules')
@@ -153,6 +164,12 @@ export class AutoTradingController {
   // Trading Session Management Endpoints
   @Post('sessions/start')
   async startTradingSession(@Body() sessionDto: TradingSessionDto) {
+    console.log('=== SESSION DTO RECEIVED ===');
+    console.log('Raw body:', JSON.stringify(sessionDto, null, 2));
+    console.log('portfolio_id:', sessionDto.portfolio_id);
+    console.log('session_name:', sessionDto.session_name);
+    console.log('config:', JSON.stringify(sessionDto.config, null, 2));
+    console.log('==========================');
     try {
       const session = await this.autoTradingService.startTradingSession(
         sessionDto.portfolio_id,
@@ -445,7 +462,7 @@ export class AutoTradingController {
   @Post('autonomous/strategies/:strategyId/deploy')
   async deployStrategy(
     @Param('strategyId') strategyId: string,
-    @Body() config: DeploymentConfig,
+    @Body() config: DeploymentConfigDto,
     @Query('userId') userId: string = 'default-user', // TODO: Get from auth context
   ) {
     try {
@@ -653,6 +670,401 @@ export class AutoTradingController {
         success: true,
         data: strategy,
         message: 'Strategy created from template successfully',
+      };
+    } catch (error) {
+      throw new HttpException(
+        {
+          success: false,
+          message: error.message,
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
+  // ============================================================================
+  // AUTO TRADING ORDER PREVIEW ENDPOINTS (S41)
+  // ============================================================================
+
+  @Get('orders/preview/:portfolioId')
+  async getPendingOrders(@Param('portfolioId') portfolioId: string) {
+    try {
+      const orders =
+        await this.autoTradingOrderPreviewService.getPendingOrdersForPortfolio(
+          Number(portfolioId),
+        );
+      return {
+        success: true,
+        data: orders,
+        count: orders.length,
+        message: 'Pending auto trading orders retrieved successfully',
+      };
+    } catch (error) {
+      throw new HttpException(
+        {
+          success: false,
+          message: error.message,
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  @Post('orders/approve/:orderId')
+  async approveOrder(@Param('orderId') orderId: string) {
+    try {
+      const order =
+        await this.autoTradingOrderPreviewService.approveOrder(orderId);
+      return {
+        success: true,
+        data: order,
+        message: 'Auto trading order approved successfully',
+      };
+    } catch (error) {
+      throw new HttpException(
+        {
+          success: false,
+          message: error.message,
+        },
+        error.message.includes('not found')
+          ? HttpStatus.NOT_FOUND
+          : HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
+  @Post('orders/reject/:orderId')
+  async rejectOrder(
+    @Param('orderId') orderId: string,
+    @Body() body: { reason?: string },
+  ) {
+    try {
+      const order = await this.autoTradingOrderPreviewService.rejectOrder(
+        orderId,
+        body.reason,
+      );
+      return {
+        success: true,
+        data: order,
+        message: 'Auto trading order rejected successfully',
+      };
+    } catch (error) {
+      throw new HttpException(
+        {
+          success: false,
+          message: error.message,
+        },
+        error.message.includes('not found')
+          ? HttpStatus.NOT_FOUND
+          : HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
+  @Put('orders/modify/:orderId')
+  async modifyOrder(
+    @Param('orderId') orderId: string,
+    @Body() updateDto: any, // Using any for now, would use UpdateAutoTradingOrderDto
+  ) {
+    try {
+      const order = await this.autoTradingOrderPreviewService.modifyOrder(
+        orderId,
+        updateDto,
+      );
+      return {
+        success: true,
+        data: order,
+        message: 'Auto trading order modified successfully',
+      };
+    } catch (error) {
+      throw new HttpException(
+        {
+          success: false,
+          message: error.message,
+        },
+        error.message.includes('not found')
+          ? HttpStatus.NOT_FOUND
+          : HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
+  @Get('orders/status/:portfolioId')
+  async getOrderStatusSummary(@Param('portfolioId') portfolioId: string) {
+    try {
+      const summary =
+        await this.autoTradingOrderPreviewService.getOrderStatusSummary(
+          Number(portfolioId),
+        );
+      return {
+        success: true,
+        data: summary,
+        message: 'Order status summary retrieved successfully',
+      };
+    } catch (error) {
+      throw new HttpException(
+        {
+          success: false,
+          message: error.message,
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  @Post('orders/bulk/approve')
+  async bulkApproveOrders(@Body() body: { orderIds: string[] }) {
+    try {
+      const orders =
+        await this.autoTradingOrderPreviewService.bulkApproveOrders(
+          body.orderIds,
+        );
+      return {
+        success: true,
+        data: orders,
+        count: orders.length,
+        message: `${orders.length} orders approved successfully`,
+      };
+    } catch (error) {
+      throw new HttpException(
+        {
+          success: false,
+          message: error.message,
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
+  @Post('orders/bulk/reject')
+  async bulkRejectOrders(
+    @Body() body: { orderIds: string[]; reason?: string },
+  ) {
+    try {
+      const orders = await this.autoTradingOrderPreviewService.bulkRejectOrders(
+        body.orderIds,
+        body.reason,
+      );
+      return {
+        success: true,
+        data: orders,
+        count: orders.length,
+        message: `${orders.length} orders rejected successfully`,
+      };
+    } catch (error) {
+      throw new HttpException(
+        {
+          success: false,
+          message: error.message,
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
+  @Delete('orders/expired')
+  async cleanupExpiredOrders() {
+    try {
+      await this.autoTradingOrderPreviewService.cleanupExpiredOrders();
+      return {
+        success: true,
+        message: 'Expired orders cleanup completed',
+      };
+    } catch (error) {
+      throw new HttpException(
+        {
+          success: false,
+          message: error.message,
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  // === Advanced Order Execution Endpoints ===
+
+  /**
+   * Create an advanced auto trading order with sophisticated features
+   */
+  @Post('orders/advanced')
+  async createAdvancedOrder(@Body() createDto: CreateAdvancedOrderDto) {
+    try {
+      const advancedOrder =
+        await this.advancedOrderExecutionService.createAdvancedOrder(createDto);
+
+      return {
+        success: true,
+        data: advancedOrder,
+        message: 'Advanced order created successfully',
+      };
+    } catch (error) {
+      throw new HttpException(
+        {
+          success: false,
+          message: error.message,
+          error: error.name,
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
+  /**
+   * Get advanced order by ID
+   */
+  @Get('orders/advanced/:orderId')
+  async getAdvancedOrder(@Param('orderId') orderId: string) {
+    try {
+      const order =
+        await this.advancedOrderExecutionService.getAdvancedOrder(orderId);
+
+      return {
+        success: true,
+        data: order,
+        message: 'Advanced order retrieved successfully',
+      };
+    } catch (error) {
+      throw new HttpException(
+        {
+          success: false,
+          message: error.message,
+        },
+        HttpStatus.NOT_FOUND,
+      );
+    }
+  }
+
+  /**
+   * Get all advanced orders for a portfolio
+   */
+  @Get('orders/advanced/portfolio/:portfolioId')
+  async getAdvancedOrdersByPortfolio(
+    @Param('portfolioId') portfolioId: number,
+  ) {
+    try {
+      const orders =
+        await this.advancedOrderExecutionService.getAdvancedOrdersByPortfolio(
+          portfolioId,
+        );
+
+      return {
+        success: true,
+        data: orders,
+        message: 'Advanced orders retrieved successfully',
+      };
+    } catch (error) {
+      throw new HttpException(
+        {
+          success: false,
+          message: error.message,
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
+  /**
+   * Cancel an advanced order
+   */
+  @Put('orders/advanced/:orderId/cancel')
+  async cancelAdvancedOrder(@Param('orderId') orderId: string) {
+    try {
+      const result =
+        await this.advancedOrderExecutionService.cancelAdvancedOrder(orderId);
+
+      return {
+        success: true,
+        data: result,
+        message: 'Advanced order cancelled successfully',
+      };
+    } catch (error) {
+      throw new HttpException(
+        {
+          success: false,
+          message: error.message,
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
+  /**
+   * Modify an advanced order
+   */
+  @Put('orders/advanced/:orderId')
+  async modifyAdvancedOrder(
+    @Param('orderId') orderId: string,
+    @Body() modifyDto: ModifyAdvancedOrderDto,
+  ) {
+    try {
+      const result =
+        await this.advancedOrderExecutionService.modifyAdvancedOrder(
+          orderId,
+          modifyDto,
+        );
+
+      return {
+        success: true,
+        data: result,
+        message: 'Advanced order modified successfully',
+      };
+    } catch (error) {
+      throw new HttpException(
+        {
+          success: false,
+          message: error.message,
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
+  /**
+   * Get execution analytics for advanced orders
+   */
+  @Get('orders/advanced/analytics/:portfolioId')
+  async getAdvancedOrderAnalytics(
+    @Param('portfolioId') portfolioId: number,
+    @Query('timeRange') timeRange?: string,
+  ) {
+    try {
+      const analytics =
+        await this.advancedOrderExecutionService.getExecutionAnalytics(
+          portfolioId,
+          timeRange,
+        );
+
+      return {
+        success: true,
+        data: analytics,
+        message: 'Execution analytics retrieved successfully',
+      };
+    } catch (error) {
+      throw new HttpException(
+        {
+          success: false,
+          message: error.message,
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
+  /**
+   * Get real-time monitoring data for active orders
+   */
+  @Get('orders/advanced/monitoring/:portfolioId')
+  async getAdvancedOrderMonitoring(@Param('portfolioId') portfolioId: number) {
+    try {
+      const monitoring =
+        await this.advancedOrderExecutionService.getOrderMonitoring(
+          portfolioId,
+        );
+
+      return {
+        success: true,
+        data: monitoring,
+        message: 'Order monitoring data retrieved successfully',
       };
     } catch (error) {
       throw new HttpException(

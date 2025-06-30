@@ -4,6 +4,25 @@ This directory contains standalone test scripts used for development and debuggi
 
 ## Scripts Overview
 
+### Docker & Cloud Run API Testing (NEW) 🚀
+
+- `test-api-docker.sh` - Comprehensive Docker container API testing
+- `test-cloud-run-apis.sh` - Cloud Run deployment API testing
+- `README-API-TESTING.md` - Complete API testing documentation
+
+**Quick Start:**
+
+```bash
+# Test APIs in Docker container
+npm run test:api:docker
+
+# Test APIs in Cloud Run deployment
+npm run test:api:cloudrun
+
+# Run both tests
+npm run test:api:all
+```
+
 ### Stock Data & API Testing
 
 - `test-stocks-endpoint.js` - Tests the stocks API endpoint functionality
@@ -37,6 +56,20 @@ This directory contains standalone test scripts used for development and debuggi
 
 ## Usage
 
+### Docker & Cloud Run Testing (Recommended)
+
+Use the new API testing scripts for comprehensive deployment validation:
+
+```bash
+# Test all external API integrations in Docker
+./test-scripts/test-api-docker.sh
+
+# Test deployed APIs in Google Cloud Run
+./test-scripts/test-cloud-run-apis.sh
+```
+
+### Traditional Node.js Testing
+
 These scripts are typically run directly with Node.js for debugging and development purposes:
 
 ```bash
@@ -47,6 +80,17 @@ node test-scripts/test-stocks-endpoint.js
 cd test-scripts
 node test-live-market-data.js
 ```
+
+## ⚠️ Critical: Docker & Cloud Run Testing
+
+**Every API change must be tested with Docker and Cloud Run compatibility:**
+
+1. **After modifying any external API integration**
+2. **Before committing API-related changes**
+3. **Before deploying to production**
+4. **During development when adding new APIs**
+
+See the complete [API Testing Documentation](README-API-TESTING.md) for detailed workflows.
 
 **Important:** When running test scripts that require external dependencies (like `node-fetch` or `socket.io-client`), ensure these are installed in the project root:
 

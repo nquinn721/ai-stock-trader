@@ -214,14 +214,65 @@ const AnalyticsPage: React.FC = observer(() => {
   const fetchStrategyAnalytics = async () => {
     setStrategyLoading(true);
     try {
-      const response = await autoTradingStore.getRunningStrategies();
+      // Use the same endpoint as AutonomousTradingPage for consistency
+      const response = await fetch(
+        `/api/auto-trading/autonomous/strategies/active`
+      );
+      const result = await response.json();
 
-      if (response.success && response.data) {
-        const strategies = response.data;
+      if (result.success && result.data) {
+        const strategies: StrategyInstance[] = Array.isArray(result.data)
+          ? result.data
+          : [];
 
+        // Get portfolios to synchronize strategy counts
+        const portfolios = portfolioStore.portfolios;
+
+        // Synchronize strategy data with portfolio assignments
+        const portfolioStrategyCounts = new Map<string, number>();
+
+        strategies.forEach((strategy: StrategyInstance) => {
+          let portfolioId = "";
+
+          // Try multiple methods to extract portfolio ID (same logic as AutonomousTradingPage)
+          if (strategy.id && strategy.id.includes("autonomous-strategy-")) {
+            portfolioId = strategy.id.replace("autonomous-strategy-", "");
+          } else if (
+            strategy.strategyId &&
+            strategy.strategyId.includes("autonomous-strategy-")
+          ) {
+            portfolioId = strategy.strategyId.replace(
+              "autonomous-strategy-",
+              ""
+            );
+          } else {
+            // Fallback to portfolio matching by name or direct ID
+            const portfolio = portfolios.find(
+              (p: any) =>
+                p.assignedStrategyName === strategy.strategyId ||
+                String(p.id) === strategy.strategyId ||
+                p.assignedStrategyName === strategy.id ||
+                String(p.id) === strategy.id
+            );
+            if (portfolio) {
+              portfolioId = String(portfolio.id);
+            }
+          }
+
+          if (portfolioId) {
+            const currentCount = portfolioStrategyCounts.get(portfolioId) || 0;
+            portfolioStrategyCounts.set(portfolioId, currentCount + 1);
+          }
+        });
+
+        // Calculate actual total active strategies based on successful portfolio mapping
+        const totalActiveStrategies = Array.from(
+          portfolioStrategyCounts.values()
+        ).reduce((sum, count) => sum + count, 0);
         // Calculate aggregated strategy metrics
         const totalReturn = strategies.reduce(
-          (sum, strategy) => sum + (strategy.performance?.totalReturn || 0),
+          (sum: number, strategy: StrategyInstance) =>
+            sum + (strategy.performance?.totalReturn || 0),
           0
         );
 
@@ -231,7 +282,7 @@ const AnalyticsPage: React.FC = observer(() => {
         const averageSharpe =
           strategies.length > 0
             ? strategies.reduce(
-                (sum, strategy) =>
+                (sum: number, strategy: StrategyInstance) =>
                   sum + (strategy.performance?.sharpeRatio || 0),
                 0
               ) / strategies.length
@@ -240,7 +291,8 @@ const AnalyticsPage: React.FC = observer(() => {
         const averageWinRate =
           strategies.length > 0
             ? strategies.reduce(
-                (sum, strategy) => sum + (strategy.performance?.winRate || 0),
+                (sum: number, strategy: StrategyInstance) =>
+                  sum + (strategy.performance?.winRate || 0),
                 0
               ) / strategies.length
             : 0;
@@ -248,35 +300,36 @@ const AnalyticsPage: React.FC = observer(() => {
         const averageDailyReturn =
           strategies.length > 0
             ? strategies.reduce(
-                (sum, strategy) =>
+                (sum: number, strategy: StrategyInstance) =>
                   sum + (strategy.performance?.dailyReturn || 0),
                 0
               ) / strategies.length
             : 0;
 
         const totalTrades = strategies.reduce(
-          (sum, strategy) => sum + (strategy.performance?.totalTrades || 0),
+          (sum: number, strategy: StrategyInstance) =>
+            sum + (strategy.performance?.totalTrades || 0),
           0
         );
 
-        const strategyBreakdown = strategies.map((strategy) => ({
-          strategyId: strategy.strategyId,
-          status: strategy.status,
-          performance: strategy.performance,
-          errorCount: strategy.errorCount || 0,
-          uptime: strategy.startedAt
-            ? Math.floor(
-                (Date.now() - new Date(strategy.startedAt).getTime()) /
-                  (1000 * 60 * 60)
-              )
-            : 0, // hours
-        }));
+        const strategyBreakdown = strategies.map(
+          (strategy: StrategyInstance) => ({
+            strategyId: strategy.strategyId,
+            status: strategy.status,
+            performance: strategy.performance,
+            errorCount: strategy.errorCount || 0,
+            uptime: strategy.startedAt
+              ? Math.floor(
+                  (Date.now() - new Date(strategy.startedAt).getTime()) /
+                    (1000 * 60 * 60)
+                )
+              : 0, // hours
+          })
+        );
 
         setStrategyAnalytics({
           runningStrategies: strategies,
-          totalActiveStrategies: strategies.filter(
-            (s) => s.status === "running"
-          ).length,
+          totalActiveStrategies: totalActiveStrategies, // Use the calculated count from portfolio mapping
           totalTradesToday: totalTrades,
           totalAutonomousReturn: totalReturn,
           averagePerformance: {
@@ -466,7 +519,7 @@ const AnalyticsPage: React.FC = observer(() => {
             },
           ]}
         />
-        <div className="page-content">
+        <div className="dashboard-content">
           <EmptyState
             type="error"
             icon={<FontAwesomeIcon icon={faChartLine} />}
@@ -509,7 +562,7 @@ const AnalyticsPage: React.FC = observer(() => {
             },
           ]}
         />
-        <div className="page-content">
+        <div className="dashboard-content">
           <EmptyState
             type="no-data"
             icon={<FontAwesomeIcon icon={faExchangeAlt} />}
@@ -553,7 +606,7 @@ const AnalyticsPage: React.FC = observer(() => {
         ]}
       />
       {/* Page Content */}
-      <div className="page-content">
+      <div className="dashboard-content">
         {/* Overview Cards */}
         {aggregatedData && (
           <div className="analytics-overview">
@@ -684,11 +737,17 @@ const AnalyticsPage: React.FC = observer(() => {
                     className={`card-change ${strategyAnalytics.totalAutonomousReturn >= 0 ? "positive" : "negative"}`}
                   >
                     {strategyAnalytics.totalAutonomousReturn >= 0 ? "+" : ""}
-                    {(
-                      (strategyAnalytics.totalAutonomousReturn / 10000) *
-                      100
-                    ).toFixed(2)}
-                    % of capital
+                    {aggregatedData
+                      ? (
+                          (strategyAnalytics.totalAutonomousReturn /
+                            aggregatedData.totalPortfolioValue) *
+                          100
+                        ).toFixed(2) + "% of total capital"
+                      : Math.abs(
+                          strategyAnalytics.totalAutonomousReturn
+                        ).toLocaleString("en-US", {
+                          maximumFractionDigits: 2,
+                        }) + " total gain"}
                   </div>
                 </div>
 
@@ -766,7 +825,9 @@ const AnalyticsPage: React.FC = observer(() => {
                       <div className="metric-row">
                         <span className="metric-label">Total Trades:</span>
                         <span className="metric-value">
-                          {strategy.performance?.totalTrades || 0}
+                          {(
+                            strategy.performance?.totalTrades || 0
+                          ).toLocaleString()}
                         </span>
                       </div>
 
@@ -1012,7 +1073,7 @@ const AnalyticsPage: React.FC = observer(() => {
             </div>
           )}
       </div>{" "}
-      {/* Close page-content */}
+      {/* Close dashboard-content */}
     </div>
   );
 });

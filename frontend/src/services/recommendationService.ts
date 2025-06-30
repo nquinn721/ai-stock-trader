@@ -11,7 +11,7 @@ import {
 const API_BASE_URL = FRONTEND_API_CONFIG.backend.baseUrl;
 
 class RecommendationService {
-  private baseURL = `${API_BASE_URL}/ml`;
+  private baseURL = `${API_BASE_URL}/api/ml`;
 
   /**
    * S19: Generate AI-powered trading recommendation for a single symbol

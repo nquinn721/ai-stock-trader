@@ -163,8 +163,9 @@ const PortfolioCreator: React.FC<PortfolioCreatorProps> = ({
         return;
       }
       const portfolioData = {
-        name: selectedType.name,
-        initialCash: initialBalance,
+        userId: userId,
+        portfolioType: selectedType.key,
+        initialBalance: initialBalance,
       };
 
       const portfolio = await portfolioStore.createPortfolio(portfolioData);

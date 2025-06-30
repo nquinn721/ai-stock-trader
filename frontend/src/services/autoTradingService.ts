@@ -229,7 +229,7 @@ class AutoTradingService {
 
   async getTradingSessions(portfolioId: string): Promise<TradingSession[]> {
     const response = await autoTradingApi.get(`/sessions/${portfolioId}`);
-    return response.data;
+    return response.data.data || response.data; // Handle both direct array and {success, data} format
   }
 
   async getSessionStatus(sessionId: string): Promise<SessionStatusResponse> {

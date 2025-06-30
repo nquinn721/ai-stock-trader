@@ -1,7 +1,14 @@
 /* Import shared trading app styles */
 @import "../shared-styles.css";
 
-/* ==========================================================================
+/* =========/* Portfolio Cards Grid */
+.content-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+  gap: 2rem;
+  margin-top: 1.5rem;
+}
+==========================================================
    Autonomous Trading Page - Uses standardized .dashboard-page
    ========================================================================== */
 
@@ -88,37 +95,255 @@
 /* Portfolio Cards Grid */
 .content-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-  gap: 1.5rem;
-  margin-top: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+  gap: 2rem;
+  margin-top: 1.5rem;
+}
+
+/* Enhanced Portfolio Card Styling */
+.portfolio-card {
+  position: relative;
+  background: linear-gradient(
+    145deg,
+    rgba(15, 23, 42, 0.95) 0%,
+    rgba(30, 41, 59, 0.9) 25%,
+    rgba(59, 130, 246, 0.15) 50%,
+    rgba(16, 185, 129, 0.1) 75%,
+    rgba(15, 23, 42, 0.95) 100%
+  ) !important;
+  border: 1px solid rgba(59, 130, 246, 0.4) !important;
+  border-radius: var(--trading-radius-xl) !important;
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.4),
+    0 4px 16px rgba(59, 130, 246, 0.25),
+    0 2px 8px rgba(16, 185, 129, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+  backdrop-filter: blur(20px);
+  transition: all 0.4s ease;
+  overflow: hidden;
+  animation: slideInUp 0.6s ease-out forwards;
+  opacity: 0;
+  transform: translateY(30px);
+}
+
+.portfolio-card:nth-child(1) {
+  animation-delay: 0.1s;
+}
+.portfolio-card:nth-child(2) {
+  animation-delay: 0.2s;
+}
+.portfolio-card:nth-child(3) {
+  animation-delay: 0.3s;
+}
+.portfolio-card:nth-child(4) {
+  animation-delay: 0.4s;
+}
+.portfolio-card:nth-child(5) {
+  animation-delay: 0.5s;
+}
+.portfolio-card:nth-child(6) {
+  animation-delay: 0.6s;
+}
+
+@keyframes slideInUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.portfolio-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(59, 130, 246, 0.08) 0%,
+    rgba(147, 51, 234, 0.06) 25%,
+    rgba(236, 72, 153, 0.04) 50%,
+    rgba(16, 185, 129, 0.08) 75%,
+    rgba(34, 197, 94, 0.06) 100%
+  );
+  pointer-events: none;
+  z-index: 0;
+  animation: colorShift 8s ease-in-out infinite;
+}
+
+@keyframes colorShift {
+  0%,
+  100% {
+    opacity: 0.6;
+  }
+  25% {
+    opacity: 0.8;
+  }
+  50% {
+    opacity: 1;
+  }
+  75% {
+    opacity: 0.8;
+  }
+}
+
+.portfolio-card:hover {
+  transform: translateY(-6px);
+  border-color: rgba(59, 130, 246, 0.6) !important;
+  box-shadow:
+    0 16px 48px rgba(0, 0, 0, 0.5),
+    0 8px 24px rgba(59, 130, 246, 0.3),
+    0 4px 12px rgba(16, 185, 129, 0.2),
+    0 2px 6px rgba(147, 51, 234, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
+}
+
+.portfolio-card .card-content {
+  position: relative;
+  z-index: 1;
 }
 
 .portfolio-card .info-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 0.75rem;
+  margin-bottom: 1rem;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  transition: all 0.3s ease;
+  border-radius: var(--trading-radius-sm);
+  padding: 0.75rem 0.5rem;
+  margin: 0.25rem 0;
+}
+
+.portfolio-card .info-row:hover {
+  background: rgba(255, 255, 255, 0.02);
+  transform: translateX(4px);
+}
+
+.portfolio-card .info-row:last-of-type {
+  border-bottom: none;
 }
 
 .portfolio-card .strategy-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin: 1rem 0;
+  margin: 1.25rem 0;
+  padding: 1rem;
+  background: rgba(59, 130, 246, 0.05);
+  border-radius: var(--trading-radius-lg);
+  border: 1px solid rgba(59, 130, 246, 0.1);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.portfolio-card .strategy-row::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(59, 130, 246, 0.1),
+    transparent
+  );
+  transition: left 0.6s ease;
+}
+
+.portfolio-card .strategy-row:hover::before {
+  left: 100%;
 }
 
 .portfolio-card .assigned-strategy {
-  margin: 0.75rem 0;
-  padding: 0.75rem;
-  background: rgba(59, 130, 246, 0.1);
-  border-radius: var(--trading-radius-md);
+  margin: 1rem 0;
+  padding: 1rem;
+  background: linear-gradient(
+    135deg,
+    rgba(59, 130, 246, 0.15) 0%,
+    rgba(16, 185, 129, 0.1) 100%
+  );
+  border-radius: var(--trading-radius-lg);
   border-left: 3px solid var(--trading-primary-500);
+  border-top: 1px solid rgba(59, 130, 246, 0.2);
+  box-shadow:
+    0 4px 12px rgba(59, 130, 246, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.portfolio-card .assigned-strategy::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 4px;
+  height: 100%;
+  background: linear-gradient(
+    180deg,
+    var(--trading-primary-500) 0%,
+    var(--trading-success-500) 100%
+  );
+  transform: scaleY(0);
+  transition: transform 0.3s ease;
+  transform-origin: bottom;
+}
+
+.portfolio-card .assigned-strategy:hover::after {
+  transform: scaleY(1);
 }
 
 .portfolio-card .card-actions {
-  margin-top: 1rem;
-  padding-top: 1rem;
-  border-top: 1px solid var(--trading-border-secondary);
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  background: linear-gradient(
+    135deg,
+    rgba(0, 0, 0, 0.1) 0%,
+    rgba(59, 130, 246, 0.02) 100%
+  );
+  border-radius: 0 0 var(--trading-radius-xl) var(--trading-radius-xl);
+  margin-left: -1.5rem;
+  margin-right: -1.5rem;
+  margin-bottom: -1.5rem;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+  padding-bottom: 1.5rem;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.portfolio-card .card-actions::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(59, 130, 246, 0.3),
+    transparent
+  );
+  animation: pulse-glow 3s ease-in-out infinite;
+}
+
+@keyframes pulse-glow {
+  0%,
+  100% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 0.8;
+  }
 }
 
 /* Live Market Data Tab */
@@ -140,7 +365,12 @@
 @media (max-width: 768px) {
   .content-grid {
     grid-template-columns: 1fr;
-    gap: 1rem;
+    gap: 1.5rem;
+    margin-top: 1rem;
+  }
+
+  .portfolio-card {
+    margin: 0 0.5rem;
   }
 
   .global-controls .control-content {
@@ -152,7 +382,17 @@
   .portfolio-card .strategy-row {
     flex-direction: column;
     align-items: stretch;
-    gap: 0.5rem;
+    gap: 0.75rem;
+    padding: 0.75rem;
+  }
+
+  .portfolio-card .card-actions {
+    margin-left: -1rem;
+    margin-right: -1rem;
+    margin-bottom: -1rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    padding-bottom: 1rem;
   }
 
   .live-market-tab .header-actions {
@@ -162,6 +402,29 @@
 
   .stock-grid {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .content-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    margin-top: 0.5rem;
+  }
+
+  .portfolio-card {
+    margin: 0;
+    border-radius: var(--trading-radius-lg) !important;
+  }
+
+  .portfolio-card .card-actions {
+    margin-left: -1rem;
+    margin-right: -1rem;
+    margin-bottom: -1rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    padding-bottom: 1rem;
+    border-radius: 0 0 var(--trading-radius-lg) var(--trading-radius-lg);
   }
 }
 
@@ -256,4 +519,281 @@
 
 .MuiInputLabel-root {
   color: var(--trading-text-secondary) !important;
+}
+
+/* ==========================================================================
+   Enhanced Button Colors and Status Indicators
+   ========================================================================== */
+
+/* Status Chip Enhancements */
+.portfolio-card .MuiChip-root {
+  font-weight: 600 !important;
+  transition: all 0.3s ease !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.5px !important;
+}
+
+/* Active Status - Vibrant Green */
+.portfolio-card .MuiChip-root[class*="success"] {
+  background: linear-gradient(
+    135deg,
+    rgba(34, 197, 94, 0.8) 0%,
+    rgba(16, 185, 129, 0.9) 50%,
+    rgba(5, 150, 105, 0.8) 100%
+  ) !important;
+  border: 1px solid rgba(34, 197, 94, 0.6) !important;
+  color: white !important;
+  box-shadow:
+    0 4px 12px rgba(34, 197, 94, 0.3),
+    0 2px 6px rgba(16, 185, 129, 0.2) !important;
+  animation: pulse-success 2s ease-in-out infinite;
+}
+
+@keyframes pulse-success {
+  0%,
+  100% {
+    box-shadow:
+      0 4px 12px rgba(34, 197, 94, 0.3),
+      0 2px 6px rgba(16, 185, 129, 0.2);
+  }
+  50% {
+    box-shadow:
+      0 6px 16px rgba(34, 197, 94, 0.4),
+      0 3px 8px rgba(16, 185, 129, 0.3);
+  }
+}
+
+/* Inactive Status - Muted Gray with Red Accent */
+.portfolio-card .MuiChip-root[class*="inactive"] {
+  background: linear-gradient(
+    135deg,
+    rgba(107, 114, 128, 0.6) 0%,
+    rgba(75, 85, 99, 0.7) 50%,
+    rgba(55, 65, 81, 0.6) 100%
+  ) !important;
+  border: 1px solid rgba(239, 68, 68, 0.4) !important;
+  color: rgba(255, 255, 255, 0.9) !important;
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Warning Status - Vibrant Orange */
+.portfolio-card .MuiChip-root[class*="warning"] {
+  background: linear-gradient(
+    135deg,
+    rgba(251, 146, 60, 0.8) 0%,
+    rgba(249, 115, 22, 0.9) 50%,
+    rgba(234, 88, 12, 0.8) 100%
+  ) !important;
+  border: 1px solid rgba(251, 146, 60, 0.6) !important;
+  color: white !important;
+  box-shadow:
+    0 4px 12px rgba(251, 146, 60, 0.3),
+    0 2px 6px rgba(249, 115, 22, 0.2) !important;
+}
+
+/* Enhanced Button Styling in Portfolio Cards */
+.portfolio-card .trading-btn {
+  font-weight: 700 !important;
+  text-transform: none !important;
+  letter-spacing: 0.3px !important;
+  position: relative !important;
+  overflow: hidden !important;
+  transition: all 0.4s ease !important;
+}
+
+/* Start Autonomous Trading Button - Vibrant Green Gradient */
+.portfolio-card .trading-btn--success {
+  background: linear-gradient(
+    135deg,
+    rgba(34, 197, 94, 0.9) 0%,
+    rgba(16, 185, 129, 1) 25%,
+    rgba(5, 150, 105, 0.95) 50%,
+    rgba(6, 120, 85, 0.9) 100%
+  ) !important;
+  border: 1px solid rgba(34, 197, 94, 0.6) !important;
+  color: white !important;
+  box-shadow:
+    0 6px 20px rgba(34, 197, 94, 0.4),
+    0 3px 10px rgba(16, 185, 129, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
+}
+
+.portfolio-card .trading-btn--success:hover {
+  background: linear-gradient(
+    135deg,
+    rgba(22, 163, 74, 1) 0%,
+    rgba(5, 150, 105, 1) 25%,
+    rgba(6, 120, 85, 1) 50%,
+    rgba(4, 108, 78, 1) 100%
+  ) !important;
+  transform: translateY(-3px) !important;
+  box-shadow:
+    0 8px 25px rgba(34, 197, 94, 0.5),
+    0 4px 15px rgba(16, 185, 129, 0.4),
+    0 0 0 1px rgba(34, 197, 94, 0.6),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25) !important;
+}
+
+.portfolio-card .trading-btn--success::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+  transition: left 0.6s ease;
+}
+
+.portfolio-card .trading-btn--success:hover::before {
+  left: 100%;
+}
+
+/* Stop Autonomous Trading Button - Vibrant Red Gradient */
+.portfolio-card .trading-btn--danger {
+  background: linear-gradient(
+    135deg,
+    rgba(239, 68, 68, 0.95) 0%,
+    rgba(220, 38, 38, 1) 25%,
+    rgba(185, 28, 28, 0.95) 50%,
+    rgba(153, 27, 27, 0.9) 100%
+  ) !important;
+  border: 1px solid rgba(239, 68, 68, 0.6) !important;
+  color: white !important;
+  box-shadow:
+    0 6px 20px rgba(239, 68, 68, 0.4),
+    0 3px 10px rgba(220, 38, 38, 0.3),
+    0 1px 3px rgba(185, 28, 28, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4) !important;
+  animation: danger-pulse 3s ease-in-out infinite;
+}
+
+@keyframes danger-pulse {
+  0%,
+  100% {
+    box-shadow:
+      0 6px 20px rgba(239, 68, 68, 0.4),
+      0 3px 10px rgba(220, 38, 38, 0.3),
+      inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  }
+  50% {
+    box-shadow:
+      0 8px 25px rgba(239, 68, 68, 0.5),
+      0 4px 15px rgba(220, 38, 38, 0.4),
+      0 0 0 1px rgba(239, 68, 68, 0.3),
+      inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  }
+}
+
+.portfolio-card .trading-btn--danger:hover {
+  background: linear-gradient(
+    135deg,
+    rgba(220, 38, 38, 1) 0%,
+    rgba(185, 28, 28, 1) 25%,
+    rgba(153, 27, 27, 1) 50%,
+    rgba(127, 29, 29, 1) 100%
+  ) !important;
+  transform: translateY(-4px) !important;
+  box-shadow:
+    0 10px 30px rgba(239, 68, 68, 0.6),
+    0 5px 20px rgba(220, 38, 38, 0.5),
+    0 0 0 2px rgba(239, 68, 68, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
+  animation: none;
+}
+
+.portfolio-card .trading-btn--danger::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    45deg,
+    transparent,
+    rgba(255, 255, 255, 0.15),
+    transparent
+  );
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.portfolio-card .trading-btn--danger:hover::after {
+  opacity: 1;
+}
+
+/* Secondary Buttons (Random Strategy) - Blue/Purple Gradient */
+.portfolio-card .trading-btn--secondary {
+  background: linear-gradient(
+    135deg,
+    rgba(59, 130, 246, 0.9) 0%,
+    rgba(99, 102, 241, 0.95) 25%,
+    rgba(139, 92, 246, 0.9) 50%,
+    rgba(147, 51, 234, 0.85) 100%
+  ) !important;
+  border: 1px solid rgba(59, 130, 246, 0.5) !important;
+  color: white !important;
+  box-shadow:
+    0 4px 16px rgba(59, 130, 246, 0.3),
+    0 2px 8px rgba(139, 92, 246, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
+}
+
+.portfolio-card .trading-btn--secondary:hover {
+  background: linear-gradient(
+    135deg,
+    rgba(37, 99, 235, 1) 0%,
+    rgba(79, 70, 229, 1) 25%,
+    rgba(109, 40, 217, 1) 50%,
+    rgba(126, 34, 206, 1) 100%
+  ) !important;
+  transform: translateY(-2px) !important;
+  box-shadow:
+    0 6px 20px rgba(59, 130, 246, 0.4),
+    0 3px 12px rgba(139, 92, 246, 0.3),
+    0 0 0 1px rgba(59, 130, 246, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
+}
+
+/* Disabled State Enhancement */
+.portfolio-card .trading-btn:disabled {
+  background: linear-gradient(
+    135deg,
+    rgba(75, 85, 99, 0.5) 0%,
+    rgba(55, 65, 81, 0.6) 100%
+  ) !important;
+  border: 1px solid rgba(107, 114, 128, 0.3) !important;
+  color: rgba(156, 163, 175, 0.8) !important;
+  box-shadow: none !important;
+  transform: none !important;
+  animation: none !important;
+}
+
+/* Enhanced Strategy Row when Active */
+.portfolio-card .strategy-row {
+  background: rgba(59, 130, 246, 0.08) !important;
+  border: 1px solid rgba(59, 130, 246, 0.2) !important;
+}
+
+.portfolio-card:has(.trading-btn--danger) .strategy-row {
+  background: linear-gradient(
+    135deg,
+    rgba(34, 197, 94, 0.1) 0%,
+    rgba(16, 185, 129, 0.08) 100%
+  ) !important;
+  border: 1px solid rgba(34, 197, 94, 0.3) !important;
+  box-shadow:
+    0 2px 8px rgba(34, 197, 94, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
 }

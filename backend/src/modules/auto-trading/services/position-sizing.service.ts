@@ -299,4 +299,57 @@ export class PositionSizingService {
       reasoning: `Maximum safe size based on ${maxRiskPercentage}% portfolio risk`,
     };
   }
+
+  /**
+   * Calculate optimal position size based on portfolio and risk parameters
+   */
+  async calculateOptimalSize(request: {
+    portfolioValue: number;
+    symbol: string;
+    currentPrice: number;
+    riskPercent: number;
+    confidence?: number;
+    riskLevel?: 'LOW' | 'MEDIUM' | 'HIGH';
+    timeHorizon?: '1D' | '1W' | '1M';
+  }): Promise<number> {
+    try {
+      const {
+        portfolioValue,
+        currentPrice,
+        riskPercent,
+        confidence = 0.5,
+        riskLevel = 'MEDIUM',
+      } = request;
+
+      // Base position sizing on risk percentage
+      const riskDollars = (portfolioValue * riskPercent) / 100;
+
+      // Adjust based on confidence level
+      const confidenceMultiplier = Math.min(confidence * 1.5, 1.0);
+
+      // Adjust based on risk level
+      const riskMultiplier = {
+        LOW: 1.2,
+        MEDIUM: 1.0,
+        HIGH: 0.7,
+      }[riskLevel];
+
+      const adjustedRiskDollars =
+        riskDollars * confidenceMultiplier * riskMultiplier;
+
+      // Calculate quantity based on current price
+      const quantity = Math.floor(adjustedRiskDollars / currentPrice);
+
+      this.logger.debug(
+        `Calculated optimal size: ${quantity} shares for ${request.symbol}`,
+      );
+      return Math.max(quantity, 1); // Minimum 1 share
+    } catch (error) {
+      this.logger.error(
+        `Failed to calculate optimal size: ${error.message}`,
+        error.stack,
+      );
+      throw error;
+    }
+  }
 }
