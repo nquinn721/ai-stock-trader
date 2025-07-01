@@ -4,6 +4,7 @@ import {
   MessageBody,
   OnGatewayConnection,
   OnGatewayDisconnect,
+  OnGatewayInit,
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
@@ -44,10 +45,12 @@ import { WebSocketHealthService } from './websocket-health.service';
 })
 @Injectable()
 export class StockWebSocketGateway
-  implements OnGatewayConnection, OnGatewayDisconnect
+  implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
 {
   @WebSocketServer()
   server: Server;
+
+  private isServerInitialized = false;
 
   private clients: Map<string, Socket> = new Map();
   private portfolioSubscriptions: Map<string, Set<number>> = new Map(); // clientId -> portfolioIds
@@ -116,6 +119,29 @@ export class StockWebSocketGateway
     // Initialize connection management
     this.initializeConnectionManagement();
   }
+
+  afterInit(server: Server) {
+    console.log('🚀 WebSocket Gateway initialized successfully');
+    this.server = server;
+    this.isServerInitialized = true;
+    
+    // Set up global error handling
+    server.on('error', (error) => {
+      console.error('❌ WebSocket server error:', error);
+      this.isServerInitialized = false;
+    });
+
+    // Log server status
+    console.log('📡 WebSocket server ready for connections');
+  }
+
+  /**
+   * Check if WebSocket server is ready for operations
+   */
+  private isServerReady(): boolean {
+    return this.server && this.isServerInitialized;
+  }
+
   handleConnection(client: Socket) {
     console.log(`Client connected: ${client.id}`);
 
@@ -275,8 +301,8 @@ export class StockWebSocketGateway
   }
   async broadcastStockUpdate(symbol: string, stockData: any) {
     try {
-      if (!this.server) {
-        console.warn('WebSocket server not initialized');
+      if (!this.isServerReady()) {
+        console.warn('WebSocket server not available, skipping stock update');
         return;
       }
 
@@ -291,7 +317,7 @@ export class StockWebSocketGateway
   }
 
   async broadcastTradingSignal(signal: any) {
-    if (!this.server) {
+    if (!this.isServerReady()) {
       console.warn(
         'WebSocket server not available, skipping trading signal broadcast',
       );
@@ -301,7 +327,7 @@ export class StockWebSocketGateway
   }
 
   async broadcastNewsUpdate(news: any) {
-    if (!this.server) {
+    if (!this.isServerReady()) {
       console.warn(
         'WebSocket server not available, skipping news update broadcast',
       );
@@ -936,7 +962,7 @@ export class StockWebSocketGateway
    */
   async sendNotificationToUser(userId: string, notification: any) {
     try {
-      if (!this.server) {
+      if (!this.isServerReady()) {
         console.warn('WebSocket server not available, skipping notification');
         return;
       }
@@ -958,7 +984,7 @@ export class StockWebSocketGateway
    */
   async sendBulkNotificationsToUser(userId: string, notifications: any[]) {
     try {
-      if (!this.server) {
+      if (!this.isServerReady()) {
         console.warn(
           'WebSocket server not available, skipping bulk notifications',
         );
@@ -990,7 +1016,7 @@ export class StockWebSocketGateway
     status: string,
   ) {
     try {
-      if (!this.server) {
+      if (!this.isServerReady()) {
         console.warn(
           'WebSocket server not available, skipping notification status update',
         );
@@ -1014,7 +1040,7 @@ export class StockWebSocketGateway
    */
   async sendUnreadCountUpdate(userId: string, count: number) {
     try {
-      if (!this.server) {
+      if (!this.isServerReady()) {
         console.warn(
           'WebSocket server not available, skipping unread count update',
         );
@@ -1035,7 +1061,7 @@ export class StockWebSocketGateway
    */
   async broadcastSystemAlert(alert: any) {
     try {
-      if (!this.server) {
+      if (!this.isServerReady()) {
         console.warn('WebSocket server not available, skipping system alert');
         return;
       }
@@ -1132,8 +1158,8 @@ export class StockWebSocketGateway
    */
   async broadcastAllPortfolios() {
     try {
-      if (!this.server) {
-        console.warn('WebSocket server not initialized');
+      if (!this.isServerReady()) {
+        console.warn('WebSocket server not available, skipping portfolio broadcast');
         return;
       }
 
@@ -1142,7 +1168,7 @@ export class StockWebSocketGateway
 
       if (portfolios && portfolios.length > 0) {
         // Send basic portfolio list to all clients
-        if (this.server) {
+        if (this.isServerReady()) {
           this.server.emit('portfolios_update', portfolios);
         }
 
@@ -1544,8 +1570,8 @@ export class StockWebSocketGateway
    */
   private emitOptimized(room: string | null, event: string, data: any) {
     try {
-      // Check if server is available
-      if (!this.server) {
+      // Check if server is available and initialized
+      if (!this.server || !this.isServerInitialized) {
         console.warn('WebSocket server not available, skipping emit');
         return;
       }
@@ -1788,7 +1814,7 @@ export class StockWebSocketGateway
    */
   private emitPredictionUpdate(symbol: string, update: PredictionUpdate) {
     try {
-      if (!this.server) {
+      if (!this.isServerReady()) {
         console.warn(
           'WebSocket server not available, skipping prediction update',
         );
