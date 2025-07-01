@@ -36,6 +36,16 @@ export class AutoTradingController {
     private readonly advancedOrderExecutionService: AdvancedOrderExecutionService,
   ) {}
 
+  // Test endpoint added at the top
+  @Get('debug/top-test')
+  async topTest() {
+    return {
+      success: true,
+      message: 'Top test endpoint works',
+      timestamp: new Date().toISOString(),
+    };
+  }
+
   // Trading Rules Management Endpoints
   @Post('rules')
   async createTradingRule(@Body() createRuleDto: CreateTradingRuleDto) {
@@ -484,6 +494,160 @@ export class AutoTradingController {
         },
         HttpStatus.BAD_REQUEST,
       );
+    }
+  }
+
+  // Debug endpoint for testing
+  @Get('debug/test')
+  async debugTest() {
+    return {
+      success: true,
+      message: 'Debug endpoint working',
+      timestamp: new Date().toISOString(),
+    };
+  }
+
+  // Debug endpoint for autonomous service test
+  @Get('debug/autonomous-test')
+  async debugAutonomousTest() {
+    try {
+      // Simple method call to test service
+      const strategies =
+        this.autoTradingService.getActiveStrategies('test-user');
+      return {
+        success: true,
+        message: 'Autonomous service accessible',
+        data: strategies,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.message,
+        error: error.stack,
+      };
+    }
+  }
+
+  // Simple test without service call
+  @Post('debug/simple-test/:portfolioId')
+  async simpleTest(
+    @Param('portfolioId') portfolioId: string,
+    @Query('userId') userId: string = 'default-user',
+  ) {
+    console.log('SIMPLE TEST: Called successfully');
+    return {
+      success: true,
+      message: 'Simple test endpoint works',
+      portfolioId,
+      userId,
+      timestamp: new Date().toISOString(),
+    };
+  }
+
+  // Test without any parameters
+  @Get('debug/no-params')
+  async noParamsTest() {
+    console.log('NO PARAMS TEST: Called successfully');
+    return {
+      success: true,
+      message: 'No params test works',
+      timestamp: new Date().toISOString(),
+    };
+  }
+
+  // Test with query parameter instead of path parameter
+  @Get('debug/query-test')
+  async queryTest(@Query('portfolioId') portfolioId: string) {
+    console.log(
+      'QUERY TEST: Called successfully with portfolioId:',
+      portfolioId,
+    );
+    return {
+      success: true,
+      message: 'Query test endpoint works',
+      portfolioId,
+      timestamp: new Date().toISOString(),
+    };
+  }
+
+  // Simple GET test
+  @Get('debug/get-test/:portfolioId')
+  async getTest(
+    @Param('portfolioId') portfolioId: string,
+    @Query('userId') userId: string = 'default-user',
+  ) {
+    console.log('GET TEST: Called successfully');
+    return {
+      success: true,
+      message: 'GET test endpoint works',
+      portfolioId,
+      userId,
+      timestamp: new Date().toISOString(),
+    };
+  }
+
+  // Debug version of auto-deploy
+  @Post('debug/auto-deploy/:portfolioId')
+  async debugAutoDeploy(
+    @Param('portfolioId') portfolioId: string,
+    @Query('userId') userId: string = 'default-user',
+  ) {
+    try {
+      console.log('DEBUG CONTROLLER: Starting debug auto-deploy');
+      console.log('DEBUG CONTROLLER: portfolioId:', portfolioId);
+      console.log('DEBUG CONTROLLER: userId:', userId);
+
+      // Test step by step
+      const result = {
+        step1: 'Starting debug auto-deploy',
+        portfolioId,
+        userId,
+        step2: null,
+        step3: null,
+        error: null,
+      };
+
+      console.log('DEBUG CONTROLLER: Step 1 completed');
+
+      // Step 1: Check if service method exists
+      result.step2 = 'Service method exists';
+
+      console.log('DEBUG CONTROLLER: About to call service method');
+
+      // Step 2: Try calling the method
+      try {
+        const instance =
+          await this.autoTradingService.autoDeployStrategyForPortfolio(
+            userId,
+            portfolioId,
+          );
+        console.log('DEBUG CONTROLLER: Service method completed');
+        result.step3 = 'Method executed successfully';
+        return {
+          success: true,
+          data: instance,
+          debug: result,
+        };
+      } catch (methodError) {
+        console.log(
+          'DEBUG CONTROLLER: Service method error:',
+          methodError.message,
+        );
+        result.error = methodError.message;
+        result.step3 = 'Method execution failed';
+        return {
+          success: false,
+          error: methodError.message,
+          debug: result,
+        };
+      }
+    } catch (error) {
+      console.log('DEBUG CONTROLLER: Controller error:', error.message);
+      return {
+        success: false,
+        message: error.message,
+        stack: error.stack,
+      };
     }
   }
 

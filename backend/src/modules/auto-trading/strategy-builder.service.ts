@@ -260,9 +260,27 @@ export class StrategyBuilderService {
   }
 
   private validateConditionParameters(component: StrategyComponent): boolean {
-    return (
-      component.parameters.operator && component.parameters.value !== undefined
-    );
+    // Handle different types of condition components
+    switch (component.name) {
+      case 'Entry Signal':
+        // Entry Signal conditions use indicators and thresholds
+        const hasIndicators =
+          component.parameters.indicators &&
+          Array.isArray(component.parameters.indicators) &&
+          component.parameters.indicators.length > 0;
+        const hasThresholds =
+          component.parameters.thresholds &&
+          typeof component.parameters.thresholds === 'object' &&
+          component.parameters.thresholds !== null;
+
+        return hasIndicators && hasThresholds;
+      default:
+        // Standard condition components use operator and value
+        return (
+          component.parameters.operator &&
+          component.parameters.value !== undefined
+        );
+    }
   }
 
   private validateActionParameters(component: StrategyComponent): boolean {

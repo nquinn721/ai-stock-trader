@@ -361,7 +361,7 @@ class AutoTradingService {
    */
   async autoDeployStrategyForPortfolio(
     portfolioId: string,
-    userId: string = "demo-user"
+    userId: string = "user-123"
   ): Promise<ApiResponse<StrategyInstance>> {
     try {
       const response = await autoTradingApi.post(
@@ -547,10 +547,12 @@ class AutoTradingService {
     }
   }
 
-  async getActiveStrategies(): Promise<ApiResponse<StrategyInstance[]>> {
+  async getActiveStrategies(
+    userId: string = "user-123"
+  ): Promise<ApiResponse<StrategyInstance[]>> {
     try {
       const response = await autoTradingApi.get(
-        `/autonomous/strategies/active`
+        `/autonomous/strategies/active?userId=${encodeURIComponent(userId)}`
       );
 
       const result = handleApiResponse<StrategyInstance[]>(response);

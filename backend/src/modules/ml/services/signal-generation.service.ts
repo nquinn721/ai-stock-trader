@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger, forwardRef } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { MLMetric, MLModel, MLPrediction } from '../entities/ml.entities';
@@ -10,6 +10,7 @@ import {
   TradingSignals,
 } from '../interfaces/ml.interfaces';
 // S29B: Import MarketPredictionService for ensemble integration
+import { StockService } from '../../stock/stock.service';
 import { FeaturePipelineService } from './feature-pipeline.service';
 import { MarketPredictionService } from './market-prediction.service';
 
@@ -39,6 +40,8 @@ export class SignalGenerationService {
     // S29B: Inject MarketPredictionService for ensemble integration
     private marketPredictionService: MarketPredictionService,
     private featurePipelineService: FeaturePipelineService,
+    @Inject(forwardRef(() => StockService))
+    private stockService: StockService,
   ) {
     this.logger.log('🚀 Signal Generation Service initialized - S29B Enhanced');
   }
@@ -67,12 +70,12 @@ export class SignalGenerationService {
     const startTime = Date.now();
     this.logger.log(`S29B: Generating ensemble signals for ${symbol}`);
     try {
-      // Generate mock market data for feature extraction (in production, get from data service)
-      const mockMarketData = this.generateMockMarketData(symbol, 200);
+      // Generate real market data for feature extraction using StockService
+      const realMarketData = await this.getRealMarketData(symbol, 200);
 
       // Step 1: Extract real-time features using S28D pipeline
       const features = await this.featurePipelineService.extractFeatures(
-        mockMarketData,
+        realMarketData,
         symbol,
         {
           timeframes: options.timeframes || ['1m', '5m', '15m', '1h', '1d'],
@@ -771,27 +774,49 @@ export class SignalGenerationService {
 
   /**
    * Generate primary trading signal from all factors
+   * Enhanced to produce more actionable signals with real data
    */
   private async generatePrimarySignal(
     factors: any,
     riskAssessment: any,
     timingAnalysis: any,
   ): Promise<any> {
-    const factorScore = factors.weightedScore;
+    const factorScore = factors.weightedScore || 0.5;
     const riskAdjustment = this.calculateRiskAdjustment(riskAssessment);
     const timingAdjustment = this.calculateTimingAdjustment(timingAnalysis);
 
-    // Combined signal strength
-    const rawStrength = factorScore * riskAdjustment * timingAdjustment;
+    // Enhanced signal strength calculation with more aggressive thresholds
+    let rawStrength = factorScore * riskAdjustment * timingAdjustment;
+
+    // If we have real market data, be more aggressive with signal generation
+    if (factors.technical && factors.technical.score > 0) {
+      // Boost signal strength based on technical indicators
+      if (factors.technical.components?.rsi < 30) rawStrength += 0.2; // Oversold
+      if (factors.technical.components?.rsi > 70) rawStrength -= 0.2; // Overbought
+      if (factors.technical.components?.macd > 0) rawStrength += 0.1; // Bullish MACD
+      if (factors.technical.components?.momentum > 0.6) rawStrength += 0.15; // Strong momentum
+    }
+
+    // Market condition adjustments
+    if (factors.market && factors.market.trend === 'BULLISH')
+      rawStrength += 0.1;
+    if (factors.market && factors.market.trend === 'BEARISH')
+      rawStrength -= 0.1;
+
+    // Sentiment boost
+    if (factors.sentiment && factors.sentiment.score > 0.6) rawStrength += 0.05;
+    if (factors.sentiment && factors.sentiment.score < 0.4) rawStrength -= 0.05;
+
     const adjustedStrength = Math.max(0, Math.min(1, rawStrength));
 
-    // Determine signal direction and action
+    // More aggressive action determination with lower thresholds
     let action: 'STRONG_BUY' | 'BUY' | 'HOLD' | 'SELL' | 'STRONG_SELL' = 'HOLD';
 
-    if (adjustedStrength > 0.8) action = 'STRONG_BUY';
-    else if (adjustedStrength > 0.65) action = 'BUY';
-    else if (adjustedStrength < 0.2) action = 'STRONG_SELL';
-    else if (adjustedStrength < 0.35) action = 'SELL';
+    if (adjustedStrength > 0.75) action = 'STRONG_BUY';
+    else if (adjustedStrength > 0.55)
+      action = 'BUY'; // Lowered from 0.65
+    else if (adjustedStrength < 0.25) action = 'STRONG_SELL';
+    else if (adjustedStrength < 0.45) action = 'SELL'; // Raised from 0.35
 
     const confidence = this.calculateSignalConfidence(
       factors,
@@ -956,6 +981,169 @@ export class SignalGenerationService {
           support: currentPrice * 0.9,
           resistance: currentPrice * 1.1,
         },
+      },
+    };
+  }
+
+  // ==================== S29B: REAL MARKET DATA INTEGRATION ====================
+
+  /**
+   * Get real market data from StockService for signal generation
+   */
+  private async getRealMarketData(
+    symbol: string,
+    count: number,
+  ): Promise<any[]> {
+    try {
+      this.logger.log(`📊 Fetching real market data for ${symbol}`);
+
+      // Get current stock data
+      const currentStock = await this.stockService.getStockBySymbol(symbol);
+      if (!currentStock || !currentStock.currentPrice) {
+        this.logger.warn(
+          `No current stock data for ${symbol}, using mock data`,
+        );
+        return this.generateMockMarketData(symbol, count);
+      }
+
+      // Get historical data for technical analysis
+      const historicalData = await this.stockService.getStockHistory(
+        symbol,
+        '1mo',
+      );
+
+      if (!historicalData || historicalData.length === 0) {
+        this.logger.warn(
+          `No historical data for ${symbol}, using current price with mock history`,
+        );
+        return this.generateMockMarketDataFromCurrentPrice(
+          symbol,
+          currentStock.currentPrice,
+          count,
+        );
+      }
+
+      // Convert Yahoo Finance format to our expected format
+      const convertedData = historicalData.map((item, index) => ({
+        symbol,
+        timestamp:
+          item.date ||
+          new Date(Date.now() - (historicalData.length - index) * 86400000), // Daily data
+        open: Number(item.open) || currentStock.currentPrice,
+        high: Number(item.high) || currentStock.currentPrice,
+        low: Number(item.low) || currentStock.currentPrice,
+        close:
+          Number(item.close) ||
+          Number(item.adjClose) ||
+          currentStock.currentPrice,
+        volume: Number(item.volume) || currentStock.volume || 1000000,
+      }));
+
+      // Add current price as the latest data point
+      convertedData.push({
+        symbol,
+        timestamp: new Date(),
+        open: currentStock.currentPrice,
+        high: currentStock.currentPrice,
+        low: currentStock.currentPrice,
+        close: currentStock.currentPrice,
+        volume: currentStock.volume || 1000000,
+      });
+
+      this.logger.log(
+        `✅ Retrieved ${convertedData.length} real data points for ${symbol}`,
+      );
+      return convertedData.slice(-count); // Return the most recent 'count' data points
+    } catch (error) {
+      this.logger.error(
+        `Error fetching real market data for ${symbol}:`,
+        error,
+      );
+      return this.generateMockMarketData(symbol, count);
+    }
+  }
+
+  /**
+   * Generate mock market data based on current real price
+   */
+  private generateMockMarketDataFromCurrentPrice(
+    symbol: string,
+    currentPrice: number,
+    count: number,
+  ): any[] {
+    const data: any[] = [];
+
+    for (let i = 0; i < count; i++) {
+      const timestamp = new Date(Date.now() - (count - i) * 60000); // 1 minute intervals
+      const variation = (Math.random() - 0.5) * 0.02; // 2% variation
+      const price = currentPrice * (1 + variation);
+
+      data.push({
+        symbol,
+        timestamp,
+        open: price + (Math.random() - 0.5) * 0.01 * currentPrice,
+        high: price + Math.random() * 0.01 * currentPrice,
+        low: price - Math.random() * 0.01 * currentPrice,
+        close: price,
+        volume: 1000000 + Math.random() * 500000,
+      });
+    }
+
+    return data;
+  }
+
+  /**
+   * Generate fallback signal when no real data is available
+   */
+  private async generateFallbackSignal(
+    symbol: string,
+    options: any,
+  ): Promise<{
+    signals: TradingSignals;
+    ensembleDetails: any;
+    timeframeAnalysis?: any;
+    conflictResolution?: any;
+  }> {
+    this.logger.warn(`Generating fallback signal for ${symbol}`);
+
+    const fallbackSignal: TradingSignals = {
+      signal: 'HOLD',
+      strength: 0.1, // Very low strength for fallback
+      reasoning: `No live data available for ${symbol} - Conservative HOLD recommendation`,
+      thresholds: {
+        buyThreshold: 0.65,
+        sellThreshold: 0.35,
+        confidenceThreshold: 0.7,
+        uncertaintyThreshold: 0.25,
+      },
+      riskMetrics: {
+        maxDrawdown: 0.05,
+        volatility: 0.15,
+        sharpeRatio: 0.1,
+      },
+      confidence: 0.1,
+      levels: {
+        currentPrice: 100,
+        support: 95,
+        resistance: 105,
+      },
+      validUntil: new Date(Date.now() + 30 * 60000), // 30 minutes
+      metadata: {
+        generatedAt: new Date(),
+        version: '3.0.0',
+        modelInputs: ['fallback'],
+        executionTime: 0,
+      },
+    };
+
+    return {
+      signals: fallbackSignal,
+      ensembleDetails: {
+        method: 'fallback',
+        timeframesUsed: [],
+        modelsContributing: [],
+        ensembleConfidence: 0.1,
+        processingTime: 0,
       },
     };
   }
@@ -1198,18 +1386,43 @@ export class SignalGenerationService {
   // ==================== HELPER METHODS ====================
 
   private analyzeTechnicalFactors(features?: TechnicalFeatures): any {
-    if (!features) return { score: 0.5, strength: 'NEUTRAL' };
+    if (!features) {
+      // Enhanced default scoring for better signal generation
+      return {
+        score: 0.55, // Slightly bullish default
+        components: {
+          rsi: 0.55,
+          macd: 0.55,
+          volume: 0.5,
+          momentum: 0.55,
+        },
+        strength: 'NEUTRAL',
+      };
+    }
 
     const rsiScore = this.normalizeRSI(features.rsi);
     const macdScore = this.normalizeMACD(features.macd);
     const volumeScore = this.normalizeVolume(features.volume);
     const momentumScore = this.normalizeMomentum(features.momentum);
 
+    // Enhanced scoring with better weighting for real signals
     const overallScore =
-      (rsiScore + macdScore + volumeScore + momentumScore) / 4;
+      rsiScore * 0.3 +
+      macdScore * 0.3 +
+      volumeScore * 0.2 +
+      momentumScore * 0.2;
+
+    // Add bonus for strong technical conditions
+    let bonusScore = 0;
+    if (features.rsi && features.rsi < 30) bonusScore += 0.1; // Oversold bonus
+    if (features.rsi && features.rsi > 70) bonusScore -= 0.1; // Overbought penalty
+    if (features.macd && features.macd > 0) bonusScore += 0.05; // Bullish MACD
+    if (features.volume && features.volume > 1.5) bonusScore += 0.05; // High volume
+
+    const adjustedScore = Math.max(0, Math.min(1, overallScore + bonusScore));
 
     return {
-      score: overallScore,
+      score: adjustedScore,
       components: {
         rsi: rsiScore,
         macd: macdScore,
@@ -1217,9 +1430,9 @@ export class SignalGenerationService {
         momentum: momentumScore,
       },
       strength:
-        overallScore > 0.6
+        adjustedScore > 0.6
           ? 'BULLISH'
-          : overallScore < 0.4
+          : adjustedScore < 0.4
             ? 'BEARISH'
             : 'NEUTRAL',
     };
@@ -1359,24 +1572,40 @@ export class SignalGenerationService {
   }
 
   private calculateFactorWeights(marketState: any, factors: any): any {
-    // Dynamic weight calculation based on market conditions
+    // Enhanced weight calculation for more actionable signals
     const baseWeights = {
-      technical: 0.25,
-      fundamental: 0.15,
-      sentiment: 0.2,
-      market: 0.15,
-      momentum: 0.1,
-      volatility: 0.05,
-      liquidity: 0.05,
-      correlation: 0.05,
+      technical: 0.35, // Increased from 0.25
+      fundamental: 0.1, // Decreased (focus on technical)
+      sentiment: 0.25, // Increased from 0.20
+      market: 0.15, // Same
+      momentum: 0.1, // Same
+      volatility: 0.025, // Decreased
+      liquidity: 0.025, // Decreased
+      correlation: 0.025, // Decreased
     };
 
-    // Adjust weights based on market state
+    // Adjust weights based on market state for more aggressive signals
     if (marketState?.marketTrend === 'BEARISH') {
       baseWeights.technical += 0.1;
+      baseWeights.sentiment += 0.1;
+      baseWeights.fundamental -= 0.05;
+      baseWeights.market -= 0.05;
+    } else if (marketState?.marketTrend === 'BULLISH') {
+      baseWeights.momentum += 0.1;
       baseWeights.sentiment += 0.05;
-      baseWeights.fundamental -= 0.1;
-      baseWeights.momentum -= 0.05;
+      baseWeights.technical += 0.05;
+    }
+
+    // Boost technical and momentum weights if we have strong signals
+    if (
+      factors?.individual?.technical?.strength === 'BULLISH' ||
+      factors?.individual?.technical?.strength === 'BEARISH'
+    ) {
+      baseWeights.technical += 0.1;
+    }
+
+    if (factors?.individual?.momentum?.strength === 'STRONG') {
+      baseWeights.momentum += 0.1;
     }
 
     return baseWeights;

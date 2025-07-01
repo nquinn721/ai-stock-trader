@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger, forwardRef } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import {
@@ -9,6 +9,7 @@ import { Portfolio } from '../../../entities/portfolio.entity';
 import { Stock } from '../../../entities/stock.entity';
 import { TradingSignals } from '../../ml/interfaces/ml.interfaces';
 import { SignalGenerationService } from '../../ml/services/signal-generation.service';
+import { StockService } from '../../stock/stock.service';
 import { AdvancedOrderExecutionService } from './advanced-order-execution.service';
 import { PositionSizingService } from './position-sizing.service';
 import { RiskManagementService } from './risk-management.service';
@@ -79,6 +80,8 @@ export class RecommendationPipelineService {
     @InjectRepository(Stock)
     private stockRepository: Repository<Stock>,
     private signalGenerationService: SignalGenerationService,
+    @Inject(forwardRef(() => StockService))
+    private stockService: StockService,
     private advancedOrderExecutionService: AdvancedOrderExecutionService,
     private riskManagementService: RiskManagementService,
     private positionSizingService: PositionSizingService,

@@ -67,7 +67,7 @@ COPY backend/package*.json ./
 # Set environment variables
 ENV PYTHON=/usr/bin/python3
 ENV NODE_ENV=production
-ENV PORT=8080
+ENV PORT=8000
 ENV TFJS_BACKEND=cpu
 ENV TFJS_DISABLE_WEBGL=true
 
@@ -89,11 +89,11 @@ RUN chown -R nestjs:nodejs /app
 USER nestjs
 
 # Expose port
-EXPOSE 8080
+EXPOSE 8000
 
 # Health check - Extended startup time for ML/AI modules
 HEALTHCHECK --interval=30s --timeout=10s --start-period=120s --retries=5 \
-    CMD curl -f http://localhost:8080/health || exit 1
+    CMD curl -f http://localhost:8000/health || exit 1
 
 # Start command
 ENTRYPOINT ["dumb-init", "--"]

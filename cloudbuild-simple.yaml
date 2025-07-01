@@ -1,6 +1,6 @@
-# Cloud Build configuration for Stock Trading App
+# Simple Cloud Build configuration for debugging
 steps:
-  # Step 1: Build the application using the backend test Dockerfile
+  # Step 1: Build the application
   - name: "gcr.io/cloud-builders/docker"
     args:
       [
@@ -20,12 +20,7 @@ steps:
     args: ["push", "gcr.io/$PROJECT_ID/stock-trading-app:$BUILD_ID"]
     timeout: "600s"
 
-  # Step 3: Push the latest tag
-  - name: "gcr.io/cloud-builders/docker"
-    args: ["push", "gcr.io/$PROJECT_ID/stock-trading-app:latest"]
-    timeout: "600s"
-
-  # Step 4: Deploy to Cloud Run
+  # Step 3: Deploy to Cloud Run (simplified)
   - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
     entrypoint: "gcloud"
     args:
@@ -36,7 +31,7 @@ steps:
         "--image",
         "gcr.io/$PROJECT_ID/stock-trading-app:$BUILD_ID",
         "--region",
-        "${_REGION}",
+        "us-central1",
         "--platform",
         "managed",
         "--allow-unauthenticated",
@@ -48,31 +43,16 @@ steps:
         "2",
         "--timeout",
         "900",
-        "--concurrency",
-        "50",
-        "--min-instances",
-        "0",
-        "--max-instances",
-        "2",
         "--set-env-vars",
-        "NODE_ENV=production,PORT=8000,TFJS_BACKEND=cpu,TFJS_DISABLE_WEBGL=true,CLOUD_SQL_CONNECTION_NAME=$PROJECT_ID:us-central1:stocktrading-mysql",
-        "--set-secrets",
-        "DATABASE_HOST=database-host:latest,DATABASE_PORT=database-port:latest,DATABASE_USERNAME=database-username:latest,DATABASE_PASSWORD=database-password:latest,DATABASE_NAME=database-name:latest,DB_USERNAME=db-username:latest,DB_PASSWORD=db-password:latest,DB_NAME=db-name:latest",
-        "--add-cloudsql-instances",
-        "$PROJECT_ID:us-central1:stocktrading-mysql",
+        "NODE_ENV=production,PORT=8000",
       ]
     timeout: "600s"
-
-# Substitution variables
-substitutions:
-  _REGION: "us-central1"
 
 # Build options
 options:
   machineType: "E2_HIGHCPU_8"
   diskSizeGb: "100"
   logging: "CLOUD_LOGGING_ONLY"
-  substitution_option: "ALLOW_LOOSE"
 
 # Build timeout
 timeout: "2400s"

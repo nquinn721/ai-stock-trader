@@ -84,7 +84,6 @@ import { PaperTradingModule } from './modules/paper-trading/paper-trading.module
 import { StockModule } from './modules/stock/stock.module';
 import { TradingModule } from './modules/trading/trading.module';
 import { WebsocketModule } from './modules/websocket/websocket.module';
-import { DatabaseInitializationService } from './services/database-initialization.service';
 import { SeedService } from './services/seed.service';
 
 @Module({
@@ -101,6 +100,10 @@ import { SeedService } from './services/seed.service';
         const dbUsername = configService.get('DATABASE_USERNAME');
         const dbPassword = configService.get('DATABASE_PASSWORD');
         const dbName = configService.get('DATABASE_NAME');
+        const nodeEnv = configService.get('NODE_ENV');
+        const cloudSqlConnection = configService.get(
+          'CLOUD_SQL_CONNECTION_NAME',
+        );
 
         // Check if required database configuration is provided
         if (!dbHost || !dbUsername || !dbPassword || !dbName) {
@@ -140,17 +143,61 @@ import { SeedService } from './services/seed.service';
           );
         }
 
-        console.log(
-          `🔗 Connecting to MySQL database at ${dbHost}:${dbPort}/${dbName}`,
-        );
+        // Cloud SQL socket connection configuration
+        const isCloudRun = process.env.K_SERVICE && process.env.K_REVISION;
+        const isProduction = nodeEnv === 'production';
+
+        let connectionConfig: any;
+
+        if (isCloudRun || (isProduction && cloudSqlConnection)) {
+          // Cloud Run with Cloud SQL Unix Socket connection
+          const socketPath = `/cloudsql/${cloudSqlConnection || 'heroic-footing-460117-k8:us-central1:stocktrading-mysql'}`;
+
+          console.log(
+            `🔗 Connecting to Cloud SQL via Unix socket: ${socketPath}/${dbName}`,
+          );
+
+          connectionConfig = {
+            type: 'mysql',
+            extra: {
+              socketPath: socketPath,
+            },
+            username: dbUsername,
+            password: dbPassword,
+            database: dbName,
+          };
+        } else if (dbHost.includes('cloudsql') || dbHost.includes(':')) {
+          // Cloud SQL TCP connection (when using proxy or direct connection)
+          console.log(
+            `🔗 Connecting to Cloud SQL via TCP: ${dbHost}:${dbPort}/${dbName}`,
+          );
+
+          connectionConfig = {
+            type: 'mysql',
+            host: dbHost,
+            port: +dbPort,
+            username: dbUsername,
+            password: dbPassword,
+            database: dbName,
+          };
+        } else {
+          // Local MySQL connection
+          console.log(
+            `🔗 Connecting to local MySQL: ${dbHost}:${dbPort}/${dbName}`,
+          );
+
+          connectionConfig = {
+            type: 'mysql',
+            host: dbHost,
+            port: +dbPort,
+            username: dbUsername,
+            password: dbPassword,
+            database: dbName,
+          };
+        }
 
         return {
-          type: 'mysql',
-          host: dbHost,
-          port: +dbPort,
-          username: dbUsername,
-          password: dbPassword,
-          database: dbName,
+          ...connectionConfig,
           entities: [
             Stock,
             News,
@@ -202,14 +249,9 @@ import { SeedService } from './services/seed.service';
           ],
           synchronize: true,
           logging: ['error', 'warn'],
-          extra: {
-            connectionLimit: 10,
-            acquireTimeout: 60000,
-            timeout: 60000,
-            reconnect: true,
-          },
           retryAttempts: 5,
           retryDelay: 3000,
+          connectTimeout: 60000,
         };
       },
       inject: [ConfigService],
@@ -234,6 +276,6 @@ import { SeedService } from './services/seed.service';
     MacroIntelligenceModule, // Keep this one enabled for testing
   ],
   controllers: [AppController],
-  providers: [AppService, SeedService, DatabaseInitializationService],
+  providers: [AppService, SeedService], // Temporarily disabled DatabaseInitializationService - needs TypeORM update
 })
 export class AppModule {}

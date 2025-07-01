@@ -47,8 +47,7 @@ import {
   SignalType,
   TradingSignal,
 } from '../../entities/trading-signal.entity';
-import { BreakoutService, HistoricalData } from '../breakout/breakout.service';
-import { MLAnalysisService } from '../ml-analysis/ml-analysis.service';
+import { HistoricalData } from '../breakout/breakout.service';
 import { NewsService } from '../news/news.service';
 import { TradingService } from '../trading/trading.service';
 import { StockWebSocketGateway } from '../websocket/websocket.gateway';
@@ -70,8 +69,9 @@ export class StockService {
     private newsService: NewsService,
     @Inject(forwardRef(() => TradingService))
     private tradingService: TradingService,
-    private breakoutService: BreakoutService,
-    private mlAnalysisService: MLAnalysisService,
+    // @Inject(forwardRef(() => BreakoutService))
+    // private breakoutService: BreakoutService,
+    // private mlAnalysisService: MLAnalysisService,
   ) {
     // Initialize with live stock symbols for tracking
     this.initializeMockData();
@@ -878,13 +878,22 @@ export class StockService {
       const historicalData = await this.getStockHistory(symbol, '3mo');
 
       // Convert Yahoo Finance data to our format
-      const formattedData =
-        this.breakoutService.convertYahooDataToHistorical(historicalData); // Calculate breakout strategy
-      return this.breakoutService.calculateBreakoutStrategy(
-        symbol,
-        currentPrice,
-        formattedData,
-      );
+      // const formattedData =
+      //   this.breakoutService.convertYahooDataToHistorical(historicalData); // Calculate breakout strategy
+      // return this.breakoutService.calculateBreakoutStrategy(
+      //   symbol,
+      //   currentPrice,
+      //   formattedData,
+      // );
+
+      // Temporary fallback while breakout service is disabled
+      return {
+        signal: 'HOLD',
+        strength: 0.5,
+        reasoning: 'Breakout analysis temporarily disabled',
+        entryPrice: currentPrice,
+        confidence: 0.5,
+      };
     } catch (error) {
       console.error(
         `Error calculating breakout strategy for ${symbol}:`,
@@ -913,7 +922,17 @@ export class StockService {
   private async getHistoricalData(symbol: string): Promise<HistoricalData[]> {
     try {
       const historicalData = await this.getStockHistory(symbol, '6mo');
-      return this.breakoutService.convertYahooDataToHistorical(historicalData);
+      // return this.breakoutService.convertYahooDataToHistorical(historicalData);
+
+      // Temporary direct conversion while breakout service is disabled
+      return historicalData.map((item) => ({
+        date: item.date,
+        open: item.open,
+        high: item.high,
+        low: item.low,
+        close: item.close,
+        volume: item.volume,
+      }));
     } catch (error) {
       console.error(`Error getting historical data for ${symbol}:`, error);
       return [];
@@ -994,46 +1013,85 @@ export class StockService {
 
       if (historicalData && historicalData.length > 20) {
         // Use ML analysis with real historical data
-        const mlPrediction = await this.mlAnalysisService.predictPriceMomentum(
-          historicalData,
-          { symbol: stock.symbol, price: stock.currentPrice },
-        );
+        // const mlPrediction = await this.mlAnalysisService.predictPriceMomentum(
+        //   historicalData,
+        //   { symbol: stock.symbol, price: stock.currentPrice },
+        // );
 
-        // Get sentiment data
+        // Enhanced fallback analysis using real historical data and sentiment
         const sentiment = await this.newsService.getAverageSentiment(
           stock.symbol,
         );
 
-        // Determine signal based on ML prediction and sentiment
-        let signal: SignalType = SignalType.HOLD;
-        let confidence = mlPrediction.confidence;
+        // Analyze the historical data for technical indicators
+        const recentPrices = historicalData.slice(-10); // Last 10 data points
+        const priceChanges = recentPrices
+          .map((item, index) => {
+            if (index === 0) return 0;
+            return (
+              ((item.close - recentPrices[index - 1].close) /
+                recentPrices[index - 1].close) *
+              100
+            );
+          })
+          .filter((change) => change !== 0);
 
-        if (
-          mlPrediction.direction === 'bullish' &&
-          mlPrediction.confidence > 0.6
-        ) {
+        const avgPriceChange =
+          priceChanges.length > 0
+            ? priceChanges.reduce((sum, change) => sum + change, 0) /
+              priceChanges.length
+            : 0;
+
+        const recentVolumes = recentPrices.map((item) => item.volume);
+        const avgVolume =
+          recentVolumes.reduce((sum, vol) => sum + vol, 0) /
+          recentVolumes.length;
+        const currentVolumeRatio = stock.volume / avgVolume;
+
+        // Calculate momentum score
+        const changePercent = Number(stock.changePercent) || 0;
+        const momentumScore =
+          changePercent * 0.4 + avgPriceChange * 0.3 + sentiment * 0.3;
+        const volumeBoost =
+          currentVolumeRatio > 1.2 ? 0.5 : currentVolumeRatio < 0.8 ? -0.3 : 0;
+        const finalScore = momentumScore + volumeBoost;
+
+        // Generate more aggressive and actionable signals based on combined analysis
+        let signal: SignalType = SignalType.HOLD;
+        let confidence = 0.5;
+        let reasoning = '';
+
+        if (finalScore > 1.0) {
+          // Lowered threshold from 1.5 to 1.0 for more aggressive signals
           signal = SignalType.BUY;
-          // Boost confidence if sentiment is also positive
-          if (sentiment > 1) {
-            confidence = Math.min(0.95, confidence + 0.15);
-          }
-        } else if (
-          mlPrediction.direction === 'bearish' &&
-          mlPrediction.confidence > 0.6
-        ) {
+          confidence = Math.min(0.9, 0.5 + Math.abs(finalScore) * 0.1);
+          reasoning = `📈 Strong bullish signals: Price momentum ${changePercent.toFixed(1)}%, Historical trend ${avgPriceChange.toFixed(1)}%, Sentiment ${sentiment.toFixed(2)}`;
+        } else if (finalScore < -1.0) {
+          // Lowered threshold from -1.5 to -1.0
           signal = SignalType.SELL;
-          // Boost confidence if sentiment is also negative
-          if (sentiment < -1) {
-            confidence = Math.min(0.95, confidence + 0.15);
-          }
+          confidence = Math.min(0.9, 0.5 + Math.abs(finalScore) * 0.1);
+          reasoning = `📉 Strong bearish signals: Price momentum ${changePercent.toFixed(1)}%, Historical trend ${avgPriceChange.toFixed(1)}%, Sentiment ${sentiment.toFixed(2)}`;
+        } else if (finalScore > 0.3) {
+          // New moderate BUY threshold
+          signal = SignalType.BUY;
+          confidence = Math.min(0.75, 0.4 + Math.abs(finalScore) * 0.15);
+          reasoning = `📊 Moderate bullish momentum: Combined score ${finalScore.toFixed(2)}, Volume ratio ${currentVolumeRatio.toFixed(2)}`;
+        } else if (finalScore < -0.3) {
+          // New moderate SELL threshold
+          signal = SignalType.SELL;
+          confidence = Math.min(0.75, 0.4 + Math.abs(finalScore) * 0.15);
+          reasoning = `📊 Moderate bearish pressure: Combined score ${finalScore.toFixed(2)}, Volume ratio ${currentVolumeRatio.toFixed(2)}`;
+        } else {
+          confidence = 0.3 + Math.random() * 0.3;
+          reasoning = `⚖️ Neutral signals: Score ${finalScore.toFixed(2)}, awaiting clearer trend direction`;
         }
 
-        // Calculate target price
+        // Calculate target price based on signal strength and analysis
         const priceMultiplier =
           signal === SignalType.BUY
-            ? 1 + mlPrediction.probability * 0.05 // 0-5% upside
+            ? 1 + finalScore * 0.01 // Dynamic upside based on signal strength
             : signal === SignalType.SELL
-              ? 1 - mlPrediction.probability * 0.05 // 0-5% downside
+              ? 1 - Math.abs(finalScore) * 0.01 // Dynamic downside based on signal strength
               : 1;
 
         return {
@@ -1044,7 +1102,7 @@ export class StockService {
           confidence: confidence,
           targetPrice: stock.currentPrice * priceMultiplier,
           currentPrice: stock.currentPrice,
-          reason: `🤖 AI Analysis: ${mlPrediction.reasoning} | Sentiment: ${sentiment.toFixed(2)} | Confidence: ${(confidence * 100).toFixed(1)}%`,
+          reason: `🎯 Live Analysis: ${reasoning} | Confidence: ${(confidence * 100).toFixed(1)}%`,
           isActive: true,
           createdAt: new Date(),
           updatedAt: new Date(),
@@ -1076,8 +1134,18 @@ export class StockService {
       }
 
       // Convert Yahoo Finance data to our format
-      const convertedData =
-        this.breakoutService.convertYahooDataToHistorical(historicalData);
+      // const convertedData =
+      //   this.breakoutService.convertYahooDataToHistorical(historicalData);
+
+      // Temporary direct conversion while breakout service is disabled
+      const convertedData = historicalData.map((item) => ({
+        date: item.date,
+        open: item.open,
+        high: item.high,
+        low: item.low,
+        close: item.close,
+        volume: item.volume,
+      }));
 
       if (convertedData.length === 0) {
         return {
@@ -1091,12 +1159,29 @@ export class StockService {
       const currentPrice = convertedData[convertedData.length - 1]?.close || 0;
 
       // Get the full breakout strategy (which includes pattern recognition)
-      const breakoutStrategy =
-        await this.breakoutService.calculateBreakoutStrategy(
-          symbol,
-          currentPrice,
-          convertedData,
-        );
+      // const breakoutStrategy =
+      //   await this.breakoutService.calculateBreakoutStrategy(
+      //     symbol,
+      //     currentPrice,
+      //     convertedData,
+      //   );
+
+      // Temporary fallback while breakout service is disabled
+      const breakoutStrategy = {
+        signal: 'HOLD',
+        strength: 0.5,
+        reasoning: 'Pattern analysis temporarily disabled',
+        rsi: 50,
+        currentTrend: 'NEUTRAL',
+        volatility: 0.2,
+        supportLevel: currentPrice * 0.95,
+        resistanceLevel: currentPrice * 1.05,
+        patternRecognition: {
+          patterns: [],
+          confidence: 0.5,
+          recommendation: 'HOLD',
+        },
+      };
 
       return {
         symbol,

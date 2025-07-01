@@ -16,6 +16,8 @@
  * =============================================================================
  */
 
+import { FRONTEND_API_CONFIG } from "../config/api.config";
+
 export interface DailyOrderSummary {
   date: string;
   portfolioId: number;
@@ -76,7 +78,7 @@ export interface OrderExecutionMetrics {
 }
 
 class OrderManagementService {
-  private readonly baseUrl = "http://localhost:8000/api/daily-order-management";
+  private readonly baseUrl = `${FRONTEND_API_CONFIG.backend.baseUrl}/api/daily-order-management`;
 
   /**
    * Get today's order summary for a specific portfolio

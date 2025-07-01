@@ -95,7 +95,6 @@ export const StrategyBuilder: React.FC = () => {
 
   // Dialog states
   const [showBacktestDialog, setShowBacktestDialog] = useState(false);
-  const [showDeployDialog, setShowDeployDialog] = useState(false);
   const [showPublishDialog, setShowPublishDialog] = useState(false);
 
   const canvasRef = useRef<HTMLDivElement>(null);
@@ -349,44 +348,6 @@ export const StrategyBuilder: React.FC = () => {
     } finally {
       setIsLoading(false);
       setShowBacktestDialog(false);
-    }
-  };
-
-  const handleDeployStrategy = async (deploymentConfig: any) => {
-    if (!validation?.isValid) {
-      setError("Cannot deploy invalid strategy. Please fix errors first.");
-      return;
-    }
-
-    if (!strategy.id) {
-      setError("Please save the strategy before deploying.");
-      return;
-    }
-
-    setIsLoading(true);
-    try {
-      // Import autoTradingService for deployment
-      const autoTradingService = (
-        await import("../../services/autoTradingService")
-      ).default;
-      const response = await autoTradingService.deployStrategy(
-        strategy.id,
-        deploymentConfig
-      );
-
-      if (!response.success) {
-        throw new Error(response.error || "Deployment failed");
-      }
-
-      setSuccessMessage(
-        `Strategy deployed successfully! Instance ID: ${response.data.id}`
-      );
-    } catch (error: any) {
-      console.error("Deploy error:", error);
-      setError(error.message || "Deployment failed");
-    } finally {
-      setIsLoading(false);
-      setShowDeployDialog(false);
     }
   };
 
@@ -651,13 +612,6 @@ export const StrategyBuilder: React.FC = () => {
               Backtest
             </Button>
             <Button
-              variant="contained"
-              onClick={() => setShowDeployDialog(true)}
-              disabled={isLoading || !validation?.isValid}
-            >
-              Deploy
-            </Button>
-            <Button
               variant="outlined"
               startIcon={<Public />}
               onClick={() => setShowPublishDialog(true)}
@@ -714,38 +668,6 @@ export const StrategyBuilder: React.FC = () => {
             variant="contained"
           >
             Run Backtest
-          </Button>
-        </DialogActions>
-      </Dialog>
-
-      <Dialog
-        open={showDeployDialog}
-        onClose={() => setShowDeployDialog(false)}
-        maxWidth="md"
-      >
-        <DialogTitle>Deploy Strategy</DialogTitle>
-        <DialogContent>
-          {/* Deployment configuration form would go here */}
-          <Typography>Deployment configuration form coming soon...</Typography>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setShowDeployDialog(false)}>Cancel</Button>
-          <Button
-            onClick={() =>
-              handleDeployStrategy({
-                portfolioId: "default-portfolio",
-                maxCapitalAllocation: 10000,
-                riskLimits: {
-                  maxDrawdown: 10,
-                  maxDailyLoss: 5,
-                  maxPositionSize: 1000,
-                },
-                enablePaperTrading: true,
-              })
-            }
-            variant="contained"
-          >
-            Deploy
           </Button>
         </DialogActions>
       </Dialog>
