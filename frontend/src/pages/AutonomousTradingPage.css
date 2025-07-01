@@ -547,18 +547,6 @@
   }
 }
 
-/* Live Market Data Tab */
-.live-market-tab .header-actions {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.live-market-tab .stock-grid {
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 1rem;
-}
-
 /* Economic Intelligence Tab */
 .economic-intelligence-tab .header-actions {
   display: flex;
@@ -635,11 +623,6 @@
     padding-left: 1rem;
     padding-right: 1rem;
     padding-bottom: 1rem;
-  }
-
-  .live-market-tab .header-actions {
-    flex-direction: column;
-    gap: 0.5rem;
   }
 
   .stock-grid {

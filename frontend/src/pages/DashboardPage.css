@@ -89,6 +89,9 @@
   transition: var(--theme-transition-base);
   position: relative;
   overflow: hidden;
+  min-height: 140px; /* Ensure consistent height for all dashboard cards */
+  display: flex;
+  flex-direction: column;
 }
 
 .dashboard-card::before {
@@ -147,6 +150,11 @@
   );
 }
 
+/* Remove margin-bottom from alert card header */
+.dashboard-card.alert-card .card-header {
+  margin-bottom: 0;
+}
+
 /* ===== CARD HEADERS ===== */
 
 .card-header {
@@ -190,8 +198,8 @@
 
 .stocks-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: var(--theme-space-8); /* Increased spacing between stock cards */
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: var(--theme-space-4); /* Reduced spacing for more compact layout */
 }
 
 .stock-card {

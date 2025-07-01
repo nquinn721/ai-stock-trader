@@ -92,6 +92,10 @@ import { SeedService } from './services/seed.service';
       isGlobal: true,
     }),
     ScheduleModule.forRoot(),
+    // ⚠️ CRITICAL: NEVER MODIFY DATABASE CONNECTION SETTINGS
+    // See: docs/DATABASE-CONNECTION-POLICY.md for strict policies
+    // Local: admin/password@localhost:3306/stocktrading_dev
+    // Production: Uses Cloud SQL Unix socket with Secret Manager
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => {

@@ -1,4 +1,4 @@
-import { faChartLine } from "@fortawesome/free-solid-svg-icons";
+import { faChartLine, faHeart } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { observer } from "mobx-react-lite";
 import React, { useCallback, useEffect, useRef, useState } from "react";
@@ -13,13 +13,13 @@ import {
 } from "recharts";
 import { useStockStore } from "../stores/StoreContext";
 import { DayTradingPattern, Stock, TradingSignal } from "../types";
-import RecommendationWidget from "./RecommendationWidget";
 import "./StockCard.css";
 import StockModal from "./StockModal";
 
 interface StockCardProps {
   stock: Stock;
   signal?: TradingSignal;
+  variant?: 'default' | 'compact';
 }
 
 interface ChartDataPoint {
@@ -29,12 +29,13 @@ interface ChartDataPoint {
   volume?: number;
 }
 
-const StockCard: React.FC<StockCardProps> = observer(({ stock, signal }) => {
+const StockCard: React.FC<StockCardProps> = observer(({ stock, signal, variant = 'default' }) => {
   const stockStore = useStockStore();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [chartData, setChartData] = useState<ChartDataPoint[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [patterns, setPatterns] = useState<DayTradingPattern[]>([]);
+  const [isFavoriteLoading, setIsFavoriteLoading] = useState(false);
   const updateIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const lastUpdateRef = useRef<number>(0);
   const getChangeColor = (changePercent: number) => {
@@ -57,6 +58,39 @@ const StockCard: React.FC<StockCardProps> = observer(({ stock, signal }) => {
     if (rsi > 70) return "overbought";
     if (rsi < 30) return "oversold";
     return "neutral";
+  };
+
+  // Handle favorite toggle
+  const handleFavoriteToggle = async (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent opening modal
+    setIsFavoriteLoading(true);
+
+    try {
+      const response = await fetch(
+        `http://localhost:8000/api/stocks/${stock.symbol}/favorite`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (response.ok) {
+        const updatedStock = await response.json();
+        // Update the stock in the store
+        stockStore.updateStockFavorite(stock.symbol, updatedStock.favorite);
+        console.log(
+          `✅ Toggled favorite for ${stock.symbol}: ${updatedStock.favorite}`
+        );
+      } else {
+        console.error("Failed to toggle favorite:", response.statusText);
+      }
+    } catch (error) {
+      console.error("Error toggling favorite:", error);
+    } finally {
+      setIsFavoriteLoading(false);
+    }
   };
 
   // Fetch today's historical data
@@ -185,10 +219,13 @@ const StockCard: React.FC<StockCardProps> = observer(({ stock, signal }) => {
     updateIntervalRef.current = setInterval(() => {
       const currentPrice = Number(stock.currentPrice);
       if (currentPrice && currentPrice > 0) {
-        // Only append if price has changed or it's been more than 5 minutes
+        // Get the latest data point to compare prices
+        const lastDataPoint = chartData[chartData.length - 1];
+        const priceChanged = !lastDataPoint || Math.abs(lastDataPoint.price - currentPrice) > 0.01;
         const timeSinceLastUpdate = Date.now() - lastUpdateRef.current;
-        if (timeSinceLastUpdate > 5 * 60 * 1000) {
-          // 5 minutes
+        
+        // Update if price changed significantly or it's been more than 2 minutes
+        if (priceChanged || timeSinceLastUpdate > 2 * 60 * 1000) {
           appendNewPriceData(currentPrice);
         }
       }
@@ -234,85 +271,53 @@ const StockCard: React.FC<StockCardProps> = observer(({ stock, signal }) => {
       .filter(Boolean);
   };
   return (
-    <div className="stock-card compact">
-      {/* Stock Header - Always Visible Summary */}
+    <div className={`stock-card vertical ${variant === 'compact' ? 'compact' : ''}`}>
+      {/* Header Section - Stock Info and Favorite */}
       <div className="stock-header">
         <div className="stock-info">
           <div className="stock-symbol">{stock.symbol}</div>
           <div className="stock-name">{stock.name}</div>
         </div>
-        <div className="stock-price-section">
-          <div className="current-price">
-            ${formatPrice(stock.currentPrice)}
-          </div>
-          <div
-            className="price-change"
-            style={{ color: getChangeColor(Number(stock.changePercent) || 0) }}
-          >
-            {(Number(stock.changePercent) || 0) >= 0 ? "+" : ""}
-            {formatPercent(stock.changePercent)}%
-          </div>
+        <button
+          className={`favorite-btn ${stock.favorite ? "favorited" : ""}`}
+          onClick={handleFavoriteToggle}
+          disabled={isFavoriteLoading}
+          title={stock.favorite ? "Remove from favorites" : "Add to favorites"}
+        >
+          <FontAwesomeIcon
+            icon={faHeart}
+            className={isFavoriteLoading ? "loading" : ""}
+          />
+        </button>
+      </div>
+
+      {/* Price Section */}
+      <div className="stock-price-section">
+        <div className="current-price">${formatPrice(stock.currentPrice)}</div>
+        <div
+          className="price-change"
+          style={{ color: getChangeColor(Number(stock.changePercent) || 0) }}
+        >
+          {(Number(stock.changePercent) || 0) >= 0 ? "+" : ""}
+          {formatPercent(stock.changePercent)}%
         </div>
-      </div>{" "}
-      {/* Mini Chart - Compact Version */}
-      <div className="mini-chart compact">
+      </div>
+
+      {/* Chart Section */}
+      <div className="chart-section">
         {isLoading ? (
-          <div
-            className="chart-loading"
-            style={{
-              height: "100px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
+          <div className="chart-loading">
             <div className="loading-spinner"></div>
-            <span style={{ marginLeft: "8px", fontSize: "12px" }}>
-              Loading...
-            </span>
+            <span>Loading...</span>
           </div>
         ) : (
           <ResponsiveContainer width="100%" height={100}>
             <LineChart
               data={chartData}
-              margin={{ top: 5, right: 8, left: 25, bottom: 15 }}
+              margin={{ top: 5, right: 5, left: 5, bottom: 5 }}
             >
-              <XAxis
-                dataKey="time"
-                tick={{ fontSize: 8, fill: "#8ba3f7" }}
-                axisLine={{ stroke: "#8ba3f7", strokeWidth: 1 }}
-                tickLine={{ stroke: "#8ba3f7" }}
-                interval="preserveStartEnd"
-                tickCount={3}
-                label={{
-                  value: "Time",
-                  position: "insideBottom",
-                  offset: -8,
-                  style: {
-                    textAnchor: "middle",
-                    fill: "#8ba3f7",
-                    fontSize: "8px",
-                  },
-                }}
-              />
-              <YAxis
-                tick={{ fontSize: 8, fill: "#8ba3f7" }}
-                axisLine={{ stroke: "#8ba3f7", strokeWidth: 1 }}
-                tickLine={{ stroke: "#8ba3f7" }}
-                tickFormatter={(value) => `$${Number(value).toFixed(0)}`}
-                width={22}
-                domain={["dataMin - 1", "dataMax + 1"]}
-                label={{
-                  value: "$",
-                  angle: -90,
-                  position: "insideLeft",
-                  style: {
-                    textAnchor: "middle",
-                    fill: "#8ba3f7",
-                    fontSize: "8px",
-                  },
-                }}
-              />
+              <XAxis dataKey="time" hide />
+              <YAxis domain={["dataMin - 1", "dataMax + 1"]} hide />
               <Tooltip
                 contentStyle={{
                   backgroundColor: "#0d1117",
@@ -326,7 +331,7 @@ const StockCard: React.FC<StockCardProps> = observer(({ stock, signal }) => {
                   "Price",
                 ]}
                 labelFormatter={(label) => `Time: ${label}`}
-              />{" "}
+              />
               <Line
                 type="monotone"
                 dataKey="price"
@@ -346,12 +351,10 @@ const StockCard: React.FC<StockCardProps> = observer(({ stock, signal }) => {
           </ResponsiveContainer>
         )}
       </div>
-      {/* Enhanced Technical Summary - Easier to Understand */}
-      <div className="technical-summary compact">
-        <div className="summary-header-compact">
-          <span className="summary-title-compact">📊 Quick Analysis</span>
-        </div>
-        <div className="technical-indicators compact">
+
+      {/* Technical Indicators Section */}
+      <div className="indicators-section">
+        <div className="technical-indicators horizontal">
           <div className="indicator-badge">
             <span className="badge-label">Trend</span>
             <span
@@ -373,6 +376,7 @@ const StockCard: React.FC<StockCardProps> = observer(({ stock, signal }) => {
                   : "➡️"}
             </span>
           </div>
+
           <div className="indicator-badge">
             <span className="badge-label">RSI</span>
             <span
@@ -381,17 +385,12 @@ const StockCard: React.FC<StockCardProps> = observer(({ stock, signal }) => {
               )}`}
               title={`Momentum Indicator: ${
                 stock.breakoutStrategy?.rsi?.toFixed(1) || "N/A"
-              } - ${
-                getRSILevel(stock.breakoutStrategy?.rsi) === "overbought"
-                  ? "⚠️ Potentially Overvalued (>70)"
-                  : getRSILevel(stock.breakoutStrategy?.rsi) === "oversold"
-                    ? "💡 Potentially Undervalued (<30)"
-                    : "✅ Balanced (30-70)"
               }`}
             >
               {stock.breakoutStrategy?.rsi?.toFixed(0) || "--"}
             </span>
           </div>
+
           <div className="indicator-badge">
             <span className="badge-label">Signal</span>
             <span
@@ -400,10 +399,10 @@ const StockCard: React.FC<StockCardProps> = observer(({ stock, signal }) => {
               }`}
               title={`AI Recommendation: ${
                 stock.tradingSignal?.signal === "buy"
-                  ? "🟢 AI suggests buying - Strong positive signals detected"
+                  ? "🟢 AI suggests buying"
                   : stock.tradingSignal?.signal === "sell"
-                    ? "🔴 AI suggests selling - Strong negative signals detected"
-                    : "🟡 AI suggests holding - Wait for clearer signals"
+                    ? "🔴 AI suggests selling"
+                    : "🟡 AI suggests holding"
               }`}
             >
               {stock.tradingSignal?.signal === "buy"
@@ -413,27 +412,18 @@ const StockCard: React.FC<StockCardProps> = observer(({ stock, signal }) => {
                   : "🟡"}
             </span>
           </div>
-          {/* AI Recommendation Widget */}
-          <RecommendationWidget
-            symbol={stock.symbol}
-            currentPrice={stock.currentPrice}
-            compact={true}
-            className="card-recommendation"
-            onRecommendationClick={() => setIsModalOpen(true)}
-          />
         </div>
 
-        <div className="view-full-details compact">
-          <button
-            className="full-details-btn compact"
-            onClick={() => setIsModalOpen(true)}
-            title="Open detailed dashboard with advanced charts and metrics"
-          >
-            <FontAwesomeIcon icon={faChartLine} />
-            Detailed Dashboard
-          </button>
-        </div>
-      </div>{" "}
+        <button
+          className="details-btn"
+          onClick={() => setIsModalOpen(true)}
+          title="Open detailed dashboard"
+        >
+          <FontAwesomeIcon icon={faChartLine} />
+          Details
+        </button>
+      </div>
+
       {/* Stock Modal */}
       <StockModal
         stock={stock}

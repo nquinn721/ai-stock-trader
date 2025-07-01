@@ -2,7 +2,6 @@ import { Assessment, PlayArrow, Stop, TrendingUp } from "@mui/icons-material";
 import { Alert, Box, Chip, Tab, Tabs, Typography } from "@mui/material";
 import { observer } from "mobx-react-lite";
 import React, { useEffect, useState } from "react";
-import StockCard from "../components/StockCard";
 import EconomicIntelligenceDashboard from "../components/macro-intelligence/EconomicIntelligenceDashboard";
 import OrderExecutionDashboard from "../components/order/OrderExecutionDashboard";
 import {
@@ -858,64 +857,6 @@ const AutonomousTradingPage: React.FC<AutonomousTradingPageProps> = observer(
       </ContentCard>
     );
 
-    const renderLiveMarketDataTab = () => {
-      const { stocksWithSignals, isLoading, readyStocks } = stockStore;
-
-      return (
-        <div className="live-market-tab">
-          <ContentCard
-            title="Live Market Data"
-            subtitle="Real-time stock prices and trading signals"
-            variant="gradient"
-            padding="lg"
-            className="live-market-header"
-            headerActions={
-              <div className="header-actions">
-                <StatusChip
-                  status={readyStocks.length > 0 ? "success" : "inactive"}
-                  label={`${readyStocks.length} stocks ready`}
-                  animated={readyStocks.length > 0}
-                />
-                <TradingButton
-                  variant="secondary"
-                  size="sm"
-                  onClick={() => stockStore.fetchStocksWithSignals()}
-                  disabled={isLoading}
-                  loading={isLoading}
-                >
-                  Refresh
-                </TradingButton>
-              </div>
-            }
-          >
-            {isLoading && readyStocks.length === 0 ? (
-              <LoadingState
-                variant="spinner"
-                message="Loading market data..."
-                size="lg"
-              />
-            ) : readyStocks.length === 0 ? (
-              <LoadingState
-                variant="skeleton"
-                message="Waiting for stocks with valid price data. Live updates will appear here automatically."
-                size="lg"
-              />
-            ) : (
-              <div className="content-grid stock-grid">
-                {stocksWithSignals.slice(0, 20).map((stock) => (
-                  <StockCard
-                    key={stock.symbol}
-                    stock={stock}
-                    signal={stock.tradingSignal || undefined}
-                  />
-                ))}
-              </div>
-            )}
-          </ContentCard>
-        </div>
-      );
-    };
-
     return (
       <div className="dashboard-page">
         <PageHeader
@@ -994,11 +935,10 @@ const AutonomousTradingPage: React.FC<AutonomousTradingPageProps> = observer(
                 className="dashboard-tabs"
               >
                 <Tab label="Portfolios" {...a11yProps(0)} />
-                <Tab label="Live Market Data" {...a11yProps(1)} />
-                <Tab label="Economic Intelligence" {...a11yProps(2)} />
-                <Tab label="Order Management" {...a11yProps(3)} />
-                <Tab label="Analytics" {...a11yProps(4)} />
-                <Tab label="Settings" {...a11yProps(5)} />
+                <Tab label="Economic Intelligence" {...a11yProps(1)} />
+                <Tab label="Order Management" {...a11yProps(2)} />
+                <Tab label="Analytics" {...a11yProps(3)} />
+                <Tab label="Settings" {...a11yProps(4)} />
               </Tabs>
 
               <TabPanel value={activeTab} index={0}>
@@ -1006,22 +946,18 @@ const AutonomousTradingPage: React.FC<AutonomousTradingPageProps> = observer(
               </TabPanel>
 
               <TabPanel value={activeTab} index={1}>
-                {renderLiveMarketDataTab()}
-              </TabPanel>
-
-              <TabPanel value={activeTab} index={2}>
                 {renderEconomicIntelligenceTab()}
               </TabPanel>
 
-              <TabPanel value={activeTab} index={3}>
+              <TabPanel value={activeTab} index={2}>
                 {renderOrderManagementTab()}
               </TabPanel>
 
-              <TabPanel value={activeTab} index={4}>
+              <TabPanel value={activeTab} index={3}>
                 {renderAnalyticsTab()}
               </TabPanel>
 
-              <TabPanel value={activeTab} index={5}>
+              <TabPanel value={activeTab} index={4}>
                 {renderSettingsTab()}
               </TabPanel>
             </div>

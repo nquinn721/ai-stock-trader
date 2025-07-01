@@ -169,7 +169,7 @@ const DashboardPage: React.FC = observer(() => {
     setPortfolioForDetails(null);
   };
 
-  const stocksWithSignals = stockStore.stocksWithSignals;
+  const stocksWithSignals = stockStore.stocksWithSignalsSorted;
   // Removed loading screen since data comes through WebSockets
   // const loading = stockStore.isLoading;
 
@@ -463,11 +463,12 @@ const DashboardPage: React.FC = observer(() => {
             />
           ) : (
             <div className="stocks-grid">
-              {stocksWithSignals.slice(0, 12).map((stock) => (
+              {stocksWithSignals.map((stock) => (
                 <StockCard
                   key={stock.symbol}
                   stock={stock}
                   signal={stock.tradingSignal || undefined}
+                  variant="compact"
                 />
               ))}
             </div>

@@ -1,5 +1,7 @@
 import { Module, forwardRef } from '@nestjs/common';
-// Removed TypeORM imports since we're using mock data
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { Stock } from '../../entities/stock.entity';
+import { TradingSignal } from '../../entities/trading-signal.entity';
 import { NewsModule } from '../news/news.module';
 import { TradingModule } from '../trading/trading.module';
 import { WebsocketModule } from '../websocket/websocket.module';
@@ -8,7 +10,7 @@ import { StockService } from './stock.service';
 
 @Module({
   imports: [
-    // Removed TypeOrmModule.forFeature([Stock, TradingSignal]) since we're using mock data
+    TypeOrmModule.forFeature([Stock, TradingSignal]),
     forwardRef(() => WebsocketModule),
     forwardRef(() => NewsModule),
     forwardRef(() => TradingModule),
