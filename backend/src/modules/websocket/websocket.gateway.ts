@@ -254,7 +254,7 @@ export class StockWebSocketGateway
     if (!this.stockSubscriptions.has(client.id)) {
       this.stockSubscriptions.set(client.id, new Set());
     }
-    this.stockSubscriptions.get(client.id)!.add(data.symbol.toUpperCase());
+    this.stockSubscriptions.get(client.id).add(data.symbol.toUpperCase());
 
     // Join room for specific stock
     client.join(`stock_${data.symbol}`);
@@ -269,7 +269,7 @@ export class StockWebSocketGateway
 
     // Remove from selective subscription tracking
     if (this.stockSubscriptions.has(client.id)) {
-      this.stockSubscriptions.get(client.id)!.delete(data.symbol.toUpperCase());
+      this.stockSubscriptions.get(client.id).delete(data.symbol.toUpperCase());
     }
 
     // Leave room for specific stock
@@ -385,7 +385,7 @@ export class StockWebSocketGateway
     if (!this.portfolioSubscriptions.has(client.id)) {
       this.portfolioSubscriptions.set(client.id, new Set());
     }
-    this.portfolioSubscriptions.get(client.id)!.add(data.portfolioId);
+    this.portfolioSubscriptions.get(client.id).add(data.portfolioId);
 
     // Join room for specific portfolio
     client.join(`portfolio_${data.portfolioId}`);
@@ -405,7 +405,7 @@ export class StockWebSocketGateway
 
     // Remove from client's portfolio subscriptions
     if (this.portfolioSubscriptions.has(client.id)) {
-      this.portfolioSubscriptions.get(client.id)!.delete(data.portfolioId);
+      this.portfolioSubscriptions.get(client.id).delete(data.portfolioId);
     }
 
     // Leave room for specific portfolio
@@ -1328,7 +1328,7 @@ export class StockWebSocketGateway
       this.messageBatch.set(eventType, []);
     }
 
-    const batch = this.messageBatch.get(eventType)!;
+    const batch = this.messageBatch.get(eventType);
     batch.push(data);
 
     // If batch is full, process immediately

@@ -162,7 +162,7 @@ export class StreamProcessingService {
           this.streamBuffers.set(symbol, []);
         }
 
-        const buffer = this.streamBuffers.get(symbol)!;
+        const buffer = this.streamBuffers.get(symbol);
 
         // Add incoming data to buffer
         buffer.push(stream);
@@ -180,7 +180,7 @@ export class StreamProcessingService {
       this.processingStreams.set(symbol, processedStream);
     }
 
-    return this.processingStreams.get(symbol)!;
+    return this.processingStreams.get(symbol);
   }
 
   /**
@@ -259,7 +259,7 @@ export class StreamProcessingService {
       this.crossVenueStreams.set(symbol, activityStream);
     }
 
-    return this.crossVenueStreams.get(symbol)!;
+    return this.crossVenueStreams.get(symbol);
   }
 
   /**

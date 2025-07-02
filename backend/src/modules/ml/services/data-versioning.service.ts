@@ -67,7 +67,7 @@ export class DataVersioningService {
     if (!this.versions.has(versionData.datasetName)) {
       this.versions.set(versionData.datasetName, []);
     }
-    this.versions.get(versionData.datasetName)!.push(version);
+    this.versions.get(versionData.datasetName).push(version);
 
     this.logger.log(
       `Created version ${version.version} for dataset ${versionData.datasetName}`,

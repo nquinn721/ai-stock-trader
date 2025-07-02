@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Between } from 'typeorm';
+import { Between, Repository } from 'typeorm';
 import { CryptoData } from '../entities/crypto-data.entity';
 import {
   BorrowingRate,

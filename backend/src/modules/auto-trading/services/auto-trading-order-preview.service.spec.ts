@@ -2,7 +2,12 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { AutoTradingOrderPreviewService } from '../src/modules/auto-trading/services/auto-trading-order-preview.service';
-import { AutoTradingOrder, AutoTradingOrderAction, AutoTradingOrderType, RiskLevel } from '../src/entities/auto-trading-order.entity';
+import {
+  AutoTradingOrder,
+  AutoTradingOrderAction,
+  AutoTradingOrderType,
+  RiskLevel,
+} from '../src/entities/auto-trading-order.entity';
 import { Portfolio } from '../src/entities/portfolio.entity';
 import { Stock } from '../src/entities/stock.entity';
 import { CreateAutoTradingOrderDto } from '../src/modules/auto-trading/dto/auto-trading-order.dto';
@@ -55,9 +60,15 @@ describe('AutoTradingOrderPreviewService', () => {
       ],
     }).compile();
 
-    service = module.get<AutoTradingOrderPreviewService>(AutoTradingOrderPreviewService);
-    repository = module.get<Repository<AutoTradingOrder>>(getRepositoryToken(AutoTradingOrder));
-    portfolioRepository = module.get<Repository<Portfolio>>(getRepositoryToken(Portfolio));
+    service = module.get<AutoTradingOrderPreviewService>(
+      AutoTradingOrderPreviewService,
+    );
+    repository = module.get<Repository<AutoTradingOrder>>(
+      getRepositoryToken(AutoTradingOrder),
+    );
+    portfolioRepository = module.get<Repository<Portfolio>>(
+      getRepositoryToken(Portfolio),
+    );
     stockRepository = module.get<Repository<Stock>>(getRepositoryToken(Stock));
   });
 
@@ -151,7 +162,7 @@ describe('AutoTradingOrderPreviewService', () => {
 
     it('should return false if order not found', async () => {
       const orderId = 'non-existent';
-      
+
       mockRepository.findOne.mockResolvedValue(null);
 
       const result = await service.approveOrder(orderId);
@@ -191,13 +202,10 @@ describe('AutoTradingOrderPreviewService', () => {
 
       const result = await service.bulkApproveOrders(orderIds);
 
-      expect(mockRepository.update).toHaveBeenCalledWith(
-        orderIds,
-        {
-          status: 'APPROVED',
-          updatedAt: expect.any(Date),
-        }
-      );
+      expect(mockRepository.update).toHaveBeenCalledWith(orderIds, {
+        status: 'APPROVED',
+        updatedAt: expect.any(Date),
+      });
       expect(result).toBe(2);
     });
   });
@@ -210,14 +218,11 @@ describe('AutoTradingOrderPreviewService', () => {
 
       const result = await service.bulkRejectOrders(orderIds, reason);
 
-      expect(mockRepository.update).toHaveBeenCalledWith(
-        orderIds,
-        {
-          status: 'REJECTED',
-          notes: reason,
-          updatedAt: expect.any(Date),
-        }
-      );
+      expect(mockRepository.update).toHaveBeenCalledWith(orderIds, {
+        status: 'REJECTED',
+        notes: reason,
+        updatedAt: expect.any(Date),
+      });
       expect(result).toBe(2);
     });
   });
