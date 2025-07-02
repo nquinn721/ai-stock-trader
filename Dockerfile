@@ -28,7 +28,7 @@ RUN npm install --ignore-scripts --no-optional
 WORKDIR /app/frontend
 COPY frontend/package*.json ./
 COPY frontend/tsconfig.json ./
-RUN npm install --no-optional
+RUN npm install
 COPY frontend/ ./
 RUN npm run build
 

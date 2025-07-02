@@ -320,7 +320,11 @@ export class StockWebSocketGateway
   async broadcastStockUpdate(symbol: string, stockData: any) {
     try {
       if (!this.isServerReady()) {
-        console.warn('WebSocket server not available, skipping stock update');
+        if (process.env.WEBSOCKET_CONNECTION_LOGGING === 'true') {
+          this.logger.warn(
+            'WebSocket server not available, skipping stock update',
+          );
+        }
         return;
       }
 
@@ -328,17 +332,25 @@ export class StockWebSocketGateway
       this.addToBatch('stock_update', { symbol, data: stockData });
       this.addToBatch(`stock_specific_update_${symbol}`, stockData);
 
-      console.log(`Queued update for ${symbol}`);
+      // Only log individual stock updates if verbose logging is enabled
+      if (process.env.WEBSOCKET_VERBOSE_LOGGING === 'true') {
+        this.logger.debug(`Queued update for ${symbol}`);
+      }
     } catch (error) {
-      console.error(`Error broadcasting stock update for ${symbol}:`, error);
+      this.logger.error(
+        `Error broadcasting stock update for ${symbol}:`,
+        error,
+      );
     }
   }
 
   async broadcastTradingSignal(signal: any) {
     if (!this.isServerReady()) {
-      console.warn(
-        'WebSocket server not available, skipping trading signal broadcast',
-      );
+      if (process.env.WEBSOCKET_CONNECTION_LOGGING === 'true') {
+        this.logger.warn(
+          'WebSocket server not available, skipping trading signal broadcast',
+        );
+      }
       return;
     }
     this.server.emit('trading_signal', signal);
@@ -346,9 +358,11 @@ export class StockWebSocketGateway
 
   async broadcastNewsUpdate(news: any) {
     if (!this.isServerReady()) {
-      console.warn(
-        'WebSocket server not available, skipping news update broadcast',
-      );
+      if (process.env.WEBSOCKET_CONNECTION_LOGGING === 'true') {
+        this.logger.warn(
+          'WebSocket server not available, skipping news update broadcast',
+        );
+      }
       return;
     }
     this.server.emit('news_update', news);
@@ -981,7 +995,11 @@ export class StockWebSocketGateway
   async sendNotificationToUser(userId: string, notification: any) {
     try {
       if (!this.isServerReady()) {
-        console.warn('WebSocket server not available, skipping notification');
+        if (process.env.WEBSOCKET_CONNECTION_LOGGING === 'true') {
+          this.logger.warn(
+            'WebSocket server not available, skipping notification',
+          );
+        }
         return;
       }
       this.server.to(`notifications_${userId}`).emit('notification', {
@@ -1003,9 +1021,11 @@ export class StockWebSocketGateway
   async sendBulkNotificationsToUser(userId: string, notifications: any[]) {
     try {
       if (!this.isServerReady()) {
-        console.warn(
-          'WebSocket server not available, skipping bulk notifications',
-        );
+        if (process.env.WEBSOCKET_CONNECTION_LOGGING === 'true') {
+          this.logger.warn(
+            'WebSocket server not available, skipping bulk notifications',
+          );
+        }
         return;
       }
       this.server.to(`notifications_${userId}`).emit('notifications_bulk', {
@@ -1035,9 +1055,11 @@ export class StockWebSocketGateway
   ) {
     try {
       if (!this.isServerReady()) {
-        console.warn(
-          'WebSocket server not available, skipping notification status update',
-        );
+        if (process.env.WEBSOCKET_CONNECTION_LOGGING === 'true') {
+          this.logger.warn(
+            'WebSocket server not available, skipping notification status update',
+          );
+        }
         return;
       }
       this.server.to(`notifications_${userId}`).emit('notification_status', {
@@ -1059,9 +1081,11 @@ export class StockWebSocketGateway
   async sendUnreadCountUpdate(userId: string, count: number) {
     try {
       if (!this.isServerReady()) {
-        console.warn(
-          'WebSocket server not available, skipping unread count update',
-        );
+        if (process.env.WEBSOCKET_CONNECTION_LOGGING === 'true') {
+          this.logger.warn(
+            'WebSocket server not available, skipping unread count update',
+          );
+        }
         return;
       }
       this.server.to(`notifications_${userId}`).emit('unread_count', {
@@ -1080,7 +1104,11 @@ export class StockWebSocketGateway
   async broadcastSystemAlert(alert: any) {
     try {
       if (!this.isServerReady()) {
-        console.warn('WebSocket server not available, skipping system alert');
+        if (process.env.WEBSOCKET_CONNECTION_LOGGING === 'true') {
+          this.logger.warn(
+            'WebSocket server not available, skipping system alert',
+          );
+        }
         return;
       }
       this.server.emit('system_alert', {
@@ -1177,9 +1205,11 @@ export class StockWebSocketGateway
   async broadcastAllPortfolios() {
     try {
       if (!this.isServerReady()) {
-        console.warn(
-          'WebSocket server not available, skipping portfolio broadcast',
-        );
+        if (process.env.WEBSOCKET_CONNECTION_LOGGING === 'true') {
+          this.logger.warn(
+            'WebSocket server not available, skipping portfolio broadcast',
+          );
+        }
         return;
       }
 
@@ -1417,9 +1447,14 @@ export class StockWebSocketGateway
         this.emitOptimized(null, `${eventType}_batch`, payload);
       }
 
-      console.log(`✨ Flushed ${batch.length} messages for ${eventType}`);
+      // Only log batch flushing if verbose logging is enabled
+      if (process.env.WEBSOCKET_VERBOSE_LOGGING === 'true') {
+        this.logger.debug(
+          `✨ Flushed ${batch.length} messages for ${eventType}`,
+        );
+      }
     } catch (error) {
-      console.error(`Error flushing batch for ${eventType}:`, error);
+      this.logger.error(`Error flushing batch for ${eventType}:`, error);
     }
 
     // Clear the batch
@@ -1592,7 +1627,9 @@ export class StockWebSocketGateway
     try {
       // Check if server is available and initialized
       if (!this.server || !this.isServerInitialized) {
-        console.warn('WebSocket server not available, skipping emit');
+        if (process.env.WEBSOCKET_CONNECTION_LOGGING === 'true') {
+          this.logger.warn('WebSocket server not available, skipping emit');
+        }
         return;
       }
 
@@ -1835,9 +1872,11 @@ export class StockWebSocketGateway
   private emitPredictionUpdate(symbol: string, update: PredictionUpdate) {
     try {
       if (!this.isServerReady()) {
-        console.warn(
-          'WebSocket server not available, skipping prediction update',
-        );
+        if (process.env.WEBSOCKET_CONNECTION_LOGGING === 'true') {
+          this.logger.warn(
+            'WebSocket server not available, skipping prediction update',
+          );
+        }
         return;
       }
       this.server.to(`predictions:${symbol}`).emit('prediction-update', update);

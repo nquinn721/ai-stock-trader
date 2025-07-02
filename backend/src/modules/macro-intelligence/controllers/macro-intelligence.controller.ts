@@ -482,20 +482,33 @@ export class MacroIntelligenceController {
 
     try {
       // Check if country is supported
-      const supportedCountries = ['US', 'China', 'Germany', 'Japan', 'UK', 'France', 'Italy', 'Canada', 'Australia', 'Brazil'];
-      
+      const supportedCountries = [
+        'US',
+        'China',
+        'Germany',
+        'Japan',
+        'UK',
+        'France',
+        'Italy',
+        'Canada',
+        'Australia',
+        'Brazil',
+      ];
+
       if (!supportedCountries.includes(country)) {
         this.logger.warn(`Country ${country} not supported, using US data`);
         country = 'US';
       }
 
       // Get comprehensive data
-      const [economic, recession, political, businessCycle] = await Promise.all([
-        this.economicService.analyzeEconomicIndicators(country),
-        this.economicService.predictRecessionProbability(country),
-        this.geopoliticalService.assessPoliticalStability(country),
-        this.economicService.identifyBusinessCyclePhase(country),
-      ]);
+      const [economic, recession, political, businessCycle] = await Promise.all(
+        [
+          this.economicService.analyzeEconomicIndicators(country),
+          this.economicService.predictRecessionProbability(country),
+          this.geopoliticalService.assessPoliticalStability(country),
+          this.economicService.identifyBusinessCyclePhase(country),
+        ],
+      );
 
       return {
         country,
@@ -508,10 +521,17 @@ export class MacroIntelligenceController {
             unemployment: Math.random() * 8 + 3, // 3% to 11%
             productivity: Math.random() * 3 + 0.5, // 0.5% to 3.5%
           },
-          risks: economic.risks || ['Inflation pressure', 'Supply chain disruptions'],
-          opportunities: economic.opportunities || ['Technology growth', 'Green transition'],
+          risks: economic.risks || [
+            'Inflation pressure',
+            'Supply chain disruptions',
+          ],
+          opportunities: economic.opportunities || [
+            'Technology growth',
+            'Green transition',
+          ],
           outlook: economic.outlook || 'neutral',
-          confidence: economic.confidence || Math.floor(Math.random() * 30) + 70, // 70-100%
+          confidence:
+            economic.confidence || Math.floor(Math.random() * 30) + 70, // 70-100%
         },
         recession: {
           probability: recession.probability || Math.random() * 40, // 0-40%
@@ -521,8 +541,12 @@ export class MacroIntelligenceController {
         },
         political: {
           score: political.overall || Math.floor(Math.random() * 30) + 70, // 70-100
-          stability: (political.overall || 75) > 80 ? 'high' : 
-                     (political.overall || 75) > 60 ? 'medium' : 'low',
+          stability:
+            (political.overall || 75) > 80
+              ? 'high'
+              : (political.overall || 75) > 60
+                ? 'medium'
+                : 'low',
           risks: ['Election cycles', 'Policy uncertainty'],
         },
         businessCycle: {
@@ -534,8 +558,10 @@ export class MacroIntelligenceController {
         timestamp: new Date(),
       };
     } catch (error) {
-      this.logger.error(`Failed to get comprehensive analysis for ${country}: ${error.message}`);
-      
+      this.logger.error(
+        `Failed to get comprehensive analysis for ${country}: ${error.message}`,
+      );
+
       // Return default data structure to prevent frontend errors
       return {
         country,
