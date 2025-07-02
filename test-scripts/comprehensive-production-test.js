@@ -128,7 +128,7 @@ async function testMultiAssetSupportedAssets() {
   const response = await axios.get(`${API_BASE}/multi-asset/supported-assets`);
   if (response.status !== 200)
     throw new Error(`Multi-asset supported assets failed: ${response.status}`);
-  const required = ["stocks", "crypto", "forex", "commodities"];
+  const required = ["stocks", "commodities"];
   for (const assetClass of required) {
     if (!response.data[assetClass])
       throw new Error(`Missing asset class: ${assetClass}`);

@@ -60,7 +60,7 @@ A comprehensive stock trading application with real-time data, sentiment analysi
 
 ### MultiAssetModule ⚠️
 
-- **Cross-Asset Trading**: Stocks, crypto, forex, commodities
+- **Cross-Asset Trading**: Stocks, commodities
 - **Asset Correlation Analysis**: Multi-asset relationship modeling
 - **Cross-Asset Arbitrage**: Opportunity detection across asset classes
 - **Currency Risk Management**: FX exposure monitoring

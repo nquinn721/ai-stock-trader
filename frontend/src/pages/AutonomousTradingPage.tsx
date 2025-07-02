@@ -2,6 +2,8 @@ import { Assessment, PlayArrow, Stop, TrendingUp } from "@mui/icons-material";
 import { Alert, Box, Chip, Tab, Tabs, Typography } from "@mui/material";
 import { observer } from "mobx-react-lite";
 import React, { useEffect, useState } from "react";
+import PerformanceAnalytics from "../components/autonomous-trading/PerformanceAnalytics";
+import TradingSettings from "../components/autonomous-trading/TradingSettings";
 import EconomicIntelligenceDashboard from "../components/macro-intelligence/EconomicIntelligenceDashboard";
 import OrderExecutionDashboard from "../components/order/OrderExecutionDashboard";
 import {
@@ -835,27 +837,46 @@ const AutonomousTradingPage: React.FC<AutonomousTradingPageProps> = observer(
       );
     };
 
-    const renderAnalyticsTab = () => (
-      <ContentCard
-        title="Performance Analytics"
-        variant="gradient"
-        padding="lg"
-      >
-        <Alert severity="info">
-          Detailed performance analytics and trading metrics will be displayed
-          here.
-        </Alert>
-      </ContentCard>
-    );
+    const renderAnalyticsTab = () => {
+      const portfolioIds = portfolios.map((p) => p.id.toString());
 
-    const renderSettingsTab = () => (
-      <ContentCard title="Trading Settings" variant="gradient" padding="lg">
-        <Alert severity="info">
-          Global trading settings and risk management parameters will be
-          configured here.
-        </Alert>
-      </ContentCard>
-    );
+      const handleExportPerformance = () => {
+        // TODO: Implement performance report export
+        console.log("Exporting performance report...");
+        // This could generate PDF reports, CSV data, etc.
+      };
+
+      return (
+        <div className="analytics-tab">
+          <PerformanceAnalytics
+            portfolioIds={portfolioIds}
+            onExport={handleExportPerformance}
+          />
+        </div>
+      );
+    };
+
+    const renderSettingsTab = () => {
+      const handleSaveSettings = (settings: any) => {
+        // TODO: Implement settings save to backend
+        console.log("Saving trading settings:", settings);
+        // This would save to backend via API calls
+      };
+
+      const handleResetSettings = () => {
+        // TODO: Implement settings reset
+        console.log("Resetting settings to defaults");
+      };
+
+      return (
+        <div className="settings-tab">
+          <TradingSettings
+            onSave={handleSaveSettings}
+            onReset={handleResetSettings}
+          />
+        </div>
+      );
+    };
 
     return (
       <div className="dashboard-page">

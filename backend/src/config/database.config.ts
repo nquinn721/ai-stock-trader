@@ -52,11 +52,11 @@ export function getDatabaseConfig(): DatabaseConfig {
     // Production environment - Cloud SQL or production database
     const config: DatabaseConfig = {
       type: 'mysql',
-      host: process.env.DB_HOST || 'localhost',
-      port: parseInt(process.env.DB_PORT || '3306'),
-      username: process.env.DB_USERNAME || 'root',
-      password: process.env.DB_PASSWORD || 'rootpassword123',
-      database: process.env.DB_NAME || 'stocktrading',
+      host: process.env.DATABASE_HOST || 'localhost',
+      port: parseInt(process.env.DATABASE_PORT || '3306'),
+      username: process.env.DATABASE_USERNAME || 'root',
+      password: process.env.DATABASE_PASSWORD || 'rootpassword123',
+      database: process.env.DATABASE_NAME || 'stocktrading',
     };
 
     // Configure SSL for Cloud SQL
@@ -67,9 +67,9 @@ export function getDatabaseConfig(): DatabaseConfig {
     }
 
     // Configure Unix socket for Cloud SQL (if provided)
-    if (process.env.DB_SOCKET_PATH) {
+    if (process.env.DATABASE_SOCKET_PATH) {
       config.extra = {
-        socketPath: process.env.DB_SOCKET_PATH,
+        socketPath: process.env.DATABASE_SOCKET_PATH,
         connectionLimit: 10,
         acquireTimeout: 60000,
         timeout: 60000,
