@@ -13,8 +13,6 @@ import { AlternativeDataService } from './alternative-data.service';
 import { ArbitrageDetectionService } from './arbitrage-detection.service';
 import { CommoditiesTradingService } from './commodities-trading.service';
 import { CrossAssetAnalyticsService } from './cross-asset-analytics.service';
-import { CryptoTradingService } from './crypto-trading.service';
-import { ForexTradingService } from './forex-trading.service';
 
 @Injectable()
 export class AssetClassManagerService {
@@ -23,8 +21,6 @@ export class AssetClassManagerService {
   constructor(
     @InjectRepository(AssetData)
     private assetDataRepository: Repository<AssetData>,
-    private cryptoService: CryptoTradingService,
-    private forexService: ForexTradingService,
     private commoditiesService: CommoditiesTradingService,
     private alternativeDataService: AlternativeDataService,
     private crossAssetAnalyticsService: CrossAssetAnalyticsService,
@@ -71,18 +67,6 @@ export class AssetClassManagerService {
     asset: AssetIdentifier,
   ): Promise<BaseMarketData> {
     switch (asset.class) {
-      case AssetClass.CRYPTO:
-        const cryptoData = await this.cryptoService.getCryptoMarketData(
-          asset.symbol,
-        );
-        return this.mapCryptoToBaseMarketData(cryptoData);
-
-      case AssetClass.FOREX:
-        const forexData = await this.forexService.getForexTick(
-          asset.symbol as any,
-        );
-        return this.mapForexToBaseMarketData(forexData);
-
       case AssetClass.COMMODITIES:
         const commodityData = await this.commoditiesService.getCommodityData(
           asset.symbol,
