@@ -307,7 +307,7 @@ export class EnsembleSystemsService {
         volatilityMultiplier *
         confidenceMultiplier;
     } // Normalize weights to sum to 1
-    const weightValues = Object.values(weights);
+    const weightValues = Object.values(weights) as number[];
     const totalWeight: number = weightValues.reduce(
       (sum: number, weight: number) => sum + weight,
       0,
@@ -901,7 +901,7 @@ export class EnsembleSystemsService {
   }
   private assessEnsembleQuality(predictions: any, weights: any): any {
     const predictionCount = Object.keys(predictions).length;
-    const predictionValues = Object.values(predictions);
+    const predictionValues = Object.values(predictions) as any[];
     const avgConfidence =
       predictionValues.reduce((sum: number, p: any) => sum + p.confidence, 0) /
       predictionCount;
@@ -936,7 +936,7 @@ export class EnsembleSystemsService {
   }
 
   private calculateWeightDistribution(weights: any): any {
-    const weightValues = Object.values(weights);
+    const weightValues = Object.values(weights) as number[];
     const maxWeight = Math.max(...weightValues);
     const concentration = maxWeight; // How concentrated the weights are
 
