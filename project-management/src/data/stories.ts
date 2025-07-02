@@ -1073,6 +1073,21 @@ export const stories: Story[] = [
     createdDate: "2025-07-01",
     completedDate: "2025-07-02",
   },
+  {
+    id: "S59",
+    title: "Remove Forex and Crypto Features - Simplify to Stock Trading Only",
+    description:
+      "Remove all forex and cryptocurrency trading features from the application and clean up the database to only include tables necessary for stock trading. This will simplify the application architecture, reduce maintenance overhead, and focus the product on its core stock trading functionality.",
+    status: "TODO",
+    priority: "High",
+    epic: "E2",
+    storyPoints: 13,
+    sprint: 5,
+    assignee: "Full Stack Development Team",
+    progress: 0,
+    dependencies: ["S47"],
+    createdDate: "2025-07-02",
+  },
 ];
 
 export default stories;

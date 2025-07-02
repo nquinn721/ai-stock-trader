@@ -68,6 +68,13 @@ export class StockService {
   private updateCounter = 0;
   private readonly SUMMARY_LOG_INTERVAL = 12; // Log summary every 12 cycles (every minute with 5-second cron)
 
+  // Rate limiting detection and backoff
+  private isRateLimited = false;
+  private rateLimitBackoffUntil: Date | null = null;
+  private consecutiveErrors = 0;
+  private readonly MAX_CONSECUTIVE_ERRORS = 3;
+  private readonly RATE_LIMIT_BACKOFF_MINUTES = 2;
+
   // Cache for live price data (not stored in DB)
   private priceCache = new Map<
     string,
@@ -335,16 +342,38 @@ export class StockService {
         setTimeout(() => reject(new Error('API timeout')), 10000); // 10 second timeout
       });
 
-      const quote = await Promise.race([
-        yahooFinance.quote(
-          symbol,
-          {},
-          {
-            validateResult: false,
-          },
-        ),
-        timeoutPromise,
-      ]);
+      let quote;
+      try {
+        quote = await Promise.race([
+          yahooFinance.quote(
+            symbol,
+            {},
+            {
+              validateResult: false,
+            },
+          ),
+          timeoutPromise,
+        ]);
+      } catch (apiError) {
+        // Handle specific API errors
+        if (apiError.message && (apiError.message.includes('Too many requests') || apiError.message.includes('Unexpected token'))) {
+          this.consecutiveErrors++;
+          if (this.consecutiveErrors >= this.MAX_CONSECUTIVE_ERRORS) {
+            this.isRateLimited = true;
+            this.rateLimitBackoffUntil = new Date(Date.now() + this.RATE_LIMIT_BACKOFF_MINUTES * 60 * 1000);
+            this.logger.warn(
+              `Rate limiting detected for ${symbol}. Entering ${this.RATE_LIMIT_BACKOFF_MINUTES}-minute backoff period until ${this.rateLimitBackoffUntil.toLocaleTimeString()}`
+            );
+          } else {
+            if (this.enableVerboseLogging) {
+              this.logger.warn(`Rate limited for ${symbol} - error ${this.consecutiveErrors}/${this.MAX_CONSECUTIVE_ERRORS}`);
+            }
+          }
+          return null;
+        }
+        // Re-throw other errors to be caught by outer try-catch
+        throw apiError;
+      }
 
       const stock = await this.getStockBySymbol(symbol);
 
@@ -364,6 +393,14 @@ export class StockService {
           marketCap: marketCap,
           lastUpdated: new Date(),
         });
+
+        // Reset consecutive errors on successful API call
+        if (this.consecutiveErrors > 0) {
+          this.consecutiveErrors = 0;
+          if (this.enableVerboseLogging) {
+            this.logger.debug('API calls successful - reset error counter');
+          }
+        }
 
         if (this.enablePriceUpdateLogging) {
           this.logger.debug(
@@ -406,6 +443,22 @@ export class StockService {
   }
   @Cron('*/5 * * * * *') // Every 5 seconds (WARNING: Very aggressive - may cause API rate limiting)
   async updateAllStockPrices() {
+    // Check if we're in rate limit backoff period
+    if (this.isRateLimited && this.rateLimitBackoffUntil) {
+      if (new Date() < this.rateLimitBackoffUntil) {
+        if (this.enableVerboseLogging) {
+          this.logger.debug('Skipping price updates - in rate limit backoff period');
+        }
+        return;
+      } else {
+        // Backoff period ended, reset rate limit state
+        this.isRateLimited = false;
+        this.rateLimitBackoffUntil = null;
+        this.consecutiveErrors = 0;
+        this.logger.log('Rate limit backoff period ended - resuming price updates');
+      }
+    }
+
     const stocks = await this.stockRepository.find(); // Get all tracked stocks from database
     const connectedClients = this.websocketGateway.getConnectedClientsCount();
 

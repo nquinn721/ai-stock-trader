@@ -13,6 +13,7 @@ Based on the error logs from the Cloud Build failure (Step 2 - Push image), the 
 ### 1. Added Missing WebSocket Dependency
 
 **File**: `backend/package.json`
+
 ```json
 "@nestjs/platform-socket.io": "^11.1.3"
 ```
@@ -22,6 +23,7 @@ Based on the error logs from the Cloud Build failure (Step 2 - Push image), the 
 ### 2. Improved Database Connection Handling
 
 **File**: `backend/src/main.ts`
+
 - Added comprehensive try-catch error handling around application bootstrap
 - Added Cloud Run-specific error handling with graceful exits
 - Added 5-second delay before exit in Cloud Run environment to allow proper restart
@@ -29,12 +31,14 @@ Based on the error logs from the Cloud Build failure (Step 2 - Push image), the 
 ### 3. Enhanced Container Health Checks
 
 **File**: `Dockerfile`
+
 - Increased health check start period from 120s to 180s
 - This gives more time for database connections to establish in Cloud Run
 
 ### 4. Optimized Cloud Build Configuration
 
 **File**: `cloudbuild.yaml`
+
 - Increased build timeout from 2400s to 3600s (1 hour)
 - Added production environment variables to build options
 - Optimized for better resource allocation
@@ -42,6 +46,7 @@ Based on the error logs from the Cloud Build failure (Step 2 - Push image), the 
 ### 5. Database Configuration Resilience
 
 **File**: `backend/src/app.module.ts`
+
 - Already had robust timeout settings (120s connection timeout)
 - Already had Cloud Run detection and fallback mechanisms
 - Connection retry logic with 10 attempts and 5s delay
@@ -49,20 +54,23 @@ Based on the error logs from the Cloud Build failure (Step 2 - Push image), the 
 ## Error Log Analysis
 
 ### Original Error:
+
 ```
-[Nest] 9 - ERROR [PackageLoader] No driver (WebSockets) has been selected. 
-In order to take advantage of the default driver, please, ensure to install 
+[Nest] 9 - ERROR [PackageLoader] No driver (WebSockets) has been selected.
+In order to take advantage of the default driver, please, ensure to install
 the "@nestjs/platform-socket.io" package
 ```
 
 ### Database Connection Error:
+
 ```
-connection aborted - error reading from client: read unix 
-/tmp/csql/heroic-footing-460117-k8:us-central1:stocktrading-mysql->@: 
+connection aborted - error reading from client: read unix
+/tmp/csql/heroic-footing-460117-k8:us-central1:stocktrading-mysql->@:
 read: connection reset by peer
 ```
 
 ### Container Exit:
+
 ```
 Container called exit(1).
 ```
@@ -80,7 +88,7 @@ After these fixes, the Cloud Build should:
 
 1. **Step 1**: Build successfully with all dependencies
 2. **Step 2**: Push image without dependency errors
-3. **Step 3**: Push latest tag successfully  
+3. **Step 3**: Push latest tag successfully
 4. **Step 4**: Deploy to Cloud Run with proper startup sequence
 
 ## Verification Steps
@@ -105,6 +113,7 @@ gcloud builds submit --config=cloudbuild.yaml --substitutions=_REGION=us-central
 ```
 
 The container should now start properly with:
+
 - WebSocket support enabled
 - Database connection resilience
 - Graceful error handling
@@ -113,6 +122,7 @@ The container should now start properly with:
 ## Monitoring
 
 After deployment, monitor:
+
 - Container startup logs for successful database connection
 - Health check endpoint: `/health`
 - WebSocket connection establishment
