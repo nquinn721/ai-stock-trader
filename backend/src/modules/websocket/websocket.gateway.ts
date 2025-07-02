@@ -157,17 +157,24 @@ export class StockWebSocketGateway
   }
 
   handleConnection(client: Socket) {
-    if (this.enableConnectionLogging) {
-      this.logger.debug(`Client connected: ${client.id}`);
-    }
+    try {
+      if (this.enableConnectionLogging) {
+        this.logger.debug(`Client connected: ${client.id}`);
+      }
 
-    // Rate limiting check
-    if (!this.checkRateLimit(client.id)) {
-      console.warn(`Rate limit exceeded for client ${client.id}`);
-      client.emit('rate_limit_exceeded', {
-        message: 'Too many requests, please slow down',
-        retryAfter: 60, // seconds
-      });
+      // Rate limiting check
+      if (!this.checkRateLimit(client.id)) {
+        console.warn(`Rate limit exceeded for client ${client.id}`);
+        client.emit('rate_limit_exceeded', {
+          message: 'Too many requests, please slow down',
+          retryAfter: 60, // seconds
+        });
+        client.disconnect();
+        return;
+      }
+    } catch (error) {
+      this.logger.error(`Error in handleConnection for client ${client.id}:`, error);
+      client.emit('connection_error', { message: 'Server connection error' });
       client.disconnect();
       return;
     }
@@ -1129,14 +1136,27 @@ export class StockWebSocketGateway
     try {
       console.log(`Sending initial data to client ${client.id}`);
 
+      // Check if services are available
+      if (!this.stockService) {
+        this.logger.error('StockService not available for initial data');
+        return;
+      }
+
       // Send stock data
       const stocks = await this.stockService.getAllStocks();
       if (stocks && stocks.length > 0) {
         client.emit('stock_updates', stocks);
         console.log(`Sent ${stocks.length} stocks to client ${client.id}`);
+      } else {
+        console.log(`No stocks available for client ${client.id}`);
       }
 
       // Send all portfolios data
+      if (!this.paperTradingService) {
+        this.logger.error('PaperTradingService not available for initial data');
+        return;
+      }
+      
       const portfolios = await this.paperTradingService.getPortfolios();
       if (portfolios && portfolios.length > 0) {
         client.emit('portfolios_update', portfolios);
