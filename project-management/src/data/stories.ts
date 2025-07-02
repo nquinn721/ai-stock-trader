@@ -1062,15 +1062,16 @@ export const stories: Story[] = [
     title: "Comprehensive Code Cleanup & Refactoring",
     description:
       "Conduct extensive cleanup and refactoring of the entire codebase to remove dead code, unused files, and improve maintainability. This includes: (1) Dead Code Removal - scan backend and frontend for unused functions, components, imports, and variables; (2) Unused File Cleanup - identify and remove unused files, components, services, and assets; (3) File Naming Standards - rename files to follow consistent naming conventions; (4) Import Optimization - remove unused imports and optimize import statements; (5) Type Safety Improvements - ensure proper TypeScript typing throughout; (6) Code Organization - reorganize files into logical directory structures; (7) Documentation Cleanup - remove outdated comments and add missing documentation; (8) Dependency Cleanup - remove unused npm packages and update outdated ones. All changes must be thoroughly tested to ensure no functionality is broken in the process.",
-    status: "TODO",
+    status: "DONE",
     priority: "Medium",
     epic: "E2",
     storyPoints: 13,
     sprint: 4,
     assignee: "Development Team",
-    progress: 0,
+    progress: 100,
     dependencies: [],
     createdDate: "2025-07-01",
+    completedDate: "2025-07-02",
   },
 ];
 
