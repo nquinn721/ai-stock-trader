@@ -1068,9 +1068,10 @@ export const stories: Story[] = [
     storyPoints: 13,
     sprint: 4,
     assignee: "Development Team",
-    progress: 0,
+    progress: 100,
     dependencies: [],
     createdDate: "2025-07-01",
+    completedDate: "2025-07-02",
   },
   {
     id: "S59",

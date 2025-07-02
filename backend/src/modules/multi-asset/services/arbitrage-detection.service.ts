@@ -56,7 +56,7 @@ export class ArbitrageDetectionService {
       if (!assetsBySymbol.has(asset.symbol)) {
         assetsBySymbol.set(asset.symbol, []);
       }
-      assetsBySymbol.get(asset.symbol)!.push(asset);
+      assetsBySymbol.get(asset.symbol).push(asset);
     });
 
     // Find price differences across exchanges

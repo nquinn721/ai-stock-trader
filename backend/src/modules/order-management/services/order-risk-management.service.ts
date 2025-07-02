@@ -465,7 +465,7 @@ export class OrderRiskManagementService {
       if (!symbolOrders.has(order.symbol)) {
         symbolOrders.set(order.symbol, []);
       }
-      symbolOrders.get(order.symbol)!.push(order);
+      symbolOrders.get(order.symbol).push(order);
     });
 
     let dayTradeCount = 0;

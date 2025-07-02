@@ -1,7 +1,7 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { Interval } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, MoreThanOrEqual } from 'typeorm';
+import { MoreThanOrEqual, Repository } from 'typeorm';
 import { MLMetric, MLModel, MLPrediction } from '../entities/ml.entities';
 import { ModelMetrics, TechnicalFeatures } from '../interfaces/ml.interfaces';
 import { FeaturePipelineService } from './feature-pipeline.service';

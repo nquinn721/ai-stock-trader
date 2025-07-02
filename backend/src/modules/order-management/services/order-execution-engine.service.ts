@@ -256,8 +256,8 @@ export class OrderExecutionEngine {
         const executionReport: ExecutionReport = {
           timestamp: new Date(),
           quantity: actualFillQuantity,
-          price: executionResult.executedPrice!,
-          commission: executionResult.commission!,
+          price: executionResult.executedPrice,
+          commission: executionResult.commission,
           venue: 'PAPER_TRADING',
           executionId: `exec_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
         };

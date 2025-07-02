@@ -127,7 +127,7 @@ export class SentimentMonitoringService {
       this.sentimentHistory.set(symbol, []);
     }
 
-    const history = this.sentimentHistory.get(symbol)!;
+    const history = this.sentimentHistory.get(symbol);
     history.unshift(sentiment);
 
     // Keep only last 100 sentiment readings
