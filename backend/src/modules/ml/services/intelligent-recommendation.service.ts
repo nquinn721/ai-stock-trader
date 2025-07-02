@@ -115,6 +115,10 @@ export interface RecommendationRequest {
 @Injectable()
 export class IntelligentRecommendationService {
   private readonly logger = new Logger(IntelligentRecommendationService.name);
+  
+  // Rate limiting for warning messages to prevent log flooding
+  private readonly warningRateLimit = new Map<string, number>();
+  private readonly WARNING_COOLDOWN_MS = 60000; // 1 minute cooldown per warning type
 
   constructor(
     private readonly featurePipelineService: FeaturePipelineService,
@@ -313,10 +317,12 @@ export class IntelligentRecommendationService {
       // For now, return null when no real data pipeline is available
       // This ensures we never use mock data
 
-      this.logger.warn(
+      this.logWarningRateLimited(
+        `pipeline-not-implemented-${request.symbol}`,
         `⚠️ Real market data pipeline not yet implemented for ${request.symbol}`,
       );
-      this.logger.warn(
+      this.logWarningRateLimited(
+        'no-mock-data-policy',
         `⚠️ Following NO MOCK DATA policy - returning null instead of fake data`,
       );
 
@@ -345,8 +351,22 @@ export class IntelligentRecommendationService {
     features: any,
   ): Promise<any> {
     try {
+      // Check if we have real market data available
+      if (!features?.hasRealData || !features?.features?.length) {
+        this.logWarningRateLimited(
+          `no-real-data-${request.symbol}`,
+          `⚠️ No real market data available for ${request.symbol} - skipping market prediction`,
+        );
+        return {
+          symbol: request.symbol,
+          prediction: null,
+          confidence: 0,
+          error: 'No real market data available for prediction',
+        };
+      }
+
       // Use S29A Market Prediction Service
-      const technicalFeatures = features.features?.[0] || {};
+      const technicalFeatures = features.features[0];
 
       const prediction = await this.marketPredictionService.predictMarket(
         request.symbol,
@@ -572,7 +592,8 @@ export class IntelligentRecommendationService {
     const hasRealData = metrics.marketPrediction?.hasRealData === true;
 
     if (!hasRealData) {
-      this.logger.warn(
+      this.logWarningRateLimited(
+        `conservative-hold-${request.symbol}`,
         `⚠️ No real market data available for ${request.symbol} - returning conservative HOLD`,
       );
 
@@ -803,5 +824,19 @@ export class IntelligentRecommendationService {
       riskLevel === 'LOW' ? 1.0 : riskLevel === 'MEDIUM' ? 0.7 : 0.3;
 
     return baseAllocation * confidenceMultiplier * riskMultiplier;
+  }
+
+  /**
+   * Rate limit warning messages to prevent log flooding
+   * Only allows the same warning message once per cooldown period
+   */
+  private logWarningRateLimited(warningKey: string, message: string): void {
+    const now = Date.now();
+    const lastLogged = this.warningRateLimit.get(warningKey);
+    
+    if (!lastLogged || now - lastLogged > this.WARNING_COOLDOWN_MS) {
+      this.logger.warn(message);
+      this.warningRateLimit.set(warningKey, now);
+    }
   }
 }

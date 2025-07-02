@@ -9,10 +9,41 @@ import { AppModule } from './app.module';
 
 async function bootstrap() {
   try {
-    const app = await NestFactory.create<NestExpressApplication>(AppModule);
+    // Configure logging levels based on environment and LOG_LEVEL setting
+    const isProduction = process.env.NODE_ENV === 'production';
+    const logLevel = process.env.LOG_LEVEL || (isProduction ? 'warn' : 'log');
+    
+    let logLevels: ('error' | 'warn' | 'log' | 'debug' | 'verbose')[];
+    
+    switch (logLevel.toLowerCase()) {
+      case 'error':
+        logLevels = ['error'];
+        break;
+      case 'warn':
+        logLevels = ['error', 'warn'];
+        break;
+      case 'log':
+        logLevels = ['error', 'warn', 'log'];
+        break;
+      case 'debug':
+        logLevels = ['error', 'warn', 'log', 'debug'];
+        break;
+      case 'verbose':
+        logLevels = ['error', 'warn', 'log', 'debug', 'verbose'];
+        break;
+      default:
+        logLevels = isProduction 
+          ? ['error', 'warn'] // Production default: Only errors and warnings
+          : ['error', 'warn', 'log']; // Development default: Include logs but not debug/verbose
+    }
+    
+    console.log(`🔧 Logging configuration: Level=${logLevel}, Levels=[${logLevels.join(', ')}], Production=${isProduction}`);
+    
+    const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+      logger: logLevels,
+    });
 
     // Serve static files (React build) in production
-    const isProduction = process.env.NODE_ENV === 'production';
     if (isProduction) {
       app.useStaticAssets(join(__dirname, '..', 'public'));
       app.setBaseViewsDir(join(__dirname, '..', 'public'));

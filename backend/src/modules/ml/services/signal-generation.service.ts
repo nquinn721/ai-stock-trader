@@ -1652,16 +1652,43 @@ export class SignalGenerationService {
   }
 
   private calculateWeightedFactorScore(factors: any, weights: any): number {
-    return Object.keys(factors.individual).reduce((sum, key) => {
-      return sum + factors.individual[key].score * (weights[key] || 0);
+    // Handle both direct factors object and wrapped factors.individual
+    const factorData = factors?.individual || factors;
+    
+    if (!factorData || typeof factorData !== 'object') {
+      return 0;
+    }
+    
+    return Object.keys(factorData).reduce((sum, key) => {
+      const factor = factorData[key];
+      if (factor && typeof factor === 'object' && typeof factor.score === 'number') {
+        return sum + factor.score * (weights[key] || 0);
+      }
+      return sum;
     }, 0);
   }
 
   private identifyDominantFactors(factors: any, weights: any): string[] {
-    const factorScores = Object.keys(factors.individual).map((key) => ({
-      name: key,
-      weightedScore: factors.individual[key].score * (weights[key] || 0),
-    }));
+    // Handle both direct factors object and wrapped factors.individual
+    const factorData = factors?.individual || factors;
+    
+    if (!factorData || typeof factorData !== 'object') {
+      return [];
+    }
+    
+    const factorScores = Object.keys(factorData).map((key) => {
+      const factor = factorData[key];
+      if (factor && typeof factor === 'object' && typeof factor.score === 'number') {
+        return {
+          name: key,
+          weightedScore: factor.score * (weights[key] || 0),
+        };
+      }
+      return {
+        name: key,
+        weightedScore: 0,
+      };
+    });
 
     return factorScores
       .sort((a, b) => b.weightedScore - a.weightedScore)
