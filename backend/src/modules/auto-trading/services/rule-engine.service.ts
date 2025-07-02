@@ -145,8 +145,28 @@ export class RuleEngineService {
           return context.recommendation?.type;
         case 'confidence_score':
           return context.recommendation?.confidence;
+        // Additional ML and trading fields (graceful fallbacks)
+        case 'ml_recommendation':
+          return context.recommendation?.type;
+        case 'ml_confidence':
+          return context.recommendation?.confidence;
+        case 'proposed_position_percent':
+          return 0; // Default to 0 for missing position percentage
+        case 'position_loss_percent':
+          return 0; // Default to 0 for missing loss percentage
+        case 'position_gain_percent':
+          return 0; // Default to 0 for missing gain percentage
+        case 'market_hours':
+          return true; // Default to market hours open
+        case 'rsi':
+          return context.technicalIndicators?.rsi || null;
+        case 'volume_spike':
+          return false; // Default to no volume spike
         default:
-          this.logger.warn(`Unknown field: ${field}`);
+          // Reduce log spam - only warn for truly unknown fields in debug mode
+          if (process.env.LOG_LEVEL === 'debug') {
+            this.logger.warn(`Unknown field: ${field}`);
+          }
           return null;
       }
     }

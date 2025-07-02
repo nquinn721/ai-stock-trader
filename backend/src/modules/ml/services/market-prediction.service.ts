@@ -685,12 +685,32 @@ export class MarketPredictionService {
 
   private calculateVolatility(features: TechnicalFeatures): number {
     const { bollingerBands, price } = features;
+    
+    // Validate bollingerBands data exists
+    if (!bollingerBands || 
+        typeof bollingerBands.upper !== 'number' || 
+        typeof bollingerBands.lower !== 'number' || 
+        typeof bollingerBands.middle !== 'number') {
+      // Fallback to a default volatility if bollinger bands are not available
+      return 0.2; // Default 20% volatility
+    }
+    
     const bandWidth =
       (bollingerBands.upper - bollingerBands.lower) / bollingerBands.middle;
     return Math.min(bandWidth, 0.5); // Cap at 50%
   }
   private detectTrend(features: TechnicalFeatures): number {
     const { movingAverages, price } = features;
+    
+    // Validate movingAverages data exists
+    if (!movingAverages || 
+        typeof movingAverages.sma20 !== 'number' || 
+        typeof movingAverages.sma50 !== 'number' ||
+        typeof price !== 'number') {
+      // Return neutral trend if data is not available
+      return 0;
+    }
+    
     const { sma20, sma50 } = movingAverages;
 
     // Simple trend detection based on moving averages

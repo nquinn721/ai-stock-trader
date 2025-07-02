@@ -475,12 +475,13 @@ export class StockService {
     const connectedClients = this.websocketGateway.getConnectedClientsCount();
 
     // Skip updates if no clients are connected to reduce unnecessary API calls
-    if (connectedClients === 0) {
-      if (this.enableVerboseLogging) {
-        this.logger.debug('Skipping price updates - no clients connected');
-      }
-      return;
-    }
+    // TEMPORARY: Commenting out to allow price updates for auto-trading
+    // if (connectedClients === 0) {
+    //   if (this.enableVerboseLogging) {
+    //     this.logger.debug('Skipping price updates - no clients connected');
+    //   }
+    //   return;
+    // }
 
     // Only log periodic updates, not every single one
     if (this.enablePriceUpdateLogging) {
@@ -632,9 +633,30 @@ export class StockService {
       }
       return historical;
     } catch (error) {
+      // Enhanced error handling for Yahoo Finance API issues
+      let errorMessage = error.message || 'Unknown error';
+      
+      // Handle specific error types
+      if (errorMessage.includes('Unexpected token') && errorMessage.includes('Edge:')) {
+        // This indicates Yahoo Finance returned HTML error page instead of JSON
+        errorMessage = 'Yahoo Finance API returned HTML error page - possible rate limiting or service issues';
+        
+        // Trigger rate limiting for this symbol to prevent further requests
+        this.consecutiveErrors++;
+        if (this.consecutiveErrors >= this.MAX_CONSECUTIVE_ERRORS) {
+          this.isRateLimited = true;
+          this.rateLimitBackoffUntil = new Date(
+            Date.now() + this.RATE_LIMIT_BACKOFF_MINUTES * 60 * 1000,
+          );
+          this.logger.warn(
+            `Yahoo Finance HTML error detected for ${symbol}. Entering ${this.RATE_LIMIT_BACKOFF_MINUTES}-minute backoff period until ${this.rateLimitBackoffUntil.toLocaleTimeString()}`,
+          );
+        }
+      }
+      
       this.logger.error(
         `Error fetching historical data for ${symbol}:`,
-        error.message,
+        errorMessage,
       );
 
       // Return empty array instead of fallback data to ensure we only use real data
