@@ -67,7 +67,7 @@
 }
 
 /* Dashboard Content Styles */
-.page-content {
+.dashboard-content {
   background: var(--color-card-background);
   border-radius: 16px;
   border: 1px solid var(--color-border);

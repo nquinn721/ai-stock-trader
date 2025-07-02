@@ -185,7 +185,7 @@ export function getEnvironmentConfig(): Partial<FrontendApiConfig> {
   if (isDevelopment) {
     return {
       http: {
-        timeout: 5000, // Faster timeout in development
+        timeout: 30000, // Increased timeout for development API calls
         retries: 1,
         retryDelay: 500,
       },

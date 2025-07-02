@@ -72,8 +72,9 @@ export const useTrade = () => {
       } else {
         // Create a default portfolio if none exists
         const newPortfolio = await portfolioStore.createPortfolio({
-          name: "Quick Trade Portfolio",
-          initialCash: 100000,
+          userId: "user-123", // TODO: Get from auth context
+          portfolioType: "DAY_TRADING_STANDARD", // Suitable for quick trading
+          initialBalance: 100000,
         });
         const newPortfolioId = newPortfolio.id;
         setPortfolioId(newPortfolioId);

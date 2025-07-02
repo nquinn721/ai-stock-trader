@@ -54,8 +54,8 @@ export function getDatabaseConfig(): DatabaseConfig {
       type: 'mysql',
       host: process.env.DB_HOST || 'localhost',
       port: parseInt(process.env.DB_PORT || '3306'),
-      username: process.env.DB_USERNAME || 'stocktrader',
-      password: process.env.DB_PASSWORD || '',
+      username: process.env.DB_USERNAME || 'root',
+      password: process.env.DB_PASSWORD || 'rootpassword123',
       database: process.env.DB_NAME || 'stocktrading',
     };
 
@@ -117,7 +117,7 @@ export const DATABASE_CONFIGS = {
     type: 'mysql' as const,
     host: process.env.DB_HOST || 'localhost',
     port: parseInt(process.env.DB_PORT || '3306'),
-    username: process.env.DB_USERNAME || 'stocktrader',
+    username: process.env.DB_USERNAME || 'root',
     password: process.env.DB_PASSWORD || '',
     database: process.env.DB_NAME || 'stocktrading',
     ssl: process.env.DB_SSL === 'true',

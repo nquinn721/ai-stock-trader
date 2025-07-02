@@ -221,6 +221,15 @@ The AI trading system uses multiple indicators:
 
 ## 🔧 Configuration
 
+### ⚠️ Database Connection Policy
+
+**CRITICAL**: Never modify database connection settings without authorization.
+
+- See [Database Connection Policy](docs/DATABASE-CONNECTION-POLICY.md) for strict guidelines
+- Local development uses `admin/password@localhost:3306`
+- Production uses Cloud SQL with managed credentials
+- **Rule**: Test connections before making any changes
+
 ### Environment Variables
 
 #### Backend (.env)

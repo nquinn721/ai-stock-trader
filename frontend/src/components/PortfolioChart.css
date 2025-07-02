@@ -333,6 +333,16 @@
   font-weight: 500;
 }
 
+.no-data-message {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 240px;
+  color: var(--trading-gray-400);
+  font-size: 14px;
+  font-style: italic;
+}
+
 /* Responsive design */
 @media (max-width: 768px) {
   .portfolio-chart-container .chart-header {

@@ -198,7 +198,7 @@ Use the standardized layout structure:
 ```tsx
 <div className="page-container">
   <PageHeader title="Page Title" sticky={true} />
-  <div className="page-content">
+  <div className="dashboard-content">
     <div className="content-grid">
       <ContentCard title="Card 1">Content</ContentCard>
       <ContentCard title="Card 2">Content</ContentCard>

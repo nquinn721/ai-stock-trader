@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Query } from '@nestjs/common';
+import { Controller, Get, Param, Post, Query } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Stock } from '../../entities/stock.entity';
 import { StockService } from './stock.service';
@@ -70,5 +70,22 @@ export class StockController {
   })
   async getPatternAnalysis(@Param('symbol') symbol: string): Promise<any> {
     return this.stockService.getPatternAnalysis(symbol.toUpperCase());
+  }
+
+  @Post(':symbol/favorite')
+  @ApiOperation({ summary: 'Toggle favorite status for a stock' })
+  @ApiResponse({
+    status: 200,
+    description: 'Updated stock with favorite status',
+  })
+  async toggleFavorite(@Param('symbol') symbol: string): Promise<Stock | null> {
+    return this.stockService.toggleFavorite(symbol.toUpperCase());
+  }
+
+  @Post('seed')
+  @ApiOperation({ summary: 'Seed database with initial stock data' })
+  @ApiResponse({ status: 200, description: 'Database seeded successfully' })
+  async seedDatabase(): Promise<{ message: string; count: number }> {
+    return this.stockService.seedDatabase();
   }
 }

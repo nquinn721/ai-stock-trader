@@ -1,15 +1,8 @@
-import { Type } from 'class-transformer';
-import {
-  IsNotEmpty,
-  IsOptional,
-  IsString,
-  IsUUID,
-  ValidateNested,
-} from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
 import { TradingSessionConfig } from '../entities/trading-session.entity';
 
 export class TradingSessionDto {
-  @IsUUID()
+  @IsString()
   @IsNotEmpty()
   portfolio_id: string;
 
@@ -17,9 +10,8 @@ export class TradingSessionDto {
   @IsString()
   session_name?: string;
 
-  @ValidateNested()
-  @Type(() => Object)
-  config: TradingSessionConfig;
+  @IsOptional()
+  config?: TradingSessionConfig;
 }
 
 export class StopTradingSessionDto {

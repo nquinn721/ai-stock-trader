@@ -229,7 +229,7 @@ class AutoTradingService {
 
   async getTradingSessions(portfolioId: string): Promise<TradingSession[]> {
     const response = await autoTradingApi.get(`/sessions/${portfolioId}`);
-    return response.data;
+    return response.data.data || response.data; // Handle both direct array and {success, data} format
   }
 
   async getSessionStatus(sessionId: string): Promise<SessionStatusResponse> {
@@ -348,6 +348,38 @@ class AutoTradingService {
       };
     } catch (error: any) {
       console.error("Failed to deploy strategy:", error);
+      return {
+        success: false,
+        data: {} as StrategyInstance,
+        error: error.response?.data?.message || error.message,
+      };
+    }
+  }
+
+  /**
+   * Automatically deploys a strategy for a portfolio based on its balance and PDT eligibility
+   */
+  async autoDeployStrategyForPortfolio(
+    portfolioId: string,
+    userId: string = "user-123"
+  ): Promise<ApiResponse<StrategyInstance>> {
+    try {
+      const response = await autoTradingApi.post(
+        `/autonomous/portfolios/${portfolioId}/auto-deploy?userId=${userId}`
+      );
+
+      // Handle wrapped response format
+      const data = response.data?.data ? response.data.data : response.data;
+
+      return {
+        success: response.data?.success !== false,
+        data: data,
+        message:
+          response.data?.message ||
+          "Strategy automatically deployed based on portfolio balance",
+      };
+    } catch (error: any) {
+      console.error("Failed to auto-deploy strategy:", error);
       return {
         success: false,
         data: {} as StrategyInstance,
@@ -515,10 +547,12 @@ class AutoTradingService {
     }
   }
 
-  async getActiveStrategies(): Promise<ApiResponse<StrategyInstance[]>> {
+  async getActiveStrategies(
+    userId: string = "user-123"
+  ): Promise<ApiResponse<StrategyInstance[]>> {
     try {
       const response = await autoTradingApi.get(
-        `/autonomous/strategies/active`
+        `/autonomous/strategies/active?userId=${encodeURIComponent(userId)}`
       );
 
       const result = handleApiResponse<StrategyInstance[]>(response);

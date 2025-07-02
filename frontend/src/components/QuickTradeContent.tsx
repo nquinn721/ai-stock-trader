@@ -129,8 +129,9 @@ const QuickTradeContent: React.FC = observer(() => {
         // Create new portfolio if none exists
         console.log("Creating new default portfolio...");
         const newPortfolio = await portfolioStore.createPortfolio({
-          name: "Default Portfolio",
-          initialCash: 10000,
+          userId: "user-123", // TODO: Get from auth context
+          portfolioType: "SMALL_ACCOUNT_BASIC", // Default portfolio type for quick trading
+          initialBalance: 10000,
         });
 
         if (newPortfolio) {

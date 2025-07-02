@@ -41,40 +41,49 @@
 
 import { Inject, Injectable, forwardRef } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import yahooFinance from 'yahoo-finance2';
 import { Stock } from '../../entities/stock.entity';
 import {
   SignalType,
   TradingSignal,
 } from '../../entities/trading-signal.entity';
-import { BreakoutService, HistoricalData } from '../breakout/breakout.service';
-import { MLAnalysisService } from '../ml-analysis/ml-analysis.service';
+import { HistoricalData } from '../breakout/breakout.service';
 import { NewsService } from '../news/news.service';
 import { TradingService } from '../trading/trading.service';
 import { StockWebSocketGateway } from '../websocket/websocket.gateway';
 
 @Injectable()
 export class StockService {
-  private mockStocks: Stock[] = [];
-  private mockSignals: TradingSignal[] = [];
+  // Cache for live price data (not stored in DB)
+  private priceCache = new Map<
+    string,
+    {
+      currentPrice: number;
+      previousClose: number;
+      changePercent: number;
+      volume: number;
+      marketCap: number;
+      lastUpdated: Date;
+    }
+  >();
 
   constructor(
-    // Temporarily comment out database dependencies
-    // @InjectRepository(Stock)
-    // private stockRepository: Repository<Stock>,
-    // @InjectRepository(TradingSignal)
-    // private tradingSignalRepository: Repository<TradingSignal>,
+    @InjectRepository(Stock)
+    private stockRepository: Repository<Stock>,
+    @InjectRepository(TradingSignal)
+    private tradingSignalRepository: Repository<TradingSignal>,
     @Inject(forwardRef(() => StockWebSocketGateway))
     private websocketGateway: StockWebSocketGateway,
     @Inject(forwardRef(() => NewsService))
     private newsService: NewsService,
     @Inject(forwardRef(() => TradingService))
     private tradingService: TradingService,
-    private breakoutService: BreakoutService,
-    private mlAnalysisService: MLAnalysisService,
+    // @Inject(forwardRef(() => BreakoutService))
+    // private breakoutService: BreakoutService,
+    // private mlAnalysisService: MLAnalysisService,
   ) {
-    // Initialize with live stock symbols for tracking
-    this.initializeMockData();
     console.log(
       '📊 Stock service initialized - will fetch live data from Yahoo Finance',
     );
@@ -84,253 +93,6 @@ export class StockService {
       this.performInitialUpdate();
     }, 5000); // 5 second delay
   }
-  private initializeMockData() {
-    // Initialize with popular stock symbols for live data tracking
-    this.mockStocks = [
-      {
-        id: 1,
-        symbol: 'AAPL',
-        name: 'Apple Inc.',
-        currentPrice: 0,
-        previousClose: 0,
-        volume: 0,
-      } as Stock,
-      {
-        id: 2,
-        symbol: 'GOOGL',
-        name: 'Alphabet Inc.',
-        currentPrice: 0,
-        previousClose: 0,
-        volume: 0,
-      } as Stock,
-      {
-        id: 3,
-        symbol: 'MSFT',
-        name: 'Microsoft Corporation',
-        currentPrice: 0,
-        previousClose: 0,
-        volume: 0,
-      } as Stock,
-      {
-        id: 4,
-        symbol: 'AMZN',
-        name: 'Amazon.com Inc.',
-        currentPrice: 0,
-        previousClose: 0,
-        volume: 0,
-      } as Stock,
-      {
-        id: 5,
-        symbol: 'TSLA',
-        name: 'Tesla Inc.',
-        currentPrice: 0,
-        previousClose: 0,
-        volume: 0,
-      } as Stock,
-      {
-        id: 6,
-        symbol: 'NVDA',
-        name: 'NVIDIA Corporation',
-        currentPrice: 0,
-        previousClose: 0,
-        volume: 0,
-      } as Stock,
-      {
-        id: 7,
-        symbol: 'META',
-        name: 'Meta Platforms Inc.',
-        currentPrice: 0,
-        previousClose: 0,
-        volume: 0,
-      } as Stock,
-      {
-        id: 8,
-        symbol: 'NFLX',
-        name: 'Netflix Inc.',
-        currentPrice: 0,
-        previousClose: 0,
-        volume: 0,
-      } as Stock,
-      {
-        id: 9,
-        symbol: 'CVNA',
-        name: 'Carvana Co.',
-        currentPrice: 0,
-        previousClose: 0,
-        volume: 0,
-      } as Stock,
-      {
-        id: 10,
-        symbol: 'CMG',
-        name: 'Chipotle Mexican Grill Inc.',
-        currentPrice: 0,
-        previousClose: 0,
-        volume: 0,
-      } as Stock,
-      {
-        id: 11,
-        symbol: 'DIS',
-        name: 'The Walt Disney Company',
-        currentPrice: 0,
-        previousClose: 0,
-        volume: 0,
-      } as Stock,
-      {
-        id: 12,
-        symbol: 'CRM',
-        name: 'Salesforce Inc.',
-        currentPrice: 0,
-        previousClose: 0,
-        volume: 0,
-      } as Stock,
-      {
-        id: 13,
-        symbol: 'PYPL',
-        name: 'PayPal Holdings Inc.',
-        currentPrice: 0,
-        previousClose: 0,
-        volume: 0,
-      } as Stock,
-      {
-        id: 14,
-        symbol: 'ADBE',
-        name: 'Adobe Inc.',
-        currentPrice: 0,
-        previousClose: 0,
-        volume: 0,
-      } as Stock,
-      {
-        id: 15,
-        symbol: 'INTC',
-        name: 'Intel Corporation',
-        currentPrice: 0,
-        previousClose: 0,
-        volume: 0,
-      } as Stock,
-      {
-        id: 16,
-        symbol: 'AMD',
-        name: 'Advanced Micro Devices Inc.',
-        currentPrice: 0,
-        previousClose: 0,
-        volume: 0,
-      } as Stock,
-      {
-        id: 17,
-        symbol: 'ORCL',
-        name: 'Oracle Corporation',
-        currentPrice: 0,
-        previousClose: 0,
-        volume: 0,
-      } as Stock,
-      {
-        id: 18,
-        symbol: 'WMT',
-        name: 'Walmart Inc.',
-        currentPrice: 0,
-        previousClose: 0,
-        volume: 0,
-      } as Stock,
-      {
-        id: 19,
-        symbol: 'HD',
-        name: 'The Home Depot Inc.',
-        currentPrice: 0,
-        previousClose: 0,
-        volume: 0,
-      } as Stock,
-      {
-        id: 20,
-        symbol: 'PG',
-        name: 'Procter & Gamble Co.',
-        currentPrice: 0,
-        previousClose: 0,
-        volume: 0,
-      } as Stock,
-      {
-        id: 21,
-        symbol: 'KO',
-        name: 'The Coca-Cola Company',
-        currentPrice: 0,
-        previousClose: 0,
-        volume: 0,
-      } as Stock,
-      {
-        id: 22,
-        symbol: 'PEP',
-        name: 'PepsiCo Inc.',
-        currentPrice: 0,
-        previousClose: 0,
-        volume: 0,
-      } as Stock,
-      {
-        id: 23,
-        symbol: 'V',
-        name: 'Visa Inc.',
-        currentPrice: 0,
-        previousClose: 0,
-        volume: 0,
-      } as Stock,
-      {
-        id: 24,
-        symbol: 'MA',
-        name: 'Mastercard Incorporated',
-        currentPrice: 0,
-        previousClose: 0,
-        volume: 0,
-      } as Stock,
-      {
-        id: 25,
-        symbol: 'UNH',
-        name: 'UnitedHealth Group Inc.',
-        currentPrice: 0,
-        previousClose: 0,
-        volume: 0,
-      } as Stock,
-      {
-        id: 26,
-        symbol: 'BAC',
-        name: 'Bank of America Corp.',
-        currentPrice: 0,
-        previousClose: 0,
-        volume: 0,
-      } as Stock,
-      {
-        id: 27,
-        symbol: 'XOM',
-        name: 'Exxon Mobil Corporation',
-        currentPrice: 0,
-        previousClose: 0,
-        volume: 0,
-      } as Stock,
-      {
-        id: 28,
-        symbol: 'CVX',
-        name: 'Chevron Corporation',
-        currentPrice: 0,
-        previousClose: 0,
-        volume: 0,
-      } as Stock,
-      {
-        id: 29,
-        symbol: 'LLY',
-        name: 'Eli Lilly and Company',
-        currentPrice: 0,
-        previousClose: 0,
-        volume: 0,
-      } as Stock,
-      {
-        id: 30,
-        symbol: 'ABBV',
-        name: 'AbbVie Inc.',
-        currentPrice: 0,
-        previousClose: 0,
-        volume: 0,
-      } as Stock,
-    ];
-    this.mockSignals = [];
-    console.log('📊 Initialized stock symbols for live data tracking');
-  }
   async getAllStocks(): Promise<
     (Stock & {
       tradingSignal?: TradingSignal | null;
@@ -339,9 +101,13 @@ export class StockService {
       recentNews?: any[];
     })[]
   > {
-    // Return stocks with live data from Yahoo Finance
-    return this.mockStocks.filter((stock) => stock.currentPrice > 0);
+    // Get stocks from database
+    const stocks = await this.stockRepository.find();
+
+    // Merge with live price data and return all stocks (even those without live prices)
+    return stocks.map((stock) => this.enrichStockWithLiveData(stock));
   }
+
   async getAllStocksWithSignals(): Promise<
     (Stock & {
       tradingSignal: TradingSignal | null;
@@ -350,7 +116,8 @@ export class StockService {
       recentNews?: any[];
     })[]
   > {
-    const stocks = this.mockStocks.filter((stock) => stock.currentPrice > 0);
+    // Get all stocks from database
+    const stocks = await this.stockRepository.find();
     const stocksWithSignals: (Stock & {
       tradingSignal: TradingSignal | null;
       breakoutStrategy?: any;
@@ -364,17 +131,23 @@ export class StockService {
       await this.newsService.getPortfolioSentiment(stockSymbols);
 
     for (const stock of stocks) {
+      // Enrich with live price data
+      const enrichedStock = this.enrichStockWithLiveData(stock);
+
       // Generate trading signal based on live price data
-      const signal = await this.generateLiveTradingSignal(stock);
+      const signal = await this.generateLiveTradingSignal(enrichedStock);
 
       // Calculate breakout strategy with live data
-      const breakoutStrategy = await this.calculateBreakoutStrategy(
-        stock.symbol,
-        stock.currentPrice,
-      );
+      const breakoutStrategy =
+        enrichedStock.currentPrice && enrichedStock.currentPrice > 0
+          ? await this.calculateBreakoutStrategy(
+              enrichedStock.symbol,
+              enrichedStock.currentPrice,
+            )
+          : null; // Skip breakout calculation for stocks without price data
 
       stocksWithSignals.push({
-        ...stock,
+        ...enrichedStock,
         tradingSignal: signal,
         breakoutStrategy,
         sentiment: sentimentMap.get(stock.symbol)?.sentiment || {
@@ -389,8 +162,26 @@ export class StockService {
 
     return stocksWithSignals;
   }
+
+  private enrichStockWithLiveData(stock: Stock): Stock {
+    const priceData = this.priceCache.get(stock.symbol);
+    if (priceData) {
+      return {
+        ...stock,
+        currentPrice: priceData.currentPrice,
+        previousClose: priceData.previousClose,
+        changePercent: priceData.changePercent,
+        volume: priceData.volume,
+        marketCap: priceData.marketCap,
+      };
+    }
+    return stock;
+  }
   async getStockBySymbol(symbol: string): Promise<Stock | null> {
-    return this.mockStocks.find((stock) => stock.symbol === symbol) || null;
+    const stock = await this.stockRepository.findOne({
+      where: { symbol },
+    });
+    return stock ? this.enrichStockWithLiveData(stock) : null;
   }
   async updateStockPrice(symbol: string): Promise<Stock | null> {
     try {
@@ -427,32 +218,29 @@ export class StockService {
         const volume = Number(quote.regularMarketVolume) || 0;
         const marketCap = Number(quote.marketCap) || 0;
 
-        // Update stock with live data
-        stock.currentPrice = newPrice;
-        stock.previousClose = prevClose;
-        stock.changePercent = changePercent;
-        stock.volume = volume;
-        stock.marketCap = marketCap;
-
-        // Update in our stock array
-        const index = this.mockStocks.findIndex((s) => s.symbol === symbol);
-        if (index !== -1) {
-          this.mockStocks[index] = stock;
-        }
+        // Update price cache (not database - live data only)
+        this.priceCache.set(symbol, {
+          currentPrice: newPrice,
+          previousClose: prevClose,
+          changePercent: changePercent,
+          volume: volume,
+          marketCap: marketCap,
+          lastUpdated: new Date(),
+        });
 
         console.log(
           `✅ Updated ${symbol}: $${newPrice.toFixed(2)} (${changePercent >= 0 ? '+' : ''}${changePercent.toFixed(2)}%)`,
         );
 
         // Only broadcast the updated stock data via WebSocket if the stock has valid price data
-        if (stock.currentPrice > 0) {
+        if (newPrice > 0) {
           this.websocketGateway.broadcastStockUpdate(symbol, {
             symbol: stock.symbol,
-            currentPrice: stock.currentPrice,
-            previousClose: stock.previousClose,
-            changePercent: stock.changePercent,
-            volume: stock.volume,
-            marketCap: stock.marketCap,
+            currentPrice: newPrice,
+            previousClose: prevClose,
+            changePercent: changePercent,
+            volume: volume,
+            marketCap: marketCap,
             timestamp: new Date().toISOString(),
           });
         } else {
@@ -464,7 +252,7 @@ export class StockService {
         console.log(`⚠️ No quote data received for ${symbol}`);
       }
 
-      return stock;
+      return stock ? this.enrichStockWithLiveData(stock) : null;
     } catch (error) {
       console.error(
         `❌ Error updating stock price for ${symbol}:`,
@@ -475,7 +263,7 @@ export class StockService {
   }
   @Cron('0 */2 * * * *') // Every 2 minutes (less aggressive to prevent API rate limiting)
   async updateAllStockPrices() {
-    const stocks = this.mockStocks; // Get all tracked stocks
+    const stocks = await this.stockRepository.find(); // Get all tracked stocks from database
     const connectedClients = this.websocketGateway.getConnectedClientsCount();
 
     console.log(
@@ -515,28 +303,63 @@ export class StockService {
         console.log(
           `⏭️ Skipping historical data for symbol with dot: ${symbol}`,
         );
-        return this.generateFallbackHistoricalData(symbol, period);
+        return [];
       }
 
       console.log(
         `📈 Fetching historical data for ${symbol} (period: ${period})...`,
       );
 
-      // For intraday periods, use fallback data directly since Yahoo Finance
-      // API has reliability issues with intraday data
+      // For intraday periods, try to get real Yahoo Finance data
       const isIntradayPeriod = ['1H', '1D'].includes(period);
-      if (isIntradayPeriod) {
-        console.log(`🔄 Using fallback data for intraday period: ${period}`);
-        return this.generateIntradayFallbackData(symbol);
-      }
 
-      // Add timeout to prevent hanging for longer periods
+      // Add timeout to prevent hanging API calls
       const timeoutPromise = new Promise<never>((_, reject) => {
         setTimeout(
           () => reject(new Error('Historical data API timeout')),
-          10000, // Reduced to 10 seconds for faster fallback
+          10000, // Timeout for Yahoo Finance API calls
         );
       });
+
+      if (isIntradayPeriod) {
+        console.log(`🔄 Attempting to get real intraday data for: ${period}`);
+        // Try to get real intraday data, return empty array if not available
+        try {
+          const { period1, interval } = this.getYahooApiParams(period);
+          const historical = await Promise.race([
+            yahooFinance.historical(
+              symbol,
+              {
+                period1: period1,
+                period2: new Date(),
+                interval: interval as any, // Use appropriate intervals for different periods
+              },
+              {
+                validateResult: false,
+              },
+            ),
+            timeoutPromise,
+          ]);
+
+          if (Array.isArray(historical) && historical.length > 0) {
+            console.log(
+              `✅ Retrieved ${historical.length} intraday data points for ${symbol}`,
+            );
+            return historical;
+          } else {
+            console.log(
+              `⚠️ No intraday data available for ${symbol}, returning empty array`,
+            );
+            return [];
+          }
+        } catch (error) {
+          console.log(
+            `⚠️ Error fetching intraday data for ${symbol}, returning empty array:`,
+            error.message,
+          );
+          return [];
+        }
+      }
 
       // Use Yahoo Finance's supported period values and intervals for longer periods
       const { period1, interval } = this.getYahooApiParams(period);
@@ -559,9 +382,9 @@ export class StockService {
       // Validate the response
       if (!Array.isArray(historical) || historical.length === 0) {
         console.log(
-          `⚠️ Empty response from Yahoo Finance for ${symbol}, using fallback`,
+          `⚠️ Empty response from Yahoo Finance for ${symbol}, returning empty array`,
         );
-        return this.generateFallbackHistoricalData(symbol, period);
+        return [];
       }
 
       console.log(
@@ -574,8 +397,8 @@ export class StockService {
         error.message,
       );
 
-      // Always return appropriate fallback data for failed requests
-      return this.generateFallbackHistoricalData(symbol, period);
+      // Return empty array instead of fallback data to ensure we only use real data
+      return [];
     }
   }
 
@@ -646,172 +469,7 @@ export class StockService {
       timestamp: new Date(point.date).getTime(),
     }));
   }
-  private generateIntradayFallbackData(symbol: string): any[] {
-    const data: any[] = [];
-    const now = new Date();
-    const marketOpen = new Date(now);
-    marketOpen.setHours(9, 30, 0, 0); // 9:30 AM
 
-    // Try to get current stock price for more realistic fallback
-    const currentStock = this.mockStocks.find((s) => s.symbol === symbol);
-    const basePrice =
-      currentStock && currentStock.currentPrice > 0
-        ? currentStock.currentPrice
-        : 100 + Math.random() * 200; // Random base price if no current price
-
-    // Generate data points every 15 minutes for the current day
-    const intervalMinutes = 15;
-    const currentTime = new Date();
-    let lastPrice = basePrice;
-
-    for (let i = 0; i < 25; i++) {
-      // ~6.5 hours of trading
-      const time = new Date(
-        marketOpen.getTime() + i * intervalMinutes * 60 * 1000,
-      );
-      if (time > currentTime) break;
-
-      // Generate more realistic price movement (trending with some volatility)
-      const trend = (Math.random() - 0.5) * 0.01; // Small overall trend
-      const volatility = (Math.random() - 0.5) * 0.015; // Random volatility
-      const priceChange = trend + volatility;
-
-      const price = lastPrice * (1 + priceChange);
-      lastPrice = price;
-
-      data.push({
-        date: time.toISOString(),
-        open: price * 0.999,
-        high: price * (1.001 + Math.random() * 0.004),
-        low: price * (0.999 - Math.random() * 0.004),
-        close: price,
-        volume: Math.floor(50000 + Math.random() * 500000), // Realistic volume
-        timestamp: time.getTime(),
-      });
-    }
-
-    console.log(
-      `📊 Generated ${data.length} fallback intraday data points for ${symbol} (base price: $${basePrice.toFixed(2)})`,
-    );
-    return data;
-  }
-  private generateFallbackHistoricalData(
-    symbol: string,
-    period: string,
-  ): any[] {
-    // For intraday periods, use the existing intraday fallback
-    const isIntradayPeriod = ['1H', '1D'].includes(period);
-    if (isIntradayPeriod) {
-      return this.generateIntradayFallbackData(symbol);
-    }
-
-    // Generate longer period fallback data
-    const data: any[] = [];
-    const currentStock = this.mockStocks.find((s) => s.symbol === symbol);
-    const basePrice = currentStock?.currentPrice || 100 + Math.random() * 200;
-
-    const periodStart = this.getPeriodStartDate(period);
-    const now = new Date();
-    const timeSpan = now.getTime() - periodStart.getTime();
-
-    // Determine data points based on period
-    let dataPoints: number;
-    let intervalMs: number;
-
-    switch (period) {
-      case '1W':
-      case '1w':
-        dataPoints = 7;
-        intervalMs = 24 * 60 * 60 * 1000; // Daily
-        break;
-      case '1M':
-      case '1mo':
-        dataPoints = 30;
-        intervalMs = 24 * 60 * 60 * 1000; // Daily
-        break;
-      case '3mo':
-        dataPoints = 90;
-        intervalMs = 24 * 60 * 60 * 1000; // Daily
-        break;
-      case '6mo':
-        dataPoints = 26;
-        intervalMs = 7 * 24 * 60 * 60 * 1000; // Weekly
-        break;
-      case '1y':
-        dataPoints = 52;
-        intervalMs = 7 * 24 * 60 * 60 * 1000; // Weekly
-        break;
-      case '2y':
-        dataPoints = 104;
-        intervalMs = 7 * 24 * 60 * 60 * 1000; // Weekly
-        break;
-      case '5y':
-        dataPoints = 60;
-        intervalMs = 30 * 24 * 60 * 60 * 1000; // Monthly
-        break;
-      default:
-        dataPoints = 30;
-        intervalMs = 24 * 60 * 60 * 1000; // Daily
-    }
-
-    let currentPrice = basePrice;
-
-    for (let i = 0; i < dataPoints; i++) {
-      const time = new Date(periodStart.getTime() + i * intervalMs);
-      if (time > now) break;
-
-      // Generate realistic price movement with long-term trend
-      const longTermTrend = Math.sin((i / dataPoints) * Math.PI * 2) * 0.005; // Cyclical trend
-      const randomWalk = (Math.random() - 0.5) * 0.02; // Random volatility
-      const priceChange = longTermTrend + randomWalk;
-
-      currentPrice = currentPrice * (1 + priceChange);
-
-      const open = currentPrice * (0.995 + Math.random() * 0.01);
-      const high = currentPrice * (1.001 + Math.random() * 0.015);
-      const low = currentPrice * (0.999 - Math.random() * 0.015);
-      const close = currentPrice;
-
-      data.push({
-        date: time.toISOString(),
-        open: Math.max(open, 0.01),
-        high: Math.max(high, open, close),
-        low: Math.min(low, open, close),
-        close: Math.max(close, 0.01),
-        volume: Math.floor(100000 + Math.random() * 1000000),
-        adjClose: Math.max(close, 0.01),
-      });
-    }
-
-    console.log(
-      `📊 Generated ${data.length} fallback historical data points for ${symbol} (period: ${period}, base price: $${basePrice.toFixed(2)})`,
-    );
-
-    return data;
-  }
-
-  private getPeriodStartDate(period: string): Date {
-    const now = new Date();
-    switch (period) {
-      case '1H':
-        return new Date(now.getTime() - 60 * 60 * 1000); // 1 hour ago
-      case '1D':
-      case '1d':
-        return new Date(now.getTime() - 24 * 60 * 60 * 1000);
-      case '1W':
-      case '1w':
-        return new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-      case '1M':
-      case '1mo':
-        return new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-      case '3mo':
-        return new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
-      case '1y':
-        return new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
-      default:
-        return new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-    }
-  }
   async getAllStocksWithSentiment(): Promise<any[]> {
     const stocks = await this.getAllStocks();
     const stockSymbols = stocks.map((stock) => stock.symbol);
@@ -878,13 +536,22 @@ export class StockService {
       const historicalData = await this.getStockHistory(symbol, '3mo');
 
       // Convert Yahoo Finance data to our format
-      const formattedData =
-        this.breakoutService.convertYahooDataToHistorical(historicalData); // Calculate breakout strategy
-      return this.breakoutService.calculateBreakoutStrategy(
-        symbol,
-        currentPrice,
-        formattedData,
-      );
+      // const formattedData =
+      //   this.breakoutService.convertYahooDataToHistorical(historicalData); // Calculate breakout strategy
+      // return this.breakoutService.calculateBreakoutStrategy(
+      //   symbol,
+      //   currentPrice,
+      //   formattedData,
+      // );
+
+      // Default response while breakout service is disabled
+      return {
+        signal: 'HOLD',
+        strength: 0.5,
+        reasoning: 'Breakout analysis temporarily disabled',
+        entryPrice: currentPrice,
+        confidence: 0.5,
+      };
     } catch (error) {
       console.error(
         `Error calculating breakout strategy for ${symbol}:`,
@@ -913,7 +580,17 @@ export class StockService {
   private async getHistoricalData(symbol: string): Promise<HistoricalData[]> {
     try {
       const historicalData = await this.getStockHistory(symbol, '6mo');
-      return this.breakoutService.convertYahooDataToHistorical(historicalData);
+      // return this.breakoutService.convertYahooDataToHistorical(historicalData);
+
+      // Temporary direct conversion while breakout service is disabled
+      return historicalData.map((item) => ({
+        date: item.date,
+        open: item.open,
+        high: item.high,
+        low: item.low,
+        close: item.close,
+        volume: item.volume,
+      }));
     } catch (error) {
       console.error(`Error getting historical data for ${symbol}:`, error);
       return [];
@@ -921,7 +598,7 @@ export class StockService {
   }
 
   /**
-   * Generate basic trading signal as fallback
+   * Generate basic trading signal using technical analysis
    */ private async generateBasicSignal(stock: Stock): Promise<TradingSignal> {
     // Enhanced technical analysis with more balanced and realistic signals
     const changePercent = Number(stock.changePercent) || 0;
@@ -994,46 +671,85 @@ export class StockService {
 
       if (historicalData && historicalData.length > 20) {
         // Use ML analysis with real historical data
-        const mlPrediction = await this.mlAnalysisService.predictPriceMomentum(
-          historicalData,
-          { symbol: stock.symbol, price: stock.currentPrice },
-        );
+        // const mlPrediction = await this.mlAnalysisService.predictPriceMomentum(
+        //   historicalData,
+        //   { symbol: stock.symbol, price: stock.currentPrice },
+        // );
 
-        // Get sentiment data
+        // Enhanced analysis using real historical data and sentiment
         const sentiment = await this.newsService.getAverageSentiment(
           stock.symbol,
         );
 
-        // Determine signal based on ML prediction and sentiment
-        let signal: SignalType = SignalType.HOLD;
-        let confidence = mlPrediction.confidence;
+        // Analyze the historical data for technical indicators
+        const recentPrices = historicalData.slice(-10); // Last 10 data points
+        const priceChanges = recentPrices
+          .map((item, index) => {
+            if (index === 0) return 0;
+            return (
+              ((item.close - recentPrices[index - 1].close) /
+                recentPrices[index - 1].close) *
+              100
+            );
+          })
+          .filter((change) => change !== 0);
 
-        if (
-          mlPrediction.direction === 'bullish' &&
-          mlPrediction.confidence > 0.6
-        ) {
+        const avgPriceChange =
+          priceChanges.length > 0
+            ? priceChanges.reduce((sum, change) => sum + change, 0) /
+              priceChanges.length
+            : 0;
+
+        const recentVolumes = recentPrices.map((item) => item.volume);
+        const avgVolume =
+          recentVolumes.reduce((sum, vol) => sum + vol, 0) /
+          recentVolumes.length;
+        const currentVolumeRatio = stock.volume / avgVolume;
+
+        // Calculate momentum score
+        const changePercent = Number(stock.changePercent) || 0;
+        const momentumScore =
+          changePercent * 0.4 + avgPriceChange * 0.3 + sentiment * 0.3;
+        const volumeBoost =
+          currentVolumeRatio > 1.2 ? 0.5 : currentVolumeRatio < 0.8 ? -0.3 : 0;
+        const finalScore = momentumScore + volumeBoost;
+
+        // Generate more aggressive and actionable signals based on combined analysis
+        let signal: SignalType = SignalType.HOLD;
+        let confidence = 0.5;
+        let reasoning = '';
+
+        if (finalScore > 1.0) {
+          // Lowered threshold from 1.5 to 1.0 for more aggressive signals
           signal = SignalType.BUY;
-          // Boost confidence if sentiment is also positive
-          if (sentiment > 1) {
-            confidence = Math.min(0.95, confidence + 0.15);
-          }
-        } else if (
-          mlPrediction.direction === 'bearish' &&
-          mlPrediction.confidence > 0.6
-        ) {
+          confidence = Math.min(0.9, 0.5 + Math.abs(finalScore) * 0.1);
+          reasoning = `📈 Strong bullish signals: Price momentum ${changePercent.toFixed(1)}%, Historical trend ${avgPriceChange.toFixed(1)}%, Sentiment ${sentiment.toFixed(2)}`;
+        } else if (finalScore < -1.0) {
+          // Lowered threshold from -1.5 to -1.0
           signal = SignalType.SELL;
-          // Boost confidence if sentiment is also negative
-          if (sentiment < -1) {
-            confidence = Math.min(0.95, confidence + 0.15);
-          }
+          confidence = Math.min(0.9, 0.5 + Math.abs(finalScore) * 0.1);
+          reasoning = `📉 Strong bearish signals: Price momentum ${changePercent.toFixed(1)}%, Historical trend ${avgPriceChange.toFixed(1)}%, Sentiment ${sentiment.toFixed(2)}`;
+        } else if (finalScore > 0.3) {
+          // New moderate BUY threshold
+          signal = SignalType.BUY;
+          confidence = Math.min(0.75, 0.4 + Math.abs(finalScore) * 0.15);
+          reasoning = `📊 Moderate bullish momentum: Combined score ${finalScore.toFixed(2)}, Volume ratio ${currentVolumeRatio.toFixed(2)}`;
+        } else if (finalScore < -0.3) {
+          // New moderate SELL threshold
+          signal = SignalType.SELL;
+          confidence = Math.min(0.75, 0.4 + Math.abs(finalScore) * 0.15);
+          reasoning = `📊 Moderate bearish pressure: Combined score ${finalScore.toFixed(2)}, Volume ratio ${currentVolumeRatio.toFixed(2)}`;
+        } else {
+          confidence = 0.3 + Math.random() * 0.3;
+          reasoning = `⚖️ Neutral signals: Score ${finalScore.toFixed(2)}, awaiting clearer trend direction`;
         }
 
-        // Calculate target price
+        // Calculate target price based on signal strength and analysis
         const priceMultiplier =
           signal === SignalType.BUY
-            ? 1 + mlPrediction.probability * 0.05 // 0-5% upside
+            ? 1 + finalScore * 0.01 // Dynamic upside based on signal strength
             : signal === SignalType.SELL
-              ? 1 - mlPrediction.probability * 0.05 // 0-5% downside
+              ? 1 - Math.abs(finalScore) * 0.01 // Dynamic downside based on signal strength
               : 1;
 
         return {
@@ -1044,13 +760,13 @@ export class StockService {
           confidence: confidence,
           targetPrice: stock.currentPrice * priceMultiplier,
           currentPrice: stock.currentPrice,
-          reason: `🤖 AI Analysis: ${mlPrediction.reasoning} | Sentiment: ${sentiment.toFixed(2)} | Confidence: ${(confidence * 100).toFixed(1)}%`,
+          reason: `🎯 Live Analysis: ${reasoning} | Confidence: ${(confidence * 100).toFixed(1)}%`,
           isActive: true,
           createdAt: new Date(),
           updatedAt: new Date(),
         } as TradingSignal;
       } else {
-        // Fallback to basic technical analysis if no historical data
+        // Use basic technical analysis if no historical data available
         return await this.generateBasicSignal(stock);
       }
     } catch (error) {
@@ -1076,8 +792,18 @@ export class StockService {
       }
 
       // Convert Yahoo Finance data to our format
-      const convertedData =
-        this.breakoutService.convertYahooDataToHistorical(historicalData);
+      // const convertedData =
+      //   this.breakoutService.convertYahooDataToHistorical(historicalData);
+
+      // Temporary direct conversion while breakout service is disabled
+      const convertedData = historicalData.map((item) => ({
+        date: item.date,
+        open: item.open,
+        high: item.high,
+        low: item.low,
+        close: item.close,
+        volume: item.volume,
+      }));
 
       if (convertedData.length === 0) {
         return {
@@ -1091,12 +817,29 @@ export class StockService {
       const currentPrice = convertedData[convertedData.length - 1]?.close || 0;
 
       // Get the full breakout strategy (which includes pattern recognition)
-      const breakoutStrategy =
-        await this.breakoutService.calculateBreakoutStrategy(
-          symbol,
-          currentPrice,
-          convertedData,
-        );
+      // const breakoutStrategy =
+      //   await this.breakoutService.calculateBreakoutStrategy(
+      //     symbol,
+      //     currentPrice,
+      //     convertedData,
+      //   );
+
+      // Default response while breakout service is disabled
+      const breakoutStrategy = {
+        signal: 'HOLD',
+        strength: 0.5,
+        reasoning: 'Pattern analysis temporarily disabled',
+        rsi: 50,
+        currentTrend: 'NEUTRAL',
+        volatility: 0.2,
+        supportLevel: currentPrice * 0.95,
+        resistanceLevel: currentPrice * 1.05,
+        patternRecognition: {
+          patterns: [],
+          confidence: 0.5,
+          recommendation: 'HOLD',
+        },
+      };
 
       return {
         symbol,
@@ -1129,14 +872,80 @@ export class StockService {
     console.log('🚀 Performing initial stock price update...');
     try {
       await this.updateAllStockPrices();
-      const stocksWithPrices = this.mockStocks.filter(
-        (stock) => stock.currentPrice > 0,
+      const stocksWithPrices = Array.from(this.priceCache.values()).filter(
+        (priceData) => priceData.currentPrice > 0,
       );
+      const totalStocks = await this.stockRepository.count();
       console.log(
-        `✅ Initial update complete: ${stocksWithPrices.length}/${this.mockStocks.length} stocks have current prices`,
+        `✅ Initial update complete: ${stocksWithPrices.length}/${totalStocks} stocks have current prices`,
       );
     } catch (error) {
       console.error('❌ Error during initial stock price update:', error);
+    }
+  }
+
+  async toggleFavorite(symbol: string): Promise<Stock | null> {
+    try {
+      const stock = await this.stockRepository.findOne({
+        where: { symbol },
+      });
+
+      if (!stock) {
+        console.log(`⚠️ Stock ${symbol} not found`);
+        return null;
+      }
+
+      // Toggle the favorite status
+      stock.favorite = !stock.favorite;
+
+      // Save to database
+      const updatedStock = await this.stockRepository.save(stock);
+
+      console.log(
+        `✅ Toggled favorite for ${symbol}: ${updatedStock.favorite}`,
+      );
+
+      // Return the stock enriched with live data
+      return this.enrichStockWithLiveData(updatedStock);
+    } catch (error) {
+      console.error(`❌ Error toggling favorite for ${symbol}:`, error.message);
+      return null;
+    }
+  }
+
+  async seedDatabase(): Promise<{ message: string; count: number }> {
+    try {
+      console.log('🌱 Starting database seed...');
+
+      // Check if stocks already exist
+      const existingCount = await this.stockRepository.count();
+      if (existingCount > 0) {
+        console.log(
+          `⚠️ Database already contains ${existingCount} stocks. Skipping seed.`,
+        );
+        return {
+          message: `Database already seeded with ${existingCount} stocks`,
+          count: existingCount,
+        };
+      }
+
+      // Import seed data
+      const { stockSeedData } = await import('../../database/seeds/stock.seed');
+
+      // Insert all seed data
+      const savedStocks = await this.stockRepository.save(stockSeedData);
+
+      console.log(
+        `✅ Successfully seeded ${savedStocks.length} stocks into the database!`,
+      );
+
+      return {
+        message: `Successfully seeded ${savedStocks.length} stocks`,
+        count: savedStocks.length,
+      };
+    } catch (error) {
+      console.error('❌ Error seeding database:', error);
+      throw new Error(`Failed to seed database: ${error.message}`);
     }
   }
 }

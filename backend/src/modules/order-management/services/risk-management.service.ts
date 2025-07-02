@@ -218,18 +218,16 @@ export class RiskManagementService {
         currentValue,
         percentOfPortfolio: 0, // Will be calculated after we know total equity
         unrealizedPnL,
-        sector: position.stock.sector,
+        sector: position.stock.sector || 'Unknown',
       };
 
       positionRisks.push(positionRisk);
       totalPositionValue += currentValue;
 
       // Accumulate sector concentrations
-      const sectorValue = sectorConcentrations.get(position.stock.sector) || 0;
-      sectorConcentrations.set(
-        position.stock.sector,
-        sectorValue + currentValue,
-      );
+      const stockSector = position.stock.sector || 'Unknown';
+      const sectorValue = sectorConcentrations.get(stockSector) || 0;
+      sectorConcentrations.set(stockSector, sectorValue + currentValue);
     }
 
     const totalEquity = Number(portfolio.totalValue);
@@ -435,13 +433,14 @@ export class RiskManagementService {
         : 0;
 
     // Check sector concentration
+    const stockSector = stock.sector || 'Unknown';
     const currentSectorPercent =
-      portfolioRisk.sectorConcentrations.get(stock.sector) || 0;
+      portfolioRisk.sectorConcentrations.get(stockSector) || 0;
     const newSectorPercent = currentSectorPercent + orderPercentOfPortfolio;
 
     if (newSectorPercent > riskLimits.maxSectorConcentration) {
       result.warnings.push(
-        `Order would result in ${newSectorPercent.toFixed(2)}% concentration in ${stock.sector} sector, ` +
+        `Order would result in ${newSectorPercent.toFixed(2)}% concentration in ${stockSector} sector, ` +
           `approaching limit of ${riskLimits.maxSectorConcentration}%`,
       );
     }

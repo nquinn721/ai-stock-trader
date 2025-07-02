@@ -123,7 +123,26 @@ const PortfolioChart: React.FC<PortfolioChartProps> = observer(
       if (!chartData) return null;
       const { performanceHistory } = chartData;
 
-      const values = performanceHistory.map((p) => {
+      // Filter out invalid data points and ensure we have valid numbers
+      const validHistory = performanceHistory.filter((p) => {
+        const value =
+          selectedMetric === "return"
+            ? p.percentReturn
+            : selectedMetric === "profit"
+              ? p.profit
+              : p.totalValue;
+        return typeof value === "number" && !isNaN(value) && isFinite(value);
+      });
+
+      if (validHistory.length === 0) {
+        return (
+          <div className="chart-container">
+            <div className="no-data-message">No valid chart data available</div>
+          </div>
+        );
+      }
+
+      const values = validHistory.map((p) => {
         switch (selectedMetric) {
           case "return":
             return p.percentReturn;
@@ -138,18 +157,26 @@ const PortfolioChart: React.FC<PortfolioChartProps> = observer(
       const maxValue = Math.max(...values);
       const valueRange = maxValue - minValue || 1;
 
-      const points = performanceHistory
+      const points = validHistory
         .map((point, index) => {
-          const x = (index / (performanceHistory.length - 1)) * 90 + 5; // 5% margin
+          const x = (index / (validHistory.length - 1)) * 90 + 5; // 5% margin
           const value =
             selectedMetric === "return"
               ? point.percentReturn
               : selectedMetric === "profit"
-              ? point.profit
-              : point.totalValue;
+                ? point.profit
+                : point.totalValue;
           const y = ((maxValue - value) / valueRange) * 80 + 10; // 10% margin
+
+          // Additional validation to ensure no NaN values
+          if (!isFinite(x) || !isFinite(y)) {
+            console.warn("Invalid chart coordinates:", { x, y, value, index });
+            return null;
+          }
+
           return `${x},${y}`;
         })
+        .filter((point) => point !== null)
         .join(" ");
 
       const isPositive = values[values.length - 1] >= values[0];
@@ -197,15 +224,20 @@ const PortfolioChart: React.FC<PortfolioChartProps> = observer(
               filter="drop-shadow(0 0 2px rgba(0,0,0,0.3))"
             />
             {/* Data points */}
-            {performanceHistory.map((point, index) => {
-              const x = (index / (performanceHistory.length - 1)) * 90 + 5;
+            {validHistory.map((point, index) => {
+              const x = (index / (validHistory.length - 1)) * 90 + 5;
               const value =
                 selectedMetric === "return"
                   ? point.percentReturn
                   : selectedMetric === "profit"
-                  ? point.profit
-                  : point.totalValue;
+                    ? point.profit
+                    : point.totalValue;
               const y = ((maxValue - value) / valueRange) * 80 + 10;
+
+              // Skip rendering if coordinates are invalid
+              if (!isFinite(x) || !isFinite(y)) {
+                return null;
+              }
 
               return (
                 <circle
@@ -215,12 +247,12 @@ const PortfolioChart: React.FC<PortfolioChartProps> = observer(
                   r="0.5"
                   fill={chartColor}
                   className="chart-point"
-                  opacity={index === performanceHistory.length - 1 ? 1 : 0.7}
+                  opacity={index === validHistory.length - 1 ? 1 : 0.7}
                 />
               );
             })}
             {/* Current value indicator */}{" "}
-            {performanceHistory.length > 0 && (
+            {validHistory.length > 0 && (
               <g>
                 <circle
                   cx="95"
@@ -334,8 +366,8 @@ const PortfolioChart: React.FC<PortfolioChartProps> = observer(
                 selectedMetric === "return"
                   ? latestPoint?.percentReturn
                   : selectedMetric === "profit"
-                  ? latestPoint?.profit
-                  : latestPoint?.totalValue
+                    ? latestPoint?.profit
+                    : latestPoint?.totalValue
               )}
             </div>
           </div>

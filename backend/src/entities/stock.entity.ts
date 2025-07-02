@@ -17,24 +17,18 @@ export class Stock {
   @Column()
   name: string;
 
-  @Column()
+  @Column({ nullable: true })
   sector: string;
 
-  @Column('text')
-  description: string;
-  @Column('decimal', { precision: 15, scale: 2, nullable: true })
-  currentPrice: number;
+  @Column({ default: false })
+  favorite: boolean;
 
-  @Column('decimal', { precision: 15, scale: 2, nullable: true })
-  previousClose: number;
-
-  @Column('decimal', { precision: 5, scale: 2, nullable: true })
-  changePercent: number;
-
-  @Column('bigint', { nullable: true })
-  volume: number;
-  @Column('decimal', { precision: 20, scale: 2, nullable: true })
-  marketCap: number;
+  // Live price data columns (not stored in DB, calculated on-the-fly)
+  currentPrice?: number;
+  previousClose?: number;
+  changePercent?: number;
+  volume?: number;
+  marketCap?: number;
 
   @CreateDateColumn()
   createdAt: Date;

@@ -10,9 +10,7 @@ import {
 import {
   Box,
   Card,
-  FormControlLabel,
   LinearProgress,
-  Switch,
   Tab,
   Tabs,
   Typography,
@@ -144,7 +142,8 @@ export const AutoTradingDashboard: React.FC = () => {
 
       // Load active trading strategies from backend
       try {
-        const strategiesResult = await autoTradingService.getActiveStrategies();
+        const strategiesResult =
+          await autoTradingService.getActiveStrategies("user-123");
         if (strategiesResult.success && strategiesResult.data) {
           const rules = strategiesResult.data.map((instance) => ({
             id: instance.id,
@@ -364,7 +363,7 @@ export const AutoTradingDashboard: React.FC = () => {
             },
           ]}
         />
-        <div className="page-content">
+        <div className="dashboard-content">
           <LinearProgress />
           <Typography variant="h6" sx={{ mt: 2, textAlign: "center" }}>
             Loading Automated Trading Dashboard...
@@ -397,21 +396,63 @@ export const AutoTradingDashboard: React.FC = () => {
           },
         ]}
       >
-        {/* Global Trading Control */}
-        <FormControlLabel
-          control={
-            <Switch
-              checked={isGlobalTradingActive}
-              onChange={toggleGlobalTrading}
-              color="primary"
-            />
-          }
-          label="Global Trading"
-          sx={{ ml: 2 }}
-        />
+        {/* Global Auto Trading Control Button */}
+        <button
+          onClick={toggleGlobalTrading}
+          className={`auto-trading-control-btn ${
+            isGlobalTradingActive ? "active" : "inactive"
+          }`}
+          style={{
+            padding: "12px 24px",
+            borderRadius: "8px",
+            border: "2px solid",
+            borderColor: isGlobalTradingActive ? "#4CAF50" : "#F44336",
+            backgroundColor: isGlobalTradingActive
+              ? "rgba(76, 175, 80, 0.1)"
+              : "rgba(244, 67, 54, 0.1)",
+            color: isGlobalTradingActive ? "#4CAF50" : "#F44336",
+            fontWeight: "600",
+            fontSize: "16px",
+            cursor: "pointer",
+            transition: "all 0.3s ease",
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
+            minWidth: "200px",
+            justifyContent: "center",
+          }}
+        >
+          <TrendingUp sx={{ fontSize: 20 }} />
+          {isGlobalTradingActive ? "Stop Auto Trading" : "Start Auto Trading"}
+        </button>
       </PageHeader>
 
-      <div className="page-content">
+      <div className="dashboard-content">
+        {/* Auto Trading Info Card */}
+        <Card
+          sx={{
+            mb: 3,
+            p: 3,
+            background: "linear-gradient(135deg, #1e3c72 0%, #2a5298 100%)",
+            color: "white",
+            borderRadius: 3,
+          }}
+        >
+          <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
+            🚀 Simplified Auto Trading
+          </Typography>
+          <Typography variant="body1" sx={{ mb: 2, opacity: 0.9 }}>
+            Auto trading strategies are automatically applied to your portfolios
+            when you turn on Auto Trading. No need to manually deploy strategies
+            - just click the button above to start or stop all automated
+            trading.
+          </Typography>
+          <Typography variant="body2" sx={{ opacity: 0.8 }}>
+            💡 <strong>Tip:</strong> Use the Emergency Stop button if you need
+            to immediately halt all trading activities.
+          </Typography>
+        </Card>
+
         {/* Status Overview Cards with Modern Design */}
         <div className="status-overview">
           <div className="status-card">

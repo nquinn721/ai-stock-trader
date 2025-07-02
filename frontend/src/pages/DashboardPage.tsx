@@ -169,7 +169,7 @@ const DashboardPage: React.FC = observer(() => {
     setPortfolioForDetails(null);
   };
 
-  const stocksWithSignals = stockStore.stocksWithSignals;
+  const stocksWithSignals = stockStore.stocksWithSignalsSorted;
   // Removed loading screen since data comes through WebSockets
   // const loading = stockStore.isLoading;
 
@@ -225,7 +225,7 @@ const DashboardPage: React.FC = observer(() => {
       />
 
       {/* Main Dashboard Content */}
-      <div className="page-content">
+      <div className="dashboard-content">
         {/* Enhanced Metrics Grid */}
         <div className="dashboard-grid grid-small">
           <div className="dashboard-card trading-card slide-up">
@@ -370,59 +370,6 @@ const DashboardPage: React.FC = observer(() => {
           </div>
         </div>
 
-        {/* Enhanced Market Data Section */}
-        <div className="dashboard-card slide-up dashboard-section-full">
-          <div className="card-header">
-            <div className="card-title">
-              <FontAwesomeIcon icon={faChartLine} className="card-title-icon" />
-              Live Market Data
-            </div>
-            <div className="card-actions">
-              <button
-                className="dashboard-btn primary"
-                onClick={() => stockStore.fetchStocksWithSignals()}
-                disabled={stockStore.isLoading}
-              >
-                {stockStore.isLoading ? (
-                  <div className="loading-spinner"></div>
-                ) : (
-                  <FontAwesomeIcon icon={faArrowTrendUp} />
-                )}
-                Refresh
-              </button>
-            </div>
-          </div>
-          {stockStore.isLoading ? (
-            <EmptyState
-              type="loading"
-              icon={<FontAwesomeIcon icon={faChartLine} />}
-              title="Loading Market Data"
-              description="Fetching latest stock prices and signals..."
-            />
-          ) : stocksWithSignals.length === 0 ? (
-            <EmptyState
-              type="no-data"
-              icon={<FontAwesomeIcon icon={faChartLine} />}
-              title="No Stock Data Ready"
-              description="Waiting for stocks with valid price data. Live updates will appear here automatically."
-              action={{
-                label: "Refresh Data",
-                onClick: () => stockStore.fetchStocksWithSignals(),
-              }}
-            />
-          ) : (
-            <div className="stocks-grid">
-              {stocksWithSignals.slice(0, 12).map((stock) => (
-                <StockCard
-                  key={stock.symbol}
-                  stock={stock}
-                  signal={stock.tradingSignal || undefined}
-                />
-              ))}
-            </div>
-          )}
-        </div>
-
         {/* Enhanced Top Performers Section */}
         {marketAnalytics.topGainer && marketAnalytics.topLoser && (
           <div className="dashboard-grid">
@@ -473,6 +420,60 @@ const DashboardPage: React.FC = observer(() => {
             </div>
           </div>
         )}
+
+        {/* Enhanced Market Data Section */}
+        <div className="dashboard-card slide-up dashboard-section-full">
+          <div className="card-header">
+            <div className="card-title">
+              <FontAwesomeIcon icon={faChartLine} className="card-title-icon" />
+              Live Market Data
+            </div>
+            <div className="card-actions">
+              <button
+                className="dashboard-btn primary"
+                onClick={() => stockStore.fetchStocksWithSignals()}
+                disabled={stockStore.isLoading}
+              >
+                {stockStore.isLoading ? (
+                  <div className="loading-spinner"></div>
+                ) : (
+                  <FontAwesomeIcon icon={faArrowTrendUp} />
+                )}
+                Refresh
+              </button>
+            </div>
+          </div>
+          {stockStore.isLoading ? (
+            <EmptyState
+              type="loading"
+              icon={<FontAwesomeIcon icon={faChartLine} />}
+              title="Loading Market Data"
+              description="Fetching latest stock prices and signals..."
+            />
+          ) : stocksWithSignals.length === 0 ? (
+            <EmptyState
+              type="no-data"
+              icon={<FontAwesomeIcon icon={faChartLine} />}
+              title="No Stock Data Ready"
+              description="Waiting for stocks with valid price data. Live updates will appear here automatically."
+              action={{
+                label: "Refresh Data",
+                onClick: () => stockStore.fetchStocksWithSignals(),
+              }}
+            />
+          ) : (
+            <div className="stocks-grid">
+              {stocksWithSignals.map((stock) => (
+                <StockCard
+                  key={stock.symbol}
+                  stock={stock}
+                  signal={stock.tradingSignal || undefined}
+                  variant="compact"
+                />
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Portfolio Details Modal */}

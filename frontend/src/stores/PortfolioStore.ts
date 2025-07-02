@@ -238,7 +238,11 @@ export class PortfolioStore {
     }
   }
 
-  async createPortfolio(portfolioData: { name: string; initialCash: number }) {
+  async createPortfolio(portfolioData: {
+    userId: string;
+    portfolioType: string;
+    initialBalance?: number;
+  }) {
     runInAction(() => {
       this.isLoading = true;
       this.error = null;
