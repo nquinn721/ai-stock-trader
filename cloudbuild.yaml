@@ -1,6 +1,6 @@
 # Cloud Build configuration for Stock Trading App
 steps:
-  # Step 1: Build the application using the backend test Dockerfile
+  # Step 1: Build the application using the standard Dockerfile
   - name: "gcr.io/cloud-builders/docker"
     args:
       [
@@ -10,7 +10,7 @@ steps:
         "-t",
         "gcr.io/$PROJECT_ID/stock-trading-app:latest",
         "-f",
-        "Dockerfile.cloudrun",
+        "Dockerfile",
         ".",
       ]
     timeout: "1800s"

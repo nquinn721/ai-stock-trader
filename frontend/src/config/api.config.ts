@@ -10,7 +10,9 @@ export interface FrontendApiConfig {
     wsUrl: string;
     endpoints: {
       stocks: string;
+      stocksFast: string;
       stocksWithSignals: string;
+      stocksBatchSignals: string;
       stockHistory: string;
       tradingSignals: string;
       paperTrading: string;
@@ -76,7 +78,9 @@ export const FRONTEND_API_CONFIG: FrontendApiConfig = {
     wsUrl: getWebSocketUrlFromEnv(),
     endpoints: {
       stocks: "/api/stocks",
+      stocksFast: "/api/stocks/fast/all",
       stocksWithSignals: "/api/stocks/with-signals/all",
+      stocksBatchSignals: "/api/stocks/signals/batch",
       stockHistory: "/api/stocks/{symbol}/history",
       tradingSignals: "/api/trading/signals",
       paperTrading: "/api/paper-trading",

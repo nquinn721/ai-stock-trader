@@ -26,14 +26,14 @@ export const useDashboard = () => {
 
   // Initialize data on component mount
   useEffect(() => {
-    stockStore.fetchStocksWithSignals();
+    stockStore.fetchStocksFast();
     portfolioStore.initializeDefaultPortfolio();
   }, [stockStore, portfolioStore]);
 
   // Update stocks when socket data changes
   useEffect(() => {
     if ((stockStore?.stocks?.length || 0) === 0 && !stockStore?.isLoading) {
-      stockStore?.fetchStocksWithSignals();
+      stockStore?.fetchStocksFast();
     }
   }, [stockStore?.stocks?.length, stockStore?.isLoading, stockStore]);
 

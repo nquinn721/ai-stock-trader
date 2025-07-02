@@ -108,6 +108,20 @@ export class StockService {
     return stocks.map((stock) => this.enrichStockWithLiveData(stock));
   }
 
+  /**
+   * Fast endpoint that returns stocks with prices only (no calculated signals)
+   * Optimized for immediate display of market data
+   */
+  async getAllStocksFast(): Promise<Stock[]> {
+    console.log('🚀 Fast stock fetch - returning prices only');
+
+    // Get stocks from database
+    const stocks = await this.stockRepository.find();
+
+    // Return only enriched price data (no signals/sentiment calculations)
+    return stocks.map((stock) => this.enrichStockWithLiveData(stock));
+  }
+
   async getAllStocksWithSignals(): Promise<
     (Stock & {
       tradingSignal: TradingSignal | null;
@@ -161,6 +175,89 @@ export class StockService {
     }
 
     return stocksWithSignals;
+  }
+
+  /**
+   * Async batch calculation of signals for all stocks
+   * Called separately after initial price data is displayed
+   */
+  async getBatchSignals(): Promise<
+    {
+      symbol: string;
+      signal: TradingSignal;
+      sentiment?: any;
+      breakoutStrategy?: any;
+      recentNews?: any[];
+    }[]
+  > {
+    console.log('🔄 Batch calculating signals for all stocks...');
+
+    const stocks = await this.stockRepository.find();
+    const results: {
+      symbol: string;
+      signal: TradingSignal;
+      sentiment?: any;
+      breakoutStrategy?: any;
+      recentNews?: any[];
+    }[] = [];
+
+    // Get sentiment data for all stocks (done in batch for efficiency)
+    const stockSymbols = stocks.map((stock) => stock.symbol);
+    const sentimentMap =
+      await this.newsService.getPortfolioSentiment(stockSymbols);
+
+    // Process signals in batches to avoid overwhelming the system
+    const batchSize = 10;
+    for (let i = 0; i < stocks.length; i += batchSize) {
+      const batch = stocks.slice(i, i + batchSize);
+
+      const batchPromises = batch.map(async (stock) => {
+        try {
+          const enrichedStock = this.enrichStockWithLiveData(stock);
+
+          // Skip calculation for stocks without price data
+          if (!enrichedStock.currentPrice || enrichedStock.currentPrice <= 0) {
+            return null;
+          }
+
+          // Generate trading signal
+          const signal = await this.generateLiveTradingSignal(enrichedStock);
+
+          // Calculate breakout strategy
+          const breakoutStrategy = await this.calculateBreakoutStrategy(
+            enrichedStock.symbol,
+            enrichedStock.currentPrice,
+          );
+
+          return {
+            symbol: stock.symbol,
+            signal,
+            sentiment: sentimentMap.get(stock.symbol)?.sentiment || {
+              score: 0,
+              label: 'neutral',
+              confidence: 0,
+              articlesAnalyzed: 0,
+            },
+            breakoutStrategy,
+            recentNews: sentimentMap.get(stock.symbol)?.recentNews || [],
+          };
+        } catch (error) {
+          console.error(`Error calculating signal for ${stock.symbol}:`, error);
+          return null;
+        }
+      });
+
+      const batchResults = await Promise.all(batchPromises);
+      results.push(...batchResults.filter((result) => result !== null));
+
+      // Small delay between batches to prevent overwhelming the system
+      if (i + batchSize < stocks.length) {
+        await new Promise((resolve) => setTimeout(resolve, 100));
+      }
+    }
+
+    console.log(`✅ Calculated signals for ${results.length} stocks`);
+    return results;
   }
 
   private enrichStockWithLiveData(stock: Stock): Stock {

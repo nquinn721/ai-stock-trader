@@ -10,7 +10,7 @@ steps:
         "-t",
         "gcr.io/$PROJECT_ID/stock-trading-app:latest",
         "-f",
-        "Dockerfile.cloudrun",
+        "Dockerfile",
         ".",
       ]
     timeout: "1800s"

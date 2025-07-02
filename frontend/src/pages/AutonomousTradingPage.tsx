@@ -198,7 +198,7 @@ const AutonomousTradingPage: React.FC<AutonomousTradingPageProps> = observer(
 
     useEffect(() => {
       if (!stockStore.isInitialized) {
-        stockStore.fetchStocksWithSignals();
+        stockStore.fetchStocksFast();
       }
     }, []);
 
