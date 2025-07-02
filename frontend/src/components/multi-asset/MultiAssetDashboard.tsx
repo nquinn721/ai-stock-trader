@@ -1,6 +1,5 @@
 import {
   AccountBalance,
-  CurrencyBitcoin,
   Grain,
   TrendingUp,
 } from "@mui/icons-material";
@@ -17,8 +16,6 @@ import React, { useEffect, useState } from "react";
 import { AlternativeDataFeed } from "./AlternativeDataFeed";
 import { CommoditiesDashboard } from "./CommoditiesDashboard";
 import { CrossAssetAnalytics } from "./CrossAssetAnalytics";
-import { CryptoDashboard } from "./CryptoDashboard";
-import { ForexDashboard } from "./ForexDashboard";
 import "./MultiAssetDashboard.css";
 
 interface AssetOverview {
@@ -27,8 +24,6 @@ interface AssetOverview {
   dailyChangePercent: number;
   assetDistribution: {
     stocks: number;
-    crypto: number;
-    forex: number;
     commodities: number;
   };
 }
@@ -181,26 +176,6 @@ export const MultiAssetDashboard: React.FC = () => {
             >
               <Box>
                 <Typography color="textSecondary" gutterBottom>
-                  Crypto Allocation
-                </Typography>
-                <Typography variant="h5" component="div">
-                  {assetOverview?.assetDistribution?.crypto?.toFixed(1) || "0"}%
-                </Typography>
-              </Box>
-              <CurrencyBitcoin sx={{ color: "#f7931a" }} />
-            </Box>
-          </CardContent>
-        </Card>
-
-        <Card className="overview-card">
-          <CardContent>
-            <Box
-              display="flex"
-              alignItems="center"
-              justifyContent="space-between"
-            >
-              <Box>
-                <Typography color="textSecondary" gutterBottom>
                   Commodities
                 </Typography>
                 <Typography variant="h5" component="div">
@@ -230,8 +205,6 @@ export const MultiAssetDashboard: React.FC = () => {
           }}
         >
           <Tab label="Cross-Asset Analytics" />
-          <Tab label="Cryptocurrency" />
-          <Tab label="Forex" />
           <Tab label="Commodities" />
           <Tab label="Alternative Data" />
         </Tabs>
@@ -243,18 +216,10 @@ export const MultiAssetDashboard: React.FC = () => {
       </TabPanel>
 
       <TabPanel value={activeTab} index={1}>
-        <CryptoDashboard />
-      </TabPanel>
-
-      <TabPanel value={activeTab} index={2}>
-        <ForexDashboard />
-      </TabPanel>
-
-      <TabPanel value={activeTab} index={3}>
         <CommoditiesDashboard />
       </TabPanel>
 
-      <TabPanel value={activeTab} index={4}>
+      <TabPanel value={activeTab} index={2}>
         <AlternativeDataFeed />
       </TabPanel>
     </div>

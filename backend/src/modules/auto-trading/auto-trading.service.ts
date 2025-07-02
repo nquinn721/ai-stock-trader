@@ -341,6 +341,14 @@ export class AutoTradingService {
       await this.checkMLSignals(portfolioId, portfolio, stocks);
 
       for (const stock of stocks) {
+        // Skip stocks without valid current price data
+        if (!stock.currentPrice || stock.currentPrice <= 0) {
+          this.logger.warn(
+            `Skipping auto-trading for ${stock.symbol}: no valid current price (${stock.currentPrice})`,
+          );
+          continue;
+        }
+
         const context = await this.buildTradingContext(stock.symbol, portfolio);
         const triggeredRules: TradingRule[] = [];
 
@@ -433,21 +441,27 @@ export class AutoTradingService {
     };
 
     try {
-      // Get intelligent recommendation from ML service
-      const mlRecommendation =
-        await this.intelligentRecommendationService.generateRecommendation({
-          symbol,
-          currentPrice: stock?.currentPrice || 0,
-          timeHorizon: '1D',
-        });
-      if (mlRecommendation) {
-        recommendation = {
-          type: mlRecommendation.action,
-          confidence: mlRecommendation.confidence,
-          reasoning: Array.isArray(mlRecommendation.reasoning)
-            ? mlRecommendation.reasoning.join(', ')
-            : mlRecommendation.reasoning || 'ML-generated recommendation',
-        };
+      // Only get ML recommendation if we have valid stock data and price
+      if (stock?.currentPrice && stock.currentPrice > 0) {
+        const mlRecommendation =
+          await this.intelligentRecommendationService.generateRecommendation({
+            symbol,
+            currentPrice: stock.currentPrice,
+            timeHorizon: '1D',
+          });
+        if (mlRecommendation) {
+          recommendation = {
+            type: mlRecommendation.action,
+            confidence: mlRecommendation.confidence,
+            reasoning: Array.isArray(mlRecommendation.reasoning)
+              ? mlRecommendation.reasoning.join(', ')
+              : mlRecommendation.reasoning || 'ML-generated recommendation',
+          };
+        }
+      } else {
+        this.logger.warn(
+          `Skipping ML recommendation for ${symbol}: no valid stock price data (price: ${stock?.currentPrice})`,
+        );
       }
     } catch (error) {
       this.logger.warn(`Failed to get ML recommendation for ${symbol}:`, error);

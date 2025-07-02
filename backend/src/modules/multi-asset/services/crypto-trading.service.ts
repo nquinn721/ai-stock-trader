@@ -1,7 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Between, Repository } from 'typeorm';
-import { CryptoData } from '../entities/crypto-data.entity';
 import {
   BorrowingRate,
   CryptoFuturesData,
@@ -21,8 +20,8 @@ export class CryptoTradingService {
   private readonly logger = new Logger(CryptoTradingService.name);
 
   constructor(
-    @InjectRepository(CryptoData)
-    private cryptoDataRepository: Repository<CryptoData>,
+    // Removed: @InjectRepository(CryptoData)
+    // Removed: private cryptoDataRepository: Repository<CryptoData>,
   ) {}
 
   async getCryptoMarketData(symbol: string): Promise<CryptoMarketData> {
@@ -207,91 +206,5 @@ export class CryptoTradingService {
       trendDirection: 'bullish',
       volatility: 0.045, // 4.5% daily volatility
     };
-  }
-
-  async storeCryptoData(data: CryptoMarketData): Promise<CryptoData> {
-    const cryptoEntity = this.cryptoDataRepository.create({
-      symbol: data.symbol,
-      exchange: 'Binance', // Default exchange
-      spotPrice: data.spot.price,
-      futuresPrice: data.futures?.price,
-      volume24h: data.spot.volume24h,
-      marketCap: data.spot.marketCap,
-      circulatingSupply: data.spot.circulatingSupply,
-      totalSupply: data.spot.totalSupply,
-      maxSupply: data.spot.maxSupply,
-      fundingRate: data.futures?.fundingRate,
-      openInterest: data.futures?.openInterest,
-      premiumIndex: data.futures?.premiumIndex,
-      nextFundingTime: data.futures?.nextFundingTime,
-      onChainMetrics: data.onChain,
-      defiMetrics: data.defi,
-      technicalIndicators: data.technicalIndicators,
-      timestamp: data.timestamp,
-    });
-
-    return this.cryptoDataRepository.save(cryptoEntity);
-  }
-
-  async getCryptoHistory(
-    symbol: string,
-    startDate: Date,
-    endDate: Date,
-  ): Promise<CryptoData[]> {
-    return this.cryptoDataRepository.find({
-      where: {
-        symbol,
-        timestamp: Between(startDate, endDate),
-      },
-      order: {
-        timestamp: 'ASC',
-      },
-    });
-  }
-
-  async getSupportedCryptos(): Promise<string[]> {
-    return [
-      'BTC',
-      'ETH',
-      'ADA',
-      'DOT',
-      'LINK',
-      'UNI',
-      'AAVE',
-      'COMP',
-      'USDC',
-      'USDT',
-      'DAI',
-      'WBTC',
-    ];
-  }
-
-  async getFundingRates(): Promise<
-    { symbol: string; rate: number; nextFunding: Date }[]
-  > {
-    const futuresSymbols = await this.getSupportedCryptos();
-
-    return Promise.all(
-      futuresSymbols.map(async (symbol) => {
-        const futuresData = await this.getFuturesData(symbol);
-        return {
-          symbol,
-          rate: futuresData?.fundingRate || 0,
-          nextFunding: futuresData?.nextFundingTime || new Date(),
-        };
-      }),
-    );
-  }
-
-  async getLiquidationHeatmap(): Promise<
-    { price: number; liquidations: number }[]
-  > {
-    // This would calculate liquidation levels based on open interest and leverage
-    return [
-      { price: 48000, liquidations: 100000000 },
-      { price: 45000, liquidations: 250000000 },
-      { price: 52000, liquidations: 150000000 },
-      { price: 55000, liquidations: 200000000 },
-    ];
   }
 }

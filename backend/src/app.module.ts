@@ -70,8 +70,6 @@ import { ArbitrageOpportunity } from './modules/multi-asset/entities/arbitrage-o
 import { AssetData } from './modules/multi-asset/entities/asset-data.entity';
 import { CommodityData } from './modules/multi-asset/entities/commodity-data.entity';
 import { CrossAssetCorrelation } from './modules/multi-asset/entities/cross-asset-correlation.entity';
-import { CryptoData } from './modules/multi-asset/entities/crypto-data.entity';
-import { ForexData } from './modules/multi-asset/entities/forex-data.entity';
 import { MultiAssetModule } from './modules/multi-asset/multi-asset.module';
 import { NewsModule } from './modules/news/news.module';
 import {
@@ -266,8 +264,6 @@ import { SeedService } from './services/seed.service';
             MarketAlert,
             ScanResult,
             AssetData,
-            CryptoData,
-            ForexData,
             CommodityData,
             AlternativeData,
             CrossAssetCorrelation,
