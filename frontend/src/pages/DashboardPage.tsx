@@ -71,7 +71,7 @@ const DashboardPage: React.FC = observer(() => {
       console.log(
         "Dashboard: Fetching initial stock data (not initialized or needs fresh data)"
       );
-      stockStore.fetchStocksWithSignals();
+      stockStore.fetchStocksFast();
     } else if (stockStore.isInitialized) {
       console.log(
         "Dashboard: Using existing stock data, WebSocket will provide updates"
@@ -431,7 +431,7 @@ const DashboardPage: React.FC = observer(() => {
             <div className="card-actions">
               <button
                 className="dashboard-btn primary"
-                onClick={() => stockStore.fetchStocksWithSignals()}
+                onClick={() => stockStore.fetchStocksFast()}
                 disabled={stockStore.isLoading}
               >
                 {stockStore.isLoading ? (
@@ -458,7 +458,7 @@ const DashboardPage: React.FC = observer(() => {
               description="Waiting for stocks with valid price data. Live updates will appear here automatically."
               action={{
                 label: "Refresh Data",
-                onClick: () => stockStore.fetchStocksWithSignals(),
+                onClick: () => stockStore.fetchStocksFast(),
               }}
             />
           ) : (

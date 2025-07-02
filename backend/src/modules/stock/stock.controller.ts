@@ -52,6 +52,30 @@ export class StockController {
     return this.stockService.getAllStocksWithSignals();
   }
 
+  @Get('fast/all')
+  @ApiOperation({
+    summary: 'Get all stocks with live prices only (fast response)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'List of all stocks with current prices, optimized for speed',
+  })
+  async getAllStocksFast() {
+    return this.stockService.getAllStocksFast();
+  }
+
+  @Get('signals/batch')
+  @ApiOperation({
+    summary: 'Get trading signals for all stocks (async calculation)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Trading signals for all stocks',
+  })
+  async getBatchSignals() {
+    return this.stockService.getBatchSignals();
+  }
+
   @Get(':symbol/update')
   @ApiOperation({ summary: 'Update stock price' })
   @ApiResponse({ status: 200, description: 'Updated stock data' })

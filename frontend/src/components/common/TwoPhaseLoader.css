@@ -1,0 +1,121 @@
+@import "../../shared-styles.css";
+
+.two-phase-loader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--theme-space-6);
+  background: var(--trading-card-bg);
+  border-radius: var(--theme-radius-lg);
+  border: 1px solid var(--trading-border-color);
+  margin: var(--theme-space-4) 0;
+  box-shadow: var(--theme-shadow-sm);
+}
+
+.phase-container {
+  display: flex;
+  align-items: center;
+  gap: var(--theme-space-8);
+  margin-bottom: var(--theme-space-4);
+}
+
+.phase-item {
+  display: flex;
+  align-items: center;
+  gap: var(--theme-space-3);
+  padding: var(--theme-space-3) var(--theme-space-4);
+  border-radius: var(--theme-radius-md);
+  transition: all 0.3s ease;
+  min-width: 180px;
+}
+
+.phase-item.loading {
+  background: var(--trading-primary-50);
+  border: 2px solid var(--trading-primary-300);
+  color: var(--trading-primary-700);
+}
+
+.phase-item.complete {
+  background: var(--trading-success-50);
+  border: 2px solid var(--trading-success-300);
+  color: var(--trading-success-700);
+}
+
+.phase-item.pending {
+  background: var(--trading-bg-secondary);
+  border: 2px solid var(--trading-border-color);
+  color: var(--trading-text-secondary);
+  opacity: 0.6;
+}
+
+.phase-indicator {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--trading-primary-200);
+  border-top: 2px solid var(--trading-primary-500);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.check-icon {
+  width: 20px;
+  height: 20px;
+  background: var(--trading-success-500);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.pending-icon {
+  font-size: 16px;
+  opacity: 0.5;
+}
+
+.phase-label {
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.phase-description {
+  text-align: center;
+  color: var(--trading-text-secondary);
+  font-size: 13px;
+  font-style: italic;
+  margin-top: var(--theme-space-2);
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .phase-container {
+    flex-direction: column;
+    gap: var(--theme-space-4);
+  }
+
+  .phase-item {
+    min-width: auto;
+    width: 100%;
+    justify-content: center;
+  }
+}

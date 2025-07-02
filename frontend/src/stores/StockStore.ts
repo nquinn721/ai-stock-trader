@@ -14,6 +14,7 @@ export class StockStore {
   tradingSignals: TradingSignal[] = [];
   selectedStock: Stock | null = null;
   isLoading = false;
+  isLoadingSignals = false; // Track signal loading separately
   error: string | null = null;
   lastUpdated: Date | null = null;
 
@@ -131,6 +132,133 @@ export class StockStore {
             : "Failed to fetch stocks with signals";
         this.isLoading = false;
       });
+    }
+  }
+
+  /**
+   * Fast two-phase loading: Get prices first, then calculate signals asynchronously
+   * This provides immediate market data display followed by signal enrichment
+   */
+  async fetchStocksFast(): Promise<void> {
+    try {
+      runInAction(() => {
+        this.isLoading = true;
+        this.error = null;
+      });
+
+      console.log("🚀 Phase 1: Fetching stock prices (fast)...");
+
+      // Phase 1: Get stock prices immediately (fast response)
+      const stocksData = await apiStore.get<Stock[]>(
+        FRONTEND_API_CONFIG.backend.endpoints.stocksFast
+      );
+
+      runInAction(() => {
+        // Update stocks with price data immediately
+        this.stocks = stocksData.map((stock) => ({
+          id: stock.id,
+          symbol: stock.symbol,
+          name: stock.name,
+          sector: stock.sector || "",
+          description: stock.description || "",
+          currentPrice: stock.currentPrice,
+          previousClose: stock.previousClose || stock.currentPrice,
+          changePercent: stock.changePercent,
+          volume: stock.volume,
+          marketCap: stock.marketCap,
+          favorite: stock.favorite || false,
+          createdAt: stock.createdAt || stock.updatedAt,
+          updatedAt: stock.updatedAt,
+          sentiment: undefined, // Will be filled in Phase 2
+          recentNews: [],
+          breakoutStrategy: undefined,
+        }));
+
+        this.lastUpdated = new Date();
+        this.isLoading = false; // Prices are loaded, user can see data
+      });
+
+      console.log(
+        `✅ Phase 1 complete: ${stocksData.length} stocks with prices loaded`
+      );
+
+      // Phase 2: Fetch calculated signals asynchronously (doesn't block UI)
+      this.fetchSignalsAsync();
+    } catch (error) {
+      runInAction(() => {
+        this.error =
+          error instanceof Error ? error.message : "Failed to fetch stock data";
+        this.isLoading = false;
+      });
+    }
+  }
+
+  /**
+   * Phase 2: Async fetch of signals and calculated data
+   * Updates UI gradually as data becomes available
+   */
+  private async fetchSignalsAsync(): Promise<void> {
+    try {
+      runInAction(() => {
+        this.isLoadingSignals = true;
+      });
+
+      console.log("🔄 Phase 2: Calculating signals asynchronously...");
+
+      const signalsData = await apiStore.get<
+        {
+          symbol: string;
+          signal: TradingSignal;
+          sentiment?: any;
+          breakoutStrategy?: any;
+          recentNews?: any[];
+        }[]
+      >(FRONTEND_API_CONFIG.backend.endpoints.stocksBatchSignals);
+
+      console.log(
+        `✅ Phase 2 complete: ${signalsData.length} signals calculated`
+      );
+
+      runInAction(() => {
+        // Update existing stocks with signal data
+        signalsData.forEach(
+          ({ symbol, signal, sentiment, breakoutStrategy, recentNews }) => {
+            const stockIndex = this.stocks.findIndex(
+              (s) => s.symbol === symbol
+            );
+            if (stockIndex !== -1) {
+              // Update stock with calculated data
+              this.stocks[stockIndex] = {
+                ...this.stocks[stockIndex],
+                sentiment,
+                breakoutStrategy,
+                recentNews: recentNews || [],
+              };
+            }
+
+            // Add signal with symbol for lookup
+            const signalWithSymbol = { ...signal, symbol };
+            const existingSignalIndex = this.tradingSignals.findIndex(
+              (s) => s.symbol === symbol
+            );
+
+            if (existingSignalIndex !== -1) {
+              this.tradingSignals[existingSignalIndex] = signalWithSymbol;
+            } else {
+              this.tradingSignals.push(signalWithSymbol);
+            }
+          }
+        );
+
+        this.isLoadingSignals = false;
+      });
+    } catch (error) {
+      console.error("Phase 2 error (signals):", error);
+      runInAction(() => {
+        this.isLoadingSignals = false;
+      });
+      // Don't set loading error since prices are already loaded
+      // Just log the error - signals are enhancement, not critical
     }
   }
 
@@ -329,6 +457,19 @@ export class StockStore {
       }
       return a.symbol.localeCompare(b.symbol); // alphabetical by symbol
     });
+  }
+
+  // Loading state helpers for two-phase loading
+  get isPricesLoaded(): boolean {
+    return !this.isLoading && this.stocks.length > 0;
+  }
+
+  get areSignalsLoaded(): boolean {
+    return !this.isLoadingSignals && this.tradingSignals.length > 0;
+  }
+
+  get isFullyLoaded(): boolean {
+    return this.isPricesLoaded && this.areSignalsLoaded;
   }
 }
 

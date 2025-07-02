@@ -35,6 +35,7 @@ import PortfolioSelector from "./PortfolioSelector";
 import QuickTrade from "./QuickTrade";
 import StockCard from "./StockCard";
 import TradingAssistantChat from "./TradingAssistantChat";
+import { TwoPhaseLoader } from "./common/TwoPhaseLoader";
 import PageHeader from "./ui/PageHeader";
 
 // Add icons to library - commented out for now
@@ -74,7 +75,8 @@ const Dashboard: React.FC = () => {
 
   // Initialize data on component mount
   useEffect(() => {
-    stockStore.fetchStocksWithSignals();
+    // Use fast loading for immediate price display
+    stockStore.fetchStocksFast();
     // Initialize with the first available portfolio or create default
     portfolioStore.initializeDefaultPortfolio();
   }, [stockStore, portfolioStore]);
@@ -82,7 +84,7 @@ const Dashboard: React.FC = () => {
   // Update stocks when socket data changes
   useEffect(() => {
     if ((stockStore?.stocks?.length || 0) === 0 && !stockStore?.isLoading) {
-      stockStore?.fetchStocksWithSignals();
+      stockStore?.fetchStocksFast();
     }
   }, [stockStore?.stocks?.length, stockStore?.isLoading, stockStore]);
 
@@ -270,21 +272,19 @@ const Dashboard: React.FC = () => {
   const stocksWithSignals = stockStore.stocksWithSignals;
   const loading = stockStore.isLoading;
 
-  // Removed loading screen since data comes through WebSockets
-  // if (loading) {
-  //   return (
-  //     <div className="dashboard">
-  //       {" "}
-  //       <EmptyState
-  //         type="loading"
-  //         icon={<AccessTime />}
-  //         title="Loading Stock Data"
-  //         description="Fetching real-time market data and trading signals..."
-  //         size="large"
-  //       />
-  //     </div>
-  //   );
-  // }
+  // Show two-phase loader during initial data loading
+  if (loading || (!stockStore.isPricesLoaded && stocksWithSignals.length === 0)) {
+    return (
+      <div className="dashboard">
+        <TwoPhaseLoader 
+          phase1Complete={stockStore.isPricesLoaded}
+          phase2Complete={stockStore.areSignalsLoaded}
+          phase1Label="Loading market prices"
+          phase2Label="Calculating trading signals"
+        />
+      </div>
+    );
+  }
 
   if (showMarketScanner) {
     return (
@@ -401,7 +401,7 @@ const Dashboard: React.FC = () => {
       {/* Header */}
       <PageHeader
         title="Auto Trading Dashboard"
-        statsValue={`${stocksWithSignals.length} stocks`}
+        statsValue={`${stocksWithSignals.length} stocks${stockStore.isLoadingSignals ? ' • Calculating signals...' : ''}`}
         actionButtons={[
           {
             icon: <AutoMode />,
