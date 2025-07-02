@@ -12,18 +12,20 @@ steps:
         "-f",
         "Dockerfile",
         ".",
+        "--build-arg",
+        "NODE_ENV=production",
       ]
-    timeout: "1800s"
+    timeout: "2400s"
 
   # Step 2: Push the image to Container Registry
   - name: "gcr.io/cloud-builders/docker"
     args: ["push", "gcr.io/$PROJECT_ID/stock-trading-app:$BUILD_ID"]
-    timeout: "600s"
+    timeout: "900s"
 
   # Step 3: Push the latest tag
   - name: "gcr.io/cloud-builders/docker"
     args: ["push", "gcr.io/$PROJECT_ID/stock-trading-app:latest"]
-    timeout: "600s"
+    timeout: "900s"
 
   # Step 4: Deploy to Cloud Run
   - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
@@ -73,9 +75,13 @@ options:
   diskSizeGb: "100"
   logging: "CLOUD_LOGGING_ONLY"
   substitution_option: "ALLOW_LOOSE"
+  env:
+    - "NODE_ENV=production"
+    - "TFJS_BACKEND=cpu"
+    - "TFJS_DISABLE_WEBGL=true"
 
 # Build timeout
-timeout: "2400s"
+timeout: "3600s"
 
 # Images to be stored in Container Registry
 images:

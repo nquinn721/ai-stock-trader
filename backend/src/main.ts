@@ -8,35 +8,36 @@ import { join } from 'path';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
-  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  try {
+    const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
-  // Serve static files (React build) in production
-  const isProduction = process.env.NODE_ENV === 'production';
-  if (isProduction) {
-    app.useStaticAssets(join(__dirname, '..', 'public'));
-    app.setBaseViewsDir(join(__dirname, '..', 'public'));
-  }
+    // Serve static files (React build) in production
+    const isProduction = process.env.NODE_ENV === 'production';
+    if (isProduction) {
+      app.useStaticAssets(join(__dirname, '..', 'public'));
+      app.setBaseViewsDir(join(__dirname, '..', 'public'));
+    }
 
-  // Enable CORS for development
-  app.enableCors({
-    origin: isProduction
-      ? true
-      : [
-          'http://localhost:3000', // Frontend development
-        ],
-    credentials: true,
-  });
+    // Enable CORS for development
+    app.enableCors({
+      origin: isProduction
+        ? true
+        : [
+            'http://localhost:3000', // Frontend development
+          ],
+      credentials: true,
+    });
 
-  // Set global API prefix
-  app.setGlobalPrefix('api');
+    // Set global API prefix
+    app.setGlobalPrefix('api');
 
-  // Enable validation pipes
-  app.useGlobalPipes(
-    new ValidationPipe({
-      transform: true,
-      whitelist: true,
-    }),
-  );
+    // Enable validation pipes
+    app.useGlobalPipes(
+      new ValidationPipe({
+        transform: true,
+        whitelist: true,
+      }),
+    );
 
   // Setup Swagger documentation (disabled temporarily for Cloud Run compatibility)
   // const config = new DocumentBuilder()
@@ -177,5 +178,19 @@ async function bootstrap() {
   console.log(
     `Swagger documentation available at: http://localhost:${port}/api`,
   );
+  } catch (error) {
+    console.error('❌ Failed to bootstrap application:', error);
+    // In Cloud Run, exit gracefully to allow restart
+    if (process.env.K_SERVICE) {
+      console.log('🔄 Cloud Run environment detected - will retry...');
+      setTimeout(() => process.exit(1), 5000); // Wait 5 seconds then exit
+    } else {
+      process.exit(1);
+    }
+  }
 }
-bootstrap();
+
+bootstrap().catch((error) => {
+  console.error('❌ Unhandled error during bootstrap:', error);
+  process.exit(1);
+});

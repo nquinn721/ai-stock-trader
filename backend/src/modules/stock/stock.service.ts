@@ -39,7 +39,7 @@
  * =============================================================================
  */
 
-import { Inject, Injectable, forwardRef } from '@nestjs/common';
+import { Inject, Injectable, Logger, forwardRef } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -56,6 +56,18 @@ import { StockWebSocketGateway } from '../websocket/websocket.gateway';
 
 @Injectable()
 export class StockService {
+  private readonly logger = new Logger(StockService.name);
+
+  // Logging configuration
+  private readonly enableVerboseLogging =
+    process.env.STOCK_VERBOSE_LOGGING === 'true';
+  private readonly enablePriceUpdateLogging =
+    process.env.STOCK_PRICE_LOGGING === 'true';
+
+  // Summary logging counter to reduce noise
+  private updateCounter = 0;
+  private readonly SUMMARY_LOG_INTERVAL = 12; // Log summary every 12 cycles (every minute with 5-second cron)
+
   // Cache for live price data (not stored in DB)
   private priceCache = new Map<
     string,
@@ -84,8 +96,8 @@ export class StockService {
     // private breakoutService: BreakoutService,
     // private mlAnalysisService: MLAnalysisService,
   ) {
-    console.log(
-      '📊 Stock service initialized - will fetch live data from Yahoo Finance',
+    this.logger.log(
+      'Stock service initialized - Yahoo Finance integration ready',
     );
 
     // Fetch initial stock prices after a short delay to ensure all services are ready
@@ -93,6 +105,19 @@ export class StockService {
       this.performInitialUpdate();
     }, 5000); // 5 second delay
   }
+
+  /**
+   * Helper method to determine if summary should be logged (reduces noise)
+   */
+  private shouldLogSummary(): boolean {
+    this.updateCounter++;
+    if (this.updateCounter >= this.SUMMARY_LOG_INTERVAL) {
+      this.updateCounter = 0;
+      return true;
+    }
+    return false;
+  }
+
   async getAllStocks(): Promise<
     (Stock & {
       tradingSignal?: TradingSignal | null;
@@ -113,7 +138,9 @@ export class StockService {
    * Optimized for immediate display of market data
    */
   async getAllStocksFast(): Promise<Stock[]> {
-    console.log('🚀 Fast stock fetch - returning prices only');
+    if (this.enableVerboseLogging) {
+      this.logger.debug('Fast stock fetch - returning prices only');
+    }
 
     // Get stocks from database
     const stocks = await this.stockRepository.find();
@@ -190,7 +217,9 @@ export class StockService {
       recentNews?: any[];
     }[]
   > {
-    console.log('🔄 Batch calculating signals for all stocks...');
+    if (this.enableVerboseLogging) {
+      this.logger.debug('Batch calculating signals for all stocks...');
+    }
 
     const stocks = await this.stockRepository.find();
     const results: {
@@ -242,7 +271,10 @@ export class StockService {
             recentNews: sentimentMap.get(stock.symbol)?.recentNews || [],
           };
         } catch (error) {
-          console.error(`Error calculating signal for ${stock.symbol}:`, error);
+          this.logger.error(
+            `Error calculating signal for ${stock.symbol}:`,
+            error,
+          );
           return null;
         }
       });
@@ -256,7 +288,9 @@ export class StockService {
       }
     }
 
-    console.log(`✅ Calculated signals for ${results.length} stocks`);
+    if (this.enableVerboseLogging) {
+      this.logger.debug(`Calculated signals for ${results.length} stocks`);
+    }
     return results;
   }
 
@@ -284,11 +318,17 @@ export class StockService {
     try {
       // Skip symbols with dots as they cause issues with yahoo-finance2
       if (symbol.includes('.')) {
-        console.log(`⏭️ Skipping symbol with dot: ${symbol}`);
+        if (this.enableVerboseLogging) {
+          this.logger.debug(`Skipping symbol with dot: ${symbol}`);
+        }
         return await this.getStockBySymbol(symbol);
       }
 
-      console.log(`📊 Fetching live data for ${symbol} from Yahoo Finance...`);
+      if (this.enablePriceUpdateLogging) {
+        this.logger.debug(
+          `Fetching live data for ${symbol} from Yahoo Finance...`,
+        );
+      }
 
       // Add timeout to prevent hanging
       const timeoutPromise = new Promise((_, reject) => {
@@ -325,9 +365,11 @@ export class StockService {
           lastUpdated: new Date(),
         });
 
-        console.log(
-          `✅ Updated ${symbol}: $${newPrice.toFixed(2)} (${changePercent >= 0 ? '+' : ''}${changePercent.toFixed(2)}%)`,
-        );
+        if (this.enablePriceUpdateLogging) {
+          this.logger.debug(
+            `Updated ${symbol}: $${newPrice.toFixed(2)} (${changePercent >= 0 ? '+' : ''}${changePercent.toFixed(2)}%)`,
+          );
+        }
 
         // Only broadcast the updated stock data via WebSocket if the stock has valid price data
         if (newPrice > 0) {
@@ -341,18 +383,22 @@ export class StockService {
             timestamp: new Date().toISOString(),
           });
         } else {
-          console.log(
-            `⏭️ Skipping WebSocket broadcast for ${symbol} - no valid price data`,
-          );
+          if (this.enableVerboseLogging) {
+            this.logger.debug(
+              `Skipping WebSocket broadcast for ${symbol} - no valid price data`,
+            );
+          }
         }
       } else {
-        console.log(`⚠️ No quote data received for ${symbol}`);
+        if (this.enableVerboseLogging) {
+          this.logger.warn(`No quote data received for ${symbol}`);
+        }
       }
 
       return stock ? this.enrichStockWithLiveData(stock) : null;
     } catch (error) {
-      console.error(
-        `❌ Error updating stock price for ${symbol}:`,
+      this.logger.error(
+        `Error updating stock price for ${symbol}:`,
         error.message,
       );
       return null;
@@ -365,13 +411,18 @@ export class StockService {
 
     // Skip updates if no clients are connected to reduce unnecessary API calls
     if (connectedClients === 0) {
-      console.log('⏭️ Skipping price updates - no clients connected');
+      if (this.enableVerboseLogging) {
+        this.logger.debug('Skipping price updates - no clients connected');
+      }
       return;
     }
 
-    console.log(
-      `🔄 Updating live prices for ${stocks.length} stocks (${connectedClients} clients connected)...`,
-    );
+    // Only log periodic updates, not every single one
+    if (this.enablePriceUpdateLogging) {
+      this.logger.debug(
+        `Updating live prices for ${stocks.length} stocks (${connectedClients} clients connected)...`,
+      );
+    }
 
     let successCount = 0;
     for (const stock of stocks) {
@@ -381,37 +432,46 @@ export class StockService {
         // Reduced delay for 5-second updates - but monitor for rate limiting
         await new Promise((resolve) => setTimeout(resolve, 100));
       } catch (error) {
-        console.error(`❌ Error updating ${stock.symbol}:`, error.message);
+        this.logger.error(`Error updating ${stock.symbol}:`, error.message);
       }
     }
 
     // Broadcast all updated stocks to clients via WebSocket (only if there are clients)
     if (successCount > 0 && connectedClients > 0) {
       await this.websocketGateway.broadcastAllStockUpdates();
-      console.log(
-        `✅ Updated ${successCount}/${stocks.length} stocks and broadcasted to ${connectedClients} clients`,
-      );
+      // Only log summary every 12 cycles (every minute) instead of every 5 seconds
+      if (this.shouldLogSummary()) {
+        this.logger.log(
+          `Updated ${successCount}/${stocks.length} stocks and broadcasted to ${connectedClients} clients`,
+        );
+      }
     } else if (successCount > 0) {
-      console.log(
-        `✅ Updated ${successCount}/${stocks.length} stocks (no clients to broadcast to)`,
-      );
+      if (this.enableVerboseLogging) {
+        this.logger.debug(
+          `Updated ${successCount}/${stocks.length} stocks (no clients to broadcast to)`,
+        );
+      }
     } else {
-      console.log('⚠️ No stocks were successfully updated');
+      this.logger.warn('No stocks were successfully updated');
     }
   }
   async getStockHistory(symbol: string, period: string = '1mo'): Promise<any> {
     try {
       // Skip symbols with dots as they cause issues with yahoo-finance2
       if (symbol.includes('.')) {
-        console.log(
-          `⏭️ Skipping historical data for symbol with dot: ${symbol}`,
-        );
+        if (this.enableVerboseLogging) {
+          this.logger.debug(
+            `Skipping historical data for symbol with dot: ${symbol}`,
+          );
+        }
         return [];
       }
 
-      console.log(
-        `📈 Fetching historical data for ${symbol} (period: ${period})...`,
-      );
+      if (this.enableVerboseLogging) {
+        this.logger.debug(
+          `Fetching historical data for ${symbol} (period: ${period})...`,
+        );
+      }
 
       // For intraday periods, try to get real Yahoo Finance data
       const isIntradayPeriod = ['1H', '1D'].includes(period);
@@ -425,7 +485,11 @@ export class StockService {
       });
 
       if (isIntradayPeriod) {
-        console.log(`🔄 Attempting to get real intraday data for: ${period}`);
+        if (this.enableVerboseLogging) {
+          this.logger.debug(
+            `Attempting to get real intraday data for: ${period}`,
+          );
+        }
         // Try to get real intraday data, return empty array if not available
         try {
           const { period1, interval } = this.getYahooApiParams(period);
@@ -445,19 +509,23 @@ export class StockService {
           ]);
 
           if (Array.isArray(historical) && historical.length > 0) {
-            console.log(
-              `✅ Retrieved ${historical.length} intraday data points for ${symbol}`,
-            );
+            if (this.enableVerboseLogging) {
+              this.logger.debug(
+                `Retrieved ${historical.length} intraday data points for ${symbol}`,
+              );
+            }
             return historical;
           } else {
-            console.log(
-              `⚠️ No intraday data available for ${symbol}, returning empty array`,
-            );
+            if (this.enableVerboseLogging) {
+              this.logger.debug(
+                `No intraday data available for ${symbol}, returning empty array`,
+              );
+            }
             return [];
           }
         } catch (error) {
-          console.log(
-            `⚠️ Error fetching intraday data for ${symbol}, returning empty array:`,
+          this.logger.warn(
+            `Error fetching intraday data for ${symbol}, returning empty array:`,
             error.message,
           );
           return [];
@@ -484,19 +552,23 @@ export class StockService {
 
       // Validate the response
       if (!Array.isArray(historical) || historical.length === 0) {
-        console.log(
-          `⚠️ Empty response from Yahoo Finance for ${symbol}, returning empty array`,
-        );
+        if (this.enableVerboseLogging) {
+          this.logger.debug(
+            `Empty response from Yahoo Finance for ${symbol}, returning empty array`,
+          );
+        }
         return [];
       }
 
-      console.log(
-        `✅ Retrieved ${historical.length} historical data points for ${symbol}`,
-      );
+      if (this.enableVerboseLogging) {
+        this.logger.debug(
+          `Retrieved ${historical.length} historical data points for ${symbol}`,
+        );
+      }
       return historical;
     } catch (error) {
-      console.error(
-        `❌ Error fetching historical data for ${symbol}:`,
+      this.logger.error(
+        `Error fetching historical data for ${symbol}:`,
         error.message,
       );
 
@@ -656,7 +728,7 @@ export class StockService {
         confidence: 0.5,
       };
     } catch (error) {
-      console.error(
+      this.logger.error(
         `Error calculating breakout strategy for ${symbol}:`,
         error,
       );
@@ -695,7 +767,7 @@ export class StockService {
         volume: item.volume,
       }));
     } catch (error) {
-      console.error(`Error getting historical data for ${symbol}:`, error);
+      this.logger.error(`Error getting historical data for ${symbol}:`, error);
       return [];
     }
   }
@@ -873,7 +945,10 @@ export class StockService {
         return await this.generateBasicSignal(stock);
       }
     } catch (error) {
-      console.error(`Error generating live signal for ${stock.symbol}:`, error);
+      this.logger.error(
+        `Error generating live signal for ${stock.symbol}:`,
+        error,
+      );
       return await this.generateBasicSignal(stock);
     }
   }
@@ -959,7 +1034,7 @@ export class StockService {
         },
       };
     } catch (error) {
-      console.error(`Error getting pattern analysis for ${symbol}:`, error);
+      this.logger.error(`Error getting pattern analysis for ${symbol}:`, error);
       return {
         symbol,
         error: `Failed to analyze patterns: ${error.message}`,
@@ -972,18 +1047,18 @@ export class StockService {
    * Perform initial stock price update to ensure data is available immediately
    */
   async performInitialUpdate(): Promise<void> {
-    console.log('🚀 Performing initial stock price update...');
+    this.logger.log('Performing initial stock price update...');
     try {
       await this.updateAllStockPrices();
       const stocksWithPrices = Array.from(this.priceCache.values()).filter(
         (priceData) => priceData.currentPrice > 0,
       );
       const totalStocks = await this.stockRepository.count();
-      console.log(
-        `✅ Initial update complete: ${stocksWithPrices.length}/${totalStocks} stocks have current prices`,
+      this.logger.log(
+        `Initial update complete: ${stocksWithPrices.length}/${totalStocks} stocks have current prices`,
       );
     } catch (error) {
-      console.error('❌ Error during initial stock price update:', error);
+      this.logger.error('Error during initial stock price update:', error);
     }
   }
 
@@ -994,7 +1069,7 @@ export class StockService {
       });
 
       if (!stock) {
-        console.log(`⚠️ Stock ${symbol} not found`);
+        this.logger.warn(`Stock ${symbol} not found`);
         return null;
       }
 
@@ -1004,27 +1079,32 @@ export class StockService {
       // Save to database
       const updatedStock = await this.stockRepository.save(stock);
 
-      console.log(
-        `✅ Toggled favorite for ${symbol}: ${updatedStock.favorite}`,
-      );
+      if (this.enableVerboseLogging) {
+        this.logger.debug(
+          `Toggled favorite for ${symbol}: ${updatedStock.favorite}`,
+        );
+      }
 
       // Return the stock enriched with live data
       return this.enrichStockWithLiveData(updatedStock);
     } catch (error) {
-      console.error(`❌ Error toggling favorite for ${symbol}:`, error.message);
+      this.logger.error(
+        `Error toggling favorite for ${symbol}:`,
+        error.message,
+      );
       return null;
     }
   }
 
   async seedDatabase(): Promise<{ message: string; count: number }> {
     try {
-      console.log('🌱 Starting database seed...');
+      this.logger.log('Starting database seed...');
 
       // Check if stocks already exist
       const existingCount = await this.stockRepository.count();
       if (existingCount > 0) {
-        console.log(
-          `⚠️ Database already contains ${existingCount} stocks. Skipping seed.`,
+        this.logger.warn(
+          `Database already contains ${existingCount} stocks. Skipping seed.`,
         );
         return {
           message: `Database already seeded with ${existingCount} stocks`,
@@ -1038,8 +1118,8 @@ export class StockService {
       // Insert all seed data
       const savedStocks = await this.stockRepository.save(stockSeedData);
 
-      console.log(
-        `✅ Successfully seeded ${savedStocks.length} stocks into the database!`,
+      this.logger.log(
+        `Successfully seeded ${savedStocks.length} stocks into the database!`,
       );
 
       return {
@@ -1047,7 +1127,7 @@ export class StockService {
         count: savedStocks.length,
       };
     } catch (error) {
-      console.error('❌ Error seeding database:', error);
+      this.logger.error('Error seeding database:', error);
       throw new Error(`Failed to seed database: ${error.message}`);
     }
   }
