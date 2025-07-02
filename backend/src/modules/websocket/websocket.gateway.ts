@@ -1,4 +1,10 @@
-import { Inject, Injectable, Optional, forwardRef } from '@nestjs/common';
+import {
+  Inject,
+  Injectable,
+  Logger,
+  Optional,
+  forwardRef,
+} from '@nestjs/common';
 import {
   ConnectedSocket,
   MessageBody,
@@ -49,6 +55,14 @@ export class StockWebSocketGateway
 {
   @WebSocketServer()
   server: Server;
+
+  private readonly logger = new Logger(StockWebSocketGateway.name);
+
+  // Logging configuration
+  private readonly enableVerboseLogging =
+    process.env.WEBSOCKET_VERBOSE_LOGGING === 'true';
+  private readonly enableConnectionLogging =
+    process.env.WEBSOCKET_CONNECTION_LOGGING === 'true';
 
   private isServerInitialized = false;
 
@@ -121,18 +135,18 @@ export class StockWebSocketGateway
   }
 
   afterInit(server: Server) {
-    console.log('🚀 WebSocket Gateway initialized successfully');
+    this.logger.log('WebSocket Gateway initialized successfully');
     this.server = server;
     this.isServerInitialized = true;
 
     // Set up global error handling
     server.on('error', (error) => {
-      console.error('❌ WebSocket server error:', error);
+      this.logger.error('WebSocket server error:', error);
       this.isServerInitialized = false;
     });
 
     // Log server status
-    console.log('📡 WebSocket server ready for connections');
+    this.logger.log('WebSocket server ready for connections');
   }
 
   /**
@@ -143,7 +157,9 @@ export class StockWebSocketGateway
   }
 
   handleConnection(client: Socket) {
-    console.log(`Client connected: ${client.id}`);
+    if (this.enableConnectionLogging) {
+      this.logger.debug(`Client connected: ${client.id}`);
+    }
 
     // Rate limiting check
     if (!this.checkRateLimit(client.id)) {
@@ -201,7 +217,9 @@ export class StockWebSocketGateway
     });
   }
   handleDisconnect(client: Socket) {
-    console.log(`Client disconnected: ${client.id}`);
+    if (this.enableConnectionLogging) {
+      this.logger.debug(`Client disconnected: ${client.id}`);
+    }
     this.clients.delete(client.id);
     this.portfolioSubscriptions.delete(client.id);
     this.notificationSubscriptions.delete(client.id);

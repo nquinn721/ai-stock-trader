@@ -20,15 +20,15 @@ RUN apk add --no-cache \
 # Set working directory
 WORKDIR /app
 
-# Copy and install root dependencies
+# Copy and install root dependencies - CRITICAL: Use npm install not npm ci
 COPY package*.json ./
-RUN npm install --ignore-scripts
+RUN npm install --ignore-scripts --no-optional
 
 # Build frontend
 WORKDIR /app/frontend
 COPY frontend/package*.json ./
 COPY frontend/tsconfig.json ./
-RUN npm install
+RUN npm install --no-optional
 COPY frontend/ ./
 RUN npm run build
 
@@ -39,7 +39,8 @@ COPY backend/tsconfig*.json ./
 COPY backend/nest-cli.json ./
 
 # Install all dependencies including dev for build
-RUN npm install --ignore-scripts
+# Use npm install instead of npm ci for compatibility
+RUN npm install --ignore-scripts --no-optional
 
 COPY backend/src ./src
 RUN npm run build
@@ -71,8 +72,8 @@ ENV PORT=8000
 ENV TFJS_BACKEND=cpu
 ENV TFJS_DISABLE_WEBGL=true
 
-# Install production dependencies with overrides
-RUN npm install --omit=dev --ignore-scripts
+# Install production dependencies with overrides - CRITICAL: Use npm install not npm ci
+RUN npm install --omit=dev --ignore-scripts --no-optional
 
 # Copy built backend
 COPY --from=build-stage /app/backend/dist ./dist
@@ -91,8 +92,8 @@ USER nestjs
 # Expose port
 EXPOSE 8000
 
-# Health check - Extended startup time for ML/AI modules
-HEALTHCHECK --interval=30s --timeout=10s --start-period=120s --retries=5 \
+# Health check - Extended startup time for ML/AI modules and database connections
+HEALTHCHECK --interval=30s --timeout=10s --start-period=180s --retries=5 \
     CMD curl -f http://localhost:8000/health || exit 1
 
 # Start command
