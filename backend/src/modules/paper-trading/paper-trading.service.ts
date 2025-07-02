@@ -48,7 +48,7 @@
 
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, MoreThanOrEqual, LessThan, Between } from 'typeorm';
+import { Between, Repository } from 'typeorm';
 import {
   AutoTradingOrder,
   AutoTradingOrderAction,
@@ -697,7 +697,7 @@ export class PaperTradingService {
       return 0;
     }
 
-    let dayGain = 0;
+    const dayGain = 0;
 
     for (const position of portfolio.positions) {
       const stock = await this.stockRepository.findOne({

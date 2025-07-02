@@ -154,7 +154,7 @@ export class DataIngestionService {
       }
 
       // Update metrics
-      const metrics = this.metrics.get(source)!;
+      const metrics = this.metrics.get(source);
       metrics.totalRecords += data.length;
       metrics.successfulRecords += data.length;
       metrics.averageLatency =
@@ -169,7 +169,7 @@ export class DataIngestionService {
       );
       return data;
     } catch (error) {
-      const metrics = this.metrics.get(source)!;
+      const metrics = this.metrics.get(source);
       metrics.failedRecords++;
       metrics.errors.push(`${new Date().toISOString()}: ${error.message}`);
 
@@ -221,7 +221,7 @@ export class DataIngestionService {
       }
 
       // Update metrics
-      const metrics = this.metrics.get(source)!;
+      const metrics = this.metrics.get(source);
       metrics.totalRecords += data.length;
       metrics.successfulRecords += data.length;
       metrics.averageLatency =
@@ -233,7 +233,7 @@ export class DataIngestionService {
       );
       return data;
     } catch (error) {
-      const metrics = this.metrics.get(source)!;
+      const metrics = this.metrics.get(source);
       metrics.failedRecords++;
       metrics.errors.push(`${new Date().toISOString()}: ${error.message}`);
 
@@ -250,7 +250,7 @@ export class DataIngestionService {
     period: string,
     interval: string,
   ): Promise<MarketDataPoint[]> {
-    const dataSource = this.dataSources.get('yahoo_finance')!;
+    const dataSource = this.dataSources.get('yahoo_finance');
     const url = `${dataSource.baseUrl}/${symbol}?period1=0&period2=9999999999&interval=${interval}&range=${period}`;
 
     const response: AxiosResponse = await axios.get(url, {
@@ -289,7 +289,7 @@ export class DataIngestionService {
     period: string,
     interval: string,
   ): Promise<MarketDataPoint[]> {
-    const dataSource = this.dataSources.get('alpha_vantage')!;
+    const dataSource = this.dataSources.get('alpha_vantage');
 
     // Map our interval to Alpha Vantage format
     let function_name = 'TIME_SERIES_DAILY';
@@ -332,7 +332,7 @@ export class DataIngestionService {
   private async getRealTimeFromYahooFinance(
     symbols: string[],
   ): Promise<MarketDataPoint[]> {
-    const dataSource = this.dataSources.get('yahoo_finance')!;
+    const dataSource = this.dataSources.get('yahoo_finance');
     const symbolsStr = symbols.join(',');
     const url = `${dataSource.baseUrl}/${symbolsStr}?interval=1m&range=1d`;
 

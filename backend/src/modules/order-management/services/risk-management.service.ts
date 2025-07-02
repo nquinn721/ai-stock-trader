@@ -552,7 +552,7 @@ export class RiskManagementService {
         dayTradeMap.set(dateKey, { buys: [], sells: [] });
       }
 
-      const dayData = dayTradeMap.get(dateKey)!;
+      const dayData = dayTradeMap.get(dateKey);
       if (order.side === OrderSide.BUY) {
         dayData.buys.push(order);
       } else {

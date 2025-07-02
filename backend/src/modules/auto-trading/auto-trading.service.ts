@@ -130,7 +130,7 @@ export class AutoTradingService {
       });
 
       this.logger.log(`Trading rule updated: ${updated?.name} (${id})`);
-      return updated!;
+      return updated;
     } catch (error) {
       this.logger.error(`Error updating trading rule ${id}:`, error);
       throw error;
@@ -454,7 +454,7 @@ export class AutoTradingService {
     }
 
     // Get technical indicators and patterns
-    let technicalIndicators: any = {
+    const technicalIndicators: any = {
       rsi: undefined,
       macd: undefined,
       volume: stock?.volume || 0,

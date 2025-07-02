@@ -432,7 +432,7 @@ export class FeaturePipelineService {
       if (!groups.has(intervalStart)) {
         groups.set(intervalStart, []);
       }
-      groups.get(intervalStart)!.push(point);
+      groups.get(intervalStart).push(point);
     }
 
     // Aggregate each group

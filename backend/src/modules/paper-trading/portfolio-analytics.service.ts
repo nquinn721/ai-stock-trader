@@ -2,11 +2,11 @@
  * =============================================================================
  * PORTFOLIO ANALYTICS SERVICE - Performance Intelligence ENGINE
  * =============================================================================
- * 
+ *
  * Advanced portfolio analytics and performance measurement service that provides
  * comprehensive insights into trading performance, risk metrics, and attribution
  * analysis for paper trading portfolios.
- * 
+ *
  * Key Features:
  * - Real-time portfolio performance calculation and tracking
  * - Risk-adjusted return metrics (Sharpe ratio, Sortino ratio, Alpha/Beta)
@@ -16,7 +16,7 @@
  * - Trade analytics and success rate calculation
  * - Benchmark comparison and relative performance
  * - Historical performance charting and trend analysis
- * 
+ *
  * Analytics Capabilities:
  * - Total return calculation (time-weighted and money-weighted)
  * - Risk metrics: VaR, max drawdown, volatility, correlation
@@ -24,21 +24,21 @@
  * - Sector and position-level contribution analysis
  * - Trade statistics: win rate, average gain/loss, holding periods
  * - Benchmark relative performance and tracking error
- * 
+ *
  * Performance Metrics:
  * - Absolute returns: daily, weekly, monthly, YTD, inception-to-date
  * - Risk-adjusted metrics: Sharpe, Sortino, Calmar, Information ratios
  * - Portfolio statistics: beta, alpha, R-squared vs benchmarks
  * - Drawdown analysis: maximum, current, recovery time
  * - Volatility measures: standard deviation, downside deviation
- * 
+ *
  * Reporting Features:
  * - Comprehensive performance reports with charts and tables
  * - Sector allocation breakdown with performance attribution
  * - Top/bottom performers identification and analysis
  * - Risk exposure analysis and concentration warnings
  * - Trade-level analytics and pattern recognition
- * 
+ *
  * Used By:
  * - Frontend performance dashboard for visualization
  * - Portfolio optimization and rebalancing recommendations
@@ -298,7 +298,7 @@ export class PortfolioAnalyticsService {
         sectorMap.set(sector, { value: 0, positions: [], returns: [] });
       }
 
-      const sectorData = sectorMap.get(sector)!;
+      const sectorData = sectorMap.get(sector);
       sectorData.value += value;
       sectorData.positions.push(position.symbol);
       sectorData.returns.push(returnPct);
@@ -376,7 +376,7 @@ export class PortfolioAnalyticsService {
         sectorMap.set(sector, { weight: 0, return: 0, value: 0 });
       }
 
-      const sectorData = sectorMap.get(sector)!;
+      const sectorData = sectorMap.get(sector);
       sectorData.weight += weight;
       sectorData.return += returnPct * weight;
       sectorData.value += value;
@@ -597,7 +597,10 @@ export class PortfolioAnalyticsService {
     return suggestions;
   }
 
-  private async calculatePeriodReturn(portfolio: any, days: number): Promise<number> {
+  private async calculatePeriodReturn(
+    portfolio: any,
+    days: number,
+  ): Promise<number> {
     // Simplified calculation - in real implementation, you'd fetch historical data
     // For now, return estimated return based on current positions
     if (!portfolio || !portfolio.positions) return 0;
@@ -610,17 +613,21 @@ export class PortfolioAnalyticsService {
 
   private getDaysSinceInception(portfolio: any): number {
     if (!portfolio || !portfolio.createdAt) return 1;
-    
+
     const createdDate = new Date(portfolio.createdAt);
     const currentDate = new Date();
     const diffTime = Math.abs(currentDate.getTime() - createdDate.getTime());
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    
+
     return Math.max(1, diffDays);
   }
 
   private async calculatePortfolioVolatility(portfolio: any): Promise<number> {
-    if (!portfolio || !portfolio.positions || portfolio.positions.length === 0) {
+    if (
+      !portfolio ||
+      !portfolio.positions ||
+      portfolio.positions.length === 0
+    ) {
       return 0.15; // Default volatility
     }
 
@@ -630,9 +637,10 @@ export class PortfolioAnalyticsService {
     const totalValue = Number(portfolio.totalValue) || 0;
 
     for (const position of portfolio.positions) {
-      const positionValue = Number(position.currentValue) || Number(position.value) || 0;
+      const positionValue =
+        Number(position.currentValue) || Number(position.value) || 0;
       const weight = totalValue > 0 ? positionValue / totalValue : 0;
-      
+
       // Mock volatility based on position type/sector (would be calculated from historical data)
       const estimatedVolatility = this.getEstimatedVolatility(position.symbol);
       weightedVolatility += weight * estimatedVolatility;
@@ -645,11 +653,17 @@ export class PortfolioAnalyticsService {
     // Mock volatility estimates - in real implementation, fetch from historical data
     const volatilityMap: { [key: string]: number } = {
       // High volatility stocks
-      'TSLA': 0.35, 'NVDA': 0.32, 'AMD': 0.30,
+      TSLA: 0.35,
+      NVDA: 0.32,
+      AMD: 0.3,
       // Medium volatility stocks
-      'AAPL': 0.22, 'GOOGL': 0.25, 'MSFT': 0.24,
+      AAPL: 0.22,
+      GOOGL: 0.25,
+      MSFT: 0.24,
       // Low volatility stocks
-      'JNJ': 0.15, 'PG': 0.14, 'KO': 0.16,
+      JNJ: 0.15,
+      PG: 0.14,
+      KO: 0.16,
     };
 
     return volatilityMap[symbol] || 0.25; // Default 25% volatility
@@ -662,37 +676,43 @@ export class PortfolioAnalyticsService {
 
     // Mock calculation based on current performance
     const totalReturn = Number(portfolio.totalReturn) || 0;
-    
+
     // Estimate max drawdown as a percentage of negative return
     if (totalReturn < 0) {
       return Math.abs(totalReturn / 100) * 1.2; // Amplify negative returns for drawdown estimate
     }
-    
+
     // For positive returns, estimate a smaller historical drawdown
     return 0.05; // 5% estimated max drawdown
   }
 
-  private async calculateCorrelationMatrix(portfolio: any): Promise<{ [symbol: string]: { [symbol2: string]: number } }> {
-    if (!portfolio || !portfolio.positions || portfolio.positions.length === 0) {
+  private async calculateCorrelationMatrix(
+    portfolio: any,
+  ): Promise<{ [symbol: string]: { [symbol2: string]: number } }> {
+    if (
+      !portfolio ||
+      !portfolio.positions ||
+      portfolio.positions.length === 0
+    ) {
       return {};
     }
 
     const positions = portfolio.positions;
-    const correlationMatrix: { [symbol: string]: { [symbol2: string]: number } } = {};
+    const correlationMatrix: {
+      [symbol: string]: { [symbol2: string]: number };
+    } = {};
 
     // Initialize correlation matrix
     for (const position1 of positions) {
       correlationMatrix[position1.symbol] = {};
-      
+
       for (const position2 of positions) {
         if (position1.symbol === position2.symbol) {
           correlationMatrix[position1.symbol][position2.symbol] = 1.0; // Perfect correlation with itself
         } else {
           // Mock correlation calculation - in real implementation, use historical price data
-          correlationMatrix[position1.symbol][position2.symbol] = this.estimateCorrelation(
-            position1.symbol,
-            position2.symbol
-          );
+          correlationMatrix[position1.symbol][position2.symbol] =
+            this.estimateCorrelation(position1.symbol, position2.symbol);
         }
       }
     }
@@ -703,9 +723,17 @@ export class PortfolioAnalyticsService {
   private estimateCorrelation(symbol1: string, symbol2: string): number {
     // Mock correlation estimates - in real implementation, calculate from historical data
     const sectorCorrelations: { [key: string]: string } = {
-      'AAPL': 'tech', 'GOOGL': 'tech', 'MSFT': 'tech', 'NVDA': 'tech', 'TSLA': 'tech',
-      'JPM': 'finance', 'BAC': 'finance', 'WFC': 'finance',
-      'JNJ': 'healthcare', 'PFE': 'healthcare', 'UNH': 'healthcare',
+      AAPL: 'tech',
+      GOOGL: 'tech',
+      MSFT: 'tech',
+      NVDA: 'tech',
+      TSLA: 'tech',
+      JPM: 'finance',
+      BAC: 'finance',
+      WFC: 'finance',
+      JNJ: 'healthcare',
+      PFE: 'healthcare',
+      UNH: 'healthcare',
     };
 
     const sector1 = sectorCorrelations[symbol1] || 'other';
@@ -719,7 +747,11 @@ export class PortfolioAnalyticsService {
   }
 
   private calculateConcentrationRisk(portfolio: any): number {
-    if (!portfolio || !portfolio.positions || portfolio.positions.length === 0) {
+    if (
+      !portfolio ||
+      !portfolio.positions ||
+      portfolio.positions.length === 0
+    ) {
       return 0;
     }
 
@@ -728,13 +760,14 @@ export class PortfolioAnalyticsService {
 
     // Calculate Herfindahl Index for concentration risk
     const weights = portfolio.positions.map((position: any) => {
-      const positionValue = Number(position.currentValue) || Number(position.value) || 0;
+      const positionValue =
+        Number(position.currentValue) || Number(position.value) || 0;
       return positionValue / totalValue;
     });
 
     // Herfindahl Index: sum of squared weights
     const herfindahlIndex = weights.reduce((sum: number, weight: number) => {
-      return sum + (weight * weight);
+      return sum + weight * weight;
     }, 0);
 
     // Convert to risk score (0-1 scale)

@@ -1081,7 +1081,7 @@ export class OrderManagementService {
         if (!groupedOrders.has(order.ocoGroupId)) {
           groupedOrders.set(order.ocoGroupId, []);
         }
-        groupedOrders.get(order.ocoGroupId)!.push(order);
+        groupedOrders.get(order.ocoGroupId).push(order);
       }
     });
 

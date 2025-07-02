@@ -675,7 +675,7 @@ export class DataPreprocessingService {
     if (completedJobs.length === 0) return 0;
 
     const totalTime = completedJobs.reduce(
-      (sum, job) => sum + (job.endTime!.getTime() - job.startTime.getTime()),
+      (sum, job) => sum + (job.endTime.getTime() - job.startTime.getTime()),
       0,
     );
 
@@ -689,7 +689,7 @@ export class DataPreprocessingService {
     if (completedJobs.length === 0) return 0;
 
     const totalThroughput = completedJobs.reduce((sum, job) => {
-      const duration = job.endTime!.getTime() - job.startTime.getTime();
+      const duration = job.endTime.getTime() - job.startTime.getTime();
       return sum + job.outputRecords / (duration / 1000); // records per second
     }, 0);
 

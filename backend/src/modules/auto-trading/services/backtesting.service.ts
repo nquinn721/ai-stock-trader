@@ -580,16 +580,14 @@ export class BacktestingService {
       ((portfolio.totalValue - initialCapital) / initialCapital) * 100;
     const trades = portfolio.trades.filter((t) => t.pnl !== undefined);
 
-    const winningTrades = trades.filter((t) => t.pnl! > 0);
-    const losingTrades = trades.filter((t) => t.pnl! < 0);
+    const winningTrades = trades.filter((t) => t.pnl > 0);
+    const losingTrades = trades.filter((t) => t.pnl < 0);
 
     const winRate =
       trades.length > 0 ? (winningTrades.length / trades.length) * 100 : 0;
 
-    const totalProfit = winningTrades.reduce((sum, t) => sum + t.pnl!, 0);
-    const totalLoss = Math.abs(
-      losingTrades.reduce((sum, t) => sum + t.pnl!, 0),
-    );
+    const totalProfit = winningTrades.reduce((sum, t) => sum + t.pnl, 0);
+    const totalLoss = Math.abs(losingTrades.reduce((sum, t) => sum + t.pnl, 0));
 
     const profitFactor =
       totalLoss > 0 ? totalProfit / totalLoss : totalProfit > 0 ? Infinity : 0;
@@ -636,11 +634,11 @@ export class BacktestingService {
         losingTrades.length > 0 ? totalLoss / losingTrades.length : 0,
       largestWin:
         winningTrades.length > 0
-          ? Math.max(...winningTrades.map((t) => t.pnl!))
+          ? Math.max(...winningTrades.map((t) => t.pnl))
           : 0,
       largestLoss:
         losingTrades.length > 0
-          ? Math.min(...losingTrades.map((t) => t.pnl!))
+          ? Math.min(...losingTrades.map((t) => t.pnl))
           : 0,
       consecutiveWins: this.calculateConsecutiveWins(trades),
       consecutiveLosses: this.calculateConsecutiveLosses(trades),
