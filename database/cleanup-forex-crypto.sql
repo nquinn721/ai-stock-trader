@@ -17,12 +17,13 @@ SHOW TABLES;
 -- notifications - User notifications
 
 -- If any forex/crypto tables exist, they would be dropped here:
--- DROP TABLE IF EXISTS forex_data;
--- DROP TABLE IF EXISTS crypto_data;
--- DROP TABLE IF EXISTS forex_pairs;
--- DROP TABLE IF EXISTS crypto_currencies;
--- DROP TABLE IF EXISTS multi_asset_portfolios;
--- DROP TABLE IF EXISTS currency_rates;
+DROP TABLE IF EXISTS forex_data;
+DROP TABLE IF EXISTS crypto_data;
+DROP TABLE IF EXISTS forex_pairs;
+DROP TABLE IF EXISTS crypto_currencies;
+DROP TABLE IF EXISTS multi_asset_portfolios;
+DROP TABLE IF EXISTS currency_rates;
+DROP TABLE IF EXISTS alternative_data, arbitrage_opportunities, arbitrage_opportunity, asset_data, auto_trades, auto_trading_orders, backtest_results, business_cycles, commodity_data, conflict_risk_assessments, cross_asset_correlation, economic_forecasts, election_predictions, liquidity_positions, market_alerts, market_making_quotes, market_making_strategies, ml_ab_tests, ml_feature_importance, ml_metrics, ml_model_performance, ml_models, ml_predictions, monetary_policy_predictions, news, notification_preferences, notification_templates, orders, policy_stance_analysis, political_stability_scores, qe_probability_assessments, recession_probabilities, risk_exposures, scan_results, screener_templates, strategy_templates, trading_rules, trading_sessions, trading_signals, trading_strategies;
 
 -- Verify the essential tables exist with correct structure
 DESCRIBE portfolios;

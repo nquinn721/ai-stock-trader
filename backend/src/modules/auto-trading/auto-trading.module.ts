@@ -26,6 +26,7 @@ import { PositionSizingService } from './services/position-sizing.service';
 import { RecommendationPipelineService } from './services/recommendation-pipeline.service';
 import { RiskManagementService } from './services/risk-management.service';
 import { RuleEngineService } from './services/rule-engine.service';
+import { StrategyRuleGeneratorService } from './services/strategy-rule-generator.service';
 import { TradeExecutionService } from './services/trade-execution.service';
 import { StrategyBuilderController } from './strategy-builder.controller';
 import { StrategyBuilderService } from './strategy-builder.service';
@@ -66,6 +67,7 @@ import { StrategyBuilderService } from './strategy-builder.service';
     PositionSizingService,
     OrderManagementService,
     RecommendationPipelineService,
+    StrategyRuleGeneratorService,
     MarketHoursService,
   ],
   exports: [
@@ -74,6 +76,7 @@ import { StrategyBuilderService } from './strategy-builder.service';
     BacktestingService,
     AutonomousTradingService,
     RecommendationPipelineService,
+    StrategyRuleGeneratorService,
   ],
 })
 export class AutoTradingModule {}

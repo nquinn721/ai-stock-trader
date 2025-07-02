@@ -1,4 +1,4 @@
-import { AccountBalance, Star, TrendingUp } from "@mui/icons-material";
+import { Star, TrendingUp } from "@mui/icons-material";
 import {
   Box,
   Button,
@@ -87,41 +87,41 @@ export const StrategyTemplates: React.FC<StrategyTemplatesProps> = ({
     },
     {
       id: "3",
-      name: "Bollinger Band Breakout",
+      name: "MACD Divergence Hunter",
       description:
-        "Volatility breakout strategy using Bollinger Bands and volume confirmation",
+        "Exploit MACD divergences with this advanced trend reversal strategy",
+      category: "Divergence",
+      difficulty: "Advanced",
+      rating: 4.8,
+      uses: 430,
+      author: "Trend Detective",
+      tags: ["MACD", "Divergence", "Trend Reversal"],
+      components: [],
+      defaultRiskRules: [],
+      defaultSymbols: ["EURUSD", "GBPUSD", "USDJPY"],
+      defaultTimeframe: "30m",
+      expectedReturn: 0.18,
+      maxDrawdown: 0.15,
+      sharpeRatio: 2.1,
+    },
+    {
+      id: "4",
+      name: "Crypto Volatility Breakout",
+      description:
+        "Capture explosive moves with Bollinger Bands and momentum confirmation",
       category: "Breakout",
       difficulty: "Intermediate",
       rating: 4.5,
-      uses: 756,
-      author: "Vol Trader",
-      tags: ["Bollinger Bands", "Breakout", "Volume"],
+      uses: 760,
+      author: "Volatility Master",
+      tags: ["Bollinger Bands", "Breakout", "Volatility"],
       components: [],
       defaultRiskRules: [],
-      defaultSymbols: ["BTC-USD", "ETH-USD"],
+      defaultSymbols: ["TSLA", "NVDA", "AMD"],
       defaultTimeframe: "1h",
       expectedReturn: 0.25,
       maxDrawdown: 0.18,
       sharpeRatio: 1.8,
-    },
-    {
-      id: "4",
-      name: "MACD Divergence Hunter",
-      description:
-        "Advanced strategy identifying MACD divergences for trend reversals",
-      category: "Divergence",
-      difficulty: "Advanced",
-      rating: 4.7,
-      uses: 423,
-      author: "Divergence Pro",
-      tags: ["MACD", "Divergence", "Reversal"],
-      components: [],
-      defaultRiskRules: [],
-      defaultSymbols: ["FOREX:EURUSD", "FOREX:GBPUSD"],
-      defaultTimeframe: "15m",
-      expectedReturn: 0.35,
-      maxDrawdown: 0.15,
-      sharpeRatio: 2.1,
     },
   ];
 
@@ -299,7 +299,7 @@ export const StrategyTemplates: React.FC<StrategyTemplatesProps> = ({
                       mb: 0.5,
                     }}
                   >
-                    <AccountBalance
+                    <TrendingUp
                       sx={{ fontSize: 16, color: "error.main", mr: 0.5 }}
                     />
                     <Typography variant="caption" color="text.secondary">

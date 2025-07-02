@@ -1,0 +1,358 @@
+@import "../../shared-styles.css";
+
+.trading-settings {
+  display: flex;
+  flex-direction: column;
+  gap: var(--theme-space-6);
+  width: 100%;
+}
+
+.alert-message {
+  margin-bottom: var(--theme-space-4);
+}
+
+/* Settings Header */
+.settings-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--theme-space-6);
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: var(--theme-border-radius-lg);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  margin-bottom: var(--theme-space-4);
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  gap: var(--theme-space-4);
+}
+
+.header-icon {
+  font-size: 32px !important;
+  color: var(--trading-primary-500);
+}
+
+.header-text h2 {
+  margin: 0;
+  font-size: var(--theme-font-size-2xl);
+  font-weight: 700;
+  color: var(--trading-text-primary);
+  margin-bottom: var(--theme-space-1);
+}
+
+.header-text p {
+  margin: 0;
+  font-size: var(--theme-font-size-sm);
+  color: var(--trading-text-secondary);
+}
+
+.header-actions {
+  display: flex;
+  gap: var(--theme-space-3);
+  align-items: center;
+}
+
+/* Settings Sections */
+.settings-section {
+  margin-bottom: var(--theme-space-6);
+}
+
+.settings-section .content-card-body {
+  padding: var(--theme-space-6);
+}
+
+.settings-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: var(--theme-space-6);
+  align-items: start;
+}
+
+/* Setting Items */
+.setting-item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--theme-space-3);
+}
+
+.setting-item.full-width {
+  grid-column: 1 / -1;
+}
+
+.setting-label {
+  display: flex;
+  flex-direction: column;
+  gap: var(--theme-space-1);
+  color: var(--trading-text-primary);
+  font-weight: 600;
+  font-size: var(--theme-font-size-sm);
+}
+
+.setting-label .setting-icon {
+  font-size: 18px !important;
+  color: var(--trading-primary-500);
+  margin-bottom: var(--theme-space-1);
+}
+
+.setting-label .setting-icon.danger {
+  color: var(--trading-danger-500);
+}
+
+.setting-description {
+  font-size: var(--theme-font-size-xs);
+  color: var(--trading-text-muted);
+  font-weight: 400;
+  line-height: 1.4;
+}
+
+.setting-control {
+  width: 100%;
+}
+
+/* Input Styling */
+.setting-control .MuiTextField-root,
+.setting-control .MuiFormControl-root {
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: var(--theme-border-radius-md);
+}
+
+.setting-control .MuiInputBase-root {
+  color: var(--trading-text-primary);
+}
+
+.setting-control .MuiInputLabel-root {
+  color: var(--trading-text-secondary);
+}
+
+.setting-control .MuiOutlinedInput-notchedOutline {
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.setting-control .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline {
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.setting-control
+  .MuiOutlinedInput-root.Mui-focused
+  .MuiOutlinedInput-notchedOutline {
+  border-color: var(--trading-primary-500);
+}
+
+/* Currency and Unit Symbols */
+.currency-symbol,
+.percentage-symbol,
+.unit-symbol {
+  color: var(--trading-text-secondary);
+  font-size: var(--theme-font-size-sm);
+  font-weight: 500;
+}
+
+/* Slider Styling */
+.setting-control .MuiSlider-root {
+  color: var(--trading-primary-500);
+  margin: var(--theme-space-4) 0;
+}
+
+.setting-control .MuiSlider-track {
+  background: linear-gradient(
+    90deg,
+    var(--trading-primary-500),
+    var(--trading-success-500)
+  );
+}
+
+.setting-control .MuiSlider-thumb {
+  background: var(--trading-primary-500);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+.setting-control .MuiSlider-mark {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.setting-control .MuiSlider-markLabel {
+  color: var(--trading-text-secondary);
+  font-size: var(--theme-font-size-xs);
+}
+
+.setting-control .MuiSlider-valueLabel {
+  background: var(--trading-primary-500);
+  color: white;
+  font-weight: 600;
+}
+
+/* Switch and Checkbox Styling */
+.MuiFormControlLabel-root {
+  color: var(--trading-text-primary);
+  margin: 0;
+}
+
+.MuiFormControlLabel-label {
+  font-size: var(--theme-font-size-sm);
+  font-weight: 500;
+}
+
+.switch-label {
+  display: flex;
+  align-items: center;
+  gap: var(--theme-space-2);
+}
+
+.MuiSwitch-root .MuiSwitch-switchBase.Mui-checked {
+  color: var(--trading-success-500);
+}
+
+.MuiSwitch-root .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track {
+  background-color: var(--trading-success-500);
+}
+
+.MuiCheckbox-root.Mui-checked {
+  color: var(--trading-primary-500);
+}
+
+/* Notification Checkboxes */
+.notification-checkboxes {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--theme-space-3);
+  padding: var(--theme-space-4);
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: var(--theme-border-radius-md);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Emergency Section */
+.emergency-section .content-card-header {
+  background: linear-gradient(
+    135deg,
+    rgba(244, 67, 54, 0.1),
+    rgba(156, 39, 176, 0.1)
+  );
+  border-bottom: 1px solid rgba(244, 67, 54, 0.2);
+}
+
+.emergency-section .content-card-title {
+  color: var(--trading-danger-400);
+}
+
+.emergency-warning {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--theme-space-3);
+  padding: var(--theme-space-4);
+  background: rgba(244, 67, 54, 0.1);
+  border: 1px solid rgba(244, 67, 54, 0.3);
+  border-radius: var(--theme-border-radius-md);
+  margin-top: var(--theme-space-4);
+}
+
+.warning-icon {
+  font-size: 24px !important;
+  color: var(--trading-danger-500);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.warning-text {
+  color: var(--trading-danger-200);
+  font-size: var(--theme-font-size-sm);
+  line-height: 1.5;
+}
+
+.warning-text strong {
+  color: var(--trading-danger-100);
+  font-weight: 600;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .settings-grid {
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: var(--theme-space-5);
+  }
+}
+
+@media (max-width: 768px) {
+  .settings-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--theme-space-4);
+    text-align: center;
+  }
+
+  .header-actions {
+    justify-content: center;
+  }
+
+  .settings-grid {
+    grid-template-columns: 1fr;
+    gap: var(--theme-space-4);
+  }
+
+  .notification-checkboxes {
+    grid-template-columns: 1fr;
+    gap: var(--theme-space-2);
+  }
+
+  .setting-control .MuiSlider-root {
+    margin: var(--theme-space-3) 0;
+  }
+
+  .settings-section .content-card-body {
+    padding: var(--theme-space-4);
+  }
+}
+
+@media (max-width: 480px) {
+  .header-content {
+    flex-direction: column;
+    text-align: center;
+    gap: var(--theme-space-2);
+  }
+
+  .header-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .header-actions button {
+    width: 100%;
+  }
+}
+
+/* Animation */
+.trading-settings {
+  animation: slideInUp 0.5s ease-out;
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Loading State */
+.settings-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+  color: var(--trading-text-secondary);
+}
+
+/* Save Indicator */
+.settings-section.has-changes .content-card-header::after {
+  content: "•";
+  color: var(--trading-warning-500);
+  font-size: 20px;
+  margin-left: var(--theme-space-2);
+}

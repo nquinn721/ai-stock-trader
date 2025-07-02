@@ -10,6 +10,7 @@ import {
   Put,
   Query,
 } from '@nestjs/common';
+import { PaperTradingService } from '../paper-trading/paper-trading.service';
 import { AutoTradingService } from './auto-trading.service';
 import {
   CreateAdvancedOrderDto,
@@ -27,6 +28,7 @@ import {
 } from './dto/trading-session.dto';
 import { AdvancedOrderExecutionService } from './services/advanced-order-execution.service';
 import { AutoTradingOrderPreviewService } from './services/auto-trading-order-preview.service';
+import { StrategyRuleGeneratorService } from './services/strategy-rule-generator.service';
 
 @Controller('auto-trading')
 export class AutoTradingController {
@@ -34,6 +36,8 @@ export class AutoTradingController {
     private readonly autoTradingService: AutoTradingService,
     private readonly autoTradingOrderPreviewService: AutoTradingOrderPreviewService,
     private readonly advancedOrderExecutionService: AdvancedOrderExecutionService,
+    private readonly strategyRuleGeneratorService: StrategyRuleGeneratorService,
+    private readonly paperTradingService: PaperTradingService,
   ) {}
 
   // Test endpoint added at the top
@@ -171,19 +175,121 @@ export class AutoTradingController {
     }
   }
 
+  // Strategy Rule Generation Endpoints
+  @Post('rules/generate-all')
+  async generateRulesForAllPortfolios() {
+    try {
+      const results =
+        await this.strategyRuleGeneratorService.generateRulesForAllPortfolios();
+      const totalRulesCreated = results.reduce(
+        (sum, result) => sum + result.rulesCreated,
+        0,
+      );
+      const successfulPortfolios = results.filter((r) => r.success).length;
+      const failedPortfolios = results.filter((r) => !r.success);
+
+      return {
+        success: true,
+        message: `Rule generation completed for ${successfulPortfolios} portfolios`,
+        data: {
+          totalRulesCreated,
+          successfulPortfolios,
+          failedPortfolios: failedPortfolios.length,
+          results,
+        },
+      };
+    } catch (error) {
+      throw new HttpException(
+        {
+          success: false,
+          message: `Failed to generate rules for all portfolios: ${error.message}`,
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  @Post('rules/generate/:portfolioId')
+  async generateRulesForPortfolio(@Param('portfolioId') portfolioId: string) {
+    try {
+      const result =
+        await this.strategyRuleGeneratorService.generateRulesForPortfolio(
+          portfolioId,
+        );
+      return {
+        success: result.success,
+        message: result.message,
+        data: {
+          portfolioId: result.portfolioId,
+          rulesCreated: result.rulesCreated,
+        },
+      };
+    } catch (error) {
+      throw new HttpException(
+        {
+          success: false,
+          message: `Failed to generate rules for portfolio ${portfolioId}: ${error.message}`,
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  @Get('rules/generate/status/:portfolioId')
+  async getRuleGenerationStatus(@Param('portfolioId') portfolioId: string) {
+    try {
+      const status =
+        await this.strategyRuleGeneratorService.getRuleGenerationStatus(
+          portfolioId,
+        );
+      return {
+        success: true,
+        data: status,
+      };
+    } catch (error) {
+      throw new HttpException(
+        {
+          success: false,
+          message: `Failed to get rule generation status for portfolio ${portfolioId}: ${error.message}`,
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  @Get('rules/generate/status')
+  async getAllPortfoliosRuleGenerationStatus() {
+    try {
+      const status =
+        await this.strategyRuleGeneratorService.getAllPortfoliosRuleGenerationStatus();
+      return {
+        success: true,
+        data: status,
+      };
+    } catch (error) {
+      throw new HttpException(
+        {
+          success: false,
+          message: `Failed to get rule generation status for all portfolios: ${error.message}`,
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
   // Trading Session Management Endpoints
   @Post('sessions/start')
-  async startTradingSession(@Body() sessionDto: TradingSessionDto) {
+  async startTradingSession(@Body() tradingSessionDto: TradingSessionDto) {
     console.log('=== SESSION DTO RECEIVED ===');
-    console.log('Raw body:', JSON.stringify(sessionDto, null, 2));
-    console.log('portfolio_id:', sessionDto.portfolio_id);
-    console.log('session_name:', sessionDto.session_name);
-    console.log('config:', JSON.stringify(sessionDto.config, null, 2));
+    console.log('Raw body:', JSON.stringify(tradingSessionDto, null, 2));
+    console.log('portfolio_id:', tradingSessionDto.portfolio_id);
+    console.log('session_name:', tradingSessionDto.session_name);
+    console.log('config:', JSON.stringify(tradingSessionDto.config, null, 2));
     console.log('==========================');
     try {
       const session = await this.autoTradingService.startTradingSession(
-        sessionDto.portfolio_id,
-        sessionDto,
+        tradingSessionDto.portfolio_id,
+        tradingSessionDto,
       );
       return {
         success: true,

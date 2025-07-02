@@ -356,17 +356,25 @@ export class StockService {
         ]);
       } catch (apiError) {
         // Handle specific API errors
-        if (apiError.message && (apiError.message.includes('Too many requests') || apiError.message.includes('Unexpected token'))) {
+        if (
+          apiError.message &&
+          (apiError.message.includes('Too many requests') ||
+            apiError.message.includes('Unexpected token'))
+        ) {
           this.consecutiveErrors++;
           if (this.consecutiveErrors >= this.MAX_CONSECUTIVE_ERRORS) {
             this.isRateLimited = true;
-            this.rateLimitBackoffUntil = new Date(Date.now() + this.RATE_LIMIT_BACKOFF_MINUTES * 60 * 1000);
+            this.rateLimitBackoffUntil = new Date(
+              Date.now() + this.RATE_LIMIT_BACKOFF_MINUTES * 60 * 1000,
+            );
             this.logger.warn(
-              `Rate limiting detected for ${symbol}. Entering ${this.RATE_LIMIT_BACKOFF_MINUTES}-minute backoff period until ${this.rateLimitBackoffUntil.toLocaleTimeString()}`
+              `Rate limiting detected for ${symbol}. Entering ${this.RATE_LIMIT_BACKOFF_MINUTES}-minute backoff period until ${this.rateLimitBackoffUntil.toLocaleTimeString()}`,
             );
           } else {
             if (this.enableVerboseLogging) {
-              this.logger.warn(`Rate limited for ${symbol} - error ${this.consecutiveErrors}/${this.MAX_CONSECUTIVE_ERRORS}`);
+              this.logger.warn(
+                `Rate limited for ${symbol} - error ${this.consecutiveErrors}/${this.MAX_CONSECUTIVE_ERRORS}`,
+              );
             }
           }
           return null;
@@ -447,7 +455,9 @@ export class StockService {
     if (this.isRateLimited && this.rateLimitBackoffUntil) {
       if (new Date() < this.rateLimitBackoffUntil) {
         if (this.enableVerboseLogging) {
-          this.logger.debug('Skipping price updates - in rate limit backoff period');
+          this.logger.debug(
+            'Skipping price updates - in rate limit backoff period',
+          );
         }
         return;
       } else {
@@ -455,7 +465,9 @@ export class StockService {
         this.isRateLimited = false;
         this.rateLimitBackoffUntil = null;
         this.consecutiveErrors = 0;
-        this.logger.log('Rate limit backoff period ended - resuming price updates');
+        this.logger.log(
+          'Rate limit backoff period ended - resuming price updates',
+        );
       }
     }
 
