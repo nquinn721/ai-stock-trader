@@ -10,7 +10,9 @@ const mockStockStore = {
   stocksWithSignals: [] as any[],
   tradingSignals: [] as any[],
   isLoading: false,
+  isLoadingSignals: false,
   error: null,
+  fetchStocksFast: jest.fn(),
   fetchStocksWithSignals: jest.fn(),
   fetchStockDetails: jest.fn(),
   fetchStockHistory: jest.fn(),
@@ -19,6 +21,9 @@ const mockStockStore = {
   topPerformers: [] as any[],
   worstPerformers: [] as any[],
   totalMarketCap: 0,
+  isPricesLoaded: true,
+  areSignalsLoaded: true,
+  isFullyLoaded: true,
 };
 
 const mockPortfolioStore = {
@@ -187,7 +192,7 @@ describe("Dashboard MobX Integration", () => {
     renderDashboardWithStore();
 
     await waitFor(() => {
-      expect(mockStockStore.fetchStocksWithSignals).toHaveBeenCalled();
+      expect(mockStockStore.fetchStocksFast).toHaveBeenCalled();
       expect(mockPortfolioStore.initializeDefaultPortfolio).toHaveBeenCalled();
     });
   });

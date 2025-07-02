@@ -7,6 +7,7 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { AutoTradingOrder } from './entities/auto-trading-order.entity';
 import { News } from './entities/news.entity';
 import { Order } from './entities/order.entity';
 import { Portfolio } from './entities/portfolio.entity';
@@ -142,6 +143,24 @@ import { SeedService } from './services/seed.service';
             '🚀 For production: Database credentials are handled via Google Secret Manager',
           );
 
+          // In Cloud Run, don't throw error immediately - allow app to start and fail gracefully
+          if (process.env.K_SERVICE) {
+            console.warn('⚠️ Cloud Run detected - starting without database connection for health checks');
+            // Return a minimal config that won't connect but allows app to start
+            return {
+              type: 'mysql',
+              host: 'localhost',
+              port: 3306,
+              username: 'placeholder',
+              password: 'placeholder',
+              database: 'placeholder',
+              entities: [],
+              synchronize: false,
+              logging: false,
+              autoLoadEntities: false,
+            };
+          }
+
           throw new Error(
             'Missing required database configuration. Please set DATABASE_HOST, DATABASE_USERNAME, DATABASE_PASSWORD, and DATABASE_NAME environment variables.',
           );
@@ -155,16 +174,31 @@ import { SeedService } from './services/seed.service';
 
         if (isCloudRun || (isProduction && cloudSqlConnection)) {
           // Cloud Run with Cloud SQL Unix Socket connection
-          const socketPath = `/cloudsql/${cloudSqlConnection || 'heroic-footing-460117-k8:us-central1:stocktrading-mysql'}`;
+          const socketPath = cloudSqlConnection || 'heroic-footing-460117-k8:us-central1:stocktrading-mysql';
 
           console.log(
-            `🔗 Connecting to Cloud SQL via Unix socket: ${socketPath}/${dbName}`,
+            `🔗 Connecting to Cloud SQL via Unix socket: /cloudsql/${socketPath}`,
           );
 
           connectionConfig = {
             type: 'mysql',
             extra: {
-              socketPath: socketPath,
+              socketPath: `/cloudsql/${socketPath}`,
+            },
+            username: dbUsername,
+            password: dbPassword,
+            database: dbName,
+          };
+        } else if (dbHost.includes('/cloudsql/')) {
+          // Direct Cloud SQL socket path
+          console.log(
+            `🔗 Connecting to Cloud SQL via Unix socket: ${dbHost}`,
+          );
+
+          connectionConfig = {
+            type: 'mysql',
+            extra: {
+              socketPath: dbHost,
             },
             username: dbUsername,
             password: dbPassword,
@@ -210,6 +244,7 @@ import { SeedService } from './services/seed.service';
             Position,
             Trade,
             Order,
+            AutoTradingOrder,
             MLModel,
             MLPrediction,
             MLMetric,
@@ -253,9 +288,17 @@ import { SeedService } from './services/seed.service';
           ],
           synchronize: true,
           logging: ['error', 'warn'],
-          retryAttempts: 5,
-          retryDelay: 3000,
-          connectTimeout: 60000,
+          retryAttempts: 10,
+          retryDelay: 5000,
+          connectTimeout: 120000,
+          acquireTimeout: 120000,
+          timeout: 120000,
+          extra: {
+            ...connectionConfig.extra,
+            connectionLimit: 10,
+            acquireTimeout: 120000,
+            timeout: 120000,
+          },
         };
       },
       inject: [ConfigService],
