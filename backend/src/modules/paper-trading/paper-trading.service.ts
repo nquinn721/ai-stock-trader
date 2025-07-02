@@ -48,7 +48,7 @@
 
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, MoreThanOrEqual, LessThan, Between } from 'typeorm';
 import {
   AutoTradingOrder,
   AutoTradingOrderAction,
@@ -1033,10 +1033,7 @@ export class PaperTradingService {
       where: {
         portfolioId,
         symbol: symbol.toUpperCase(),
-        executedAt: {
-          $gte: today,
-          $lt: tomorrow,
-        } as any,
+        executedAt: Between(today, tomorrow),
       },
       order: { executedAt: 'ASC' },
     });

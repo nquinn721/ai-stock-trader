@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, Between } from 'typeorm';
 import { AssetData } from '../entities/asset-data.entity';
 import {
   AssetClass,
@@ -257,10 +257,7 @@ export class AssetClassManagerService {
       where: {
         symbol: asset.symbol,
         assetClass: asset.class,
-        timestamp: {
-          $gte: startDate,
-          $lte: endDate,
-        } as any,
+        timestamp: Between(startDate, endDate),
       },
       order: {
         timestamp: 'ASC',

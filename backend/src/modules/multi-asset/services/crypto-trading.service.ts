@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, Between } from 'typeorm';
 import { CryptoData } from '../entities/crypto-data.entity';
 import {
   BorrowingRate,
@@ -241,10 +241,7 @@ export class CryptoTradingService {
     return this.cryptoDataRepository.find({
       where: {
         symbol,
-        timestamp: {
-          $gte: startDate,
-          $lte: endDate,
-        } as any,
+        timestamp: Between(startDate, endDate),
       },
       order: {
         timestamp: 'ASC',

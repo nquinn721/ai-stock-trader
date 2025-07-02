@@ -22,6 +22,7 @@ import {
   useWebSocketStore,
 } from "../stores/StoreContext";
 import { Portfolio } from "../types";
+import { TwoPhaseLoader } from "./common/TwoPhaseLoader";
 import "./Dashboard.css";
 import EmptyState from "./EmptyState";
 import EnhancedPortfolioAnalyticsDashboard from "./EnhancedPortfolioAnalyticsDashboard";
@@ -35,7 +36,6 @@ import PortfolioSelector from "./PortfolioSelector";
 import QuickTrade from "./QuickTrade";
 import StockCard from "./StockCard";
 import TradingAssistantChat from "./TradingAssistantChat";
-import { TwoPhaseLoader } from "./common/TwoPhaseLoader";
 import PageHeader from "./ui/PageHeader";
 
 // Add icons to library - commented out for now
@@ -273,10 +273,13 @@ const Dashboard: React.FC = () => {
   const loading = stockStore.isLoading;
 
   // Show two-phase loader during initial data loading
-  if (loading || (!stockStore.isPricesLoaded && stocksWithSignals.length === 0)) {
+  if (
+    loading ||
+    (!stockStore.isPricesLoaded && stocksWithSignals.length === 0)
+  ) {
     return (
       <div className="dashboard">
-        <TwoPhaseLoader 
+        <TwoPhaseLoader
           phase1Complete={stockStore.isPricesLoaded}
           phase2Complete={stockStore.areSignalsLoaded}
           phase1Label="Loading market prices"
@@ -401,7 +404,7 @@ const Dashboard: React.FC = () => {
       {/* Header */}
       <PageHeader
         title="Auto Trading Dashboard"
-        statsValue={`${stocksWithSignals.length} stocks${stockStore.isLoadingSignals ? ' • Calculating signals...' : ''}`}
+        statsValue={`${stocksWithSignals.length} stocks${stockStore.isLoadingSignals ? " • Calculating signals..." : ""}`}
         actionButtons={[
           {
             icon: <AutoMode />,

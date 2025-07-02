@@ -145,7 +145,9 @@ import { SeedService } from './services/seed.service';
 
           // In Cloud Run, don't throw error immediately - allow app to start and fail gracefully
           if (process.env.K_SERVICE) {
-            console.warn('⚠️ Cloud Run detected - starting without database connection for health checks');
+            console.warn(
+              '⚠️ Cloud Run detected - starting without database connection for health checks',
+            );
             // Return a minimal config that won't connect but allows app to start
             return {
               type: 'mysql',
@@ -174,7 +176,9 @@ import { SeedService } from './services/seed.service';
 
         if (isCloudRun || (isProduction && cloudSqlConnection)) {
           // Cloud Run with Cloud SQL Unix Socket connection
-          const socketPath = cloudSqlConnection || 'heroic-footing-460117-k8:us-central1:stocktrading-mysql';
+          const socketPath =
+            cloudSqlConnection ||
+            'heroic-footing-460117-k8:us-central1:stocktrading-mysql';
 
           console.log(
             `🔗 Connecting to Cloud SQL via Unix socket: /cloudsql/${socketPath}`,
@@ -191,9 +195,7 @@ import { SeedService } from './services/seed.service';
           };
         } else if (dbHost.includes('/cloudsql/')) {
           // Direct Cloud SQL socket path
-          console.log(
-            `🔗 Connecting to Cloud SQL via Unix socket: ${dbHost}`,
-          );
+          console.log(`🔗 Connecting to Cloud SQL via Unix socket: ${dbHost}`);
 
           connectionConfig = {
             type: 'mysql',

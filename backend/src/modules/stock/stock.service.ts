@@ -9,7 +9,7 @@
  *
  * Key Features:
  * - Yahoo Finance API integration for real-time stock prices
- * - Automated market data updates via scheduled cron jobs (every 2 minutes)
+ * - Automated market data updates via scheduled cron jobs (every 5 seconds)
  * - Advanced technical analysis (RSI, MACD, Bollinger Bands, SMA/EMA)
  * - Trading signal generation and distribution via WebSocket
  * - Historical data processing and trend analysis
@@ -358,10 +358,16 @@ export class StockService {
       return null;
     }
   }
-  @Cron('0 */2 * * * *') // Every 2 minutes (less aggressive to prevent API rate limiting)
+  @Cron('*/5 * * * * *') // Every 5 seconds (WARNING: Very aggressive - may cause API rate limiting)
   async updateAllStockPrices() {
     const stocks = await this.stockRepository.find(); // Get all tracked stocks from database
     const connectedClients = this.websocketGateway.getConnectedClientsCount();
+
+    // Skip updates if no clients are connected to reduce unnecessary API calls
+    if (connectedClients === 0) {
+      console.log('⏭️ Skipping price updates - no clients connected');
+      return;
+    }
 
     console.log(
       `🔄 Updating live prices for ${stocks.length} stocks (${connectedClients} clients connected)...`,
@@ -372,8 +378,8 @@ export class StockService {
       try {
         const updated = await this.updateStockPrice(stock.symbol);
         if (updated) successCount++;
-        // Add delay to avoid rate limiting
-        await new Promise((resolve) => setTimeout(resolve, 500));
+        // Reduced delay for 5-second updates - but monitor for rate limiting
+        await new Promise((resolve) => setTimeout(resolve, 100));
       } catch (error) {
         console.error(`❌ Error updating ${stock.symbol}:`, error.message);
       }

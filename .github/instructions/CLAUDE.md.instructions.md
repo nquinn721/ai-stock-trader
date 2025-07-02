@@ -51,7 +51,7 @@ This document provides quick reference guidelines for AI assistants working on t
 - Source: Yahoo Finance API (real-time)
 - Backend: `/stocks` and `/stocks/with-signals/all` endpoints
 - Frontend: REST API + WebSocket updates
-- Update: Every 2 minutes via cron job
+- Update: Every 5 seconds via cron job
 
 **Portfolio Performance:**
 

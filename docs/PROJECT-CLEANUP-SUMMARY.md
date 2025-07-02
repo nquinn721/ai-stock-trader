@@ -6,12 +6,14 @@
 ## Cleanup Actions Performed
 
 ### 1. Created Archive Structure
+
 - `archived/` - Root folder for obsolete files
   - `archived/debug-scripts/` - Debug and troubleshooting scripts
   - `archived/obsolete-scripts/` - Redundant test scripts
   - `archived/fix-scripts/` - One-time fix scripts
 
 ### 2. Moved Debug Scripts to `archived/debug-scripts/`
+
 - `debug-auto-trading-session.js`
 - `debug-paper-trading.js`
 - `debug-trade-execution.js`
@@ -20,6 +22,7 @@
 - `test-pipeline-debug.js`
 
 ### 3. Moved Obsolete Test Scripts to `archived/obsolete-scripts/`
+
 - `test-all-scenarios.js`
 - `test-autonomous-quick.js`
 - `test-autonomous-trading-comprehensive.js`
@@ -46,7 +49,9 @@
 - `test-recommendation-and-trading-execution.sh`
 
 ### 4. Organized Documentation to `docs/`
+
 #### Moved to `docs/implementation-summaries/`
+
 - `AUTO-TRADING-BUTTON-IMPLEMENTATION-SUMMARY.md`
 - `AUTONOMOUS-TRADING-IMPLEMENTATION.md`
 - `AUTONOMOUS-TRADING-STATUS.md`
@@ -55,6 +60,7 @@
 - `TYPESCRIPT-FIX-SUMMARY.md`
 
 #### Moved to `docs/`
+
 - `DATABASE-FIX-GUIDE.md`
 - `DATABASE-SETUP-OPTIONS.md`
 - `LOCAL-MYSQL-SETUP.md`
@@ -62,6 +68,7 @@
 - `DEPLOYMENT.md`
 
 ### 5. Organized Database Files to `database/`
+
 - `database-config.env`
 - `grant-privileges.sh`
 - `grant-privileges.sql`
@@ -69,6 +76,7 @@
 - `start-database.bat`
 
 ### 6. Organized Scripts to `scripts/`
+
 - `quick-test.ps1`
 - `run-all-tests.ps1`
 - `setup-database-secrets.ps1`
@@ -76,6 +84,7 @@
 - `update-cloudbuild-db.ps1`
 
 ### 7. Moved Active Tests to `test-scripts/`
+
 - `test-performance.sh` (performance monitoring)
 - `user-experience-demo.sh` (demo script)
 
@@ -130,6 +139,7 @@ Stock-Trading-App-Nest/
 ## Verification
 
 To verify the cleanup was successful:
+
 - ✅ Root directory contains only essential files
 - ✅ All archived files preserved in `archived/` folder
 - ✅ Documentation organized in `docs/` folder
