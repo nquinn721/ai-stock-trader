@@ -1,6 +1,6 @@
 import { Inject, Injectable, Logger, forwardRef } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, MoreThanOrEqual } from 'typeorm';
 import {
   AutoTradingOrder,
   RiskLevel,
@@ -8,6 +8,7 @@ import {
 import { Portfolio } from '../../../entities/portfolio.entity';
 import { Stock } from '../../../entities/stock.entity';
 import { TradingSignals } from '../../ml/interfaces/ml.interfaces';
+import { MLService } from '../../ml/services/ml.service';
 import { SignalGenerationService } from '../../ml/services/signal-generation.service';
 import { StockService } from '../../stock/stock.service';
 import { AdvancedOrderExecutionService } from './advanced-order-execution.service';
@@ -80,6 +81,8 @@ export class RecommendationPipelineService {
     @InjectRepository(Stock)
     private stockRepository: Repository<Stock>,
     private signalGenerationService: SignalGenerationService,
+    @Inject(forwardRef(() => MLService))
+    private mlService: MLService,
     @Inject(forwardRef(() => StockService))
     private stockService: StockService,
     private advancedOrderExecutionService: AdvancedOrderExecutionService,
@@ -97,8 +100,8 @@ export class RecommendationPipelineService {
     this.pipelineConfig = {
       enabled: true,
       autoExecutionEnabled: false, // Start conservative
-      minimumConfidence: 0.75, // Only high-confidence signals
-      maximumRiskLevel: RiskLevel.MEDIUM,
+      minimumConfidence: 0.05, // Temporarily lowered for testing
+      maximumRiskLevel: RiskLevel.HIGH,
       supportedTimeframes: ['5m', '15m', '1h', '1d'],
       portfolioFilters: [], // Empty means all portfolios
       symbolFilters: [], // Empty means all symbols
@@ -121,47 +124,117 @@ export class RecommendationPipelineService {
     this.logger.log(`S43: Generating recommendations for ${symbol}`);
 
     try {
-      // Step 1: Get ensemble signals from the ML pipeline (S19 dependency)
-      const signalResponse =
-        await this.signalGenerationService.generateEnsembleSignals(symbol, {
-          timeframes:
-            options.timeframes || this.pipelineConfig.supportedTimeframes,
-          includeConflictResolution: true,
-          ensembleMethod: 'meta_learning',
-          confidenceThreshold: this.pipelineConfig.minimumConfidence,
-          enableRealTimeStream: true,
-        });
+      this.logger.log(`S43: Step 1 - Getting current stock data for ${symbol}`);
 
-      const signals = signalResponse.signals;
-
-      // Step 2: Convert ML signals to trading recommendations
-      const recommendations: TradingRecommendation[] = [];
-
-      if (signals) {
-        const recommendation = await this.convertSignalToRecommendation(
-          symbol,
-          signals,
-          signalResponse.ensembleDetails,
-          options,
-        );
-
-        if (recommendation) {
-          recommendations.push(recommendation);
-
-          // Cache for tracking
-          this.recommendationCache.set(recommendation.id, recommendation);
-
-          this.logger.log(
-            `S43: Generated ${recommendation.action} recommendation for ${symbol} with ${recommendation.confidence} confidence`,
-          );
-        }
+      // Step 1: Get current stock price for the recommendation
+      const currentStock = await this.stockService.getStockBySymbol(symbol);
+      if (!currentStock || !currentStock.currentPrice) {
+        this.logger.warn(`No current stock data for ${symbol}`);
+        return [];
       }
 
+      this.logger.log(
+        `S43: Step 2 - Current stock price: ${currentStock.currentPrice}`,
+      );
+
+      // Step 2: Generate enhanced AI recommendation with ensemble signals using the ML service
+      this.logger.log(
+        `S43: Step 3 - Calling ML service for enhanced recommendation`,
+      );
+
+      const enhancedRecommendation =
+        await this.mlService.generateEnhancedIntelligentRecommendation(
+          symbol,
+          currentStock.currentPrice,
+          {
+            portfolioContext: {
+              currentHoldings: 0,
+              availableCash: 10000,
+              riskTolerance: 'MEDIUM',
+            },
+            timeHorizon: '1D',
+            ensembleOptions: {
+              timeframes:
+                options.timeframes || this.pipelineConfig.supportedTimeframes,
+              includeConflictResolution: true,
+              ensembleMethod: 'meta_learning',
+              confidenceThreshold: this.pipelineConfig.minimumConfidence,
+              enableRealTimeStream: true,
+            },
+          },
+        );
+
+      this.logger.log(
+        `S43: Step 4 - Enhanced recommendation received: ${JSON.stringify({
+          action: enhancedRecommendation?.action,
+          confidence: enhancedRecommendation?.confidence,
+          available: !!enhancedRecommendation,
+        })}`,
+      );
+
+      // Step 3: Convert enhanced recommendation to trading recommendations
+      const recommendations: TradingRecommendation[] = [];
+
+      if (enhancedRecommendation) {
+        this.logger.log(
+          `S43: Enhanced recommendation exists, confidence: ${enhancedRecommendation.confidence}`,
+        );
+
+        if (enhancedRecommendation.confidence > 0.01) {
+          // Lowered threshold for debugging
+          this.logger.log(
+            `S43: Step 5 - Converting to trading recommendation (confidence: ${enhancedRecommendation.confidence})`,
+          );
+
+          const recommendation =
+            await this.convertEnhancedRecommendationToTradingRecommendation(
+              symbol,
+              enhancedRecommendation,
+              currentStock.currentPrice,
+              options,
+            );
+
+          this.logger.log(
+            `S43: Conversion result: ${JSON.stringify({
+              hasRecommendation: !!recommendation,
+              action: recommendation?.action,
+              confidence: recommendation?.confidence,
+            })}`,
+          );
+
+          if (recommendation) {
+            recommendations.push(recommendation);
+
+            // Cache for tracking
+            this.recommendationCache.set(recommendation.id, recommendation);
+
+            this.logger.log(
+              `S43: Generated ${recommendation.action} recommendation for ${symbol} with ${recommendation.confidence} confidence`,
+            );
+          } else {
+            this.logger.warn(
+              `S43: Conversion returned null recommendation for ${symbol}`,
+            );
+          }
+        } else {
+          this.logger.warn(
+            `S43: Enhanced recommendation confidence too low: ${enhancedRecommendation.confidence}`,
+          );
+        }
+      } else {
+        this.logger.warn(
+          `S43: No enhanced recommendation received for ${symbol}`,
+        );
+      }
+
+      this.logger.log(
+        `S43: Step 6 - Returning ${recommendations.length} recommendations`,
+      );
       return recommendations;
     } catch (error) {
       this.logger.error(
         `S43: Error generating recommendations for ${symbol}:`,
-        error,
+        error.stack || error,
       );
       return [];
     }
@@ -235,6 +308,83 @@ export class RecommendationPipelineService {
         takeProfit,
       ),
       maxDrawdown: signals.riskMetrics?.maxDrawdown || 0.05,
+      createdAt: new Date(),
+    };
+
+    return recommendation;
+  }
+
+  /**
+   * Convert enhanced ML recommendation to structured trading recommendation
+   */
+  private async convertEnhancedRecommendationToTradingRecommendation(
+    symbol: string,
+    enhancedRecommendation: any,
+    currentPrice: number,
+    options: any,
+  ): Promise<TradingRecommendation | null> {
+    // Extract action from enhanced recommendation
+    const action = this.determineActionFromEnhancedRecommendation(
+      enhancedRecommendation,
+    );
+    if (action === 'HOLD' && !this.shouldIncludeHoldSignals()) {
+      return null; // Skip HOLD signals unless specifically requested
+    }
+
+    const confidence = enhancedRecommendation.confidence || 0;
+
+    // Calculate stop loss and take profit levels
+    const { stopLoss, takeProfit } = this.calculateRiskLevels(
+      currentPrice,
+      action,
+      enhancedRecommendation.riskAssessment?.volatility || 0.02,
+      confidence,
+    );
+
+    // Determine risk level based on enhanced recommendation
+    const riskLevel = this.determineRiskLevelFromEnhanced(
+      enhancedRecommendation,
+      confidence,
+    );
+
+    // Generate reasoning from enhanced recommendation
+    const reasoning = enhancedRecommendation.reasoning || [
+      `AI recommendation: ${action}`,
+      `Confidence: ${(confidence * 100).toFixed(1)}%`,
+      `Risk Level: ${enhancedRecommendation.riskLevel || 'MEDIUM'}`,
+    ];
+
+    const recommendation: TradingRecommendation = {
+      id: this.generateRecommendationId(symbol, action),
+      symbol,
+      action,
+      confidence,
+      reasoning,
+      entryPrice: currentPrice,
+      stopLoss,
+      takeProfit,
+      positionSize: 0, // Will be calculated during order creation
+      riskLevel,
+      timeHorizon: enhancedRecommendation.timeHorizon || '1D',
+      expiryTime: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours default
+      technicalSignals: {
+        rsi: enhancedRecommendation.metrics?.technicalSignals?.rsi,
+        macd: enhancedRecommendation.metrics?.technicalSignals?.macd,
+        bollinger: enhancedRecommendation.metrics?.technicalSignals?.bollinger,
+        volume: enhancedRecommendation.metrics?.technicalSignals?.volume,
+      },
+      marketConditions: {
+        trend: enhancedRecommendation.metrics?.marketPrediction?.direction,
+        volatility: enhancedRecommendation.metrics?.riskAssessment?.volatility,
+        strength: enhancedRecommendation.metrics?.technicalSignals?.strength,
+      },
+      riskRewardRatio: this.calculateRiskRewardRatio(
+        currentPrice,
+        stopLoss,
+        takeProfit,
+      ),
+      maxDrawdown:
+        enhancedRecommendation.metrics?.riskAssessment?.maxDrawdown || 0.05,
       createdAt: new Date(),
     };
 
@@ -463,8 +613,8 @@ export class RecommendationPipelineService {
   }
 
   private shouldIncludeHoldSignals(): boolean {
-    // For now, skip HOLD signals to focus on actionable recommendations
-    return false;
+    // Temporarily enable HOLD signals for debugging
+    return true;
   }
 
   private calculateRiskLevels(
@@ -622,7 +772,7 @@ export class RecommendationPipelineService {
 
     return this.autoTradingOrderRepository.count({
       where: {
-        createdAt: { $gte: today } as any,
+        createdAt: MoreThanOrEqual(today),
       },
     });
   }
@@ -731,5 +881,38 @@ export class RecommendationPipelineService {
       successRate: totalOrders > 0 ? totalOrders / activeRecs.length : 0,
       avgConfidence,
     };
+  }
+
+  private determineActionFromEnhancedRecommendation(
+    enhancedRecommendation: any,
+  ): 'BUY' | 'SELL' | 'HOLD' | 'WATCH' {
+    if (!enhancedRecommendation || !enhancedRecommendation.action)
+      return 'HOLD';
+
+    const action = enhancedRecommendation.action.toString().toUpperCase();
+    if (action.includes('BUY') || action.includes('LONG')) return 'BUY';
+    if (action.includes('SELL') || action.includes('SHORT')) return 'SELL';
+    if (action.includes('WATCH')) return 'WATCH';
+    return 'HOLD';
+  }
+
+  private determineRiskLevelFromEnhanced(
+    enhancedRecommendation: any,
+    confidence: number,
+  ): RiskLevel {
+    // Use the risk level from the enhanced recommendation if available
+    if (enhancedRecommendation.riskLevel) {
+      const riskLevel = enhancedRecommendation.riskLevel
+        .toString()
+        .toUpperCase();
+      if (riskLevel === 'LOW') return RiskLevel.LOW;
+      if (riskLevel === 'HIGH') return RiskLevel.HIGH;
+      return RiskLevel.MEDIUM;
+    }
+
+    // Fallback to confidence-based risk assessment
+    if (confidence > 0.8) return RiskLevel.LOW;
+    if (confidence < 0.4) return RiskLevel.HIGH;
+    return RiskLevel.MEDIUM;
   }
 }

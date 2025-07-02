@@ -71,9 +71,22 @@ export class SignalGenerationService {
     this.logger.log(`S29B: Generating ensemble signals for ${symbol}`);
     try {
       // Generate real market data for feature extraction using StockService
+      this.logger.log(`S29B: Step 1 - Getting real market data for ${symbol}`);
       const realMarketData = await this.getRealMarketData(symbol, 200);
 
+      if (!realMarketData || realMarketData.length === 0) {
+        this.logger.warn(
+          `S29B: No real market data available for analysis for ${symbol}`,
+        );
+        return await this.generateFallbackSignal(symbol, options);
+      }
+
+      this.logger.log(
+        `S29B: Retrieved ${realMarketData.length} data points for ${symbol}`,
+      );
+
       // Step 1: Extract real-time features using S28D pipeline
+      this.logger.log(`S29B: Step 2 - Extracting features for ${symbol}`);
       const features = await this.featurePipelineService.extractFeatures(
         realMarketData,
         symbol,
@@ -83,11 +96,21 @@ export class SignalGenerationService {
         },
       );
 
+      this.logger.log(`S29B: Features extracted successfully for ${symbol}`);
+
       // Step 2: Get comprehensive market predictions from S29A
+      this.logger.log(
+        `S29B: Step 3 - Getting market predictions for ${symbol}`,
+      );
       const marketPredictions =
         await this.marketPredictionService.getEnsemblePrediction(symbol, '1d');
 
+      this.logger.log(`S29B: Market predictions obtained for ${symbol}`);
+
       // Step 3: Generate signals for each timeframe
+      this.logger.log(
+        `S29B: Step 4 - Generating multi-timeframe signals for ${symbol}`,
+      );
       const timeframeSignals = await this.generateMultiTimeframeSignals(
         symbol,
         marketPredictions,
@@ -95,23 +118,40 @@ export class SignalGenerationService {
         options,
       );
 
+      this.logger.log(`S29B: Multi-timeframe signals generated for ${symbol}`);
+
       // Step 4: Apply signal conflict resolution
+      this.logger.log(
+        `S29B: Step 5 - Applying conflict resolution for ${symbol}`,
+      );
       const conflictResolution = options.includeConflictResolution
         ? await this.resolveSignalConflicts(symbol, timeframeSignals, options)
         : null;
 
+      this.logger.log(`S29B: Conflict resolution completed for ${symbol}`);
+
       // Step 5: Create ensemble signal using meta-learning
+      this.logger.log(`S29B: Step 6 - Creating ensemble signal for ${symbol}`);
       const ensembleSignal = await this.createEnsembleSignal(
         symbol,
         timeframeSignals,
         marketPredictions,
         conflictResolution,
         options,
-      ); // Step 6: Apply final validation and quality checks
+      );
+
+      this.logger.log(`S29B: Ensemble signal created for ${symbol}`);
+
+      // Step 6: Apply final validation and quality checks
+      this.logger.log(
+        `S29B: Step 7 - Validating ensemble signal for ${symbol}`,
+      );
       const validatedSignal = await this.validateEnsembleSignal(
         ensembleSignal,
         options,
       );
+
+      this.logger.log(`S29B: Signal validation completed for ${symbol}`);
 
       const result = {
         signals: validatedSignal,
