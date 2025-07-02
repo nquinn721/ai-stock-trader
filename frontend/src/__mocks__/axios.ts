@@ -1,4 +1,6 @@
 // Mock axios for Jest tests
+declare const jest: any;
+
 export default {
   get: jest.fn(() => Promise.resolve({ data: {} })),
   post: jest.fn(() => Promise.resolve({ data: {} })),

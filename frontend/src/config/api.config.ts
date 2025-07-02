@@ -60,13 +60,13 @@ function getWebSocketUrlFromEnv(): string {
   // In production (when REACT_APP_WS_URL is empty), use relative path
   // In development, use localhost
   const envUrl = process.env.REACT_APP_WS_URL;
-  if (envUrl === "" || envUrl === undefined) {
+  if (envUrl === "") {
     // Production: construct WebSocket URL from current origin
     const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
     return `${protocol}//${window.location.host}`;
   }
   // Development: use localhost
-  return envUrl || "ws://localhost:8000";
+  return envUrl || "http://localhost:8000";
 }
 
 /**

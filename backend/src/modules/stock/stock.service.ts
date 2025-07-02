@@ -133,8 +133,8 @@ export class StockService {
       recentNews?: any[];
     })[]
   > {
-    // Get stocks from database
-    const stocks = await this.stockRepository.find();
+    // Get stocks from database (limit to 20)
+    const stocks = await this.stockRepository.find({ take: 20 });
 
     // Merge with live price data and return all stocks (even those without live prices)
     return stocks.map((stock) => this.enrichStockWithLiveData(stock));
@@ -149,8 +149,8 @@ export class StockService {
       this.logger.debug('Fast stock fetch - returning prices only');
     }
 
-    // Get stocks from database
-    const stocks = await this.stockRepository.find();
+    // Get stocks from database (limit to 20)
+    const stocks = await this.stockRepository.find({ take: 20 });
 
     // Return only enriched price data (no signals/sentiment calculations)
     return stocks.map((stock) => this.enrichStockWithLiveData(stock));
@@ -164,8 +164,8 @@ export class StockService {
       recentNews?: any[];
     })[]
   > {
-    // Get all stocks from database
-    const stocks = await this.stockRepository.find();
+    // Get stocks from database (limit to 20)
+    const stocks = await this.stockRepository.find({ take: 20 });
     const stocksWithSignals: (Stock & {
       tradingSignal: TradingSignal | null;
       breakoutStrategy?: any;
@@ -228,7 +228,7 @@ export class StockService {
       this.logger.debug('Batch calculating signals for all stocks...');
     }
 
-    const stocks = await this.stockRepository.find();
+    const stocks = await this.stockRepository.find({ take: 20 });
     const results: {
       symbol: string;
       signal: TradingSignal;
@@ -471,8 +471,11 @@ export class StockService {
       }
     }
 
-    const stocks = await this.stockRepository.find(); // Get all tracked stocks from database
+    const stocks = await this.stockRepository.find({ take: 20 }); // Get tracked stocks from database (limit to 20)
     const connectedClients = this.websocketGateway.getConnectedClientsCount();
+
+    // Debug logging for stock count
+    this.logger.log(`Found ${stocks.length} stocks in database for price updates`);
 
     // Skip updates if no clients are connected to reduce unnecessary API calls
     // TEMPORARY: Commenting out to allow price updates for auto-trading
