@@ -124,7 +124,7 @@ export class StockWebSocketGateway
     console.log('🚀 WebSocket Gateway initialized successfully');
     this.server = server;
     this.isServerInitialized = true;
-    
+
     // Set up global error handling
     server.on('error', (error) => {
       console.error('❌ WebSocket server error:', error);
@@ -1159,7 +1159,9 @@ export class StockWebSocketGateway
   async broadcastAllPortfolios() {
     try {
       if (!this.isServerReady()) {
-        console.warn('WebSocket server not available, skipping portfolio broadcast');
+        console.warn(
+          'WebSocket server not available, skipping portfolio broadcast',
+        );
         return;
       }
 

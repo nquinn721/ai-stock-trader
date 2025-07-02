@@ -44,7 +44,9 @@ export class OrderService {
         symbol: savedOrder.symbol,
       });
     } else {
-      console.warn('WebSocket server not available, skipping order_created emit');
+      console.warn(
+        'WebSocket server not available, skipping order_created emit',
+      );
     }
 
     return savedOrder;
@@ -86,7 +88,9 @@ export class OrderService {
         portfolioId: order.portfolioId,
       });
     } else {
-      console.warn('WebSocket server not available, skipping order_cancelled emit');
+      console.warn(
+        'WebSocket server not available, skipping order_cancelled emit',
+      );
     }
   }
 
@@ -255,7 +259,9 @@ export class OrderService {
           tradeId: trade.id,
         });
       } else {
-        console.warn('WebSocket server not available, skipping order_executed emit');
+        console.warn(
+          'WebSocket server not available, skipping order_executed emit',
+        );
       }
 
       console.log(`✅ Order ${order.id} executed successfully`);
@@ -274,7 +280,9 @@ export class OrderService {
           error: error.message,
         });
       } else {
-        console.warn('WebSocket server not available, skipping order_execution_failed emit');
+        console.warn(
+          'WebSocket server not available, skipping order_execution_failed emit',
+        );
       }
     }
   }

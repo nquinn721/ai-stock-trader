@@ -319,7 +319,9 @@ export class StockStore {
     });
   }
 
-  get stocksWithSignalsSorted(): (Stock & { tradingSignal: TradingSignal | null })[] {
+  get stocksWithSignalsSorted(): (Stock & {
+    tradingSignal: TradingSignal | null;
+  })[] {
     return this.stocksWithSignals.sort((a, b) => {
       // Sort by favorite first (favorites at top), then by symbol alphabetically
       if (a.favorite !== b.favorite) {
