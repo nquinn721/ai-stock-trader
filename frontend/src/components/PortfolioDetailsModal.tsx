@@ -235,7 +235,7 @@ const PortfolioDetailsModal: React.FC<PortfolioDetailsModalProps> = observer(
                     className={`tab ${activeTab === "history" ? "active" : ""}`}
                     onClick={() => setActiveTab("history")}
                   >
-                    <FontAwesomeIcon icon="history" />
+                    <FontAwesomeIcon icon="clock" />
                     Trading History ({performance?.trades.length || 0})
                   </button>
                 </div>
@@ -411,7 +411,7 @@ const PortfolioDetailsModal: React.FC<PortfolioDetailsModalProps> = observer(
                       {performance.trades.length === 0 ? (
                         <EmptyState
                           type="no-data"
-                          icon={<FontAwesomeIcon icon="history" />}
+                          icon={<FontAwesomeIcon icon="clock" />}
                           title="No Trading History"
                           description="This portfolio doesn't have any completed trades yet"
                           size="medium"

@@ -40,7 +40,7 @@ const MarketScannerPage: React.FC = observer(() => {
           },
         ]}
       />
-      <div className="page-content">
+      <div className="dashboard-content">
         <MarketScannerDashboard onStockSelect={handleStockSelect} />
       </div>
     </div>

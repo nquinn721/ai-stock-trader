@@ -27,7 +27,6 @@ import macroIntelligenceService, {
 import "../../shared-styles.css";
 import ContentCard from "../ui/ContentCard";
 import LoadingState from "../ui/LoadingState";
-import PageHeader from "../ui/PageHeader";
 import StatusChip from "../ui/StatusChip";
 import "./EconomicIntelligenceDashboard.css";
 
@@ -670,30 +669,8 @@ const EconomicIntelligenceDashboard: React.FC<
   );
 
   return (
-    <div className="page-container economic-intelligence-dashboard">
-      <PageHeader
-        title="Economic Intelligence & Macro Analysis"
-        statsValue={`${selectedCountry} • Health: ${economicData?.overallHealth || 0}/100`}
-        actionButtons={[
-          {
-            icon: <span>←</span>,
-            onClick: () =>
-              onNavigateBack ? onNavigateBack() : (window.location.href = "/"),
-            tooltip: "Back to Dashboard",
-            className: "back-button",
-            label: "Back",
-          },
-          {
-            icon: <Refresh />,
-            onClick: loadEconomicData,
-            tooltip: "Refresh Data",
-            className: "action-btn",
-            label: "Refresh",
-          },
-        ]}
-      />
-
-      <div className="page-content">
+    <div className="economic-intelligence-dashboard">
+      <div className="dashboard-content">
         {error && (
           <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError(null)}>
             {error}

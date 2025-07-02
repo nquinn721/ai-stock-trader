@@ -16,7 +16,7 @@ All pages must follow this exact structure:
 // Standard page structure template
 <div className="page-container">
   <div className="page-header">{/* Standard header implementation */}</div>
-  <div className="page-content">{/* Page-specific content */}</div>
+  <div className="dashboard-content">{/* Page-specific content */}</div>
 </div>
 ```
 

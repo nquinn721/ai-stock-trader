@@ -105,3 +105,241 @@ describe('AutonomousTradingService - Random Strategy Assignment', () => {
     });
   });
 });
+
+describe('AutonomousTradingService - S46 Auto Strategy Assignment', () => {
+  let service: AutonomousTradingService;
+  let portfolioRepository: any;
+  let strategyRepository: any;
+
+  beforeEach(async () => {
+    const module: TestingModule = await Test.createTestingModule({
+      providers: [
+        AutonomousTradingService,
+        {
+          provide: 'PortfolioRepository',
+          useValue: {
+            findOne: jest.fn(),
+            save: jest.fn(),
+          },
+        },
+        {
+          provide: 'TradingStrategyRepository',
+          useValue: {
+            findOne: jest.fn(),
+            create: jest.fn(),
+            save: jest.fn(),
+          },
+        },
+        {
+          provide: 'AutoTradeRepository',
+          useValue: {},
+        },
+        {
+          provide: 'BacktestingService',
+          useValue: {},
+        },
+        {
+          provide: 'StrategyBuilderService',
+          useValue: {
+            validateStrategy: jest
+              .fn()
+              .mockResolvedValue({ isValid: true, errors: [] }),
+          },
+        },
+        {
+          provide: 'RiskManagementService',
+          useValue: {},
+        },
+        {
+          provide: 'StockService',
+          useValue: {},
+        },
+        {
+          provide: 'PaperTradingService',
+          useValue: {},
+        },
+      ],
+    }).compile();
+
+    service = module.get<AutonomousTradingService>(AutonomousTradingService);
+    portfolioRepository = module.get('PortfolioRepository');
+    strategyRepository = module.get('TradingStrategyRepository');
+  });
+
+  describe('Automatic Strategy Selection Based on Portfolio Balance', () => {
+    it('should select day trading aggressive strategy for high balance portfolios (>=$50k)', () => {
+      const portfolio = {
+        id: 1,
+        totalValue: 60000,
+        currentCash: 60000,
+      } as Portfolio;
+
+      // Use reflection to access private method for testing
+      const selectedStrategy = (service as any).selectStrategyForPortfolio(
+        portfolio,
+      );
+
+      expect(selectedStrategy.id).toBe('day-trading-aggressive');
+      expect(selectedStrategy.name).toBe('Day Trading Aggressive');
+      expect(selectedStrategy.type).toBe('day_trading');
+      expect(selectedStrategy.minBalance).toBe(25000);
+    });
+
+    it('should select day trading conservative strategy for PDT-eligible portfolios ($25k-$50k)', () => {
+      const portfolio = {
+        id: 1,
+        totalValue: 30000,
+        currentCash: 30000,
+      } as Portfolio;
+
+      const selectedStrategy = (service as any).selectStrategyForPortfolio(
+        portfolio,
+      );
+
+      expect(selectedStrategy.id).toBe('day-trading-conservative');
+      expect(selectedStrategy.name).toBe('Day Trading Conservative');
+      expect(selectedStrategy.type).toBe('day_trading');
+      expect(selectedStrategy.minBalance).toBe(25000);
+    });
+
+    it('should select swing trading growth strategy for medium balance portfolios ($5k-$25k)', () => {
+      const portfolio = {
+        id: 1,
+        totalValue: 10000,
+        currentCash: 10000,
+      } as Portfolio;
+
+      const selectedStrategy = (service as any).selectStrategyForPortfolio(
+        portfolio,
+      );
+
+      expect(selectedStrategy.id).toBe('swing-trading-growth');
+      expect(selectedStrategy.name).toBe('Swing Trading Growth');
+      expect(selectedStrategy.type).toBe('swing_trading');
+      expect(selectedStrategy.minBalance).toBe(0);
+    });
+
+    it('should select swing trading value strategy for small balance portfolios (<$5k)', () => {
+      const portfolio = {
+        id: 1,
+        totalValue: 2000,
+        currentCash: 2000,
+      } as Portfolio;
+
+      const selectedStrategy = (service as any).selectStrategyForPortfolio(
+        portfolio,
+      );
+
+      expect(selectedStrategy.id).toBe('swing-trading-value');
+      expect(selectedStrategy.name).toBe('Swing Trading Value');
+      expect(selectedStrategy.type).toBe('swing_trading');
+      expect(selectedStrategy.minBalance).toBe(0);
+    });
+
+    it('should handle PDT threshold edge case (exactly $25,000)', () => {
+      const portfolio = {
+        id: 1,
+        totalValue: 25000,
+        currentCash: 25000,
+      } as Portfolio;
+
+      const selectedStrategy = (service as any).selectStrategyForPortfolio(
+        portfolio,
+      );
+
+      expect(selectedStrategy.type).toBe('day_trading');
+      expect(selectedStrategy.id).toBe('day-trading-conservative');
+    });
+
+    it('should use currentCash when totalValue is zero', () => {
+      const portfolio = {
+        id: 1,
+        totalValue: 0,
+        currentCash: 30000,
+      } as Portfolio;
+
+      const selectedStrategy = (service as any).selectStrategyForPortfolio(
+        portfolio,
+      );
+      expect(selectedStrategy.type).toBe('day_trading');
+    });
+  });
+
+  describe('PDT (Pattern Day Trader) Compliance', () => {
+    it('should correctly identify PDT-eligible accounts ($25k+)', () => {
+      const portfolio = {
+        id: 1,
+        totalValue: 25000,
+        currentCash: 25000,
+      } as Portfolio;
+
+      const selectedStrategy = (service as any).selectStrategyForPortfolio(
+        portfolio,
+      );
+      expect(selectedStrategy.type).toBe('day_trading');
+    });
+
+    it('should correctly identify non-PDT accounts (<$25k)', () => {
+      const portfolio = {
+        id: 1,
+        totalValue: 24999,
+        currentCash: 24999,
+      } as Portfolio;
+
+      const selectedStrategy = (service as any).selectStrategyForPortfolio(
+        portfolio,
+      );
+      expect(selectedStrategy.type).toBe('swing_trading');
+    });
+  });
+
+  describe('Risk Management Configuration', () => {
+    it('should create aggressive risk config for day trading strategies', () => {
+      const portfolio = {
+        id: 1,
+        totalValue: 60000,
+        currentCash: 60000,
+      } as Portfolio;
+
+      const strategyConfig = {
+        id: 'day-trading-aggressive',
+        maxPositions: 10,
+        executionFrequency: 'minute' as const,
+        riskLevel: 'aggressive',
+      };
+
+      const config = (service as any).createAutoDeploymentConfig(
+        portfolio,
+        strategyConfig,
+      );
+
+      expect(config.riskLimits.maxDrawdown).toBe(15); // aggressive
+      expect(config.riskLimits.maxPositionSize).toBe(25); // aggressive
+      expect(config.riskLimits.dailyLossLimit).toBe(3000); // 5% of 60k
+    });
+
+    it('should create conservative risk config for swing trading strategies', () => {
+      const portfolio = {
+        id: 1,
+        totalValue: 2000,
+        currentCash: 2000,
+      } as Portfolio;
+
+      const strategyConfig = {
+        id: 'swing-trading-value',
+        maxPositions: 2,
+        executionFrequency: 'daily' as const,
+        riskLevel: 'conservative',
+      };
+
+      const config = (service as any).createAutoDeploymentConfig(
+        portfolio,
+        strategyConfig,
+      );
+
+      expect(config.riskLimits.maxDrawdown).toBe(5); // conservative
+      expect(config.riskLimits.maxPositionSize).toBe(10); // conservative
+      expect(config.riskLimits.dailyLossLimit).toBe(40); // 2% of 2k
+    });
+  });
+});

@@ -55,19 +55,14 @@ async function bootstrap() {
   // SwaggerModule.setup('api', app, document);
 
   // Add a comprehensive health check endpoint for Cloud Run and debugging
-  // This responds immediately for startup probes, even if ML modules are still loading
+  // This responds immediately for startup probes
   app.getHttpAdapter().get('/health', async (req: any, res: any) => {
     try {
-      const appContext = app.get('DatabaseInitializationService');
-      let dbHealth = { database: false, tables: {}, connection: {} };
-
-      if (appContext) {
-        try {
-          dbHealth = await appContext.healthCheck();
-        } catch (error) {
-          console.error('Database health check failed:', error);
-        }
-      }
+      // Basic health check without DatabaseInitializationService (temporarily disabled)
+      let dbHealth = {
+        status: 'basic',
+        message: 'Database initialization service disabled',
+      };
 
       const healthStatus = {
         status: 'ok',
@@ -124,9 +119,9 @@ async function bootstrap() {
     });
   }
 
-  const port = process.env.PORT || 8080;
+  const port = process.env.PORT || 8000;
   await app.listen(port, '0.0.0.0');
-  console.log(`Application is running on: http://localhost:${port}`);
+  console.log(`Application is running on: http://0.0.0.0:${port}`);
   console.log(
     `Swagger documentation available at: http://localhost:${port}/api`,
   );

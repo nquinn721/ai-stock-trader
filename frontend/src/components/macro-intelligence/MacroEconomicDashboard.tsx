@@ -204,7 +204,7 @@ export const MacroEconomicDashboard: React.FC = () => {
           title="Macro Economic Intelligence"
           statsValue="Loading Analysis..."
         />
-        <div className="page-content">
+        <div className="dashboard-content">
           <div className="loading-container">
             <LinearProgress />
             <Typography sx={{ mt: 2, textAlign: "center" }}>
@@ -231,7 +231,7 @@ export const MacroEconomicDashboard: React.FC = () => {
           statsValue="Error Loading"
           actionButtons={[retryButton]}
         />
-        <div className="page-content">
+        <div className="dashboard-content">
           <div className="error-container">
             <Alert severity="error">{error}</Alert>
           </div>
@@ -247,7 +247,7 @@ export const MacroEconomicDashboard: React.FC = () => {
           title="Macro Economic Intelligence"
           statsValue="No Data Available"
         />
-        <div className="page-content">
+        <div className="dashboard-content">
           <Typography>No data available</Typography>
         </div>
       </div>
@@ -306,7 +306,7 @@ export const MacroEconomicDashboard: React.FC = () => {
         </div>
       </PageHeader>
 
-      <div className="page-content">
+      <div className="dashboard-content">
         {/* Key Metrics Overview */}
         <div className="metrics-overview">
           <div className="metric-card">

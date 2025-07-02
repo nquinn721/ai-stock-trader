@@ -569,7 +569,7 @@ npm ci --ignore-scripts
    ```jsx
    <div className="page-container">
      <div className="page-header">{/* Standard header */}</div>
-     <div className="page-content">{/* Page content */}</div>
+     <div className="dashboard-content">{/* Page content */}</div>
    </div>
    ```
 

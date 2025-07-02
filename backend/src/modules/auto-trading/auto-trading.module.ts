@@ -1,5 +1,8 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { AutoTradingOrder } from '../../entities/auto-trading-order.entity';
+import { Portfolio } from '../../entities/portfolio.entity';
+import { Stock } from '../../entities/stock.entity';
 import { MarketHoursService } from '../../utils/market-hours.service';
 import { MLModule } from '../ml/ml.module';
 import { PaperTradingModule } from '../paper-trading/paper-trading.module';
@@ -13,10 +16,14 @@ import { StrategyTemplate } from './entities/strategy-template.entity';
 import { TradingRule } from './entities/trading-rule.entity';
 import { TradingSession } from './entities/trading-session.entity';
 import { TradingStrategy } from './entities/trading-strategy.entity';
+import { RecommendationPipelineController } from './recommendation-pipeline.controller';
+import { AdvancedOrderExecutionService } from './services/advanced-order-execution.service';
+import { AutoTradingOrderPreviewService } from './services/auto-trading-order-preview.service';
 import { AutonomousTradingService } from './services/autonomous-trading.service';
 import { BacktestingService } from './services/backtesting.service';
 import { OrderManagementService } from './services/order-management.service';
 import { PositionSizingService } from './services/position-sizing.service';
+import { RecommendationPipelineService } from './services/recommendation-pipeline.service';
 import { RiskManagementService } from './services/risk-management.service';
 import { RuleEngineService } from './services/rule-engine.service';
 import { TradeExecutionService } from './services/trade-execution.service';
@@ -32,23 +39,33 @@ import { StrategyBuilderService } from './strategy-builder.service';
       TradingStrategy,
       StrategyTemplate,
       BacktestResult,
+      AutoTradingOrder,
+      Portfolio,
+      Stock,
     ]),
     PaperTradingModule,
     StockModule,
     WebsocketModule,
     MLModule,
   ],
-  controllers: [AutoTradingController, StrategyBuilderController],
+  controllers: [
+    AutoTradingController,
+    StrategyBuilderController,
+    RecommendationPipelineController,
+  ],
   providers: [
     AutoTradingService,
     StrategyBuilderService,
     BacktestingService,
     AutonomousTradingService,
+    AutoTradingOrderPreviewService,
+    AdvancedOrderExecutionService,
     RuleEngineService,
     TradeExecutionService,
     RiskManagementService,
     PositionSizingService,
     OrderManagementService,
+    RecommendationPipelineService,
     MarketHoursService,
   ],
   exports: [
@@ -56,6 +73,7 @@ import { StrategyBuilderService } from './strategy-builder.service';
     StrategyBuilderService,
     BacktestingService,
     AutonomousTradingService,
+    RecommendationPipelineService,
   ],
 })
 export class AutoTradingModule {}

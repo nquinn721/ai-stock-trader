@@ -1,11 +1,8 @@
 @import "../../shared-styles.css";
 
-.economic-intelligence-dashboard {
-  background: var(--trading-bg-gradient-dark);
-  min-height: 100vh;
-}
+/* Economic Intelligence Dashboard - Inherits styling from parent ContentCard */
 
-.economic-intelligence-dashboard .page-content {
+.economic-intelligence-dashboard .dashboard-content {
   gap: var(--theme-space-6);
 }
 
@@ -172,24 +169,38 @@
   background: var(--trading-bg-surface);
 }
 
+/* Economic Intelligence Header */
+.economic-intelligence-header .header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.economic-intelligence-header .header-actions .MuiButton-root {
+  font-weight: 600;
+  text-transform: none;
+  transition: all 0.3s ease;
+  border-radius: var(--trading-radius-md);
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .trends-grid {
     grid-template-columns: repeat(2, 1fr);
   }
-  
+
   .indicators-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .rate-expectations {
     grid-template-columns: 1fr;
   }
-  
+
   .market-impact-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .sanctions-status {
     flex-direction: column;
     align-items: flex-start;

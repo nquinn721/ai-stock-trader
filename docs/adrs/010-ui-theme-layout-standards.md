@@ -48,7 +48,7 @@ We adopt the dashboard layout and styling as the **mandatory standard** for all 
 2. **Layout Structure**:
    - `.page-container` as the root wrapper
    - `.page-header` with standardized left/right sections
-   - `.page-content` for main content area
+   - `.dashboard-content` for main content area
 
 3. **Component Patterns**:
    - Glass-morphism cards with consistent border-radius

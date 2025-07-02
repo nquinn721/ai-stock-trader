@@ -39,7 +39,7 @@
   z-index: 0;
 }
 
-.page-content {
+.dashboard-content {
   position: relative;
   z-index: 1;
   padding: var(--theme-space-6) var(--theme-space-4);
@@ -879,7 +879,7 @@
    ========================================================================== */
 
 @media (max-width: 768px) {
-  .page-content {
+  .dashboard-content {
     padding: var(--theme-space-4) var(--theme-space-3) !important;
     margin-top: 64px !important;
   }

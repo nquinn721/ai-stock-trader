@@ -31,8 +31,9 @@ const PortfolioList: React.FC<PortfolioListProps> = observer(
         };
 
         await portfolioStore.createPortfolio({
-          name: portfolioData.name,
-          initialCash: portfolioData.initialCash || 100000,
+          userId: "user-123", // TODO: Get from auth context
+          portfolioType: "SMALL_ACCOUNT_BASIC", // Default portfolio type
+          initialBalance: portfolioData.initialCash || 100000,
         });
 
         // Reset form and refresh portfolios

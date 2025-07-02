@@ -176,7 +176,7 @@ const EnterpriseDataIntelligence: React.FC = () => {
         </button>
       </div>
 
-      <div className="page-content">
+      <div className="dashboard-content">
         {activeTab === "overview" && (
           <div className="overview-tab">
             <div className="metrics-grid">

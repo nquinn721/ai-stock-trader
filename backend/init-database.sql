@@ -75,11 +75,13 @@ CREATE TABLE IF NOT EXISTS stocks (
     marketCap BIGINT DEFAULT 0,
     sector VARCHAR(100) NULL,
     industry VARCHAR(100) NULL,
+    favorite BOOLEAN DEFAULT FALSE,
     isActive BOOLEAN DEFAULT TRUE,
     lastUpdated TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     INDEX idx_symbol (symbol),
     INDEX idx_sector (sector),
+    INDEX idx_favorite (favorite),
     INDEX idx_updated (lastUpdated)
 );
 

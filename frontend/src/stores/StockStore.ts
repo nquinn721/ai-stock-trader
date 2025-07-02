@@ -63,7 +63,10 @@ export class StockStore {
       );
 
       runInAction(() => {
-        this.stocks = stocks;
+        this.stocks = stocks.map((stock) => ({
+          ...stock,
+          favorite: stock.favorite || false, // Ensure favorite property exists
+        }));
         this.lastUpdated = new Date();
         this.isLoading = false;
       });
@@ -100,6 +103,7 @@ export class StockStore {
           changePercent: stock.changePercent,
           volume: stock.volume,
           marketCap: stock.marketCap,
+          favorite: stock.favorite || false, // Add favorite property with default
           createdAt: stock.createdAt || stock.updatedAt,
           updatedAt: stock.updatedAt,
           sentiment: stock.sentiment,
@@ -191,20 +195,48 @@ export class StockStore {
   private updateStocksFromWebSocket(stockUpdates: Stock[]): void {
     runInAction(() => {
       stockUpdates.forEach((updatedStock) => {
-        // Only update stocks that have valid price data
-        if (updatedStock.currentPrice > 0) {
-          const index = this.stocks.findIndex(
-            (stock) => stock.symbol === updatedStock.symbol
-          );
-          if (index !== -1) {
-            this.stocks[index] = { ...this.stocks[index], ...updatedStock };
-          } else {
-            // Add new stock if it has valid data
-            this.stocks.push(updatedStock);
-          }
+        const existingIndex = this.stocks.findIndex(
+          (stock) => stock.symbol === updatedStock.symbol
+        );
+
+        if (existingIndex !== -1) {
+          // Update existing stock with new data (even if price is 0 or undefined)
+          this.stocks[existingIndex] = {
+            ...this.stocks[existingIndex],
+            currentPrice:
+              updatedStock.currentPrice ||
+              this.stocks[existingIndex].currentPrice,
+            previousClose:
+              updatedStock.previousClose ||
+              this.stocks[existingIndex].previousClose,
+            changePercent:
+              updatedStock.changePercent !== undefined
+                ? updatedStock.changePercent
+                : this.stocks[existingIndex].changePercent,
+            volume: updatedStock.volume || this.stocks[existingIndex].volume,
+            marketCap:
+              updatedStock.marketCap || this.stocks[existingIndex].marketCap,
+          };
+        } else if (updatedStock.currentPrice > 0) {
+          // Only add new stocks if they have valid price data
+          this.stocks.push(updatedStock);
         }
       });
       this.lastUpdated = new Date();
+    });
+  }
+
+  updateStockFavorite(symbol: string, favorite: boolean): void {
+    runInAction(() => {
+      const stockIndex = this.stocks.findIndex(
+        (stock) => stock.symbol === symbol
+      );
+      if (stockIndex !== -1) {
+        this.stocks[stockIndex] = {
+          ...this.stocks[stockIndex],
+          favorite: favorite,
+        };
+      }
     });
   }
 
@@ -276,7 +308,7 @@ export class StockStore {
   }
 
   get stocksWithSignals(): (Stock & { tradingSignal: TradingSignal | null })[] {
-    return this.readyStocks.map((stock) => {
+    return this.stocks.map((stock) => {
       const signal = this.tradingSignals.find(
         (signal) => signal.symbol === stock.symbol && signal.isActive
       );
@@ -284,6 +316,18 @@ export class StockStore {
         ...stock,
         tradingSignal: signal || null,
       };
+    });
+  }
+
+  get stocksWithSignalsSorted(): (Stock & {
+    tradingSignal: TradingSignal | null;
+  })[] {
+    return this.stocksWithSignals.sort((a, b) => {
+      // Sort by favorite first (favorites at top), then by symbol alphabetically
+      if (a.favorite !== b.favorite) {
+        return b.favorite ? 1 : -1; // favorites first
+      }
+      return a.symbol.localeCompare(b.symbol); // alphabetical by symbol
     });
   }
 }

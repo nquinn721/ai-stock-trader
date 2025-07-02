@@ -36,12 +36,18 @@ export class OrderService {
     const savedOrder = await this.orderRepository.save(order);
 
     // Notify clients of new order
-    this.websocketGateway.server.emit('order_created', {
-      orderId: savedOrder.id,
-      portfolioId: savedOrder.portfolioId,
-      type: savedOrder.type,
-      symbol: savedOrder.symbol,
-    });
+    if (this.websocketGateway.server) {
+      this.websocketGateway.server.emit('order_created', {
+        orderId: savedOrder.id,
+        portfolioId: savedOrder.portfolioId,
+        type: savedOrder.type,
+        symbol: savedOrder.symbol,
+      });
+    } else {
+      console.warn(
+        'WebSocket server not available, skipping order_created emit',
+      );
+    }
 
     return savedOrder;
   }
@@ -76,10 +82,16 @@ export class OrderService {
     await this.orderRepository.save(order);
 
     // Notify clients of order cancellation
-    this.websocketGateway.server.emit('order_cancelled', {
-      orderId: order.id,
-      portfolioId: order.portfolioId,
-    });
+    if (this.websocketGateway.server) {
+      this.websocketGateway.server.emit('order_cancelled', {
+        orderId: order.id,
+        portfolioId: order.portfolioId,
+      });
+    } else {
+      console.warn(
+        'WebSocket server not available, skipping order_cancelled emit',
+      );
+    }
   }
 
   /**
@@ -236,15 +248,21 @@ export class OrderService {
       await this.orderRepository.save(order);
 
       // Notify clients of order execution
-      this.websocketGateway.server.emit('order_executed', {
-        orderId: order.id,
-        portfolioId: order.portfolioId,
-        symbol: order.symbol,
-        type: order.type,
-        executedPrice: currentPrice,
-        quantity: order.quantity,
-        tradeId: trade.id,
-      });
+      if (this.websocketGateway.server) {
+        this.websocketGateway.server.emit('order_executed', {
+          orderId: order.id,
+          portfolioId: order.portfolioId,
+          symbol: order.symbol,
+          type: order.type,
+          executedPrice: currentPrice,
+          quantity: order.quantity,
+          tradeId: trade.id,
+        });
+      } else {
+        console.warn(
+          'WebSocket server not available, skipping order_executed emit',
+        );
+      }
 
       console.log(`✅ Order ${order.id} executed successfully`);
     } catch (error) {
@@ -255,11 +273,17 @@ export class OrderService {
       await this.orderRepository.save(order);
 
       // Notify clients of execution failure
-      this.websocketGateway.server.emit('order_execution_failed', {
-        orderId: order.id,
-        portfolioId: order.portfolioId,
-        error: error.message,
-      });
+      if (this.websocketGateway.server) {
+        this.websocketGateway.server.emit('order_execution_failed', {
+          orderId: order.id,
+          portfolioId: order.portfolioId,
+          error: error.message,
+        });
+      } else {
+        console.warn(
+          'WebSocket server not available, skipping order_execution_failed emit',
+        );
+      }
     }
   }
 

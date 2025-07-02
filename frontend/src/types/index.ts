@@ -289,6 +289,7 @@ export interface Stock {
   changePercent: number;
   volume: number;
   marketCap: number;
+  favorite: boolean;
   createdAt: string;
   updatedAt: string;
   sentiment?: SentimentData;
